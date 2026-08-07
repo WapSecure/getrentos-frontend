@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { VerificationLeftContent, VerificationRightContent } from '@/components/auth/Verification';
 import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
 import { useSignup } from '@/hooks/useSignup';
-import { ROUTES } from '@/lib/constants/auth';
+import { ROUTES, getDashboardRoute } from '@/lib/constants/auth';
 
 export type VerificationStep = 'id-select' | 'id-upload' | 'liveness' | 'processing' | 'complete';
 
@@ -39,11 +39,11 @@ export default function VerificationPage() {
   };
 
   const handleComplete = () => {
-    router.push(`/dashboard/${signupData.selectedRoles[0]}`);
+    router.push(getDashboardRoute(signupData.selectedRoles[0]));
   };
 
   const handleSkip = () => {
-    router.push(`/dashboard/${signupData.selectedRoles[0]}`);
+    router.push(getDashboardRoute(signupData.selectedRoles[0]));
   };
 
   // Don't show back button on processing and complete steps

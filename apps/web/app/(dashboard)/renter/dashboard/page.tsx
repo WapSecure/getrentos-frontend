@@ -16,7 +16,7 @@ import { RenterMoveInChecklist } from '@/components/renter/dashboard/RenterMoveI
 import { RenterLeaseRenewal } from '@/components/renter/dashboard/RenterLeaseRenewal';
 import { RenterRoommates } from '@/components/renter/dashboard/RenterRoommates';
 import { RenterReviews } from '@/components/renter/dashboard/RenterReviews';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
+import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 
 export default function RenterDashboardPage() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function RenterDashboardPage() {
         setUser(parsedUser);
 
         if (parsedUser.role && parsedUser.role !== 'renter') {
-          router.replace(`/${parsedUser.role}/dashboard`);
+          router.replace(getDashboardRoute(parsedUser.role));
           return;
         }
       }
