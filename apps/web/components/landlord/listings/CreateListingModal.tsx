@@ -1,0 +1,261 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import type { Listing, Unit } from '@/types/landlord';
+
+interface CreateListingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  vacantUnits: Unit[];
+  onPublish: (listing: Omit<Listing, 'id' | 'status' | 'createdAt'>) => void;
+}
+
+const amenityOptions = ['Parking', 'Swimming Pool', 'Security', '24/7 Power', 'Gym', 'Elevator'];
+
+export const CreateListingModal = ({
+  isOpen,
+  onClose,
+  vacantUnits,
+  onPublish,
+}: CreateListingModalProps) => {
+  const [unitId, setUnitId] = useState('');
+  const [listingTitle, setListingTitle] = useState('');
+  const [monthlyRent, setMonthlyRent] = useState('');
+  const [securityDeposit, setSecurityDeposit] = useState('');
+  const [availabilityDate, setAvailabilityDate] = useState('');
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [allowPets, setAllowPets] = useState(false);
+  const [furnished, setFurnished] = useState(false);
+  const [shortLetEnabled, setShortLetEnabled] = useState(false);
+
+  const selectedUnit = useMemo(
+    () => vacantUnits.find((u) => u.id === unitId),
+    [vacantUnits, unitId]
+  );
+
+  const handleUnitChange = (id: string) => {
+    setUnitId(id);
+    const unit = vacantUnits.find((u) => u.id === id);
+    if (unit && !monthlyRent) setMonthlyRent(String(unit.monthlyRent));
+    if (unit && !listingTitle) setListingTitle(`${unit.propertyName} — ${unit.unitName}`);
+  };
+
+  const reset = () => {
+    setUnitId('');
+    setListingTitle('');
+    setMonthlyRent('');
+    setSecurityDeposit('');
+    setAvailabilityDate('');
+    setAmenities([]);
+    setAllowPets(false);
+    setFurnished(false);
+    setShortLetEnabled(false);
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
+  const toggleAmenity = (amenity: string) => {
+    setAmenities((prev) =>
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
+  };
+
+  const isValid =
+    selectedUnit && listingTitle.trim() && Number(monthlyRent) > 0 && availabilityDate;
+
+  const handlePublish = () => {
+    if (!selectedUnit || !isValid) return;
+    onPublish({
+      unitId: selectedUnit.id,
+      propertyId: selectedUnit.propertyId,
+      propertyName: selectedUnit.propertyName,
+      unitName: selectedUnit.unitName,
+      listingTitle: listingTitle.trim(),
+      monthlyRent: Number(monthlyRent),
+      securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
+      amenities,
+      availabilityDate,
+      allowPets,
+      furnished,
+      shortLetEnabled,
+    });
+    handleClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+          >
+            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Publish Listing</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Make a vacant unit available for rent
+                </p>
+              </div>
+              <button
+                onClick={handleClose}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4 overflow-y-auto flex-1">
+              {vacantUnits.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+                  No vacant units available to list. Add a property or mark a unit vacant first.
+                </p>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Unit <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={unitId}
+                      onChange={(e) => handleUnitChange(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    >
+                      <option value="">Select a vacant unit</option>
+                      {vacantUnits.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.propertyName} — {u.unitName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Listing Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={listingTitle}
+                      onChange={(e) => setListingTitle(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Monthly Rent (₦) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={monthlyRent}
+                        onChange={(e) => setMonthlyRent(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Security Deposit (₦)
+                      </label>
+                      <input
+                        type="number"
+                        value={securityDeposit}
+                        onChange={(e) => setSecurityDeposit(e.target.value)}
+                        placeholder="Optional"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Availability Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={availabilityDate}
+                      onChange={(e) => setAvailabilityDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Amenities
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {amenityOptions.map((amenity) => (
+                        <button
+                          key={amenity}
+                          type="button"
+                          onClick={() => toggleAmenity(amenity)}
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                            amenities.includes(amenity)
+                              ? 'bg-[#c4a747]/10 border-[#c4a747] text-[#c4a747]'
+                              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+                          }`}
+                        >
+                          {amenity}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="checkbox"
+                        checked={allowPets}
+                        onChange={(e) => setAllowPets(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      />
+                      Allow pets
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="checkbox"
+                        checked={furnished}
+                        onChange={(e) => setFurnished(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      />
+                      Furnished
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="checkbox"
+                        checked={shortLetEnabled}
+                        onChange={(e) => setShortLetEnabled(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      />
+                      Short-let enabled
+                    </label>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {vacantUnits.length > 0 && (
+              <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+                <Button variant="primary" fullWidth onClick={handlePublish} disabled={!isValid}>
+                  Publish Listing
+                </Button>
+                <Button variant="ghost" fullWidth onClick={handleClose}>
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};

@@ -1,0 +1,25 @@
+{
+  "name": "@getrentos/ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./styles": {
+      "import": "./src/styles/index.css"
+    }
+  },
+  "scripts": {
+    "build": "echo 'No build step yet'",
+    "dev": "echo 'No dev step yet'"
+  },
+  "devDependencies": {
+    "@getrentos/typescript-config": "workspace:*",
+    "typescript": "^5.4.5"
+  }
+}

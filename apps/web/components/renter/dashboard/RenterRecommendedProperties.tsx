@@ -1,0 +1,192 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+
+type PeriodType = 'month' | 'year' | 'week';
+
+interface Property {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  period: PeriodType;
+  bedrooms: number;
+  bathrooms: number;
+  size: number;
+  rating: number;
+  verified: boolean;
+  image: string;
+}
+
+const recommendedProperties: Property[] = [
+  {
+    id: '1',
+    title: 'Modern Downtown Loft',
+    location: 'Ikeja, Lagos',
+    price: 200000,
+    period: 'month',
+    bedrooms: 2,
+    bathrooms: 2,
+    size: 1200,
+    rating: 4.8,
+    verified: true,
+    image: '/images/prop1.jpg',
+  },
+  {
+    id: '2',
+    title: 'Cozy Studio Apartment',
+    location: 'Victoria Island, Lagos',
+    price: 150000,
+    period: 'month',
+    bedrooms: 1,
+    bathrooms: 1,
+    size: 650,
+    rating: 4.6,
+    verified: true,
+    image: '/images/prop2.jpg',
+  },
+  {
+    id: '3',
+    title: 'Executive 3-Bed Apartment',
+    location: 'Ikoyi, Lagos',
+    price: 350000,
+    period: 'month',
+    bedrooms: 3,
+    bathrooms: 2,
+    size: 1800,
+    rating: 4.9,
+    verified: true,
+    image: '/images/prop3.jpg',
+  },
+  {
+    id: '4',
+    title: 'Affordable 2-Bed Flat',
+    location: 'Surulere, Lagos',
+    price: 120000,
+    period: 'month',
+    bedrooms: 2,
+    bathrooms: 1,
+    size: 950,
+    rating: 4.5,
+    verified: false,
+    image: '/images/prop4.jpg',
+  },
+];
+
+const formatPrice = (price: number, period: PeriodType) => {
+  const formatter = new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  const periodMap: Record<PeriodType, string> = {
+    month: '/mo',
+    year: '/yr',
+    week: '/wk',
+  };
+  return `${formatter.format(price)}${periodMap[period]}`;
+};
+
+export const RenterRecommendedProperties = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.4 }}
+      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+    >
+      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Recommended for You
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Based on your search history and preferences
+          </p>
+        </div>
+        <Button href="/renter/discover" variant="ghost" size="sm" className="gap-1">
+          View All
+          <Eye className="w-3 h-3" />
+        </Button>
+      </div>
+
+      <div className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          {recommendedProperties.map((property, index) => (
+            <motion.div
+              key={property.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 + index * 0.05, duration: 0.3 }}
+              className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+            >
+              {/* Property Image Placeholder */}
+              <div className="relative h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f]">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-[#c4a747]/20 rounded-xl flex items-center justify-center mx-auto">
+                      <Home className="w-6 h-6 text-[#c4a747]" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Property Image</p>
+                  </div>
+                </div>
+                {property.verified && (
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                    Verified
+                  </span>
+                )}
+                <button className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors">
+                  <Heart className="w-3 h-3 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Property Details */}
+              <div className="p-3">
+                <div className="flex justify-between items-start mb-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {property.title}
+                  </h3>
+                  <div className="flex items-center gap-0.5">
+                    <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {property.rating}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <MapPin className="w-3 h-3" />
+                  <span>{property.location}</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                  <div className="flex items-center gap-1">
+                    <Bed className="w-3 h-3" />
+                    <span>{property.bedrooms}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Bath className="w-3 h-3" />
+                    <span>{property.bathrooms}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Square className="w-3 h-3" />
+                    <span>{property.size} sqft</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold text-[#c4a747]">
+                    {formatPrice(property.price, property.period)}
+                  </span>
+                  <Button size="sm" variant="outline">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+};

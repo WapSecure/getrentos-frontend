@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof -iTCP -sTCP:LISTEN -a -p 87982 -P)",
+      "Bash(curl -sf http://localhost:3001)",
+      "Bash(rm -f /tmp/nextdev.log *)",
+      "Bash(ls components/auth/Verification/steps/ 2>/dev/null *)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp",
+      "/Users/josephorji/Documents/getrentosFE/components/auth/Verification/steps"
+    ]
+  }
+}

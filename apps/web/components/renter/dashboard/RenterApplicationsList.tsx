@@ -1,0 +1,250 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+
+type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
+type PeriodType = 'month' | 'year' | 'week';
+
+interface Application {
+  id: string;
+  title: string;
+  address: string;
+  status: ApplicationStatus;
+  date: string;
+  price: number;
+  period: PeriodType;
+  bedrooms: number;
+  bathrooms: number;
+  size: number;
+  image: string;
+}
+
+const applications: Application[] = [
+  {
+    id: '1',
+    title: 'Modern Downtown Loft',
+    address: '420 Main St, Ikeja, Lagos',
+    status: 'under_review',
+    date: '2024-06-07',
+    price: 200000,
+    period: 'month',
+    bedrooms: 2,
+    bathrooms: 2,
+    size: 1200,
+    image: '/images/property1.jpg',
+  },
+  {
+    id: '2',
+    title: 'Cozy Studio Apartment',
+    address: '123 Victoria Island, Lagos',
+    status: 'pending',
+    date: '2024-06-05',
+    price: 150000,
+    period: 'month',
+    bedrooms: 1,
+    bathrooms: 1,
+    size: 650,
+    image: '/images/property2.jpg',
+  },
+  {
+    id: '3',
+    title: 'Luxury Beachfront Villa',
+    address: '456 Elegushi Beach, Lagos',
+    status: 'approved',
+    date: '2024-05-28',
+    price: 800000,
+    period: 'month',
+    bedrooms: 4,
+    bathrooms: 3,
+    size: 3200,
+    image: '/images/property3.jpg',
+  },
+  {
+    id: '4',
+    title: 'Executive 3-Bed Apartment',
+    address: '789 Ikoyi, Lagos',
+    status: 'under_review',
+    date: '2024-05-25',
+    price: 350000,
+    period: 'month',
+    bedrooms: 3,
+    bathrooms: 2,
+    size: 1800,
+    image: '/images/property4.jpg',
+  },
+  {
+    id: '5',
+    title: 'Affordable 2-Bed Flat',
+    address: '321 Surulere, Lagos',
+    status: 'pending',
+    date: '2024-05-20',
+    price: 120000,
+    period: 'month',
+    bedrooms: 2,
+    bathrooms: 1,
+    size: 950,
+    image: '/images/property5.jpg',
+  },
+];
+
+const statusConfig: Record<
+  ApplicationStatus,
+  { label: string; color: string; icon: React.ElementType }
+> = {
+  pending: {
+    label: 'Pending Review',
+    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+    icon: Clock,
+  },
+  under_review: {
+    label: 'Under Review',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+    icon: Building2,
+  },
+  approved: {
+    label: 'Approved',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+    icon: CheckCircle,
+  },
+  rejected: {
+    label: 'Rejected',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+    icon: XCircle,
+  },
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+const formatPrice = (price: number, period: PeriodType) => {
+  const formatter = new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  const periodMap: Record<PeriodType, string> = {
+    month: '/mo',
+    year: '/yr',
+    week: '/wk',
+  };
+  return `${formatter.format(price)}${periodMap[period]}`;
+};
+
+import { CheckCircle, XCircle } from 'lucide-react';
+
+export const RenterApplicationsList = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2, duration: 0.4 }}
+      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+    >
+      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Applications</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Track your rental applications</p>
+        </div>
+        <Button href="/renter/applications" variant="ghost" size="sm" className="gap-1">
+          View All
+          <Eye className="w-3 h-3" />
+        </Button>
+      </div>
+
+      <div className="divide-y divide-gray-200 dark:divide-white/10">
+        {applications.map((app, index) => {
+          const StatusIcon = statusConfig[app.status].icon;
+
+          return (
+            <motion.div
+              key={app.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 * index, duration: 0.3 }}
+              className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
+            >
+              <div className="flex flex-col md:flex-row md:items-start gap-4">
+                <div className="w-full md:w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#2a3a3f] dark:to-[#1a2a2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-[#c4a747]/20 rounded-lg flex items-center justify-center">
+                    <Home className="w-4 h-4 text-[#c4a747]" />
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex flex-wrap justify-between items-start gap-2">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#c4a747] transition-colors">
+                        {app.title}
+                      </h3>
+                      <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                        <MapPin className="w-3 h-3" />
+                        <span>{app.address}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[#c4a747]">
+                        {formatPrice(app.price, app.period)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <Bed className="w-3 h-3" />
+                      <span>
+                        {app.bedrooms} {app.bedrooms === 1 ? 'bed' : 'beds'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Bath className="w-3 h-3" />
+                      <span>
+                        {app.bathrooms} {app.bathrooms === 1 ? 'bath' : 'baths'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Square className="w-3 h-3" />
+                      <span>{app.size} sqft</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CalendarDays className="w-3 h-3" />
+                      <span>Applied {formatDate(app.date)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between md:justify-end gap-3">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[app.status].color}`}
+                  >
+                    <StatusIcon className="w-3 h-3" />
+                    {statusConfig[app.status].label}
+                  </span>
+                  <Button variant="outline" size="sm" className="hidden md:inline-flex">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-3 md:hidden">
+                <Button variant="outline" size="sm" fullWidth>
+                  View Details
+                </Button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+};

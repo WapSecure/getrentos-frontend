@@ -1,0 +1,234 @@
+export const AUTH_CONSTANTS = {
+  OTP_LENGTH: 6,
+  OTP_EXPIRY_MINUTES: 5,
+  RESEND_OTP_DELAY_SECONDS: 30,
+  PASSWORD_MIN_LENGTH: 8,
+  PASSWORD_MAX_LENGTH: 50,
+} as const;
+
+export const SIGNUP_METHODS = {
+  EMAIL: 'email',
+  PHONE: 'phone',
+} as const;
+
+export type SignupMethod = (typeof SIGNUP_METHODS)[keyof typeof SIGNUP_METHODS];
+
+export const ROLES = {
+  RENTER: {
+    id: 'renter',
+    name: 'Renter',
+    description: 'Search verified homes, apply digitally, pay rent securely.',
+    icon: 'Home',
+    requiresVerification: ['identity'],
+    canAddLater: true,
+    order: 1,
+    dashboardRoute: '/renter/dashboard',
+  },
+  LANDLORD: {
+    id: 'landlord',
+    name: 'Landlord',
+    description: 'List properties, vet tenants, collect rent through escrow.',
+    icon: 'Building2',
+    requiresVerification: ['identity', 'property'],
+    canAddLater: true,
+    order: 2,
+    dashboardRoute: '/landlord/dashboard',
+  },
+  OWNER: {
+    id: 'owner',
+    name: 'Property Owner',
+    description: 'List for sale, accept offers, track property value.',
+    icon: 'TrendingUp',
+    requiresVerification: ['identity', 'property'],
+    canAddLater: true,
+    order: 3,
+    dashboardRoute: '/owner/dashboard',
+  },
+  BUYER: {
+    id: 'buyer',
+    name: 'Property Buyer',
+    description: 'Save, compare, tour properties, make offers securely.',
+    icon: 'Search',
+    requiresVerification: ['identity'],
+    canAddLater: true,
+    order: 4,
+    dashboardRoute: '/buyer/dashboard',
+  },
+  REALTOR: {
+    id: 'realtor',
+    name: 'Realtor',
+    description: 'Bring listings, schedule tours, negotiate on behalf.',
+    icon: 'Users',
+    requiresVerification: ['identity', 'license'],
+    canAddLater: true,
+    order: 5,
+    dashboardRoute: '/realtor/dashboard',
+  },
+  AGENT: {
+    id: 'agent',
+    name: 'Agent',
+    description: 'Operate on behalf with scoped, delegated permissions.',
+    icon: 'UserCheck',
+    requiresVerification: ['identity'],
+    canAddLater: true,
+    order: 6,
+    dashboardRoute: '/agent/dashboard',
+  },
+  ADMIN: {
+    id: 'admin',
+    name: 'Admin',
+    description: 'Verify properties, resolve disputes, monitor fraud.',
+    icon: 'Shield',
+    requiresVerification: ['identity'],
+    canAddLater: false,
+    order: 7,
+    dashboardRoute: '/admin/dashboard',
+  },
+} as const;
+
+export type RoleId = (typeof ROLES)[keyof typeof ROLES]['id'];
+
+export const VERIFICATION_TYPES = {
+  IDENTITY: {
+    id: 'identity',
+    name: 'Identity Verification',
+    description: 'Verify your identity with government ID and selfie',
+    required: true,
+  },
+  PROPERTY: {
+    id: 'property',
+    name: 'Property Verification',
+    description: 'Upload property documents to verify ownership',
+    required: false,
+  },
+  LICENSE: {
+    id: 'license',
+    name: 'License Verification',
+    description: 'Verify your real estate license',
+    required: false,
+  },
+} as const;
+
+export const ERROR_MESSAGES = {
+  REQUIRED_FIELD: 'This field is required',
+  INVALID_EMAIL: 'Please enter a valid email address',
+  INVALID_PHONE: 'Please enter a valid phone number',
+  PASSWORD_TOO_SHORT: `Password must be at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`,
+  PASSWORD_MISMATCH: 'Passwords do not match',
+  INVALID_OTP: 'Invalid verification code',
+  OTP_EXPIRED: 'Verification code has expired. Please request a new one',
+  USER_EXISTS: 'An account with this email/phone already exists',
+  SOMETHING_WRONG: 'Something went wrong. Please try again',
+} as const;
+
+export const STORAGE_KEYS = {
+  SIGNUP_DATA: 'getrentos_signup_data',
+  AUTH_TOKEN: 'getrentos_auth_token',
+  USER: 'getrentos_user',
+  SELECTED_ROLES: 'getrentos_selected_roles',
+} as const;
+
+// Main ROUTES constant
+export const ROUTES = {
+  // Public routes
+  HOME: '/',
+  SIGNUP: '/signup',
+  LOGIN: '/login',
+  FORGOT_PASSWORD: '/forgot-password',
+  ROLE_SELECTION: '/role-selection',
+  VERIFICATION: '/verification',
+
+  // Dashboard base routes
+  DASHBOARD: '/dashboard',
+
+  // Role-specific dashboards
+  RENTER_DASHBOARD: '/renter/dashboard',
+  LANDLORD_DASHBOARD: '/landlord/dashboard',
+  OWNER_DASHBOARD: '/owner/dashboard',
+  BUYER_DASHBOARD: '/buyer/dashboard',
+  REALTOR_DASHBOARD: '/realtor/dashboard',
+  AGENT_DASHBOARD: '/agent/dashboard',
+  ADMIN_DASHBOARD: '/admin/dashboard',
+
+  // Renter specific routes
+  RENTER_DISCOVER: '/renter/discover',
+  RENTER_SAVED: '/renter/saved',
+  RENTER_APPLICATIONS: '/renter/applications',
+  RENTER_LEASE: '/renter/lease',
+  RENTER_PAYMENTS: '/renter/payments',
+  RENTER_MAINTENANCE: '/renter/maintenance',
+  RENTER_MESSAGES: '/renter/messages',
+  RENTER_DOCUMENTS: '/renter/documents',
+  RENTER_SETTINGS: '/renter/settings',
+  RENTER_TRUST_SCORE: '/renter/trust-score',
+  RENTER_CALENDAR: '/renter/calendar',
+  RENTER_ROOMMATES: '/renter/roommates',
+  RENTER_REVIEWS: '/renter/reviews',
+
+  // Landlord specific routes
+  LANDLORD_PROPERTIES: '/landlord/properties',
+  LANDLORD_UNITS: '/landlord/units',
+  LANDLORD_LISTINGS: '/landlord/listings',
+  LANDLORD_APPLICATIONS: '/landlord/applications',
+  LANDLORD_TENANTS: '/landlord/tenants',
+  LANDLORD_LEASES: '/landlord/leases',
+  LANDLORD_PAYMENTS: '/landlord/payments',
+  LANDLORD_MAINTENANCE: '/landlord/maintenance',
+  LANDLORD_VENDORS: '/landlord/vendors',
+  LANDLORD_FINANCIALS: '/landlord/financials',
+  LANDLORD_DOCUMENTS: '/landlord/documents',
+  LANDLORD_MESSAGES: '/landlord/messages',
+  LANDLORD_REVIEWS: '/landlord/reviews',
+  LANDLORD_SETTINGS: '/landlord/settings',
+} as const;
+
+export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
+
+export const SIGNIN_CONSTANTS = {
+  MAX_LOGIN_ATTEMPTS: 5,
+  LOCKOUT_DURATION_MINUTES: 15,
+  SESSION_DURATION_HOURS: 24,
+} as const;
+
+export const SIGNIN_METHODS = {
+  EMAIL: 'email',
+  PHONE: 'phone',
+  MAGIC_LINK: 'magic-link',
+} as const;
+
+export type SigninMethod = (typeof SIGNIN_METHODS)[keyof typeof SIGNIN_METHODS];
+
+// Helper function to get dashboard route by role
+export const getDashboardRoute = (roleId: string): string => {
+  const roleMap: Record<string, string> = {
+    renter: ROUTES.RENTER_DASHBOARD,
+    landlord: ROUTES.LANDLORD_DASHBOARD,
+    owner: ROUTES.OWNER_DASHBOARD,
+    buyer: ROUTES.BUYER_DASHBOARD,
+    realtor: ROUTES.REALTOR_DASHBOARD,
+    agent: ROUTES.AGENT_DASHBOARD,
+    admin: ROUTES.ADMIN_DASHBOARD,
+  };
+  return roleMap[roleId] || ROUTES.DASHBOARD;
+};
+
+// Helper function to get role from stored user
+export const getUserRole = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      return user.role || 'renter';
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+// Helper function to check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return !!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+};

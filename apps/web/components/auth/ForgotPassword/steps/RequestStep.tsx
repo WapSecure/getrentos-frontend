@@ -1,0 +1,117 @@
+'use client';
+
+import { useState } from 'react';
+import { Mail, Phone, CheckCircle, XCircle } from 'lucide-react';
+
+interface RequestStepProps {
+  method: 'email' | 'phone';
+  setMethod: (method: 'email' | 'phone') => void;
+  identifier: string;
+  setIdentifier: (value: string) => void;
+}
+
+export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: RequestStepProps) => {
+  const [touched, setTouched] = useState(false);
+  const [error, setError] = useState('');
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) return 'Email is required';
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex =
+      /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,6}[-\s\.]?[0-9]{1,6}$/;
+    if (!phone) return 'Phone number is required';
+    if (!phoneRegex.test(phone)) return 'Please enter a valid phone number (e.g., +1 234 567 8900)';
+    return '';
+  };
+
+  const handleChange = (value: string) => {
+    setIdentifier(value);
+    setTouched(true);
+    if (method === 'email') {
+      setError(validateEmail(value));
+    } else {
+      setError(validatePhone(value));
+    }
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    if (method === 'email') {
+      setError(validateEmail(identifier));
+    } else {
+      setError(validatePhone(identifier));
+    }
+  };
+
+  const isValid =
+    method === 'email' ? validateEmail(identifier) === '' : validatePhone(identifier) === '';
+
+  return (
+    <div className="space-y-6">
+      <div className="flex gap-2 p-1 bg-gray-100 dark:bg-white/10 rounded-xl">
+        <button
+          onClick={() => {
+            setMethod('email');
+            setIdentifier('');
+            setError('');
+            setTouched(false);
+          }}
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+            method === 'email'
+              ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+              : 'text-gray-600 dark:text-gray-400'
+          }`}
+        >
+          <Mail className="w-4 h-4 inline mr-2" />
+          Email
+        </button>
+        <button
+          onClick={() => {
+            setMethod('phone');
+            setIdentifier('');
+            setError('');
+            setTouched(false);
+          }}
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+            method === 'phone'
+              ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+              : 'text-gray-600 dark:text-gray-400'
+          }`}
+        >
+          <Phone className="w-4 h-4 inline mr-2" />
+          Phone
+        </button>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          {method === 'email' ? 'Email Address' : 'Phone Number'}
+        </label>
+        <div className="relative">
+          <input
+            type={method === 'email' ? 'email' : 'tel'}
+            value={identifier}
+            onChange={(e) => handleChange(e.target.value)}
+            onBlur={handleBlur}
+            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+              touched && error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
+            placeholder={method === 'email' ? 'you@example.com' : '+1 234 567 8900'}
+          />
+          {touched && !error && identifier && (
+            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+          )}
+          {touched && error && (
+            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+          )}
+        </div>
+        {touched && error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      </div>
+    </div>
+  );
+};
