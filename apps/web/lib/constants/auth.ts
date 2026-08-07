@@ -180,6 +180,19 @@ export const ROUTES = {
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SETTINGS: '/landlord/settings',
+
+  // Property Owner specific routes
+  OWNER_PROPERTIES: '/owner/properties',
+  OWNER_LISTINGS: '/owner/listings',
+  OWNER_LEADS: '/owner/leads',
+  OWNER_OFFERS: '/owner/offers',
+  OWNER_TRANSACTIONS: '/owner/transactions',
+  OWNER_ANALYTICS: '/owner/analytics',
+  OWNER_DOCUMENTS: '/owner/documents',
+  OWNER_MESSAGES: '/owner/messages',
+  OWNER_REVIEWS: '/owner/reviews',
+  OWNER_TRUST_PROFILE: '/owner/trust-profile',
+  OWNER_SETTINGS: '/owner/settings',
 } as const;
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];

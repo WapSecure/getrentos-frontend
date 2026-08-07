@@ -1,0 +1,184 @@
+'use client';
+
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency, formatDate } from '@/lib/format';
+import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
+
+interface OwnerVerificationStatusModalProps {
+  property: OwnerProperty | null;
+  onClose: () => void;
+  onResubmit: (propertyId: string) => void;
+}
+
+const statusConfig: Record<
+  OwnershipVerificationStatus,
+  { label: string; icon: React.ElementType; bg: string; color: string; message: string }
+> = {
+  verified: {
+    label: 'Verified',
+    icon: ShieldCheck,
+    bg: 'bg-green-50 dark:bg-green-900/20',
+    color: 'text-green-600 dark:text-green-400',
+    message:
+      'Ownership has been confirmed. This property is eligible for sale listing and ownership transfer.',
+  },
+  pending_review: {
+    label: 'Pending Review',
+    icon: ShieldAlert,
+    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+    color: 'text-yellow-600 dark:text-yellow-400',
+    message:
+      'Our compliance team is reviewing your submitted documents. This typically takes 24–48 hours.',
+  },
+  needs_clarification: {
+    label: 'Needs Clarification',
+    icon: HelpCircle,
+    bg: 'bg-orange-50 dark:bg-orange-900/20',
+    color: 'text-orange-600 dark:text-orange-400',
+    message:
+      'Additional information or clearer documents are required before we can complete verification.',
+  },
+  rejected: {
+    label: 'Rejected',
+    icon: ShieldX,
+    bg: 'bg-red-50 dark:bg-red-900/20',
+    color: 'text-red-600 dark:text-red-400',
+    message: 'Verification could not be completed with the documents provided.',
+  },
+};
+
+export const OwnerVerificationStatusModal = ({
+  property,
+  onClose,
+  onResubmit,
+}: OwnerVerificationStatusModalProps) => {
+  const [resubmitFileName, setResubmitFileName] = useState('');
+
+  if (!property) return null;
+
+  const config = statusConfig[property.verificationStatus];
+  const Icon = config.icon;
+  const canResubmit =
+    property.verificationStatus === 'rejected' ||
+    property.verificationStatus === 'needs_clarification';
+
+  const handleResubmit = () => {
+    onResubmit(property.id);
+    setResubmitFileName('');
+  };
+
+  return (
+    <AnimatePresence>
+      {property && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
+          >
+            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Verification Status</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{property.name}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4 overflow-y-auto flex-1">
+              <div className="text-center py-4">
+                <div
+                  className={`w-14 h-14 mx-auto mb-3 rounded-2xl ${config.bg} flex items-center justify-center`}
+                >
+                  <Icon className={`w-7 h-7 ${config.color}`} />
+                </div>
+                <h4 className="font-semibold text-gray-900 dark:text-white">{config.label}</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">
+                  {config.message}
+                </p>
+              </div>
+
+              {property.rejectionReason && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">
+                    Reviewer note
+                  </p>
+                  <p className="text-xs text-red-600 dark:text-red-300">
+                    {property.rejectionReason}
+                  </p>
+                </div>
+              )}
+
+              <div className="rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-white/5 overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Owner on record</span>
+                  <span className="text-gray-900 dark:text-white font-medium">
+                    {property.ownerName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between px-3 py-2 text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Purchase price</span>
+                  <span className="text-gray-900 dark:text-white font-medium">
+                    {formatCurrency(property.purchasePrice)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between px-3 py-2 text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Purchase date</span>
+                  <span className="text-gray-900 dark:text-white font-medium">
+                    {formatDate(property.purchaseDate)}
+                  </span>
+                </div>
+              </div>
+
+              {canResubmit && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Upload updated document
+                  </label>
+                  <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#c4a747] transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => setResubmitFileName(e.target.files?.[0]?.name || '')}
+                    />
+                    <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {resubmitFileName || 'Click to upload'}
+                    </span>
+                    {resubmitFileName && (
+                      <Check className="w-4 h-4 text-green-500 flex-shrink-0 ml-auto" />
+                    )}
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+              <Button variant="ghost" onClick={onClose} className="flex-1">
+                Close
+              </Button>
+              {canResubmit && (
+                <Button
+                  variant="primary"
+                  onClick={handleResubmit}
+                  disabled={!resubmitFileName}
+                  className="flex-1"
+                >
+                  Resubmit Documents
+                </Button>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
