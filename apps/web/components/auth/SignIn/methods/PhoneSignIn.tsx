@@ -7,8 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
+import { BACKEND_ROLE_TO_ID, ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import { ToastVariant } from '@/components/ui/Toast';
+import { authService } from '@/services/authService';
 
 const phoneSchema = z.object({
   identifier: z
@@ -61,27 +62,24 @@ export const PhoneSignIn = ({
 
     setIsLoading(true);
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await authService.login(data.identifier, data.password);
 
-      // Demo phone login
-      if (data.identifier === '+12345678900' && data.password === 'demo123') {
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, 'mock_token');
-        localStorage.setItem(
-          STORAGE_KEYS.USER,
-          JSON.stringify({ phone: data.identifier, role: 'renter' })
-        );
-        router.push(getDashboardRoute('renter'));
-        showToast('Successfully signed in! Redirecting...', 'success');
-      } else {
-        onLoginAttempt();
-        showToast('Invalid phone number or password. Please try again.', 'error');
-      }
-    } catch (err) {
-      showToast('Something went wrong. Please try again.', 'error');
-    } finally {
-      setIsLoading(false);
+    if (response.success && response.data) {
+      const { accessToken, refreshToken, ...user } = response.data;
+      const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
+
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...user, role: primaryRoleId }));
+
+      router.push(getDashboardRoute(primaryRoleId));
+      showToast('Successfully signed in! Redirecting...', 'success');
+    } else {
+      onLoginAttempt();
+      showToast(response.message || 'Invalid phone number or password. Please try again.', 'error');
     }
+
+    setIsLoading(false);
   };
 
   return (

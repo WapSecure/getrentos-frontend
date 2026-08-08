@@ -16,8 +16,13 @@ export type SignupStep = 'signup' | 'otp' | 'roles' | 'verification';
 interface SignupStore {
   data: SignupData;
   step: SignupStep;
+  /** Reference from /auth/otp/send, needed again at /auth/signup. Must survive
+   * navigation from /signup to /role-selection, so it lives here rather than
+   * in a hook's local state. */
+  otpReference: string | null;
   setData: (data: Partial<SignupData>) => void;
   setStep: (step: SignupStep) => void;
+  setOtpReference: (reference: string | null) => void;
   addRole: (roleId: string) => void;
   removeRole: (roleId: string) => void;
   reset: () => void;
@@ -40,6 +45,7 @@ export const useSignupStore = create<SignupStore>()(
     (set) => ({
       data: initialState,
       step: 'signup',
+      otpReference: null,
       canAddMoreRoles: false,
 
       setData: (newData) =>
@@ -48,6 +54,8 @@ export const useSignupStore = create<SignupStore>()(
         })),
 
       setStep: (step) => set({ step }),
+
+      setOtpReference: (reference) => set({ otpReference: reference }),
 
       addRole: (roleId) =>
         set((state) => {
@@ -77,6 +85,7 @@ export const useSignupStore = create<SignupStore>()(
         set({
           data: initialState,
           step: 'signup',
+          otpReference: null,
           canAddMoreRoles: false,
         }),
     }),
@@ -84,6 +93,7 @@ export const useSignupStore = create<SignupStore>()(
       name: 'signup-storage',
       partialize: (state) => ({
         data: state.data,
+        otpReference: state.otpReference,
         // Don't persist step and canAddMoreRoles
       }),
     }

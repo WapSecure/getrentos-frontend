@@ -88,6 +88,10 @@ export const ROLES = {
 
 export type RoleId = (typeof ROLES)[keyof typeof ROLES]['id'];
 
+// Roles that require identity + property/license verification before they can operate.
+// Mirrors ROLES_REQUIRING_VERIFICATION in the backend's roles.constants.ts.
+export const ROLES_REQUIRING_VERIFICATION = ['landlord', 'owner', 'realtor'] as const;
+
 export const VERIFICATION_TYPES = {
   IDENTITY: {
     id: 'identity',
@@ -124,6 +128,7 @@ export const ERROR_MESSAGES = {
 export const STORAGE_KEYS = {
   SIGNUP_DATA: 'getrentos_signup_data',
   AUTH_TOKEN: 'getrentos_auth_token',
+  REFRESH_TOKEN: 'getrentos_refresh_token',
   USER: 'getrentos_user',
   SELECTED_ROLES: 'getrentos_selected_roles',
 } as const;
@@ -258,6 +263,17 @@ export const SIGNIN_METHODS = {
 } as const;
 
 export type SigninMethod = (typeof SIGNIN_METHODS)[keyof typeof SIGNIN_METHODS];
+
+// Maps backend RoleType values (e.g. "PROPERTY_OWNER") back to frontend role ids ('owner').
+// Mirrors PUBLIC_ROLE_MAP in the backend's roles.constants.ts, inverted.
+export const BACKEND_ROLE_TO_ID: Record<string, string> = {
+  RENTER: 'renter',
+  LANDLORD: 'landlord',
+  PROPERTY_OWNER: 'owner',
+  PROPERTY_BUYER: 'buyer',
+  REALTOR: 'realtor',
+  AGENT: 'agent',
+};
 
 // Helper function to get dashboard route by role
 export const getDashboardRoute = (roleId: string): string => {
