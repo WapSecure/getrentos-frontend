@@ -1,4 +1,4 @@
-import { SignupData } from '@/lib/store/signupStore';
+import { apiFetch, ApiError } from '@/lib/apiClient';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -7,70 +7,108 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-// Mock API calls - replace with actual API integration
+export interface AuthUser {
+  id: string;
+  email?: string;
+  phone?: string;
+  legalName: string;
+  isVerified: boolean;
+  /** Backend RoleType values, e.g. "RENTER", "PROPERTY_OWNER" */
+  roles: string[];
+  trustScore: number;
+}
+
+export interface AuthResult extends AuthUser {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+type OtpPurpose = 'signup' | 'password_reset';
+
+async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>> {
+  try {
+    const data = await fn();
+    return { success: true, data };
+  } catch (err) {
+    if (err instanceof ApiError) {
+      return { success: false, error: err.message, message: err.message };
+    }
+    return {
+      success: false,
+      error: 'Something went wrong',
+      message: 'Something went wrong. Please try again.',
+    };
+  }
+}
+
 export const authService = {
   async sendOtp(
     identifier: string,
-    method: 'email' | 'phone'
+    method: 'email' | 'phone',
+    purpose: OtpPurpose = 'signup'
   ): Promise<ApiResponse<{ reference: string }>> {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock successful response
-    return {
-      success: true,
-      message: `OTP sent to your ${method}`,
-      data: { reference: 'mock_ref_' + Date.now() },
-    };
+    return safeCall(() =>
+      apiFetch('/auth/otp/send', {
+        method: 'POST',
+        body: JSON.stringify({ identifier, method, purpose }),
+      })
+    );
   },
 
   async verifyOtp(otp: string, reference: string): Promise<ApiResponse<{ verified: boolean }>> {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    // Mock OTP validation - accept 123456 for demo
-    if (otp === '123456') {
-      return {
-        success: true,
-        message: 'OTP verified successfully',
-        data: { verified: true },
-      };
-    }
-
-    return {
-      success: false,
-      error: 'Invalid OTP',
-      message: 'The verification code you entered is incorrect',
-    };
+    return safeCall(() =>
+      apiFetch('/auth/otp/verify', {
+        method: 'POST',
+        body: JSON.stringify({ reference, otp }),
+      })
+    );
   },
 
-  async createAccount(data: SignupData): Promise<ApiResponse<{ user: unknown; token: string }>> {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Mock account creation
-    return {
-      success: true,
-      message: 'Account created successfully',
-      data: {
-        user: {
-          id: 'user_' + Date.now(),
-          email: data.email,
-          phone: data.phone,
-          fullName: data.fullName,
-          roles: data.selectedRoles,
-          isVerified: data.isVerified,
-          trustScore: 0,
-        },
-        token: 'mock_jwt_token_' + Date.now(),
-      },
-    };
+  async resendOtp(reference: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      apiFetch('/auth/otp/resend', {
+        method: 'POST',
+        body: JSON.stringify({ reference }),
+      })
+    );
   },
 
-  async resendOtp(reference: string): Promise<ApiResponse> {
-    await new Promise((resolve) => setTimeout(resolve, 800));
+  async createAccount(data: {
+    email?: string;
+    phone?: string;
+    fullName: string;
+    password: string;
+    method: 'email' | 'phone';
+    selectedRoles: string[];
+    reference: string;
+  }): Promise<ApiResponse<AuthResult>> {
+    return safeCall(() =>
+      apiFetch('/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
 
-    return {
-      success: true,
-      message: 'OTP resent successfully',
-    };
+  async login(identifier: string, password: string): Promise<ApiResponse<AuthResult>> {
+    return safeCall(() =>
+      apiFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ identifier, password }),
+      })
+    );
+  },
+
+  async resetPassword(
+    reference: string,
+    newPassword: string
+  ): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      apiFetch('/auth/password/reset', {
+        method: 'POST',
+        body: JSON.stringify({ reference, newPassword }),
+      })
+    );
   },
 };

@@ -10,12 +10,19 @@ interface OtpStepProps {
   otp: string;
   setOtp: (value: string) => void;
   onBack: () => void;
+  onResend: () => void | Promise<void>;
 }
 
-export const OtpStep = ({ method, identifier, otp, setOtp, onBack }: OtpStepProps) => {
+export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: OtpStepProps) => {
   const [timeLeft, setTimeLeft] = useState(300);
   const [canResend, setCanResend] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleResend = async () => {
+    await onResend();
+    setTimeLeft(300);
+    setCanResend(false);
+  };
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -93,7 +100,10 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack }: OtpStepProp
         {!canResend ? (
           <p className="text-sm text-gray-500">Resend code in {formatTime(timeLeft)}</p>
         ) : (
-          <button className="text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors">
+          <button
+            onClick={handleResend}
+            className="text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+          >
             Resend code
           </button>
         )}

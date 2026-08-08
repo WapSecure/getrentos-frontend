@@ -2,15 +2,22 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { authService } from '@/services/authService';
-import { ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
+import {
+  ROLES_REQUIRING_VERIFICATION,
+  ROUTES,
+  STORAGE_KEYS,
+  getDashboardRoute,
+} from '@/lib/constants/auth';
 
 export const useSignup = () => {
   const router = useRouter();
   const {
     data,
     step,
+    otpReference,
     setData,
     setStep,
+    setOtpReference,
     addRole,
     removeRole,
     canAddMoreRoles,
@@ -19,7 +26,6 @@ export const useSignup = () => {
   } = useSignupStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [otpReference, setOtpReference] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('Current signup state:', {
@@ -34,11 +40,11 @@ export const useSignup = () => {
     setIsLoading(true);
     setError(null);
 
-    const response = await authService.sendOtp(identifier, method);
+    const response = await authService.sendOtp(identifier, method, 'signup');
     console.log('Send OTP response:', response);
 
     if (response.success && response.data) {
-      setOtpReference(response.data.reference || null);
+      setOtpReference(response.data.reference);
       setStep('otp');
       console.log('Step changed to OTP');
     } else {
@@ -90,18 +96,36 @@ export const useSignup = () => {
     setIsLoading(true);
     setError(null);
 
-    const response = await authService.createAccount(data);
+    if (!otpReference) {
+      setError('Your verification session expired. Please start over.');
+      setIsLoading(false);
+      return false;
+    }
+
+    const response = await authService.createAccount({
+      email: data.method === 'email' ? data.email : undefined,
+      phone: data.method === 'phone' ? data.phone : undefined,
+      fullName: data.fullName,
+      password: data.password,
+      method: data.method,
+      selectedRoles: data.selectedRoles,
+      reference: otpReference,
+    });
     console.log('Create account response:', response);
 
     if (response.success && response.data) {
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.token);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.data.user));
+      const { accessToken, refreshToken, expiresIn: _expiresIn, ...user } = response.data;
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+      localStorage.setItem(
+        STORAGE_KEYS.USER,
+        JSON.stringify({ ...user, role: data.selectedRoles[0] })
+      );
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 
       const primaryRole = data.selectedRoles[0];
-
-      const needsVerification = data.selectedRoles.some(
-        (roleId: string) => roleId === 'landlord' || roleId === 'owner' || roleId === 'realtor'
+      const needsVerification = data.selectedRoles.some((roleId: string) =>
+        (ROLES_REQUIRING_VERIFICATION as readonly string[]).includes(roleId)
       );
 
       if (needsVerification) {
@@ -127,7 +151,6 @@ export const useSignup = () => {
 
   const resetSignup = () => {
     reset();
-    setOtpReference(null);
     setError(null);
   };
 

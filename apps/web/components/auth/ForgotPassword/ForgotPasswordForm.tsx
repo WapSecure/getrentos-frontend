@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Mail, Phone, ArrowLeft } from 'lucide-react';
+import { Shield, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { RequestStep } from './steps/RequestStep';
 import { OtpStep } from './steps/OtpStep';
 import { ResetStep } from './steps/ResetStep';
+import { authService } from '@/services/authService';
 
 interface ForgotPasswordFormProps {
   onSuccess: () => void;
@@ -20,6 +21,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [identifier, setIdentifier] = useState('');
   const [otp, setOtp] = useState('');
+  const [reference, setReference] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,18 +32,48 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
       return;
     }
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setStep('otp');
+    const response = await authService.sendOtp(identifier, method, 'password_reset');
     setIsLoading(false);
-    showToast(`Verification code sent to your ${method}`, 'success');
+
+    if (response.success && response.data) {
+      setReference(response.data.reference);
+      setStep('otp');
+      showToast(`Verification code sent to your ${method}`, 'success');
+    } else {
+      showToast(response.message || 'Failed to send verification code', 'error');
+    }
   };
 
-  const handleVerifyOtp = () => {
+  const handleResendCode = async () => {
+    if (!reference) return;
+    const response = await authService.resendOtp(reference);
+    if (response.success) {
+      showToast(`Verification code resent to your ${method}`, 'success');
+    } else {
+      showToast(response.message || 'Failed to resend code', 'error');
+    }
+  };
+
+  const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
       showToast('Please enter the 6-digit verification code', 'error');
       return;
     }
-    setStep('reset');
+    if (!reference) {
+      showToast('Your session expired. Please start over.', 'error');
+      setStep('request');
+      return;
+    }
+
+    setIsLoading(true);
+    const response = await authService.verifyOtp(otp, reference);
+    setIsLoading(false);
+
+    if (response.success && response.data?.verified) {
+      setStep('reset');
+    } else {
+      showToast(response.message || 'Invalid verification code', 'error');
+    }
   };
 
   const handleResetPassword = async () => {
@@ -53,10 +85,21 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
       showToast('Passwords do not match', 'error');
       return;
     }
+    if (!reference) {
+      showToast('Your session expired. Please start over.', 'error');
+      setStep('request');
+      return;
+    }
+
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await authService.resetPassword(reference, newPassword);
     setIsLoading(false);
-    onSuccess();
+
+    if (response.success) {
+      onSuccess();
+    } else {
+      showToast(response.message || 'Failed to reset password', 'error');
+    }
   };
 
   const handleBack = () => {
@@ -127,8 +170,15 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
                 otp={otp}
                 setOtp={setOtp}
                 onBack={() => setStep('request')}
+                onResend={handleResendCode}
               />
-              <Button onClick={handleVerifyOtp} variant="primary" size="lg" className="w-full mt-6">
+              <Button
+                onClick={handleVerifyOtp}
+                isLoading={isLoading}
+                variant="primary"
+                size="lg"
+                className="w-full mt-6"
+              >
                 Verify Code
               </Button>
             </motion.div>
