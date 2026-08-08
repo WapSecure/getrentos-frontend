@@ -205,6 +205,19 @@ export const ROUTES = {
   BUYER_REVIEWS: '/buyer/reviews',
   BUYER_TRUST_PROFILE: '/buyer/trust-profile',
   BUYER_SETTINGS: '/buyer/settings',
+
+  // Realtor specific routes
+  REALTOR_CLIENTS: '/realtor/clients',
+  REALTOR_LISTINGS: '/realtor/listings',
+  REALTOR_LEADS: '/realtor/leads',
+  REALTOR_VIEWINGS: '/realtor/viewings',
+  REALTOR_OFFERS: '/realtor/offers',
+  REALTOR_COMMISSIONS: '/realtor/commissions',
+  REALTOR_DOCUMENTS: '/realtor/documents',
+  REALTOR_MESSAGES: '/realtor/messages',
+  REALTOR_REVIEWS: '/realtor/reviews',
+  REALTOR_TRUST_PROFILE: '/realtor/trust-profile',
+  REALTOR_SETTINGS: '/realtor/settings',
 } as const;
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
