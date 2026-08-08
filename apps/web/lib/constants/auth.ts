@@ -180,6 +180,18 @@ export const ROUTES = {
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SETTINGS: '/landlord/settings',
+
+  // Buyer specific routes
+  BUYER_DISCOVER: '/buyer/discover',
+  BUYER_SAVED: '/buyer/saved',
+  BUYER_VIEWINGS: '/buyer/viewings',
+  BUYER_OFFERS: '/buyer/offers',
+  BUYER_TRANSACTIONS: '/buyer/transactions',
+  BUYER_DOCUMENTS: '/buyer/documents',
+  BUYER_MESSAGES: '/buyer/messages',
+  BUYER_REVIEWS: '/buyer/reviews',
+  BUYER_TRUST_PROFILE: '/buyer/trust-profile',
+  BUYER_SETTINGS: '/buyer/settings',
 } as const;
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
