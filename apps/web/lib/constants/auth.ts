@@ -218,6 +218,17 @@ export const ROUTES = {
   REALTOR_REVIEWS: '/realtor/reviews',
   REALTOR_TRUST_PROFILE: '/realtor/trust-profile',
   REALTOR_SETTINGS: '/realtor/settings',
+
+  // Agent specific routes
+  AGENT_TASKS: '/agent/tasks',
+  AGENT_INSPECTIONS: '/agent/inspections',
+  AGENT_VERIFICATIONS: '/agent/verifications',
+  AGENT_SYNC: '/agent/sync',
+  AGENT_DOCUMENTS: '/agent/documents',
+  AGENT_MESSAGES: '/agent/messages',
+  AGENT_REVIEWS: '/agent/reviews',
+  AGENT_TRUST_PROFILE: '/agent/trust-profile',
+  AGENT_SETTINGS: '/agent/settings',
 } as const;
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
