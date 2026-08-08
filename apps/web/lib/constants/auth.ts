@@ -229,6 +229,18 @@ export const ROUTES = {
   AGENT_REVIEWS: '/agent/reviews',
   AGENT_TRUST_PROFILE: '/agent/trust-profile',
   AGENT_SETTINGS: '/agent/settings',
+
+  // Admin / BackOffice specific routes
+  ADMIN_USERS: '/admin/users',
+  ADMIN_VERIFICATIONS: '/admin/verifications',
+  ADMIN_DISPUTES: '/admin/disputes',
+  ADMIN_FRAUD: '/admin/fraud',
+  ADMIN_ESCROW: '/admin/escrow',
+  ADMIN_AUDIT_LOGS: '/admin/audit-logs',
+  ADMIN_DOCUMENTS: '/admin/documents',
+  ADMIN_MESSAGES: '/admin/messages',
+  ADMIN_REPORTS: '/admin/reports',
+  ADMIN_SETTINGS: '/admin/settings',
 } as const;
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
