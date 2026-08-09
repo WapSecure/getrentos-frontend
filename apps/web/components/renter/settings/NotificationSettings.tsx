@@ -12,7 +12,7 @@ import {
   Home,
   Check,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 interface NotificationPreference {
   id: string;
@@ -162,9 +162,7 @@ export const NotificationSettings = () => {
         })}
       </div>
 
-      <Button variant="primary" className="mt-4">
-        Save Preferences
-      </Button>
+      <SaveButton label="Save Preferences" className="mt-4" />
     </div>
   );
 };

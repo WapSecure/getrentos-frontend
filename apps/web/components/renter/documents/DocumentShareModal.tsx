@@ -10,7 +10,7 @@ interface DocumentShareModalProps {
   onClose: () => void;
   documentId: string;
   documentName: string;
-  onShare: () => void;
+  onShare: (email: string) => void;
 }
 
 export const DocumentShareModal = ({
@@ -24,6 +24,7 @@ export const DocumentShareModal = ({
   const [shareEmail, setShareEmail] = useState('');
   const [shareLink, setShareLink] = useState(`https://getrentos.com/share/${documentId}`);
   const [expiryDays, setExpiryDays] = useState(7);
+  const [lastSharedWith, setLastSharedWith] = useState<string | null>(null);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(shareLink);
@@ -33,8 +34,10 @@ export const DocumentShareModal = ({
 
   const handleShare = () => {
     if (!shareEmail.trim()) return;
-    onShare();
+    onShare(shareEmail.trim());
+    setLastSharedWith(shareEmail.trim());
     setShareEmail('');
+    setTimeout(() => setLastSharedWith(null), 3000);
   };
 
   return (
@@ -75,6 +78,12 @@ export const DocumentShareModal = ({
                     Share
                   </Button>
                 </div>
+                {lastSharedWith && (
+                  <p className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 mt-1.5">
+                    <Check className="w-3 h-3" />
+                    Shared with {lastSharedWith}
+                  </p>
+                )}
               </div>
 
               {/* Share Link */}

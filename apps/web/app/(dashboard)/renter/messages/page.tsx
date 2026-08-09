@@ -317,6 +317,14 @@ export default function MessagesPage() {
     setFilterType(filters.type);
   };
 
+  const getConversationLabelIds = (conv: Conversation): string[] => {
+    const ids: string[] = [];
+    if (conv.propertyName.includes('Loft')) ids.push('1');
+    if (conv.messages.some((m) => m.text.toLowerCase().includes('lease'))) ids.push('2');
+    if (conv.messages.some((m) => /maintenance|repair/i.test(m.text))) ids.push('3');
+    return ids;
+  };
+
   const filteredConversations = conversations.filter((conv) => {
     const matchesSearch =
       conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -328,7 +336,8 @@ export default function MessagesPage() {
       (filterType === 'unread' && conv.unreadCount > 0) ||
       (filterType === 'read' && conv.unreadCount === 0);
 
-    const matchesLabel = selectedLabel === 'all' || conv.id === selectedLabel;
+    const matchesLabel =
+      selectedLabel === 'all' || getConversationLabelIds(conv).includes(selectedLabel);
 
     return matchesSearch && matchesType && matchesLabel;
   });
@@ -346,15 +355,20 @@ export default function MessagesPage() {
       id: '1',
       name: 'Property Inquiries',
       color: 'bg-blue-100',
-      count: conversations.filter((c) => c.propertyName.includes('Loft')).length,
+      count: conversations.filter((c) => getConversationLabelIds(c).includes('1')).length,
     },
     {
       id: '2',
       name: 'Lease Discussions',
       color: 'bg-green-100',
-      count: conversations.filter((c) => c.messages.some((m) => m.text.includes('lease'))).length,
+      count: conversations.filter((c) => getConversationLabelIds(c).includes('2')).length,
     },
-    { id: '3', name: 'Maintenance', color: 'bg-yellow-100', count: 1 },
+    {
+      id: '3',
+      name: 'Maintenance',
+      color: 'bg-yellow-100',
+      count: conversations.filter((c) => getConversationLabelIds(c).includes('3')).length,
+    },
   ];
 
   return (

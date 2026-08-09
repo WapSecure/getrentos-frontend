@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Handshake, ShieldCheck, MessageCircle, FileText, Star } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 interface NotificationPreference {
   id: string;
@@ -66,9 +66,7 @@ export const NotificationSettings = () => {
         ))}
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Save Preferences
-      </Button>
+      <SaveButton label="Save Preferences" className="mt-6" />
     </div>
   );
 };

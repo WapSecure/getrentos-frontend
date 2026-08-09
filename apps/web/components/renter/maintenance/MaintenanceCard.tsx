@@ -12,6 +12,7 @@ import {
   Star,
   ChevronRight,
   AlertTriangle,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { MaintenanceRequest } from '@/types/maintenance';
@@ -20,6 +21,7 @@ interface MaintenanceCardProps {
   request: MaintenanceRequest;
   onViewDetails: () => void;
   onRateVendor?: (id: string, rating: number) => void;
+  onUpdateStatus?: (id: string, status: MaintenanceRequest['status']) => void;
 }
 
 const priorityConfig = {
@@ -66,6 +68,11 @@ const statusConfig = {
     color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
     icon: CheckCircle,
   },
+  cancelled: {
+    label: 'Cancelled',
+    color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    icon: XCircle,
+  },
 };
 
 const categoryIcons = {
@@ -88,7 +95,12 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-export const MaintenanceCard = ({ request, onViewDetails, onRateVendor }: MaintenanceCardProps) => {
+export const MaintenanceCard = ({
+  request,
+  onViewDetails,
+  onRateVendor,
+  onUpdateStatus,
+}: MaintenanceCardProps) => {
   const PriorityIcon = priorityConfig[request.priority].icon;
   const StatusIcon = statusConfig[request.status].icon;
   const categoryIcon = categoryIcons[request.category as keyof typeof categoryIcons] || '📌';
@@ -101,6 +113,11 @@ export const MaintenanceCard = ({ request, onViewDetails, onRateVendor }: Mainte
 
   const handleViewDetails = () => {
     onViewDetails();
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onUpdateStatus?.(request.id, 'cancelled');
   };
 
   return (
@@ -162,6 +179,11 @@ export const MaintenanceCard = ({ request, onViewDetails, onRateVendor }: Mainte
           {request.status === 'resolved' && !request.vendorRating && onRateVendor && (
             <Button size="sm" variant="outline" onClick={handleRateVendor}>
               Rate Vendor
+            </Button>
+          )}
+          {request.status === 'submitted' && onUpdateStatus && (
+            <Button size="sm" variant="ghost" className="text-red-500" onClick={handleCancel}>
+              Cancel Request
             </Button>
           )}
           <Button size="sm" variant="ghost" className="gap-1" onClick={handleViewDetails}>

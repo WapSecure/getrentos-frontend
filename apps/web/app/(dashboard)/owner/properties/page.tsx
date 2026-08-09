@@ -8,7 +8,9 @@ import { OwnerSidebar } from '@/components/owner/dashboard/OwnerSidebar';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
 import { AddOwnerPropertyModal } from '@/components/owner/properties/AddOwnerPropertyModal';
 import { OwnerVerificationStatusModal } from '@/components/owner/properties/OwnerVerificationStatusModal';
+import { EditOwnerPropertyModal } from '@/components/owner/properties/EditOwnerPropertyModal';
 import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 
@@ -92,6 +94,8 @@ export default function OwnerPropertiesPage() {
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusModalProperty, setStatusModalProperty] = useState<OwnerProperty | null>(null);
+  const [editingProperty, setEditingProperty] = useState<OwnerProperty | null>(null);
+  const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -137,6 +141,20 @@ export default function OwnerPropertiesPage() {
       )
     );
     setStatusModalProperty(null);
+  };
+
+  const handleEditSave = (
+    id: string,
+    updates: Pick<
+      OwnerProperty,
+      'name' | 'propertyType' | 'address' | 'city' | 'state' | 'estimatedValue'
+    >
+  ) => {
+    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+  };
+
+  const handleDelete = (id: string) => {
+    setProperties((prev) => prev.filter((p) => p.id !== id));
   };
 
   const filteredProperties = properties.filter((p) => {
@@ -247,6 +265,8 @@ export default function OwnerPropertiesPage() {
                     property={property}
                     delay={index * 0.05}
                     onClick={() => setStatusModalProperty(property)}
+                    onEdit={() => setEditingProperty(property)}
+                    onDelete={() => setDeletingPropertyId(property.id)}
                   />
                 ))}
               </div>
@@ -265,6 +285,20 @@ export default function OwnerPropertiesPage() {
         property={statusModalProperty}
         onClose={() => setStatusModalProperty(null)}
         onResubmit={handleResubmit}
+      />
+
+      <EditOwnerPropertyModal
+        property={editingProperty}
+        onClose={() => setEditingProperty(null)}
+        onSave={handleEditSave}
+      />
+
+      <ConfirmDialog
+        open={!!deletingPropertyId}
+        onOpenChange={(open) => !open && setDeletingPropertyId(null)}
+        title="Delete this property?"
+        description="This will permanently remove the property and any associated sale listings. This cannot be undone."
+        onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
     </div>
   );

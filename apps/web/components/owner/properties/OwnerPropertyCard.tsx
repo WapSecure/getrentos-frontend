@@ -9,7 +9,15 @@ import {
   HelpCircle,
   Building2,
   MoreVertical,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/DropdownMenu';
 import { formatCurrency } from '@/lib/format';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 
@@ -42,10 +50,18 @@ const verificationConfig: Record<
 interface OwnerPropertyCardProps {
   property: OwnerProperty;
   onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   delay?: number;
 }
 
-export const OwnerPropertyCard = ({ property, onClick, delay = 0 }: OwnerPropertyCardProps) => {
+export const OwnerPropertyCard = ({
+  property,
+  onClick,
+  onEdit,
+  onDelete,
+  delay = 0,
+}: OwnerPropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
   const VerificationIcon = verification.icon;
   const appreciation =
@@ -76,12 +92,26 @@ export const OwnerPropertyCard = ({ property, onClick, delay = 0 }: OwnerPropert
             Listed
           </div>
         )}
-        <button
-          onClick={(e) => e.stopPropagation()}
-          className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
-        >
-          <MoreVertical className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
+            >
+              <MoreVertical className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onSelect={() => onEdit?.()}>
+              <Pencil className="w-4 h-4" />
+              Edit Property
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onDelete?.()} className="text-destructive">
+              <Trash2 className="w-4 h-4" />
+              Delete Property
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="p-4">

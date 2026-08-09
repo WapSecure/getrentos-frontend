@@ -33,9 +33,10 @@ interface ListingCardProps {
   listing: Listing;
   delay?: number;
   onTogglePause: (id: string) => void;
+  onPreview: (listing: Listing) => void;
 }
 
-export const ListingCard = ({ listing, delay = 0, onTogglePause }: ListingCardProps) => {
+export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: ListingCardProps) => {
   const status = statusConfig[listing.status];
 
   return (
@@ -94,7 +95,13 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause }: ListingCardPr
         </p>
 
         <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
-          <Button variant="outline" size="sm" fullWidth className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            className="gap-1.5"
+            onClick={() => onPreview(listing)}
+          >
             <Eye className="w-3.5 h-3.5" />
             Preview
           </Button>

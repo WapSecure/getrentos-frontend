@@ -37,6 +37,7 @@ export default function DiscoverPage() {
     bathrooms: '',
     propertyType: '',
     verifiedOnly: false,
+    search: '',
   });
 
   useEffect(() => {
@@ -95,8 +96,12 @@ export default function DiscoverPage() {
     }
   };
 
-  const handleApplyFilters = (newFilters: typeof filters) => {
-    setFilters(newFilters);
+  const handleApplyFilters = (newFilters: Omit<typeof filters, 'search'>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+  };
+
+  const handleSearch = (query: string) => {
+    setFilters((prev) => ({ ...prev, search: query }));
   };
 
   if (isLoading) {
@@ -133,7 +138,7 @@ export default function DiscoverPage() {
               <div className="lg:col-span-2 space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1">
-                    <DiscoverSearchBar onSearch={(query) => console.log('Search:', query)} />
+                    <DiscoverSearchBar onSearch={handleSearch} />
                   </div>
                   <SavedSearchAlert
                     currentFilters={filters}

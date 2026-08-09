@@ -3,6 +3,7 @@
 import { ReactNode, forwardRef } from 'react';
 import { motion, MotionProps } from 'framer-motion';
 import Link from 'next/link';
+import { cn } from '@/lib/cn';
 
 interface ButtonProps {
   children: ReactNode;
@@ -48,15 +49,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-[#c4a747] text-[#0a1a1f] hover:bg-[#a88d3a] focus:ring-[#c4a747] disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-primary text-primary-foreground hover:opacity-90 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed',
       secondary:
-        'bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:border-white/20 dark:hover:bg-white/20 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-secondary text-secondary-foreground border border-border hover:opacity-80 focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       outline:
-        'bg-transparent text-gray-900 border-2 border-gray-300 hover:bg-gray-100 dark:text-white dark:border-white/30 dark:hover:bg-white/10 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-transparent text-foreground border-2 border-border hover:bg-secondary focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       ghost:
-        'bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-transparent text-muted-foreground hover:bg-secondary focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       danger:
-        'bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-destructive text-destructive-foreground hover:opacity-90 focus:ring-destructive disabled:opacity-50 disabled:cursor-not-allowed',
     };
 
     const sizes = {
@@ -75,11 +76,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       full: 'rounded-full',
     };
 
-    const widthClass = fullWidth ? 'w-full' : '';
-    const shadowClass = shadow ? 'shadow-lg hover:shadow-xl transition-shadow' : '';
-    const disabledClass = disabled || isLoading ? 'cursor-not-allowed' : 'cursor-pointer';
-
-    const combinedClassName = `${baseStyles} ${variants[variant]} ${sizes[size]} ${roundedStyles[rounded]} ${widthClass} ${shadowClass} ${disabledClass} ${className}`;
+    const combinedClassName = cn(
+      baseStyles,
+      variants[variant],
+      sizes[size],
+      roundedStyles[rounded],
+      fullWidth && 'w-full',
+      shadow && 'shadow-lg hover:shadow-xl transition-shadow',
+      disabled || isLoading ? 'cursor-not-allowed' : 'cursor-pointer',
+      className
+    );
 
     const content = (
       <>

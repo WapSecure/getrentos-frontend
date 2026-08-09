@@ -13,6 +13,7 @@ import { RecentlyViewed } from '@/components/renter/saved/RecentlyViewed';
 import { SavedAIRecommendations } from '@/components/renter/saved/SavedAIRecommendations';
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
+import { Toast } from '@/components/ui/Toast';
 import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { Property } from '@/types/renter';
 
@@ -37,6 +38,7 @@ export default function SavedPage() {
 
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [shareToast, setShareToast] = useState<string | null>(null);
 
   // Load saved properties with mock data
   const loadSavedProperties = () => {
@@ -254,7 +256,21 @@ export default function SavedPage() {
   };
 
   const handleShareSelected = () => {
-    console.log('Share selected:', selectedProperties);
+    setShareToast(
+      `Share link copied for ${selectedProperties.length} propert${selectedProperties.length === 1 ? 'y' : 'ies'}`
+    );
+    window.setTimeout(() => setShareToast(null), 3000);
+  };
+
+  const handleBulkMoveToWishlist = (wishlistId: string) => {
+    const updatedWishlists = wishlists.map((w) =>
+      w.id === wishlistId
+        ? { ...w, propertyIds: Array.from(new Set([...w.propertyIds, ...selectedProperties])) }
+        : w
+    );
+    setWishlists(updatedWishlists);
+    localStorage.setItem('renter_wishlists', JSON.stringify(updatedWishlists));
+    setSelectedProperties([]);
   };
 
   const handleSelectProperty = (propertyId: string) => {
@@ -328,14 +344,19 @@ export default function SavedPage() {
         </main>
       </div>
 
+      {shareToast && (
+        <Toast message={shareToast} variant="success" onClose={() => setShareToast(null)} />
+      )}
+
       <BulkActions
         selectedCount={selectedProperties.length}
         totalCount={savedProperties.length}
+        wishlists={wishlists}
         onSelectAll={handleSelectAll}
         onClearSelection={handleClearSelection}
         onDeleteSelected={handleDeleteSelected}
         onShareSelected={handleShareSelected}
-        onMoveToWishlist={() => {}}
+        onMoveToWishlist={handleBulkMoveToWishlist}
       />
 
       <ExportSavedProperties

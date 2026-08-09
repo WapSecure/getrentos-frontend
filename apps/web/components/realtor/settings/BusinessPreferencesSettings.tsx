@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
 
@@ -79,9 +79,7 @@ export const BusinessPreferencesSettings = () => {
         </label>
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Save Preferences
-      </Button>
+      <SaveButton label="Save Preferences" className="mt-6" />
     </div>
   );
 };

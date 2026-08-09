@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, RefreshCcw, BarChart3, X } from 'lucide-react';
+import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
 import { OwnerNavbar } from '@/components/owner/navigation/OwnerNavbar';
 import { OwnerSidebar } from '@/components/owner/dashboard/OwnerSidebar';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
@@ -59,6 +59,7 @@ export default function OwnerAnalyticsPage() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
   const [convertingProperty, setConvertingProperty] = useState<InvestmentMetrics | null>(null);
+  const [exported, setExported] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -134,9 +135,20 @@ export default function OwnerAnalyticsPage() {
                   <BarChart3 className="w-4 h-4" />
                   Compare
                 </Button>
-                <Button variant="outline" className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Export
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => {
+                    setExported(true);
+                    window.setTimeout(() => setExported(false), 2500);
+                  }}
+                >
+                  {exported ? (
+                    <Check className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  {exported ? 'Exported' : 'Export'}
                 </Button>
               </div>
             </div>

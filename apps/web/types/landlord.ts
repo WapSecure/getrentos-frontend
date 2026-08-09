@@ -29,6 +29,7 @@ export interface Property {
   occupiedUnits: number;
   monthlyRevenue: number;
   createdAt: string;
+  archived?: boolean;
 }
 
 export interface Unit {

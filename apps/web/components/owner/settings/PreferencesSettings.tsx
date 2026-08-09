@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { RefreshCcw, Percent } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 export const PreferencesSettings = () => {
   const [minOfferPct, setMinOfferPct] = useState('85');
@@ -69,9 +69,7 @@ export const PreferencesSettings = () => {
         </label>
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Save Preferences
-      </Button>
+      <SaveButton label="Save Preferences" className="mt-6" />
     </div>
   );
 };
