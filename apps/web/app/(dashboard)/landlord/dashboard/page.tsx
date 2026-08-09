@@ -1,7 +1,7 @@
 'use client';
 
 import { useLandlordUser } from '../layout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building2 } from 'lucide-react';
 import { LandlordDashboardHeader } from '@/components/landlord/dashboard/LandlordDashboardHeader';
 import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStatsCards';
@@ -9,59 +9,29 @@ import { LandlordRevenueChart } from '@/components/landlord/dashboard/LandlordRe
 import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordActivityFeed';
 import { LandlordQuickActions } from '@/components/landlord/dashboard/LandlordQuickActions';
 import { Button } from '@/components/ui/Button';
-import type { Property } from '@/types/landlord';
+import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 
-const mockProperties: Property[] = [
-  {
-    id: 'prop_001',
-    name: 'Sunrise Apartments',
-    type: 'apartment',
-    address: '14 Adeola Odeku Street',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '/images/properties/sunrise-apartments.jpg',
-    verificationStatus: 'verified',
-    totalUnits: 8,
-    occupiedUnits: 6,
-    monthlyRevenue: 2_850_000,
-    createdAt: '2024-11-02T00:00:00.000Z',
-  },
-  {
-    id: 'prop_002',
-    name: 'Palm Court Residences',
-    type: 'duplex',
-    address: '22 Admiralty Way',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '/images/properties/palm-court.jpg',
-    verificationStatus: 'verified',
-    totalUnits: 4,
-    occupiedUnits: 3,
-    monthlyRevenue: 1_620_000,
-    createdAt: '2025-01-15T00:00:00.000Z',
-  },
-  {
-    id: 'prop_003',
-    name: 'Modern Downtown Loft',
-    type: 'shared_apartment',
-    address: '5 Ikeja GRA',
-    city: 'Ikeja',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '/images/properties/downtown-loft.jpg',
-    verificationStatus: 'pending',
-    totalUnits: 3,
-    occupiedUnits: 1,
-    monthlyRevenue: 450_000,
-    createdAt: '2025-04-20T00:00:00.000Z',
-  },
-];
+const EMPTY_STATS: LandlordDashboardStats = {
+  totalProperties: 0,
+  occupiedUnits: 0,
+  vacantUnits: 0,
+  monthlyRevenue: 0,
+  outstandingPayments: 0,
+  activeMaintenanceRequests: 0,
+};
 
 export default function LandlordDashboardPage() {
   const user = useLandlordUser();
-  const [properties, setProperties] = useState<Property[]>(mockProperties);
+  const [stats, setStats] = useState<LandlordDashboardStats>(EMPTY_STATS);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const response = await landlordService.getDashboardStats();
+      if (response.success && response.data) setStats(response.data);
+    };
+
+    fetchStats();
+  }, []);
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -69,18 +39,20 @@ export default function LandlordDashboardPage() {
   if (currentHour >= 12 && currentHour < 18) greeting = 'Good afternoon';
   if (currentHour >= 18) greeting = 'Good evening';
 
-  const totalUnits = properties.reduce((sum, p) => sum + p.totalUnits, 0);
-  const occupiedUnits = properties.reduce((sum, p) => sum + p.occupiedUnits, 0);
-  const vacantUnits = totalUnits - occupiedUnits;
-  const monthlyRevenue = properties.reduce((sum, p) => sum + p.monthlyRevenue, 0);
-  const outstandingPayments = 380_000;
-  const activeMaintenanceRequests = 2;
+  const {
+    totalProperties,
+    occupiedUnits,
+    vacantUnits,
+    monthlyRevenue,
+    outstandingPayments,
+    activeMaintenanceRequests,
+  } = stats;
 
   return (
     <>
       <LandlordDashboardHeader greeting={greeting} firstName={firstName} />
 
-      {properties.length === 0 ? (
+      {totalProperties === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
@@ -97,7 +69,7 @@ export default function LandlordDashboardPage() {
       ) : (
         <>
           <LandlordStatsCards
-            totalProperties={properties.length}
+            totalProperties={totalProperties}
             occupiedUnits={occupiedUnits}
             vacantUnits={vacantUnits}
             monthlyRevenue={monthlyRevenue}
