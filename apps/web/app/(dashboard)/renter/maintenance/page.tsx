@@ -184,7 +184,7 @@ export default function MaintenancePage() {
     },
   ];
 
-  const alerts = [
+  const initialAlerts = [
     {
       id: 'alert_001',
       type: 'status_update' as const,
@@ -202,6 +202,7 @@ export default function MaintenancePage() {
       read: false,
     },
   ];
+  const [alerts, setAlerts] = useState(initialAlerts);
 
   if (isLoading) {
     return (
@@ -224,8 +225,10 @@ export default function MaintenancePage() {
               <MaintenanceHeader onReport={() => setShowReportModal(true)} />
               <MaintenanceAlerts
                 alerts={alerts}
-                onMarkAsRead={(id) => console.log('Mark as read:', id)}
-                onClearAll={() => console.log('Clear all')}
+                onMarkAsRead={(id) =>
+                  setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)))
+                }
+                onClearAll={() => setAlerts((prev) => prev.map((a) => ({ ...a, read: true })))}
               />
             </div>
 

@@ -2,15 +2,33 @@
 
 import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/cn';
 
 interface CardProps {
   children: ReactNode;
   className?: string;
   hover?: boolean;
   delay?: number;
+  /** Set for dense dashboard/admin contexts: skips the scroll-in + hover-lift animation meant for marketing pages. */
+  static?: boolean;
 }
 
-export const Card = ({ children, className = '', hover = true, delay = 0 }: CardProps) => {
+export const Card = ({
+  children,
+  className = '',
+  hover = true,
+  delay = 0,
+  static: isStatic = false,
+}: CardProps) => {
+  const baseClassName = cn(
+    'bg-card border border-border rounded-lg overflow-hidden transition-all duration-300',
+    className
+  );
+
+  if (isStatic) {
+    return <div className={baseClassName}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -31,7 +49,7 @@ export const Card = ({ children, className = '', hover = true, delay = 0 }: Card
             }
           : {}
       }
-      className={`bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden transition-all duration-300 ${className}`}
+      className={baseClassName}
     >
       {children}
     </motion.div>

@@ -15,6 +15,7 @@ interface DiscoverPropertyGridProps {
     bathrooms: string;
     propertyType: string;
     verifiedOnly: boolean;
+    search?: string;
   };
   savedProperties: string[];
   onSave: (id: string) => void;
@@ -185,6 +186,12 @@ export const DiscoverPropertyGrid = ({
     setTimeout(() => {
       let filtered = [...mockProperties];
 
+      if (filters.search) {
+        const query = filters.search.toLowerCase();
+        filtered = filtered.filter(
+          (p) => p.title.toLowerCase().includes(query) || p.location.toLowerCase().includes(query)
+        );
+      }
       if (filters.location) {
         filtered = filtered.filter((p) =>
           p.location.toLowerCase().includes(filters.location.toLowerCase())

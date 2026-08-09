@@ -13,6 +13,8 @@ import { DocumentAnalytics } from '@/components/renter/documents/DocumentAnalyti
 import { DocumentExpiryAlerts } from '@/components/renter/documents/DocumentExpiryAlerts';
 import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkActions';
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
+import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
+import { Toast } from '@/components/ui/Toast';
 import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 
 interface Document {
@@ -50,6 +52,8 @@ export default function DocumentsPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sharingDocumentId, setSharingDocumentId] = useState<string | null>(null);
+  const [downloadToast, setDownloadToast] = useState<string | null>(null);
 
   const loadDocuments = () => {
     const mockDocuments: Document[] = [
@@ -220,11 +224,24 @@ export default function DocumentsPage() {
   };
 
   const handleShare = (id: string) => {
-    console.log('Share document:', id);
+    setSharingDocumentId(id);
+  };
+
+  const handleConfirmShare = (email: string) => {
+    if (!sharingDocumentId) return;
+    setDocuments((prev) =>
+      prev.map((d) =>
+        d.id === sharingDocumentId
+          ? { ...d, sharedWith: [...new Set([...(d.sharedWith || []), email])] }
+          : d
+      )
+    );
   };
 
   const handleDownload = (id: string) => {
-    console.log('Download document:', id);
+    const doc = documents.find((d) => d.id === id);
+    setDownloadToast(doc ? `${doc.name} downloaded` : 'Document downloaded');
+    window.setTimeout(() => setDownloadToast(null), 3000);
   };
 
   const handleSelectDocument = (id: string) => {
@@ -311,8 +328,18 @@ export default function DocumentsPage() {
         <DocumentBulkActions
           selectedCount={selectedDocuments.length}
           onDelete={handleBulkDelete}
-          onShare={() => console.log('Share selected')}
-          onDownload={() => console.log('Download selected')}
+          onShare={() => {
+            setDownloadToast(
+              `Share links copied for ${selectedDocuments.length} document${selectedDocuments.length === 1 ? '' : 's'}`
+            );
+            window.setTimeout(() => setDownloadToast(null), 3000);
+          }}
+          onDownload={() => {
+            setDownloadToast(
+              `${selectedDocuments.length} document${selectedDocuments.length === 1 ? '' : 's'} downloaded`
+            );
+            window.setTimeout(() => setDownloadToast(null), 3000);
+          }}
           onClearSelection={() => setSelectedDocuments([])}
         />
       )}
@@ -322,6 +349,18 @@ export default function DocumentsPage() {
         onClose={() => setShowUploadModal(false)}
         onSubmit={handleUpload}
       />
+
+      <DocumentShareModal
+        isOpen={!!sharingDocumentId}
+        onClose={() => setSharingDocumentId(null)}
+        documentId={sharingDocumentId || ''}
+        documentName={documents.find((d) => d.id === sharingDocumentId)?.name || ''}
+        onShare={handleConfirmShare}
+      />
+
+      {downloadToast && (
+        <Toast message={downloadToast} variant="success" onClose={() => setDownloadToast(null)} />
+      )}
     </div>
   );
 }

@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Download, Upload, FolderOpen, Search } from 'lucide-react';
+import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { RealtorNavbar } from '@/components/realtor/navigation/RealtorNavbar';
 import { RealtorSidebar } from '@/components/realtor/dashboard/RealtorSidebar';
 import { Button } from '@/components/ui/Button';
+import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
+import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
 import { formatDate } from '@/lib/format';
 import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { RealtorDocument } from '@/types/realtor';
@@ -60,6 +62,7 @@ export default function RealtorDocumentsPage() {
   const [documents, setDocuments] = useState<RealtorDocument[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -82,6 +85,19 @@ export default function RealtorDocumentsPage() {
     };
     checkAuth();
   }, [router]);
+
+  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
+    setDocuments((prev) => [
+      {
+        id: `doc_${Date.now()}`,
+        name: data.name,
+        category: data.category as RealtorDocument['category'],
+        uploadedAt: new Date().toISOString(),
+        sizeLabel: data.sizeLabel,
+      },
+      ...prev,
+    ]);
+  };
 
   if (isLoading) {
     return (
@@ -122,7 +138,7 @@ export default function RealtorDocumentsPage() {
                   {documents.length === 1 ? '' : 's'}
                 </p>
               </div>
-              <Button variant="primary" className="gap-2">
+              <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
                 <Upload className="w-4 h-4" />
                 Upload Document
               </Button>
@@ -183,12 +199,7 @@ export default function RealtorDocumentsPage() {
                     <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
                       {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
                     </div>
-                    <button
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-[#c4a747] hover:bg-gray-100 dark:hover:bg-white/10 flex-shrink-0"
-                      title="Download"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
+                    <DocumentRowActions showShare={false} />
                   </div>
                 ))}
               </div>
@@ -196,6 +207,15 @@ export default function RealtorDocumentsPage() {
           </div>
         </main>
       </div>
+
+      <DocumentUploadDialog
+        open={isUploadOpen}
+        onOpenChange={setIsUploadOpen}
+        categories={categoryFilters
+          .filter((c) => c.value !== 'all')
+          .map((c) => ({ value: c.value, label: c.label }))}
+        onUpload={handleUpload}
+      />
     </div>
   );
 }

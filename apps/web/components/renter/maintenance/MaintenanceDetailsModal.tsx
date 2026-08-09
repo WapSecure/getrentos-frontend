@@ -12,6 +12,7 @@ import {
   Wrench,
   Phone,
   Mail,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { MaintenanceRequest } from '@/types/maintenance';
@@ -35,6 +36,7 @@ const statusConfig = {
   assigned: { label: 'Assigned', color: 'bg-purple-100 text-purple-800', icon: User },
   in_progress: { label: 'In Progress', color: 'bg-yellow-100 text-yellow-800', icon: Wrench },
   resolved: { label: 'Resolved', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+  cancelled: { label: 'Cancelled', color: 'bg-gray-100 text-gray-600', icon: XCircle },
 };
 
 const formatDate = (dateString: string) => {

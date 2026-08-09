@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { Calendar, Clock, FileText, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -33,6 +34,7 @@ const formatDate = (dateString: string) => {
 };
 
 export const RenterLeaseRenewal = () => {
+  const router = useRouter();
   const daysUntilOffer = Math.ceil(
     (new Date(renewalData.renewalOfferDate).getTime() - new Date().getTime()) /
       (1000 * 60 * 60 * 24)
@@ -103,7 +105,12 @@ export const RenterLeaseRenewal = () => {
           </div>
         </div>
 
-        <Button variant="outline" fullWidth className="gap-2">
+        <Button
+          variant="outline"
+          fullWidth
+          className="gap-2"
+          onClick={() => router.push('/renter/lease')}
+        >
           <FileText className="w-4 h-4" />
           Review Lease Terms
           <ArrowRight className="w-3 h-3" />

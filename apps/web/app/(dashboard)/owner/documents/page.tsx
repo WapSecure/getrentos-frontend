@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Download, Share2, Upload, FolderOpen, Search, Check } from 'lucide-react';
+import { FileText, Upload, FolderOpen, Search, Check } from 'lucide-react';
 import { OwnerNavbar } from '@/components/owner/navigation/OwnerNavbar';
 import { OwnerSidebar } from '@/components/owner/dashboard/OwnerSidebar';
 import { Button } from '@/components/ui/Button';
+import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
+import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
 import { formatDate } from '@/lib/format';
 import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { OwnershipTransferDocument } from '@/types/owner';
@@ -79,6 +81,7 @@ export default function OwnerDocumentsPage() {
   const [documents, setDocuments] = useState<OwnershipTransferDocument[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -106,6 +109,22 @@ export default function OwnerDocumentsPage() {
     setDocuments((prev) =>
       prev.map((d) => (d.id === docId ? { ...d, sharedWithBuyer: !d.sharedWithBuyer } : d))
     );
+  };
+
+  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
+    setDocuments((prev) => [
+      {
+        id: `doc_${Date.now()}`,
+        propertyId: '',
+        propertyName: 'Unassigned',
+        name: data.name,
+        category: data.category as OwnershipTransferDocument['category'],
+        uploadedAt: new Date().toISOString(),
+        sizeLabel: data.sizeLabel,
+        sharedWithBuyer: false,
+      },
+      ...prev,
+    ]);
   };
 
   if (isLoading) {
@@ -148,7 +167,7 @@ export default function OwnerDocumentsPage() {
                   Ownership verification and sale transfer documents across your portfolio
                 </p>
               </div>
-              <Button variant="primary" className="gap-2">
+              <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
                 <Upload className="w-4 h-4" />
                 Upload Document
               </Button>
@@ -219,20 +238,7 @@ export default function OwnerDocumentsPage() {
                       {doc.sharedWithBuyer && <Check className="w-3 h-3" />}
                       {doc.sharedWithBuyer ? 'Shared with Buyer' : 'Not Shared'}
                     </button>
-                    <div className="flex gap-1 flex-shrink-0">
-                      <button
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#c4a747] hover:bg-gray-100 dark:hover:bg-white/10"
-                        title="Share securely"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#c4a747] hover:bg-gray-100 dark:hover:bg-white/10"
-                        title="Download"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <DocumentRowActions onShare={() => toggleShare(doc.id)} />
                   </div>
                 ))}
               </div>
@@ -240,6 +246,15 @@ export default function OwnerDocumentsPage() {
           </div>
         </main>
       </div>
+
+      <DocumentUploadDialog
+        open={isUploadOpen}
+        onOpenChange={setIsUploadOpen}
+        categories={categoryFilters
+          .filter((c) => c.value !== 'all')
+          .map((c) => ({ value: c.value, label: c.label }))}
+        onUpload={handleUpload}
+      />
     </div>
   );
 }

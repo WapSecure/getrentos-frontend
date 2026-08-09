@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { getInitials } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -78,9 +79,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Save Changes
-      </Button>
+      <SaveButton label="Save Changes" className="mt-6" />
     </div>
   );
 };

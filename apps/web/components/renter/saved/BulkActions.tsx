@@ -3,19 +3,26 @@
 import { useState } from 'react';
 import { Trash2, Share2, BookmarkPlus, X } from 'lucide-react';
 
+interface BulkActionsWishlist {
+  id: string;
+  name: string;
+}
+
 interface BulkActionsProps {
   selectedCount: number;
   totalCount: number;
+  wishlists: BulkActionsWishlist[];
   onSelectAll: () => void;
   onClearSelection: () => void;
   onDeleteSelected: () => void;
   onShareSelected: () => void;
-  onMoveToWishlist: () => void;
+  onMoveToWishlist: (wishlistId: string) => void;
 }
 
 export const BulkActions = ({
   selectedCount,
   totalCount,
+  wishlists,
   onSelectAll,
   onClearSelection,
   onDeleteSelected,
@@ -64,13 +71,22 @@ export const BulkActions = ({
           </button>
           {showWishlistMenu && (
             <div className="absolute bottom-full mb-2 right-0 bg-white dark:bg-[#1a2a2f] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 min-w-40">
-              {/* Wishlist options would go here */}
-              <button className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg">
-                Dream Homes
-              </button>
-              <button className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg">
-                Budget Options
-              </button>
+              {wishlists.length === 0 ? (
+                <p className="px-3 py-1.5 text-xs text-gray-400">No wishlists yet</p>
+              ) : (
+                wishlists.map((wishlist) => (
+                  <button
+                    key={wishlist.id}
+                    onClick={() => {
+                      onMoveToWishlist(wishlist.id);
+                      setShowWishlistMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg"
+                  >
+                    {wishlist.name}
+                  </button>
+                ))
+              )}
             </div>
           )}
         </div>

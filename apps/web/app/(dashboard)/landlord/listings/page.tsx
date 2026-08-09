@@ -7,6 +7,7 @@ import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar'
 import { LandlordSidebar } from '@/components/landlord/dashboard/LandlordSidebar';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
 import { CreateListingModal } from '@/components/landlord/listings/CreateListingModal';
+import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
 import { Button } from '@/components/ui/Button';
 import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { Listing, ListingStatus, Unit } from '@/types/landlord';
@@ -79,6 +80,7 @@ export default function LandlordListingsPage() {
   const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
   const [filter, setFilter] = useState<'all' | ListingStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [previewListing, setPreviewListing] = useState<Listing | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -203,6 +205,7 @@ export default function LandlordListingsPage() {
                     listing={listing}
                     delay={index * 0.05}
                     onTogglePause={handleTogglePause}
+                    onPreview={setPreviewListing}
                   />
                 ))}
               </div>
@@ -217,6 +220,8 @@ export default function LandlordListingsPage() {
         vacantUnits={vacantUnits}
         onPublish={handlePublish}
       />
+
+      <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />
     </div>
   );
 }

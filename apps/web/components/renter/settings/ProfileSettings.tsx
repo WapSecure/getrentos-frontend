@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Camera, User, Mail, Phone, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -117,9 +117,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           />
         </div>
 
-        <Button type="submit" variant="primary">
-          Save Changes
-        </Button>
+        <SaveButton type="submit" label="Save Changes" />
       </form>
     </div>
   );

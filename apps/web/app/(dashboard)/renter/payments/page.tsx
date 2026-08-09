@@ -14,6 +14,7 @@ import { PaymentAnalytics } from '@/components/renter/payments/PaymentAnalytics'
 import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentReceiptsGallery';
 import { PaymentNotifications } from '@/components/renter/payments/PaymentNotifications';
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
+import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
 import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 
 interface Payment {
@@ -57,6 +58,7 @@ export default function PaymentsPage() {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
 
   const loadPayments = () => {
     const mockPayments: Payment[] = [
@@ -202,12 +204,57 @@ export default function PaymentsPage() {
     checkAuth();
   }, [router]);
 
+  const pushNotification = (notification: Omit<Notification, 'id' | 'date' | 'read'>) => {
+    setNotifications((prev) => [
+      { ...notification, id: `notif_${Date.now()}`, date: new Date().toISOString(), read: false },
+      ...prev,
+    ]);
+  };
+
   const handlePayNow = (paymentId: string) => {
-    console.log('Pay now:', paymentId);
+    const payment = payments.find((p) => p.id === paymentId);
+    if (!payment) return;
+
+    setPayments((prev) =>
+      prev.map((p) => (p.id === paymentId ? { ...p, status: 'processing' } : p))
+    );
+
+    window.setTimeout(() => {
+      const paidDate = new Date().toISOString().slice(0, 10);
+      setReceipts((prevReceipts) => [
+        {
+          id: `rec_${paymentId}_${Date.now()}`,
+          paymentId,
+          propertyName: payment.propertyName,
+          amount: payment.amount,
+          date: paidDate,
+          fileName: `Rent_Receipt_${payment.propertyName}_${paidDate}.pdf`,
+          url: '#',
+        },
+        ...prevReceipts,
+      ]);
+      pushNotification({
+        type: 'success',
+        title: 'Payment Successful',
+        message: `Rent payment of ₦${payment.amount.toLocaleString()} for ${payment.propertyName} was successful.`,
+      });
+      setPayments((prev) =>
+        prev.map((p) =>
+          p.id === paymentId ? { ...p, status: 'paid', escrowStatus: 'held', date: paidDate } : p
+        )
+      );
+    }, 1800);
   };
 
   const handleDownloadReceipt = (receiptId: string) => {
-    console.log('Download receipt:', receiptId);
+    const receipt = receipts.find((r) => r.id === receiptId || r.paymentId === receiptId);
+    pushNotification({
+      type: 'info',
+      title: 'Receipt Downloaded',
+      message: receipt
+        ? `${receipt.fileName} has been downloaded.`
+        : 'Your receipt has been downloaded.',
+    });
   };
 
   const handleViewReceipt = (receiptId: string) => {
@@ -215,7 +262,18 @@ export default function PaymentsPage() {
   };
 
   const handleDispute = (paymentId: string) => {
-    console.log('Dispute payment:', paymentId);
+    setDisputingPaymentId(paymentId);
+  };
+
+  const handleSubmitDispute = (reason: string) => {
+    if (!disputingPaymentId) return;
+    const payment = payments.find((p) => p.id === disputingPaymentId);
+    pushNotification({
+      type: 'info',
+      title: 'Dispute Submitted',
+      message: `Your dispute for ${payment?.propertyName ?? 'this payment'} has been submitted for review: "${reason}"`,
+    });
+    setDisputingPaymentId(null);
   };
 
   const handleMarkNotificationAsRead = (id: string) => {
@@ -280,6 +338,12 @@ export default function PaymentsPage() {
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
         payments={payments}
+      />
+
+      <DisputePaymentDialog
+        open={!!disputingPaymentId}
+        onOpenChange={(open) => !open && setDisputingPaymentId(null)}
+        onSubmit={handleSubmitDispute}
       />
     </div>
   );

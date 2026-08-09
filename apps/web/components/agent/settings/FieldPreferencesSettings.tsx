@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Wifi } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
 const dayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -109,9 +109,7 @@ export const FieldPreferencesSettings = () => {
         </label>
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Save Preferences
-      </Button>
+      <SaveButton label="Save Preferences" className="mt-6" />
     </div>
   );
 };

@@ -9,7 +9,17 @@ import {
   ShieldX,
   MoreVertical,
   Building2,
+  Pencil,
+  Archive,
+  ArchiveRestore,
+  Trash2,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/DropdownMenu';
 import { formatCurrency } from '@/lib/format';
 import type { Property } from '@/types/landlord';
 
@@ -50,10 +60,20 @@ const verificationConfig: Record<
 interface PropertyCardProps {
   property: Property;
   onClick?: () => void;
+  onEdit?: () => void;
+  onToggleArchive?: () => void;
+  onDelete?: () => void;
   delay?: number;
 }
 
-export const PropertyCard = ({ property, onClick, delay = 0 }: PropertyCardProps) => {
+export const PropertyCard = ({
+  property,
+  onClick,
+  onEdit,
+  onToggleArchive,
+  onDelete,
+  delay = 0,
+}: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
   const VerificationIcon = verification.icon;
   const vacantUnits = property.totalUnits - property.occupiedUnits;
@@ -78,12 +98,39 @@ export const PropertyCard = ({ property, onClick, delay = 0 }: PropertyCardProps
           <VerificationIcon className="w-3 h-3" />
           {verification.label}
         </div>
-        <button
-          onClick={(e) => e.stopPropagation()}
-          className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
-        >
-          <MoreVertical className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
+            >
+              <MoreVertical className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onSelect={() => onEdit?.()}>
+              <Pencil className="w-4 h-4" />
+              Edit Property
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onToggleArchive?.()}>
+              {property.archived ? (
+                <ArchiveRestore className="w-4 h-4" />
+              ) : (
+                <Archive className="w-4 h-4" />
+              )}
+              {property.archived ? 'Unarchive Property' : 'Archive Property'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onDelete?.()} className="text-destructive">
+              <Trash2 className="w-4 h-4" />
+              Delete Property
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {property.archived && (
+          <div className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-black/60 text-white">
+            Archived
+          </div>
+        )}
       </div>
 
       <div className="p-4">

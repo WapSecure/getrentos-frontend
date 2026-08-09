@@ -20,6 +20,7 @@ const statusOptions = [
   { value: 'assigned', label: 'Assigned' },
   { value: 'in_progress', label: 'In Progress' },
   { value: 'resolved', label: 'Resolved' },
+  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 const priorityOptions = [
@@ -149,6 +150,7 @@ export const MaintenanceList = ({
                   request={request}
                   onViewDetails={() => handleViewDetails(request)}
                   onRateVendor={handleRateVendor}
+                  onUpdateStatus={onUpdateStatus}
                 />
               </motion.div>
             ))

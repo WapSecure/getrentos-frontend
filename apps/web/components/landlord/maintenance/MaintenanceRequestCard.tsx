@@ -62,6 +62,10 @@ const statusConfig: Record<MaintenanceRequestStatus, { label: string; className:
     label: 'Resolved',
     className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
   },
+  cancelled: {
+    label: 'Cancelled',
+    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+  },
 };
 
 interface MaintenanceRequestCardProps {

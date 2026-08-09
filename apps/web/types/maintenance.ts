@@ -6,7 +6,12 @@ export type MaintenanceCategory =
   | 'appliances'
   | 'other';
 export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
-export type MaintenanceRequestStatus = 'submitted' | 'assigned' | 'in_progress' | 'resolved';
+export type MaintenanceRequestStatus =
+  | 'submitted'
+  | 'assigned'
+  | 'in_progress'
+  | 'resolved'
+  | 'cancelled';
 
 export interface MaintenanceRequest {
   id: string;

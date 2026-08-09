@@ -7,7 +7,9 @@ import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar'
 import { LandlordSidebar } from '@/components/landlord/dashboard/LandlordSidebar';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyModal';
+import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
 import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { Property } from '@/types/landlord';
 
@@ -69,6 +71,8 @@ export default function LandlordPropertiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -103,6 +107,21 @@ export default function LandlordPropertiesPage() {
       createdAt: new Date().toISOString(),
     };
     setProperties((prev) => [newProperty, ...prev]);
+  };
+
+  const handleEditSave = (
+    id: string,
+    updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>
+  ) => {
+    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+  };
+
+  const handleToggleArchive = (id: string) => {
+    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, archived: !p.archived } : p)));
+  };
+
+  const handleDelete = (id: string) => {
+    setProperties((prev) => prev.filter((p) => p.id !== id));
   };
 
   const filteredProperties = properties.filter((p) => {
@@ -212,6 +231,9 @@ export default function LandlordPropertiesPage() {
                     property={property}
                     delay={index * 0.05}
                     onClick={() => router.push(`/landlord/units?property=${property.id}`)}
+                    onEdit={() => setEditingProperty(property)}
+                    onToggleArchive={() => handleToggleArchive(property.id)}
+                    onDelete={() => setDeletingPropertyId(property.id)}
                   />
                 ))}
               </div>
@@ -224,6 +246,20 @@ export default function LandlordPropertiesPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onPublish={handlePublish}
+      />
+
+      <EditPropertyModal
+        property={editingProperty}
+        onClose={() => setEditingProperty(null)}
+        onSave={handleEditSave}
+      />
+
+      <ConfirmDialog
+        open={!!deletingPropertyId}
+        onOpenChange={(open) => !open && setDeletingPropertyId(null)}
+        title="Delete this property?"
+        description="This will permanently remove the property and all of its unit records. This cannot be undone."
+        onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
     </div>
   );
