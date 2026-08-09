@@ -167,6 +167,7 @@ export const ROUTES = {
   RENTER_DOCUMENTS: '/renter/documents',
   RENTER_SETTINGS: '/renter/settings',
   RENTER_TRUST_SCORE: '/renter/trust-score',
+  RENTER_CREDIT_REPORT: '/renter/credit-report',
   RENTER_CALENDAR: '/renter/calendar',
   RENTER_ROOMMATES: '/renter/roommates',
   RENTER_REVIEWS: '/renter/reviews',
