@@ -60,12 +60,12 @@ export const PaymentReceiptsGallery = ({
 
   return (
     <>
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">Receipts Gallery</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <h3 className="font-semibold text-foreground">Receipts Gallery</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {receipts.length} receipts available
               </p>
             </div>
@@ -77,7 +77,7 @@ export const PaymentReceiptsGallery = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search receipts..."
-                className="pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747] w-full sm:w-48"
+                className="pl-10 pr-4 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-48"
               />
             </div>
           </div>
@@ -90,20 +90,18 @@ export const PaymentReceiptsGallery = ({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              className="group relative p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#c4a747] hover:shadow-md transition-all cursor-pointer"
+              className="group relative p-3 rounded-lg border border-border hover:border-primary hover:shadow-md transition-all cursor-pointer"
               onClick={() => handleView(receipt)}
             >
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+                <div className="p-2 rounded-lg bg-secondary">
                   <FileText className="w-4 h-4 text-gray-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {receipt.fileName}
-                  </p>
+                  <p className="text-sm font-medium text-foreground truncate">{receipt.fileName}</p>
                   <p className="text-xs text-gray-500">{receipt.propertyName}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-semibold text-[#c4a747]">
+                    <span className="text-xs font-semibold text-primary">
                       {formatCurrency(receipt.amount)}
                     </span>
                     <span className="text-xs text-gray-400">•</span>
@@ -151,25 +149,23 @@ export const PaymentReceiptsGallery = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Receipt Preview</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {selectedReceipt.fileName}
-                </p>
+                <h3 className="font-semibold text-foreground">Receipt Preview</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{selectedReceipt.fileName}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onDownload(selectedReceipt.id)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                  className="p-1.5 rounded-lg hover:bg-secondary"
                 >
                   <Download className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setShowPreview(false)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                  className="p-1.5 rounded-lg hover:bg-secondary"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -177,13 +173,13 @@ export const PaymentReceiptsGallery = ({
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="p-4 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-white/5 border border-border">
                 <div className="text-center">
-                  <FileText className="w-12 h-12 text-[#c4a747] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <FileText className="w-12 h-12 text-primary mx-auto mb-2" />
+                  <p className="text-sm font-medium text-foreground">
                     {selectedReceipt.propertyName}
                   </p>
-                  <p className="text-2xl font-bold text-[#c4a747]">
+                  <p className="text-2xl font-bold text-primary">
                     {formatCurrency(selectedReceipt.amount)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{formatDate(selectedReceipt.date)}</p>

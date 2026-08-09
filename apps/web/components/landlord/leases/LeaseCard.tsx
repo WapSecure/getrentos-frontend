@@ -46,14 +46,12 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {lease.tenantName}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          <h3 className="font-semibold text-foreground truncate">{lease.tenantName}</h3>
+          <p className="text-xs text-muted-foreground truncate">
             {lease.propertyName} • {lease.unitName}
           </p>
         </div>
@@ -67,13 +65,13 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
           <p className="text-xs text-gray-400">Lease Period</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <p className="text-sm font-medium text-foreground">
             {formatDate(lease.leaseStart)} – {formatDate(lease.leaseEnd)}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-400">Monthly Rent</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <p className="text-sm font-medium text-foreground">
             {formatCurrency(lease.rentAmount, { compact: true })}
           </p>
         </div>
@@ -85,7 +83,7 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
         </p>
       )}
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
         {lease.status === 'draft' && (
           <Button
             variant="primary"

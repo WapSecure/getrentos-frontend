@@ -16,7 +16,7 @@ export const ListingPreviewModal = ({ listing, onClose }: ListingPreviewModalPro
       <DialogContent>
         {listing && (
           <>
-            <div className="relative h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f]">
+            <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Megaphone className="w-12 h-12 text-gray-400 dark:text-gray-600" />
               </div>
@@ -71,7 +71,7 @@ export const ListingPreviewModal = ({ listing, onClose }: ListingPreviewModalPro
                         key={amenity}
                         className="flex items-center gap-1.5 text-xs text-muted-foreground"
                       >
-                        <Check className="w-3 h-3 text-primary flex-shrink-0" />
+                        <Check className="w-3 h-3 text-primary shrink-0" />
                         {amenity}
                       </span>
                     ))}

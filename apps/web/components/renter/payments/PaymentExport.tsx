@@ -106,12 +106,12 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Export Payments</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Export Payments</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {payments.length} payments available to export
                 </p>
               </div>
@@ -123,15 +123,13 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
             <div className="p-4 space-y-4">
               {/* Date Range */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Date Range
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Date Range</label>
                 <select
                   value={dateRange}
                   onChange={(e) =>
                     setDateRange(e.target.value as 'all' | 'last3' | 'last6' | 'last12')
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="all">All Time</option>
                   <option value="last3">Last 3 Months</option>
@@ -142,16 +140,14 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
 
               {/* Export Options */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Format
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Format</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setFormat('pdf')}
                     className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
                       format === 'pdf'
-                        ? 'border-[#c4a747] bg-[#c4a747]/10'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                        ? 'border-primary bg-accent'
+                        : 'border-border hover:border-gray-300'
                     }`}
                   >
                     <FileText className="w-5 h-5 text-gray-500" />
@@ -161,8 +157,8 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
                     onClick={() => setFormat('csv')}
                     className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
                       format === 'csv'
-                        ? 'border-[#c4a747] bg-[#c4a747]/10'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                        ? 'border-primary bg-accent'
+                        : 'border-border hover:border-gray-300'
                     }`}
                   >
                     <FileSpreadsheet className="w-5 h-5 text-gray-500" />
@@ -175,13 +171,13 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Total Payments</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <span className="font-medium text-foreground">
                     {getFilteredPayments().length}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-gray-500">Total Amount</span>
-                  <span className="font-medium text-[#c4a747]">
+                  <span className="font-medium text-primary">
                     {formatCurrency(getFilteredPayments().reduce((sum, p) => sum + p.amount, 0))}
                   </span>
                 </div>

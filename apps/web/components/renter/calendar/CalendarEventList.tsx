@@ -30,7 +30,7 @@ const typeColors: Record<string, { bg: string; text: string }> = {
     text: 'text-yellow-600 dark:text-yellow-400',
   },
   lease: { bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-600 dark:text-purple-400' },
-  personal: { bg: 'bg-gray-50 dark:bg-gray-800', text: 'text-gray-600 dark:text-gray-400' },
+  personal: { bg: 'bg-gray-50 dark:bg-gray-800', text: 'text-muted-foreground' },
 };
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -58,15 +58,15 @@ export const CalendarEventList = ({
   });
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[#c4a747]" />
+          <Calendar className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Upcoming Events</h3>
+            <h3 className="font-semibold text-foreground">Upcoming Events</h3>
             <p className="text-xs text-gray-500">{events.length} events</p>
           </div>
         </div>
@@ -76,11 +76,9 @@ export const CalendarEventList = ({
       </div>
 
       {isExpanded && (
-        <div className="divide-y divide-gray-200 dark:divide-white/10 max-h-80 overflow-y-auto">
+        <div className="divide-y divide-border max-h-80 overflow-y-auto">
           {sortedEvents.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-              No events scheduled
-            </div>
+            <div className="p-4 text-center text-muted-foreground">No events scheduled</div>
           ) : (
             sortedEvents.map((event) => {
               const typeStyle = typeColors[event.type] || typeColors.personal;
@@ -88,10 +86,7 @@ export const CalendarEventList = ({
               const StatusIcon = status.icon;
 
               return (
-                <div
-                  key={event.id}
-                  className="p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                >
+                <div key={event.id} className="p-3 hover:bg-secondary transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -105,10 +100,8 @@ export const CalendarEventList = ({
                           {status.label}
                         </span>
                       </div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                        {event.title}
-                      </h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <h4 className="text-sm font-medium text-foreground mt-1">{event.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {formatDate(event.date)} • {event.startTime} - {event.endTime}
                       </p>
                       {event.location && (

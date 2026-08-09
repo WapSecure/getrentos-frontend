@@ -123,12 +123,12 @@ export const MaintenanceCard = ({
   return (
     <div
       onClick={handleViewDetails}
-      className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
+      className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
     >
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="font-semibold text-gray-900 dark:text-white">{request.title}</h4>
+            <h4 className="font-semibold text-foreground">{request.title}</h4>
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${priorityConfig[request.priority].color}`}
             >
@@ -143,7 +143,7 @@ export const MaintenanceCard = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
             <span>{request.propertyName}</span>
             <span>•</span>
             <span>
@@ -151,9 +151,7 @@ export const MaintenanceCard = ({
             </span>
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-            {request.description}
-          </p>
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{request.description}</p>
 
           <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
             <div className="flex items-center gap-1">
@@ -168,14 +166,14 @@ export const MaintenanceCard = ({
             )}
             {request.vendorRating && (
               <div className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
+                <Star className="w-3 h-3 fill-primary text-primary" />
                 <span>{request.vendorRating}.0</span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {request.status === 'resolved' && !request.vendorRating && onRateVendor && (
             <Button size="sm" variant="outline" onClick={handleRateVendor}>
               Rate Vendor

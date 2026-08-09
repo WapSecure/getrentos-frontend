@@ -13,8 +13,8 @@ export const DocumentsHeader = ({ documentCount, onUpload }: DocumentsHeaderProp
     <div className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Documents</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
+          <p className="text-muted-foreground mt-1">
             Manage all your rental documents securely in one place
           </p>
         </div>
@@ -27,7 +27,7 @@ export const DocumentsHeader = ({ documentCount, onUpload }: DocumentsHeaderProp
         </div>
       </div>
 
-      <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800">
+      <div className="mt-4 p-3 rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
             <Shield className="w-5 h-5 text-blue-600" />

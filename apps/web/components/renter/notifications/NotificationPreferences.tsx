@@ -78,17 +78,15 @@ export const NotificationPreferences = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Settings className="w-4 h-4 text-[#c4a747]" />
+          <Settings className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Notification Preferences
-            </h3>
+            <h3 className="font-semibold text-foreground">Notification Preferences</h3>
             <p className="text-xs text-gray-500">Manage how you receive notifications</p>
           </div>
         </div>
@@ -102,19 +100,17 @@ export const NotificationPreferences = () => {
           {preferences.map((pref) => (
             <div
               key={pref.id}
-              className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700"
+              className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                    {pref.label}
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{pref.description}</p>
+                  <h4 className="text-sm font-medium text-foreground">{pref.label}</h4>
+                  <p className="text-xs text-muted-foreground">{pref.description}</p>
                 </div>
                 <button
                   onClick={() => togglePreference(pref.id)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    pref.enabled ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+                    pref.enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   <span
@@ -125,31 +121,31 @@ export const NotificationPreferences = () => {
                 </button>
               </div>
               {pref.enabled && (
-                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex gap-4">
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                <div className="mt-3 pt-3 border-t border-border flex gap-4">
+                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
                       checked={pref.channels.email}
                       onChange={() => toggleChannel(pref.id, 'email')}
-                      className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
                     />
                     Email
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
                       checked={pref.channels.push}
                       onChange={() => toggleChannel(pref.id, 'push')}
-                      className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
                     />
                     Push
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
                       checked={pref.channels.inApp}
                       onChange={() => toggleChannel(pref.id, 'inApp')}
-                      className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
                     />
                     In-App
                   </label>

@@ -30,9 +30,9 @@ const commissionData: CommissionPoint[] = [
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1a2a2f] px-3 py-2 shadow-lg">
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold text-foreground">
         {formatCurrency(payload[0].value as number)}
       </p>
     </div>
@@ -45,11 +45,11 @@ export const RealtorCommissionChart = () => {
   const change = ((currentValue - previousValue) / previousValue) * 100;
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-5">
+    <div className="bg-card rounded-2xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">Commission Trend</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <h3 className="font-semibold text-foreground">Commission Trend</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Monthly commission earned, last 6 months
           </p>
         </div>
@@ -71,8 +71,8 @@ export const RealtorCommissionChart = () => {
           <AreaChart data={commissionData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="commissionFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#c4a747" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="#c4a747" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -85,27 +85,27 @@ export const RealtorCommissionChart = () => {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-gray-400 dark:text-gray-500"
+              className="text-muted-foreground"
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-gray-400 dark:text-gray-500"
+              className="text-muted-foreground"
               tickFormatter={(value) => formatCurrency(value, { compact: true })}
               width={64}
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: '#c4a747', strokeWidth: 1, strokeDasharray: '4 4' }}
+              cursor={{ stroke: 'var(--primary)', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
             <Area
               type="monotone"
               dataKey="amount"
-              stroke="#c4a747"
+              stroke="var(--primary)"
               strokeWidth={2}
               fill="url(#commissionFill)"
-              activeDot={{ r: 4, fill: '#c4a747', stroke: 'white', strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

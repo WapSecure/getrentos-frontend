@@ -61,7 +61,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Lease</h1>
+            <h1 className="text-2xl font-bold text-foreground">My Lease</h1>
             <span
               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
             >
@@ -69,7 +69,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
               {statusConfig.label}
             </span>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             {lease.propertyName} • {lease.address}
           </p>
         </div>
@@ -92,7 +92,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             <Calendar className="w-4 h-4 text-blue-600" />
             <span className="text-blue-700 dark:text-blue-300 font-medium">Lease Period</span>
           </div>
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-muted-foreground">
             {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
           </span>
           {lease.status === 'active' && (

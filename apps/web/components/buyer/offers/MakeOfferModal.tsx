@@ -67,27 +67,24 @@ export const MakeOfferModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-sm w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-sm w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Make an Offer</h3>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
+              <h3 className="font-semibold text-foreground">Make an Offer</h3>
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Property <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={propertyId}
                   onChange={(e) => setPropertyId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Select a property</option>
                   {listings.map((l) => (
@@ -104,7 +101,7 @@ export const MakeOfferModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Offer Amount (₦) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -112,12 +109,12 @@ export const MakeOfferModal = ({
                   min={0}
                   value={offerAmount}
                   onChange={(e) => setOfferAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Financing Type
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -128,8 +125,8 @@ export const MakeOfferModal = ({
                       onClick={() => setFinancingType(option.value)}
                       className={`px-2 py-2 rounded-lg border text-sm transition-colors ${
                         financingType === option.value
-                          ? 'border-[#c4a747] bg-[#c4a747]/10 text-[#c4a747]'
-                          : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
+                          ? 'border-primary bg-accent text-primary'
+                          : 'border-border text-muted-foreground'
                       }`}
                     >
                       {option.label}
@@ -139,7 +136,7 @@ export const MakeOfferModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Deposit Amount (₦) <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <input
@@ -147,12 +144,12 @@ export const MakeOfferModal = ({
                   min={0}
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Message to Owner <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <textarea
@@ -160,12 +157,12 @@ export const MakeOfferModal = ({
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}
                   placeholder="e.g. Pre-approved and ready to close quickly"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+            <div className="p-4 border-t border-border flex gap-3 shrink-0">
               <Button variant="ghost" onClick={handleClose} className="flex-1">
                 Cancel
               </Button>

@@ -116,12 +116,12 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-lg w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Upload Document</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Upload Document</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Upload a new document to your vault
                 </p>
               </div>
@@ -137,15 +137,13 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  dragActive
-                    ? 'border-[#c4a747] bg-[#c4a747]/5'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-[#c4a747]'
+                  dragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary'
                 }`}
               >
                 {file ? (
                   <div className="space-y-2">
-                    <FileText className="w-8 h-8 text-[#c4a747] mx-auto" />
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{file.name}</p>
+                    <FileText className="w-8 h-8 text-primary mx-auto" />
+                    <p className="text-sm font-medium text-foreground">{file.name}</p>
                     <p className="text-xs text-gray-500">
                       {(file.size / (1024 * 1024)).toFixed(2)} MB
                     </p>
@@ -159,12 +157,10 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                 ) : (
                   <>
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Drag and drop your file here
-                    </p>
+                    <p className="text-sm text-muted-foreground">Drag and drop your file here</p>
                     <p className="text-xs text-gray-500 mt-1">or</p>
                     <label className="cursor-pointer">
-                      <span className="text-sm text-[#c4a747] hover:text-[#a88d3a]">
+                      <span className="text-sm text-primary hover:text-[#a88d3a]">
                         Browse files
                       </span>
                       <input type="file" onChange={handleFileSelect} className="hidden" />
@@ -176,7 +172,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Document Name
                   </label>
                   <input
@@ -184,19 +180,19 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter document name"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Document Type
                     </label>
                     <select
                       value={type}
                       onChange={(e) => setType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {documentTypes.map((t) => (
                         <option key={t.value} value={t.value}>
@@ -207,13 +203,13 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Category
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {categories.map((cat) => (
                         <option key={cat} value={cat}>
@@ -225,7 +221,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Tags (comma separated)
                   </label>
                   <input
@@ -233,7 +229,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="e.g., important, signed, lease"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -246,7 +242,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                   </div>
                   <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#c4a747] rounded-full transition-all duration-200"
+                      className="h-full bg-primary rounded-full transition-all duration-200"
                       style={{ width: `${progress}%` }}
                     />
                   </div>

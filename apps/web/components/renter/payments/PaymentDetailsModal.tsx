@@ -89,14 +89,12 @@ export const PaymentDetailsModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Payment Details</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {payment.propertyName}
-                </p>
+                <h3 className="font-semibold text-foreground">Payment Details</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{payment.propertyName}</p>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
@@ -108,7 +106,7 @@ export const PaymentDetailsModal = ({
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                 <div>
                   <p className="text-xs text-gray-500">Amount</p>
-                  <p className="text-2xl font-bold text-[#c4a747]">
+                  <p className="text-2xl font-bold text-primary">
                     {formatCurrency(payment.amount)}
                   </p>
                 </div>
@@ -127,7 +125,7 @@ export const PaymentDetailsModal = ({
                     <Calendar className="w-3 h-3 text-gray-400" />
                     <span className="text-xs text-gray-500">Due Date</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-foreground">
                     {formatDate(payment.dueDate)}
                   </p>
                 </div>
@@ -136,9 +134,7 @@ export const PaymentDetailsModal = ({
                     <DollarSign className="w-3 h-3 text-gray-400" />
                     <span className="text-xs text-gray-500">Paid On</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {formatDate(payment.date)}
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{formatDate(payment.date)}</p>
                 </div>
               </div>
 
@@ -152,7 +148,7 @@ export const PaymentDetailsModal = ({
                   {payment.method === 'wallet' && <Wallet className="w-3 h-3 text-gray-400" />}
                   <span className="text-xs text-gray-500">Payment Method</span>
                 </div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                <p className="text-sm font-medium text-foreground capitalize">
                   {payment.method.replace('_', ' ')}
                 </p>
               </div>
@@ -173,9 +169,7 @@ export const PaymentDetailsModal = ({
               {/* Description */}
               <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                 <span className="text-xs text-gray-500">Description</span>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5">
-                  {payment.description}
-                </p>
+                <p className="text-sm text-foreground mt-0.5">{payment.description}</p>
               </div>
 
               {/* Actions */}

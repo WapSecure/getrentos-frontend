@@ -34,7 +34,7 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#c4a747] transition-colors"
+        className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
       >
         <Navigation className="w-3 h-3" />
         Calculate commute
@@ -45,10 +45,10 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Commute Calculator</h3>
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h3 className="font-semibold text-foreground">Commute Calculator</h3>
               <button onClick={() => setIsOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
               </button>
@@ -56,19 +56,17 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   From this property
                 </label>
                 <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg">
-                  <MapPin className="w-4 h-4 text-[#c4a747]" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {propertyLocation}
-                  </span>
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-sm text-muted-foreground">{propertyLocation}</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   To (work/school)
                 </label>
                 <div className="flex gap-2">
@@ -77,13 +75,13 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     placeholder="Enter address"
-                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Mode of transport
                 </label>
                 <div className="flex gap-2">
@@ -91,8 +89,8 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
                     onClick={() => setMode('driving')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors ${
                       mode === 'driving'
-                        ? 'bg-[#c4a747] text-white'
-                        : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-muted-foreground'
                     }`}
                   >
                     <Car className="w-4 h-4" />
@@ -102,8 +100,8 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
                     onClick={() => setMode('transit')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors ${
                       mode === 'transit'
-                        ? 'bg-[#c4a747] text-white'
-                        : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-muted-foreground'
                     }`}
                   >
                     <Bus className="w-4 h-4" />
@@ -113,8 +111,8 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
                     onClick={() => setMode('walking')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors ${
                       mode === 'walking'
-                        ? 'bg-[#c4a747] text-white'
-                        : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-muted-foreground'
                     }`}
                   >
                     <Train className="w-4 h-4" />

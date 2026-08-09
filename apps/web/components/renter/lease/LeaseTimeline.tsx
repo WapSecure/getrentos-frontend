@@ -28,14 +28,14 @@ export const LeaseTimeline = ({ lease }: LeaseTimelineProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Lease Timeline</h3>
+          <Calendar className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Lease Timeline</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Key events and milestones</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Key events and milestones</p>
       </div>
 
       <div className="p-4">
@@ -57,9 +57,7 @@ export const LeaseTimeline = ({ lease }: LeaseTimelineProps) => {
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                      {event.event}
-                    </h4>
+                    <h4 className="text-sm font-medium text-foreground">{event.event}</h4>
                     <span className="text-xs text-gray-500">{formatDate(event.date)}</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5">{event.description}</p>

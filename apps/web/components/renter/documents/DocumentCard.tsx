@@ -119,29 +119,29 @@ export const DocumentCard = ({
   if (viewMode === 'list') {
     return (
       <>
-        <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-100 dark:border-white/5">
+        <div className="flex items-center justify-between p-3 hover:bg-secondary transition-colors border-b border-border">
           <div className="flex items-center gap-3">
             {onSelect && (
               <Button variant="ghost" size="sm" onClick={onSelect} className="p-1 h-auto">
                 <div
-                  className={`w-4 h-4 rounded border-2 ${isSelected ? 'bg-[#c4a747] border-[#c4a747]' : 'border-gray-300 dark:border-gray-600'}`}
+                  className={`w-4 h-4 rounded border-2 ${isSelected ? 'bg-primary border-primary' : 'border-border'}`}
                 >
                   {isSelected && <Check className="w-3 h-3 text-white" />}
                 </div>
               </Button>
             )}
-            <div className={`p-2 rounded-lg bg-gray-100 dark:bg-white/10 ${typeColor}`}>
+            <div className={`p-2 rounded-lg bg-secondary ${typeColor}`}>
               <TypeIcon className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-medium text-gray-900 dark:text-white">{document.name}</p>
+                <p className="font-medium text-foreground">{document.name}</p>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${statusColors[document.status]}`}
                 >
                   {document.status}
                 </span>
-                {document.isFavorite && <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />}
+                {document.isFavorite && <Star className="w-3 h-3 fill-primary text-primary" />}
               </div>
               <div className="flex items-center gap-3 text-xs text-gray-500">
                 <span>{document.category}</span>
@@ -168,7 +168,7 @@ export const DocumentCard = ({
               title={document.isFavorite ? 'Remove favorite' : 'Add favorite'}
             >
               {document.isFavorite ? (
-                <Star className="w-4 h-4 fill-[#c4a747] text-[#c4a747]" />
+                <Star className="w-4 h-4 fill-primary text-primary" />
               ) : (
                 <StarOff className="w-4 h-4 text-gray-400" />
               )}
@@ -196,12 +196,12 @@ export const DocumentCard = ({
                 <MoreVertical className="w-4 h-4 text-gray-500" />
               </Button>
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a2a2f] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleShareClick}
-                    className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                    className="w-full justify-start px-4 py-2 text-sm text-foreground hover:bg-secondary"
                   >
                     <Share2 className="w-3 h-3 mr-2" />
                     Share
@@ -241,7 +241,7 @@ export const DocumentCard = ({
   return (
     <>
       <div
-        className={`group bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-[#c4a747]' : ''}`}
+        className={`group bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
       >
         <div className="p-4">
           <div className="flex items-start justify-between">
@@ -249,13 +249,13 @@ export const DocumentCard = ({
               {onSelect && (
                 <Button variant="ghost" size="sm" onClick={onSelect} className="p-0.5 h-auto">
                   <div
-                    className={`w-4 h-4 rounded border-2 ${isSelected ? 'bg-[#c4a747] border-[#c4a747]' : 'border-gray-300 dark:border-gray-600'}`}
+                    className={`w-4 h-4 rounded border-2 ${isSelected ? 'bg-primary border-primary' : 'border-border'}`}
                   >
                     {isSelected && <Check className="w-3 h-3 text-white" />}
                   </div>
                 </Button>
               )}
-              <div className={`p-2 rounded-lg bg-gray-100 dark:bg-white/10 ${typeColor}`}>
+              <div className={`p-2 rounded-lg bg-secondary ${typeColor}`}>
                 <TypeIcon className="w-5 h-5" />
               </div>
             </div>
@@ -267,7 +267,7 @@ export const DocumentCard = ({
                 className="p-1 h-auto"
               >
                 {document.isFavorite ? (
-                  <Star className="w-4 h-4 fill-[#c4a747] text-[#c4a747]" />
+                  <Star className="w-4 h-4 fill-primary text-primary" />
                 ) : (
                   <StarOff className="w-4 h-4 text-gray-400" />
                 )}
@@ -277,12 +277,12 @@ export const DocumentCard = ({
                   <MoreVertical className="w-4 h-4 text-gray-500" />
                 </Button>
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a2a2f] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                  <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleShareClick}
-                      className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                      className="w-full justify-start px-4 py-2 text-sm text-foreground hover:bg-secondary"
                     >
                       <Share2 className="w-3 h-3 mr-2" />
                       Share
@@ -302,9 +302,7 @@ export const DocumentCard = ({
             </div>
           </div>
 
-          <h4 className="font-medium text-gray-900 dark:text-white mt-3 line-clamp-1">
-            {document.name}
-          </h4>
+          <h4 className="font-medium text-foreground mt-3 line-clamp-1">{document.name}</h4>
 
           <p className="text-xs text-gray-500 mt-0.5">{document.category}</p>
 
@@ -338,7 +336,7 @@ export const DocumentCard = ({
             </div>
           )}
 
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-white/10">
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
             <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[document.status]}`}>
               {document.status}
             </span>

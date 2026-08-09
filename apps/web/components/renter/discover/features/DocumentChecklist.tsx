@@ -62,16 +62,16 @@ export const DocumentChecklist = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-3">
-          <FileText className="w-5 h-5 text-[#c4a747]" />
+          <FileText className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Document Checklist</h3>
+            <h3 className="font-semibold text-foreground">Document Checklist</h3>
             <p className="text-xs text-gray-500">
               {completedCount}/{documents.length} documents uploaded
             </p>
@@ -92,7 +92,7 @@ export const DocumentChecklist = () => {
             </div>
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#c4a747] rounded-full transition-all duration-300"
+                className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${(requiredCompleted / requiredCount) * 100}%` }}
               />
             </div>
@@ -106,7 +106,7 @@ export const DocumentChecklist = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5"
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary"
               >
                 <div className="flex items-center gap-2">
                   {doc.uploaded ? (
@@ -116,7 +116,7 @@ export const DocumentChecklist = () => {
                   )}
                   <div>
                     <p
-                      className={`text-sm ${doc.uploaded ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}
+                      className={`text-sm ${doc.uploaded ? 'text-gray-500 line-through' : 'text-foreground'}`}
                     >
                       {doc.name}
                     </p>
@@ -127,10 +127,10 @@ export const DocumentChecklist = () => {
                   <button
                     onClick={() => handleUpload(doc.id)}
                     disabled={isUploading === doc.id}
-                    className="flex items-center gap-1 text-xs text-[#c4a747] hover:text-[#a88d3a]"
+                    className="flex items-center gap-1 text-xs text-primary hover:text-[#a88d3a]"
                   >
                     {isUploading === doc.id ? (
-                      <div className="w-3 h-3 border-2 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <Upload className="w-3 h-3" />

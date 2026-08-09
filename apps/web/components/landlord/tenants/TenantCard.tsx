@@ -38,19 +38,19 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-[#0a1a1f] font-semibold text-sm flex-shrink-0">
+          <div className="w-11 h-11 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
             {getInitials(tenant.name)}
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-gray-900 dark:text-white">{tenant.name}</h3>
+              <h3 className="font-semibold text-foreground">{tenant.name}</h3>
               {tenant.verified && <ShieldCheck className="w-3.5 h-3.5 text-green-500" />}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{tenant.email}</p>
+            <p className="text-xs text-muted-foreground">{tenant.email}</p>
           </div>
         </div>
         <span
@@ -60,19 +60,19 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
         </span>
       </div>
 
-      <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 mt-4">
+      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-4">
         <Home className="w-4 h-4 text-gray-400" />
         {tenant.propertyName} • {tenant.unitName}
       </div>
       <div className="flex items-center justify-between mt-2">
         <p className="text-xs text-gray-400">Moved in {formatDate(tenant.moveInDate)}</p>
         <div className="flex items-center gap-1">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Trust Score</span>
-          <span className="text-xs font-bold text-[#c4a747]">{tenant.trustScore}</span>
+          <span className="text-xs font-medium text-muted-foreground">Trust Score</span>
+          <span className="text-xs font-bold text-primary">{tenant.trustScore}</span>
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
         <Button href="/landlord/messages" variant="outline" size="sm" fullWidth className="gap-1.5">
           <MessageCircle className="w-3.5 h-3.5" />
           Message

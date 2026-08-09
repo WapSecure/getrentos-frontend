@@ -43,40 +43,38 @@ const benefits = [
 
 export const TrustScoreBenefits = () => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Trust Score Benefits</h3>
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Trust Score Benefits</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Unlock more features with higher trust scores
         </p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {benefits.map((benefit, index) => {
           const Icon = benefit.icon;
           return (
             <div
               key={index}
-              className="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="p-3 flex items-center gap-3 hover:bg-secondary transition-colors"
             >
-              <div className="p-2 rounded-lg bg-[#c4a747]/10">
-                <Icon className="w-4 h-4 text-[#c4a747]" />
+              <div className="p-2 rounded-lg bg-accent">
+                <Icon className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {benefit.title}
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{benefit.title}</p>
                   <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 rounded-full">
                     {benefit.level}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{benefit.description}</p>
+                <p className="text-xs text-muted-foreground">{benefit.description}</p>
               </div>
-              <CheckCircle className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+              <CheckCircle className="w-4 h-4 text-muted-foreground/50" />
             </div>
           );
         })}

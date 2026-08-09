@@ -39,20 +39,16 @@ export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCar
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-[#c4a747]/10 flex-shrink-0">
-            <ClipboardCheck className="w-4 h-4 text-[#c4a747]" />
+          <div className="p-2.5 rounded-xl bg-accent shrink-0">
+            <ClipboardCheck className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {inspection.propertyAddress}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {inspection.clientName}
-            </p>
+            <h3 className="font-semibold text-foreground truncate">{inspection.propertyAddress}</h3>
+            <p className="text-xs text-muted-foreground truncate">{inspection.clientName}</p>
           </div>
         </div>
         <span
@@ -77,7 +73,7 @@ export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCar
         </span>
       </div>
 
-      <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
         <span>{inspection.rooms.length} rooms checked</span>
         <span className="flex items-center gap-1">
           <Camera className="w-3.5 h-3.5" />
@@ -85,7 +81,7 @@ export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCar
         </span>
       </div>
 
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
         <p className="text-xs text-gray-400">{formatDate(inspection.scheduledDate)}</p>
         {condition && (
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${condition.className}`}>

@@ -56,21 +56,21 @@ export const RenterReviews = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.4 }}
-        className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+        className="bg-card rounded-xl border border-border overflow-hidden"
       >
-        <div className="p-4 border-b border-gray-200 dark:border-white/10">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Reviews & Ratings</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Share your experience</p>
+        <div className="p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">Reviews & Ratings</h2>
+          <p className="text-sm text-muted-foreground">Share your experience</p>
         </div>
 
         <div className="p-4">
           {/* Your Rating Summary */}
           <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">4.8</div>
+              <div className="text-3xl font-bold text-foreground">4.8</div>
               <div className="flex gap-0.5 mt-1">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
+                  <Star key={star} className="w-3 h-3 fill-primary text-primary" />
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-1">Your Rating</p>
@@ -80,35 +80,35 @@ export const RenterReviews = () => {
                 <div className="flex items-center gap-2 text-xs">
                   <span>5 star</span>
                   <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[60%] h-full bg-[#c4a747] rounded-full" />
+                    <div className="w-[60%] h-full bg-primary rounded-full" />
                   </div>
                   <span>60%</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span>4 star</span>
                   <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[25%] h-full bg-[#c4a747] rounded-full" />
+                    <div className="w-[25%] h-full bg-primary rounded-full" />
                   </div>
                   <span>25%</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span>3 star</span>
                   <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[10%] h-full bg-[#c4a747] rounded-full" />
+                    <div className="w-[10%] h-full bg-primary rounded-full" />
                   </div>
                   <span>10%</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span>2 star</span>
                   <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[3%] h-full bg-[#c4a747] rounded-full" />
+                    <div className="w-[3%] h-full bg-primary rounded-full" />
                   </div>
                   <span>3%</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span>1 star</span>
                   <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[2%] h-full bg-[#c4a747] rounded-full" />
+                    <div className="w-[2%] h-full bg-primary rounded-full" />
                   </div>
                   <span>2%</span>
                 </div>
@@ -119,9 +119,7 @@ export const RenterReviews = () => {
           {/* Pending Reviews */}
           {pendingReviews.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Pending Reviews
-              </h3>
+              <h3 className="text-sm font-medium text-foreground mb-3">Pending Reviews</h3>
               <div className="space-y-3">
                 {pendingReviews.map((review, index) => (
                   <motion.div
@@ -132,7 +130,7 @@ export const RenterReviews = () => {
                     className="flex items-center justify-between p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800"
                   >
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <p className="text-sm font-medium text-foreground">
                         {review.type === 'property' ? review.property : review.landlord}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
@@ -150,26 +148,22 @@ export const RenterReviews = () => {
 
           {/* Recent Reviews */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              Your Recent Reviews
-            </h3>
+            <h3 className="text-sm font-medium text-foreground mb-3">Your Recent Reviews</h3>
             <div className="space-y-3">
               {[1, 2].map((_, index) => (
                 <div key={index} className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Luxury Beachfront Villa
-                      </p>
+                      <p className="text-sm font-medium text-foreground">Luxury Beachfront Villa</p>
                       <div className="flex gap-0.5 mt-1">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
+                          <Star key={star} className="w-3 h-3 fill-primary text-primary" />
                         ))}
                       </div>
                     </div>
                     <span className="text-xs text-gray-500">2 months ago</span>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     Great property, excellent location, very responsive landlord!
                   </p>
                   <div className="flex items-center gap-2 mt-2">
@@ -191,13 +185,11 @@ export const RenterReviews = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Write a Review
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <h3 className="text-xl font-semibold text-foreground mb-2">Write a Review</h3>
+              <p className="text-sm text-muted-foreground mb-4">
                 {selectedReview.type === 'property'
                   ? `How was your experience at ${selectedReview.property}?`
                   : `How was your experience with ${selectedReview.landlord}?`}
@@ -213,9 +205,9 @@ export const RenterReviews = () => {
                     onClick={() => setRating(star)}
                   >
                     {(hoverRating || rating) >= star ? (
-                      <Star className="w-8 h-8 fill-[#c4a747] text-[#c4a747]" />
+                      <Star className="w-8 h-8 fill-primary text-primary" />
                     ) : (
-                      <StarOutline className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                      <StarOutline className="w-8 h-8 text-muted-foreground/50" />
                     )}
                   </button>
                 ))}
@@ -227,7 +219,7 @@ export const RenterReviews = () => {
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747] mb-4"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4"
               />
 
               <div className="flex gap-3">

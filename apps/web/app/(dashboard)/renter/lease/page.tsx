@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { LeaseHeader } from '@/components/renter/lease/LeaseHeader';
 import { LeaseStats } from '@/components/renter/lease/LeaseStats';
 import { LeaseDetails } from '@/components/renter/lease/LeaseDetails';
@@ -16,7 +13,6 @@ import { LeaseSummaryCard } from '@/components/renter/lease/LeaseSummaryCard';
 import { RentIncreaseHistory } from '@/components/renter/lease/RentIncreaseHistory';
 import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaymentReminders';
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { FileText } from 'lucide-react';
 import type { RenewalOffer } from '@/types/lease';
 
@@ -56,9 +52,6 @@ interface Lease {
 }
 
 export default function LeasePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [lease, setLease] = useState<Lease | null>(null);
   const [renewalOffer, setRenewalOffer] = useState<RenewalOffer | null>(null);
 
@@ -144,49 +137,21 @@ export default function LeasePage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadLeaseData();
-      loadRenewalOffer();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadLeaseData();
+    loadRenewalOffer();
+  }, []);
 
   if (!lease) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-        <RenterNavbar user={user} />
-        <div className="flex">
-          <RenterSidebar />
-          <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <FileText className="w-8 h-8 text-gray-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">No Active Lease</h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-2">
-                You don&apos;t have an active lease agreement at the moment.
-              </p>
-            </div>
-          </main>
+      <div className="text-center py-12">
+        <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center">
+          <FileText className="w-8 h-8 text-muted-foreground" />
         </div>
+        <h2 className="text-2xl font-bold text-foreground">No Active Lease</h2>
+        <p className="text-muted-foreground mt-2">
+          You don&apos;t have an active lease agreement at the moment.
+        </p>
       </div>
     );
   }
@@ -221,36 +186,26 @@ export default function LeasePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <LeaseHeader lease={lease} renewalOffer={renewalOffer} />
+      <LeaseStats lease={lease} />
+      <LeaseSummaryCard lease={lease} />
 
-      <div className="flex">
-        <RenterSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <LeaseHeader lease={lease} renewalOffer={renewalOffer} />
-            <LeaseStats lease={lease} />
-            <LeaseSummaryCard lease={lease} />
-
-            <div className="grid lg:grid-cols-3 gap-6 mt-6">
-              <div className="lg:col-span-2 space-y-6">
-                <LeaseDetails lease={lease} />
-                <LeaseTimeline lease={lease} />
-                <UpcomingPaymentReminders reminders={paymentReminders} />
-              </div>
-              <div className="space-y-6">
-                {renewalOffer && <LeaseRenewalOffer renewalOffer={renewalOffer} lease={lease} />}
-                <LeasePaymentSchedule payments={lease.paymentHistory} />
-                <LeaseDocuments documents={lease.documents} />
-                <RentIncreaseHistory increases={rentIncreases} />
-                <LeaseMoveOutChecklist />
-                <LeaseTerminationRequest leaseId={lease.id} propertyName={lease.propertyName} />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        <div className="lg:col-span-2 space-y-6">
+          <LeaseDetails lease={lease} />
+          <LeaseTimeline lease={lease} />
+          <UpcomingPaymentReminders reminders={paymentReminders} />
+        </div>
+        <div className="space-y-6">
+          {renewalOffer && <LeaseRenewalOffer renewalOffer={renewalOffer} lease={lease} />}
+          <LeasePaymentSchedule payments={lease.paymentHistory} />
+          <LeaseDocuments documents={lease.documents} />
+          <RentIncreaseHistory increases={rentIncreases} />
+          <LeaseMoveOutChecklist />
+          <LeaseTerminationRequest leaseId={lease.id} propertyName={lease.propertyName} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

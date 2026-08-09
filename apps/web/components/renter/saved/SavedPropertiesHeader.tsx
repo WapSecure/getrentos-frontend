@@ -19,24 +19,20 @@ export const SavedPropertiesHeader = ({
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Saved Properties</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Track and manage your favorite properties
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Saved Properties</h1>
+          <p className="text-muted-foreground mt-1">Track and manage your favorite properties</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1a2a2f] rounded-lg border border-gray-200 dark:border-white/10">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded-lg border border-border">
             <Heart className="w-4 h-4 text-pink-500" />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{savedCount}</span>
+            <span className="text-sm font-medium text-foreground">{savedCount}</span>
             <span className="text-xs text-gray-500">Saved</span>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1a2a2f] rounded-lg border border-gray-200 dark:border-white/10">
-            <Bookmark className="w-4 h-4 text-[#c4a747]" />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {wishlistCount}
-            </span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded-lg border border-border">
+            <Bookmark className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">{wishlistCount}</span>
             <span className="text-xs text-gray-500">Wishlists</span>
           </div>
 
@@ -59,10 +55,10 @@ export const SavedPropertiesHeader = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mt-4 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border border-purple-200 dark:border-purple-800 flex items-center gap-3"
+          className="mt-4 p-3 rounded-lg bg-linear-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border border-purple-200 dark:border-purple-800 flex items-center gap-3"
         >
-          <Sparkles className="w-4 h-4 text-purple-600 flex-shrink-0" />
-          <p className="text-sm text-gray-700 dark:text-gray-300">
+          <Sparkles className="w-4 h-4 text-purple-600 shrink-0" />
+          <p className="text-sm text-foreground">
             <span className="font-semibold">AI Insight:</span> You have {savedCount} saved
             properties.
             {savedCount >= 3

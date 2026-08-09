@@ -1,14 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { AgentNavbar } from '@/components/agent/navigation/AgentNavbar';
-import { AgentSidebar } from '@/components/agent/dashboard/AgentSidebar';
+import { useAgentUser } from '../layout';
 import { AgentDashboardHeader } from '@/components/agent/dashboard/AgentDashboardHeader';
 import { AgentStatsCards } from '@/components/agent/dashboard/AgentStatsCards';
 import { AgentTaskList } from '@/components/agent/dashboard/AgentTaskList';
 import { AgentQuickActions } from '@/components/agent/dashboard/AgentQuickActions';
-import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { AgentTask } from '@/types/agent';
 
 const mockStats = {
@@ -57,43 +53,7 @@ const mockTodaysTasks: AgentTask[] = [
 ];
 
 export default function AgentDashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-
-        if (parsedUser.role && parsedUser.role !== 'agent') {
-          router.replace(getDashboardRoute(parsedUser.role));
-          return;
-        }
-      }
-
-      setIsLoading(false);
-    };
-
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const user = useAgentUser();
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -102,29 +62,19 @@ export default function AgentDashboardPage() {
   if (currentHour >= 18) greeting = 'Good evening';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <AgentNavbar user={user} />
+    <>
+      <AgentDashboardHeader greeting={greeting} firstName={firstName} />
 
-      <div className="flex">
-        <AgentSidebar />
+      <AgentStatsCards {...mockStats} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <AgentDashboardHeader greeting={greeting} firstName={firstName} />
-
-            <AgentStatsCards {...mockStats} />
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <AgentTaskList tasks={mockTodaysTasks} />
-              </div>
-              <div>
-                <AgentQuickActions />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <AgentTaskList tasks={mockTodaysTasks} />
+        </div>
+        <div>
+          <AgentQuickActions />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

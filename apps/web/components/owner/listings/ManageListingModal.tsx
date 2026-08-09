@@ -32,34 +32,27 @@ export const ManageListingModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Manage Listing</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {listing.listingTitle}
-                </p>
+                <h3 className="font-semibold text-foreground">Manage Listing</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{listing.listingTitle}</p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-3">
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-white/5 overflow-hidden">
+              <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Property</span>
-                  <span className="text-gray-900 dark:text-white font-medium">
-                    {listing.propertyName}
-                  </span>
+                  <span className="text-muted-foreground">Property</span>
+                  <span className="text-foreground font-medium">{listing.propertyName}</span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Asking Price</span>
-                  <span className="text-gray-900 dark:text-white font-medium">
+                  <span className="text-muted-foreground">Asking Price</span>
+                  <span className="text-foreground font-medium">
                     {formatCurrency(listing.askingPrice)}
                   </span>
                 </div>
@@ -107,7 +100,7 @@ export const ManageListingModal = ({
                   </Button>
                 )}
                 {listing.status === 'closed' && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                  <p className="text-sm text-muted-foreground text-center py-2">
                     This listing is closed.
                   </p>
                 )}

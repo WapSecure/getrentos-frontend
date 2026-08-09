@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { NotificationsHeader } from '@/components/renter/notifications/NotificationsHeader';
 import { NotificationsStats } from '@/components/renter/notifications/NotificationsStats';
 import { NotificationsList } from '@/components/renter/notifications/NotificationsList';
@@ -13,13 +10,9 @@ import { NotificationAnalytics } from '@/components/renter/notifications/Notific
 import { DoNotDisturb } from '@/components/renter/notifications/DoNotDisturb';
 import { NotificationSearch } from '@/components/renter/notifications/NotificationSearch';
 import { NotificationSound } from '@/components/renter/notifications/NotificationSound';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { Notification } from '@/types/notification';
 
 export default function NotificationsPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filterType, setFilterType] = useState<string>('all');
   const [filterRead, setFilterRead] = useState<string>('all');
@@ -125,21 +118,9 @@ export default function NotificationsPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadNotifications();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadNotifications();
+  }, []);
 
   const handleMarkAsRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
@@ -171,60 +152,42 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <NotificationsHeader
+        unreadCount={unreadCount}
+        totalCount={notifications.length}
+        onMarkAllAsRead={handleMarkAllAsRead}
+        onClearAll={handleClearAll}
+      />
 
-      <div className="flex">
-        <RenterSidebar />
+      <NotificationsStats notifications={notifications} unreadCount={unreadCount} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <NotificationsHeader
-              unreadCount={unreadCount}
-              totalCount={notifications.length}
-              onMarkAllAsRead={handleMarkAllAsRead}
-              onClearAll={handleClearAll}
-            />
-
-            <NotificationsStats notifications={notifications} unreadCount={unreadCount} />
-
-            <div className="space-y-4 mb-6">
-              <NotificationSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <NotificationFilters
-                  filterType={filterType}
-                  setFilterType={setFilterType}
-                  filterRead={filterRead}
-                  setFilterRead={setFilterRead}
-                />
-                <NotificationsList
-                  notifications={filteredNotifications}
-                  onMarkAsRead={handleMarkAsRead}
-                  onDelete={handleDelete}
-                />
-              </div>
-              <div className="space-y-6">
-                <NotificationPreferences />
-                <NotificationAnalytics notifications={notifications} />
-                <NotificationSound />
-                <DoNotDisturb />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="space-y-4 mb-6">
+        <NotificationSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
       </div>
-    </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <NotificationFilters
+            filterType={filterType}
+            setFilterType={setFilterType}
+            filterRead={filterRead}
+            setFilterRead={setFilterRead}
+          />
+          <NotificationsList
+            notifications={filteredNotifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+          />
+        </div>
+        <div className="space-y-6">
+          <NotificationPreferences />
+          <NotificationAnalytics notifications={notifications} />
+          <NotificationSound />
+          <DoNotDisturb />
+        </div>
+      </div>
+    </>
   );
 }

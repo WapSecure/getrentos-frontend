@@ -15,8 +15,8 @@ export const ThemeSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Theme Settings</h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h2 className="text-xl font-semibold text-foreground mb-4">Theme Settings</h2>
+      <p className="text-sm text-muted-foreground mb-6">
         Choose your preferred theme for the application
       </p>
 
@@ -29,19 +29,17 @@ export const ThemeSettings = () => {
               key={themeOption.id}
               onClick={() => setTheme(themeOption.id)}
               className={`p-4 rounded-xl border-2 transition-all ${
-                isSelected
-                  ? 'border-[#c4a747] bg-[#c4a747]/10'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                isSelected ? 'border-primary bg-accent' : 'border-border hover:border-gray-300'
               }`}
             >
               <div className="flex flex-col items-center gap-2">
-                <Icon className={`w-6 h-6 ${isSelected ? 'text-[#c4a747]' : 'text-gray-500'}`} />
+                <Icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-gray-500'}`} />
                 <span
-                  className={`text-sm font-medium ${isSelected ? 'text-[#c4a747]' : 'text-gray-700 dark:text-gray-300'}`}
+                  className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}
                 >
                   {themeOption.label}
                 </span>
-                {isSelected && <Check className="w-4 h-4 text-[#c4a747]" />}
+                {isSelected && <Check className="w-4 h-4 text-primary" />}
               </div>
             </button>
           );

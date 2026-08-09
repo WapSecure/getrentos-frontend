@@ -48,14 +48,14 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-[#0a1a1f] font-semibold text-sm">
+        <div className="w-8 h-8 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm">
           {initials}
         </div>
         <div className="hidden sm:block text-left">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{fullName}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Field Agent</p>
+          <p className="text-sm font-medium text-foreground">{fullName}</p>
+          <p className="text-xs text-muted-foreground">Field Agent</p>
         </div>
         <ChevronDown
           className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -68,17 +68,17 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1a2a2f] rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+            className="absolute right-0 mt-2 w-64 bg-card rounded-xl shadow-lg border border-border z-50"
           >
-            <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">{fullName}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || ''}</p>
+            <div className="p-3 border-b border-border">
+              <p className="text-sm font-semibold text-foreground">{fullName}</p>
+              <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
             </div>
 
             <div className="py-2">
               <Link
                 href="/agent/settings"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <User className="w-4 h-4" />
@@ -86,7 +86,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
               </Link>
               <Link
                 href="/agent/settings"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <Settings className="w-4 h-4" />
@@ -94,7 +94,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
               </Link>
               <Link
                 href="/agent/tasks"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <ClipboardList className="w-4 h-4" />
@@ -102,7 +102,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
               </Link>
               <Link
                 href="/agent/trust-profile"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <Shield className="w-4 h-4" />
@@ -110,7 +110,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
               </Link>
               <Link
                 href="/help"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <HelpCircle className="w-4 h-4" />
@@ -118,7 +118,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
               </Link>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-gray-700 py-2">
+            <div className="border-t border-border py-2">
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

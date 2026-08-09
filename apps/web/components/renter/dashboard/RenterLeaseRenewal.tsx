@@ -45,13 +45,11 @@ export const RenterLeaseRenewal = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Lease Renewal</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Your lease is coming up for renewal
-        </p>
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Lease Renewal</h2>
+        <p className="text-sm text-muted-foreground">Your lease is coming up for renewal</p>
       </div>
 
       <div className="p-4">
@@ -73,28 +71,26 @@ export const RenterLeaseRenewal = () => {
 
         <div className="space-y-3 mb-4">
           <div className="flex justify-between items-center py-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Property</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {renewalData.property}
-            </span>
+            <span className="text-sm text-muted-foreground">Property</span>
+            <span className="text-sm font-medium text-foreground">{renewalData.property}</span>
           </div>
-          <div className="flex justify-between items-center py-2 border-t border-gray-200 dark:border-white/10">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Current Lease Ends</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="flex justify-between items-center py-2 border-t border-border">
+            <span className="text-sm text-muted-foreground">Current Lease Ends</span>
+            <span className="text-sm font-medium text-foreground">
               {formatDate(renewalData.currentEndDate)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-t border-gray-200 dark:border-white/10">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Current Rent</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="flex justify-between items-center py-2 border-t border-border">
+            <span className="text-sm text-muted-foreground">Current Rent</span>
+            <span className="text-sm font-medium text-foreground">
               {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
                 renewalData.currentRentAmount
               )}
               /mo
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-t border-gray-200 dark:border-white/10">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Expected Increase</span>
+          <div className="flex justify-between items-center py-2 border-t border-border">
+            <span className="text-sm text-muted-foreground">Expected Increase</span>
             <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
               {renewalData.increasePercentage}% (
               {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(

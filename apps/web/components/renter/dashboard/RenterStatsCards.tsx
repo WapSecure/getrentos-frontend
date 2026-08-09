@@ -87,9 +87,9 @@ const StatCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl bg-white dark:bg-[#1a2a2f] border border-gray-200 dark:border-white/10 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+      className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#c4a747]/5 to-transparent" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-primary/5 to-transparent" />
 
       <div className="relative p-4">
         {/* Icon at the top */}
@@ -101,15 +101,13 @@ const StatCard = ({
 
         {/* Content below icon */}
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-          <p className={`font-bold text-gray-900 dark:text-white tracking-tight ${valueSize}`}>
-            {formatValue()}
-          </p>
+          <p className="text-sm text-muted-foreground mb-1">{label}</p>
+          <p className={`font-bold text-foreground tracking-tight ${valueSize}`}>{formatValue()}</p>
           {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#c4a747] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </motion.div>
   );
 };

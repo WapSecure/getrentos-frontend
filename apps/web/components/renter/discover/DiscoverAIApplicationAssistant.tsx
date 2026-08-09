@@ -60,14 +60,14 @@ export const DiscoverAIApplicationAssistant = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">AI Application Assistant</h3>
+          <MessageSquare className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">AI Application Assistant</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Get personalized help with your rental applications
         </p>
       </div>
@@ -83,7 +83,7 @@ export const DiscoverAIApplicationAssistant = () => {
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#c4a747] rounded-full"
+              className="h-full bg-primary rounded-full"
               style={{ width: `${(completedCount / totalSteps) * 100}%` }}
             />
           </div>
@@ -99,7 +99,7 @@ export const DiscoverAIApplicationAssistant = () => {
               transition={{ delay: 0.4 + index * 0.05 }}
               className="flex items-center gap-3"
             >
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 {step.status === 'completed' && (
                   <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                     <CheckCircle className="w-3 h-3 text-green-600" />
@@ -118,7 +118,7 @@ export const DiscoverAIApplicationAssistant = () => {
               </div>
               <div className="flex-1">
                 <p
-                  className={`text-sm font-medium ${step.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}
+                  className={`text-sm font-medium ${step.status === 'completed' ? 'text-gray-500 line-through' : 'text-foreground'}`}
                 >
                   {step.title}
                 </p>
@@ -132,12 +132,12 @@ export const DiscoverAIApplicationAssistant = () => {
         </div>
 
         {/* AI Tip */}
-        <div className="p-3 rounded-lg bg-gradient-to-r from-[#c4a747]/10 to-transparent border border-[#c4a747]/20">
+        <div className="p-3 rounded-lg bg-linear-to-r from-primary/10 to-transparent border border-primary/20">
           <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-[#c4a747] mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-primary mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-gray-900 dark:text-white">AI Suggestion</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              <p className="text-xs font-medium text-foreground">AI Suggestion</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Complete your document upload to increase approval chances by 40%. Landlords prefer
                 verified applicants.
               </p>

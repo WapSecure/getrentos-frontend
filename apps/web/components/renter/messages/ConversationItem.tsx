@@ -53,14 +53,14 @@ export const ConversationItem = ({
     <div
       className={`group relative p-3 rounded-xl cursor-pointer transition-all ${
         isSelected
-          ? 'bg-[#c4a747]/10 border border-[#c4a747]/20'
-          : 'hover:bg-gray-50 dark:hover:bg-white/5 border border-transparent'
+          ? 'bg-accent border border-primary/20'
+          : 'hover:bg-secondary border border-transparent'
       }`}
       onClick={onSelect}
     >
       <div className="flex items-start gap-3">
-        <div className="relative flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-white font-semibold text-sm">
+        <div className="relative shrink-0">
+          <div className="w-12 h-12 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold text-sm">
             {getInitials(conversation.participantName)}
           </div>
           {conversation.unreadCount > 0 && (
@@ -73,7 +73,7 @@ export const ConversationItem = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-900 dark:text-white truncate">
+              <span className="font-medium text-foreground truncate">
                 {conversation.participantName}
               </span>
               <span
@@ -82,19 +82,19 @@ export const ConversationItem = ({
                 {conversation.participantRole}
               </span>
             </div>
-            <span className="text-xs text-gray-500 flex-shrink-0">
+            <span className="text-xs text-gray-500 shrink-0">
               {formatTime(conversation.lastMessageTime)}
             </span>
           </div>
 
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-500 flex-shrink-0">
+            <span className="text-xs text-gray-500 shrink-0">
               <Home className="w-3 h-3 inline mr-0.5" />
               {conversation.propertyName}
             </span>
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-0.5">
+          <p className="text-sm text-muted-foreground truncate mt-0.5">
             {conversation.lastMessage}
           </p>
         </div>
@@ -110,7 +110,7 @@ export const ConversationItem = ({
           title={conversation.isPinned ? 'Unpin' : 'Pin'}
         >
           {conversation.isPinned ? (
-            <Pin className="w-3 h-3 text-[#c4a747]" />
+            <Pin className="w-3 h-3 text-primary" />
           ) : (
             <PinOff className="w-3 h-3 text-gray-400" />
           )}

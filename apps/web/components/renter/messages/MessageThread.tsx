@@ -40,16 +40,14 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+    <div className="bg-card rounded-xl border border-border flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-white font-semibold text-sm">
+          <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold text-sm">
             {getInitials(conversation.participantName)}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              {conversation.participantName}
-            </h3>
+            <h3 className="font-semibold text-foreground">{conversation.participantName}</h3>
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span className="capitalize">{conversation.participantRole}</span>
               <span>•</span>
@@ -89,7 +87,7 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-gray-200 dark:border-white/10">
+      <div className="p-4 border-t border-border">
         <MessageInput onSend={handleSend} />
       </div>
     </div>

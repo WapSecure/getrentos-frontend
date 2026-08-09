@@ -40,43 +40,40 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
 
   if (units.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-12 text-center">
-        <DoorClosed className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-        <p className="text-gray-500 dark:text-gray-400">No units found</p>
+      <div className="bg-card rounded-2xl border border-border p-12 text-center">
+        <DoorClosed className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+        <p className="text-muted-foreground">No units found</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-white/10 text-left">
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Unit</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Property</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Details</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Rent</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Status</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Tenant</th>
+            <tr className="border-b border-border text-left">
+              <th className="px-4 py-3 font-medium text-muted-foreground">Unit</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Property</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Details</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Rent</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Tenant</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+          <tbody className="divide-y divide-border">
             {units.map((unit) => {
               const status = statusConfig[unit.occupancyStatus];
               return (
-                <tr
-                  key={unit.id}
-                  className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                <tr key={unit.id} className="hover:bg-secondary transition-colors">
+                  <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                     {unit.unitName}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {unit.propertyName}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     <span className="inline-flex items-center gap-1">
                       <Bed className="w-3.5 h-3.5" />
                       {unit.bedrooms}
@@ -86,7 +83,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                       {unit.bathrooms}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-900 dark:text-white font-medium whitespace-nowrap">
+                  <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
                     {formatCurrency(unit.monthlyRent, { compact: true })}
                   </td>
                   <td className="px-4 py-3">
@@ -96,26 +93,26 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                       {status.label}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {unit.tenantName || '—'}
                   </td>
                   <td className="px-4 py-3 relative">
                     <button
                       onClick={() => setOpenMenuId(openMenuId === unit.id ? null : unit.id)}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                      className="p-1.5 rounded-lg hover:bg-secondary"
                     >
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
 
                     {openMenuId === unit.id && (
-                      <div className="absolute right-4 top-10 z-20 w-44 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-gray-200 dark:border-white/10 py-1">
+                      <div className="absolute right-4 top-10 z-20 w-44 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-border py-1">
                         {unit.occupancyStatus === 'vacant' ? (
                           <button
                             onClick={() => {
                               setAssigningUnitId(unit.id);
                               setOpenMenuId(null);
                             }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
                           >
                             <UserPlus className="w-3.5 h-3.5" />
                             Assign Tenant
@@ -126,7 +123,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                               onMarkVacant(unit.id);
                               setOpenMenuId(null);
                             }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
                           >
                             <DoorClosed className="w-3.5 h-3.5" />
                             Mark Vacant
@@ -136,8 +133,8 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                     )}
 
                     {assigningUnitId === unit.id && (
-                      <div className="absolute right-4 top-10 z-30 w-56 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-gray-200 dark:border-white/10 p-3">
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      <div className="absolute right-4 top-10 z-30 w-56 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-border p-3">
+                        <label className="block text-xs font-medium text-foreground mb-1.5">
                           Tenant name
                         </label>
                         <input
@@ -147,12 +144,12 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                           onChange={(e) => setTenantNameInput(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleAssignSubmit(unit.id)}
                           placeholder="e.g. Adaeze Okafor"
-                          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => handleAssignSubmit(unit.id)}
-                            className="flex-1 text-xs font-medium text-[#0a1a1f] bg-[#c4a747] rounded-md py-1.5 hover:bg-[#a88d3a]"
+                            className="flex-1 text-xs font-medium text-primary-foreground bg-primary rounded-md py-1.5 hover:bg-[#a88d3a]"
                           >
                             Assign
                           </button>
@@ -161,7 +158,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                               setAssigningUnitId(null);
                               setTenantNameInput('');
                             }}
-                            className="flex-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/10 rounded-md py-1.5"
+                            className="flex-1 text-xs font-medium text-muted-foreground bg-secondary rounded-md py-1.5"
                           >
                             Cancel
                           </button>

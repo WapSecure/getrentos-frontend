@@ -55,14 +55,12 @@ export const ViewingCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {viewing.listingTitle}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <h3 className="font-semibold text-foreground truncate">{viewing.listingTitle}</h3>
+          <p className="text-xs text-muted-foreground mt-1">
             With {viewing.leadName} · {formatDate(viewing.scheduledDate)} · {viewing.scheduledTime}
           </p>
         </div>
@@ -74,12 +72,10 @@ export const ViewingCard = ({
         </span>
       </div>
 
-      {viewing.notes && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{viewing.notes}</p>
-      )}
+      {viewing.notes && <p className="text-xs text-muted-foreground mt-3">{viewing.notes}</p>}
 
       {(viewing.status === 'pending' || viewing.status === 'confirmed') && (
-        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        <div className="flex gap-2 mt-4 pt-4 border-t border-border">
           <Button
             variant="ghost"
             size="sm"

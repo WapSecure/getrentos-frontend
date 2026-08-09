@@ -103,30 +103,27 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Add Property</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Add Property</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Step {step + 1} of {steps.length}: {steps[step]}
                 </p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-4 pt-3 flex-shrink-0">
+            <div className="px-4 pt-3 shrink-0">
               <div className="flex gap-1.5">
                 {steps.map((label, index) => (
                   <div
                     key={label}
                     className={`h-1 flex-1 rounded-full transition-colors ${
-                      index <= step ? 'bg-[#c4a747]' : 'bg-gray-200 dark:bg-white/10'
+                      index <= step ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
                     }`}
                   />
                 ))}
@@ -137,7 +134,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
               {step === 0 && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Property Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -145,18 +142,18 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       value={form.name}
                       onChange={(e) => update('name', e.target.value)}
                       placeholder="e.g. Sunrise Apartments"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Property Type
                     </label>
                     <select
                       value={form.type}
                       onChange={(e) => update('type', e.target.value as PropertyType)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {propertyTypes.map((t) => (
                         <option key={t.value} value={t.value}>
@@ -167,7 +164,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Address <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -175,37 +172,37 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       value={form.address}
                       onChange={(e) => update('address', e.target.value)}
                       placeholder="Street address"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         City <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={form.city}
                         onChange={(e) => update('city', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         State <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={form.state}
                         onChange={(e) => update('state', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Number of Units
                     </label>
                     <input
@@ -213,12 +210,12 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       min={1}
                       value={form.totalUnits}
                       onChange={(e) => update('totalUnits', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Description
                     </label>
                     <textarea
@@ -226,7 +223,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       onChange={(e) => update('description', e.target.value)}
                       rows={2}
                       placeholder="Optional description"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </>
@@ -242,13 +239,13 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     onSelect={(name) => update('coverImageName', name)}
                   />
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Gallery Images <span className="text-gray-400 font-normal">(optional)</span>
                     </label>
                     <button
                       type="button"
                       onClick={() => update('galleryCount', form.galleryCount + 1)}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-[#c4a747] hover:text-[#c4a747] transition-colors"
+                      className="w-full flex items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                     >
                       <Upload className="w-4 h-4" />
                       {form.galleryCount > 0
@@ -256,12 +253,12 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                         : 'Add gallery images'}
                     </button>
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       type="checkbox"
                       checked={form.hasVideoTour}
                       onChange={(e) => update('hasVideoTour', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                     />
                     <Video className="w-4 h-4" />
                     Include video tour
@@ -272,7 +269,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
               {step === 2 && (
                 <>
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                    <ShieldCheck className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <ShieldCheck className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                     <p className="text-xs text-blue-700 dark:text-blue-300">
                       Verification documents are optional at this stage, but properties without at
                       least one document will show as unverified to renters and buyers until
@@ -302,7 +299,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
 
               {step === 3 && (
                 <div className="space-y-3">
-                  <div className="rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-white/5 overflow-hidden">
+                  <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
                     <SummaryRow label="Name" value={form.name || '—'} />
                     <SummaryRow
                       label="Type"
@@ -319,7 +316,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       value={hasAnyVerificationDoc ? 'Submitted' : 'None uploaded'}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     Publishing makes this property searchable. You can also save it as a draft and
                     publish later.
                   </p>
@@ -327,7 +324,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+            <div className="p-4 border-t border-border flex gap-3 shrink-0">
               {step > 0 && (
                 <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
                   Back
@@ -383,20 +380,20 @@ const UploadField = ({
 }) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      <label className="block text-sm font-medium text-foreground mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#c4a747] transition-colors cursor-pointer">
+      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
         <input
           type="file"
           className="hidden"
           onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}
         />
-        <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-        <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+        <Icon className="w-4 h-4 text-gray-400 shrink-0" />
+        <span className="text-sm text-muted-foreground truncate">
           {fileName || 'Click to upload'}
         </span>
-        {fileName && <Check className="w-4 h-4 text-green-500 flex-shrink-0 ml-auto" />}
+        {fileName && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
       </label>
     </div>
   );
@@ -404,9 +401,7 @@ const UploadField = ({
 
 const SummaryRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between px-3 py-2 text-sm">
-    <span className="text-gray-500 dark:text-gray-400">{label}</span>
-    <span className="text-gray-900 dark:text-white font-medium text-right truncate max-w-[60%]">
-      {value}
-    </span>
+    <span className="text-muted-foreground">{label}</span>
+    <span className="text-foreground font-medium text-right truncate max-w-[60%]">{value}</span>
   </div>
 );

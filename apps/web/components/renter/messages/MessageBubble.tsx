@@ -57,8 +57,8 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
   return (
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isCurrentUser && (
-        <div className="flex-shrink-0 mr-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-white text-xs font-semibold">
+        <div className="shrink-0 mr-3">
+          <div className="w-8 h-8 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-xs font-semibold">
             {getInitials(message.senderName)}
           </div>
         </div>
@@ -67,18 +67,14 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
       <div className={`max-w-[70%] ${isCurrentUser ? 'order-1' : 'order-2'}`}>
         {!isCurrentUser && (
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {message.senderName}
-            </span>
+            <span className="text-sm font-medium text-foreground">{message.senderName}</span>
             <span className="text-xs text-gray-500 capitalize">{message.senderRole}</span>
           </div>
         )}
 
         <div
           className={`rounded-2xl p-3 ${
-            isCurrentUser
-              ? 'bg-[#c4a747] text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+            isCurrentUser ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-foreground'
           }`}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>

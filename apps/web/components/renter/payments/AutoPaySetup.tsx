@@ -15,17 +15,17 @@ export const AutoPaySetup = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Repeat className="w-4 h-4 text-[#c4a747]" />
-            <h3 className="font-semibold text-gray-900 dark:text-white">AutoPay</h3>
+            <Repeat className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">AutoPay</h3>
           </div>
           <button
             onClick={handleToggle}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              enabled ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+              enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -35,7 +35,7 @@ export const AutoPaySetup = () => {
             />
           </button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Automatically pay rent on time every month
         </p>
       </div>
@@ -47,13 +47,13 @@ export const AutoPaySetup = () => {
           className="p-4 space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Payment Frequency
             </label>
             <select
               value={frequency}
               onChange={(e) => setFrequency(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="monthly">Monthly</option>
               <option value="quarterly">Quarterly</option>
@@ -62,13 +62,13 @@ export const AutoPaySetup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Payment Day of Month
             </label>
             <select
               value={dayOfMonth}
               onChange={(e) => setDayOfMonth(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                 <option key={day} value={day}>

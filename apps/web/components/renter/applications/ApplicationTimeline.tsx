@@ -60,9 +60,7 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <StatusIcon className={`w-5 h-5 ${statusColor}`} />
-          <span className="text-sm font-medium text-gray-900 dark:text-white capitalize">
-            {statusLabel}
-          </span>
+          <span className="text-sm font-medium text-foreground capitalize">{statusLabel}</span>
         </div>
         <span className="text-sm text-gray-500">
           {completedCount}/{totalSteps} steps
@@ -75,7 +73,7 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5 }}
-          className="h-full bg-[#c4a747] rounded-full"
+          className="h-full bg-primary rounded-full"
         />
       </div>
 
@@ -110,9 +108,7 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
                 <div className="flex items-center gap-2">
                   <h4
                     className={`text-sm font-medium ${
-                      step.completed
-                        ? 'text-gray-900 dark:text-white'
-                        : 'text-gray-500 dark:text-gray-400'
+                      step.completed ? 'text-foreground' : 'text-muted-foreground'
                     }`}
                   >
                     {step.stage}

@@ -63,10 +63,8 @@ export const CalendarHeader = ({
     <div className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Calendar</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your property schedule and events
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
+          <p className="text-muted-foreground mt-1">Manage your property schedule and events</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -82,7 +80,7 @@ export const CalendarHeader = ({
           <Button variant="ghost" size="sm" onClick={() => navigateMonth(-1)} className="p-2">
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <span className="text-lg font-semibold text-gray-900 dark:text-white min-w-[150px] text-center">
+          <span className="text-lg font-semibold text-foreground min-w-[150px] text-center">
             {getTitle()}
           </span>
           <Button variant="ghost" size="sm" onClick={() => navigateMonth(1)} className="p-2">
@@ -96,12 +94,12 @@ export const CalendarHeader = ({
 
         <div className="flex-1" />
 
-        <div className="flex gap-1 p-1 bg-gray-100 dark:bg-white/10 rounded-lg">
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setViewMode('month')}
-            className={`p-1.5 ${viewMode === 'month' ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm' : 'text-gray-500'}`}
+            className={`p-1.5 ${viewMode === 'month' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
           >
             <LayoutGrid className="w-4 h-4" />
           </Button>
@@ -109,7 +107,7 @@ export const CalendarHeader = ({
             variant="ghost"
             size="sm"
             onClick={() => setViewMode('week')}
-            className={`p-1.5 ${viewMode === 'week' ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm' : 'text-gray-500'}`}
+            className={`p-1.5 ${viewMode === 'week' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
           >
             <List className="w-4 h-4" />
           </Button>
@@ -117,7 +115,7 @@ export const CalendarHeader = ({
             variant="ghost"
             size="sm"
             onClick={() => setViewMode('day')}
-            className={`p-1.5 ${viewMode === 'day' ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm' : 'text-gray-500'}`}
+            className={`p-1.5 ${viewMode === 'day' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
           >
             <CalendarIcon className="w-4 h-4" />
           </Button>

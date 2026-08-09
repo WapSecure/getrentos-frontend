@@ -1,13 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { OwnerNavbar } from '@/components/owner/navigation/OwnerNavbar';
-import { OwnerSidebar } from '@/components/owner/dashboard/OwnerSidebar';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';
-import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
+import { cn } from '@/lib/cn';
 
 const mockConversations: Conversation[] = [
   {
@@ -88,38 +85,11 @@ const mockMessages: Record<string, ThreadMessage[]> = {
 };
 
 export default function OwnerMessagesPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [messagesByConversation, setMessagesByConversation] = useState<
-    Record<string, ThreadMessage[]>
-  >({});
+  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
+  const [messagesByConversation, setMessagesByConversation] =
+    useState<Record<string, ThreadMessage[]>>(mockMessages);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        if (parsedUser.role && parsedUser.role !== 'owner') {
-          router.replace(getDashboardRoute(parsedUser.role));
-          return;
-        }
-      }
-      setConversations(mockConversations);
-      setMessagesByConversation(mockMessages);
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
 
   const handleSelect = (id: string) => {
     setActiveId(id);
@@ -150,74 +120,54 @@ export default function OwnerMessagesPage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   const filteredConversations = conversations.filter((c) =>
     c.participantName.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const activeConversation = conversations.find((c) => c.id === activeId);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <OwnerNavbar user={user} />
+    <div className="h-[calc(100vh-8rem)]">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+        <p className="text-muted-foreground mt-1">Communicate with buyers, realtors, and support</p>
+      </div>
 
-      <div className="flex">
-        <OwnerSidebar />
+      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
+        <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
+          <ConversationList
+            conversations={filteredConversations}
+            activeId={activeId}
+            searchQuery={searchQuery}
+            onSearch={setSearchQuery}
+            onSelect={handleSelect}
+          />
+        </div>
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto h-[calc(100vh-8rem)]">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Communicate with buyers, realtors, and support
+        <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
+          {activeConversation ? (
+            <>
+              <button
+                onClick={() => setActiveId(null)}
+                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to conversations
+              </button>
+              <MessageThread
+                contactName={activeConversation.participantName}
+                contactRole={activeConversation.participantRole}
+                messages={messagesByConversation[activeConversation.id] || []}
+                onSend={handleSend}
+              />
+            </>
+          ) : (
+            <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">
+                Select a conversation to start messaging
               </p>
             </div>
-
-            <div className="flex gap-4 h-[calc(100%-4.5rem)]">
-              <div className={`${activeId ? 'hidden sm:flex' : 'flex'} w-full sm:w-auto`}>
-                <ConversationList
-                  conversations={filteredConversations}
-                  activeId={activeId}
-                  searchQuery={searchQuery}
-                  onSearch={setSearchQuery}
-                  onSelect={handleSelect}
-                />
-              </div>
-
-              <div className={`${activeId ? 'flex' : 'hidden sm:flex'} flex-1 flex-col`}>
-                {activeConversation ? (
-                  <>
-                    <button
-                      onClick={() => setActiveId(null)}
-                      className="sm:hidden flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mb-2"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Back to conversations
-                    </button>
-                    <MessageThread
-                      contactName={activeConversation.participantName}
-                      contactRole={activeConversation.participantRole}
-                      messages={messagesByConversation[activeConversation.id] || []}
-                      onSend={handleSend}
-                    />
-                  </>
-                ) : (
-                  <div className="flex-1 bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 flex items-center justify-center">
-                    <p className="text-sm text-gray-400">
-                      Select a conversation to start messaging
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </main>
+          )}
+        </div>
       </div>
     </div>
   );

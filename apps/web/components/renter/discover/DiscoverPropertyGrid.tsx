@@ -255,7 +255,7 @@ export const DiscoverPropertyGrid = ({
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -266,8 +266,8 @@ export const DiscoverPropertyGrid = ({
         <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
           <Home className="w-8 h-8 text-gray-400" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">No properties found</h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+        <h3 className="text-lg font-medium text-foreground">No properties found</h3>
+        <p className="text-muted-foreground mt-1">
           Try adjusting your filters to find more properties
         </p>
       </div>

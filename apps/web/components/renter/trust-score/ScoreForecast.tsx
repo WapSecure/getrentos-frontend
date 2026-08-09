@@ -11,10 +11,10 @@ export const ScoreForecast = ({ currentScore }: ScoreForecastProps) => {
   const potentialIncrease = forecastScore - currentScore;
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Score Forecast</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Score Forecast</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">
           Potential score after completing verifications
         </p>
       </div>
@@ -22,12 +22,12 @@ export const ScoreForecast = ({ currentScore }: ScoreForecastProps) => {
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Current Score</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{currentScore}</p>
+            <p className="text-sm text-muted-foreground">Current Score</p>
+            <p className="text-2xl font-bold text-foreground">{currentScore}</p>
           </div>
           <TrendingUp className="w-6 h-6 text-green-500" />
           <div className="text-right">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Forecast Score</p>
+            <p className="text-sm text-muted-foreground">Forecast Score</p>
             <p className="text-2xl font-bold text-green-600">{forecastScore}</p>
           </div>
         </div>

@@ -67,25 +67,21 @@ export const RenterMoveInChecklist = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.55, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Move-In Checklist
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Complete these steps before moving in
-            </p>
+            <h2 className="text-lg font-semibold text-foreground">Move-In Checklist</h2>
+            <p className="text-sm text-muted-foreground">Complete these steps before moving in</p>
           </div>
           <div className="text-right">
-            <span className="text-sm font-semibold text-[#c4a747]">
+            <span className="text-sm font-semibold text-primary">
               {completedCount}/{totalCount}
             </span>
             <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
               <div
-                className="h-full bg-[#c4a747] rounded-full transition-all duration-300"
+                className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -100,7 +96,7 @@ export const RenterMoveInChecklist = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 + index * 0.05, duration: 0.3 }}
-            className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="flex items-start gap-3 p-2 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
             onClick={() => toggleItem(item.id)}
           >
             <button className="mt-0.5">
@@ -113,7 +109,7 @@ export const RenterMoveInChecklist = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p
-                  className={`text-sm font-medium ${item.completed ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}
+                  className={`text-sm font-medium ${item.completed ? 'text-gray-500 line-through' : 'text-foreground'}`}
                 >
                   {item.title}
                 </p>
@@ -131,7 +127,7 @@ export const RenterMoveInChecklist = () => {
         ))}
       </div>
 
-      <div className="p-4 border-t border-gray-200 dark:border-white/10">
+      <div className="p-4 border-t border-border">
         <Button variant="primary" fullWidth className="gap-2">
           <FileText className="w-4 h-4" />
           Generate Move-In Report

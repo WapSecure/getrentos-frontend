@@ -11,26 +11,24 @@ export const TrustScoreComparison = ({ currentScore }: TrustScoreComparisonProps
   const difference = currentScore - averageScore;
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Score Comparison</h3>
+          <Users className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Score Comparison</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          How you compare to other renters
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">How you compare to other renters</p>
       </div>
 
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Your Score</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{currentScore}</p>
+            <p className="text-sm text-muted-foreground">Your Score</p>
+            <p className="text-2xl font-bold text-foreground">{currentScore}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{averageScore}</p>
+            <p className="text-sm text-muted-foreground">Average Score</p>
+            <p className="text-2xl font-bold text-foreground">{averageScore}</p>
           </div>
         </div>
 
@@ -40,7 +38,7 @@ export const TrustScoreComparison = ({ currentScore }: TrustScoreComparisonProps
               ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
               : difference < 0
                 ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                : 'bg-gray-50 dark:bg-gray-800 border border-border'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -53,7 +51,7 @@ export const TrustScoreComparison = ({ currentScore }: TrustScoreComparisonProps
                   ? 'text-green-800 dark:text-green-300'
                   : difference < 0
                     ? 'text-red-800 dark:text-red-300'
-                    : 'text-gray-700 dark:text-gray-300'
+                    : 'text-foreground'
               }`}
             >
               {difference > 0 && `You're ${Math.abs(difference)} points above average`}

@@ -58,17 +58,17 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Payment Schedule</h3>
+          <Calendar className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Payment Schedule</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rent payment history</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Rent payment history</p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {payments.map((payment, index) => {
           const statusConfig = getStatusConfig(payment.status);
           const StatusIcon = statusConfig.icon;
@@ -79,14 +79,14 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="flex items-center justify-between p-3 hover:bg-secondary transition-colors"
             >
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{payment.month}</p>
+                <p className="text-sm font-medium text-foreground">{payment.month}</p>
                 <p className="text-xs text-gray-500">{payment.date}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="text-sm font-semibold text-foreground">
                   {formatCurrency(payment.amount)}
                 </span>
                 <span
@@ -101,7 +101,7 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
         })}
       </div>
 
-      <div className="p-3 border-t border-gray-200 dark:border-white/10">
+      <div className="p-3 border-t border-border">
         <Button variant="ghost" size="sm" fullWidth className="gap-1">
           View All Payments
         </Button>

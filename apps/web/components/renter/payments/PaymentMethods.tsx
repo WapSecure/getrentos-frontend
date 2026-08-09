@@ -69,14 +69,12 @@ export const PaymentMethods = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Payment Methods</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Manage your payment options
-            </p>
+            <h3 className="font-semibold text-foreground">Payment Methods</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Manage your payment options</p>
           </div>
           <Button size="sm" variant="ghost" onClick={() => setShowAdd(!showAdd)}>
             <Plus className="w-4 h-4" />
@@ -85,7 +83,7 @@ export const PaymentMethods = () => {
         </div>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {methods.map((method, index) => {
           const Icon = getIcon(method.type);
           return (
@@ -94,14 +92,14 @@ export const PaymentMethods = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="flex items-center justify-between p-3 hover:bg-secondary transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
                   <Icon className="w-5 h-5 text-gray-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
+                  <p className="text-sm font-medium text-foreground">{method.name}</p>
                   {method.expiry && (
                     <p className="text-xs text-gray-500">Expires {method.expiry}</p>
                   )}
@@ -116,7 +114,7 @@ export const PaymentMethods = () => {
                 {!method.isDefault && (
                   <button
                     onClick={() => handleSetDefault(method.id)}
-                    className="text-xs text-[#c4a747] hover:underline"
+                    className="text-xs text-primary hover:underline"
                   >
                     Set Default
                   </button>
@@ -134,17 +132,17 @@ export const PaymentMethods = () => {
       </div>
 
       {showAdd && (
-        <div className="p-4 border-t border-gray-200 dark:border-white/10">
+        <div className="p-4 border-t border-border">
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="Card number"
-              className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <input
               type="text"
               placeholder="MM/YY"
-              className="w-20 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="w-20 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <Button size="sm">Add</Button>
           </div>

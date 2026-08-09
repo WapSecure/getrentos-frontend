@@ -19,9 +19,9 @@ interface ROIComparisonChartProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1a2a2f] px-3 py-2 shadow-lg">
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold text-foreground">
         {(payload[0].value as number).toFixed(1)}% ROI
       </p>
     </div>
@@ -35,9 +35,9 @@ export const ROIComparisonChart = ({ metrics }: ROIComparisonChartProps) => {
   }));
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-5">
-      <h3 className="font-semibold text-gray-900 dark:text-white">ROI by Property</h3>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-4">
+    <div className="bg-card rounded-2xl border border-border p-5">
+      <h3 className="font-semibold text-foreground">ROI by Property</h3>
+      <p className="text-xs text-muted-foreground mt-0.5 mb-4">
         Return on investment across your portfolio
       </p>
 
@@ -54,13 +54,13 @@ export const ROIComparisonChart = ({ metrics }: ROIComparisonChartProps) => {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: 'currentColor' }}
-              className="text-gray-400 dark:text-gray-500"
+              className="text-muted-foreground"
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-gray-400 dark:text-gray-500"
+              className="text-muted-foreground"
               tickFormatter={(value) => `${value}%`}
               width={44}
             />
@@ -68,7 +68,7 @@ export const ROIComparisonChart = ({ metrics }: ROIComparisonChartProps) => {
               content={<CustomTooltip />}
               cursor={{ fill: 'currentColor', className: 'text-gray-50 dark:text-white/5' }}
             />
-            <Bar dataKey="roi" fill="#c4a747" radius={[4, 4, 0, 0]} maxBarSize={48} />
+            <Bar dataKey="roi" fill="var(--primary)" radius={[4, 4, 0, 0]} maxBarSize={48} />
           </BarChart>
         </ResponsiveContainer>
       </div>

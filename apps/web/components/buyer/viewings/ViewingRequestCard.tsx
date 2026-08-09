@@ -48,14 +48,12 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {request.propertyTitle}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <h3 className="font-semibold text-foreground truncate">{request.propertyTitle}</h3>
+          <p className="text-xs text-muted-foreground mt-1">
             {formatDate(request.requestedDate)} · {request.requestedTime}
           </p>
         </div>
@@ -67,12 +65,10 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
         </span>
       </div>
 
-      {request.notes && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{request.notes}</p>
-      )}
+      {request.notes && <p className="text-xs text-muted-foreground mt-3">{request.notes}</p>}
 
       {canCancel && (
-        <div className="flex justify-end mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        <div className="flex justify-end mt-4 pt-4 border-t border-border">
           <Button
             variant="ghost"
             size="sm"

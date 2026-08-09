@@ -68,16 +68,16 @@ export const WishlistManager = ({
   const totalProperties = wishlists.reduce((sum, w) => sum + w.propertyIds.length, 0);
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Wishlists</h3>
+            <h3 className="font-semibold text-foreground">Wishlists</h3>
             <p className="text-xs text-gray-500">Organize your saved properties</p>
           </div>
           <button
             onClick={() => setIsCreating(true)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
           >
             <Plus className="w-4 h-4 text-gray-500" />
           </button>
@@ -89,9 +89,7 @@ export const WishlistManager = ({
         <div
           onClick={() => setSelectedWishlist('all')}
           className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
-            selectedWishlist === 'all'
-              ? 'bg-[#c4a747]/10 text-[#c4a747]'
-              : 'hover:bg-gray-50 dark:hover:bg-white/5'
+            selectedWishlist === 'all' ? 'bg-accent text-primary' : 'hover:bg-secondary'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -110,7 +108,7 @@ export const WishlistManager = ({
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="flex-1 px-2 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="flex-1 px-2 py-1 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                   autoFocus
                 />
                 <button onClick={handleSaveEdit} className="p-1 rounded-lg bg-green-500 text-white">
@@ -127,9 +125,7 @@ export const WishlistManager = ({
               <div
                 onClick={() => setSelectedWishlist(wishlist.id)}
                 className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer group ${
-                  selectedWishlist === wishlist.id
-                    ? 'bg-[#c4a747]/10 text-[#c4a747]'
-                    : 'hover:bg-gray-50 dark:hover:bg-white/5'
+                  selectedWishlist === wishlist.id ? 'bg-accent text-primary' : 'hover:bg-secondary'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -171,14 +167,14 @@ export const WishlistManager = ({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-2 p-2 border-t border-gray-200 dark:border-white/10"
+              className="mt-2 p-2 border-t border-border"
             >
               <input
                 type="text"
                 value={newWishlistName}
                 onChange={(e) => setNewWishlistName(e.target.value)}
                 placeholder="Wishlist name"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] focus:outline-none focus:ring-2 focus:ring-[#c4a747] mb-2"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary mb-2"
                 autoFocus
               />
               <div className="flex gap-2">

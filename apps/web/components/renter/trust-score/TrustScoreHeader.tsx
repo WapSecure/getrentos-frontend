@@ -22,7 +22,7 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trust Score</h1>
+            <h1 className="text-2xl font-bold text-foreground">Trust Score</h1>
             <span
               className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${scoreInfo.color} bg-${scoreInfo.color.includes('green') ? 'green' : scoreInfo.color.includes('blue') ? 'blue' : scoreInfo.color.includes('yellow') ? 'yellow' : 'red'}-50 dark:bg-${scoreInfo.color.includes('green') ? 'green' : scoreInfo.color.includes('blue') ? 'blue' : scoreInfo.color.includes('yellow') ? 'yellow' : 'red'}-900/20`}
             >
@@ -30,7 +30,7 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
               {scoreInfo.label}
             </span>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             Your trust score determines your credibility on the platform
           </p>
         </div>
@@ -41,7 +41,7 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
         </Button>
       </div>
 
-      <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800">
+      <div className="mt-4 p-3 rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
             <Shield className="w-5 h-5 text-blue-600" />

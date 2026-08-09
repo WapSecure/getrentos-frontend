@@ -26,10 +26,10 @@ interface RoommatesListProps {
 export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesListProps) => {
   if (roommates.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 p-12 text-center">
+      <div className="bg-card rounded-xl border border-border p-12 text-center">
         <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No roommates yet</h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
+        <h3 className="text-xl font-semibold text-foreground">No roommates yet</h3>
+        <p className="text-muted-foreground mt-2">
           Invite your first roommate to start sharing your space
         </p>
         <Button variant="primary" className="mt-4">
@@ -42,11 +42,11 @@ export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesL
   const totalPercentage = roommates.reduce((sum, r) => sum + r.sharePercentage, 0);
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">Roommates</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <h3 className="font-semibold text-foreground">Roommates</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
             {roommates.length} people • {totalPercentage}% rent allocated
           </p>
         </div>
@@ -58,7 +58,7 @@ export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesL
         </div>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {roommates.map((roommate, index) => (
           <motion.div
             key={roommate.id}
@@ -72,7 +72,7 @@ export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesL
       </div>
 
       {totalPercentage < 100 && (
-        <div className="p-3 border-t border-gray-200 dark:border-white/10 bg-yellow-50 dark:bg-yellow-900/20">
+        <div className="p-3 border-t border-border bg-yellow-50 dark:bg-yellow-900/20">
           <p className="text-xs text-yellow-700 dark:text-yellow-300">
             ⚠️ {100 - totalPercentage}% of rent is unallocated. Assign shares to all roommates.
           </p>

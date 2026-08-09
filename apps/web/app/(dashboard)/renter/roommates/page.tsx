@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { RoommatesHeader } from '@/components/renter/roommates/RoommatesHeader';
 import { RoommatesStats } from '@/components/renter/roommates/RoommatesStats';
 import { RoommatesList } from '@/components/renter/roommates/RoommatesList';
@@ -12,7 +9,6 @@ import { ExpenseTracker } from '@/components/renter/roommates/ExpenseTracker';
 import { RoommateTasks } from '@/components/renter/roommates/RoommateTasks';
 import { InviteRoommateModal } from '@/components/renter/roommates/InviteRoommateModal';
 import { RoommateAgreementModal } from '@/components/renter/roommates/RoommateAgreementModal';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 
 interface Roommate {
   id: string;
@@ -37,9 +33,6 @@ interface Expense {
 }
 
 export default function RoommatesPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [roommates, setRoommates] = useState<Roommate[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -127,21 +120,9 @@ export default function RoommatesPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadRoommates();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadRoommates();
+  }, []);
 
   const handleInvite = (data: { email: string; message: string }) => {
     const newRoommate: Roommate = {
@@ -179,51 +160,33 @@ export default function RoommatesPage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <RoommatesHeader
+        roommateCount={roommates.length}
+        onInvite={() => setShowInviteModal(true)}
+        onAgreement={() => setShowAgreementModal(true)}
+      />
 
-      <div className="flex">
-        <RenterSidebar />
+      <RoommatesStats roommates={roommates} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <RoommatesHeader
-              roommateCount={roommates.length}
-              onInvite={() => setShowInviteModal(true)}
-              onAgreement={() => setShowAgreementModal(true)}
-            />
-
-            <RoommatesStats roommates={roommates} />
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <RoommatesList
-                  roommates={roommates}
-                  onRemove={handleRemoveRoommate}
-                  onUpdateShare={handleUpdateShare}
-                />
-                <ExpenseTracker
-                  expenses={expenses}
-                  roommates={roommates}
-                  onAddExpense={handleAddExpense}
-                />
-              </div>
-              <div className="space-y-6">
-                <RentSplitCalculator roommates={roommates} />
-                <RoommateTasks roommates={roommates} onCompleteTask={handleCompleteTask} />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <RoommatesList
+            roommates={roommates}
+            onRemove={handleRemoveRoommate}
+            onUpdateShare={handleUpdateShare}
+          />
+          <ExpenseTracker
+            expenses={expenses}
+            roommates={roommates}
+            onAddExpense={handleAddExpense}
+          />
+        </div>
+        <div className="space-y-6">
+          <RentSplitCalculator roommates={roommates} />
+          <RoommateTasks roommates={roommates} onCompleteTask={handleCompleteTask} />
+        </div>
       </div>
 
       <InviteRoommateModal
@@ -237,6 +200,6 @@ export default function RoommatesPage() {
         onClose={() => setShowAgreementModal(false)}
         roommates={roommates}
       />
-    </div>
+    </>
   );
 }

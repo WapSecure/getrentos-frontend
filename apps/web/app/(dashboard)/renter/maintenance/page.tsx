@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { MaintenanceHeader } from '@/components/renter/maintenance/MaintenanceHeader';
 import { MaintenanceStats } from '@/components/renter/maintenance/MaintenanceStats';
 import { MaintenanceList } from '@/components/renter/maintenance/MaintenanceList';
@@ -14,7 +11,6 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import type {
   MaintenanceRequest,
   MaintenanceCategory,
@@ -29,9 +25,6 @@ interface ReportData {
 }
 
 export default function MaintenancePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
 
@@ -87,21 +80,9 @@ export default function MaintenancePage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadMaintenanceRequests();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadMaintenanceRequests();
+  }, []);
 
   const handleReportIssue = (data: ReportData) => {
     const newRequest: MaintenanceRequest = {
@@ -204,58 +185,40 @@ export default function MaintenancePage() {
   ];
   const [alerts, setAlerts] = useState(initialAlerts);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <MaintenanceHeader onReport={() => setShowReportModal(true)} />
+        <MaintenanceAlerts
+          alerts={alerts}
+          onMarkAsRead={(id) =>
+            setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)))
+          }
+          onClearAll={() => setAlerts((prev) => prev.map((a) => ({ ...a, read: true })))}
+        />
+      </div>
 
-      <div className="flex">
-        <RenterSidebar />
+      <MaintenanceStats requests={requests} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <MaintenanceHeader onReport={() => setShowReportModal(true)} />
-              <MaintenanceAlerts
-                alerts={alerts}
-                onMarkAsRead={(id) =>
-                  setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)))
-                }
-                onClearAll={() => setAlerts((prev) => prev.map((a) => ({ ...a, read: true })))}
-              />
-            </div>
-
-            <MaintenanceStats requests={requests} />
-
-            <div className="grid lg:grid-cols-3 gap-6 mt-6">
-              <div className="lg:col-span-2 space-y-6">
-                <MaintenanceList
-                  requests={requests}
-                  onUpdateStatus={handleUpdateStatus}
-                  onRateVendor={handleRateVendor}
-                />
-              </div>
-              <div className="space-y-6">
-                <QuickReport onQuickReport={handleReportIssue} />
-                <MaintenanceAnalytics requests={requests} />
-                <MaintenanceChecklist />
-                <ScheduledMaintenance schedules={scheduledMaintenance} />
-                <EmergencyContact
-                  contacts={emergencyContacts}
-                  onCall={handleCall}
-                  onMessage={handleMessage}
-                />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        <div className="lg:col-span-2 space-y-6">
+          <MaintenanceList
+            requests={requests}
+            onUpdateStatus={handleUpdateStatus}
+            onRateVendor={handleRateVendor}
+          />
+        </div>
+        <div className="space-y-6">
+          <QuickReport onQuickReport={handleReportIssue} />
+          <MaintenanceAnalytics requests={requests} />
+          <MaintenanceChecklist />
+          <ScheduledMaintenance schedules={scheduledMaintenance} />
+          <EmergencyContact
+            contacts={emergencyContacts}
+            onCall={handleCall}
+            onMessage={handleMessage}
+          />
+        </div>
       </div>
 
       <ReportMaintenanceModal
@@ -263,6 +226,6 @@ export default function MaintenancePage() {
         onClose={() => setShowReportModal(false)}
         onSubmit={handleReportIssue}
       />
-    </div>
+    </>
   );
 }

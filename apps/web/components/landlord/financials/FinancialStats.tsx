@@ -47,13 +47,13 @@ export const FinancialStats = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.4 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+            className="bg-card rounded-2xl border border-border p-4"
           >
             <div className={`inline-flex p-2.5 rounded-xl ${colors.bg} mb-3`}>
               <stat.icon className={`w-5 h-5 ${colors.icon}`} />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{stat.label}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+            <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+            <p className="text-xl font-bold text-foreground tracking-tight">
               {formatCurrency(stat.value, { compact: true })}
             </p>
           </motion.div>

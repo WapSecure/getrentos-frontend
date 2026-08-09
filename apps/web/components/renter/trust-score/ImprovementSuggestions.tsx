@@ -36,25 +36,22 @@ const suggestions = [
 
 export const ImprovementSuggestions = () => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Improve Your Score</h3>
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Improve Your Score</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Complete these actions to increase your trust score
         </p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {suggestions.map((suggestion) => {
           const Icon = suggestion.icon;
           return (
-            <div
-              key={suggestion.id}
-              className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-            >
+            <div key={suggestion.id} className="p-4 hover:bg-secondary transition-colors">
               <div className="flex items-start gap-3">
                 <div
                   className={`p-2 rounded-lg ${
@@ -77,9 +74,7 @@ export const ImprovementSuggestions = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                      {suggestion.title}
-                    </h4>
+                    <h4 className="text-sm font-medium text-foreground">{suggestion.title}</h4>
                     <span
                       className={`text-xs px-1.5 py-0.5 rounded-full ${
                         suggestion.priority === 'high'
@@ -92,9 +87,7 @@ export const ImprovementSuggestions = () => {
                       {suggestion.priority}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {suggestion.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{suggestion.description}</p>
                 </div>
                 <Button variant="ghost" size="sm" className="gap-0">
                   <ArrowRight className="w-4 h-4" />

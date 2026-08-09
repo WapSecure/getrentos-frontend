@@ -39,19 +39,16 @@ export const ScheduleViewingModal = ({ lead, onClose, onSchedule }: ScheduleView
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Schedule Viewing</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Schedule Viewing</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {lead.buyerName} · {lead.propertyName}
                 </p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -62,39 +59,35 @@ export const ScheduleViewingModal = ({ lead, onClose, onSchedule }: ScheduleView
                   <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
                     <Check className="w-7 h-7 text-green-600 dark:text-green-400" />
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <p className="text-sm text-foreground">
                     Viewing scheduled for {date} at {time}. {lead.buyerName} has been notified.
                   </p>
                 </div>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Date
-                    </label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Date</label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Time
-                    </label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Time</label>
                     <input
                       type="time"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </>
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3">
+            <div className="p-4 border-t border-border flex gap-3">
               {confirmed ? (
                 <Button variant="primary" className="w-full" onClick={handleClose}>
                   Done

@@ -49,7 +49,7 @@ export const LandlordSidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-[#0a1a1f] border-r border-gray-200 dark:border-white/10 overflow-y-auto z-30 hidden lg:block">
+    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
       <nav className="p-4 space-y-1">
         {navItems.map((item, index) => {
           const isActive = pathname === item.href;
@@ -64,8 +64,8 @@ export const LandlordSidebar = () => {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#c4a747]/10 text-[#c4a747]'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-accent text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <item.icon className="w-4 h-4" />

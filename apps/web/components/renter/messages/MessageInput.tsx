@@ -78,7 +78,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={1}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1a2a2f] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747] focus:border-transparent resize-none"
+            className="w-full px-4 py-2.5 rounded-xl border border-border bg-gray-50 dark:bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
         </div>

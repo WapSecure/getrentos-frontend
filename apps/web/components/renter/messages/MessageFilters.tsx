@@ -34,14 +34,14 @@ export const MessageFilters = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#c4a747]" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Filters</span>
+          <Filter className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Filters</span>
           <span className="text-xs text-gray-500">
             {unreadCount} unread / {totalCount} total
           </span>
@@ -56,13 +56,11 @@ export const MessageFilters = ({
       {isExpanded && (
         <div className="p-3 pt-0 grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Message Type
-            </label>
+            <label className="block text-xs font-medium text-foreground mb-1">Message Type</label>
             <select
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">All Messages</option>
               <option value="unread">Unread</option>
@@ -71,13 +69,11 @@ export const MessageFilters = ({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Sort By
-            </label>
+            <label className="block text-xs font-medium text-foreground mb-1">Sort By</label>
             <select
               value={filters.sortBy}
               onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="recent">Most Recent</option>
               <option value="oldest">Oldest</option>

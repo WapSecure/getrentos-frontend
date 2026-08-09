@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { TrustScoreHeader } from '@/components/renter/trust-score/TrustScoreHeader';
 import { TrustScoreStats } from '@/components/renter/trust-score/TrustScoreStats';
 import { TrustScoreRing } from '@/components/renter/trust-score/TrustScoreRing';
@@ -18,13 +15,9 @@ import { ScoreFactors } from '@/components/renter/trust-score/ScoreFactors';
 import { TrustScoreTips } from '@/components/renter/trust-score/TrustScoreTips';
 import { ScoreForecast } from '@/components/renter/trust-score/ScoreForecast';
 import { ScoreNotifications } from '@/components/renter/trust-score/ScoreNotifications';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
 
 export default function TrustScorePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [trustScore, setTrustScore] = useState(0);
   const [verifications, setVerifications] = useState<VerificationItem[]>([]);
   const [history, setHistory] = useState<TrustScoreHistoryItem[]>([]);
@@ -142,70 +135,40 @@ export default function TrustScorePage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadTrustScoreData();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadTrustScoreData();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <TrustScoreHeader trustScore={trustScore} />
 
-      <div className="flex">
-        <RenterSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <TrustScoreHeader trustScore={trustScore} />
-
-            <div className="grid lg:grid-cols-3 gap-6 mb-6">
-              <div className="lg:col-span-1">
-                <TrustScoreRing score={trustScore} size={200} strokeWidth={12} />
-              </div>
-              <div className="lg:col-span-2">
-                <TrustScoreStats trustScore={trustScore} />
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <VerificationList verifications={verifications} />
-                <TrustScoreHistory history={history} />
-                <VerificationTimeline verifications={verifications} />
-                <ScoreFactors />
-              </div>
-              <div className="space-y-6">
-                <TrustBadges badges={badges} />
-                <ScoreForecast currentScore={trustScore} />
-                <ImprovementSuggestions />
-                <TrustScoreTips />
-                <TrustScoreComparison currentScore={trustScore} />
-                <TrustScoreBenefits />
-                <ScoreNotifications />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-1">
+          <TrustScoreRing score={trustScore} size={200} strokeWidth={12} />
+        </div>
+        <div className="lg:col-span-2">
+          <TrustScoreStats trustScore={trustScore} />
+        </div>
       </div>
-    </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <VerificationList verifications={verifications} />
+          <TrustScoreHistory history={history} />
+          <VerificationTimeline verifications={verifications} />
+          <ScoreFactors />
+        </div>
+        <div className="space-y-6">
+          <TrustBadges badges={badges} />
+          <ScoreForecast currentScore={trustScore} />
+          <ImprovementSuggestions />
+          <TrustScoreTips />
+          <TrustScoreComparison currentScore={trustScore} />
+          <TrustScoreBenefits />
+          <ScoreNotifications />
+        </div>
+      </div>
+    </>
   );
 }

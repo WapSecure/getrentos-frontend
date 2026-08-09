@@ -75,16 +75,12 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {offer.propertyTitle}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            Owner: {offer.ownerName}
-          </p>
+          <h3 className="font-semibold text-foreground truncate">{offer.propertyTitle}</h3>
+          <p className="text-xs text-muted-foreground truncate">Owner: {offer.ownerName}</p>
         </div>
         <span
           className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
@@ -97,7 +93,7 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
           <p className="text-xs text-gray-400">Your Offer</p>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">
+          <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
           <p
@@ -109,14 +105,14 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
         </div>
         <div>
           <p className="text-xs text-gray-400">Financing</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+          <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
             <FinancingIcon className="w-3.5 h-3.5 text-gray-400" />
             {financingLabels[offer.financingType]}
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
+      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
         Submitted {formatDate(offer.submittedAt)}
       </p>
     </motion.div>

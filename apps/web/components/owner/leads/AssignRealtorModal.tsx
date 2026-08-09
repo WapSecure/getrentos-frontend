@@ -47,19 +47,16 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Assign Realtor</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Assign Realtor</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {lead.buyerName} · {lead.propertyName}
                 </p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -70,7 +67,7 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
                   <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
                     <Check className="w-7 h-7 text-green-600 dark:text-green-400" />
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <p className="text-sm text-foreground">
                     {selectedRealtor?.name} has been assigned to this lead.
                   </p>
                 </div>
@@ -81,27 +78,23 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
                     onClick={() => setSelectedId(realtor.id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${
                       selectedId === realtor.id
-                        ? 'border-[#c4a747] bg-[#c4a747]/10'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5'
+                        ? 'border-primary bg-accent'
+                        : 'border-border hover:bg-secondary'
                     }`}
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-[#0a1a1f] font-semibold text-xs flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
                       {getInitials(realtor.name)}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {realtor.name}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {realtor.speciality}
-                      </p>
+                      <p className="text-sm font-medium text-foreground truncate">{realtor.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{realtor.speciality}</p>
                     </div>
                   </button>
                 ))
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3">
+            <div className="p-4 border-t border-border flex gap-3">
               {assigned ? (
                 <Button variant="primary" className="w-full" onClick={handleClose}>
                   Done

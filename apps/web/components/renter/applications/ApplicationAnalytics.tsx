@@ -26,10 +26,10 @@ export const ApplicationAnalytics = ({ applications }: ApplicationAnalyticsProps
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Application Analytics</h3>
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Application Analytics</h3>
         <p className="text-xs text-gray-500">Insights about your applications</p>
       </div>
 
@@ -52,53 +52,51 @@ export const ApplicationAnalytics = ({ applications }: ApplicationAnalyticsProps
                 cy="40"
                 r="32"
                 fill="none"
-                stroke="#c4a747"
+                stroke="var(--primary)"
                 strokeWidth="6"
                 strokeDasharray={`${(successRate / 100) * 201} 201`}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
-                {successRate}%
-              </span>
+              <span className="text-xl font-bold text-foreground">{successRate}%</span>
               <span className="text-xs text-gray-500">Success</span>
             </div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm">
               <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-gray-600 dark:text-gray-400">Approved</span>
-              <span className="font-medium text-gray-900 dark:text-white ml-auto">{approved}</span>
+              <span className="text-muted-foreground">Approved</span>
+              <span className="font-medium text-foreground ml-auto">{approved}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <div className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="text-gray-600 dark:text-gray-400">Rejected</span>
-              <span className="font-medium text-gray-900 dark:text-white ml-auto">{rejected}</span>
+              <span className="text-muted-foreground">Rejected</span>
+              <span className="font-medium text-foreground ml-auto">{rejected}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <div className="w-2 h-2 rounded-full bg-yellow-500" />
-              <span className="text-gray-600 dark:text-gray-400">Pending</span>
-              <span className="font-medium text-gray-900 dark:text-white ml-auto">{pending}</span>
+              <span className="text-muted-foreground">Pending</span>
+              <span className="font-medium text-foreground ml-auto">{pending}</span>
             </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-200 dark:border-white/10">
+        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border">
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-[#c4a747]" />
+              <Clock className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Avg Response</span>
             </div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">{avgResponseTime}</p>
+            <p className="text-sm font-semibold text-foreground">{avgResponseTime}</p>
           </div>
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-[#c4a747]" />
+              <TrendingUp className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Total</span>
             </div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">{total}</p>
+            <p className="text-sm font-semibold text-foreground">{total}</p>
           </div>
         </div>
 

@@ -22,18 +22,16 @@ export const VerificationCard = ({ visit, delay = 0 }: VerificationCardProps) =>
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4 hover:shadow-lg transition-all duration-300"
+      className="bg-card rounded-2xl border border-border p-4 hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-[#c4a747]/10 flex-shrink-0">
-            <UserCheck className="w-4 h-4 text-[#c4a747]" />
+          <div className="p-2.5 rounded-xl bg-accent shrink-0">
+            <UserCheck className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {visit.subjectName}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <h3 className="font-semibold text-foreground truncate">{visit.subjectName}</h3>
+            <p className="text-xs text-muted-foreground truncate">
               {subjectLabels[visit.subjectType]} · {visit.address}
             </p>
           </div>
@@ -59,21 +57,21 @@ export const VerificationCard = ({ visit, delay = 0 }: VerificationCardProps) =>
           {visit.idVerified ? (
             <CheckCircle2 className="w-4 h-4 text-green-500" />
           ) : (
-            <XCircle className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+            <XCircle className="w-4 h-4 text-muted-foreground/50" />
           )}
-          <span className="text-xs text-gray-600 dark:text-gray-300">ID Verified</span>
+          <span className="text-xs text-muted-foreground">ID Verified</span>
         </div>
         <div className="flex items-center gap-1.5">
           {visit.addressConfirmed ? (
             <CheckCircle2 className="w-4 h-4 text-green-500" />
           ) : (
-            <XCircle className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+            <XCircle className="w-4 h-4 text-muted-foreground/50" />
           )}
-          <span className="text-xs text-gray-600 dark:text-gray-300">Address Confirmed</span>
+          <span className="text-xs text-muted-foreground">Address Confirmed</span>
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
+      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
         {formatDate(visit.scheduledDate)}
       </p>
     </motion.div>

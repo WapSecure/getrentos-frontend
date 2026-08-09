@@ -12,10 +12,10 @@ export const AgentDashboardHeader = ({ greeting, firstName }: AgentDashboardHead
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-foreground">
           {greeting}, {firstName}!
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-muted-foreground mt-1">
           Here&apos;s what&apos;s on your schedule today.
         </p>
       </div>

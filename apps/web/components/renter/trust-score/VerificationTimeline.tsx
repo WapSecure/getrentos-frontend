@@ -29,15 +29,15 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-[#c4a747]" />
+          <Clock className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Verification Timeline</h3>
+            <h3 className="font-semibold text-foreground">Verification Timeline</h3>
             <p className="text-xs text-gray-500">
               {timelineItems.filter((t) => t.status === 'completed').length} of{' '}
               {timelineItems.length} complete
@@ -75,9 +75,7 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
                     <div className="flex items-center gap-2">
                       <h4
                         className={`text-sm font-medium ${
-                          item.status === 'completed'
-                            ? 'text-gray-900 dark:text-white'
-                            : 'text-gray-500 dark:text-gray-400'
+                          item.status === 'completed' ? 'text-foreground' : 'text-muted-foreground'
                         }`}
                       >
                         {item.event}

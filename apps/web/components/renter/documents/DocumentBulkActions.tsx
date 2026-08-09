@@ -20,10 +20,8 @@ export const DocumentBulkActions = ({
 }: DocumentBulkActionsProps) => {
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-3 flex items-center gap-3">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {selectedCount} selected
-        </span>
+      <div className="bg-card rounded-xl shadow-2xl border border-border p-3 flex items-center gap-3">
+        <span className="text-sm font-medium text-foreground">{selectedCount} selected</span>
         <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
         <Button variant="ghost" size="sm" onClick={onClearSelection} className="p-1.5">
           <X className="w-4 h-4" />

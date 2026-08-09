@@ -97,17 +97,13 @@ export const SavedPropertiesGrid = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12 bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10"
+        className="text-center py-12 bg-card rounded-xl border border-border"
       >
         <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
           <Heart className="w-8 h-8 text-gray-400" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          No saved properties yet
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
-          Start exploring and save properties you love
-        </p>
+        <h3 className="text-lg font-medium text-foreground">No saved properties yet</h3>
+        <p className="text-muted-foreground mt-1">Start exploring and save properties you love</p>
         <Button href="/renter/discover" variant="primary" className="mt-4">
           Discover Properties
         </Button>
@@ -118,7 +114,7 @@ export const SavedPropertiesGrid = ({
   if (isFiltering) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,15 +124,13 @@ export const SavedPropertiesGrid = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12 bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10"
+        className="text-center py-12 bg-card rounded-xl border border-border"
       >
         <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
           <Filter className="w-8 h-8 text-gray-400" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          No matching properties
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+        <h3 className="text-lg font-medium text-foreground">No matching properties</h3>
+        <p className="text-muted-foreground mt-1">
           Try changing your filters to see more properties
         </p>
       </motion.div>
@@ -146,14 +140,14 @@ export const SavedPropertiesGrid = ({
   return (
     <div className="space-y-4">
       {/* Filter Stats Bar */}
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-4">
           <span>
             Showing {filteredProperties.length} of {properties.length} properties
           </span>
           {filterStatus !== 'all' && (
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-[#c4a747]" />
+              <span className="w-2 h-2 rounded-full bg-primary" />
               Filtered by:{' '}
               {filterStatus === 'applied'
                 ? 'Applied'

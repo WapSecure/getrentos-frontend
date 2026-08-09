@@ -1,22 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { CalendarHeader } from '@/components/renter/calendar/CalendarHeader';
 import { CalendarView } from '@/components/renter/calendar/CalendarView';
 import { CalendarStats } from '@/components/renter/calendar/CalendarStats';
 import { CalendarEventList } from '@/components/renter/calendar/CalendarEventList';
 import { CalendarEventModal } from '@/components/renter/calendar/CalendarEventModal';
 import { CalendarSync } from '@/components/renter/calendar/CalendarSync';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/types/calendar';
 
 export default function CalendarPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -95,21 +88,9 @@ export default function CalendarPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadEvents();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadEvents();
+  }, []);
 
   const handleUpdateEvent = (id: string, updates: Partial<CalendarEvent>) => {
     setEvents((prev) => prev.map((event) => (event.id === id ? { ...event, ...updates } : event)));
@@ -147,54 +128,36 @@ export default function CalendarPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <CalendarHeader
+        currentDate={currentDate}
+        setCurrentDate={setCurrentDate}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onAddEvent={openAddEventModal}
+      />
 
-      <div className="flex">
-        <RenterSidebar />
+      <CalendarStats events={events} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <CalendarHeader
-              currentDate={currentDate}
-              setCurrentDate={setCurrentDate}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              onAddEvent={openAddEventModal}
-            />
-
-            <CalendarStats events={events} />
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <CalendarView
-                  events={events}
-                  viewMode={viewMode}
-                  currentDate={currentDate}
-                  onEventClick={openEditEventModal}
-                />
-              </div>
-              <div className="space-y-6">
-                <CalendarEventList
-                  events={events}
-                  onUpdateEvent={handleUpdateEvent}
-                  onDeleteEvent={handleDeleteEvent}
-                  onEditEvent={openEditEventModal}
-                />
-                <CalendarSync />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <CalendarView
+            events={events}
+            viewMode={viewMode}
+            currentDate={currentDate}
+            onEventClick={openEditEventModal}
+          />
+        </div>
+        <div className="space-y-6">
+          <CalendarEventList
+            events={events}
+            onUpdateEvent={handleUpdateEvent}
+            onDeleteEvent={handleDeleteEvent}
+            onEditEvent={openEditEventModal}
+          />
+          <CalendarSync />
+        </div>
       </div>
 
       <CalendarEventModal
@@ -204,6 +167,6 @@ export default function CalendarPage() {
         onSave={handleSaveEvent}
         event={editingEvent}
       />
-    </div>
+    </>
   );
 }

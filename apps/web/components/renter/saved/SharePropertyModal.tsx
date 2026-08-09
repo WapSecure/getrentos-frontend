@@ -73,17 +73,14 @@ export const SharePropertyModal = ({ isOpen, onClose, property }: SharePropertyM
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Share Property</h3>
+                <h3 className="font-semibold text-foreground">Share Property</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{property.title}</p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -95,25 +92,25 @@ export const SharePropertyModal = ({ isOpen, onClose, property }: SharePropertyM
                   <button
                     key={option.name}
                     onClick={option.action}
-                    className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
                   >
                     <div
                       className={`w-10 h-10 rounded-full ${option.color} flex items-center justify-center`}
                     >
                       <option.icon className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{option.name}</span>
+                    <span className="text-xs text-muted-foreground">{option.name}</span>
                   </button>
                 ))}
               </div>
 
               {/* Copy Link Section */}
-              <div className="pt-4 border-t border-gray-200 dark:border-white/10">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <div className="pt-4 border-t border-border">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Or copy link
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-gray-600 dark:text-gray-400 truncate">
+                  <div className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-muted-foreground truncate">
                     {shareUrl}
                   </div>
                   <Button variant="outline" onClick={handleCopyLink} className="gap-2">

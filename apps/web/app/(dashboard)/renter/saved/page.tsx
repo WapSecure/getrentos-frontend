@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { SavedPropertiesHeader } from '@/components/renter/saved/SavedPropertiesHeader';
 import { SavedPropertiesFilters } from '@/components/renter/saved/SavedPropertiesFilters';
 import { SavedPropertiesGrid } from '@/components/renter/saved/SavedPropertiesGrid';
@@ -14,7 +11,6 @@ import { SavedAIRecommendations } from '@/components/renter/saved/SavedAIRecomme
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
 import { Toast } from '@/components/ui/Toast';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { Property } from '@/types/renter';
 
 interface Wishlist {
@@ -24,9 +20,6 @@ interface Wishlist {
 }
 
 export default function SavedPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
   const [wishlists, setWishlists] = useState<Wishlist[]>([]);
   const [selectedWishlist, setSelectedWishlist] = useState<string>('all');
@@ -199,22 +192,10 @@ export default function SavedPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadSavedProperties();
-      loadWishlists();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadSavedProperties();
+    loadWishlists();
+  }, []);
 
   const handleRemoveProperty = (propertyId: string) => {
     const updated = savedProperties.filter((p) => p.id !== propertyId);
@@ -281,67 +262,49 @@ export default function SavedPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <SavedPropertiesHeader
+        savedCount={savedProperties.length}
+        wishlistCount={wishlists.length}
+        onExport={() => setShowExportModal(true)}
+      />
 
-      <div className="flex">
-        <RenterSidebar />
+      <div className="grid lg:grid-cols-4 gap-6">
+        <div className="space-y-6">
+          <WishlistManager
+            wishlists={wishlists}
+            setWishlists={setWishlists}
+            selectedWishlist={selectedWishlist}
+            setSelectedWishlist={setSelectedWishlist}
+          />
+          <RecentlyViewed />
+          <SavedSearchesList />
+          <SavedAIRecommendations />
+        </div>
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <SavedPropertiesHeader
-              savedCount={savedProperties.length}
-              wishlistCount={wishlists.length}
-              onExport={() => setShowExportModal(true)}
-            />
+        <div className="lg:col-span-3 space-y-6">
+          <SavedPropertiesFilters
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+          />
 
-            <div className="grid lg:grid-cols-4 gap-6">
-              <div className="space-y-6">
-                <WishlistManager
-                  wishlists={wishlists}
-                  setWishlists={setWishlists}
-                  selectedWishlist={selectedWishlist}
-                  setSelectedWishlist={setSelectedWishlist}
-                />
-                <RecentlyViewed />
-                <SavedSearchesList />
-                <SavedAIRecommendations />
-              </div>
-
-              <div className="lg:col-span-3 space-y-6">
-                <SavedPropertiesFilters
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  filterStatus={filterStatus}
-                  setFilterStatus={setFilterStatus}
-                />
-
-                <SavedPropertiesGrid
-                  properties={savedProperties}
-                  viewMode={viewMode}
-                  sortBy={sortBy}
-                  filterStatus={filterStatus}
-                  onRemove={handleRemoveProperty}
-                  onMoveToWishlist={handleMoveToWishlist}
-                  wishlists={wishlists}
-                  selectedProperties={selectedProperties}
-                  onSelectProperty={handleSelectProperty}
-                />
-              </div>
-            </div>
-          </div>
-        </main>
+          <SavedPropertiesGrid
+            properties={savedProperties}
+            viewMode={viewMode}
+            sortBy={sortBy}
+            filterStatus={filterStatus}
+            onRemove={handleRemoveProperty}
+            onMoveToWishlist={handleMoveToWishlist}
+            wishlists={wishlists}
+            selectedProperties={selectedProperties}
+            onSelectProperty={handleSelectProperty}
+          />
+        </div>
       </div>
 
       {shareToast && (
@@ -364,6 +327,6 @@ export default function SavedPage() {
         onClose={() => setShowExportModal(false)}
         properties={savedProperties}
       />
-    </div>
+    </>
   );
 }

@@ -1,13 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { FileText } from 'lucide-react';
-import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar';
-import { LandlordSidebar } from '@/components/landlord/dashboard/LandlordSidebar';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
-import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { ApplicationStatus, RentalApplication } from '@/types/landlord';
 
 const mockApplications: RentalApplication[] = [
@@ -83,34 +79,9 @@ const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
 ];
 
 export default function LandlordApplicationsPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [applications, setApplications] = useState<RentalApplication[]>([]);
+  const [applications, setApplications] = useState<RentalApplication[]>(mockApplications);
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        if (parsedUser.role && parsedUser.role !== 'landlord') {
-          router.replace(getDashboardRoute(parsedUser.role));
-          return;
-        }
-      }
-      setApplications(mockApplications);
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
 
   const updateStatus = (id: string, status: ApplicationStatus) => {
     setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
@@ -121,72 +92,54 @@ export default function LandlordApplicationsPage() {
   const handleReject = (id: string) => updateStatus(id, 'rejected');
   const handleRequestInfo = (id: string) => updateStatus(id, 'under_review');
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   const filteredApplications = applications.filter((a) => filter === 'all' || a.status === filter);
   const pendingCount = applications.filter((a) => a.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <LandlordNavbar user={user} />
-
-      <div className="flex">
-        <LandlordSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {pendingCount} application{pendingCount === 1 ? '' : 's'} awaiting review
-              </p>
-            </div>
-
-            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-white/10 rounded-lg w-fit mb-6 overflow-x-auto">
-              {statusFilters.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setFilter(option.value)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                    filter === option.value
-                      ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-
-            {filteredApplications.length === 0 ? (
-              <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-12 text-center">
-                <FileText className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">No applications found</p>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredApplications.map((application, index) => (
-                  <ApplicationCard
-                    key={application.id}
-                    application={application}
-                    delay={index * 0.05}
-                    onViewDetails={() => setSelectedApplication(application)}
-                    onApprove={() => handleApprove(application.id)}
-                    onReject={() => handleReject(application.id)}
-                    onRequestInfo={() => handleRequestInfo(application.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+    <>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Applications</h1>
+        <p className="text-muted-foreground mt-1">
+          {pendingCount} application{pendingCount === 1 ? '' : 's'} awaiting review
+        </p>
       </div>
+
+      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6 overflow-x-auto">
+        {statusFilters.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => setFilter(option.value)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+              filter === option.value
+                ? 'bg-card text-primary shadow-sm'
+                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredApplications.length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <FileText className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-muted-foreground">No applications found</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredApplications.map((application, index) => (
+            <ApplicationCard
+              key={application.id}
+              application={application}
+              delay={index * 0.05}
+              onViewDetails={() => setSelectedApplication(application)}
+              onApprove={() => handleApprove(application.id)}
+              onReject={() => handleReject(application.id)}
+              onRequestInfo={() => handleRequestInfo(application.id)}
+            />
+          ))}
+        </div>
+      )}
 
       <ApplicationDetailsModal
         application={selectedApplication}
@@ -195,6 +148,6 @@ export default function LandlordApplicationsPage() {
         onReject={handleReject}
         onRequestInfo={handleRequestInfo}
       />
-    </div>
+    </>
   );
 }

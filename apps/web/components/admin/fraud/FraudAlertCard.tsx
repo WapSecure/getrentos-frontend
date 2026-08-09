@@ -61,20 +61,16 @@ export const FraudAlertCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 flex-shrink-0">
+          <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 shrink-0">
             <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {alert.subjectName}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate capitalize">
-              {alert.subjectRole}
-            </p>
+            <h3 className="font-semibold text-foreground truncate">{alert.subjectName}</h3>
+            <p className="text-xs text-muted-foreground truncate capitalize">{alert.subjectRole}</p>
           </div>
         </div>
         <span
@@ -84,9 +80,9 @@ export const FraudAlertCard = ({
         </span>
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-300 mt-3">{alert.reason}</p>
+      <p className="text-sm text-muted-foreground mt-3">{alert.reason}</p>
 
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
         <span className={`inline-flex items-center gap-1 text-xs font-medium ${status.className}`}>
           <StatusIcon className="w-3.5 h-3.5" />
           {status.label}

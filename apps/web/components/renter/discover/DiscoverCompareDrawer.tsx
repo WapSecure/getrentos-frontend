@@ -57,21 +57,16 @@ export const DiscoverCompareDrawer = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-4xl bg-white dark:bg-[#0a1a1f] shadow-xl z-50 overflow-y-auto"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-4xl bg-background shadow-xl z-50 overflow-y-auto"
           >
-            <div className="sticky top-0 bg-white dark:bg-[#0a1a1f] border-b border-gray-200 dark:border-white/10 p-4 flex justify-between items-center">
+            <div className="sticky top-0 bg-background border-b border-border p-4 flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Compare Properties
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <h2 className="text-xl font-semibold text-foreground">Compare Properties</h2>
+                <p className="text-sm text-muted-foreground">
                   {properties.length} of 4 properties selected
                 </p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={onClose} className="p-2 rounded-lg hover:bg-secondary">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -82,10 +77,8 @@ export const DiscoverCompareDrawer = ({
                   <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
                     <GitCompare className="w-8 h-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    No properties selected
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  <h3 className="text-lg font-medium text-foreground">No properties selected</h3>
+                  <p className="text-muted-foreground mt-1">
                     Click the compare icon on any property to add it here
                   </p>
                 </div>
@@ -93,14 +86,14 @@ export const DiscoverCompareDrawer = ({
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-white/10">
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
                           Features
                         </th>
                         {properties.map((property) => (
                           <th key={property.id} className="text-left py-3 px-4 min-w-[200px]">
                             <div className="flex justify-between items-start">
-                              <span className="font-semibold text-gray-900 dark:text-white">
+                              <span className="font-semibold text-foreground">
                                 {property.title}
                               </span>
                               <button
@@ -114,23 +107,19 @@ export const DiscoverCompareDrawer = ({
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-white/10">
+                    <tbody className="divide-y divide-border">
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Price
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Price</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
-                            <span className="font-semibold text-[#c4a747]">
+                            <span className="font-semibold text-primary">
                               {formatPrice(property.price, property.period)}
                             </span>
                           </td>
                         ))}
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Location
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Location</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1 text-sm">
@@ -141,9 +130,7 @@ export const DiscoverCompareDrawer = ({
                         ))}
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Bedrooms
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Bedrooms</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
@@ -154,9 +141,7 @@ export const DiscoverCompareDrawer = ({
                         ))}
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Bathrooms
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Bathrooms</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
@@ -167,7 +152,7 @@ export const DiscoverCompareDrawer = ({
                         ))}
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">Size</td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Size</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
@@ -178,22 +163,18 @@ export const DiscoverCompareDrawer = ({
                         ))}
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Rating
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Rating</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-[#c4a747] text-[#c4a747]" />
+                              <Star className="w-4 h-4 fill-primary text-primary" />
                               {property.rating}
                             </div>
                           </td>
                         ))}
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Verified
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Verified</td>
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             {property.verified ? (

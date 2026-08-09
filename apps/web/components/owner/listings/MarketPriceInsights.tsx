@@ -86,35 +86,32 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
     Math.round(prices.reduce((sum, p) => sum + p, 0) / prices.length / 500_000) * 500_000;
 
   return (
-    <div className="rounded-lg border border-[#c4a747]/30 bg-[#c4a747]/5 p-3">
+    <div className="rounded-lg border border-primary/30 bg-accent p-3">
       <div className="flex items-center gap-1.5 mb-2">
-        <TrendingUp className="w-3.5 h-3.5 text-[#c4a747]" />
-        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+        <TrendingUp className="w-3.5 h-3.5 text-primary" />
+        <p className="text-xs font-medium text-foreground">
           Market insight: recent sales near {city}
         </p>
       </div>
 
       <div className="space-y-1.5 mb-3">
         {comparables.map((c, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
-          >
+          <div key={i} className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
               {c.propertyType} · {c.size} sqm · sold {c.soldMonthsAgo} mo
               {c.soldMonthsAgo === 1 ? '' : 's'} ago
             </span>
-            <span className="font-medium text-gray-700 dark:text-gray-300">
+            <span className="font-medium text-foreground">
               {formatCurrency(c.soldPrice, { compact: true })}
             </span>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-[#c4a747]/20">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-between pt-2 border-t border-primary/20">
+        <p className="text-xs text-muted-foreground">
           Suggested range{' '}
-          <span className="font-semibold text-gray-900 dark:text-white">
+          <span className="font-semibold text-foreground">
             {formatCurrency(lowEstimate, { compact: true })} –{' '}
             {formatCurrency(highEstimate, { compact: true })}
           </span>

@@ -21,16 +21,14 @@ export const TrustScoreHistory = ({ history }: TrustScoreHistoryProps) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">Score History</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Track your trust score changes
-          </p>
+          <h3 className="font-semibold text-foreground">Score History</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Track your trust score changes</p>
         </div>
         <Button variant="ghost" size="sm" className="p-1 h-auto">
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -38,17 +36,15 @@ export const TrustScoreHistory = ({ history }: TrustScoreHistoryProps) => {
       </div>
 
       {isExpanded && (
-        <div className="p-4 pt-0 divide-y divide-gray-200 dark:divide-white/10">
+        <div className="p-4 pt-0 divide-y divide-border">
           {history.map((item, index) => (
             <div key={index} className="py-3 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{item.reason}</p>
+                <p className="text-sm font-medium text-foreground">{item.reason}</p>
                 <p className="text-xs text-gray-500">{formatDate(item.date)}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {item.score}
-                </span>
+                <span className="text-sm font-semibold text-foreground">{item.score}</span>
                 <span
                   className={`text-xs font-medium ${
                     item.change > 0

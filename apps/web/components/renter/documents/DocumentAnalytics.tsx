@@ -35,41 +35,41 @@ export const DocumentAnalytics = ({ documents }: DocumentAnalyticsProps) => {
     documents.length > 0 ? (parseFloat(usedSpace) / documents.length).toFixed(1) + ' MB' : '0 MB';
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Document Analytics</h3>
+          <BarChart3 className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Document Analytics</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Storage & usage insights</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Storage & usage insights</p>
       </div>
 
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <Database className="w-3 h-3 text-[#c4a747]" />
+              <Database className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Used Space</span>
             </div>
-            <p className="text-sm font-bold text-gray-900 dark:text-white">{usedSpace}</p>
+            <p className="text-sm font-bold text-foreground">{usedSpace}</p>
             <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
-              <div className="h-full bg-[#c4a747] rounded-full" style={{ width: '33%' }} />
+              <div className="h-full bg-primary rounded-full" style={{ width: '33%' }} />
             </div>
             <p className="text-xs text-gray-500 mt-1">{freeSpace} free</p>
           </div>
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <FileText className="w-3 h-3 text-[#c4a747]" />
+              <FileText className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Documents</span>
             </div>
-            <p className="text-sm font-bold text-gray-900 dark:text-white">{documents.length}</p>
+            <p className="text-sm font-bold text-foreground">{documents.length}</p>
             <p className="text-xs text-gray-500">Avg size: {averageSize}</p>
           </div>
         </div>
 
         <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
           <div className="flex items-center gap-1">
-            <PieChart className="w-3 h-3 text-[#c4a747]" />
+            <PieChart className="w-3 h-3 text-primary" />
             <span className="text-xs text-gray-500">Type Distribution</span>
           </div>
           <div className="flex flex-wrap gap-1 mt-1">

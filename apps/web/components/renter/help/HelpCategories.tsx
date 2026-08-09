@@ -37,10 +37,10 @@ interface HelpCategoriesProps {
 
 export const HelpCategories = ({ selectedCategory, onSelectCategory }: HelpCategoriesProps) => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Categories</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Browse by topic</p>
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Categories</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Browse by topic</p>
       </div>
 
       <div className="p-2">
@@ -53,9 +53,7 @@ export const HelpCategories = ({ selectedCategory, onSelectCategory }: HelpCateg
                 key={category.id}
                 onClick={() => onSelectCategory(category.id)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  isSelected
-                    ? 'bg-[#c4a747]/10 text-[#c4a747]'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
+                  isSelected ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'
                 }`}
               >
                 <Icon className="w-4 h-4" />

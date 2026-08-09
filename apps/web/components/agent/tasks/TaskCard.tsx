@@ -48,7 +48,7 @@ const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
 const priorityConfig: Record<TaskPriority, { label: string; className: string }> = {
   high: { label: 'High', className: 'text-red-600 dark:text-red-400' },
   medium: { label: 'Medium', className: 'text-yellow-600 dark:text-yellow-400' },
-  low: { label: 'Low', className: 'text-gray-500 dark:text-gray-400' },
+  low: { label: 'Low', className: 'text-muted-foreground' },
 };
 
 interface TaskCardProps {
@@ -72,18 +72,16 @@ export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: Tas
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-[#c4a747]/10 flex-shrink-0">
-            <TypeIcon className="w-4 h-4 text-[#c4a747]" />
+          <div className="p-2.5 rounded-xl bg-accent shrink-0">
+            <TypeIcon className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{task.title}</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {task.propertyAddress}
-            </p>
+            <h3 className="font-semibold text-foreground truncate">{task.title}</h3>
+            <p className="text-xs text-muted-foreground truncate">{task.propertyAddress}</p>
           </div>
         </div>
         <span
@@ -96,9 +94,7 @@ export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: Tas
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
           <p className="text-xs text-gray-400">Assigned By</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-            {task.assignedBy}
-          </p>
+          <p className="text-sm font-medium text-foreground truncate">{task.assignedBy}</p>
         </div>
         <div>
           <p className="text-xs text-gray-400">Priority</p>
@@ -112,7 +108,7 @@ export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: Tas
       </p>
 
       {isActionable && (
-        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        <div className="flex gap-2 mt-4 pt-4 border-t border-border">
           <Button
             variant="ghost"
             size="sm"

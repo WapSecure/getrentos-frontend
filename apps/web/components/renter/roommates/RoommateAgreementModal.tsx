@@ -42,12 +42,12 @@ export const RoommateAgreementModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center sticky top-0 bg-white dark:bg-[#1a2a2f] z-10">
+            <div className="p-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Roommate Agreement</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Roommate Agreement</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Review and agree to the roommate terms
                 </p>
               </div>
@@ -72,26 +72,24 @@ export const RoommateAgreementModal = ({
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+                  <div className="p-2 rounded-lg bg-secondary">
                     <Users className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Roommates</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h4 className="font-medium text-foreground">Roommates</h4>
+                    <p className="text-sm text-muted-foreground">
                       {roommates.map((r) => r.name).join(', ')}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+                  <div className="p-2 rounded-lg bg-secondary">
                     <Home className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      Shared Responsibilities
-                    </h4>
-                    <ul className="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside space-y-1">
+                    <h4 className="font-medium text-foreground">Shared Responsibilities</h4>
+                    <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                       <li>Keep common areas clean and tidy</li>
                       <li>Respect quiet hours (10 PM - 8 AM)</li>
                       <li>Notify roommates of guests in advance</li>
@@ -102,14 +100,12 @@ export const RoommateAgreementModal = ({
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+                  <div className="p-2 rounded-lg bg-secondary">
                     <DollarSign className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      Financial Agreement
-                    </h4>
-                    <ul className="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside space-y-1">
+                    <h4 className="font-medium text-foreground">Financial Agreement</h4>
+                    <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                       <li>Rent split according to agreed percentages</li>
                       <li>Utilities and shared expenses equally divided</li>
                       <li>Payments due by the 1st of each month</li>
@@ -134,15 +130,15 @@ export const RoommateAgreementModal = ({
                 </div>
               </div>
 
-              <div className="flex items-start gap-2 pt-4 border-t border-gray-200 dark:border-white/10">
+              <div className="flex items-start gap-2 pt-4 border-t border-border">
                 <input
                   type="checkbox"
                   id="agree"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                  className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary"
                 />
-                <label htmlFor="agree" className="text-sm text-gray-700 dark:text-gray-300">
+                <label htmlFor="agree" className="text-sm text-foreground">
                   I have read and agree to the terms of this roommate agreement. All roommates will
                   be notified of this agreement.
                 </label>

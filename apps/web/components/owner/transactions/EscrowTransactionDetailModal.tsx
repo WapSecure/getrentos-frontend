@@ -84,36 +84,31 @@ export const EscrowTransactionDetailModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {transaction.propertyName}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">{transaction.propertyName}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Buyer: {transaction.buyerName}
                 </p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-5 overflow-y-auto flex-1">
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 flex items-center justify-between">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Sale Price</span>
-                <span className="text-lg font-bold text-[#c4a747]">
+                <span className="text-sm text-muted-foreground">Sale Price</span>
+                <span className="text-lg font-bold text-primary">
                   {formatCurrency(transaction.salePrice)}
                 </span>
               </div>
 
               {isFrozen ? (
                 <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-medium text-red-700 dark:text-red-400">
                       Escrow frozen — dispute active
@@ -126,9 +121,7 @@ export const EscrowTransactionDetailModal = ({
                 </div>
               ) : (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Escrow Timeline
-                  </h4>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Escrow Timeline</h4>
                   <div className="space-y-0">
                     {escrowSteps.map((step, index) => {
                       const isDone = index < activeIndex || transaction.escrowStatus === 'released';
@@ -139,12 +132,12 @@ export const EscrowTransactionDetailModal = ({
                         <div key={step.key} className="flex gap-3">
                           <div className="flex flex-col items-center">
                             <div
-                              className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                                 isDone || (isActive && transaction.escrowStatus === 'released')
-                                  ? 'bg-[#c4a747] text-white'
+                                  ? 'bg-primary text-white'
                                   : isActive
-                                    ? 'bg-[#c4a747]/20 text-[#c4a747] ring-2 ring-[#c4a747]'
-                                    : 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                                    ? 'bg-primary/20 text-primary ring-2 ring-primary'
+                                    : 'bg-secondary text-gray-400'
                               }`}
                             >
                               {isDone ? (
@@ -155,16 +148,14 @@ export const EscrowTransactionDetailModal = ({
                             </div>
                             {!isLast && (
                               <div
-                                className={`w-0.5 flex-1 min-h-6 ${isDone ? 'bg-[#c4a747]' : 'bg-gray-200 dark:bg-white/10'}`}
+                                className={`w-0.5 flex-1 min-h-6 ${isDone ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'}`}
                               />
                             )}
                           </div>
                           <div className="pb-5">
                             <p
                               className={`text-sm font-medium ${
-                                isDone || isActive
-                                  ? 'text-gray-900 dark:text-white'
-                                  : 'text-gray-400 dark:text-gray-500'
+                                isDone || isActive ? 'text-foreground' : 'text-muted-foreground'
                               }`}
                             >
                               {step.label}
@@ -179,7 +170,7 @@ export const EscrowTransactionDetailModal = ({
               )}
 
               <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                <Lock className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <Lock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-700 dark:text-blue-300">
                   Funds are held and released automatically by GetRentos escrow once all
                   verification and payment conditions are met. Manual release is not available to
@@ -193,12 +184,12 @@ export const EscrowTransactionDetailModal = ({
                 </p>
               )}
 
-              <div className="border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden">
+              <div className="border border-border rounded-lg overflow-hidden">
                 <button
                   onClick={() => setShowActivityLog((v) => !v)}
-                  className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="w-full flex items-center justify-between p-3 text-left hover:bg-secondary transition-colors"
                 >
-                  <span className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <ScrollText className="w-4 h-4 text-gray-400" />
                     Activity Log
                     <span className="text-xs font-normal text-gray-400">
@@ -211,19 +202,17 @@ export const EscrowTransactionDetailModal = ({
                 </button>
 
                 {showActivityLog && (
-                  <div className="border-t border-gray-200 dark:border-white/10 divide-y divide-gray-100 dark:divide-white/5">
+                  <div className="border-t border-border divide-y divide-border">
                     {transaction.activityLog.map((entry) => {
                       const actor = actorConfig[entry.actor];
                       const ActorIcon = actor.icon;
                       return (
                         <div key={entry.id} className="flex items-start gap-3 p-3">
-                          <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/10 flex-shrink-0">
-                            <ActorIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                          <div className="p-1.5 rounded-lg bg-secondary shrink-0">
+                            <ActorIcon className="w-3.5 h-3.5 text-muted-foreground" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs text-gray-700 dark:text-gray-300">
-                              {entry.action}
-                            </p>
+                            <p className="text-xs text-foreground">{entry.action}</p>
                             <p className="text-xs text-gray-400 mt-0.5">
                               {actor.label} · {formatDate(entry.timestamp, 'long')}
                             </p>
@@ -236,7 +225,7 @@ export const EscrowTransactionDetailModal = ({
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+            <div className="p-4 border-t border-border flex gap-3 shrink-0">
               <Button variant="ghost" className="flex-1" onClick={onClose}>
                 Close
               </Button>

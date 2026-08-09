@@ -68,9 +68,9 @@ export const PaymentNotifications = ({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
       >
-        <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+        <Bell className="w-5 h-5 text-muted-foreground" />
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
         )}
@@ -82,18 +82,15 @@ export const PaymentNotifications = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1a2a2f] rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+            className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
           >
-            <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="p-3 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                <h3 className="font-semibold text-foreground">Notifications</h3>
                 <p className="text-xs text-gray-500">{unreadCount} unread</p>
               </div>
               {unreadCount > 0 && (
-                <button
-                  onClick={onClearAll}
-                  className="text-xs text-[#c4a747] hover:text-[#a88d3a]"
-                >
+                <button onClick={onClearAll} className="text-xs text-primary hover:text-[#a88d3a]">
                   Clear all
                 </button>
               )}
@@ -113,20 +110,20 @@ export const PaymentNotifications = ({
                   return (
                     <div
                       key={notification.id}
-                      className={`p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer ${
+                      className={`p-3 hover:bg-secondary transition-colors cursor-pointer ${
                         !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                       }`}
                       onClick={() => onMarkAsRead(notification.id)}
                     >
                       <div className="flex gap-3">
-                        <div className={`p-2 rounded-lg ${color} flex-shrink-0`}>
+                        <div className={`p-2 rounded-lg ${color} shrink-0`}>
                           <Icon className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className="text-sm font-medium text-foreground">
                             {notification.title}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             {notification.message}
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
@@ -134,7 +131,7 @@ export const PaymentNotifications = ({
                           </p>
                         </div>
                         {!notification.read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 shrink-0" />
                         )}
                       </div>
                     </div>

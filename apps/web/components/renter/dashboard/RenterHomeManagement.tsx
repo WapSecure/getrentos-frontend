@@ -59,15 +59,13 @@ export const RenterHomeManagement = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden mt-6"
+      className="bg-card rounded-xl border border-border overflow-hidden mt-6"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Home Management</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Track utilities and guest access
-            </p>
+            <h2 className="text-lg font-semibold text-foreground">Home Management</h2>
+            <p className="text-sm text-muted-foreground">Track utilities and guest access</p>
           </div>
           <Button variant="ghost" size="sm">
             Manage
@@ -78,7 +76,7 @@ export const RenterHomeManagement = () => {
       <div className="p-4">
         {/* Utilities Section */}
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Utilities</h3>
+          <h3 className="text-sm font-medium text-foreground mb-3">Utilities</h3>
           <div className="space-y-3">
             {utilities.map((utility) => (
               <div
@@ -86,18 +84,16 @@ export const RenterHomeManagement = () => {
                 className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-[#c4a747]/10">
-                    <utility.icon className="w-4 h-4 text-[#c4a747]" />
+                  <div className="p-2 rounded-lg bg-accent">
+                    <utility.icon className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {utility.name}
-                    </p>
+                    <p className="text-sm font-medium text-foreground">{utility.name}</p>
                     <p className="text-xs text-gray-500">Usage: {utility.usage}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {utility.amount
                       ? new Intl.NumberFormat('en-NG', {
                           style: 'currency',
@@ -121,24 +117,22 @@ export const RenterHomeManagement = () => {
         </div>
 
         {/* Guest Access Section */}
-        <div className="pt-3 border-t border-gray-200 dark:border-white/10">
+        <div className="pt-3 border-t border-border">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Guest Access</h3>
+            <h3 className="text-sm font-medium text-foreground">Guest Access</h3>
             <Button size="sm" variant="ghost" className="text-xs">
               Add Guest
             </Button>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-3">
-              <Key className="w-4 h-4 text-[#c4a747]" />
+              <Key className="w-4 h-4 text-primary" />
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Temporary Access Code
-                </p>
+                <p className="text-sm font-medium text-foreground">Temporary Access Code</p>
                 <p className="text-xs text-gray-500">Expires: Sep 15, 2024</p>
               </div>
             </div>
-            <button className="text-xs text-[#c4a747] hover:text-[#a88d3a]">Generate</button>
+            <button className="text-xs text-primary hover:text-[#a88d3a]">Generate</button>
           </div>
         </div>
       </div>

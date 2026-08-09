@@ -41,57 +41,52 @@ export const AddClientModal = ({ isOpen, onClose, onSubmit }: AddClientModalProp
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Add Client</h3>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h3 className="font-semibold text-foreground">Add Client</h3>
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Client Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Phone
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Phone</label>
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Client Type
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -102,8 +97,8 @@ export const AddClientModal = ({ isOpen, onClose, onSubmit }: AddClientModalProp
                       onClick={() => setRole(option)}
                       className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
                         role === option
-                          ? 'border-[#c4a747] bg-[#c4a747]/10 text-[#c4a747]'
-                          : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
+                          ? 'border-primary bg-accent text-primary'
+                          : 'border-border text-muted-foreground'
                       }`}
                     >
                       {option === 'owner' ? 'Property Owner' : 'Landlord'}
@@ -113,7 +108,7 @@ export const AddClientModal = ({ isOpen, onClose, onSubmit }: AddClientModalProp
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3">
+            <div className="p-4 border-t border-border flex gap-3">
               <Button variant="ghost" onClick={handleClose} className="flex-1">
                 Cancel
               </Button>

@@ -37,15 +37,15 @@ export const RoommateTasks = ({ roommates, onCompleteTask }: RoommateTasksProps)
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Clipboard className="w-4 h-4 text-[#c4a747]" />
+          <Clipboard className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Roommate Tasks</h3>
+            <h3 className="font-semibold text-foreground">Roommate Tasks</h3>
             <p className="text-xs text-gray-500">{allTasks.length} active tasks</p>
           </div>
         </div>
@@ -63,12 +63,12 @@ export const RoommateTasks = ({ roommates, onCompleteTask }: RoommateTasksProps)
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               placeholder="New task..."
-              className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <select
               value={selectedRoommate || ''}
               onChange={(e) => setSelectedRoommate(e.target.value)}
-              className="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Assign to</option>
               {roommates.map((r) => (
@@ -94,17 +94,15 @@ export const RoommateTasks = ({ roommates, onCompleteTask }: RoommateTasksProps)
               allTasks.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5"
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary"
                 >
                   <button
                     onClick={() => onCompleteTask(item.roommateId, item.task)}
-                    className="flex-shrink-0"
+                    className="shrink-0"
                   >
                     <Circle className="w-4 h-4 text-gray-400 hover:text-green-500 transition-colors" />
                   </button>
-                  <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
-                    {item.task}
-                  </span>
+                  <span className="text-sm text-foreground flex-1">{item.task}</span>
                   <span className="text-xs text-gray-500">{item.roommateName}</span>
                 </div>
               ))

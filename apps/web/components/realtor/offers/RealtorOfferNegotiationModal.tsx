@@ -65,38 +65,33 @@ export const RealtorOfferNegotiationModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {offer.listingTitle}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <h3 className="font-semibold text-foreground">{offer.listingTitle}</h3>
+                <p className="text-xs text-muted-foreground">
                   {offer.leadName} → {offer.clientName}
                 </p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 flex items-start gap-2 flex-shrink-0">
-              <Info className="w-3.5 h-3.5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 flex items-start gap-2 shrink-0">
+              <Info className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
               <p className="text-xs text-blue-700 dark:text-blue-300">
                 You are negotiating on behalf of {offer.clientName}. Actions here are recorded as
                 taken on their behalf.
               </p>
             </div>
 
-            <div className="p-3 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10 flex items-center justify-between text-sm flex-shrink-0">
-              <span className="text-gray-500 dark:text-gray-400">
+            <div className="p-3 bg-gray-50 dark:bg-white/5 border-b border-border flex items-center justify-between text-sm shrink-0">
+              <span className="text-muted-foreground">
                 Asking {formatCurrency(offer.askingPrice, { compact: true })}
               </span>
-              <span className="font-semibold text-[#c4a747]">
+              <span className="font-semibold text-primary">
                 Current offer {formatCurrency(offer.offerAmount, { compact: true })}
               </span>
             </div>
@@ -108,10 +103,10 @@ export const RealtorOfferNegotiationModal = ({
                 if (isSystem) {
                   return (
                     <div key={msg.id} className="flex justify-center">
-                      <span className="text-xs px-3 py-1.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
+                      <span className="text-xs px-3 py-1.5 rounded-full bg-secondary text-muted-foreground">
                         {msg.text}
                         {msg.amount !== undefined && (
-                          <strong className="text-gray-900 dark:text-white">
+                          <strong className="text-foreground">
                             {' '}
                             {formatCurrency(msg.amount, { compact: true })}
                           </strong>
@@ -128,8 +123,8 @@ export const RealtorOfferNegotiationModal = ({
                     <div
                       className={`max-w-[75%] rounded-2xl p-3 ${
                         isRealtor
-                          ? 'bg-[#c4a747] text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-100 dark:bg-gray-800 text-foreground'
                       }`}
                     >
                       <p className="text-[10px] uppercase tracking-wide opacity-70 mb-0.5">
@@ -143,9 +138,9 @@ export const RealtorOfferNegotiationModal = ({
             </div>
 
             {isCountering ? (
-              <div className="p-4 border-t border-gray-200 dark:border-white/10 space-y-3 flex-shrink-0">
+              <div className="p-4 border-t border-border space-y-3 shrink-0">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Counter Amount (₦)
                   </label>
                   <input
@@ -153,18 +148,18 @@ export const RealtorOfferNegotiationModal = ({
                     min={0}
                     value={counterAmount}
                     onChange={(e) => setCounterAmount(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Note (optional)
                   </label>
                   <input
                     type="text"
                     value={counterNote}
                     onChange={(e) => setCounterNote(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex gap-3">
@@ -182,7 +177,7 @@ export const RealtorOfferNegotiationModal = ({
                 </div>
               </div>
             ) : (
-              <div className="p-4 border-t border-gray-200 dark:border-white/10 flex-shrink-0 space-y-3">
+              <div className="p-4 border-t border-border shrink-0 space-y-3">
                 {!isDecided && (
                   <div className="flex gap-2">
                     <Button
@@ -218,7 +213,7 @@ export const RealtorOfferNegotiationModal = ({
                     onChange={(e) => setMessageText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Send a message..."
-                    className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <Button
                     variant="secondary"
