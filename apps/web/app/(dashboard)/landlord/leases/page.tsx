@@ -1,97 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
 import { Button } from '@/components/ui/Button';
+import { landlordService } from '@/services/landlordService';
 import type { Lease, LeaseStatus, Unit } from '@/types/landlord';
-
-const mockLeases: Lease[] = [
-  {
-    id: 'lease_001',
-    tenantId: 'tenant_001',
-    tenantName: 'Adaeze Okafor',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitId: 'unit_001',
-    unitName: 'Unit 1A',
-    leaseStart: '2025-02-01',
-    leaseEnd: '2027-01-31',
-    rentAmount: 450_000,
-    securityDeposit: 450_000,
-    status: 'signed',
-    createdAt: '2025-01-20T00:00:00.000Z',
-  },
-  {
-    id: 'lease_003',
-    tenantId: 'tenant_003',
-    tenantName: 'Chuka Nwosu',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitId: 'unit_003',
-    unitName: 'Unit 3B',
-    leaseStart: '2024-11-10',
-    leaseEnd: '2026-08-21',
-    rentAmount: 450_000,
-    securityDeposit: 450_000,
-    status: 'signed',
-    createdAt: '2024-11-01T00:00:00.000Z',
-  },
-  {
-    id: 'lease_004',
-    tenantId: 'tenant_004',
-    tenantName: 'Ifeoma Bello',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitId: 'unit_005',
-    unitName: 'Unit 1A',
-    leaseStart: '2025-06-01',
-    leaseEnd: '2026-05-31',
-    rentAmount: 580_000,
-    securityDeposit: 580_000,
-    status: 'signed',
-    createdAt: '2025-05-20T00:00:00.000Z',
-  },
-  {
-    id: 'lease_005',
-    tenantId: 'tenant_005',
-    tenantName: 'Segun Adeyemi',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitId: 'unit_006',
-    unitName: 'Unit 1B',
-    leaseStart: '2024-08-20',
-    leaseEnd: '2025-08-19',
-    rentAmount: 580_000,
-    status: 'expired',
-    createdAt: '2024-08-10T00:00:00.000Z',
-  },
-];
-
-const mockVacantUnits: Unit[] = [
-  {
-    id: 'unit_007',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitName: 'Unit 2A',
-    bedrooms: 2,
-    bathrooms: 2,
-    monthlyRent: 460_000,
-    occupancyStatus: 'vacant',
-  },
-  {
-    id: 'unit_009',
-    propertyId: 'prop_003',
-    propertyName: 'Modern Downtown Loft',
-    unitName: 'Unit B',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 450_000,
-    occupancyStatus: 'vacant',
-  },
-];
 
 const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -102,36 +18,52 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 ];
 
 export default function LandlordLeasesPage() {
-  const [leases, setLeases] = useState<Lease[]>(mockLeases);
-  const [vacantUnits, setVacantUnits] = useState<Unit[]>(mockVacantUnits);
+  const [leases, setLeases] = useState<Lease[]>([]);
+  const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
   const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
 
-  const handleCreateLease = (
+  useEffect(() => {
+    const fetchData = async () => {
+      const [leasesRes, vacantUnitsRes] = await Promise.all([
+        landlordService.listLeases(),
+        landlordService.listVacantUnitsForLease(),
+      ]);
+      if (leasesRes.success && leasesRes.data) setLeases(leasesRes.data);
+      if (vacantUnitsRes.success && vacantUnitsRes.data) setVacantUnits(vacantUnitsRes.data);
+    };
+
+    fetchData();
+  }, []);
+
+  const handleCreateLease = async (
     data: Omit<Lease, 'id' | 'status' | 'createdAt'>,
     sendImmediately: boolean
   ) => {
-    const newLease: Lease = {
-      ...data,
-      id: `lease_${Date.now()}`,
-      status: sendImmediately ? 'sent' : 'draft',
-      createdAt: new Date().toISOString(),
-    };
-    setLeases((prev) => [newLease, ...prev]);
-    setVacantUnits((prev) => prev.filter((u) => u.id !== data.unitId));
-  };
-
-  const handleSendLease = (id: string) => {
-    setLeases((prev) => prev.map((l) => (l.id === id ? { ...l, status: 'sent' } : l)));
-  };
-
-  const handleSendRenewalOffer = (leaseId: string, newRent: number, newEndDate: string) => {
-    setLeases((prev) =>
-      prev.map((l) =>
-        l.id === leaseId ? { ...l, rentAmount: newRent, leaseEnd: newEndDate, status: 'sent' } : l
-      )
+    const { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit } = data;
+    const response = await landlordService.createLease(
+      { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit },
+      sendImmediately
     );
+    if (response.success && response.data) {
+      setLeases((prev) => [response.data!, ...prev]);
+      setVacantUnits((prev) => prev.filter((u) => u.id !== data.unitId));
+    }
+  };
+
+  const handleSendLease = async (id: string) => {
+    const response = await landlordService.sendLease(id);
+    if (response.success && response.data) {
+      setLeases((prev) => prev.map((l) => (l.id === id ? response.data! : l)));
+    }
+  };
+
+  const handleSendRenewalOffer = async (leaseId: string, newRent: number, newEndDate: string) => {
+    const response = await landlordService.renewLease(leaseId, newRent, newEndDate);
+    if (response.success && response.data) {
+      setLeases((prev) => prev.map((l) => (l.id === leaseId ? response.data! : l)));
+    }
     setRenewingLease(null);
   };
 

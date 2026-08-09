@@ -1,6 +1,14 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { Property, Unit, Listing } from '@/types/landlord';
+import type {
+  Property,
+  Unit,
+  Listing,
+  RentalApplication,
+  ApplicationStatus,
+  Lease,
+  Tenant,
+} from '@/types/landlord';
 
 export interface LandlordDashboardStats {
   totalProperties: number;
@@ -120,5 +128,64 @@ export const landlordService = {
 
   async toggleListingPause(id: string): Promise<ApiResponse<Listing>> {
     return safeCall(() => authFetch(`/landlord/listings/${id}/toggle-pause`, { method: 'PATCH' }));
+  },
+
+  // ---- Applications ----
+  async listApplications(status?: string): Promise<ApiResponse<RentalApplication[]>> {
+    return safeCall(() => authFetch(`/landlord/applications${toQuery({ status })}`));
+  },
+
+  async updateApplicationStatus(
+    id: string,
+    status: ApplicationStatus
+  ): Promise<ApiResponse<RentalApplication>> {
+    return safeCall(() =>
+      authFetch(`/landlord/applications/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+    );
+  },
+
+  // ---- Leases ----
+  async listLeases(status?: string): Promise<ApiResponse<Lease[]>> {
+    return safeCall(() => authFetch(`/landlord/leases${toQuery({ status })}`));
+  },
+
+  async listVacantUnitsForLease(): Promise<ApiResponse<Unit[]>> {
+    return safeCall(() => authFetch('/landlord/leases/vacant-units'));
+  },
+
+  async createLease(
+    data: Pick<
+      Lease,
+      'unitId' | 'tenantName' | 'leaseStart' | 'leaseEnd' | 'rentAmount' | 'securityDeposit'
+    >,
+    sendImmediately: boolean
+  ): Promise<ApiResponse<Lease>> {
+    return safeCall(() =>
+      authFetch('/landlord/leases', {
+        method: 'POST',
+        body: JSON.stringify({ ...data, sendImmediately }),
+      })
+    );
+  },
+
+  async sendLease(id: string): Promise<ApiResponse<Lease>> {
+    return safeCall(() => authFetch(`/landlord/leases/${id}/send`, { method: 'PATCH' }));
+  },
+
+  async renewLease(id: string, rentAmount: number, leaseEnd: string): Promise<ApiResponse<Lease>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${id}/renew`, {
+        method: 'PATCH',
+        body: JSON.stringify({ rentAmount, leaseEnd }),
+      })
+    );
+  },
+
+  // ---- Tenants ----
+  async listTenants(): Promise<ApiResponse<Tenant[]>> {
+    return safeCall(() => authFetch('/landlord/tenants'));
   },
 };
