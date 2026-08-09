@@ -17,12 +17,16 @@ interface BackendErrorBody {
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  // Don't set Content-Type for FormData bodies — the browser must set it
+  // itself (including the multipart boundary).
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...options.headers,
       },
     });

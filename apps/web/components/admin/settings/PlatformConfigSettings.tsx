@@ -1,29 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { adminService } from '@/services/adminService';
+import type { PlatformConfigRole, RoleRequirement } from '@/types/admin';
 
-interface RoleRequirement {
-  role: string;
-  requiresVerification: boolean;
-}
+const ROLE_LABELS: Record<PlatformConfigRole, string> = {
+  landlord: 'Landlord',
+  owner: 'Property Owner',
+  realtor: 'Realtor',
+  agent: 'Agent',
+  renter: 'Renter',
+  buyer: 'Buyer',
+};
 
-const initialRoleRequirements: RoleRequirement[] = [
-  { role: 'Landlord', requiresVerification: true },
-  { role: 'Property Owner', requiresVerification: true },
-  { role: 'Realtor', requiresVerification: true },
-  { role: 'Agent', requiresVerification: true },
-  { role: 'Renter', requiresVerification: false },
-  { role: 'Buyer', requiresVerification: false },
+const DEFAULT_ROLE_REQUIREMENTS: RoleRequirement[] = [
+  { role: 'landlord', requiresVerification: true },
+  { role: 'owner', requiresVerification: true },
+  { role: 'realtor', requiresVerification: true },
+  { role: 'agent', requiresVerification: true },
+  { role: 'renter', requiresVerification: false },
+  { role: 'buyer', requiresVerification: false },
 ];
 
 export const PlatformConfigSettings = () => {
   const [minTrustScore, setMinTrustScore] = useState(60);
   const [escrowHoldDays, setEscrowHoldDays] = useState(3);
   const [autoFlagFraud, setAutoFlagFraud] = useState(true);
-  const [roleRequirements, setRoleRequirements] = useState(initialRoleRequirements);
+  const [roleRequirements, setRoleRequirements] =
+    useState<RoleRequirement[]>(DEFAULT_ROLE_REQUIREMENTS);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const toggleRole = (role: string) => {
+  useEffect(() => {
+    adminService.getPlatformConfig().then((response) => {
+      if (response.success && response.data) {
+        setMinTrustScore(response.data.minTrustScore);
+        setEscrowHoldDays(response.data.escrowHoldDays);
+        setAutoFlagFraud(response.data.autoFlagFraud);
+        setRoleRequirements(response.data.roleRequirements);
+      }
+    });
+  }, []);
+
+  const toggleRole = (role: PlatformConfigRole) => {
     setRoleRequirements((prev) =>
       prev.map((r) =>
         r.role === role ? { ...r, requiresVerification: !r.requiresVerification } : r
@@ -31,18 +52,31 @@ export const PlatformConfigSettings = () => {
     );
   };
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    const response = await adminService.updatePlatformConfig({
+      minTrustScore,
+      escrowHoldDays,
+      autoFlagFraud,
+      roleRequirements,
+    });
+    setIsSaving(false);
+    if (response.success) {
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-        Platform Configuration
-      </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h2 className="text-xl font-semibold text-foreground mb-4">Platform Configuration</h2>
+      <p className="text-sm text-muted-foreground mb-6">
         Default thresholds and role verification rules applied platform-wide
       </p>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Minimum Trust Score for Auto-Approval
           </label>
           <input
@@ -51,12 +85,12 @@ export const PlatformConfigSettings = () => {
             max={100}
             value={minTrustScore}
             onChange={(e) => setMinTrustScore(Number(e.target.value))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Escrow Verification Hold Period (days)
           </label>
           <input
@@ -65,18 +99,16 @@ export const PlatformConfigSettings = () => {
             max={30}
             value={escrowHoldDays}
             onChange={(e) => setEscrowHoldDays(Number(e.target.value))}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Auto-flag suspicious activity for review
-          </span>
+        <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+          <span className="text-sm text-foreground">Auto-flag suspicious activity for review</span>
           <button
             onClick={() => setAutoFlagFraud((prev) => !prev)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              autoFlagFraud ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+              autoFlagFraud ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
             <span
@@ -86,20 +118,20 @@ export const PlatformConfigSettings = () => {
         </div>
 
         <div>
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <p className="text-sm font-medium text-foreground mb-2">
             Roles Requiring Manual Verification
           </p>
           <div className="space-y-2">
             {roleRequirements.map((r) => (
               <div
                 key={r.role}
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700"
+                className="flex items-center justify-between p-3 rounded-lg border border-border"
               >
-                <span className="text-sm text-gray-700 dark:text-gray-300">{r.role}</span>
+                <span className="text-sm text-foreground">{ROLE_LABELS[r.role]}</span>
                 <button
                   onClick={() => toggleRole(r.role)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    r.requiresVerification ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+                    r.requiresVerification ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   <span
@@ -112,8 +144,15 @@ export const PlatformConfigSettings = () => {
         </div>
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Save Configuration
+      <Button
+        variant="primary"
+        className="mt-6 gap-1.5"
+        onClick={handleSave}
+        disabled={isSaving}
+        isLoading={isSaving}
+      >
+        {saved && <Check className="w-4 h-4" />}
+        {saved ? 'Saved' : 'Save Configuration'}
       </Button>
     </div>
   );
