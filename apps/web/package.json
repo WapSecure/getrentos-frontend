@@ -34,6 +34,7 @@
   "devDependencies": {
     "@getrentos/eslint-config": "workspace:*",
     "@getrentos/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
