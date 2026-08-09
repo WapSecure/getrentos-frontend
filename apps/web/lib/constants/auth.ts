@@ -273,6 +273,11 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   PROPERTY_BUYER: 'buyer',
   REALTOR: 'realtor',
   AGENT: 'agent',
+  // Internal staff roles all collapse to 'admin' on the frontend, matching
+  // the backend's roleTypeToPublicId fallback.
+  BACKOFFICE_ADMIN: 'admin',
+  SUPER_ADMIN: 'admin',
+  VERIFICATION_OFFICER: 'admin',
 };
 
 // Helper function to get dashboard route by role
