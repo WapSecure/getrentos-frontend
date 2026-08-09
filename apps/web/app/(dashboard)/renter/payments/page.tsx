@@ -212,43 +212,37 @@ export default function PaymentsPage() {
   };
 
   const handlePayNow = (paymentId: string) => {
+    const payment = payments.find((p) => p.id === paymentId);
+    if (!payment) return;
+
     setPayments((prev) =>
       prev.map((p) => (p.id === paymentId ? { ...p, status: 'processing' } : p))
     );
 
     window.setTimeout(() => {
-      setPayments((prev) => {
-        const paidPayment = prev.find((p) => p.id === paymentId);
-        if (paidPayment) {
-          setReceipts((prevReceipts) => [
-            {
-              id: `rec_${paymentId}`,
-              paymentId,
-              propertyName: paidPayment.propertyName,
-              amount: paidPayment.amount,
-              date: new Date().toISOString().slice(0, 10),
-              fileName: `Rent_Receipt_${paidPayment.propertyName}_${new Date().toISOString().slice(0, 10)}.pdf`,
-              url: '#',
-            },
-            ...prevReceipts,
-          ]);
-          pushNotification({
-            type: 'success',
-            title: 'Payment Successful',
-            message: `Rent payment of ₦${paidPayment.amount.toLocaleString()} for ${paidPayment.propertyName} was successful.`,
-          });
-        }
-        return prev.map((p) =>
-          p.id === paymentId
-            ? {
-                ...p,
-                status: 'paid',
-                escrowStatus: 'held',
-                date: new Date().toISOString().slice(0, 10),
-              }
-            : p
-        );
+      const paidDate = new Date().toISOString().slice(0, 10);
+      setReceipts((prevReceipts) => [
+        {
+          id: `rec_${paymentId}_${Date.now()}`,
+          paymentId,
+          propertyName: payment.propertyName,
+          amount: payment.amount,
+          date: paidDate,
+          fileName: `Rent_Receipt_${payment.propertyName}_${paidDate}.pdf`,
+          url: '#',
+        },
+        ...prevReceipts,
+      ]);
+      pushNotification({
+        type: 'success',
+        title: 'Payment Successful',
+        message: `Rent payment of ₦${payment.amount.toLocaleString()} for ${payment.propertyName} was successful.`,
       });
+      setPayments((prev) =>
+        prev.map((p) =>
+          p.id === paymentId ? { ...p, status: 'paid', escrowStatus: 'held', date: paidDate } : p
+        )
+      );
     }, 1800);
   };
 
