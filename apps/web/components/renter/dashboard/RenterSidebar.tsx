@@ -20,6 +20,7 @@ import {
   Bell,
   Calendar,
   Zap,
+  TrendingUp,
 } from 'lucide-react';
 
 interface NavItem {
@@ -41,6 +42,7 @@ const navItems: NavItem[] = [
   { label: 'Documents', href: '/renter/documents', icon: Home },
   { label: 'Roommates', href: '/renter/roommates', icon: Users },
   { label: 'Trust Score', href: '/renter/trust-score', icon: Star },
+  { label: 'Credit Report', href: '/renter/credit-report', icon: TrendingUp },
   { label: 'Notifications', href: '/renter/notifications', icon: Bell },
   { label: 'Calendar', href: '/renter/calendar', icon: Calendar },
   { label: 'Settings', href: '/renter/settings', icon: Settings },
