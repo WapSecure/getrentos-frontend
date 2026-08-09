@@ -42,16 +42,13 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-3 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-3 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Tag className="w-4 h-4 text-[#c4a747]" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Labels</span>
+          <Tag className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Labels</span>
         </div>
-        <button
-          onClick={() => setIsAdding(!isAdding)}
-          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-white/10"
-        >
+        <button onClick={() => setIsAdding(!isAdding)} className="p-1 rounded hover:bg-secondary">
           <Plus className="w-4 h-4" />
         </button>
       </div>
@@ -62,8 +59,8 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
           onClick={() => onSelectLabel('all')}
           className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
             selectedLabel === 'all'
-              ? 'bg-[#c4a747]/10 text-[#c4a747]'
-              : 'hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-300'
+              ? 'bg-accent text-primary'
+              : 'hover:bg-secondary text-foreground'
           }`}
         >
           <span>All Conversations</span>
@@ -78,8 +75,8 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
             onClick={() => onSelectLabel(label.id)}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
               selectedLabel === label.id
-                ? 'bg-[#c4a747]/10 text-[#c4a747]'
-                : 'hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-300'
+                ? 'bg-accent text-primary'
+                : 'hover:bg-secondary text-foreground'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -92,14 +89,14 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
 
         {/* Add Label Form */}
         {isAdding && (
-          <div className="p-2 mt-2 border-t border-gray-200 dark:border-white/10 space-y-2">
+          <div className="p-2 mt-2 border-t border-border space-y-2">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={newLabelName}
                 onChange={(e) => setNewLabelName(e.target.value)}
                 placeholder="Label name"
-                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <Button size="sm" onClick={handleAddLabel} disabled={!newLabelName.trim()}>
                 Add
@@ -114,7 +111,7 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
                   key={color}
                   onClick={() => setSelectedColor(color)}
                   className={`w-6 h-6 rounded-full border-2 ${
-                    selectedColor === color ? 'border-[#c4a747]' : 'border-transparent'
+                    selectedColor === color ? 'border-primary' : 'border-transparent'
                   }`}
                 >
                   <div className={`w-full h-full rounded-full ${color.split(' ')[0]}`} />

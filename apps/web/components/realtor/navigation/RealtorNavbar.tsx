@@ -70,8 +70,8 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/95 dark:bg-[#0a1a1f]/95 backdrop-blur-md border-b border-gray-200 dark:border-white/10 shadow-sm'
-            : 'bg-white dark:bg-[#0a1a1f] border-b border-gray-200 dark:border-white/10'
+            ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm'
+            : 'bg-background border-b border-border'
         }`}
       >
         <div className="px-4 sm:px-6 lg:px-8">
@@ -81,13 +81,13 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
             <div className="hidden md:flex items-center gap-6">
               <Link
                 href="/realtor/dashboard"
-                className="text-gray-700 dark:text-gray-300 font-medium hover:text-[#c4a747] transition-colors"
+                className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
               <Link
                 href="/realtor/listings"
-                className="text-gray-500 dark:text-gray-400 hover:text-[#c4a747] transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Listings
               </Link>
@@ -99,7 +99,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                 <input
                   type="text"
                   placeholder="Search clients, listings, leads..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-[#1a2a2f] border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747] focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
             </div>
@@ -110,9 +110,9 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                  className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
                 >
-                  <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <Bell className="w-5 h-5 text-muted-foreground" />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                   )}
@@ -124,16 +124,14 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1a2a2f] rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                      className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
                     >
-                      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                          Notifications
-                        </h3>
+                      <div className="p-3 border-b border-border flex justify-between items-center">
+                        <h3 className="font-semibold text-foreground">Notifications</h3>
                         {unreadCount > 0 && (
                           <button
                             onClick={handleMarkAllAsRead}
-                            className="text-xs text-[#c4a747] hover:text-[#a88d3a]"
+                            className="text-xs text-primary hover:text-[#a88d3a]"
                           >
                             Mark all as read
                           </button>
@@ -146,30 +144,30 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                           notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors ${
+                              className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
                                 !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
                               onClick={() => handleMarkAsRead(notification.id)}
                             >
                               <div className="flex justify-between items-start mb-1">
-                                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                                <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
                                 <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
                                   {formatRelativeTime(notification.time)}
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                              <p className="text-xs text-muted-foreground">
                                 {notification.message}
                               </p>
                             </div>
                           ))
                         )}
                       </div>
-                      <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+                      <div className="p-2 border-t border-border">
                         <Link
                           href="/realtor/dashboard"
-                          className="block w-full text-center text-sm text-[#c4a747] hover:text-[#a88d3a] py-1"
+                          className="block w-full text-center text-sm text-primary hover:text-[#a88d3a] py-1"
                           onClick={() => setShowNotifications(false)}
                         >
                           View all notifications
@@ -184,7 +182,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                className="md:hidden p-2 rounded-lg hover:bg-secondary"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -197,7 +195,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
               <input
                 type="text"
                 placeholder="Search clients, listings, leads..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-[#1a2a2f] border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747] focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -210,19 +208,19 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-white dark:bg-[#0a1a1f] border-b border-gray-200 dark:border-white/10 md:hidden"
+            className="fixed top-16 left-0 right-0 z-40 bg-background border-b border-border md:hidden"
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
                 href="/realtor/dashboard"
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
                 href="/realtor/listings"
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Listings

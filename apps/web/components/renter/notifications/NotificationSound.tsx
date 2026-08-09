@@ -17,19 +17,19 @@ export const NotificationSound = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
           {isEnabled ? (
-            <Volume2 className="w-4 h-4 text-[#c4a747]" />
+            <Volume2 className="w-4 h-4 text-primary" />
           ) : (
             <VolumeX className="w-4 h-4 text-gray-400" />
           )}
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Notification Sound</h3>
+            <h3 className="font-semibold text-foreground">Notification Sound</h3>
             <p className="text-xs text-gray-500">Play sound for new notifications</p>
           </div>
         </div>
@@ -41,11 +41,11 @@ export const NotificationSound = () => {
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700 dark:text-gray-300">Sound Enabled</span>
+            <span className="text-sm text-foreground">Sound Enabled</span>
             <button
               onClick={() => setIsEnabled(!isEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isEnabled ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+                isEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
@@ -58,13 +58,11 @@ export const NotificationSound = () => {
 
           {isEnabled && (
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Sound Type
-              </label>
+              <label className="block text-xs font-medium text-foreground mb-1">Sound Type</label>
               <select
                 value={selectedSound}
                 onChange={(e) => setSelectedSound(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {soundOptions.map((option) => (
                   <option key={option.value} value={option.value}>

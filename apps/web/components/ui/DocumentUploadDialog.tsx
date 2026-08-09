@@ -10,6 +10,7 @@ export interface UploadedDocumentData {
   name: string;
   category: string;
   sizeLabel: string;
+  file: File;
 }
 
 interface DocumentUploadDialogProps {
@@ -63,6 +64,7 @@ export const DocumentUploadDialog = ({
         name: file.name,
         category,
         sizeLabel: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        file,
       });
       reset();
       onOpenChange(false);

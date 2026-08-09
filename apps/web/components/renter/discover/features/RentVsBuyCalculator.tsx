@@ -75,7 +75,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
     <>
       <button
         onClick={handleOpen}
-        className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#c4a747] transition-colors"
+        className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
       >
         <Calculator className="w-3 h-3" />
         Rent vs Buy
@@ -90,19 +90,17 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto shadow-2xl"
+              className="bg-card rounded-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Sticky Header */}
-              <div className="sticky top-0 bg-white dark:bg-[#1a2a2f] p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center z-10">
+              <div className="sticky top-0 bg-card p-4 border-b border-border flex justify-between items-center z-10">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-[#c4a747]/10">
-                    <Calculator className="w-4 h-4 text-[#c4a747]" />
+                  <div className="p-1.5 rounded-lg bg-accent">
+                    <Calculator className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Rent vs Buy Analysis
-                    </h3>
+                    <h3 className="font-semibold text-foreground">Rent vs Buy Analysis</h3>
                     <p className="text-xs text-gray-500">
                       Compare costs and make informed decisions
                     </p>
@@ -110,7 +108,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                 </div>
                 <button
                   onClick={handleClose}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
                 >
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
@@ -119,7 +117,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
               <div className="p-5 space-y-5">
                 {/* Property Info Cards */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200 dark:border-blue-800">
+                  <div className="p-3 rounded-lg bg-linear-to-r from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center gap-2 mb-1">
                       <Home className="w-4 h-4 text-blue-600" />
                       <span className="text-xs text-blue-600">Property Price</span>
@@ -128,7 +126,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                       {formatCurrency(propertyPrice)}
                     </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border border-green-200 dark:border-green-800">
+                  <div className="p-3 rounded-lg bg-linear-to-r from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border border-green-200 dark:border-green-800">
                     <div className="flex items-center gap-2 mb-1">
                       <Wallet className="w-4 h-4 text-green-600" />
                       <span className="text-xs text-green-600">Monthly Rent</span>
@@ -142,7 +140,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                 {/* Input Section */}
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Down Payment
                     </label>
                     <div className="relative">
@@ -151,7 +149,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                         type="number"
                         value={downPayment}
                         onChange={(e) => setDownPayment(Number(e.target.value))}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -163,7 +161,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Interest Rate (%)
                       </label>
                       <input
@@ -171,17 +169,17 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                         step="0.5"
                         value={interestRate}
                         onChange={(e) => setInterestRate(Number(e.target.value))}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Loan Term
                       </label>
                       <select
                         value={loanTerm}
                         onChange={(e) => setLoanTerm(Number(e.target.value))}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         <option value={15}>15 years</option>
                         <option value={20}>20 years</option>
@@ -193,21 +191,21 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
 
                 {/* Results Section */}
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-[#c4a747]" />
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     Monthly Cost Breakdown
                   </h4>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                       <p className="text-xs text-gray-500">Mortgage Payment</p>
-                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      <p className="text-lg font-bold text-foreground">
                         {formatCurrency(monthlyMortgage)}
                       </p>
                     </div>
                     <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                       <p className="text-xs text-gray-500">Maintenance & Tax</p>
-                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      <p className="text-lg font-bold text-foreground">
                         {formatCurrency(monthlyMaintenance + monthlyPropertyTax)}
                       </p>
                     </div>
@@ -228,7 +226,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
 
                     {monthlyDifference <= 0 ? (
                       <div className="flex items-start gap-2 mt-3 pt-2 border-t border-green-200 dark:border-green-800">
-                        <Info className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <Info className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
                         <p className="text-xs text-green-700 dark:text-green-300">
                           Buying builds equity over time. You&apos;ll own the property after{' '}
                           {loanTerm} years.
@@ -236,7 +234,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                       </div>
                     ) : (
                       <div className="flex items-start gap-2 mt-3 pt-2 border-t border-amber-200 dark:border-amber-800">
-                        <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <Info className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
                         <p className="text-xs text-amber-700 dark:text-amber-300">
                           Renting may be more affordable now. Consider saving{' '}
                           {formatCurrency(propertyPrice * 0.2 - downPayment)} more for down payment.

@@ -26,7 +26,7 @@ const eventTypes: { value: CalendarEventType; label: string }[] = [
   { value: 'personal', label: 'Personal' },
 ];
 
-const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#c4a747', '#ef4444', '#ec4899'];
+const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', 'var(--primary)', '#ef4444', '#ec4899'];
 
 const getInitialFormData = (event?: CalendarEvent | null): CalendarEventFormData => ({
   title: event?.title || '',
@@ -39,7 +39,7 @@ const getInitialFormData = (event?: CalendarEvent | null): CalendarEventFormData
   notes: event?.notes || '',
   reminder: event?.reminder || false,
   recurrence: event?.recurrence || 'none',
-  color: event?.color || '#c4a747',
+  color: event?.color || 'var(--primary)',
 });
 
 export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarEventModalProps) => {
@@ -59,14 +59,14 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-lg w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
+                <h3 className="font-semibold text-foreground">
                   {event ? 'Edit Event' : 'Add Event'}
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {event ? 'Update event details' : 'Create a new event'}
                 </p>
               </div>
@@ -77,7 +77,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
 
             <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -85,12 +85,12 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Event title"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Description
                 </label>
                 <textarea
@@ -98,12 +98,12 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Event description"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Date <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -112,14 +112,14 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Start Time
                   </label>
                   <div className="relative">
@@ -128,36 +128,32 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                       type="time"
                       value={formData.startTime}
                       onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    End Time
-                  </label>
+                  <label className="block text-sm font-medium text-foreground mb-1">End Time</label>
                   <div className="relative">
                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="time"
                       value={formData.endTime}
                       onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Event Type
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Event Type</label>
                 <select
                   value={formData.type}
                   onChange={(e) =>
                     setFormData({ ...formData, type: e.target.value as CalendarEventType })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {eventTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -168,9 +164,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Location
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Location</label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -178,15 +172,13 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="Event location"
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Color
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Color</label>
                 <div className="flex gap-2 flex-wrap">
                   {colors.map((color) => (
                     <button
@@ -204,25 +196,25 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
               </div>
 
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
                     type="checkbox"
                     checked={formData.reminder}
                     onChange={(e) => setFormData({ ...formData, reminder: e.target.checked })}
-                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                   />
                   <Bell className="w-4 h-4" />
                   Set Reminder
                 </label>
 
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-2 text-sm text-foreground">
                   <Repeat className="w-4 h-4" />
                   <select
                     value={formData.recurrence}
                     onChange={(e) =>
                       setFormData({ ...formData, recurrence: e.target.value as CalendarRecurrence })
                     }
-                    className="px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="px-2 py-1 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="none">None</option>
                     <option value="daily">Daily</option>
@@ -233,7 +225,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3">
+            <div className="p-4 border-t border-border flex gap-3">
               <Button
                 variant="primary"
                 fullWidth

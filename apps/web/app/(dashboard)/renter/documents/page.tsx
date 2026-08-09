@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { DocumentsHeader } from '@/components/renter/documents/DocumentsHeader';
 import { DocumentsStats } from '@/components/renter/documents/DocumentsStats';
 import { DocumentsList } from '@/components/renter/documents/DocumentsList';
@@ -15,7 +12,6 @@ import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkA
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
 import { Toast } from '@/components/ui/Toast';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 
 interface Document {
   id: string;
@@ -43,9 +39,6 @@ interface UploadData {
 }
 
 export default function DocumentsPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -175,21 +168,9 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadDocuments();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadDocuments();
+  }, []);
 
   const handleUpload = (data: UploadData) => {
     const newDoc: Document = {
@@ -267,61 +248,40 @@ export default function DocumentsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <DocumentsHeader documentCount={documents.length} onUpload={() => setShowUploadModal(true)} />
 
-      <div className="flex">
-        <RenterSidebar />
+      <DocumentsStats documents={documents} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <DocumentsHeader
-              documentCount={documents.length}
-              onUpload={() => setShowUploadModal(true)}
-            />
+      <DocumentExpiryAlerts documents={documents} />
 
-            <DocumentsStats documents={documents} />
+      <div className="grid lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1 space-y-6">
+          <DocumentCategories
+            documents={documents}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+          <DocumentAnalytics documents={documents} />
+        </div>
 
-            <DocumentExpiryAlerts documents={documents} />
+        <div className="lg:col-span-3 space-y-6">
+          <DocumentSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
 
-            <div className="grid lg:grid-cols-4 gap-6">
-              <div className="lg:col-span-1 space-y-6">
-                <DocumentCategories
-                  documents={documents}
-                  selectedCategory={selectedCategory}
-                  onSelectCategory={setSelectedCategory}
-                />
-                <DocumentAnalytics documents={documents} />
-              </div>
-
-              <div className="lg:col-span-3 space-y-6">
-                <DocumentSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
-
-                <DocumentsList
-                  documents={filteredDocuments}
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                  selectedDocuments={selectedDocuments}
-                  onSelectDocument={handleSelectDocument}
-                  onSelectAll={handleSelectAll}
-                  onDelete={handleDelete}
-                  onToggleFavorite={handleToggleFavorite}
-                  onShare={handleShare}
-                  onDownload={handleDownload}
-                />
-              </div>
-            </div>
-          </div>
-        </main>
+          <DocumentsList
+            documents={filteredDocuments}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            selectedDocuments={selectedDocuments}
+            onSelectDocument={handleSelectDocument}
+            onSelectAll={handleSelectAll}
+            onDelete={handleDelete}
+            onToggleFavorite={handleToggleFavorite}
+            onShare={handleShare}
+            onDownload={handleDownload}
+          />
+        </div>
       </div>
 
       {selectedDocuments.length > 0 && (
@@ -361,6 +321,6 @@ export default function DocumentsPage() {
       {downloadToast && (
         <Toast message={downloadToast} variant="success" onClose={() => setDownloadToast(null)} />
       )}
-    </div>
+    </>
   );
 }

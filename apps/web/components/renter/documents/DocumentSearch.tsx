@@ -31,7 +31,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
             value={searchTerm}
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Search documents by name, category, or tags..."
-            className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747] focus:border-transparent"
+            className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           {searchTerm && (
             <button
@@ -46,8 +46,8 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
           onClick={() => setShowFilters(!showFilters)}
           className={`px-3 py-2.5 rounded-xl border transition-colors ${
             showFilters
-              ? 'border-[#c4a747] bg-[#c4a747]/10 text-[#c4a747]'
-              : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5'
+              ? 'border-primary bg-accent text-primary'
+              : 'border-border hover:bg-secondary'
           }`}
         >
           <Filter className="w-4 h-4" />
@@ -55,11 +55,11 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
       </div>
 
       {showFilters && (
-        <div className="flex flex-wrap gap-2 p-3 bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap gap-2 p-3 bg-card rounded-xl border border-border">
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Types</option>
             <option value="lease">Lease</option>
@@ -70,7 +70,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-            className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>

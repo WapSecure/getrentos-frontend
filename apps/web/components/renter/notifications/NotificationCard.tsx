@@ -75,7 +75,7 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   },
   system: {
     icon: AlertCircle,
-    color: 'text-gray-600 dark:text-gray-400',
+    color: 'text-muted-foreground',
     bg: 'bg-gray-50 dark:bg-gray-800',
   },
 };
@@ -130,7 +130,7 @@ export const NotificationCard = ({
     <div
       className={`group p-4 rounded-xl transition-all cursor-pointer ${
         notification.read
-          ? 'hover:bg-gray-50 dark:hover:bg-white/5'
+          ? 'hover:bg-secondary'
           : 'bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-50 dark:hover:bg-blue-900/20'
       } ${isHovered ? 'shadow-sm' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
@@ -138,7 +138,7 @@ export const NotificationCard = ({
       onClick={handleClick}
     >
       <div className="flex items-start gap-4">
-        <div className={`p-2 rounded-lg ${config.bg} flex-shrink-0`}>
+        <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
           <Icon className={`w-5 h-5 ${config.color}`} />
         </div>
 
@@ -148,22 +148,18 @@ export const NotificationCard = ({
               <div className="flex items-center gap-2">
                 <h4
                   className={`text-sm font-semibold ${
-                    notification.read
-                      ? 'text-gray-700 dark:text-gray-300'
-                      : 'text-gray-900 dark:text-white'
+                    notification.read ? 'text-foreground' : 'text-foreground'
                   }`}
                 >
                   {notification.title}
                 </h4>
                 {!notification.read && (
-                  <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                  <span className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />
                 )}
               </div>
               <p
                 className={`text-sm ${
-                  notification.read
-                    ? 'text-gray-500 dark:text-gray-400'
-                    : 'text-gray-700 dark:text-gray-300'
+                  notification.read ? 'text-muted-foreground' : 'text-foreground'
                 } mt-0.5`}
               >
                 {notification.message}
@@ -174,12 +170,12 @@ export const NotificationCard = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {notification.action && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-0 text-[#c4a747]"
+                  className="gap-0 text-primary"
                   onClick={handleActionClick}
                 >
                   {notification.action.label}

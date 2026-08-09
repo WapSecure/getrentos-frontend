@@ -43,9 +43,9 @@ export const ApplicationsStats = ({ applications }: ApplicationsStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className={`${stat.bg} rounded-xl p-4 border border-gray-200 dark:border-white/10`}
+          className={`${stat.bg} rounded-xl p-4 border border-border`}
         >
-          <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
+          <p className="text-sm text-muted-foreground">{stat.label}</p>
           <p className={`text-2xl font-bold ${stat.color} mt-1`}>{stat.value}</p>
         </motion.div>
       ))}

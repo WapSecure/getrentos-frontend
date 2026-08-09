@@ -52,7 +52,7 @@ const activities: Activity[] = [
     title: 'Trust score increased to 87',
     time: '2024-06-03T16:45:00',
     icon: TrendingUp,
-    iconColor: 'text-[#c4a747]',
+    iconColor: 'text-primary',
   },
   {
     id: '5',
@@ -84,28 +84,28 @@ export const RenterRecentActivity = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Your latest actions and updates</p>
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
+        <p className="text-sm text-muted-foreground">Your latest actions and updates</p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {activities.map((activity, index) => (
           <motion.div
             key={activity.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.45 + index * 0.03, duration: 0.3 }}
-            className="p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="p-3 hover:bg-secondary transition-colors cursor-pointer"
           >
             <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg bg-gray-100 dark:bg-white/10`}>
+              <div className={`p-2 rounded-lg bg-secondary`}>
                 <activity.icon className={`w-4 h-4 ${activity.iconColor}`} />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-900 dark:text-white">{activity.title}</p>
+                <p className="text-sm text-foreground">{activity.title}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Clock className="w-3 h-3 text-gray-400" />
                   <span className="text-xs text-gray-500">{formatTimeAgo(activity.time)}</span>
@@ -116,8 +116,8 @@ export const RenterRecentActivity = () => {
         ))}
       </div>
 
-      <div className="p-3 border-t border-gray-200 dark:border-white/10 text-center">
-        <button className="text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors">
+      <div className="p-3 border-t border-border text-center">
+        <button className="text-sm text-primary hover:text-[#a88d3a] transition-colors">
           View all activity
         </button>
       </div>

@@ -82,7 +82,7 @@ export const ApplicationTimeline = ({
       case 'completed':
         return 'text-green-600';
       case 'current':
-        return 'text-[#c4a747]';
+        return 'text-primary';
       default:
         return 'text-gray-400';
     }
@@ -92,10 +92,10 @@ export const ApplicationTimeline = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Application Timeline</h3>
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Application Timeline</h3>
         <p className="text-xs text-gray-500 mt-1">Track your application progress</p>
       </div>
 
@@ -113,7 +113,7 @@ export const ApplicationTimeline = ({
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5 }}
-              className="h-full bg-[#c4a747] rounded-full"
+              className="h-full bg-primary rounded-full"
             />
           </div>
         </div>
@@ -129,20 +129,20 @@ export const ApplicationTimeline = ({
               className="flex gap-3"
             >
               {/* Icon */}
-              <div className="relative flex-shrink-0">
+              <div className="relative shrink-0">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     step.status === 'completed'
                       ? 'bg-green-100 dark:bg-green-900/20'
                       : step.status === 'current'
-                        ? 'bg-[#c4a747]/20'
-                        : 'bg-gray-100 dark:bg-white/10'
+                        ? 'bg-primary/20'
+                        : 'bg-secondary'
                   }`}
                 >
                   {step.status === 'completed' ? (
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   ) : step.status === 'current' ? (
-                    <Clock className="w-4 h-4 text-[#c4a747]" />
+                    <Clock className="w-4 h-4 text-primary" />
                   ) : (
                     <step.icon className="w-4 h-4 text-gray-400" />
                   )}
@@ -163,7 +163,7 @@ export const ApplicationTimeline = ({
                     {step.title}
                   </h4>
                   {step.status === 'current' && (
-                    <span className="text-xs text-[#c4a747] px-2 py-0.5 rounded-full bg-[#c4a747]/10">
+                    <span className="text-xs text-primary px-2 py-0.5 rounded-full bg-accent">
                       In Progress
                     </span>
                   )}

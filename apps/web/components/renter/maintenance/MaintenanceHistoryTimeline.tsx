@@ -48,13 +48,11 @@ export const MaintenanceHistoryTimeline = ({ events }: MaintenanceHistoryTimelin
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Request Timeline</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Complete history of this request
-        </p>
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Request Timeline</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Complete history of this request</p>
       </div>
 
       <div className="p-4">
@@ -82,14 +80,10 @@ export const MaintenanceHistoryTimeline = ({ events }: MaintenanceHistoryTimelin
 
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                        {event.title}
-                      </h4>
+                      <h4 className="text-sm font-medium text-foreground">{event.title}</h4>
                       <span className="text-xs text-gray-500">{formatDate(event.date)}</span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                      {event.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{event.description}</p>
                     <p className="text-xs text-gray-400 mt-1">by {event.user}</p>
                   </div>
                 </motion.div>

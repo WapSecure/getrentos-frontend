@@ -1,9 +1,7 @@
 'use client';
 
+import { useRenterUser } from '../layout';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { MessagesHeader } from '@/components/renter/messages/MessagesHeader';
 import { MessageConversationList } from '@/components/renter/messages/MessageConversationList';
 import { MessageThread } from '@/components/renter/messages/MessageThread';
@@ -13,7 +11,6 @@ import { MessageTemplates } from '@/components/renter/messages/MessageTemplates'
 import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageLabels } from '@/components/renter/messages/MessageLabels';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { MessageCircle } from 'lucide-react';
 import {
   Conversation,
@@ -25,9 +22,7 @@ import {
 } from '@/types/messages';
 
 export default function MessagesPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const user = useRenterUser();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -204,21 +199,9 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadConversations();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadConversations();
+  }, []);
 
   const handleSendMessage = (conversationId: string, text: string, attachments?: Attachment[]) => {
     const newMessage: Message = {
@@ -342,14 +325,6 @@ export default function MessagesPage() {
     return matchesSearch && matchesType && matchesLabel;
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   const labels = [
     {
       id: '1',
@@ -372,83 +347,69 @@ export default function MessagesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <MessagesHeader unreadCount={conversations.reduce((sum, c) => sum + c.unreadCount, 0)} />
 
-      <div className="flex">
-        <RenterSidebar />
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-4">
+          <MessageSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
+          <MessageFilters
+            onFilterChange={handleFilterChange}
+            unreadCount={conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
+            totalCount={conversations.length}
+          />
+          <MessageLabels
+            labels={labels}
+            onSelectLabel={setSelectedLabel}
+            selectedLabel={selectedLabel}
+          />
+          <MessageConversationList
+            conversations={filteredConversations}
+            selectedId={selectedConversation?.id || null}
+            onSelect={handleSelectConversation}
+            onPin={handlePinConversation}
+            onArchive={handleArchiveConversation}
+          />
+          <MessageTemplates
+            onSelectTemplate={(content) => {
+              if (selectedConversation) {
+                handleSendMessage(selectedConversation.id, content);
+              }
+            }}
+          />
+          <QuickReplies
+            onSelectReply={(reply) => {
+              if (selectedConversation) {
+                handleSendMessage(selectedConversation.id, reply);
+              }
+            }}
+          />
+          <MessageReminders
+            reminders={reminders}
+            onAddReminder={handleAddReminder}
+            onToggleReminder={handleToggleReminder}
+            onDeleteReminder={handleDeleteReminder}
+          />
+        </div>
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <MessagesHeader
-              unreadCount={conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
+        <div className="lg:col-span-2">
+          {selectedConversation ? (
+            <MessageThread
+              conversation={selectedConversation}
+              onSendMessage={handleSendMessage}
+              currentUser={user}
             />
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1 space-y-4">
-                <MessageSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
-                <MessageFilters
-                  onFilterChange={handleFilterChange}
-                  unreadCount={conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
-                  totalCount={conversations.length}
-                />
-                <MessageLabels
-                  labels={labels}
-                  onSelectLabel={setSelectedLabel}
-                  selectedLabel={selectedLabel}
-                />
-                <MessageConversationList
-                  conversations={filteredConversations}
-                  selectedId={selectedConversation?.id || null}
-                  onSelect={handleSelectConversation}
-                  onPin={handlePinConversation}
-                  onArchive={handleArchiveConversation}
-                />
-                <MessageTemplates
-                  onSelectTemplate={(content) => {
-                    if (selectedConversation) {
-                      handleSendMessage(selectedConversation.id, content);
-                    }
-                  }}
-                />
-                <QuickReplies
-                  onSelectReply={(reply) => {
-                    if (selectedConversation) {
-                      handleSendMessage(selectedConversation.id, reply);
-                    }
-                  }}
-                />
-                <MessageReminders
-                  reminders={reminders}
-                  onAddReminder={handleAddReminder}
-                  onToggleReminder={handleToggleReminder}
-                  onDeleteReminder={handleDeleteReminder}
-                />
-              </div>
-
-              <div className="lg:col-span-2">
-                {selectedConversation ? (
-                  <MessageThread
-                    conversation={selectedConversation}
-                    onSendMessage={handleSendMessage}
-                    currentUser={user}
-                  />
-                ) : (
-                  <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 p-12 text-center">
-                    <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      No conversation selected
-                    </h3>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2">
-                      Select a conversation from the list to start messaging
-                    </p>
-                  </div>
-                )}
-              </div>
+          ) : (
+            <div className="bg-card rounded-xl border border-border p-12 text-center">
+              <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground">No conversation selected</h3>
+              <p className="text-muted-foreground mt-2">
+                Select a conversation from the list to start messaging
+              </p>
             </div>
-          </div>
-        </main>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -45,25 +45,25 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-2xl w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-2xl w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+                <div className="p-2 rounded-lg bg-secondary">
                   <FileText className="w-5 h-5 text-gray-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{document.name}</h3>
+                  <h3 className="font-semibold text-foreground">{document.name}</h3>
                   <p className="text-xs text-gray-500">{document.category}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsFavorite(!isFavorite)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                  className="p-1.5 rounded-lg hover:bg-secondary"
                 >
                   {isFavorite ? (
-                    <Star className="w-5 h-5 fill-[#c4a747] text-[#c4a747]" />
+                    <Star className="w-5 h-5 fill-primary text-primary" />
                   ) : (
                     <StarOff className="w-5 h-5 text-gray-400" />
                   )}
@@ -79,7 +79,7 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
               <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-8 text-center min-h-[200px] flex items-center justify-center">
                 <div className="text-center">
                   <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{document.name}</p>
+                  <p className="text-sm text-muted-foreground">{document.name}</p>
                   <p className="text-xs text-gray-500">
                     {document.size} • v{document.version}
                   </p>
@@ -90,19 +90,15 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <div>
                   <p className="text-xs text-gray-500">Category</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {document.category}
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{document.category}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Type</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
-                    {document.type}
-                  </p>
+                  <p className="text-sm font-medium text-foreground capitalize">{document.type}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Uploaded</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-foreground">
                     {formatDate(document.uploadedAt)}
                   </p>
                 </div>
@@ -140,7 +136,7 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
               )}
 
               {/* Actions */}
-              <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-white/10">
+              <div className="flex gap-3 mt-6 pt-4 border-t border-border">
                 <Button variant="primary" className="flex-1 gap-2">
                   <Download className="w-4 h-4" />
                   Download

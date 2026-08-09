@@ -67,7 +67,7 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+        className="flex items-center gap-1 text-sm text-primary hover:text-[#a88d3a] transition-colors"
       >
         <Bell className="w-4 h-4" />
         Save this search
@@ -79,11 +79,11 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-[#1a2a2f] rounded-xl shadow-lg border border-gray-200 dark:border-white/10 z-50"
+            className="absolute top-full left-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
           >
             <div className="p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Save this search</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <h3 className="font-semibold text-foreground mb-2">Save this search</h3>
+              <p className="text-xs text-muted-foreground mb-3">
                 Get notified when new properties match your criteria
               </p>
               <input
@@ -91,7 +91,7 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
                 placeholder="e.g., 2-bed in Ikeja under ₦200k"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747] mb-3"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-3"
               />
               <Button size="sm" fullWidth onClick={handleSave} disabled={!searchName.trim()}>
                 <Save className="w-3 h-3 mr-1" />
@@ -100,16 +100,14 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
             </div>
 
             {savedSearches.length > 0 && (
-              <div className="border-t border-gray-200 dark:border-white/10 p-4">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Your saved searches
-                </h4>
+              <div className="border-t border-border p-4">
+                <h4 className="text-sm font-medium text-foreground mb-2">Your saved searches</h4>
                 <div className="space-y-2">
                   {savedSearches.map((search) => (
                     <div key={search.id} className="flex items-center justify-between text-sm">
                       <button
                         onClick={() => handleApplySearch(search.filters)}
-                        className="text-gray-600 dark:text-gray-400 hover:text-[#c4a747] text-left flex-1"
+                        className="text-muted-foreground hover:text-primary text-left flex-1"
                       >
                         {search.name}
                       </button>

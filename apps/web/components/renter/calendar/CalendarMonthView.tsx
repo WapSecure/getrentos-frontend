@@ -23,7 +23,7 @@ const typeColors: Record<string, string> = {
   payment: '#10b981',
   maintenance: '#f59e0b',
   lease: '#8b5cf6',
-  personal: '#c4a747',
+  personal: 'var(--primary)',
 };
 
 export const CalendarMonthView = ({
@@ -47,13 +47,10 @@ export const CalendarMonthView = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="grid grid-cols-7 border-b border-border">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <div
-            key={day}
-            className="p-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400"
-          >
+          <div key={day} className="p-2 text-center text-xs font-medium text-muted-foreground">
             {day}
           </div>
         ))}
@@ -74,14 +71,14 @@ export const CalendarMonthView = ({
           return (
             <div
               key={day.toString()}
-              className={`h-24 p-1 border-r border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer ${
+              className={`h-24 p-1 border-r border-b border-gray-100 dark:border-gray-800 hover:bg-secondary transition-colors cursor-pointer ${
                 isTodayDate ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
               }`}
             >
               <div className="flex flex-col h-full">
                 <span
                   className={`text-xs font-medium ${
-                    isTodayDate ? 'text-[#c4a747]' : 'text-gray-700 dark:text-gray-300'
+                    isTodayDate ? 'text-primary' : 'text-foreground'
                   }`}
                 >
                   {format(day, 'd')}
@@ -96,7 +93,7 @@ export const CalendarMonthView = ({
                       }}
                       className="text-[10px] px-1 py-0.5 rounded truncate text-white"
                       style={{
-                        backgroundColor: event.color || typeColors[event.type] || '#c4a747',
+                        backgroundColor: event.color || typeColors[event.type] || 'var(--primary)',
                       }}
                     >
                       {event.title}

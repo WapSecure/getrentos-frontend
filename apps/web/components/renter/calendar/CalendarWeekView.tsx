@@ -14,7 +14,7 @@ const typeColors: Record<string, string> = {
   payment: '#10b981',
   maintenance: '#f59e0b',
   lease: '#8b5cf6',
-  personal: '#c4a747',
+  personal: 'var(--primary)',
 };
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 8 PM
@@ -40,12 +40,12 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="overflow-x-auto">
         <div className="min-w-[700px]">
           {/* Header */}
-          <div className="grid grid-cols-8 border-b border-gray-200 dark:border-white/10">
-            <div className="p-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 w-16" />
+          <div className="grid grid-cols-8 border-b border-border">
+            <div className="p-2 text-center text-xs font-medium text-muted-foreground w-16" />
             {days.map((day, index) => (
               <div
                 key={index}
@@ -53,12 +53,12 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
                   isToday(day) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                 }`}
               >
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                <div className="text-xs font-medium text-muted-foreground">
                   {format(day, 'EEE')}
                 </div>
                 <div
                   className={`text-sm font-semibold ${
-                    isToday(day) ? 'text-[#c4a747]' : 'text-gray-700 dark:text-gray-300'
+                    isToday(day) ? 'text-primary' : 'text-foreground'
                   }`}
                 >
                   {format(day, 'd')}
@@ -97,7 +97,8 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
                             style={{
                               top: position.top,
                               height: position.height,
-                              backgroundColor: event.color || typeColors[event.type] || '#c4a747',
+                              backgroundColor:
+                                event.color || typeColors[event.type] || 'var(--primary)',
                               minHeight: '16px',
                             }}
                           >

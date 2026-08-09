@@ -29,7 +29,7 @@ const colorClasses = {
     bg: 'bg-purple-50 dark:bg-purple-950/20',
     icon: 'text-purple-600 dark:text-purple-400',
   },
-  gold: { bg: 'bg-[#c4a747]/10', icon: 'text-[#c4a747]' },
+  gold: { bg: 'bg-accent', icon: 'text-primary' },
   emerald: {
     bg: 'bg-emerald-50 dark:bg-emerald-950/20',
     icon: 'text-emerald-600 dark:text-emerald-400',
@@ -45,9 +45,9 @@ const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCard
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl bg-white dark:bg-[#1a2a2f] border border-gray-200 dark:border-white/10 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+      className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#c4a747]/5 to-transparent" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-primary/5 to-transparent" />
 
       <div className="relative p-4">
         <div
@@ -57,13 +57,13 @@ const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCard
         </div>
 
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{value}</p>
+          <p className="text-sm text-muted-foreground mb-1">{label}</p>
+          <p className="text-2xl font-bold text-foreground tracking-tight">{value}</p>
           {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#c4a747] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </motion.div>
   );
 };

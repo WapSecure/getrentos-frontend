@@ -112,3 +112,65 @@ export interface AdminDocument {
   uploadedAt: string;
   sizeLabel: string;
 }
+
+export interface Conversation {
+  id: string;
+  participantName: string;
+  participantRole: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount: number;
+}
+
+export interface ThreadMessage {
+  id: string;
+  senderId: 'admin' | 'contact';
+  text: string;
+  timestamp: string;
+  read: boolean;
+}
+
+export interface RevenuePoint {
+  month: string;
+  gmv: number;
+}
+
+export interface RevenueBreakdown {
+  category: string;
+  amount: number;
+  share: number;
+}
+
+export type NotificationPreferenceId =
+  | 'fraud'
+  | 'disputes'
+  | 'verifications'
+  | 'escrow'
+  | 'messages';
+
+export interface NotificationPreference {
+  id: NotificationPreferenceId;
+  email: boolean;
+  push: boolean;
+}
+
+export type PlatformConfigRole = 'renter' | 'landlord' | 'owner' | 'buyer' | 'realtor' | 'agent';
+
+export interface RoleRequirement {
+  role: PlatformConfigRole;
+  requiresVerification: boolean;
+}
+
+export interface PlatformConfig {
+  minTrustScore: number;
+  escrowHoldDays: number;
+  autoFlagFraud: boolean;
+  roleRequirements: RoleRequirement[];
+}
+
+export interface AdminProfile {
+  fullName: string;
+  email: string;
+  phone?: string;
+  avatarUrl?: string;
+}

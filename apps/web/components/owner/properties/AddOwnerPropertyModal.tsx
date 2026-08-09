@@ -115,30 +115,27 @@ export const AddOwnerPropertyModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Add Property</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Add Property</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Step {step + 1} of {steps.length}: {steps[step]}
                 </p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-4 pt-3 flex-shrink-0">
+            <div className="px-4 pt-3 shrink-0">
               <div className="flex gap-1.5">
                 {steps.map((label, index) => (
                   <div
                     key={label}
                     className={`h-1 flex-1 rounded-full transition-colors ${
-                      index <= step ? 'bg-[#c4a747]' : 'bg-gray-200 dark:bg-white/10'
+                      index <= step ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
                     }`}
                   />
                 ))}
@@ -149,7 +146,7 @@ export const AddOwnerPropertyModal = ({
               {step === 0 && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Property Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -157,18 +154,18 @@ export const AddOwnerPropertyModal = ({
                       value={form.name}
                       onChange={(e) => update('name', e.target.value)}
                       placeholder="e.g. Lekki Waterfront Duplex"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Property Type
                     </label>
                     <select
                       value={form.propertyType}
                       onChange={(e) => update('propertyType', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {propertyTypes.map((t) => (
                         <option key={t} value={t}>
@@ -179,7 +176,7 @@ export const AddOwnerPropertyModal = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Registered Owner Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -187,12 +184,12 @@ export const AddOwnerPropertyModal = ({
                       value={form.ownerName}
                       onChange={(e) => update('ownerName', e.target.value)}
                       placeholder="Full legal name as on title document"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Address <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -200,38 +197,38 @@ export const AddOwnerPropertyModal = ({
                       value={form.address}
                       onChange={(e) => update('address', e.target.value)}
                       placeholder="Street address"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         City <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={form.city}
                         onChange={(e) => update('city', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         State <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={form.state}
                         onChange={(e) => update('state', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Purchase Price (₦)
                       </label>
                       <input
@@ -239,11 +236,11 @@ export const AddOwnerPropertyModal = ({
                         min={0}
                         value={form.purchasePrice}
                         onChange={(e) => update('purchasePrice', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Estimated Value (₦)
                       </label>
                       <input
@@ -251,20 +248,20 @@ export const AddOwnerPropertyModal = ({
                         min={0}
                         value={form.estimatedValue}
                         onChange={(e) => update('estimatedValue', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Purchase Date
                     </label>
                     <input
                       type="date"
                       value={form.purchaseDate}
                       onChange={(e) => update('purchaseDate', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </>
@@ -273,7 +270,7 @@ export const AddOwnerPropertyModal = ({
               {step === 1 && (
                 <>
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                    <ShieldAlert className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <ShieldAlert className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                     <p className="text-xs text-blue-700 dark:text-blue-300">
                       Upload at least one proof of ownership. Our compliance team verifies documents
                       before your property can be listed for sale.
@@ -309,7 +306,7 @@ export const AddOwnerPropertyModal = ({
 
               {step === 2 && (
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-white/5 overflow-hidden">
+                  <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
                     <SummaryRow label="Property" value={form.name || '—'} />
                     <SummaryRow label="Owner" value={form.ownerName || '—'} />
                     <SummaryRow
@@ -321,14 +318,14 @@ export const AddOwnerPropertyModal = ({
                       value={hasAnyDocument ? 'Submitted' : 'None uploaded'}
                     />
                   </div>
-                  <label className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer">
+                  <label className="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer">
                     <input
                       type="checkbox"
                       checked={form.declared}
                       onChange={(e) => update('declared', e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                      className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-foreground">
                       I declare that I am the legal and rightful owner of this property, that the
                       documents provided are authentic, and that all information submitted is
                       accurate to the best of my knowledge.
@@ -342,10 +339,8 @@ export const AddOwnerPropertyModal = ({
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
                     <Clock className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Pending Review
-                  </h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">
+                  <h4 className="text-lg font-semibold text-foreground">Pending Review</h4>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                     Your ownership documents for <strong>{form.name}</strong> have been submitted.
                     Our compliance team typically completes review within 24–48 hours.
                   </p>
@@ -357,7 +352,7 @@ export const AddOwnerPropertyModal = ({
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+            <div className="p-4 border-t border-border flex gap-3 shrink-0">
               {step > 0 && !submitted && (
                 <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
                   Back
@@ -414,20 +409,18 @@ const UploadField = ({
 }) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        {label}
-      </label>
-      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#c4a747] transition-colors cursor-pointer">
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
+      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
         <input
           type="file"
           className="hidden"
           onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}
         />
-        <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
-        <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+        <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+        <span className="text-sm text-muted-foreground truncate">
           {fileName || 'Click to upload'}
         </span>
-        {fileName && <Check className="w-4 h-4 text-green-500 flex-shrink-0 ml-auto" />}
+        {fileName && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
       </label>
     </div>
   );
@@ -435,9 +428,7 @@ const UploadField = ({
 
 const SummaryRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between px-3 py-2 text-sm">
-    <span className="text-gray-500 dark:text-gray-400">{label}</span>
-    <span className="text-gray-900 dark:text-white font-medium text-right truncate max-w-[60%]">
-      {value}
-    </span>
+    <span className="text-muted-foreground">{label}</span>
+    <span className="text-foreground font-medium text-right truncate max-w-[60%]">{value}</span>
   </div>
 );

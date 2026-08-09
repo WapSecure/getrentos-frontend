@@ -48,8 +48,8 @@ export const PaymentSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Payment Settings</h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h2 className="text-xl font-semibold text-foreground mb-4">Payment Settings</h2>
+      <p className="text-sm text-muted-foreground mb-6">
         Manage your payment methods and billing information
       </p>
 
@@ -60,12 +60,12 @@ export const PaymentSettings = () => {
           return (
             <div
               key={method.id}
-              className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700"
+              className="flex items-center justify-between p-4 rounded-lg border border-border"
             >
               <div className="flex items-center gap-3">
                 <Icon className="w-5 h-5 text-gray-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
+                  <p className="text-sm font-medium text-foreground">{method.name}</p>
                   {method.expiry && (
                     <p className="text-xs text-gray-500">Expires {method.expiry}</p>
                   )}

@@ -31,7 +31,7 @@ export const LeaseTerminationRequest = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+        className="bg-card rounded-xl border border-border overflow-hidden"
       >
         <div className="p-4">
           <div className="flex items-start gap-3">
@@ -39,10 +39,8 @@ export const LeaseTerminationRequest = ({
               <AlertTriangle className="w-5 h-5 text-red-500" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                Early Lease Termination
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <h3 className="font-semibold text-foreground">Early Lease Termination</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Request to terminate your lease before the end date
               </p>
               <Button variant="danger" size="sm" className="mt-2" onClick={() => setIsOpen(true)}>
@@ -53,7 +51,7 @@ export const LeaseTerminationRequest = ({
 
           <div className="mt-3 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
               <p className="text-xs text-yellow-700 dark:text-yellow-400">
                 Early termination may incur penalties. Review your lease agreement for details.
               </p>
@@ -68,14 +66,12 @@ export const LeaseTerminationRequest = ({
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Request Early Termination
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{propertyName}</p>
+                <h3 className="font-semibold text-foreground">Request Early Termination</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{propertyName}</p>
               </div>
               <button onClick={() => setIsOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
@@ -84,19 +80,19 @@ export const LeaseTerminationRequest = ({
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Proposed Move-Out Date
                 </label>
                 <input
                   type="date"
                   value={noticeDate}
                   onChange={(e) => setNoticeDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Reason for Termination
                 </label>
                 <textarea
@@ -104,7 +100,7 @@ export const LeaseTerminationRequest = ({
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Please provide details..."
                   rows={4}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 

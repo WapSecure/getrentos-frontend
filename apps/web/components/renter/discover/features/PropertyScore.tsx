@@ -55,7 +55,7 @@ export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
             cy={currentSize.ring / 2}
             r={radius}
             fill="none"
-            stroke="#c4a747"
+            stroke="var(--primary)"
             strokeWidth={currentSize.stroke}
             strokeDasharray={circumference}
             strokeDashoffset={offset}
@@ -67,9 +67,7 @@ export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
         </div>
       </div>
       <div>
-        <div className={`font-medium ${currentSize.text} text-gray-900 dark:text-white`}>
-          {getScoreLabel()}
-        </div>
+        <div className={`font-medium ${currentSize.text} text-foreground`}>{getScoreLabel()}</div>
         <div className={`${currentSize.label} text-gray-500`}>Property Score</div>
       </div>
     </motion.div>

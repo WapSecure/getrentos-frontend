@@ -57,7 +57,7 @@ const typeConfig: Record<
   system: {
     icon: AlertCircle,
     label: 'System',
-    color: 'text-gray-600 dark:text-gray-400',
+    color: 'text-muted-foreground',
     bg: 'bg-gray-50 dark:bg-gray-800',
   },
 };
@@ -107,13 +107,10 @@ export const NotificationsStats = ({ notifications, unreadCount }: Notifications
   return (
     <div className="grid grid-cols-3 gap-4 mb-6">
       {stats.map((stat, index) => (
-        <div
-          key={stat.label}
-          className={`${stat.bg} rounded-xl p-4 border border-gray-200 dark:border-white/10`}
-        >
+        <div key={stat.label} className={`${stat.bg} rounded-xl p-4 border border-border`}>
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />
-            <span className="text-xs text-gray-600 dark:text-gray-400">{stat.label}</span>
+            <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
           <p className={`text-lg font-bold ${stat.color} mt-1`}>{stat.value}</p>
         </div>
@@ -128,11 +125,11 @@ export const NotificationsStats = ({ notifications, unreadCount }: Notifications
             return (
               <div
                 key={type}
-                className={`${config.bg} rounded-xl p-3 border border-gray-200 dark:border-white/10 flex items-center gap-2`}
+                className={`${config.bg} rounded-xl p-3 border border-border flex items-center gap-2`}
               >
                 <Icon className={`w-4 h-4 ${config.color}`} />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{config.label}</p>
+                  <p className="text-xs text-muted-foreground">{config.label}</p>
                   <p className={`text-sm font-bold ${config.color}`}>{count}</p>
                 </div>
               </div>

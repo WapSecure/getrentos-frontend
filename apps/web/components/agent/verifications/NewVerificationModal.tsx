@@ -64,27 +64,24 @@ export const NewVerificationModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Log Verification</h3>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h3 className="font-semibold text-foreground">Log Verification</h3>
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Task <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={taskId}
                   onChange={(e) => setTaskId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Select a verification task</option>
                   {tasks.map((t) => (
@@ -96,19 +93,19 @@ export const NewVerificationModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Subject Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={subjectName}
                   onChange={(e) => setSubjectName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Subject Type
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -120,8 +117,8 @@ export const NewVerificationModal = ({
                         onClick={() => setSubjectType(type)}
                         className={`px-2 py-2 rounded-lg border text-sm capitalize transition-colors ${
                           subjectType === type
-                            ? 'border-[#c4a747] bg-[#c4a747]/10 text-[#c4a747]'
-                            : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
+                            ? 'border-primary bg-accent text-primary'
+                            : 'border-border text-muted-foreground'
                         }`}
                       >
                         {type}
@@ -131,40 +128,40 @@ export const NewVerificationModal = ({
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
                   checked={idVerified}
                   onChange={(e) => setIdVerified(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                 />
                 ID document verified on-site
               </label>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
                   checked={addressConfirmed}
                   onChange={(e) => setAddressConfirmed(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                 />
                 Address confirmed on-site
               </label>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Notes <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10">
+            <div className="p-4 border-t border-border">
               <Button
                 variant="primary"
                 fullWidth

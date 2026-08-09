@@ -39,7 +39,7 @@ const categoryColors: Record<string, string> = {
   Receipts: 'text-green-600 dark:text-green-400',
   'Inspection Reports': 'text-purple-600 dark:text-purple-400',
   Insurance: 'text-orange-600 dark:text-orange-400',
-  Miscellaneous: 'text-gray-600 dark:text-gray-400',
+  Miscellaneous: 'text-muted-foreground',
 };
 
 export const DocumentCategories = ({
@@ -65,15 +65,13 @@ export const DocumentCategories = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Folder className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Categories</h3>
+          <Folder className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Categories</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          {categoryList.length} categories
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">{categoryList.length} categories</p>
       </div>
 
       <div className="p-2 space-y-1 max-h-96 overflow-y-auto">
@@ -81,8 +79,8 @@ export const DocumentCategories = ({
           onClick={() => onSelectCategory('all')}
           className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
             selectedCategory === 'all'
-              ? 'bg-[#c4a747]/10 text-[#c4a747]'
-              : 'hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-300'
+              ? 'bg-accent text-primary'
+              : 'hover:bg-secondary text-foreground'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -102,8 +100,8 @@ export const DocumentCategories = ({
               onClick={() => onSelectCategory(category)}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
                 selectedCategory === category
-                  ? 'bg-[#c4a747]/10 text-[#c4a747]'
-                  : 'hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-300'
+                  ? 'bg-accent text-primary'
+                  : 'hover:bg-secondary text-foreground'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -116,14 +114,14 @@ export const DocumentCategories = ({
         })}
 
         {isAddingCategory ? (
-          <div className="mt-2 p-2 border-t border-gray-200 dark:border-white/10">
+          <div className="mt-2 p-2 border-t border-border">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 placeholder="Category name"
-                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <Button size="sm" onClick={handleAddCategory} disabled={!newCategory.trim()}>
                 Add

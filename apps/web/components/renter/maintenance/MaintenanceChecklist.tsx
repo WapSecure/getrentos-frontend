@@ -70,16 +70,16 @@ export const MaintenanceChecklist = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-3">
-          <FileText className="w-5 h-5 text-[#c4a747]" />
+          <FileText className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Maintenance Checklist</h3>
+            <h3 className="font-semibold text-foreground">Maintenance Checklist</h3>
             <p className="text-xs text-gray-500">
               {completedCount}/{totalCount} items completed
             </p>
@@ -93,7 +93,7 @@ export const MaintenanceChecklist = () => {
           <div className="mb-3">
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#c4a747] rounded-full transition-all duration-300"
+                className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -105,10 +105,10 @@ export const MaintenanceChecklist = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer"
+              className="flex items-start gap-3 p-2 rounded-lg hover:bg-secondary cursor-pointer"
               onClick={() => toggleItem(item.id)}
             >
-              <button className="mt-1 flex-shrink-0">
+              <button className="mt-1 shrink-0">
                 {item.completed ? (
                   <CheckCircle className="w-5 h-5 text-green-500" />
                 ) : (
@@ -117,7 +117,7 @@ export const MaintenanceChecklist = () => {
               </button>
               <div>
                 <p
-                  className={`text-sm ${item.completed ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}
+                  className={`text-sm ${item.completed ? 'text-gray-500 line-through' : 'text-foreground'}`}
                 >
                   {item.title}
                 </p>

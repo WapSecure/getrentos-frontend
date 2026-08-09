@@ -20,7 +20,7 @@ export const NotificationSearch = ({ searchTerm, onSearch }: NotificationSearchP
         value={searchTerm}
         onChange={(e) => onSearch(e.target.value)}
         placeholder="Search notifications..."
-        className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747] focus:border-transparent"
+        className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
       />
       {searchTerm && (
         <button

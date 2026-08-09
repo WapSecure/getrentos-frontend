@@ -74,12 +74,12 @@ export const MaintenanceList = ({
 
   return (
     <>
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">Maintenance Requests</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <h3 className="font-semibold text-foreground">Maintenance Requests</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {filteredRequests.length} requests found
               </p>
             </div>
@@ -92,14 +92,14 @@ export const MaintenanceList = ({
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search..."
-                  className="pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747] w-full sm:w-40"
+                  className="pl-10 pr-4 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-40"
                 />
               </div>
 
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {statusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -111,7 +111,7 @@ export const MaintenanceList = ({
               <select
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {priorityOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -123,16 +123,14 @@ export const MaintenanceList = ({
           </div>
         </div>
 
-        <div className="divide-y divide-gray-200 dark:divide-white/10">
+        <div className="divide-y divide-border">
           {filteredRequests.length === 0 ? (
             <div className="p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
                 <Wrench className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                No maintenance requests
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
+              <h3 className="text-lg font-medium text-foreground">No maintenance requests</h3>
+              <p className="text-muted-foreground mt-1">
                 {searchTerm || filterStatus !== 'all' || filterPriority !== 'all'
                   ? 'Try adjusting your filters'
                   : 'Report an issue to get started'}

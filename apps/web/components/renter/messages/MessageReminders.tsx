@@ -51,14 +51,14 @@ export const MessageReminders = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-[#c4a747]" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Reminders</span>
+          <Bell className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Reminders</span>
           <span className="text-xs text-gray-500">
             {reminders.filter((r) => r.active).length} active
           </span>
@@ -84,26 +84,26 @@ export const MessageReminders = ({
       {isExpanded && (
         <div className="p-3 pt-0 space-y-2 max-h-64 overflow-y-auto">
           {isAdding && (
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 space-y-2">
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-2">
               <input
                 type="text"
                 value={newReminder.message}
                 onChange={(e) => setNewReminder({ ...newReminder, message: e.target.value })}
                 placeholder="Reminder message..."
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <div className="flex gap-2">
                 <input
                   type="date"
                   value={newReminder.date}
                   onChange={(e) => setNewReminder({ ...newReminder, date: e.target.value })}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <input
                   type="time"
                   value={newReminder.time}
                   onChange={(e) => setNewReminder({ ...newReminder, time: e.target.value })}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
               <div className="flex gap-2">
@@ -134,9 +134,7 @@ export const MessageReminders = ({
                 }`}
               >
                 <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-sm ${reminder.active ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}
-                  >
+                  <p className={`text-sm ${reminder.active ? 'text-foreground' : 'text-gray-500'}`}>
                     {reminder.message}
                   </p>
                   <p className="text-xs text-gray-500">
@@ -150,7 +148,7 @@ export const MessageReminders = ({
                     title={reminder.active ? 'Disable' : 'Enable'}
                   >
                     {reminder.active ? (
-                      <Bell className="w-3 h-3 text-[#c4a747]" />
+                      <Bell className="w-3 h-3 text-primary" />
                     ) : (
                       <BellOff className="w-3 h-3 text-gray-400" />
                     )}

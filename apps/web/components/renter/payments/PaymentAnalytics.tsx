@@ -35,46 +35,40 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <PieChart className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Payment Analytics</h3>
+          <PieChart className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Payment Analytics</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Spending insights</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Spending insights</p>
       </div>
 
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-[#c4a747]" />
+              <DollarSign className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Total Paid</span>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalPaid)}
-            </p>
+            <p className="text-lg font-bold text-foreground">{formatCurrency(totalPaid)}</p>
           </div>
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-[#c4a747]" />
+              <TrendingUp className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Avg Payment</span>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">
-              {formatCurrency(averagePayment)}
-            </p>
+            <p className="text-lg font-bold text-foreground">{formatCurrency(averagePayment)}</p>
           </div>
         </div>
 
         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
           <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3 text-[#c4a747]" />
+            <Calendar className="w-3 h-3 text-primary" />
             <span className="text-xs text-gray-500">Monthly Average</span>
           </div>
-          <p className="text-lg font-bold text-gray-900 dark:text-white">
-            {formatCurrency(monthlySpending)}
-          </p>
+          <p className="text-lg font-bold text-foreground">{formatCurrency(monthlySpending)}</p>
         </div>
 
         <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">

@@ -60,36 +60,29 @@ export const HelpArticles = ({ searchQuery, selectedCategory }: HelpArticlesProp
 
   if (filteredArticles.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 p-8 text-center">
+      <div className="bg-card rounded-xl border border-border p-8 text-center">
         <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-gray-500 dark:text-gray-400">No articles found</p>
+        <p className="text-muted-foreground">No articles found</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Help Articles</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Help Articles</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">
           {filteredArticles.length} articles found
         </p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {filteredArticles.map((article) => (
-          <div
-            key={article.id}
-            className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
-          >
+          <div key={article.id} className="p-4 hover:bg-secondary transition-colors cursor-pointer">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                  {article.title}
-                </h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {article.description}
-                </p>
+                <h4 className="text-sm font-medium text-foreground">{article.title}</h4>
+                <p className="text-sm text-muted-foreground mt-0.5">{article.description}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Eye className="w-3 h-3" />

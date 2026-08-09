@@ -100,14 +100,14 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Expense Tracker</h3>
+          <DollarSign className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Expense Tracker</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span className="text-xs font-medium text-muted-foreground">
             Total: {formatCurrency(totalExpenses)}
           </span>
           <Button size="sm" variant="primary" onClick={() => setShowAddExpense(!showAddExpense)}>
@@ -128,13 +128,13 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
       {isExpanded && (
         <div className="p-4 pt-0">
           {showAddExpense && (
-            <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 space-y-3">
+            <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
               <input
                 type="text"
                 value={newExpense.description}
                 onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
                 placeholder="Description"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <div className="flex gap-2">
                 <input
@@ -142,14 +142,14 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
                   placeholder="Amount"
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <select
                   value={newExpense.category}
                   onChange={(e) =>
                     setNewExpense({ ...newExpense, category: handleCategoryChange(e.target.value) })
                   }
-                  className="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="rent">Rent</option>
                   <option value="utilities">Utilities</option>
@@ -160,7 +160,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
               <select
                 value={newExpense.paidBy}
                 onChange={(e) => setNewExpense({ ...newExpense, paidBy: e.target.value })}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Paid by</option>
                 {roommates.map((r) => (
@@ -185,16 +185,14 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
             </div>
           )}
 
-          <div className="divide-y divide-gray-200 dark:divide-white/10 max-h-64 overflow-y-auto">
+          <div className="divide-y divide-border max-h-64 overflow-y-auto">
             {expenses.length === 0 ? (
               <p className="text-sm text-gray-500 text-center py-4">No expenses recorded</p>
             ) : (
               expenses.map((expense) => (
                 <div key={expense.id} className="flex items-center justify-between py-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {expense.description}
-                    </p>
+                    <p className="text-sm font-medium text-foreground">{expense.description}</p>
                     <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
                       <span>Paid by {expense.paidBy}</span>
                       <span>•</span>
@@ -206,7 +204,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                       </span>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-[#c4a747]">
+                  <span className="text-sm font-semibold text-primary">
                     {formatCurrency(expense.amount)}
                   </span>
                 </div>

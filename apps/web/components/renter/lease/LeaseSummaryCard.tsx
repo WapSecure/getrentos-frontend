@@ -57,7 +57,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <div className="relative">
         {/* Status Bar */}
@@ -66,31 +66,29 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
         <div className="p-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#c4a747]/10">
-                <Building2 className="w-5 h-5 text-[#c4a747]" />
+              <div className="p-2 rounded-lg bg-accent">
+                <Building2 className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {lease.propertyName}
-                </h3>
-                <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">{lease.propertyName}</h3>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                   <MapPin className="w-3 h-3" />
                   <span className="text-xs">{lease.address}</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold text-[#c4a747]">
+              <p className="text-sm font-bold text-primary">
                 {formatCurrency(lease.rentAmount)}/mo
               </p>
               <p className="text-xs text-gray-500 mt-0.5">{getDaysRemaining()} days left</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-white/10">
+          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border">
             <div>
               <p className="text-xs text-gray-500">Lease Start</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-foreground">
                 {new Date(lease.startDate).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -100,7 +98,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
             </div>
             <div>
               <p className="text-xs text-gray-500">Lease End</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-foreground">
                 {new Date(lease.endDate).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -110,21 +108,19 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
             </div>
             <div>
               <p className="text-xs text-gray-500">Security Deposit</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-foreground">
                 {formatCurrency(lease.securityDeposit)}
               </p>
             </div>
           </div>
 
           {/* Landlord Info Mini */}
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-white text-xs font-semibold">
+          <div className="mt-3 pt-3 border-t border-border flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-xs font-semibold">
               {lease.landlord.name.charAt(0)}
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {lease.landlord.name}
-              </p>
+              <p className="text-sm font-medium text-foreground">{lease.landlord.name}</p>
               <p className="text-xs text-gray-500">{lease.landlord.email}</p>
             </div>
           </div>

@@ -31,14 +31,14 @@ export const MaintenanceAnalytics = ({ requests }: MaintenanceAnalyticsProps) =>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Maintenance Analytics</h3>
+          <BarChart3 className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Maintenance Analytics</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Performance insights</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Performance insights</p>
       </div>
 
       <div className="p-4 space-y-4">
@@ -48,14 +48,14 @@ export const MaintenanceAnalytics = ({ requests }: MaintenanceAnalyticsProps) =>
               <CheckCircle className="w-3 h-3 text-green-500" />
               <span className="text-xs text-gray-500">Resolution Rate</span>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{resolutionRate}%</p>
+            <p className="text-lg font-bold text-foreground">{resolutionRate}%</p>
           </div>
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-blue-500" />
               <span className="text-xs text-gray-500">Avg Response</span>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{avgResponseTime}h</p>
+            <p className="text-lg font-bold text-foreground">{avgResponseTime}h</p>
           </div>
         </div>
 

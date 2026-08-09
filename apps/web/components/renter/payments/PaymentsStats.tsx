@@ -79,11 +79,11 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className={`${stat.bg} rounded-xl p-4 border border-gray-200 dark:border-white/10`}
+          className={`${stat.bg} rounded-xl p-4 border border-border`}
         >
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />
-            <span className="text-xs text-gray-600 dark:text-gray-400">{stat.label}</span>
+            <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
           <p className={`text-lg font-bold ${stat.color} mt-1`}>{stat.value}</p>
         </motion.div>

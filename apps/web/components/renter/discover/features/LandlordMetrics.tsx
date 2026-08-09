@@ -26,8 +26,8 @@ export const LandlordMetrics = ({
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <MessageCircle className="w-3 h-3 text-[#c4a747]" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">Landlord Response</span>
+          <MessageCircle className="w-3 h-3 text-primary" />
+          <span className="text-xs text-muted-foreground">Landlord Response</span>
         </div>
         {verifiedBadge && (
           <div className="flex items-center gap-1">
@@ -39,19 +39,19 @@ export const LandlordMetrics = ({
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <p className="text-lg font-bold text-gray-900 dark:text-white">{responseRate}%</p>
+          <p className="text-lg font-bold text-foreground">{responseRate}%</p>
           <p className="text-xs text-gray-500">Response rate</p>
         </div>
         <div>
-          <p className="text-lg font-bold text-gray-900 dark:text-white">{responseTime}</p>
+          <p className="text-lg font-bold text-foreground">{responseTime}</p>
           <p className="text-xs text-gray-500">Avg. response</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-white/10">
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
         <div className="flex items-center gap-1">
-          <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
-          <span className="text-sm font-semibold text-gray-900 dark:text-white">{rating}</span>
+          <Star className="w-3 h-3 fill-primary text-primary" />
+          <span className="text-sm font-semibold text-foreground">{rating}</span>
           <span className="text-xs text-gray-500">({totalReviews} reviews)</span>
         </div>
         <div className="flex items-center gap-1">

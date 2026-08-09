@@ -25,35 +25,30 @@ const notifications = [
 
 export const ScoreNotifications = () => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Score Updates</h3>
+          <Bell className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Score Updates</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Recent activity affecting your score
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">Recent activity affecting your score</p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {notifications.map((notification) => (
-          <div
-            key={notification.id}
-            className="p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-          >
+          <div key={notification.id} className="p-3 hover:bg-secondary transition-colors">
             <div className="flex items-start gap-3">
               {notification.type === 'success' && (
-                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
               )}
               {notification.type === 'info' && (
-                <Clock className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                <Clock className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
               )}
               {notification.type === 'warning' && (
-                <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
               )}
               <div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{notification.message}</p>
+                <p className="text-sm text-foreground">{notification.message}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{notification.time}</p>
               </div>
             </div>

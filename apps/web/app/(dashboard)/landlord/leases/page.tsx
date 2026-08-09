@@ -1,15 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Plus, FileCheck } from 'lucide-react';
-import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar';
-import { LandlordSidebar } from '@/components/landlord/dashboard/LandlordSidebar';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
 import { Button } from '@/components/ui/Button';
-import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { Lease, LeaseStatus, Unit } from '@/types/landlord';
 
 const mockLeases: Lease[] = [
@@ -106,37 +102,11 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 ];
 
 export default function LandlordLeasesPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [leases, setLeases] = useState<Lease[]>([]);
-  const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
+  const [leases, setLeases] = useState<Lease[]>(mockLeases);
+  const [vacantUnits, setVacantUnits] = useState<Unit[]>(mockVacantUnits);
   const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        if (parsedUser.role && parsedUser.role !== 'landlord') {
-          router.replace(getDashboardRoute(parsedUser.role));
-          return;
-        }
-      }
-      setLeases(mockLeases);
-      setVacantUnits(mockVacantUnits);
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
 
   const handleCreateLease = (
     data: Omit<Lease, 'id' | 'status' | 'createdAt'>,
@@ -165,80 +135,58 @@ export default function LandlordLeasesPage() {
     setRenewingLease(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   const filteredLeases = leases.filter((l) => filter === 'all' || l.status === filter);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <LandlordNavbar user={user} />
-
-      <div className="flex">
-        <LandlordSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leases</h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {leases.filter((l) => l.status === 'signed').length} active lease
-                  {leases.filter((l) => l.status === 'signed').length === 1 ? '' : 's'}
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                className="gap-2"
-                onClick={() => setIsCreateModalOpen(true)}
-              >
-                <Plus className="w-4 h-4" />
-                Create Lease
-              </Button>
-            </div>
-
-            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-white/10 rounded-lg w-fit mb-6 overflow-x-auto">
-              {statusFilters.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setFilter(option.value)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                    filter === option.value
-                      ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-
-            {filteredLeases.length === 0 ? (
-              <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-12 text-center">
-                <FileCheck className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">No leases found</p>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredLeases.map((lease, index) => (
-                  <LeaseCard
-                    key={lease.id}
-                    lease={lease}
-                    delay={index * 0.05}
-                    onSendLease={handleSendLease}
-                    onRequestRenewal={setRenewingLease}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+    <>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Leases</h1>
+          <p className="text-muted-foreground mt-1">
+            {leases.filter((l) => l.status === 'signed').length} active lease
+            {leases.filter((l) => l.status === 'signed').length === 1 ? '' : 's'}
+          </p>
+        </div>
+        <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
+          <Plus className="w-4 h-4" />
+          Create Lease
+        </Button>
       </div>
+
+      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6 overflow-x-auto">
+        {statusFilters.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => setFilter(option.value)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+              filter === option.value
+                ? 'bg-card text-primary shadow-sm'
+                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredLeases.length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <FileCheck className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-muted-foreground">No leases found</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredLeases.map((lease, index) => (
+            <LeaseCard
+              key={lease.id}
+              lease={lease}
+              delay={index * 0.05}
+              onSendLease={handleSendLease}
+              onRequestRenewal={setRenewingLease}
+            />
+          ))}
+        </div>
+      )}
 
       <CreateLeaseModal
         isOpen={isCreateModalOpen}
@@ -253,6 +201,6 @@ export default function LandlordLeasesPage() {
         onClose={() => setRenewingLease(null)}
         onSend={handleSendRenewalOffer}
       />
-    </div>
+    </>
   );
 }

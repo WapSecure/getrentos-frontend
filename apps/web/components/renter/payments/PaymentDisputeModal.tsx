@@ -41,12 +41,12 @@ export const PaymentDisputeModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Dispute Payment</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Dispute Payment</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Payment ID: {paymentId.slice(0, 8)}
                 </p>
               </div>
@@ -58,7 +58,7 @@ export const PaymentDisputeModal = ({
             <div className="p-4 space-y-4">
               <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
                   <p className="text-xs text-yellow-700 dark:text-yellow-400">
                     Please provide detailed information about your dispute. This will be reviewed by
                     our team.
@@ -67,13 +67,13 @@ export const PaymentDisputeModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Reason for Dispute
                 </label>
                 <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Select a reason...</option>
                   <option value="incorrect_amount">Incorrect Amount</option>
@@ -85,15 +85,13 @@ export const PaymentDisputeModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Details
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Details</label>
                 <textarea
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder="Please provide additional details about your dispute..."
                   rows={4}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 

@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { PaymentsHeader } from '@/components/renter/payments/PaymentsHeader';
 import { PaymentsStats } from '@/components/renter/payments/PaymentsStats';
 import { PaymentsList } from '@/components/renter/payments/PaymentsList';
@@ -15,7 +12,6 @@ import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentRece
 import { PaymentNotifications } from '@/components/renter/payments/PaymentNotifications';
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
 import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 
 interface Payment {
   id: string;
@@ -51,9 +47,6 @@ interface Notification {
 }
 
 export default function PaymentsPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -188,21 +181,9 @@ export default function PaymentsPage() {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadPayments();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadPayments();
+  }, []);
 
   const pushNotification = (notification: Omit<Notification, 'id' | 'date' | 'read'>) => {
     setNotifications((prev) => [
@@ -284,54 +265,36 @@ export default function PaymentsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <PaymentsHeader onExport={() => setShowExportModal(true)} />
+      <PaymentsStats payments={payments} />
 
-      <div className="flex">
-        <RenterSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <PaymentsHeader onExport={() => setShowExportModal(true)} />
-            <PaymentsStats payments={payments} />
-
-            <div className="grid lg:grid-cols-3 gap-6 mt-6">
-              <div className="lg:col-span-2 space-y-6">
-                <PaymentsList
-                  payments={payments}
-                  onPayNow={handlePayNow}
-                  onDownloadReceipt={handleDownloadReceipt}
-                  onDispute={handleDispute}
-                />
-                <PaymentReceiptsGallery
-                  receipts={receipts}
-                  onDownload={handleDownloadReceipt}
-                  onView={handleViewReceipt}
-                />
-              </div>
-              <div className="space-y-6">
-                <PaymentNotifications
-                  notifications={notifications}
-                  onMarkAsRead={handleMarkNotificationAsRead}
-                  onClearAll={handleClearAllNotifications}
-                />
-                <PaymentSchedule payments={payments} />
-                <PaymentMethods />
-                <AutoPaySetup />
-                <PaymentAnalytics payments={payments} />
-              </div>
-            </div>
-          </div>
-        </main>
+      <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        <div className="lg:col-span-2 space-y-6">
+          <PaymentsList
+            payments={payments}
+            onPayNow={handlePayNow}
+            onDownloadReceipt={handleDownloadReceipt}
+            onDispute={handleDispute}
+          />
+          <PaymentReceiptsGallery
+            receipts={receipts}
+            onDownload={handleDownloadReceipt}
+            onView={handleViewReceipt}
+          />
+        </div>
+        <div className="space-y-6">
+          <PaymentNotifications
+            notifications={notifications}
+            onMarkAsRead={handleMarkNotificationAsRead}
+            onClearAll={handleClearAllNotifications}
+          />
+          <PaymentSchedule payments={payments} />
+          <PaymentMethods />
+          <AutoPaySetup />
+          <PaymentAnalytics payments={payments} />
+        </div>
       </div>
 
       <PaymentExport
@@ -345,6 +308,6 @@ export default function PaymentsPage() {
         onOpenChange={(open) => !open && setDisputingPaymentId(null)}
         onSubmit={handleSubmitDispute}
       />
-    </div>
+    </>
   );
 }

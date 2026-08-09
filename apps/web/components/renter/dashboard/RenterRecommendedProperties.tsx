@@ -96,14 +96,12 @@ export const RenterRecommendedProperties = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Recommended for You
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="text-lg font-semibold text-foreground">Recommended for You</h2>
+          <p className="text-sm text-muted-foreground">
             Based on your search history and preferences
           </p>
         </div>
@@ -121,14 +119,14 @@ export const RenterRecommendedProperties = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 + index * 0.05, duration: 0.3 }}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
             >
               {/* Property Image Placeholder */}
-              <div className="relative h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f]">
+              <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-[#c4a747]/20 rounded-xl flex items-center justify-center mx-auto">
-                      <Home className="w-6 h-6 text-[#c4a747]" />
+                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto">
+                      <Home className="w-6 h-6 text-primary" />
                     </div>
                     <p className="text-xs text-gray-500 mt-2">Property Image</p>
                   </div>
@@ -146,21 +144,17 @@ export const RenterRecommendedProperties = () => {
               {/* Property Details */}
               <div className="p-3">
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {property.title}
-                  </h3>
+                  <h3 className="font-semibold text-foreground text-sm">{property.title}</h3>
                   <div className="flex items-center gap-0.5">
-                    <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      {property.rating}
-                    </span>
+                    <Star className="w-3 h-3 fill-primary text-primary" />
+                    <span className="text-xs text-muted-foreground">{property.rating}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
                   <MapPin className="w-3 h-3" />
                   <span>{property.location}</span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
                   <div className="flex items-center gap-1">
                     <Bed className="w-3 h-3" />
                     <span>{property.bedrooms}</span>
@@ -175,7 +169,7 @@ export const RenterRecommendedProperties = () => {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-[#c4a747]">
+                  <span className="text-lg font-bold text-primary">
                     {formatPrice(property.price, property.period)}
                   </span>
                   <Button size="sm" variant="outline">

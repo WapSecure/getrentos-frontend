@@ -81,16 +81,16 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
   };
 
   return (
-    <div className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+    <div className="p-4 hover:bg-secondary transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold text-sm shrink-0">
             {getInitials(roommate.name)}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h4 className="font-semibold text-gray-900 dark:text-white">{roommate.name}</h4>
+              <h4 className="font-semibold text-foreground">{roommate.name}</h4>
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[roommate.status].color}`}
               >
@@ -149,7 +149,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
                   type="number"
                   value={sharePercentage}
                   onChange={(e) => setSharePercentage(Number(e.target.value))}
-                  className="w-16 px-2 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-16 px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   min="0"
                   max="100"
                 />
@@ -173,7 +173,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-[#c4a747]">
+                <span className="text-sm font-semibold text-primary">
                   {roommate.sharePercentage}%
                 </span>
                 <Button
@@ -198,7 +198,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
               <MoreVertical className="w-4 h-4 text-gray-500" />
             </Button>
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a2a2f] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+              <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10">
                 <Button
                   variant="ghost"
                   size="sm"

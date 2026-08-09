@@ -30,8 +30,8 @@ const financialData: FinancialPoint[] = [
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1a2a2f] px-3 py-2 shadow-lg space-y-1">
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</p>
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       {payload.map((entry) => (
         <p key={entry.name} className="text-sm font-semibold" style={{ color: entry.color }}>
           {entry.name}: {formatCurrency(entry.value as number)}
@@ -43,18 +43,18 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 export const FinancialChart = () => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-5">
+    <div className="bg-card rounded-2xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">Income vs Expenses</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Last 6 months</p>
+          <h3 className="font-semibold text-foreground">Income vs Expenses</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Last 6 months</p>
         </div>
         <div className="flex items-center gap-4 text-xs">
-          <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+          <span className="flex items-center gap-1.5 text-muted-foreground">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             Income
           </span>
-          <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+          <span className="flex items-center gap-1.5 text-muted-foreground">
             <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
             Expenses
           </span>
@@ -78,13 +78,13 @@ export const FinancialChart = () => {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-gray-400 dark:text-gray-500"
+              className="text-muted-foreground"
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-gray-400 dark:text-gray-500"
+              className="text-muted-foreground"
               tickFormatter={(value) => formatCurrency(value, { compact: true })}
               width={56}
             />

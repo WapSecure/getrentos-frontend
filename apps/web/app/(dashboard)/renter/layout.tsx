@@ -1,0 +1,76 @@
+'use client';
+
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
+import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
+import { PageLoadingState } from '@/components/ui/Skeleton';
+import {
+  ROUTES,
+  isAuthenticated,
+  STORAGE_KEYS,
+  getDashboardRoute,
+  BACKEND_ROLE_TO_ID,
+} from '@/lib/constants/auth';
+
+export type RenterUser = { fullName: string; email: string; role?: string; roles?: string[] };
+
+const RenterUserContext = createContext<RenterUser | null>(null);
+
+/** Returns the signed-in renter's profile, populated once by the renter layout's auth check. */
+export const useRenterUser = () => useContext(RenterUserContext);
+
+export default function RenterLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const [user, setUser] = useState<RenterUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const authenticated = isAuthenticated();
+      if (!authenticated) {
+        router.replace(ROUTES.LOGIN);
+        return;
+      }
+
+      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+      if (storedUser) {
+        const parsedUser: RenterUser = JSON.parse(storedUser);
+
+        // A user can hold multiple roles (e.g. Renter + Renter); gate on whether
+        // ANY of them is renter-equivalent, not just the primary `role` field.
+        const hasRenterRole = (parsedUser.roles || []).some(
+          (r) => BACKEND_ROLE_TO_ID[r] === 'renter'
+        );
+        if (!hasRenterRole) {
+          router.replace(getDashboardRoute(parsedUser.role || 'renter'));
+          return;
+        }
+
+        setUser(parsedUser);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (isLoading) {
+    return <PageLoadingState />;
+  }
+
+  return (
+    <RenterUserContext.Provider value={user}>
+      <div className="min-h-screen bg-background">
+        <RenterNavbar user={user} />
+        <div className="flex">
+          <RenterSidebar />
+          <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">{children}</div>
+          </main>
+        </div>
+      </div>
+    </RenterUserContext.Provider>
+  );
+}

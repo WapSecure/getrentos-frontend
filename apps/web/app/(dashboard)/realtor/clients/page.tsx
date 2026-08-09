@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Users } from 'lucide-react';
-import { RealtorNavbar } from '@/components/realtor/navigation/RealtorNavbar';
-import { RealtorSidebar } from '@/components/realtor/dashboard/RealtorSidebar';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
 import { Button } from '@/components/ui/Button';
-import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { RealtorClient, ClientRole } from '@/types/realtor';
 
 const mockClients: RealtorClient[] = [
@@ -48,34 +45,10 @@ type RoleFilter = 'all' | ClientRole;
 
 export default function RealtorClientsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState<RealtorClient[]>([]);
+  const [clients, setClients] = useState<RealtorClient[]>(mockClients);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        if (parsedUser.role && parsedUser.role !== 'realtor') {
-          router.replace(getDashboardRoute(parsedUser.role));
-          return;
-        }
-      }
-      setClients(mockClients);
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
 
   const handleAddClient = (
     data: Omit<RealtorClient, 'id' | 'status' | 'propertiesRepresented' | 'joinedDate'>
@@ -96,14 +69,6 @@ export default function RealtorClientsPage() {
     return matchesSearch && matchesFilter;
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   const filterOptions: { value: RoleFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'owner', label: 'Owners' },
@@ -111,99 +76,85 @@ export default function RealtorClientsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RealtorNavbar user={user} />
-
-      <div className="flex">
-        <RealtorSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Clients</h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {clients.length} client{clients.length === 1 ? '' : 's'} you represent
-                </p>
-              </div>
-              <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
-                <Plus className="w-4 h-4" />
-                Add Client
-              </Button>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search clients..."
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
-                />
-              </div>
-              <div className="flex gap-1 p-1 bg-gray-100 dark:bg-white/10 rounded-lg w-fit">
-                {filterOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setFilter(option.value)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                      filter === option.value
-                        ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {filteredClients.length === 0 ? (
-              <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#c4a747]/10 flex items-center justify-center">
-                  <Users className="w-8 h-8 text-[#c4a747]" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {clients.length === 0 ? 'No clients yet' : 'No clients match your filters'}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
-                  {clients.length === 0
-                    ? 'Add an owner or landlord client to start representing their properties.'
-                    : 'Try adjusting your search or filter.'}
-                </p>
-                {clients.length === 0 && (
-                  <Button
-                    variant="primary"
-                    className="mt-6"
-                    onClick={() => setIsAddModalOpen(true)}
-                  >
-                    Add Your First Client
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredClients.map((client, index) => (
-                  <ClientCard
-                    key={client.id}
-                    client={client}
-                    delay={index * 0.05}
-                    onMessage={() => router.push(`/realtor/messages?client=${client.id}`)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+    <>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Clients</h1>
+          <p className="text-muted-foreground mt-1">
+            {clients.length} client{clients.length === 1 ? '' : 's'} you represent
+          </p>
+        </div>
+        <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
+          <Plus className="w-4 h-4" />
+          Add Client
+        </Button>
       </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search clients..."
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
+          {filterOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setFilter(option.value)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                filter === option.value
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filteredClients.length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+            <Users className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">
+            {clients.length === 0 ? 'No clients yet' : 'No clients match your filters'}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+            {clients.length === 0
+              ? 'Add an owner or landlord client to start representing their properties.'
+              : 'Try adjusting your search or filter.'}
+          </p>
+          {clients.length === 0 && (
+            <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
+              Add Your First Client
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredClients.map((client, index) => (
+            <ClientCard
+              key={client.id}
+              client={client}
+              delay={index * 0.05}
+              onMessage={() => router.push(`/realtor/messages?client=${client.id}`)}
+            />
+          ))}
+        </div>
+      )}
 
       <AddClientModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddClient}
       />
-    </div>
+    </>
   );
 }

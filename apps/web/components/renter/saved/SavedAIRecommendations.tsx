@@ -45,11 +45,11 @@ export const SavedAIRecommendations = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden"
+      className="bg-linear-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden"
     >
       <div className="p-3 border-b border-purple-200 dark:border-purple-800 flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-purple-600" />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">AI Recommendations</h3>
+        <h3 className="text-sm font-semibold text-foreground">AI Recommendations</h3>
       </div>
 
       <div className="divide-y divide-purple-200 dark:divide-purple-800">
@@ -64,9 +64,9 @@ export const SavedAIRecommendations = () => {
                   {rec.type === 'price_drop' && <TrendingDown className="w-3 h-3 text-green-600" />}
                   {rec.type === 'trending' && <TrendingUp className="w-3 h-3 text-blue-600" />}
                   {rec.type === 'deadline' && <Clock className="w-3 h-3 text-orange-600" />}
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">{rec.title}</h4>
+                  <h4 className="text-sm font-medium text-foreground">{rec.title}</h4>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">{rec.description}</p>
+                <p className="text-xs text-muted-foreground">{rec.description}</p>
               </div>
               <Button size="sm" variant="ghost" className="gap-0">
                 {rec.actionText}

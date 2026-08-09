@@ -125,18 +125,16 @@ export const ApplicationDetailsModal = ({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+              className="bg-card rounded-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
             >
               {/* Header */}
-              <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+              <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="p-2 rounded-lg bg-[#c4a747]/10">
-                    <FileText className="w-5 h-5 text-[#c4a747]" />
+                  <div className="p-2 rounded-lg bg-accent">
+                    <FileText className="w-5 h-5 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                      {application.title}
-                    </h3>
+                    <h3 className="font-semibold text-foreground truncate">{application.title}</h3>
                     <div className="flex items-center gap-2">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
@@ -149,7 +147,7 @@ export const ApplicationDetailsModal = ({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   {application.status !== 'approved' &&
                     application.status !== 'rejected' &&
                     onWithdraw && (
@@ -162,22 +160,19 @@ export const ApplicationDetailsModal = ({
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
-                  <button
-                    onClick={onClose}
-                    className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-                  >
+                  <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Tabs */}
-              <div className="flex border-b border-gray-200 dark:border-white/10 flex-shrink-0">
+              <div className="flex border-b border-border shrink-0">
                 <button
                   onClick={() => setActiveTab('details')}
                   className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === 'details'
-                      ? 'text-[#c4a747] border-b-2 border-[#c4a747]'
+                      ? 'text-primary border-b-2 border-primary'
                       : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
@@ -187,7 +182,7 @@ export const ApplicationDetailsModal = ({
                   onClick={() => setActiveTab('timeline')}
                   className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === 'timeline'
-                      ? 'text-[#c4a747] border-b-2 border-[#c4a747]'
+                      ? 'text-primary border-b-2 border-primary'
                       : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
@@ -197,7 +192,7 @@ export const ApplicationDetailsModal = ({
                   onClick={() => setActiveTab('notes')}
                   className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === 'notes'
-                      ? 'text-[#c4a747] border-b-2 border-[#c4a747]'
+                      ? 'text-primary border-b-2 border-primary'
                       : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
@@ -211,44 +206,38 @@ export const ApplicationDetailsModal = ({
                   <div className="space-y-6">
                     {/* Property Info */}
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Property Details
-                      </h4>
+                      <h4 className="text-sm font-medium text-foreground mb-3">Property Details</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                           <p className="text-xs text-gray-500">Address</p>
                           <div className="flex items-center gap-1 mt-1">
                             <MapPin className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm text-gray-900 dark:text-white">
-                              {application.address}
-                            </span>
+                            <span className="text-sm text-foreground">{application.address}</span>
                           </div>
                         </div>
                         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                           <p className="text-xs text-gray-500">Rent</p>
-                          <p className="text-sm font-semibold text-[#c4a747] mt-1">
+                          <p className="text-sm font-semibold text-primary mt-1">
                             {formatPrice(application.price, application.period)}
                           </p>
                         </div>
                         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                           <p className="text-xs text-gray-500">Property Details</p>
                           <div className="flex items-center gap-3 mt-1">
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <span className="text-sm text-foreground">
                               {application.bedrooms} beds
                             </span>
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <span className="text-sm text-foreground">
                               {application.bathrooms} baths
                             </span>
-                            <span className="text-sm text-gray-900 dark:text-white">
-                              {application.size} sqft
-                            </span>
+                            <span className="text-sm text-foreground">{application.size} sqft</span>
                           </div>
                         </div>
                         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                           <p className="text-xs text-gray-500">Lease Details</p>
                           <div className="flex items-center gap-2 mt-1">
                             <Calendar className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <span className="text-sm text-foreground">
                               Move-in: {formatDate(application.moveInDate)}
                             </span>
                           </div>
@@ -261,17 +250,17 @@ export const ApplicationDetailsModal = ({
 
                     {/* Landlord Info */}
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      <h4 className="text-sm font-medium text-foreground mb-3">
                         Landlord Information
                       </h4>
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-white font-semibold">
+                          <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold">
                             {application.landlord.name.charAt(0)}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="font-medium text-gray-900 dark:text-white">
+                              <p className="font-medium text-foreground">
                                 {application.landlord.name}
                               </p>
                               <Shield className="w-4 h-4 text-green-500" />
@@ -297,9 +286,7 @@ export const ApplicationDetailsModal = ({
 
                     {/* Documents */}
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Documents
-                      </h4>
+                      <h4 className="text-sm font-medium text-foreground mb-3">Documents</h4>
                       <div className="space-y-2">
                         {application.documents.map((doc, index) => {
                           const docStatus = getDocumentStatus(doc.uploaded);
@@ -310,9 +297,7 @@ export const ApplicationDetailsModal = ({
                             >
                               <div className="flex items-center gap-2">
                                 <FileText className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-900 dark:text-white">
-                                  {doc.name}
-                                </span>
+                                <span className="text-sm text-foreground">{doc.name}</span>
                                 {doc.required && (
                                   <span className="text-xs text-red-500">Required</span>
                                 )}
@@ -322,7 +307,7 @@ export const ApplicationDetailsModal = ({
                                   {docStatus.label}
                                 </span>
                                 {doc.uploaded ? (
-                                  <button className="text-xs text-[#c4a747] hover:underline">
+                                  <button className="text-xs text-primary hover:underline">
                                     View
                                   </button>
                                 ) : (
@@ -340,10 +325,10 @@ export const ApplicationDetailsModal = ({
                     {/* Notes */}
                     {application.applicationNotes && (
                       <div>
-                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <h4 className="text-sm font-medium text-foreground mb-2">
                           Application Notes
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+                        <p className="text-sm text-muted-foreground p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                           {application.applicationNotes}
                         </p>
                       </div>

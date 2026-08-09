@@ -88,20 +88,18 @@ export const DiscoverAIRecommendations = () => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-      <div className="bg-gradient-to-r from-[#c4a747]/10 to-transparent rounded-xl border border-[#c4a747]/20 overflow-hidden">
+      <div className="bg-linear-to-r from-primary/10 to-transparent rounded-xl border border-primary/20 overflow-hidden">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[#c4a747]/20">
-              <Brain className="w-5 h-5 text-[#c4a747]" />
+            <div className="p-2 rounded-lg bg-primary/20">
+              <Brain className="w-5 h-5 text-primary" />
             </div>
             <div className="text-left">
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                AI-Powered Recommendations
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <h3 className="font-semibold text-foreground">AI-Powered Recommendations</h3>
+              <p className="text-sm text-muted-foreground">
                 Personalized insights based on your activity
               </p>
             </div>
@@ -130,21 +128,17 @@ export const DiscoverAIRecommendations = () => {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {rec.title}
-                      </h4>
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-white/50 dark:bg-white/10 text-gray-600 dark:text-gray-400">
+                      <h4 className="text-sm font-semibold text-foreground">{rec.title}</h4>
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-white/50 dark:bg-white/10 text-muted-foreground">
                         {rec.confidence}% match
                       </span>
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                      {rec.description}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
                     {rec.action && (
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="mt-2 p-0 h-auto text-xs text-[#c4a747]"
+                        className="mt-2 p-0 h-auto text-xs text-primary"
                       >
                         {rec.action} <ChevronRight className="w-3 h-3 ml-1" />
                       </Button>

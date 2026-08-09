@@ -30,10 +30,10 @@ export const NotificationsList = ({
 }: NotificationsListProps) => {
   if (notifications.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 p-12 text-center">
+      <div className="bg-card rounded-xl border border-border p-12 text-center">
         <BellOff className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No notifications</h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
+        <h3 className="text-xl font-semibold text-foreground">No notifications</h3>
+        <p className="text-muted-foreground mt-2">
           {notifications.length === 0 ? "You're all caught up!" : 'Try adjusting your filters'}
         </p>
       </div>
@@ -41,8 +41,8 @@ export const NotificationsList = ({
   }
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="divide-y divide-border">
         <AnimatePresence>
           {notifications.map((notification, index) => (
             <motion.div

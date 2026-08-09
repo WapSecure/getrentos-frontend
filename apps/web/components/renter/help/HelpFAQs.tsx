@@ -86,23 +86,21 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
 
   if (filteredFAQs.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 p-8 text-center">
+      <div className="bg-card rounded-xl border border-border p-8 text-center">
         <HelpCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-gray-500 dark:text-gray-400">No FAQs found for this category</p>
+        <p className="text-muted-foreground">No FAQs found for this category</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Frequently Asked Questions</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Quick answers to common questions
-        </p>
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Frequently Asked Questions</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Quick answers to common questions</p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {filteredFAQs.map((faq) => {
           const isExpanded = expandedId === faq.id;
           return (
@@ -110,23 +108,19 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
               <button
                 onClick={() => toggleExpanded(faq.id)}
                 aria-expanded={isExpanded}
-                className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary transition-colors"
               >
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {faq.question}
-                </span>
+                <span className="text-sm font-medium text-foreground">{faq.question}</span>
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
                 )}
               </button>
 
               {isExpanded && (
                 <div className="px-4 pb-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {faq.answer}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
                 </div>
               )}
             </div>

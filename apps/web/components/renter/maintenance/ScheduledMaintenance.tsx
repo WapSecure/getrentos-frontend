@@ -40,17 +40,15 @@ export const ScheduledMaintenance = ({ schedules }: ScheduledMaintenanceProps) =
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#c4a747]" />
-            <h3 className="font-semibold text-gray-900 dark:text-white">Scheduled Maintenance</h3>
+            <Calendar className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">Scheduled Maintenance</h3>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Upcoming and ongoing maintenance
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">Upcoming and ongoing maintenance</p>
         </div>
         <Button size="sm" variant="ghost" className="gap-1">
           <Plus className="w-3 h-3" />
@@ -58,7 +56,7 @@ export const ScheduledMaintenance = ({ schedules }: ScheduledMaintenanceProps) =
         </Button>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {schedules.length === 0 ? (
           <div className="p-8 text-center">
             <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
@@ -70,13 +68,10 @@ export const ScheduledMaintenance = ({ schedules }: ScheduledMaintenanceProps) =
             const StatusIcon = status.icon;
 
             return (
-              <div
-                key={schedule.id}
-                className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-              >
+              <div key={schedule.id} className="p-4 hover:bg-secondary transition-colors">
                 <div className="flex flex-wrap justify-between items-start gap-2">
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">{schedule.title}</h4>
+                    <h4 className="font-medium text-foreground">{schedule.title}</h4>
                     <p className="text-sm text-gray-500 mt-0.5">{schedule.description}</p>
                     <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
                       <div className="flex items-center gap-1">

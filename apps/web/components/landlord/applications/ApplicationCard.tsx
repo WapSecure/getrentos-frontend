@@ -31,25 +31,25 @@ export const ApplicationCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-[#0a1a1f] font-semibold text-sm flex-shrink-0">
+          <div className="w-11 h-11 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
             {getInitials(application.applicantName)}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+              <h3 className="font-semibold text-foreground truncate">
                 {application.applicantName}
               </h3>
               {isVerified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
               ) : (
-                <ShieldAlert className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" />
+                <ShieldAlert className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {application.propertyName} • {application.unitName}
             </p>
           </div>
@@ -60,24 +60,24 @@ export const ApplicationCard = ({
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
           <p className="text-xs text-gray-400">Monthly Income</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <p className="text-sm font-medium text-foreground">
             {formatCurrency(application.monthlyIncome, { compact: true })}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-400">Applied</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <p className="text-sm font-medium text-foreground">
             {formatDate(application.applicationDate)}
           </p>
         </div>
       </div>
 
       <div className="flex items-center gap-1.5 mt-3">
-        <span className="text-xs text-gray-500 dark:text-gray-400">Trust Score</span>
-        <span className="text-xs font-bold text-[#c4a747]">{application.trustScore}</span>
+        <span className="text-xs text-muted-foreground">Trust Score</span>
+        <span className="text-xs font-bold text-primary">{application.trustScore}</span>
       </div>
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
         <Button variant="outline" size="sm" fullWidth className="gap-1.5" onClick={onViewDetails}>
           <Eye className="w-3.5 h-3.5" />
           Details

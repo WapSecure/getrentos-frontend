@@ -61,11 +61,11 @@ export const RealtorListingCard = ({ listing, onClick, delay = 0 }: RealtorListi
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="group bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
     >
-      <div className="relative h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f]">
+      <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Megaphone className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          <Megaphone className="w-12 h-12 text-muted-foreground" />
         </div>
         <div
           className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.className}`}
@@ -73,25 +73,25 @@ export const RealtorListingCard = ({ listing, onClick, delay = 0 }: RealtorListi
           <StatusIcon className="w-3 h-3" />
           {status.label}
         </div>
-        <div className="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-[#c4a747] bg-[#c4a747]/10">
+        <div className="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-primary bg-accent">
           {listing.category === 'sale' ? 'For Sale' : 'For Rent'}
         </div>
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white truncate">{listing.title}</h3>
-        <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <h3 className="font-semibold text-foreground truncate">{listing.title}</h3>
+        <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
           <MapPin className="w-3 h-3" />
           {listing.city}, {listing.state}
         </p>
         <p className="text-xs text-gray-400 mt-0.5">Client: {listing.clientName}</p>
 
-        <p className="text-lg font-bold text-[#c4a747] mt-3">
+        <p className="text-lg font-bold text-primary mt-3">
           {formatCurrency(listing.price, { compact: true })}
           {listing.category === 'rental' ? '/yr' : ''}
         </p>
 
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
           {listing.bedrooms !== undefined && (
             <span className="flex items-center gap-1">
               <BedDouble className="w-3.5 h-3.5" />

@@ -78,17 +78,14 @@ export const OwnerVerificationStatusModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Verification Status</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{property.name}</p>
+                <h3 className="font-semibold text-foreground">Verification Status</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{property.name}</p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -100,8 +97,8 @@ export const OwnerVerificationStatusModal = ({
                 >
                   <Icon className={`w-7 h-7 ${config.color}`} />
                 </div>
-                <h4 className="font-semibold text-gray-900 dark:text-white">{config.label}</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">
+                <h4 className="font-semibold text-foreground">{config.label}</h4>
+                <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                   {config.message}
                 </p>
               </div>
@@ -117,22 +114,20 @@ export const OwnerVerificationStatusModal = ({
                 </div>
               )}
 
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-white/5 overflow-hidden">
+              <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Owner on record</span>
-                  <span className="text-gray-900 dark:text-white font-medium">
-                    {property.ownerName}
-                  </span>
+                  <span className="text-muted-foreground">Owner on record</span>
+                  <span className="text-foreground font-medium">{property.ownerName}</span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Purchase price</span>
-                  <span className="text-gray-900 dark:text-white font-medium">
+                  <span className="text-muted-foreground">Purchase price</span>
+                  <span className="text-foreground font-medium">
                     {formatCurrency(property.purchasePrice)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Purchase date</span>
-                  <span className="text-gray-900 dark:text-white font-medium">
+                  <span className="text-muted-foreground">Purchase date</span>
+                  <span className="text-foreground font-medium">
                     {formatDate(property.purchaseDate)}
                   </span>
                 </div>
@@ -140,28 +135,28 @@ export const OwnerVerificationStatusModal = ({
 
               {canResubmit && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Upload updated document
                   </label>
-                  <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#c4a747] transition-colors cursor-pointer">
+                  <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
                     <input
                       type="file"
                       className="hidden"
                       onChange={(e) => setResubmitFileName(e.target.files?.[0]?.name || '')}
                     />
-                    <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="text-sm text-muted-foreground truncate">
                       {resubmitFileName || 'Click to upload'}
                     </span>
                     {resubmitFileName && (
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0 ml-auto" />
+                      <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />
                     )}
                   </label>
                 </div>
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+            <div className="p-4 border-t border-border flex gap-3 shrink-0">
               <Button variant="ghost" onClick={onClose} className="flex-1">
                 Close
               </Button>

@@ -29,7 +29,7 @@ export const DiscoverSearchBar = ({ onSearch }: DiscoverSearchBarProps) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by location, property name, or keyword..."
-          className="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c4a747] focus:border-transparent"
+          className="w-full pl-12 pr-12 py-3 rounded-xl border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         {query && (
           <button

@@ -57,15 +57,13 @@ export const RenterRoommates = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.65, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Roommates</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Manage shared living arrangements
-            </p>
+            <h2 className="text-lg font-semibold text-foreground">Roommates</h2>
+            <p className="text-sm text-muted-foreground">Manage shared living arrangements</p>
           </div>
           <Button size="sm" className="gap-1" onClick={() => setShowInvite(!showInvite)}>
             <UserPlus className="w-3 h-3" />
@@ -75,14 +73,14 @@ export const RenterRoommates = () => {
       </div>
 
       {showInvite && (
-        <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+        <div className="p-4 border-b border-border bg-gray-50 dark:bg-white/5">
           <div className="flex gap-2">
             <input
               type="email"
               placeholder="Enter roommate's email"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+              className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <Button size="sm">Send Invite</Button>
           </div>
@@ -102,11 +100,11 @@ export const RenterRoommates = () => {
             className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-white/5"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center text-[#0a1a1f] font-semibold">
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold">
                 {roommate.name.charAt(0)}
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">{roommate.name}</p>
+                <p className="font-medium text-foreground">{roommate.name}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <Mail className="w-3 h-3 text-gray-400" />
                   <span className="text-xs text-gray-500">{roommate.email}</span>
@@ -114,7 +112,7 @@ export const RenterRoommates = () => {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm font-semibold text-[#c4a747]">
+              <p className="text-sm font-semibold text-primary">
                 {roommate.sharePercentage}% share
               </p>
               <div className="flex items-center gap-1 mt-1">
@@ -126,17 +124,13 @@ export const RenterRoommates = () => {
         ))}
 
         {/* Rent Split Summary */}
-        <div className="mt-4 p-3 rounded-lg bg-[#c4a747]/10 border border-[#c4a747]/20">
+        <div className="mt-4 p-3 rounded-lg bg-accent border border-primary/20">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              Monthly Rent Split
-            </span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {totalShare}% allocated
-            </span>
+            <span className="text-sm font-medium text-foreground">Monthly Rent Split</span>
+            <span className="text-sm font-medium text-foreground">{totalShare}% allocated</span>
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div className="h-full bg-[#c4a747] rounded-full" style={{ width: `${totalShare}%` }} />
+            <div className="h-full bg-primary rounded-full" style={{ width: `${totalShare}%` }} />
           </div>
           <p className="text-xs text-gray-500 mt-2">
             {totalShare === 100 ? 'All rent allocated' : `${100 - totalShare}% unallocated`}

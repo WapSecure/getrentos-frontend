@@ -45,7 +45,7 @@ export const InvestmentStatsCards = ({
       bg: 'bg-emerald-50 dark:bg-emerald-950/20',
       icon: 'text-emerald-600 dark:text-emerald-400',
     },
-    gold: { bg: 'bg-[#c4a747]/10', icon: 'text-[#c4a747]' },
+    gold: { bg: 'bg-accent', icon: 'text-primary' },
     green: { bg: 'bg-green-50 dark:bg-green-950/20', icon: 'text-green-600 dark:text-green-400' },
   } as const;
 
@@ -59,15 +59,13 @@ export const InvestmentStatsCards = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.4 }}
-            className="rounded-2xl bg-white dark:bg-[#1a2a2f] border border-gray-200 dark:border-white/10 p-4"
+            className="rounded-2xl bg-card border border-border p-4"
           >
             <div className={`inline-flex p-2.5 rounded-xl ${colors.bg} mb-3`}>
               <stat.icon className={`w-5 h-5 ${colors.icon}`} />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{stat.label}</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-              {stat.value}
-            </p>
+            <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+            <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
           </motion.div>
         );
       })}

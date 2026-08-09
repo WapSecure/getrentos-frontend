@@ -85,38 +85,33 @@ export const CreateLeaseModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Create Lease</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Draft a new lease agreement
-                </p>
+                <h3 className="font-semibold text-foreground">Create Lease</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Draft a new lease agreement</p>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               {vacantUnits.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+                <p className="text-sm text-muted-foreground text-center py-8">
                   No vacant units available. Mark a unit vacant or add a property first.
                 </p>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Unit <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={unitId}
                       onChange={(e) => handleUnitChange(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="">Select a vacant unit</option>
                       {vacantUnits.map((u) => (
@@ -128,7 +123,7 @@ export const CreateLeaseModal = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Tenant Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -136,49 +131,49 @@ export const CreateLeaseModal = ({
                       value={tenantName}
                       onChange={(e) => setTenantName(e.target.value)}
                       placeholder="Full legal name"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Lease Start <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
                         value={leaseStart}
                         onChange={(e) => setLeaseStart(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Lease End <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
                         value={leaseEnd}
                         onChange={(e) => setLeaseEnd(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Rent Amount (₦) <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="number"
                         value={rentAmount}
                         onChange={(e) => setRentAmount(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Deposit (₦)
                       </label>
                       <input
@@ -186,7 +181,7 @@ export const CreateLeaseModal = ({
                         value={securityDeposit}
                         onChange={(e) => setSecurityDeposit(e.target.value)}
                         placeholder="Optional"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -195,7 +190,7 @@ export const CreateLeaseModal = ({
             </div>
 
             {vacantUnits.length > 0 && (
-              <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+              <div className="p-4 border-t border-border flex gap-3 shrink-0">
                 <Button
                   variant="outline"
                   fullWidth

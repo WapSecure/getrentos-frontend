@@ -55,7 +55,7 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
     bg: 'bg-orange-50 dark:bg-orange-950/20',
     color: 'text-orange-600 dark:text-orange-400',
   },
-  offer: { icon: Handshake, bg: 'bg-[#c4a747]/10', color: 'text-[#c4a747]' },
+  offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
   commission: {
     icon: Wallet,
     bg: 'bg-emerald-50 dark:bg-emerald-950/20',
@@ -65,31 +65,29 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
 
 export const RealtorActivityFeed = () => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Recent Activity</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">
           Leads, viewings, offers, and commission updates
         </p>
       </div>
 
-      <div className="divide-y divide-gray-100 dark:divide-white/5">
+      <div className="divide-y divide-border">
         {activityItems.map((item) => {
           const config = typeConfig[item.type];
           const Icon = config.icon;
           return (
             <div
               key={item.id}
-              className="p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
             >
-              <div className={`p-2 rounded-lg ${config.bg} flex-shrink-0`}>
+              <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
                 <Icon className={`w-4 h-4 ${config.color}`} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{item.title}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {item.description}
-                </p>
+                <p className="text-sm font-medium text-foreground">{item.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                 <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
               </div>
             </div>

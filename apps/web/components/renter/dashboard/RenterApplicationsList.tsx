@@ -149,12 +149,12 @@ export const RenterApplicationsList = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Applications</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Track your rental applications</p>
+          <h2 className="text-lg font-semibold text-foreground">My Applications</h2>
+          <p className="text-sm text-muted-foreground">Track your rental applications</p>
         </div>
         <Button href="/renter/applications" variant="ghost" size="sm" className="gap-1">
           View All
@@ -162,7 +162,7 @@ export const RenterApplicationsList = () => {
         </Button>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {applications.map((app, index) => {
           const StatusIcon = statusConfig[app.status].icon;
 
@@ -172,34 +172,34 @@ export const RenterApplicationsList = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * index, duration: 0.3 }}
-              className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
+              className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
-                <div className="w-full md:w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#2a3a3f] dark:to-[#1a2a2f] rounded-xl flex items-center justify-center flex-shrink-0">
-                  <div className="w-8 h-8 bg-[#c4a747]/20 rounded-lg flex items-center justify-center">
-                    <Home className="w-4 h-4 text-[#c4a747]" />
+                <div className="w-full md:w-16 h-16 bg-linear-to-br from-secondary to-muted rounded-xl flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                    <Home className="w-4 h-4 text-primary" />
                   </div>
                 </div>
 
                 <div className="flex-1">
                   <div className="flex flex-wrap justify-between items-start gap-2">
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#c4a747] transition-colors">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                         {app.title}
                       </h3>
-                      <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                         <MapPin className="w-3 h-3" />
                         <span>{app.address}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-[#c4a747]">
+                      <div className="text-lg font-bold text-primary">
                         {formatPrice(app.price, app.period)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Bed className="w-3 h-3" />
                       <span>

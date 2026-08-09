@@ -51,20 +51,18 @@ export const DiscoverAINeighborhoodInsights = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden mb-6"
+      className="bg-card rounded-xl border border-border overflow-hidden mb-6"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-[#c4a747]" />
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              AI Neighborhood Insights
-            </h3>
+            <MapPin className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">AI Neighborhood Insights</h3>
           </div>
           <div className="flex items-center gap-2">
             <div className="text-right">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Overall Score</p>
-              <p className="text-xl font-bold text-[#c4a747]">{overallScore}</p>
+              <p className="text-xs text-muted-foreground">Overall Score</p>
+              <p className="text-xl font-bold text-primary">{overallScore}</p>
             </div>
             <div className="relative w-12 h-12">
               <svg className="w-12 h-12 transform -rotate-90">
@@ -82,14 +80,14 @@ export const DiscoverAINeighborhoodInsights = () => {
                   cy="24"
                   r="20"
                   fill="none"
-                  stroke="#c4a747"
+                  stroke="var(--primary)"
                   strokeWidth="4"
                   strokeDasharray={`${(overallScore / 100) * 125.6} 125.6`}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-[#c4a747]" />
+                <TrendingUp className="w-4 h-4 text-primary" />
               </div>
             </div>
           </div>
@@ -107,22 +105,18 @@ export const DiscoverAINeighborhoodInsights = () => {
               className="p-2 rounded-lg bg-gray-50 dark:bg-white/5"
             >
               <div className="flex items-center gap-2 mb-1">
-                <metric.icon className="w-3 h-3 text-[#c4a747]" />
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {metric.label}
-                </span>
+                <metric.icon className="w-3 h-3 text-primary" />
+                <span className="text-xs font-medium text-foreground">{metric.label}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {metric.score}
-                </span>
+                <span className="text-lg font-bold text-foreground">{metric.score}</span>
                 <span className="text-xs text-gray-500">
                   {metric.score >= 80 ? 'Excellent' : metric.score >= 60 ? 'Good' : 'Average'}
                 </span>
               </div>
               <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
                 <div
-                  className="h-full bg-[#c4a747] rounded-full"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${metric.score}%` }}
                 />
               </div>

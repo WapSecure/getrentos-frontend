@@ -51,10 +51,8 @@ export const AutomationSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-        Automation & Reminders
-      </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h2 className="text-xl font-semibold text-foreground mb-4">Automation & Reminders</h2>
+      <p className="text-sm text-muted-foreground mb-6">
         Let GetRentos handle routine communication with your tenants
       </p>
 
@@ -62,23 +60,21 @@ export const AutomationSettings = () => {
         {toggles.map((item) => (
           <div
             key={item.id}
-            className="flex items-start justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
+            className="flex items-start justify-between gap-4 p-4 rounded-lg border border-border"
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 flex-shrink-0">
-                <item.icon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <div className="p-2 rounded-lg bg-secondary shrink-0">
+                <item.icon className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{item.label}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {item.description}
-                </p>
+                <p className="text-sm font-medium text-foreground">{item.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
               </div>
             </div>
             <button
               onClick={() => toggle(item.id)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${
-                item.enabled ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
+                item.enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span

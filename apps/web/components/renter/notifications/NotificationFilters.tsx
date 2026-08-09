@@ -36,16 +36,16 @@ export const NotificationFilters = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#c4a747]" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Filters</span>
+          <Filter className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Filters</span>
           {(filterType !== 'all' || filterRead !== 'all') && (
-            <span className="w-2 h-2 bg-[#c4a747] rounded-full" />
+            <span className="w-2 h-2 bg-primary rounded-full" />
           )}
         </div>
         {isExpanded ? (
@@ -58,7 +58,7 @@ export const NotificationFilters = ({
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs font-medium text-foreground mb-1">
               Notification Type
             </label>
             <div className="flex flex-wrap gap-2">
@@ -76,9 +76,7 @@ export const NotificationFilters = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Status
-            </label>
+            <label className="block text-xs font-medium text-foreground mb-1">Status</label>
             <div className="flex flex-wrap gap-2">
               {readOptions.map((option) => (
                 <Button

@@ -59,29 +59,29 @@ export const DiscoverAIPricePredictor = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-gradient-to-br from-gray-50 to-white dark:from-[#1a2a2f] dark:to-[#0a1a1f] rounded-xl border border-gray-200 dark:border-white/10 p-4 mb-6"
+      className="bg-linear-to-br from-secondary to-card dark:from-card dark:to-background rounded-xl border border-border p-4 mb-6"
     >
       <div className="flex items-center gap-2 mb-3">
-        <Zap className="w-4 h-4 text-[#c4a747]" />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">AI Price Prediction</h3>
+        <Zap className="w-4 h-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">AI Price Prediction</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-3">
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Current Market Price</p>
-          <p className="text-lg font-bold text-gray-900 dark:text-white">
+          <p className="text-xs text-muted-foreground">Current Market Price</p>
+          <p className="text-lg font-bold text-foreground">
             {formatPrice(mockPrediction.currentPrice)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Predicted Price (30 days)</p>
-          <p className="text-lg font-bold text-gray-900 dark:text-white">
+          <p className="text-xs text-muted-foreground">Predicted Price (30 days)</p>
+          <p className="text-lg font-bold text-foreground">
             {formatPrice(mockPrediction.predictedPrice)}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-3 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+      <div className="flex items-center justify-between mb-3 p-2 rounded-lg bg-secondary">
         <div className="flex items-center gap-2">
           {getTrendIcon()}
           <span className={`text-sm font-medium ${getTrendColor()}`}>
@@ -91,14 +91,14 @@ export const DiscoverAIPricePredictor = () => {
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Award className="w-3 h-3 text-[#c4a747]" />
+          <Award className="w-3 h-3 text-primary" />
           <span className="text-xs text-gray-500">{mockPrediction.confidence}% confidence</span>
         </div>
       </div>
 
       <div className="flex items-start gap-2">
-        <Target className="w-4 h-4 text-[#c4a747] mt-0.5" />
-        <p className="text-xs text-gray-600 dark:text-gray-400">{mockPrediction.recommendation}</p>
+        <Target className="w-4 h-4 text-primary mt-0.5" />
+        <p className="text-xs text-muted-foreground">{mockPrediction.recommendation}</p>
       </div>
     </motion.div>
   );

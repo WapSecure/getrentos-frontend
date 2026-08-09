@@ -93,18 +93,16 @@ export const MaintenanceRequestCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 flex-shrink-0">
-            <CategoryIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+          <div className="p-2 rounded-lg bg-secondary shrink-0">
+            <CategoryIcon className="w-4 h-4 text-muted-foreground" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {request.issueTitle}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <h3 className="font-semibold text-foreground truncate">{request.issueTitle}</h3>
+            <p className="text-xs text-muted-foreground truncate">
               {request.tenantName} • {request.propertyName}, {request.unitName}
             </p>
           </div>
@@ -120,24 +118,20 @@ export const MaintenanceRequestCard = ({
         </span>
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-300 mt-3 line-clamp-2">
-        {request.description}
-      </p>
+      <p className="text-sm text-muted-foreground mt-3 line-clamp-2">{request.description}</p>
 
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs text-gray-400">Reported {formatRelativeTime(request.createdAt)}</p>
         {request.assignedVendorName && (
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Vendor:{' '}
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              {request.assignedVendorName}
-            </span>
+            <span className="font-medium text-foreground">{request.assignedVendorName}</span>
           </p>
         )}
       </div>
 
       {!isResolved && (
-        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        <div className="flex gap-2 mt-4 pt-4 border-t border-border">
           <Button
             variant="outline"
             size="sm"

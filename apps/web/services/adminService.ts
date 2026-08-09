@@ -10,7 +10,18 @@ import type {
   FraudAlertStatus,
   PlatformEscrowTransaction,
   AuditLogEntry,
+  AdminDocument,
+  AdminDocumentCategory,
+  Conversation,
+  ThreadMessage,
+  RevenuePoint,
+  RevenueBreakdown,
+  NotificationPreference,
+  PlatformConfig,
+  AdminProfile,
 } from '@/types/admin';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -205,5 +216,141 @@ export const adminService = {
       limit: params.limit?.toString(),
     });
     return safeCall(() => authFetch(`/admin/audit-logs${query}`));
+  },
+
+  // ---- Documents ----
+  async listDocuments(
+    params: { search?: string; category?: string } = {}
+  ): Promise<ApiResponse<AdminDocument[]>> {
+    return safeCall(() => authFetch(`/admin/documents${toQuery(params)}`));
+  },
+
+  async uploadDocument(
+    name: string,
+    category: AdminDocumentCategory,
+    file: File
+  ): Promise<ApiResponse<AdminDocument>> {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('category', category);
+    formData.append('file', file);
+    return safeCall(() => authFetch('/admin/documents', { method: 'POST', body: formData }));
+  },
+
+  async getDocumentDownloadUrl(id: string): Promise<ApiResponse<{ url: string; name: string }>> {
+    return safeCall(() => authFetch(`/admin/documents/${id}/download`));
+  },
+
+  // ---- Messages ----
+  async listConversations(params: { search?: string } = {}): Promise<ApiResponse<Conversation[]>> {
+    return safeCall(() => authFetch(`/admin/messages/conversations${toQuery(params)}`));
+  },
+
+  async getConversationMessages(conversationId: string): Promise<ApiResponse<ThreadMessage[]>> {
+    return safeCall(() => authFetch(`/admin/messages/conversations/${conversationId}/messages`));
+  },
+
+  async sendConversationMessage(
+    conversationId: string,
+    text: string
+  ): Promise<ApiResponse<ThreadMessage>> {
+    return safeCall(() =>
+      authFetch(`/admin/messages/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+    );
+  },
+
+  async markConversationRead(conversationId: string): Promise<ApiResponse<{ success: boolean }>> {
+    return safeCall(() =>
+      authFetch(`/admin/messages/conversations/${conversationId}/read`, { method: 'PATCH' })
+    );
+  },
+
+  // ---- Reports ----
+  async getReportsStats(): Promise<
+    ApiResponse<{
+      gmvYtd: number;
+      activeUsers: number;
+      avgTrustScore: number;
+      momGrowthPct: number;
+    }>
+  > {
+    return safeCall(() => authFetch('/admin/reports/stats'));
+  },
+
+  async getRevenueSeries(months = 6): Promise<ApiResponse<RevenuePoint[]>> {
+    return safeCall(() => authFetch(`/admin/reports/revenue-series?months=${months}`));
+  },
+
+  async getGmvBreakdown(): Promise<ApiResponse<RevenueBreakdown[]>> {
+    return safeCall(() => authFetch('/admin/reports/gmv-breakdown'));
+  },
+
+  /** Triggers a browser download of the transactions CSV export. */
+  async exportReportsCsv(): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token =
+        typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) : null;
+      const response = await fetch(`${API_BASE_URL}/admin/reports/export`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new ApiError(response.status, 'Failed to export report');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'getrentos-transactions.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
+  },
+
+  // ---- Settings ----
+  async getProfile(): Promise<ApiResponse<AdminProfile>> {
+    return safeCall(() => authFetch('/admin/profile'));
+  },
+
+  async updateProfile(
+    data: Partial<{ fullName: string; email: string; phone: string }>
+  ): Promise<ApiResponse<AdminProfile>> {
+    return safeCall(() =>
+      authFetch('/admin/profile', { method: 'PATCH', body: JSON.stringify(data) })
+    );
+  },
+
+  async uploadAvatar(file: File): Promise<ApiResponse<AdminProfile>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return safeCall(() => authFetch('/admin/profile/avatar', { method: 'POST', body: formData }));
+  },
+
+  async getNotificationPreferences(): Promise<ApiResponse<NotificationPreference[]>> {
+    return safeCall(() => authFetch('/admin/settings/notifications'));
+  },
+
+  async updateNotificationPreferences(
+    preferences: NotificationPreference[]
+  ): Promise<ApiResponse<NotificationPreference[]>> {
+    return safeCall(() =>
+      authFetch('/admin/settings/notifications', {
+        method: 'PUT',
+        body: JSON.stringify({ preferences }),
+      })
+    );
+  },
+
+  async getPlatformConfig(): Promise<ApiResponse<PlatformConfig>> {
+    return safeCall(() => authFetch('/admin/settings/platform-config'));
+  },
+
+  async updatePlatformConfig(config: PlatformConfig): Promise<ApiResponse<PlatformConfig>> {
+    return safeCall(() =>
+      authFetch('/admin/settings/platform-config', { method: 'PUT', body: JSON.stringify(config) })
+    );
   },
 };

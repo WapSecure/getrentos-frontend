@@ -81,13 +81,10 @@ export const DocumentsStats = ({ documents }: DocumentsStatsProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-6">
       {stats.map((stat, index) => (
-        <div
-          key={stat.label}
-          className={`${stat.bg} rounded-xl p-3 border border-gray-200 dark:border-white/10`}
-        >
+        <div key={stat.label} className={`${stat.bg} rounded-xl p-3 border border-border`}>
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />
-            <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{stat.label}</span>
+            <span className="text-xs text-muted-foreground truncate">{stat.label}</span>
           </div>
           <p className={`text-base font-bold ${stat.color} mt-1`}>{stat.value}</p>
         </div>

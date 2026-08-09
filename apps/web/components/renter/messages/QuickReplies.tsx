@@ -21,14 +21,14 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-[#c4a747]" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Quick Replies</span>
+          <Zap className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Quick Replies</span>
         </div>
         {isExpanded ? (
           <ChevronUp className="w-4 h-4 text-gray-500" />
@@ -43,7 +43,7 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
             <button
               key={index}
               onClick={() => onSelectReply(reply)}
-              className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-secondary rounded-lg transition-colors"
             >
               {reply}
             </button>

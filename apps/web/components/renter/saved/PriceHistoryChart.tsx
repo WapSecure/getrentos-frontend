@@ -61,17 +61,14 @@ export const PriceHistoryChart = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-lg w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Price History</h3>
+                <h3 className="font-semibold text-foreground">Price History</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{propertyTitle}</p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -81,9 +78,7 @@ export const PriceHistoryChart = ({
               <div className="grid grid-cols-3 gap-3 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                 <div>
                   <p className="text-xs text-gray-500">Current Price</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {formatPrice(currentPrice)}
-                  </p>
+                  <p className="text-lg font-bold text-foreground">{formatPrice(currentPrice)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Price Change</p>
@@ -130,7 +125,7 @@ export const PriceHistoryChart = ({
                           transition={{ duration: 0.5, delay: index * 0.05 }}
                           className={`w-full rounded-t-lg ${
                             item.price === currentPrice
-                              ? 'bg-[#c4a747]'
+                              ? 'bg-primary'
                               : item.price < firstPrice
                                 ? 'bg-green-400'
                                 : 'bg-gray-400'

@@ -72,33 +72,30 @@ export const CreateListingModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center flex-shrink-0">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Add Listing</h3>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
-              >
+            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
+              <h3 className="font-semibold text-foreground">Add Listing</h3>
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               {clients.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
+                <p className="text-sm text-muted-foreground text-center py-6">
                   Add a client first before creating a listing on their behalf.
                 </p>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Client <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={clientId}
                       onChange={(e) => setClientId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="">Select a client</option>
                       {clients.map((c) => (
@@ -110,7 +107,7 @@ export const CreateListingModal = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Category
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -121,8 +118,8 @@ export const CreateListingModal = ({
                           onClick={() => setCategory(option)}
                           className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
                             category === option
-                              ? 'border-[#c4a747] bg-[#c4a747]/10 text-[#c4a747]'
-                              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
+                              ? 'border-primary bg-accent text-primary'
+                              : 'border-border text-muted-foreground'
                           }`}
                         >
                           {option === 'sale' ? 'For Sale' : 'For Rent'}
@@ -132,7 +129,7 @@ export const CreateListingModal = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Listing Title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -140,18 +137,18 @@ export const CreateListingModal = ({
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Property Type
                     </label>
                     <select
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {propertyTypes.map((t) => (
                         <option key={t} value={t}>
@@ -162,7 +159,7 @@ export const CreateListingModal = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       {category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'}{' '}
                       <span className="text-red-500">*</span>
                     </label>
@@ -171,38 +168,36 @@ export const CreateListingModal = ({
                       min={0}
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        City
-                      </label>
+                      <label className="block text-sm font-medium text-foreground mb-1">City</label>
                       <input
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         State
                       </label>
                       <input
                         type="text"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Bedrooms
                       </label>
                       <input
@@ -210,11 +205,11 @@ export const CreateListingModal = ({
                         min={0}
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Bathrooms
                       </label>
                       <input
@@ -222,7 +217,7 @@ export const CreateListingModal = ({
                         min={0}
                         value={bathrooms}
                         onChange={(e) => setBathrooms(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -231,7 +226,7 @@ export const CreateListingModal = ({
             </div>
 
             {clients.length > 0 && (
-              <div className="p-4 border-t border-gray-200 dark:border-white/10 flex gap-3 flex-shrink-0">
+              <div className="p-4 border-t border-border flex gap-3 shrink-0">
                 <Button
                   variant="outline"
                   className="flex-1"

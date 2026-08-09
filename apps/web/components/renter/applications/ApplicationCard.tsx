@@ -79,26 +79,26 @@ export const ApplicationCard = ({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-md transition-shadow"
+        className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow"
       >
         <div className="flex flex-col sm:flex-row">
-          <div className="w-full sm:w-40 h-32 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f] flex items-center justify-center flex-shrink-0 relative">
+          <div className="w-full sm:w-40 h-32 bg-linear-to-br from-secondary to-muted flex items-center justify-center shrink-0 relative">
             <Home className="w-8 h-8 text-gray-400" />
           </div>
 
           <div className="flex-1 p-4">
             <div className="flex flex-wrap justify-between items-start gap-2">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white hover:text-[#c4a747] transition-colors">
+                <h3 className="font-semibold text-foreground hover:text-primary transition-colors">
                   {application.title}
                 </h3>
-                <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                   <MapPin className="w-3 h-3" />
                   <span className="text-xs">{application.address}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className="text-sm font-bold text-[#c4a747]">
+                <span className="text-sm font-bold text-primary">
                   {formatPrice(application.price, application.period)}
                 </span>
                 <div
@@ -110,7 +110,7 @@ export const ApplicationCard = ({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-600 dark:text-gray-400">
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Bed className="w-3 h-3" />
                 <span>{application.bedrooms} beds</span>
@@ -136,10 +136,8 @@ export const ApplicationCard = ({
             <div className="flex justify-between items-center mt-3">
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <User className="w-3 h-3" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {application.landlord.name}
-                </span>
-                <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
+                <span className="text-foreground">{application.landlord.name}</span>
+                <Star className="w-3 h-3 fill-primary text-primary" />
                 <span>{application.landlord.rating || 4.8}</span>
               </div>
               <div className="flex gap-2">
@@ -171,9 +169,9 @@ export const ApplicationCard = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-md transition-shadow group"
+      className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow group"
     >
-      <div className="h-32 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f] flex items-center justify-center relative">
+      <div className="h-32 bg-linear-to-br from-secondary to-muted flex items-center justify-center relative">
         <Home className="w-10 h-10 text-gray-400" />
         <div
           className={`absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[application.status].color}`}
@@ -184,15 +182,15 @@ export const ApplicationCard = ({
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-[#c4a747] transition-colors">
+        <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
           {application.title}
         </h3>
-        <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
           <MapPin className="w-3 h-3" />
           <span className="text-xs line-clamp-1">{application.address}</span>
         </div>
 
-        <div className="flex items-center gap-3 mt-2 text-xs text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Bed className="w-3 h-3" />
             <span>{application.bedrooms}</span>
@@ -207,9 +205,9 @@ export const ApplicationCard = ({
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-white/10">
+        <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
           <div>
-            <span className="font-bold text-[#c4a747]">
+            <span className="font-bold text-primary">
               {formatPrice(application.price, application.period)}
             </span>
             <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">

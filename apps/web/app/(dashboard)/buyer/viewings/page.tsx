@@ -1,14 +1,11 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, CalendarClock } from 'lucide-react';
-import { BuyerNavbar } from '@/components/buyer/navigation/BuyerNavbar';
-import { BuyerSidebar } from '@/components/buyer/dashboard/BuyerSidebar';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
 import { Button } from '@/components/ui/Button';
-import { ROUTES, isAuthenticated, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import type { ViewingRequest, BuyerPropertyListing } from '@/types/buyer';
 
 const mockListings: BuyerPropertyListing[] = [
@@ -63,36 +60,11 @@ const mockViewingRequests: ViewingRequest[] = [
 ];
 
 function BuyerViewingsPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const defaultPropertyId = searchParams.get('property') || undefined;
 
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [requests, setRequests] = useState<ViewingRequest[]>([]);
+  const [requests, setRequests] = useState<ViewingRequest[]>(mockViewingRequests);
   const [isModalOpen, setIsModalOpen] = useState(!!defaultPropertyId);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        if (parsedUser.role && parsedUser.role !== 'buyer') {
-          router.replace(getDashboardRoute(parsedUser.role));
-          return;
-        }
-      }
-      setRequests(mockViewingRequests);
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
 
   const handleSubmit = (propertyId: string, date: string, time: string, notes: string) => {
     const property = mockListings.find((l) => l.id === propertyId);
@@ -114,65 +86,43 @@ function BuyerViewingsPageContent() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <BuyerNavbar user={user} />
-
-      <div className="flex">
-        <BuyerSidebar />
-
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Viewing Requests
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {requests.length} request{requests.length === 1 ? '' : 's'}
-                </p>
-              </div>
-              <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-                <Plus className="w-4 h-4" />
-                Request Viewing
-              </Button>
-            </div>
-
-            {requests.length === 0 ? (
-              <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#c4a747]/10 flex items-center justify-center">
-                  <CalendarClock className="w-8 h-8 text-[#c4a747]" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  No viewing requests yet
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
-                  Request a viewing from any property to schedule a tour with the owner.
-                </p>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {requests.map((request, index) => (
-                  <ViewingRequestCard
-                    key={request.id}
-                    request={request}
-                    delay={index * 0.05}
-                    onCancel={() => handleCancel(request.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+    <>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Viewing Requests</h1>
+          <p className="text-muted-foreground mt-1">
+            {requests.length} request{requests.length === 1 ? '' : 's'}
+          </p>
+        </div>
+        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
+          <Plus className="w-4 h-4" />
+          Request Viewing
+        </Button>
       </div>
+
+      {requests.length === 0 ? (
+        <div className="bg-card border border-border rounded-lg p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+            <CalendarClock className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">No viewing requests yet</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+            Request a viewing from any property to schedule a tour with the owner.
+          </p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {requests.map((request, index) => (
+            <ViewingRequestCard
+              key={request.id}
+              request={request}
+              delay={index * 0.05}
+              onCancel={() => handleCancel(request.id)}
+            />
+          ))}
+        </div>
+      )}
 
       <RequestViewingModal
         isOpen={isModalOpen}
@@ -181,7 +131,7 @@ function BuyerViewingsPageContent() {
         defaultPropertyId={defaultPropertyId}
         onSubmit={handleSubmit}
       />
-    </div>
+    </>
   );
 }
 

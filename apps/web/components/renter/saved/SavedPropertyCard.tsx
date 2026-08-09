@@ -138,9 +138,9 @@ export const SavedPropertyCard = ({
   if (viewMode === 'list') {
     return (
       <>
-        <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden hover:shadow-md transition-shadow">
+        <div className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow">
           <div className="flex flex-col sm:flex-row">
-            <div className="relative w-full sm:w-48 h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f] flex-shrink-0">
+            <div className="relative w-full sm:w-48 h-40 bg-linear-to-br from-secondary to-muted shrink-0">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Home className="w-8 h-8 text-gray-400" />
               </div>
@@ -154,7 +154,7 @@ export const SavedPropertyCard = ({
                   className="absolute top-2 left-2 z-20 p-1 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors"
                 >
                   {isSelected ? (
-                    <CheckSquare className="w-4 h-4 text-[#c4a747]" />
+                    <CheckSquare className="w-4 h-4 text-primary" />
                   ) : (
                     <Square className="w-4 h-4 text-gray-500" />
                   )}
@@ -181,26 +181,24 @@ export const SavedPropertyCard = ({
             <div className="flex-1 p-4">
               <div className="flex flex-wrap justify-between gap-2">
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white hover:text-[#c4a747] transition-colors">
+                  <h3 className="font-semibold text-foreground hover:text-primary transition-colors">
                     {property.title}
                   </h3>
-                  <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                     <MapPin className="w-3 h-3" />
                     <span className="text-xs">{property.location}</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-[#c4a747]">{formatPrice()}</p>
+                  <p className="text-lg font-bold text-primary">{formatPrice()}</p>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <Star className="w-3 h-3 fill-[#c4a747] text-[#c4a747]" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      {property.rating}
-                    </span>
+                    <Star className="w-3 h-3 fill-primary text-primary" />
+                    <span className="text-xs text-muted-foreground">{property.rating}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-600 dark:text-gray-400">
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Bed className="w-3 h-3" />
                   <span>{property.bedrooms} beds</span>
@@ -234,7 +232,7 @@ export const SavedPropertyCard = ({
               </div>
 
               {note && (
-                <div className="mt-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-xs text-gray-600 dark:text-gray-400">
+                <div className="mt-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-xs text-muted-foreground">
                   📝 {note}
                 </div>
               )}
@@ -253,7 +251,7 @@ export const SavedPropertyCard = ({
                 <div className="relative">
                   <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5"
+                    className="p-2 rounded-lg border border-border hover:bg-secondary"
                   >
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
@@ -263,14 +261,14 @@ export const SavedPropertyCard = ({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a2a2f] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+                        className="absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-lg border border-border z-10"
                       >
                         <button
                           onClick={() => {
                             setShowShareModal(true);
                             setShowMenu(false);
                           }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                         >
                           <ExternalLink className="w-3 h-3" />
                           Share Property
@@ -280,26 +278,26 @@ export const SavedPropertyCard = ({
                             setShowPriceHistory(true);
                             setShowMenu(false);
                           }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                         >
                           <TrendingUp className="w-3 h-3" />
                           Price History
                         </button>
-                        <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                        <div className="border-t border-border my-1" />
                         <div className="px-2 py-1">
                           <p className="text-xs text-gray-500 px-2 py-1">Move to wishlist</p>
                           {wishlists.map((list) => (
                             <button
                               key={list.id}
                               onClick={() => handleMoveToWishlist(list.id)}
-                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                             >
                               <BookmarkPlus className="w-3 h-3" />
                               {list.name}
                             </button>
                           ))}
                         </div>
-                        <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                        <div className="border-t border-border my-1" />
                         <button
                           onClick={() => {
                             onRemove(property.id);
@@ -343,8 +341,8 @@ export const SavedPropertyCard = ({
 
   return (
     <>
-      <div className="group bg-white dark:bg-[#1a2a2f] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all duration-300 relative">
-        <div className="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f]">
+      <div className="group bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 relative">
+        <div className="relative h-48 bg-linear-to-br from-secondary to-muted">
           <div className="absolute inset-0 flex items-center justify-center">
             <Home className="w-12 h-12 text-gray-400 dark:text-gray-600" />
           </div>
@@ -358,7 +356,7 @@ export const SavedPropertyCard = ({
               className="absolute top-2 left-2 z-20 p-1 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors"
             >
               {isSelected ? (
-                <CheckSquare className="w-4 h-4 text-[#c4a747]" />
+                <CheckSquare className="w-4 h-4 text-primary" />
               ) : (
                 <Square className="w-4 h-4 text-gray-500" />
               )}
@@ -380,7 +378,7 @@ export const SavedPropertyCard = ({
             <Heart className="w-4 h-4 text-red-500 fill-red-500" />
           </button>
 
-          <div className="absolute bottom-2 left-2 bg-[#c4a747] text-[#0a1a1f] px-2 py-1 rounded-lg text-sm font-bold z-10">
+          <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded-lg text-sm font-bold z-10">
             {formatPrice()}
           </div>
 
@@ -402,15 +400,15 @@ export const SavedPropertyCard = ({
         </div>
 
         <div className="p-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#c4a747] transition-colors line-clamp-1">
+          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
             {property.title}
           </h3>
-          <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
             <MapPin className="w-3 h-3" />
             <span className="text-xs line-clamp-1">{property.location}</span>
           </div>
 
-          <div className="flex items-center gap-3 mt-3 text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Bed className="w-3 h-3" />
               <span>{property.bedrooms} beds</span>
@@ -426,7 +424,7 @@ export const SavedPropertyCard = ({
           </div>
 
           {note && (
-            <div className="mt-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+            <div className="mt-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-xs text-muted-foreground line-clamp-2">
               📝 {note}
             </div>
           )}
@@ -443,7 +441,7 @@ export const SavedPropertyCard = ({
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5"
+                className="p-2 rounded-lg border border-border hover:bg-secondary"
               >
                 <MoreHorizontal className="w-4 h-4" />
               </button>
@@ -453,14 +451,14 @@ export const SavedPropertyCard = ({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a2a2f] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+                    className="absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-lg border border-border z-10"
                   >
                     <button
                       onClick={() => {
                         setShowNoteModal(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                     >
                       <BookmarkPlus className="w-3 h-3" />
                       Add Note
@@ -470,7 +468,7 @@ export const SavedPropertyCard = ({
                         setShowShareModal(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                     >
                       <ExternalLink className="w-3 h-3" />
                       Share Property
@@ -480,26 +478,26 @@ export const SavedPropertyCard = ({
                         setShowPriceHistory(true);
                         setShowMenu(false);
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                     >
                       <TrendingUp className="w-3 h-3" />
                       Price History
                     </button>
-                    <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                    <div className="border-t border-border my-1" />
                     <div className="px-2 py-1">
                       <p className="text-xs text-gray-500 px-2 py-1">Move to wishlist</p>
                       {wishlists.map((list) => (
                         <button
                           key={list.id}
                           onClick={() => handleMoveToWishlist(list.id)}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
                         >
                           <BookmarkPlus className="w-3 h-3" />
                           {list.name}
                         </button>
                       ))}
                     </div>
-                    <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                    <div className="border-t border-border my-1" />
                     <button
                       onClick={() => {
                         onRemove(property.id);

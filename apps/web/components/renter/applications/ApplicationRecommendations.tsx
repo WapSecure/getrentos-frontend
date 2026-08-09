@@ -74,12 +74,12 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-purple-600" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">AI Recommendations</h3>
+          <h3 className="font-semibold text-foreground">AI Recommendations</h3>
         </div>
       </div>
 
@@ -87,14 +87,14 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
         {recommendations.map((rec) => (
           <div
             key={rec.id}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+            className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-secondary transition-colors"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">{rec.title}</h4>
+                <h4 className="text-sm font-medium text-foreground">{rec.title}</h4>
                 <p className="text-xs text-gray-500 mt-0.5">{rec.description}</p>
               </div>
-              <Button size="sm" variant="ghost" className="gap-0 flex-shrink-0">
+              <Button size="sm" variant="ghost" className="gap-0 shrink-0">
                 {rec.action}
                 <ArrowRight className="w-3 h-3" />
               </Button>

@@ -13,22 +13,20 @@ const factors = [
 
 export const ScoreFactors = () => {
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Score Factors</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          What impacts your trust score
-        </p>
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <h3 className="font-semibold text-foreground">Score Factors</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">What impacts your trust score</p>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {factors.map((factor, index) => (
           <div key={index} className="p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {factor.status === 'positive' && <CheckCircle className="w-4 h-4 text-green-500" />}
               {factor.status === 'pending' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
               {factor.status === 'negative' && <XCircle className="w-4 h-4 text-red-500" />}
-              <span className="text-sm text-gray-700 dark:text-gray-300">{factor.label}</span>
+              <span className="text-sm text-foreground">{factor.label}</span>
             </div>
             <span
               className={`text-sm font-semibold ${

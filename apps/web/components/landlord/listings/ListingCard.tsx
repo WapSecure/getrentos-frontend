@@ -44,9 +44,9 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-2xl border border-border overflow-hidden"
     >
-      <div className="relative h-32 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#2a3a3f] dark:to-[#1a2a2f]">
+      <div className="relative h-32 bg-linear-to-br from-secondary to-muted">
         <div className="absolute inset-0 flex items-center justify-center">
           <Megaphone className="w-10 h-10 text-gray-400 dark:text-gray-600" />
         </div>
@@ -58,32 +58,30 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-          {listing.listingTitle}
-        </h3>
-        <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <h3 className="font-semibold text-foreground truncate">{listing.listingTitle}</h3>
+        <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
           <MapPin className="w-3 h-3" />
           {listing.propertyName} • {listing.unitName}
         </p>
 
-        <p className="text-lg font-bold text-[#c4a747] mt-3">
+        <p className="text-lg font-bold text-primary mt-3">
           {formatCurrency(listing.monthlyRent, { compact: true })}
           <span className="text-xs text-gray-400 font-normal">/mo</span>
         </p>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
           {listing.furnished && (
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
               <Sofa className="w-3 h-3" /> Furnished
             </span>
           )}
           {listing.allowPets && (
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
               <PawPrint className="w-3 h-3" /> Pets OK
             </span>
           )}
           {listing.shortLetEnabled && (
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
               Short-let
             </span>
           )}
@@ -94,7 +92,7 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
           Available {formatDate(listing.availabilityDate)}
         </p>
 
-        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        <div className="flex gap-2 mt-4 pt-4 border-t border-border">
           <Button
             variant="outline"
             size="sm"

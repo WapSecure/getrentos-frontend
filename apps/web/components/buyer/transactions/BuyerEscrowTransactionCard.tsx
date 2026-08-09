@@ -43,16 +43,12 @@ export const BuyerEscrowTransactionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {transaction.propertyTitle}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            Owner: {transaction.ownerName}
-          </p>
+          <h3 className="font-semibold text-foreground truncate">{transaction.propertyTitle}</h3>
+          <p className="text-xs text-muted-foreground truncate">Owner: {transaction.ownerName}</p>
         </div>
         <span
           className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
@@ -68,14 +64,14 @@ export const BuyerEscrowTransactionCard = ({
         </span>
       </div>
 
-      <p className="text-lg font-bold text-[#c4a747] mt-3">
+      <p className="text-lg font-bold text-primary mt-3">
         {formatCurrency(transaction.purchasePrice, { compact: true })}
       </p>
 
       <div className="mt-3">
-        <div className="h-1.5 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${isFrozen ? 'bg-red-500' : 'bg-[#c4a747]'}`}
+            className={`h-full rounded-full transition-all duration-500 ${isFrozen ? 'bg-red-500' : 'bg-primary'}`}
             style={{ width: `${progressPct}%` }}
           />
         </div>

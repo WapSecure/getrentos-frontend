@@ -53,14 +53,12 @@ export const RealtorOfferCard = ({ offer, onClick, delay = 0 }: RealtorOfferCard
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-            {offer.listingTitle}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          <h3 className="font-semibold text-foreground truncate">{offer.listingTitle}</h3>
+          <p className="text-xs text-muted-foreground truncate">
             {offer.leadName} → {offer.clientName}
           </p>
         </div>
@@ -74,7 +72,7 @@ export const RealtorOfferCard = ({ offer, onClick, delay = 0 }: RealtorOfferCard
 
       <div className="mt-4">
         <p className="text-xs text-gray-400">Offer Amount</p>
-        <p className="text-sm font-bold text-gray-900 dark:text-white">
+        <p className="text-sm font-bold text-foreground">
           {formatCurrency(offer.offerAmount, { compact: true })}
         </p>
         <p
@@ -85,7 +83,7 @@ export const RealtorOfferCard = ({ offer, onClick, delay = 0 }: RealtorOfferCard
         </p>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
+      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
         Submitted {formatDate(offer.submittedAt)}
       </p>
     </motion.div>

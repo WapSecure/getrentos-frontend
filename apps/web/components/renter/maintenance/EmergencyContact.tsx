@@ -24,9 +24,9 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-b border-red-200 dark:border-red-800">
+      <div className="p-4 bg-linear-to-r from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-b border-red-200 dark:border-red-800">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-red-600" />
           <div>
@@ -38,18 +38,15 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
         </div>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {contacts.map((contact) => (
-          <div
-            key={contact.id}
-            className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-          >
+          <div key={contact.id} className="p-4 hover:bg-secondary transition-colors">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+              <div className="p-2 rounded-lg bg-secondary">
                 <User className="w-4 h-4 text-gray-500" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900 dark:text-white">{contact.name}</h4>
+                <h4 className="font-medium text-foreground">{contact.name}</h4>
                 <p className="text-sm text-gray-500">{contact.role}</p>
                 <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
@@ -91,7 +88,7 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
         ))}
       </div>
 
-      <div className="p-3 border-t border-gray-200 dark:border-white/10 text-center">
+      <div className="p-3 border-t border-border text-center">
         <p className="text-xs text-gray-500">
           For life-threatening emergencies, please call 911 or your local emergency services
           immediately.

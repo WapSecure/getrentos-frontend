@@ -22,14 +22,14 @@ export const PrivacySettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Privacy Settings</h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h2 className="text-xl font-semibold text-foreground mb-4">Privacy Settings</h2>
+      <p className="text-sm text-muted-foreground mb-6">
         Control who can see your information and activity
       </p>
 
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Profile Visibility
           </label>
           <div className="grid grid-cols-3 gap-3">
@@ -41,16 +41,14 @@ export const PrivacySettings = () => {
                   key={option.id}
                   onClick={() => setPrivacy({ ...privacy, profileVisibility: option.id })}
                   className={`p-3 rounded-lg border-2 transition-all ${
-                    isSelected
-                      ? 'border-[#c4a747] bg-[#c4a747]/10'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    isSelected ? 'border-primary bg-accent' : 'border-border hover:border-gray-300'
                   }`}
                 >
                   <Icon
-                    className={`w-5 h-5 mx-auto mb-1 ${isSelected ? 'text-[#c4a747]' : 'text-gray-500'}`}
+                    className={`w-5 h-5 mx-auto mb-1 ${isSelected ? 'text-primary' : 'text-gray-500'}`}
                   />
                   <p
-                    className={`text-xs text-center ${isSelected ? 'text-[#c4a747]' : 'text-gray-600 dark:text-gray-400'}`}
+                    className={`text-xs text-center ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}
                   >
                     {option.label}
                   </p>
@@ -61,19 +59,17 @@ export const PrivacySettings = () => {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            What others can see
-          </label>
+          <label className="block text-sm font-medium text-foreground">What others can see</label>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
             <div className="flex items-center gap-3">
               <Eye className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Show Email Address</span>
+              <span className="text-sm text-foreground">Show Email Address</span>
             </div>
             <button
               onClick={() => setPrivacy({ ...privacy, showEmail: !privacy.showEmail })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                privacy.showEmail ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+                privacy.showEmail ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
@@ -84,15 +80,15 @@ export const PrivacySettings = () => {
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
             <div className="flex items-center gap-3">
               <Phone className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Show Phone Number</span>
+              <span className="text-sm text-foreground">Show Phone Number</span>
             </div>
             <button
               onClick={() => setPrivacy({ ...privacy, showPhone: !privacy.showPhone })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                privacy.showPhone ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+                privacy.showPhone ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
@@ -103,15 +99,15 @@ export const PrivacySettings = () => {
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
             <div className="flex items-center gap-3">
               <User className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Show Activity Status</span>
+              <span className="text-sm text-foreground">Show Activity Status</span>
             </div>
             <button
               onClick={() => setPrivacy({ ...privacy, showActivity: !privacy.showActivity })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                privacy.showActivity ? 'bg-[#c4a747]' : 'bg-gray-300 dark:bg-gray-600'
+                privacy.showActivity ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span

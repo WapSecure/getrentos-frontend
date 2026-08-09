@@ -59,7 +59,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProp
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-green-200 dark:border-green-800 overflow-hidden"
+        className="bg-card rounded-xl border border-green-200 dark:border-green-800 overflow-hidden"
       >
         <div className="p-4 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
           <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProp
           </div>
         </div>
         <div className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             You&apos;ve accepted the renewal offer for {lease.propertyName}. Your new lease will
             begin on {formatDate(renewalOffer.newEndDate)}.
           </p>
@@ -86,16 +86,16 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProp
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+        className="bg-card rounded-xl border border-border overflow-hidden"
       >
-        <div className="p-4 border-b border-gray-200 dark:border-white/10">
+        <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <XCircle className="w-5 h-5 text-gray-500" />
-            <h3 className="font-semibold text-gray-900 dark:text-white">Renewal Declined</h3>
+            <h3 className="font-semibold text-foreground">Renewal Declined</h3>
           </div>
         </div>
         <div className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             You&apos;ve declined the renewal offer. Your current lease will expire on{' '}
             {formatDate(lease.endDate)}.
           </p>
@@ -117,14 +117,14 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProp
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-[#c4a747]/30 overflow-hidden"
+      className="bg-card rounded-xl border border-primary/30 overflow-hidden"
     >
-      <div className="p-4 bg-gradient-to-r from-[#c4a747]/10 to-transparent border-b border-[#c4a747]/20">
+      <div className="p-4 bg-linear-to-r from-primary/10 to-transparent border-b border-primary/20">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Renewal Offer</h3>
+          <TrendingUp className="w-5 h-5 text-primary" />
+          <h3 className="font-semibold text-foreground">Renewal Offer</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Your landlord has sent a renewal offer
         </p>
       </div>
@@ -133,19 +133,19 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProp
         <div className="grid grid-cols-2 gap-3">
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-[#c4a747]" />
+              <DollarSign className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Current Rent</span>
             </div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            <p className="text-sm font-semibold text-foreground">
               {formatCurrency(lease.rentAmount)}
             </p>
           </div>
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-[#c4a747]" />
+              <TrendingUp className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">New Rent</span>
             </div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            <p className="text-sm font-semibold text-foreground">
               {formatCurrency(renewalOffer.newRentAmount)}
             </p>
           </div>

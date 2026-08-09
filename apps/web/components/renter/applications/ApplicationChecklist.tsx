@@ -75,15 +75,15 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
   const isReady = requiredCompleted === requiredTotal;
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-3">
-          <FileCheck className="w-5 h-5 text-[#c4a747]" />
+          <FileCheck className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Application Checklist</h3>
+            <h3 className="font-semibold text-foreground">Application Checklist</h3>
             <p className="text-xs text-gray-500">
               {completedCount}/{totalCount} items completed
             </p>
@@ -106,7 +106,7 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
           <div className="mb-3">
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#c4a747] rounded-full transition-all duration-300"
+                className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -119,10 +119,10 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary cursor-pointer"
               onClick={() => toggleItem(item.id)}
             >
-              <button className="flex-shrink-0">
+              <button className="shrink-0">
                 {item.completed ? (
                   <CheckCircle className="w-5 h-5 text-green-500" />
                 ) : (
@@ -132,7 +132,7 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <p
-                    className={`text-sm ${item.completed ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}
+                    className={`text-sm ${item.completed ? 'text-gray-500 line-through' : 'text-foreground'}`}
                   >
                     {item.title}
                   </p>
@@ -140,7 +140,7 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
                 </div>
                 <p className="text-xs text-gray-500">{item.description}</p>
               </div>
-              {item.completed && <FileText className="w-4 h-4 text-green-500 flex-shrink-0" />}
+              {item.completed && <FileText className="w-4 h-4 text-green-500 shrink-0" />}
             </motion.div>
           ))}
 
@@ -154,7 +154,7 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
           ) : (
             <div className="mt-3 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-yellow-700 dark:text-yellow-300">
                   Complete all required items before submitting your application.
                 </p>

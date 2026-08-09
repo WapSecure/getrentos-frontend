@@ -78,7 +78,7 @@ export const NeighborhoodCompare = () => {
   const getScoreBar = (score: number) => {
     return (
       <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div className="h-full bg-[#c4a747] rounded-full" style={{ width: `${score}%` }} />
+        <div className="h-full bg-primary rounded-full" style={{ width: `${score}%` }} />
       </div>
     );
   };
@@ -87,7 +87,7 @@ export const NeighborhoodCompare = () => {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#c4a747] transition-colors"
+        className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
       >
         <GitCompare className="w-3 h-3" />
         Compare neighborhoods
@@ -98,13 +98,11 @@ export const NeighborhoodCompare = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="sticky top-0 bg-white dark:bg-[#1a2a2f] p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="sticky top-0 bg-card p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Compare Neighborhoods
-                </h3>
+                <h3 className="font-semibold text-foreground">Compare Neighborhoods</h3>
                 <p className="text-xs text-gray-500">Select up to 3 neighborhoods to compare</p>
               </div>
               <button onClick={() => setIsOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
@@ -121,8 +119,8 @@ export const NeighborhoodCompare = () => {
                     onClick={() => handleSelect(neighborhood.name)}
                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                       selectedNeighborhoods.includes(neighborhood.name)
-                        ? 'bg-[#c4a747] text-white'
-                        : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-foreground hover:bg-gray-200'
                     } ${!selectedNeighborhoods.includes(neighborhood.name) && selectedNeighborhoods.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={
                       !selectedNeighborhoods.includes(neighborhood.name) &&
@@ -143,16 +141,14 @@ export const NeighborhoodCompare = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-white/10">
+                      <tr className="border-b border-border">
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
                           Feature
                         </th>
                         {selectedNeighborhoods.map((name) => (
                           <th key={name} className="text-left py-3 px-4 min-w-[150px]">
                             <div className="flex justify-between items-center">
-                              <span className="font-semibold text-gray-900 dark:text-white">
-                                {name}
-                              </span>
+                              <span className="font-semibold text-foreground">{name}</span>
                               <button
                                 onClick={() =>
                                   setSelectedNeighborhoods(
@@ -168,16 +164,16 @@ export const NeighborhoodCompare = () => {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-white/10">
+                    <tbody className="divide-y divide-border">
                       {selectedNeighborhoods.map((name) => {
                         const neighborhood = neighborhoods.find((n) => n.name === name);
                         if (!neighborhood) return null;
                         return (
                           <tr key={name}>
-                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                            <td className="py-3 px-4 text-sm text-muted-foreground">
                               Average Rent
                             </td>
-                            <td className="py-3 px-4 font-medium text-[#c4a747]">
+                            <td className="py-3 px-4 font-medium text-primary">
                               {formatCurrency(neighborhood.avgRent)}/mo
                             </td>
                           </tr>
@@ -185,9 +181,7 @@ export const NeighborhoodCompare = () => {
                       })}
 
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Safety Score
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Safety Score</td>
                         {selectedNeighborhoods.map((name) => {
                           const neighborhood = neighborhoods.find((n) => n.name === name);
                           return (
@@ -209,9 +203,7 @@ export const NeighborhoodCompare = () => {
                       </tr>
 
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Transit Score
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Transit Score</td>
                         {selectedNeighborhoods.map((name) => {
                           const neighborhood = neighborhoods.find((n) => n.name === name);
                           return (
@@ -233,9 +225,7 @@ export const NeighborhoodCompare = () => {
                       </tr>
 
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          School Score
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">School Score</td>
                         {selectedNeighborhoods.map((name) => {
                           const neighborhood = neighborhoods.find((n) => n.name === name);
                           return (
@@ -257,9 +247,7 @@ export const NeighborhoodCompare = () => {
                       </tr>
 
                       <tr>
-                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                          Amenities
-                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Amenities</td>
                         {selectedNeighborhoods.map((name) => {
                           const neighborhood = neighborhoods.find((n) => n.name === name);
                           return (
@@ -268,7 +256,7 @@ export const NeighborhoodCompare = () => {
                                 {neighborhood?.amenities.map((amenity) => (
                                   <span
                                     key={amenity}
-                                    className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-white/10 rounded-full"
+                                    className="text-xs px-2 py-0.5 bg-secondary rounded-full"
                                   >
                                     {amenity}
                                   </span>

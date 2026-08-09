@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
-import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
 import { ApplicationsHeader } from '@/components/renter/applications/ApplicationsHeader';
 import { ApplicationsStats } from '@/components/renter/applications/ApplicationsStats';
 import { ApplicationsFilterSort } from '@/components/renter/applications/ApplicationsFilterSort';
@@ -11,7 +8,6 @@ import { ApplicationsList } from '@/components/renter/applications/ApplicationsL
 import { ApplicationAnalytics } from '@/components/renter/applications/ApplicationAnalytics';
 import { ApplicationRecommendations } from '@/components/renter/applications/ApplicationRecommendations';
 import { ApplicationExport } from '@/components/renter/applications/ApplicationExport';
-import { ROUTES, isAuthenticated, STORAGE_KEYS } from '@/lib/constants/auth';
 import { Application } from '@/types/renter';
 
 interface Note {
@@ -22,9 +18,6 @@ interface Note {
 }
 
 export default function ApplicationsPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ fullName: string; email: string; role?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
   const [filterStatus, setFilterStatus] = useState<
     'all' | 'pending' | 'under_review' | 'approved' | 'rejected'
@@ -196,22 +189,10 @@ export default function ApplicationsPage() {
 
   // Now useEffect can safely call the functions
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
-        return;
-      }
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      loadApplications();
-      loadNotes();
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadApplications();
+    loadNotes();
+  }, []);
 
   const saveNotes = (updatedNotes: Record<string, Note[]>) => {
     localStorage.setItem('application_notes', JSON.stringify(updatedNotes));
@@ -258,61 +239,40 @@ export default function ApplicationsPage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a1a1f]">
-      <RenterNavbar user={user} />
+    <>
+      <ApplicationsHeader applications={applications} onExport={() => setShowExportModal(true)} />
 
-      <div className="flex">
-        <RenterSidebar />
+      <ApplicationsStats applications={applications} />
 
-        <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <ApplicationsHeader
-              applications={applications}
-              onExport={() => setShowExportModal(true)}
-            />
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <ApplicationsFilterSort
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
 
-            <ApplicationsStats applications={applications} />
+          <ApplicationsList
+            applications={applications}
+            filterStatus={filterStatus}
+            sortBy={sortBy}
+            viewMode={viewMode}
+            onWithdraw={handleWithdrawApplication}
+            notes={notes}
+            onAddNote={handleAddNote}
+            onDeleteNote={handleDeleteNote}
+            onEditNote={handleEditNote}
+          />
+        </div>
 
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <ApplicationsFilterSort
-                  filterStatus={filterStatus}
-                  setFilterStatus={setFilterStatus}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                />
-
-                <ApplicationsList
-                  applications={applications}
-                  filterStatus={filterStatus}
-                  sortBy={sortBy}
-                  viewMode={viewMode}
-                  onWithdraw={handleWithdrawApplication}
-                  notes={notes}
-                  onAddNote={handleAddNote}
-                  onDeleteNote={handleDeleteNote}
-                  onEditNote={handleEditNote}
-                />
-              </div>
-
-              <div className="space-y-6">
-                <ApplicationAnalytics applications={applications} />
-                <ApplicationRecommendations applications={applications} />
-              </div>
-            </div>
-          </div>
-        </main>
+        <div className="space-y-6">
+          <ApplicationAnalytics applications={applications} />
+          <ApplicationRecommendations applications={applications} />
+        </div>
       </div>
 
       <ApplicationExport
@@ -320,6 +280,6 @@ export default function ApplicationsPage() {
         onClose={() => setShowExportModal(false)}
         applications={applications}
       />
-    </div>
+    </>
   );
 }

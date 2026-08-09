@@ -137,16 +137,14 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#c4a747]" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">
-            Message Templates
-          </span>
+          <FileText className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Message Templates</span>
           <span className="text-xs text-gray-500">({templates.length})</span>
         </div>
         <div className="flex items-center gap-2">
@@ -170,27 +168,27 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
       {isExpanded && (
         <div className="p-3 pt-0 space-y-3 max-h-96 overflow-y-auto">
           {isAdding && (
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 space-y-3">
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
               <input
                 type="text"
                 value={newTemplate.name}
                 onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
                 placeholder="Template name"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <textarea
                 value={newTemplate.content}
                 onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
                 placeholder="Template content..."
                 rows={3}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <select
                 value={newTemplate.category}
                 onChange={(e) =>
                   setNewTemplate({ ...newTemplate, category: handleCategoryChange(e.target.value) })
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {categoryOptions.map((cat) => (
                   <option key={cat} value={cat}>
@@ -216,7 +214,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
           {templates.map((template) => (
             <div
               key={template.id}
-              className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#c4a747] transition-colors"
+              className="p-3 rounded-lg border border-border hover:border-primary transition-colors"
             >
               {editingId === template.id && editTemplate ? (
                 <div className="space-y-3">
@@ -224,13 +222,13 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                     type="text"
                     value={editTemplate.name}
                     onChange={(e) => setEditTemplate({ ...editTemplate, name: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <textarea
                     value={editTemplate.content}
                     onChange={(e) => setEditTemplate({ ...editTemplate, content: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <select
                     value={editTemplate.category}
@@ -240,7 +238,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                         category: handleCategoryChange(e.target.value),
                       })
                     }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     {categoryOptions.map((cat) => (
                       <option key={cat} value={cat}>
@@ -262,16 +260,14 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-gray-900 dark:text-white">
-                          {template.name}
-                        </h4>
+                        <h4 className="font-medium text-foreground">{template.name}</h4>
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[template.category]}`}
                         >
                           {categoryLabels[template.category]}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {template.content}
                       </p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
@@ -281,14 +277,14 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                     <div className="flex gap-1 ml-2">
                       <button
                         onClick={() => handleUseTemplate(template.content)}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-white/10"
+                        className="p-1 rounded hover:bg-secondary"
                         title="Use template"
                       >
                         <Check className="w-3 h-3 text-green-500" />
                       </button>
                       <button
                         onClick={() => handleCopyTemplate(template.content, template.id)}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-white/10"
+                        className="p-1 rounded hover:bg-secondary"
                         title="Copy template"
                       >
                         {copiedId === template.id ? (
@@ -299,7 +295,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                       </button>
                       <button
                         onClick={() => handleEditTemplate(template.id)}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-white/10"
+                        className="p-1 rounded hover:bg-secondary"
                         title="Edit template"
                       >
                         <Edit2 className="w-3 h-3 text-blue-500" />

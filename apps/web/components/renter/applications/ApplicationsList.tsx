@@ -72,12 +72,12 @@ export const ApplicationsList = ({
 
   if (sortedApplications.length === 0) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10">
+      <div className="text-center py-12 bg-card rounded-xl border border-border">
         <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
           <FileText className="w-8 h-8 text-gray-400" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">No applications found</h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+        <h3 className="text-lg font-medium text-foreground">No applications found</h3>
+        <p className="text-muted-foreground mt-1">
           {filterStatus === 'all'
             ? "You haven't submitted any applications yet"
             : `No ${filterStatus} applications found`}

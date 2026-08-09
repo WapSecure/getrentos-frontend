@@ -40,13 +40,11 @@ export const RenterTrustScoreCard = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25, duration: 0.4 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Your Trust Score</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Build trust to unlock more features
-        </p>
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Your Trust Score</h2>
+        <p className="text-sm text-muted-foreground">Build trust to unlock more features</p>
       </div>
 
       <div className="p-4">
@@ -54,12 +52,8 @@ export const RenterTrustScoreCard = () => {
         <div className="flex flex-col items-center mb-4">
           <TrustScoreRing score={trustScore} size={120} strokeWidth={8} />
           <div className="text-center mt-3">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
-              Excellent Trust Score
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Higher scores get better opportunities
-            </p>
+            <p className="text-sm font-medium text-foreground">Excellent Trust Score</p>
+            <p className="text-xs text-muted-foreground">Higher scores get better opportunities</p>
           </div>
         </div>
 
@@ -81,7 +75,7 @@ export const RenterTrustScoreCard = () => {
                     className={`w-3 h-3 ${item.verified ? 'text-green-600' : 'text-gray-400'}`}
                   />
                 </div>
-                <span className="text-sm text-gray-700 dark:text-gray-300">{item.label}</span>
+                <span className="text-sm text-foreground">{item.label}</span>
               </div>
               {item.verified ? (
                 <CheckCircle className="w-4 h-4 text-green-600" />
@@ -97,7 +91,7 @@ export const RenterTrustScoreCard = () => {
 
         {/* Progress Bar */}
         <div className="mb-4">
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>Verification Progress</span>
             <span>
               {verifiedCount}/{totalCount} completed
@@ -108,7 +102,7 @@ export const RenterTrustScoreCard = () => {
               initial={{ width: 0 }}
               animate={{ width: `${(verifiedCount / totalCount) * 100}%` }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="h-full bg-[#c4a747] rounded-full"
+              className="h-full bg-primary rounded-full"
             />
           </div>
         </div>

@@ -64,11 +64,11 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.3 }}
-          className="text-2xl font-bold text-gray-900 dark:text-white"
+          className="text-2xl font-bold text-foreground"
         >
           {displayScore}
         </motion.span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">Trust Score</span>
+        <span className="text-xs text-muted-foreground">Trust Score</span>
       </div>
     </div>
   );

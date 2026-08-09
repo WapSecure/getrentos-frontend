@@ -70,14 +70,12 @@ export const MaintenanceDetailsModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center sticky top-0 bg-white dark:bg-[#1a2a2f] z-10">
+            <div className="p-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Maintenance Details</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {request.propertyName}
-                </p>
+                <h3 className="font-semibold text-foreground">Maintenance Details</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{request.propertyName}</p>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
@@ -87,9 +85,7 @@ export const MaintenanceDetailsModal = ({
             <div className="p-4 space-y-4">
               {/* Title & Status */}
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {request.title}
-                </h4>
+                <h4 className="text-lg font-semibold text-foreground">{request.title}</h4>
                 <div className="flex gap-2">
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${priorityConfig[request.priority].color}`}
@@ -113,7 +109,7 @@ export const MaintenanceDetailsModal = ({
                     <Calendar className="w-3 h-3 text-gray-400" />
                     <span className="text-xs text-gray-500">Reported</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-foreground">
                     {formatDate(request.createdAt)}
                   </p>
                 </div>
@@ -122,7 +118,7 @@ export const MaintenanceDetailsModal = ({
                     <MapPin className="w-3 h-3 text-gray-400" />
                     <span className="text-xs text-gray-500">Category</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                  <p className="text-sm font-medium text-foreground capitalize">
                     {request.category}
                   </p>
                 </div>
@@ -131,9 +127,7 @@ export const MaintenanceDetailsModal = ({
               {/* Description */}
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                 <span className="text-xs text-gray-500">Description</span>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                  {request.description}
-                </p>
+                <p className="text-sm text-foreground mt-1">{request.description}</p>
               </div>
 
               {/* Vendor Info */}
@@ -145,7 +139,7 @@ export const MaintenanceDetailsModal = ({
                       Assigned Vendor
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-foreground">
                     {request.assignedVendorName}
                   </p>
                 </div>
@@ -154,7 +148,7 @@ export const MaintenanceDetailsModal = ({
               {/* Status Update Actions */}
               {request.status !== 'resolved' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Update Status
                   </label>
                   <div className="flex flex-wrap gap-2">

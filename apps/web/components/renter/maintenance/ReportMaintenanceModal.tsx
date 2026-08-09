@@ -85,14 +85,12 @@ export const ReportMaintenanceModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center sticky top-0 bg-white dark:bg-[#1a2a2f] z-10">
+            <div className="p-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Report Maintenance Issue
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <h3 className="font-semibold text-foreground">Report Maintenance Issue</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Provide details about the issue you&apos;re experiencing
                 </p>
               </div>
@@ -104,7 +102,7 @@ export const ReportMaintenanceModal = ({
             <div className="p-4 space-y-4">
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Issue Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -112,7 +110,7 @@ export const ReportMaintenanceModal = ({
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
                   placeholder="Brief description of the issue"
-                  className={`w-full px-3 py-2 rounded-lg border ${errors.title ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]`}
+                  className={`w-full px-3 py-2 rounded-lg border ${errors.title ? 'border-red-500' : 'border-border'} bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary`}
                 />
                 {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
               </div>
@@ -120,13 +118,13 @@ export const ReportMaintenanceModal = ({
               {/* Category & Priority */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => handleChange('category', e.target.value)}
-                    className={`w-full px-3 py-2 rounded-lg border ${errors.category ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]`}
+                    className={`w-full px-3 py-2 rounded-lg border ${errors.category ? 'border-red-500' : 'border-border'} bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary`}
                   >
                     <option value="">Select category</option>
                     {categories.map((cat) => (
@@ -141,13 +139,13 @@ export const ReportMaintenanceModal = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Priority <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.priority}
                     onChange={(e) => handleChange('priority', e.target.value)}
-                    className={`w-full px-3 py-2 rounded-lg border ${errors.priority ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]`}
+                    className={`w-full px-3 py-2 rounded-lg border ${errors.priority ? 'border-red-500' : 'border-border'} bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary`}
                   >
                     <option value="">Select priority</option>
                     {priorities.map((p) => (
@@ -164,7 +162,7 @@ export const ReportMaintenanceModal = ({
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -172,7 +170,7 @@ export const ReportMaintenanceModal = ({
                   onChange={(e) => handleChange('description', e.target.value)}
                   placeholder="Detailed description of the issue..."
                   rows={4}
-                  className={`w-full px-3 py-2 rounded-lg border ${errors.description ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]`}
+                  className={`w-full px-3 py-2 rounded-lg border ${errors.description ? 'border-red-500' : 'border-border'} bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary`}
                 />
                 {errors.description && (
                   <p className="text-xs text-red-500 mt-1">{errors.description}</p>
@@ -181,10 +179,10 @@ export const ReportMaintenanceModal = ({
 
               {/* Photo Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Photos (Optional)
                 </label>
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-[#c4a747] transition-colors cursor-pointer">
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
                   <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-500">Click or drag to upload photos</p>
                   <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
@@ -195,7 +193,7 @@ export const ReportMaintenanceModal = ({
               {formData.priority === 'urgent' && (
                 <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
                     <p className="text-xs text-red-700 dark:text-red-300">
                       <span className="font-medium">Urgent Request:</span> A vendor will be assigned
                       within 2 hours. For life-threatening emergencies, please call your landlord

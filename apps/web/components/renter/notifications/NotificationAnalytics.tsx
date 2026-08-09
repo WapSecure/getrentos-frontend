@@ -21,15 +21,13 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
   const avgResponseTime = '2.3 hours';
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Notification Analytics</h3>
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Notification Analytics</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Your notification engagement
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">Your notification engagement</p>
       </div>
 
       <div className="p-4 space-y-4">
@@ -39,25 +37,25 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
               <CheckCircle className="w-3 h-3 text-green-500" />
               <span className="text-xs text-gray-500">Read Rate</span>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{readRate}%</p>
+            <p className="text-lg font-bold text-foreground">{readRate}%</p>
           </div>
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-blue-500" />
               <span className="text-xs text-gray-500">Avg Response</span>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{avgResponseTime}</p>
+            <p className="text-lg font-bold text-foreground">{avgResponseTime}</p>
           </div>
         </div>
 
         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Read</span>
-            <span className="font-medium text-gray-900 dark:text-white">{readCount}</span>
+            <span className="font-medium text-foreground">{readCount}</span>
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
             <div
-              className="h-full bg-[#c4a747] rounded-full transition-all duration-300"
+              className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${readRate}%` }}
             />
           </div>

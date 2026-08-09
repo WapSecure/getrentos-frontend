@@ -45,8 +45,8 @@ export const ApplicationsFilterSort = ({
             onClick={() => setFilterStatus(option.value)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filterStatus === option.value
-                ? 'bg-[#c4a747] text-white'
-                : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20'
+                ? 'bg-primary text-white'
+                : 'bg-secondary text-muted-foreground hover:bg-gray-200 dark:hover:bg-white/20'
             }`}
           >
             {option.label}
@@ -59,7 +59,7 @@ export const ApplicationsFilterSort = ({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'recent' | 'property' | 'status')}
-            className="appearance-none px-4 py-1.5 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#c4a747] cursor-pointer"
+            className="appearance-none px-4 py-1.5 pr-8 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -70,13 +70,11 @@ export const ApplicationsFilterSort = ({
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
 
-        <div className="flex gap-1 p-1 bg-gray-100 dark:bg-white/10 rounded-lg">
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-md transition-colors ${
-              viewMode === 'grid'
-                ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
-                : 'text-gray-500'
+              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -84,9 +82,7 @@ export const ApplicationsFilterSort = ({
           <button
             onClick={() => setViewMode('list')}
             className={`p-1.5 rounded-md transition-colors ${
-              viewMode === 'list'
-                ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
-                : 'text-gray-500'
+              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'
             }`}
           >
             <List className="w-4 h-4" />

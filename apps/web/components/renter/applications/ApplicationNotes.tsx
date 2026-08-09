@@ -68,7 +68,7 @@ export const ApplicationNotes = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-gray-900 dark:text-white">Notes</h4>
+        <h4 className="font-medium text-foreground">Notes</h4>
         <Button size="sm" variant="ghost" onClick={() => setIsAdding(true)} className="gap-1">
           <Plus className="w-3 h-3" />
           Add Note
@@ -81,14 +81,14 @@ export const ApplicationNotes = ({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700"
+          className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border"
         >
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Add your notes about this application..."
             rows={3}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747] resize-none"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
           <div className="flex gap-2 mt-2">
             <Button size="sm" onClick={handleAddNote} disabled={!content.trim()}>
@@ -112,7 +112,7 @@ export const ApplicationNotes = ({
             key={note.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700"
+            className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border"
           >
             {editingId === note.id ? (
               <div className="space-y-2">
@@ -120,7 +120,7 @@ export const ApplicationNotes = ({
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <div className="flex gap-2">
                   <Button
@@ -137,7 +137,7 @@ export const ApplicationNotes = ({
               </div>
             ) : (
               <div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{note.content}</p>
+                <p className="text-sm text-foreground">{note.content}</p>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-1 text-xs text-gray-500">
                     <Clock className="w-3 h-3" />

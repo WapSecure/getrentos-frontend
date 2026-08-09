@@ -74,9 +74,9 @@ export const SavedSearchesList = () => {
 
   if (savedSearches.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-white/10">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Saved Searches</h3>
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border">
+          <h3 className="font-semibold text-foreground">Saved Searches</h3>
           <p className="text-xs text-gray-500">Get notified for new matches</p>
         </div>
         <div className="p-8 text-center">
@@ -91,11 +91,11 @@ export const SavedSearchesList = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Saved Searches</h3>
+            <h3 className="font-semibold text-foreground">Saved Searches</h3>
             <p className="text-xs text-gray-500">{savedSearches.length} active searches</p>
           </div>
           <Button size="sm" variant="ghost" className="gap-1">
@@ -105,7 +105,7 @@ export const SavedSearchesList = () => {
         </div>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-white/10">
+      <div className="divide-y divide-border">
         {savedSearches.map((search) => (
           <div key={search.id} className="p-3">
             <button
@@ -115,9 +115,7 @@ export const SavedSearchesList = () => {
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-2">
                   <Search className="w-3 h-3 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {search.name}
-                  </span>
+                  <span className="text-sm font-medium text-foreground">{search.name}</span>
                   {search.newMatches > 0 && (
                     <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs rounded-full">
                       {search.newMatches} new
@@ -142,7 +140,7 @@ export const SavedSearchesList = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mt-3 pt-3 border-t border-gray-100 dark:border-white/5"
+                  className="mt-3 pt-3 border-t border-border"
                 >
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">

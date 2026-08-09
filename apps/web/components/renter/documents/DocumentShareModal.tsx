@@ -48,12 +48,12 @@ export const DocumentShareModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-[#1a2a2f] rounded-xl max-w-md w-full mx-4 overflow-hidden"
+            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Share Document</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{documentName}</p>
+                <h3 className="font-semibold text-foreground">Share Document</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{documentName}</p>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
@@ -63,7 +63,7 @@ export const DocumentShareModal = ({
             <div className="p-4 space-y-4">
               {/* Share with Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Share with email
                 </label>
                 <div className="flex gap-2">
@@ -72,7 +72,7 @@ export const DocumentShareModal = ({
                     value={shareEmail}
                     onChange={(e) => setShareEmail(e.target.value)}
                     placeholder="Enter email address"
-                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <Button size="sm" onClick={handleShare} disabled={!shareEmail.trim()}>
                     Share
@@ -88,11 +88,11 @@ export const DocumentShareModal = ({
 
               {/* Share Link */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Shareable link
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex-1 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-sm text-gray-600 dark:text-gray-400 truncate">
+                  <div className="flex-1 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-sm text-muted-foreground truncate">
                     {shareLink}
                   </div>
                   <Button variant="outline" onClick={handleCopyLink} className="gap-2">
@@ -103,19 +103,17 @@ export const DocumentShareModal = ({
               </div>
 
               {/* Link Settings */}
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Link settings
-                  </span>
+                  <span className="text-sm font-medium text-foreground">Link settings</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500">Expires after</span>
                   <select
                     value={expiryDays}
                     onChange={(e) => setExpiryDays(Number(e.target.value))}
-                    className="px-2 py-1 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#c4a747]"
+                    className="px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value={1}>1 day</option>
                     <option value={7}>7 days</option>

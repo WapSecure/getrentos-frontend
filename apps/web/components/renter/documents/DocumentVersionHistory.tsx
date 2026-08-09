@@ -52,15 +52,15 @@ export const DocumentVersionHistory = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
         onClick={handleToggleExpand}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-[#c4a747]" />
+          <Clock className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Version History</h3>
+            <h3 className="font-semibold text-foreground">Version History</h3>
             <p className="text-xs text-gray-500">{versions.length} versions</p>
           </div>
         </div>
@@ -74,16 +74,13 @@ export const DocumentVersionHistory = ({
       </div>
 
       {isExpanded && (
-        <div className="divide-y divide-gray-200 dark:divide-white/10">
+        <div className="divide-y divide-border">
           {versions.map((version) => (
-            <div
-              key={version.id}
-              className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-            >
+            <div key={version.id} className="p-4 hover:bg-secondary transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`p-2 rounded-lg ${version.isCurrent ? 'bg-green-100 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-white/10'}`}
+                    className={`p-2 rounded-lg ${version.isCurrent ? 'bg-green-100 dark:bg-green-900/20' : 'bg-secondary'}`}
                   >
                     <FileText
                       className={`w-4 h-4 ${version.isCurrent ? 'text-green-600' : 'text-gray-500'}`}
@@ -91,9 +88,7 @@ export const DocumentVersionHistory = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        v{version.version}
-                      </span>
+                      <span className="font-medium text-foreground">v{version.version}</span>
                       {version.isCurrent && (
                         <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-600 rounded-full">
                           Current
@@ -104,7 +99,7 @@ export const DocumentVersionHistory = ({
                       {formatDate(version.date)} • {version.size} • by {version.user}
                     </p>
                     {version.comment && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 italic">
+                      <p className="text-xs text-muted-foreground mt-1 italic">
                         &quot;{version.comment}&quot;
                       </p>
                     )}

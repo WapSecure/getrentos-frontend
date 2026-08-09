@@ -66,13 +66,13 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className="bg-white dark:bg-[#1a2a2f] rounded-xl p-4 border border-gray-200 dark:border-white/10"
+          className="bg-card rounded-xl p-4 border border-border"
         >
           <div className="flex items-center gap-2 mb-1">
-            <stat.icon className="w-4 h-4 text-[#c4a747]" />
-            <span className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</span>
+            <stat.icon className="w-4 h-4 text-primary" />
+            <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
-          <p className="text-base font-semibold text-gray-900 dark:text-white">
+          <p className="text-base font-semibold text-foreground">
             {stat.value}
             {stat.suffix || ''}
           </p>

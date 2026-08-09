@@ -66,16 +66,14 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#1a2a2f] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden"
+      className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-white/10">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Wrench className="w-4 h-4 text-[#c4a747]" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Quick Report</h3>
+          <Wrench className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Quick Report</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Report common issues in one click
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">Report common issues in one click</p>
       </div>
 
       <div className="p-4 space-y-2">
@@ -91,18 +89,18 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
               className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${
                 isSelected
                   ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                  : 'hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
+                  : 'hover:bg-secondary border-transparent'
               } border`}
             >
               <div
                 className={`p-2 rounded-lg ${
-                  isSelected ? 'bg-green-100 dark:bg-green-900/40' : 'bg-gray-100 dark:bg-white/10'
+                  isSelected ? 'bg-green-100 dark:bg-green-900/40' : 'bg-secondary'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isSelected ? 'text-green-600' : 'text-gray-500'}`} />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{option.label}</p>
+                <p className="text-sm font-medium text-foreground">{option.label}</p>
                 <p className="text-xs text-gray-500">{option.description}</p>
               </div>
               {isSelected ? (

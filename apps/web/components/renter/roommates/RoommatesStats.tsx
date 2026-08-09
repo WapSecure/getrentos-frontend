@@ -51,13 +51,10 @@ export const RoommatesStats = ({ roommates }: RoommatesStatsProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       {stats.map((stat, index) => (
-        <div
-          key={stat.label}
-          className={`${stat.bg} rounded-xl p-4 border border-gray-200 dark:border-white/10`}
-        >
+        <div key={stat.label} className={`${stat.bg} rounded-xl p-4 border border-border`}>
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />
-            <span className="text-xs text-gray-600 dark:text-gray-400">{stat.label}</span>
+            <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
           <p className={`text-lg font-bold ${stat.color} mt-1`}>{stat.value}</p>
         </div>

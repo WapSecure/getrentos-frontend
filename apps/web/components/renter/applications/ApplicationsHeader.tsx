@@ -21,8 +21,8 @@ export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeade
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Applications</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">My Applications</h1>
+          <p className="text-muted-foreground mt-1">
             Track and manage all your rental applications
           </p>
         </div>
@@ -40,35 +40,33 @@ export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeade
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-        <div className="bg-white dark:bg-[#1a2a2f] rounded-lg p-3 border border-gray-200 dark:border-white/10">
+        <div className="bg-card rounded-lg p-3 border border-border">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total</span>
+            <span className="text-sm font-medium text-foreground">Total</span>
           </div>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{total}</p>
+          <p className="text-xl font-bold text-foreground mt-1">{total}</p>
         </div>
-        <div className="bg-white dark:bg-[#1a2a2f] rounded-lg p-3 border border-gray-200 dark:border-white/10">
+        <div className="bg-card rounded-lg p-3 border border-border">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pending</span>
+            <span className="text-sm font-medium text-foreground">Pending</span>
           </div>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{pending}</p>
+          <p className="text-xl font-bold text-foreground mt-1">{pending}</p>
         </div>
-        <div className="bg-white dark:bg-[#1a2a2f] rounded-lg p-3 border border-gray-200 dark:border-white/10">
+        <div className="bg-card rounded-lg p-3 border border-border">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Approved</span>
+            <span className="text-sm font-medium text-foreground">Approved</span>
           </div>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{approved}</p>
+          <p className="text-xl font-bold text-foreground mt-1">{approved}</p>
         </div>
-        <div className="bg-white dark:bg-[#1a2a2f] rounded-lg p-3 border border-gray-200 dark:border-white/10">
+        <div className="bg-card rounded-lg p-3 border border-border">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#c4a747]" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Success Rate
-            </span>
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">Success Rate</span>
           </div>
-          <p className="text-xl font-bold text-[#c4a747] mt-1">
+          <p className="text-xl font-bold text-primary mt-1">
             {total > 0 ? `${Math.round((approved / total) * 100)}%` : '0%'}
           </p>
         </div>

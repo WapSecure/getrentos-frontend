@@ -57,51 +57,44 @@ interface PaymentsTableProps {
 export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) => {
   if (payments.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 p-12 text-center">
-        <p className="text-gray-500 dark:text-gray-400">No payments found</p>
+      <div className="bg-card rounded-2xl border border-border p-12 text-center">
+        <p className="text-muted-foreground">No payments found</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-[#1a2a2f] rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-white/10 text-left">
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Tenant</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Property</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Amount</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Due Date</th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">
-                Payment Status
-              </th>
-              <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">
-                Escrow Status
-              </th>
+            <tr className="border-b border-border text-left">
+              <th className="px-4 py-3 font-medium text-muted-foreground">Tenant</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Property</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Due Date</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Payment Status</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Escrow Status</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+          <tbody className="divide-y divide-border">
             {payments.map((payment) => {
               const escrow = escrowConfig[payment.escrowStatus];
               const status = statusConfig[payment.status];
               const EscrowIcon = escrow.icon;
               return (
-                <tr
-                  key={payment.id}
-                  className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                <tr key={payment.id} className="hover:bg-secondary transition-colors">
+                  <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                     {payment.tenantName}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {payment.propertyName} • {payment.unitName}
                   </td>
-                  <td className="px-4 py-3 text-gray-900 dark:text-white font-medium whitespace-nowrap">
+                  <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
                     {formatCurrency(payment.amount, { compact: true })}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {formatDate(payment.dueDate)}
                   </td>
                   <td className="px-4 py-3">
@@ -122,7 +115,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                   <td className="px-4 py-3">
                     <button
                       onClick={() => onViewDetails(payment)}
-                      className="text-xs font-medium text-[#c4a747] hover:text-[#a88d3a] whitespace-nowrap"
+                      className="text-xs font-medium text-primary hover:text-[#a88d3a] whitespace-nowrap"
                     >
                       View Details
                     </button>
