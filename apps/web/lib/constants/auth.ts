@@ -161,6 +161,7 @@ export const ROUTES = {
   RENTER_APPLICATIONS: '/renter/applications',
   RENTER_LEASE: '/renter/lease',
   RENTER_PAYMENTS: '/renter/payments',
+  RENTER_FINANCING: '/renter/financing',
   RENTER_MAINTENANCE: '/renter/maintenance',
   RENTER_MESSAGES: '/renter/messages',
   RENTER_DOCUMENTS: '/renter/documents',
