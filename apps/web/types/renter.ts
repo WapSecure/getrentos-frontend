@@ -3,6 +3,19 @@ export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejec
 export type PaymentStatus = 'upcoming' | 'overdue' | 'paid';
 export type MaintenanceStatus = 'submitted' | 'assigned' | 'in_progress' | 'resolved';
 
+export interface PropertyReview {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  comment: string;
+}
+
+export interface PropertyFee {
+  label: string;
+  amount: number;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -22,6 +35,14 @@ export interface Property {
   landlordRating?: number;
   landlordReviews?: number;
   landlordVerified?: boolean;
+  description?: string;
+  amenities?: string[];
+  landlordName?: string;
+  landlordEmail?: string;
+  landlordPhone?: string;
+  availableFrom?: string;
+  additionalFees?: PropertyFee[];
+  reviews?: PropertyReview[];
 }
 
 export interface Document {

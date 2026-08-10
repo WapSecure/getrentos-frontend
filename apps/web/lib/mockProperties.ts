@@ -1,0 +1,349 @@
+import type { Property } from '@/types/renter';
+
+export const mockProperties: Property[] = [
+  {
+    id: '1',
+    title: 'Modern Downtown Loft',
+    location: 'Ikeja, Lagos',
+    price: 200000,
+    period: 'month',
+    bedrooms: 2,
+    bathrooms: 2,
+    size: 1200,
+    rating: 4.8,
+    verified: true,
+    image: '',
+    score: 92,
+    hasVirtualTour: true,
+    virtualTourUrl: '#',
+    landlordResponseRate: 95,
+    landlordRating: 4.9,
+    landlordReviews: 156,
+    landlordVerified: true,
+    description:
+      'A bright, open-plan loft in the heart of Ikeja with easy access to the airport, Computer Village, and the Ikeja City Mall. Recently renovated with modern fittings throughout, and backed by a landlord with one of the fastest response rates on GetRentos.',
+    amenities: [
+      '24/7 security',
+      'Backup generator',
+      'Borehole water supply',
+      'Fitted kitchen',
+      'Dedicated parking',
+      'Prepaid electricity meter',
+      'CCTV',
+      'Gated compound',
+    ],
+    landlordName: 'Adaeze Okonkwo',
+    landlordEmail: 'adaeze.okonkwo@getrentos.test',
+    landlordPhone: '+234 803 123 4567',
+    availableFrom: '2026-09-01',
+    additionalFees: [
+      { label: 'Agency Fee (10%)', amount: 20000 },
+      { label: 'Legal Fee (10%)', amount: 20000 },
+      { label: 'Caution Deposit', amount: 200000 },
+    ],
+    reviews: [
+      {
+        id: 'r1',
+        author: 'Bolanle A.',
+        rating: 5,
+        date: '2026-05-14',
+        comment: 'Adaeze responded within the hour every time. The loft is exactly as pictured.',
+      },
+      {
+        id: 'r2',
+        author: 'Chinedu O.',
+        rating: 4.5,
+        date: '2026-03-02',
+        comment: 'Great location for the airport run. Water and power have been steady.',
+      },
+    ],
+  },
+  {
+    id: '2',
+    title: 'Cozy Studio Apartment',
+    location: 'Victoria Island, Lagos',
+    price: 150000,
+    period: 'month',
+    bedrooms: 1,
+    bathrooms: 1,
+    size: 650,
+    rating: 4.6,
+    verified: true,
+    image: '',
+    score: 78,
+    hasVirtualTour: false,
+    landlordResponseRate: 88,
+    landlordRating: 4.7,
+    landlordReviews: 89,
+    landlordVerified: true,
+    description:
+      'A compact, efficient studio in Victoria Island — ideal for young professionals working around Ozumba Mbadiwe or Adeola Odeku. Walking distance to several banks, restaurants, and the waterfront.',
+    amenities: [
+      '24/7 security',
+      'Backup generator',
+      'Fitted kitchenette',
+      'Water heater',
+      'Prepaid electricity meter',
+      'Estate parking',
+    ],
+    landlordName: 'Tunde Bakare',
+    landlordEmail: 'tunde.bakare@getrentos.test',
+    landlordPhone: '+234 805 234 5678',
+    availableFrom: '2026-08-20',
+    additionalFees: [
+      { label: 'Agency Fee (10%)', amount: 15000 },
+      { label: 'Legal Fee (10%)', amount: 15000 },
+      { label: 'Caution Deposit', amount: 150000 },
+    ],
+    reviews: [
+      {
+        id: 'r1',
+        author: 'Feyisayo K.',
+        rating: 4.5,
+        date: '2026-04-20',
+        comment: 'Small but well laid out. Tunde was fair during the walkthrough.',
+      },
+    ],
+  },
+  {
+    id: '3',
+    title: 'Luxury Beachfront Villa',
+    location: 'Elegushi Beach, Lagos',
+    price: 800000,
+    period: 'month',
+    bedrooms: 4,
+    bathrooms: 3,
+    size: 3200,
+    rating: 4.9,
+    verified: true,
+    image: '',
+    score: 96,
+    hasVirtualTour: true,
+    virtualTourUrl: '#',
+    landlordResponseRate: 98,
+    landlordRating: 5.0,
+    landlordReviews: 234,
+    landlordVerified: true,
+    description:
+      'An expansive 4-bedroom villa steps from Elegushi Beach, with a private pool and staff quarters. Finished to a five-star standard — popular with executives and diplomatic staff relocating to Lagos.',
+    amenities: [
+      '24/7 armed security',
+      'Private swimming pool',
+      'Backup generator (full-house)',
+      'Borehole water supply',
+      'Staff quarters',
+      'Smart home fittings',
+      'Gated estate',
+      'CCTV',
+      '2-car garage',
+    ],
+    landlordName: 'Folake Adebayo',
+    landlordEmail: 'folake.adebayo@getrentos.test',
+    landlordPhone: '+234 802 345 6789',
+    availableFrom: '2026-08-15',
+    additionalFees: [
+      { label: 'Agency Fee (10%)', amount: 80000 },
+      { label: 'Legal Fee (10%)', amount: 80000 },
+      { label: 'Caution Deposit', amount: 800000 },
+    ],
+    reviews: [
+      {
+        id: 'r1',
+        author: 'Emeka N.',
+        rating: 5,
+        date: '2026-06-01',
+        comment: 'Worth every naira. Folake and her team handled everything professionally.',
+      },
+      {
+        id: 'r2',
+        author: 'Grace I.',
+        rating: 5,
+        date: '2026-02-18',
+        comment: 'The pool and the ocean view make this one of a kind on the island.',
+      },
+    ],
+  },
+  {
+    id: '4',
+    title: 'Executive 3-Bed Apartment',
+    location: 'Ikoyi, Lagos',
+    price: 350000,
+    period: 'month',
+    bedrooms: 3,
+    bathrooms: 2,
+    size: 1800,
+    rating: 4.7,
+    verified: true,
+    image: '',
+    score: 85,
+    hasVirtualTour: true,
+    virtualTourUrl: '#',
+    landlordResponseRate: 92,
+    landlordRating: 4.8,
+    landlordReviews: 112,
+    landlordVerified: true,
+    description:
+      'A well-appointed 3-bedroom apartment on a quiet Ikoyi close, minutes from the Falomo roundabout. Suited to families who want space without leaving the island.',
+    amenities: [
+      '24/7 security',
+      'Backup generator',
+      'Borehole water supply',
+      'Fitted kitchen',
+      'Dedicated parking (2 slots)',
+      'Children’s play area',
+      'Gated compound',
+    ],
+    landlordName: 'Emeka Chukwu',
+    landlordEmail: 'emeka.chukwu@getrentos.test',
+    landlordPhone: '+234 806 456 7890',
+    availableFrom: '2026-09-10',
+    additionalFees: [
+      { label: 'Agency Fee (10%)', amount: 35000 },
+      { label: 'Legal Fee (10%)', amount: 35000 },
+      { label: 'Caution Deposit', amount: 350000 },
+    ],
+    reviews: [
+      {
+        id: 'r1',
+        author: 'Adaobi U.',
+        rating: 4.5,
+        date: '2026-05-09',
+        comment: 'Quiet close, good for kids. Emeka fixed a plumbing issue same day.',
+      },
+    ],
+  },
+  {
+    id: '5',
+    title: 'Affordable 2-Bed Flat',
+    location: 'Surulere, Lagos',
+    price: 120000,
+    period: 'month',
+    bedrooms: 2,
+    bathrooms: 1,
+    size: 950,
+    rating: 4.5,
+    verified: false,
+    image: '',
+    score: 65,
+    hasVirtualTour: false,
+    landlordResponseRate: 75,
+    landlordRating: 4.2,
+    landlordReviews: 45,
+    landlordVerified: false,
+    description:
+      'A budget-friendly 2-bedroom flat in Surulere, close to the National Stadium and Adeniran Ogunsanya Street. A solid option for tenants prioritizing value over finish.',
+    amenities: [
+      'Shared security',
+      'Borehole water supply',
+      'Prepaid electricity meter',
+      'Street parking',
+    ],
+    landlordName: 'Ibrahim Musa',
+    landlordEmail: 'ibrahim.musa@getrentos.test',
+    landlordPhone: '+234 807 567 8901',
+    availableFrom: '2026-08-25',
+    additionalFees: [
+      { label: 'Agency Fee (10%)', amount: 12000 },
+      { label: 'Legal Fee (10%)', amount: 12000 },
+      { label: 'Caution Deposit', amount: 120000 },
+    ],
+    reviews: [
+      {
+        id: 'r1',
+        author: 'Kunle T.',
+        rating: 4,
+        date: '2026-01-30',
+        comment:
+          'Good value for Surulere. Landlord is still setting up on GetRentos so replies can be slow.',
+      },
+    ],
+  },
+  {
+    id: '6',
+    title: 'Penthouse with Ocean View',
+    location: 'Lekki Phase 1, Lagos',
+    price: 550000,
+    period: 'month',
+    bedrooms: 3,
+    bathrooms: 2,
+    size: 2200,
+    rating: 4.9,
+    verified: true,
+    image: '',
+    score: 94,
+    hasVirtualTour: true,
+    virtualTourUrl: '#',
+    landlordResponseRate: 96,
+    landlordRating: 4.9,
+    landlordReviews: 178,
+    landlordVerified: true,
+    description:
+      'A top-floor penthouse in Lekki Phase 1 with unobstructed ocean views from a wraparound balcony. Close to the Lekki-Ikoyi Link Bridge and Admiralty Way’s restaurant scene.',
+    amenities: [
+      '24/7 security',
+      'Backup generator',
+      'Rooftop terrace',
+      'Fitted kitchen',
+      'Gym access',
+      'Dedicated parking',
+      'CCTV',
+      'Gated estate',
+    ],
+    landlordName: 'Ngozi Eze',
+    landlordEmail: 'ngozi.eze@getrentos.test',
+    landlordPhone: '+234 809 678 9012',
+    availableFrom: '2026-09-05',
+    additionalFees: [
+      { label: 'Agency Fee (10%)', amount: 55000 },
+      { label: 'Legal Fee (10%)', amount: 55000 },
+      { label: 'Caution Deposit', amount: 550000 },
+    ],
+    reviews: [
+      {
+        id: 'r1',
+        author: 'Somto A.',
+        rating: 5,
+        date: '2026-06-10',
+        comment: 'The view alone is worth it. Ngozi was transparent about every cost upfront.',
+      },
+      {
+        id: 'r2',
+        author: 'Halima B.',
+        rating: 4.5,
+        date: '2026-04-02',
+        comment: 'Beautiful finish. Gym equipment could use an upgrade.',
+      },
+    ],
+  },
+];
+
+export const getPropertyById = (id: string): Property | undefined =>
+  mockProperties.find((property) => property.id === id);
+
+interface RecentlyViewedEntry {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  image: string;
+  viewedAt: string;
+}
+
+export const trackRecentlyViewed = (property: Property) => {
+  const recent = localStorage.getItem('recently_viewed');
+  let recentProperties: RecentlyViewedEntry[] = recent ? JSON.parse(recent) : [];
+
+  recentProperties = recentProperties.filter((p) => p.id !== property.id);
+
+  recentProperties.unshift({
+    id: property.id,
+    title: property.title,
+    location: property.location,
+    price: property.price,
+    image: property.image,
+    viewedAt: new Date().toISOString(),
+  });
+
+  recentProperties = recentProperties.slice(0, 10);
+  localStorage.setItem('recently_viewed', JSON.stringify(recentProperties));
+};

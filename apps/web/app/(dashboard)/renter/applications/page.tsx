@@ -177,7 +177,11 @@ export default function ApplicationsPage() {
         ],
       },
     ];
-    setApplications(mockApplications);
+
+    const submitted = localStorage.getItem('renter_submitted_applications');
+    const submittedApplications: Application[] = submitted ? JSON.parse(submitted) : [];
+
+    setApplications([...submittedApplications, ...mockApplications]);
   };
 
   const loadNotes = () => {
