@@ -21,6 +21,7 @@ import {
   Calendar,
   Zap,
   TrendingUp,
+  Smartphone,
 } from 'lucide-react';
 
 interface NavItem {
@@ -43,6 +44,7 @@ const navItems: NavItem[] = [
   { label: 'Roommates', href: '/renter/roommates', icon: Users },
   { label: 'Trust Score', href: '/renter/trust-score', icon: Star },
   { label: 'Credit Report', href: '/renter/credit-report', icon: TrendingUp },
+  { label: 'USSD Access', href: '/renter/ussd-access', icon: Smartphone },
   { label: 'Notifications', href: '/renter/notifications', icon: Bell },
   { label: 'Calendar', href: '/renter/calendar', icon: Calendar },
   { label: 'Settings', href: '/renter/settings', icon: Settings },
