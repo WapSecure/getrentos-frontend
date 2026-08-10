@@ -1,65 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Megaphone } from 'lucide-react';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
 import { CreateListingModal } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
 import { Button } from '@/components/ui/Button';
+import { landlordService } from '@/services/landlordService';
 import type { Listing, ListingStatus, Unit } from '@/types/landlord';
-
-const mockVacantUnits: Unit[] = [
-  {
-    id: 'unit_004',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitName: 'Unit 4A',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 320_000,
-    occupancyStatus: 'vacant',
-  },
-  {
-    id: 'unit_007',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitName: 'Unit 2A',
-    bedrooms: 2,
-    bathrooms: 2,
-    monthlyRent: 460_000,
-    occupancyStatus: 'vacant',
-  },
-  {
-    id: 'unit_009',
-    propertyId: 'prop_003',
-    propertyName: 'Modern Downtown Loft',
-    unitName: 'Unit B',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 450_000,
-    occupancyStatus: 'vacant',
-  },
-];
-
-const mockListings: Listing[] = [
-  {
-    id: 'listing_001',
-    unitId: 'unit_004',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitName: 'Unit 4A',
-    listingTitle: 'Bright 1-Bed Apartment in Victoria Island',
-    monthlyRent: 320_000,
-    securityDeposit: 320_000,
-    amenities: ['Parking', 'Security', '24/7 Power'],
-    availabilityDate: '2026-09-01',
-    allowPets: false,
-    furnished: true,
-    shortLetEnabled: false,
-    status: 'published',
-    createdAt: '2026-07-20T00:00:00.000Z',
-  },
-];
 
 const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -69,31 +17,59 @@ const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
 ];
 
 export default function LandlordListingsPage() {
-  const [listings, setListings] = useState<Listing[]>(mockListings);
-  const [vacantUnits, setVacantUnits] = useState<Unit[]>(
-    mockVacantUnits.filter((u) => !mockListings.some((l) => l.unitId === u.id))
-  );
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
   const [filter, setFilter] = useState<'all' | ListingStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
 
-  const handlePublish = (data: Omit<Listing, 'id' | 'status' | 'createdAt'>) => {
-    const newListing: Listing = {
-      ...data,
-      id: `listing_${Date.now()}`,
-      status: 'published',
-      createdAt: new Date().toISOString(),
+  useEffect(() => {
+    const fetchData = async () => {
+      const [listingsRes, vacantUnitsRes] = await Promise.all([
+        landlordService.listListings(),
+        landlordService.listVacantUnits(),
+      ]);
+      if (listingsRes.success && listingsRes.data) setListings(listingsRes.data);
+      if (vacantUnitsRes.success && vacantUnitsRes.data) setVacantUnits(vacantUnitsRes.data);
     };
-    setListings((prev) => [newListing, ...prev]);
-    setVacantUnits((prev) => prev.filter((u) => u.id !== data.unitId));
+
+    fetchData();
+  }, []);
+
+  const handlePublish = async (data: Omit<Listing, 'id' | 'status' | 'createdAt'>) => {
+    const {
+      unitId,
+      listingTitle,
+      monthlyRent,
+      securityDeposit,
+      amenities,
+      availabilityDate,
+      allowPets,
+      furnished,
+      shortLetEnabled,
+    } = data;
+    const response = await landlordService.publishListing({
+      unitId,
+      listingTitle,
+      monthlyRent,
+      securityDeposit,
+      amenities,
+      availabilityDate,
+      allowPets,
+      furnished,
+      shortLetEnabled,
+    });
+    if (response.success && response.data) {
+      setListings((prev) => [response.data!, ...prev]);
+      setVacantUnits((prev) => prev.filter((u) => u.id !== data.unitId));
+    }
   };
 
-  const handleTogglePause = (id: string) => {
-    setListings((prev) =>
-      prev.map((l) =>
-        l.id === id ? { ...l, status: l.status === 'paused' ? 'published' : 'paused' } : l
-      )
-    );
+  const handleTogglePause = async (id: string) => {
+    const response = await landlordService.toggleListingPause(id);
+    if (response.success && response.data) {
+      setListings((prev) => prev.map((l) => (l.id === id ? response.data! : l)));
+    }
   };
 
   const filteredListings = listings.filter((l) => filter === 'all' || l.status === filter);

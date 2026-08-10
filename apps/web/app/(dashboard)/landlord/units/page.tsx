@@ -6,160 +6,8 @@ import { Plus, Search } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { Button } from '@/components/ui/Button';
+import { landlordService } from '@/services/landlordService';
 import type { Property, Unit } from '@/types/landlord';
-
-const mockProperties: Property[] = [
-  {
-    id: 'prop_001',
-    name: 'Sunrise Apartments',
-    type: 'apartment',
-    address: '14 Adeola Odeku Street',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '',
-    verificationStatus: 'verified',
-    totalUnits: 8,
-    occupiedUnits: 6,
-    monthlyRevenue: 2_850_000,
-    createdAt: '2024-11-02T00:00:00.000Z',
-  },
-  {
-    id: 'prop_002',
-    name: 'Palm Court Residences',
-    type: 'duplex',
-    address: '22 Admiralty Way',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '',
-    verificationStatus: 'verified',
-    totalUnits: 4,
-    occupiedUnits: 3,
-    monthlyRevenue: 1_620_000,
-    createdAt: '2025-01-15T00:00:00.000Z',
-  },
-  {
-    id: 'prop_003',
-    name: 'Modern Downtown Loft',
-    type: 'shared_apartment',
-    address: '5 Ikeja GRA',
-    city: 'Ikeja',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '',
-    verificationStatus: 'pending',
-    totalUnits: 3,
-    occupiedUnits: 1,
-    monthlyRevenue: 450_000,
-    createdAt: '2025-04-20T00:00:00.000Z',
-  },
-];
-
-const mockUnits: Unit[] = [
-  {
-    id: 'unit_001',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitName: 'Unit 1A',
-    bedrooms: 2,
-    bathrooms: 2,
-    monthlyRent: 450_000,
-    occupancyStatus: 'occupied',
-    tenantId: 'tenant_001',
-    tenantName: 'Adaeze Okafor',
-  },
-  {
-    id: 'unit_002',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitName: 'Unit 2B',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 320_000,
-    occupancyStatus: 'occupied',
-    tenantId: 'tenant_002',
-    tenantName: 'Tunde Bakare',
-  },
-  {
-    id: 'unit_003',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitName: 'Unit 3B',
-    bedrooms: 2,
-    bathrooms: 2,
-    monthlyRent: 450_000,
-    occupancyStatus: 'occupied',
-    tenantId: 'tenant_003',
-    tenantName: 'Chuka Nwosu',
-  },
-  {
-    id: 'unit_004',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitName: 'Unit 4A',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 320_000,
-    occupancyStatus: 'vacant',
-  },
-  {
-    id: 'unit_005',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitName: 'Unit 1A',
-    bedrooms: 3,
-    bathrooms: 2,
-    monthlyRent: 580_000,
-    occupancyStatus: 'occupied',
-    tenantId: 'tenant_004',
-    tenantName: 'Ifeoma Bello',
-  },
-  {
-    id: 'unit_006',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitName: 'Unit 1B',
-    bedrooms: 3,
-    bathrooms: 2,
-    monthlyRent: 580_000,
-    occupancyStatus: 'notice_given',
-    tenantId: 'tenant_005',
-    tenantName: 'Segun Adeyemi',
-  },
-  {
-    id: 'unit_007',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitName: 'Unit 2A',
-    bedrooms: 2,
-    bathrooms: 2,
-    monthlyRent: 460_000,
-    occupancyStatus: 'vacant',
-  },
-  {
-    id: 'unit_008',
-    propertyId: 'prop_003',
-    propertyName: 'Modern Downtown Loft',
-    unitName: 'Unit A',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 450_000,
-    occupancyStatus: 'occupied',
-    tenantId: 'tenant_006',
-    tenantName: 'Ngozi Eze',
-  },
-  {
-    id: 'unit_009',
-    propertyId: 'prop_003',
-    propertyName: 'Modern Downtown Loft',
-    unitName: 'Unit B',
-    bedrooms: 1,
-    bathrooms: 1,
-    monthlyRent: 450_000,
-    occupancyStatus: 'vacant',
-  },
-];
 
 export default function LandlordUnitsPage() {
   return (
@@ -171,35 +19,55 @@ export default function LandlordUnitsPage() {
 
 function LandlordUnitsPageContent() {
   const searchParams = useSearchParams();
-  const [properties] = useState<Property[]>(mockProperties);
-  const [units, setUnits] = useState<Unit[]>(mockUnits);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [propertyFilter, setPropertyFilter] = useState<string>(
     searchParams.get('property') || 'all'
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const handleMarkVacant = (unitId: string) => {
-    setUnits((prev) =>
-      prev.map((u) =>
-        u.id === unitId
-          ? { ...u, occupancyStatus: 'vacant', tenantId: undefined, tenantName: undefined }
-          : u
-      )
-    );
+  useEffect(() => {
+    const fetchData = async () => {
+      const [propertiesRes, unitsRes] = await Promise.all([
+        landlordService.listProperties(),
+        landlordService.listUnits(),
+      ]);
+      if (propertiesRes.success && propertiesRes.data) setProperties(propertiesRes.data);
+      if (unitsRes.success && unitsRes.data) setUnits(unitsRes.data);
+    };
+
+    fetchData();
+  }, []);
+
+  const handleMarkVacant = async (unitId: string) => {
+    const response = await landlordService.markUnitVacant(unitId);
+    if (response.success && response.data) {
+      setUnits((prev) => prev.map((u) => (u.id === unitId ? response.data! : u)));
+    }
   };
 
-  const handleAssignTenant = (unitId: string, tenantName: string) => {
-    setUnits((prev) =>
-      prev.map((u) => (u.id === unitId ? { ...u, occupancyStatus: 'occupied', tenantName } : u))
-    );
+  const handleAssignTenant = async (unitId: string, tenantName: string) => {
+    const response = await landlordService.assignUnitTenant(unitId, tenantName);
+    if (response.success && response.data) {
+      setUnits((prev) => prev.map((u) => (u.id === unitId ? response.data! : u)));
+    }
   };
 
-  const handleAddUnit = (
+  const handleAddUnit = async (
     data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
   ) => {
-    const newUnit: Unit = { ...data, id: `unit_${Date.now()}`, occupancyStatus: 'vacant' };
-    setUnits((prev) => [newUnit, ...prev]);
+    const { propertyId, unitName, bedrooms, bathrooms, monthlyRent } = data;
+    const response = await landlordService.createUnit({
+      propertyId,
+      unitName,
+      bedrooms,
+      bathrooms,
+      monthlyRent,
+    });
+    if (response.success && response.data) {
+      setUnits((prev) => [response.data!, ...prev]);
+    }
   };
 
   const filteredUnits = units.filter((u) => {

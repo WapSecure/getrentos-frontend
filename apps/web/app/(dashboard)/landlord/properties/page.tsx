@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
@@ -8,93 +8,70 @@ import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyMo
 import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { landlordService } from '@/services/landlordService';
 import type { Property } from '@/types/landlord';
-
-const mockProperties: Property[] = [
-  {
-    id: 'prop_001',
-    name: 'Sunrise Apartments',
-    type: 'apartment',
-    address: '14 Adeola Odeku Street',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '',
-    verificationStatus: 'verified',
-    totalUnits: 8,
-    occupiedUnits: 6,
-    monthlyRevenue: 2_850_000,
-    createdAt: '2024-11-02T00:00:00.000Z',
-  },
-  {
-    id: 'prop_002',
-    name: 'Palm Court Residences',
-    type: 'duplex',
-    address: '22 Admiralty Way',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '',
-    verificationStatus: 'verified',
-    totalUnits: 4,
-    occupiedUnits: 3,
-    monthlyRevenue: 1_620_000,
-    createdAt: '2025-01-15T00:00:00.000Z',
-  },
-  {
-    id: 'prop_003',
-    name: 'Modern Downtown Loft',
-    type: 'shared_apartment',
-    address: '5 Ikeja GRA',
-    city: 'Ikeja',
-    state: 'Lagos',
-    country: 'Nigeria',
-    coverImage: '',
-    verificationStatus: 'pending',
-    totalUnits: 3,
-    occupiedUnits: 1,
-    monthlyRevenue: 450_000,
-    createdAt: '2025-04-20T00:00:00.000Z',
-  },
-];
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
 
 export default function LandlordPropertiesPage() {
   const router = useRouter();
-  const [properties, setProperties] = useState<Property[]>(mockProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
-  const handlePublish = (
+  useEffect(() => {
+    const fetchProperties = async () => {
+      const response = await landlordService.listProperties();
+      if (response.success && response.data) setProperties(response.data);
+    };
+
+    fetchProperties();
+  }, []);
+
+  const handlePublish = async (
     data: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>
   ) => {
-    const newProperty: Property = {
-      ...data,
-      id: `prop_${Date.now()}`,
-      occupiedUnits: 0,
-      monthlyRevenue: 0,
-      createdAt: new Date().toISOString(),
-    };
-    setProperties((prev) => [newProperty, ...prev]);
+    const { name, type, address, city, state, country, description, totalUnits } = data;
+    const response = await landlordService.createProperty({
+      name,
+      type,
+      address,
+      city,
+      state,
+      country,
+      description,
+      totalUnits,
+    });
+    if (response.success && response.data) {
+      setProperties((prev) => [response.data!, ...prev]);
+    }
   };
 
-  const handleEditSave = (
+  const handleEditSave = async (
     id: string,
     updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>
   ) => {
-    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+    const response = await landlordService.updateProperty(id, updates);
+    if (response.success && response.data) {
+      setProperties((prev) => prev.map((p) => (p.id === id ? response.data! : p)));
+    }
   };
 
-  const handleToggleArchive = (id: string) => {
-    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, archived: !p.archived } : p)));
+  const handleToggleArchive = async (id: string) => {
+    const response = await landlordService.toggleArchiveProperty(id);
+    if (response.success && response.data) {
+      setProperties((prev) => prev.map((p) => (p.id === id ? response.data! : p)));
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setProperties((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    const response = await landlordService.deleteProperty(id);
+    if (response.success) {
+      setProperties((prev) => prev.filter((p) => p.id !== id));
+    }
   };
 
   const filteredProperties = properties.filter((p) => {

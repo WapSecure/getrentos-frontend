@@ -21,13 +21,18 @@ export const AddUnitModal = ({
   defaultPropertyId,
   onSave,
 }: AddUnitModalProps) => {
-  const [propertyId, setPropertyId] = useState(defaultPropertyId || properties[0]?.id || '');
+  const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [unitName, setUnitName] = useState('');
   const [bedrooms, setBedrooms] = useState('1');
   const [bathrooms, setBathrooms] = useState('1');
   const [monthlyRent, setMonthlyRent] = useState('');
 
+  const propertyId = properties.some((p) => p.id === selectedPropertyId)
+    ? selectedPropertyId
+    : defaultPropertyId || properties[0]?.id || '';
+
   const handleClose = () => {
+    setSelectedPropertyId('');
     setUnitName('');
     setBedrooms('1');
     setBathrooms('1');
@@ -80,7 +85,7 @@ export const AddUnitModal = ({
                 </label>
                 <select
                   value={propertyId}
-                  onChange={(e) => setPropertyId(e.target.value)}
+                  onChange={(e) => setSelectedPropertyId(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {properties.map((p) => (

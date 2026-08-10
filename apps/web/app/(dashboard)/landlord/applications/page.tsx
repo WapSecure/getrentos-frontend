@@ -1,74 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText } from 'lucide-react';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
+import { landlordService } from '@/services/landlordService';
 import type { ApplicationStatus, RentalApplication } from '@/types/landlord';
-
-const mockApplications: RentalApplication[] = [
-  {
-    id: 'app_001',
-    applicantName: 'Bisi Adewale',
-    applicantEmail: 'bisi.adewale@example.com',
-    applicantPhone: '+234 802 111 2233',
-    propertyId: 'prop_001',
-    propertyName: 'Sunrise Apartments',
-    unitId: 'unit_004',
-    unitName: 'Unit 4A',
-    monthlyIncome: 850_000,
-    employmentStatus: 'Full-time — Product Manager, Flutterwave',
-    verificationStatus: 'verified',
-    trustScore: 84,
-    applicationDate: '2026-08-05T00:00:00.000Z',
-    status: 'pending',
-    documents: [
-      { name: 'Government ID', uploaded: true },
-      { name: 'Proof of Income', uploaded: true },
-      { name: 'Bank Statement', uploaded: false },
-    ],
-  },
-  {
-    id: 'app_002',
-    applicantName: 'Emeka Chukwu',
-    applicantEmail: 'emeka.chukwu@example.com',
-    applicantPhone: '+234 809 222 3344',
-    propertyId: 'prop_002',
-    propertyName: 'Palm Court Residences',
-    unitId: 'unit_007',
-    unitName: 'Unit 2A',
-    monthlyIncome: 620_000,
-    employmentStatus: 'Self-employed — Consultant',
-    verificationStatus: 'pending',
-    trustScore: 58,
-    applicationDate: '2026-08-04T00:00:00.000Z',
-    status: 'under_review',
-    documents: [
-      { name: 'Government ID', uploaded: true },
-      { name: 'Proof of Income', uploaded: false },
-    ],
-  },
-  {
-    id: 'app_003',
-    applicantName: 'Grace Iheanacho',
-    applicantEmail: 'grace.iheanacho@example.com',
-    applicantPhone: '+234 815 333 4455',
-    propertyId: 'prop_003',
-    propertyName: 'Modern Downtown Loft',
-    unitId: 'unit_009',
-    unitName: 'Unit B',
-    monthlyIncome: 700_000,
-    employmentStatus: 'Full-time — Nurse, Reddington Hospital',
-    verificationStatus: 'verified',
-    trustScore: 90,
-    applicationDate: '2026-08-01T00:00:00.000Z',
-    status: 'approved',
-    documents: [
-      { name: 'Government ID', uploaded: true },
-      { name: 'Proof of Income', uploaded: true },
-    ],
-  },
-];
 
 const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -79,13 +16,24 @@ const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
 ];
 
 export default function LandlordApplicationsPage() {
-  const [applications, setApplications] = useState<RentalApplication[]>(mockApplications);
+  const [applications, setApplications] = useState<RentalApplication[]>([]);
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
 
-  const updateStatus = (id: string, status: ApplicationStatus) => {
-    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-    setSelectedApplication((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
+  useEffect(() => {
+    const fetchApplications = async () => {
+      const response = await landlordService.listApplications();
+      if (response.success && response.data) setApplications(response.data);
+    };
+
+    fetchApplications();
+  }, []);
+
+  const updateStatus = async (id: string, status: ApplicationStatus) => {
+    const response = await landlordService.updateApplicationStatus(id, status);
+    if (!response.success || !response.data) return;
+    setApplications((prev) => prev.map((a) => (a.id === id ? response.data! : a)));
+    setSelectedApplication((prev) => (prev && prev.id === id ? response.data! : prev));
   };
 
   const handleApprove = (id: string) => updateStatus(id, 'approved');

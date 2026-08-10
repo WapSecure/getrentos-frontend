@@ -1,10 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Download, FileSpreadsheet, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { FinancialChart } from '@/components/landlord/financials/FinancialChart';
 import { Button } from '@/components/ui/Button';
+import {
+  landlordService,
+  type FinancialStats as FinancialStatsData,
+  type FinancialChartPoint,
+} from '@/services/landlordService';
 
 type ReportPeriod = 'monthly' | 'quarterly' | 'yearly';
 
@@ -14,21 +19,49 @@ const periodOptions: { value: ReportPeriod; label: string }[] = [
   { value: 'yearly', label: 'Yearly' },
 ];
 
+const EMPTY_STATS: FinancialStatsData = {
+  rentalIncome: 0,
+  outstandingRent: 0,
+  maintenanceCosts: 0,
+  netProfit: 0,
+};
+
 export default function LandlordFinancialsPage() {
   const [period, setPeriod] = useState<ReportPeriod>('monthly');
-  const [exportedFormat, setExportedFormat] = useState<'csv' | 'pdf' | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exported, setExported] = useState(false);
+  const [stats, setStats] = useState<FinancialStatsData>(EMPTY_STATS);
+  const [chartData, setChartData] = useState<FinancialChartPoint[]>([]);
 
-  const handleExport = (format: 'csv' | 'pdf') => {
-    setExportedFormat(format);
-    window.setTimeout(() => setExportedFormat(null), 2500);
+  useEffect(() => {
+    const fetchStats = async () => {
+      const response = await landlordService.getFinancialStats(period);
+      if (response.success && response.data) setStats(response.data);
+    };
+
+    fetchStats();
+  }, [period]);
+
+  useEffect(() => {
+    const fetchChart = async () => {
+      const response = await landlordService.getFinancialChart();
+      if (response.success && response.data) setChartData(response.data);
+    };
+
+    fetchChart();
+  }, []);
+
+  const handleExport = async () => {
+    setExporting(true);
+    const response = await landlordService.exportFinancialsCsv();
+    setExporting(false);
+    if (response.success) {
+      setExported(true);
+      window.setTimeout(() => setExported(false), 2500);
+    }
   };
 
-  // Mock values scale slightly with the selected reporting period for realism
-  const periodMultiplier = period === 'monthly' ? 1 : period === 'quarterly' ? 3 : 12;
-  const rentalIncome = 3_750_000 * periodMultiplier;
-  const outstandingRent = 380_000;
-  const maintenanceCosts = 705_000 * periodMultiplier;
-  const netProfit = rentalIncome - maintenanceCosts;
+  const { rentalIncome, outstandingRent, maintenanceCosts, netProfit } = stats;
 
   return (
     <>
@@ -39,30 +72,19 @@ export default function LandlordFinancialsPage() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => handleExport('csv')}
-          >
-            {exportedFormat === 'csv' ? (
-              <Check className="w-3.5 h-3.5 text-green-500" />
-            ) : (
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-            )}
-            {exportedFormat === 'csv' ? 'Exported' : 'Export CSV'}
-          </Button>
-          <Button
             variant="primary"
             size="sm"
             className="gap-1.5"
-            onClick={() => handleExport('pdf')}
+            onClick={handleExport}
+            disabled={exporting}
+            isLoading={exporting}
           >
-            {exportedFormat === 'pdf' ? (
+            {exported ? (
               <Check className="w-3.5 h-3.5" />
             ) : (
-              <Download className="w-3.5 h-3.5" />
+              <FileSpreadsheet className="w-3.5 h-3.5" />
             )}
-            {exportedFormat === 'pdf' ? 'Downloaded' : 'Download PDF'}
+            {exported ? 'Exported' : 'Export CSV'}
           </Button>
         </div>
       </div>
@@ -90,7 +112,7 @@ export default function LandlordFinancialsPage() {
         netProfit={netProfit}
       />
 
-      <FinancialChart />
+      <FinancialChart data={chartData} />
     </>
   );
 }
