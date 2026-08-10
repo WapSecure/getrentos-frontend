@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Heart, FileText, MessageCircle, Calendar, Home, CreditCard } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -113,52 +114,54 @@ const StatCard = ({
 };
 
 export const RenterStatsCards = () => {
+  const { t } = useLanguage();
+
   const stats = [
     {
       icon: Heart,
-      label: 'Saved Properties',
+      label: t('dashboard.stats.saved_properties'),
       value: 12,
-      subtitle: '3 new this week',
+      subtitle: t('dashboard.stats.saved_properties_subtitle'),
       color: 'pink',
       delay: 0,
     },
     {
       icon: FileText,
-      label: 'Active Applications',
+      label: t('dashboard.stats.active_applications'),
       value: 3,
-      subtitle: '2 under review',
+      subtitle: t('dashboard.stats.active_applications_subtitle'),
       color: 'blue',
       delay: 0.05,
     },
     {
       icon: MessageCircle,
-      label: 'Unread Messages',
+      label: t('dashboard.stats.unread_messages'),
       value: 8,
-      subtitle: 'From 3 landlords',
+      subtitle: t('dashboard.stats.unread_messages_subtitle'),
       color: 'green',
       delay: 0.1,
     },
     {
       icon: Calendar,
-      label: 'Viewings Scheduled',
+      label: t('dashboard.stats.viewings_scheduled'),
       value: 2,
-      subtitle: 'This week',
+      subtitle: t('dashboard.stats.viewings_scheduled_subtitle'),
       color: 'orange',
       delay: 0.15,
     },
     {
       icon: Home,
-      label: 'Current Lease',
+      label: t('dashboard.stats.current_lease'),
       value: 'Active',
-      subtitle: 'Ends Dec 2024',
+      subtitle: t('dashboard.stats.current_lease_subtitle'),
       color: 'purple',
       delay: 0.2,
     },
     {
       icon: CreditCard,
-      label: 'Total Rent Paid',
+      label: t('dashboard.stats.total_rent_paid'),
       value: 2450000,
-      subtitle: 'Lifetime',
+      subtitle: t('dashboard.stats.total_rent_paid_subtitle'),
       color: 'emerald',
       delay: 0.25,
       isCurrency: true,
@@ -167,7 +170,7 @@ export const RenterStatsCards = () => {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-      {stats.map((stat, index) => (
+      {stats.map((stat) => (
         <StatCard
           key={stat.label}
           icon={stat.icon}

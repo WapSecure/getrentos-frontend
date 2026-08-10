@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Menu, X, LogOut, Settings, User, HelpCircle, Shield } from 'lucide-react';
+import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
 
 interface RenterNavbarProps {
@@ -14,7 +15,7 @@ interface RenterNavbarProps {
 }
 
 export const RenterNavbar = ({ user }: RenterNavbarProps) => {
-  const router = useRouter();
+  const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -80,13 +81,13 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 href="/renter/dashboard"
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
-                Dashboard
+                {t('nav.dashboard')}
               </Link>
               <Link
                 href="/renter/discover"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Discover
+                {t('nav.discover')}
               </Link>
             </div>
 
@@ -96,7 +97,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search for properties, locations..."
+                  placeholder={t('nav.search_placeholder')}
                   className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
@@ -104,6 +105,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
 
             {/* Right Section */}
             <div className="flex items-center gap-3">
+              <LanguageToggle />
               <ThemeToggle />
 
               {/* Notifications */}
@@ -191,7 +193,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search for properties..."
+                placeholder={t('nav.search_placeholder')}
                 className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
@@ -214,14 +216,14 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Dashboard
+                {t('nav.dashboard')}
               </Link>
               <Link
                 href="/renter/discover"
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Discover
+                {t('nav.discover')}
               </Link>
             </div>
           </motion.div>

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface VerificationItem {
   label: string;
@@ -31,6 +32,7 @@ const verificationItems: VerificationItem[] = [
 ];
 
 export const RenterTrustScoreCard = () => {
+  const { t } = useLanguage();
   const trustScore = 78;
   const verifiedCount = verificationItems.filter((item) => item.verified).length;
   const totalCount = verificationItems.length;
@@ -43,8 +45,10 @@ export const RenterTrustScoreCard = () => {
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Your Trust Score</h2>
-        <p className="text-sm text-muted-foreground">Build trust to unlock more features</p>
+        <h2 className="text-lg font-semibold text-foreground">
+          {t('dashboard.trust_score.title')}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t('dashboard.trust_score.subtitle')}</p>
       </div>
 
       <div className="p-4">
@@ -110,7 +114,7 @@ export const RenterTrustScoreCard = () => {
         {/* Action Button */}
         <Button href="/renter/verification" variant="primary" fullWidth className="gap-2">
           <TrendingUp className="w-4 h-4" />
-          Improve Your Trust Score
+          {t('dashboard.trust_score.improve_button')}
           <ArrowRight className="w-3 h-3" />
         </Button>
       </div>

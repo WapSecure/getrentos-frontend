@@ -23,36 +23,39 @@ import {
   TrendingUp,
   Smartphone,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/renter/dashboard', icon: LayoutDashboard },
-  { label: 'Discover', href: '/renter/discover', icon: Search },
-  { label: 'Saved', href: '/renter/saved', icon: Heart },
-  { label: 'Applications', href: '/renter/applications', icon: FileText },
-  { label: 'My Lease', href: '/renter/lease', icon: FileCheck },
-  { label: 'Payments', href: '/renter/payments', icon: CreditCard },
-  { label: 'Flex Financing', href: '/renter/financing', icon: Zap },
-  { label: 'Maintenance', href: '/renter/maintenance', icon: Wrench },
-  { label: 'Messages', href: '/renter/messages', icon: MessageCircle },
-  { label: 'Documents', href: '/renter/documents', icon: Home },
-  { label: 'Roommates', href: '/renter/roommates', icon: Users },
-  { label: 'Trust Score', href: '/renter/trust-score', icon: Star },
-  { label: 'Credit Report', href: '/renter/credit-report', icon: TrendingUp },
-  { label: 'USSD Access', href: '/renter/ussd-access', icon: Smartphone },
-  { label: 'Notifications', href: '/renter/notifications', icon: Bell },
-  { label: 'Calendar', href: '/renter/calendar', icon: Calendar },
-  { label: 'Settings', href: '/renter/settings', icon: Settings },
-  { label: 'Help', href: '/renter/help', icon: HelpCircle },
+  { labelKey: 'sidebar.dashboard', href: '/renter/dashboard', icon: LayoutDashboard },
+  { labelKey: 'sidebar.discover', href: '/renter/discover', icon: Search },
+  { labelKey: 'sidebar.saved', href: '/renter/saved', icon: Heart },
+  { labelKey: 'sidebar.applications', href: '/renter/applications', icon: FileText },
+  { labelKey: 'sidebar.my_lease', href: '/renter/lease', icon: FileCheck },
+  { labelKey: 'sidebar.payments', href: '/renter/payments', icon: CreditCard },
+  { labelKey: 'sidebar.flex_financing', href: '/renter/financing', icon: Zap },
+  { labelKey: 'sidebar.maintenance', href: '/renter/maintenance', icon: Wrench },
+  { labelKey: 'sidebar.messages', href: '/renter/messages', icon: MessageCircle },
+  { labelKey: 'sidebar.documents', href: '/renter/documents', icon: Home },
+  { labelKey: 'sidebar.roommates', href: '/renter/roommates', icon: Users },
+  { labelKey: 'sidebar.trust_score', href: '/renter/trust-score', icon: Star },
+  { labelKey: 'sidebar.credit_report', href: '/renter/credit-report', icon: TrendingUp },
+  { labelKey: 'sidebar.ussd_access', href: '/renter/ussd-access', icon: Smartphone },
+  { labelKey: 'sidebar.notifications', href: '/renter/notifications', icon: Bell },
+  { labelKey: 'sidebar.calendar', href: '/renter/calendar', icon: Calendar },
+  { labelKey: 'sidebar.settings', href: '/renter/settings', icon: Settings },
+  { labelKey: 'sidebar.help', href: '/renter/help', icon: HelpCircle },
 ];
 
 export const RenterSidebar = () => {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
@@ -75,7 +78,7 @@ export const RenterSidebar = () => {
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </motion.div>
           );
