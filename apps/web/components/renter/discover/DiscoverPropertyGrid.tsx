@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DiscoverPropertyCard } from './DiscoverPropertyCard';
+import { VirtualTourViewerModal } from './features/VirtualTourViewerModal';
 import { Property } from '@/types/renter';
+import type { TourModalMode } from '@/types/virtual-tour';
 import { Home } from 'lucide-react';
 
 interface DiscoverPropertyGridProps {
@@ -179,6 +181,8 @@ export const DiscoverPropertyGrid = ({
   const router = useRouter();
   const [properties, setProperties] = useState(mockProperties);
   const [isLoading, setIsLoading] = useState(false);
+  const [tourProperty, setTourProperty] = useState<Property | null>(null);
+  const [tourInitialMode, setTourInitialMode] = useState<TourModalMode>('tour');
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -244,8 +248,14 @@ export const DiscoverPropertyGrid = ({
     router.push(`/renter/properties/${property.id}`);
   };
 
-  const handleScheduleViewing = (propertyId: string) => {
-    router.push(`/renter/properties/${propertyId}/schedule`);
+  const handleScheduleViewing = (property: Property) => {
+    setTourInitialMode('booking');
+    setTourProperty(property);
+  };
+
+  const handleOpenTour = (property: Property) => {
+    setTourInitialMode('tour');
+    setTourProperty(property);
   };
 
   const handleApply = (propertyId: string) => {
@@ -284,10 +294,17 @@ export const DiscoverPropertyGrid = ({
           onSave={() => handleSave(property.id)}
           onCompare={() => onCompare(property)}
           onViewDetails={() => handleViewDetails(property)}
-          onScheduleViewing={() => handleScheduleViewing(property.id)}
+          onScheduleViewing={() => handleScheduleViewing(property)}
           onApply={() => handleApply(property.id)}
+          onOpenTour={() => handleOpenTour(property)}
         />
       ))}
+
+      <VirtualTourViewerModal
+        propertyTitle={tourProperty?.title || null}
+        initialMode={tourInitialMode}
+        onClose={() => setTourProperty(null)}
+      />
     </div>
   );
 };

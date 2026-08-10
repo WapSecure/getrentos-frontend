@@ -5,10 +5,10 @@ import { Camera, Play } from 'lucide-react';
 
 interface VirtualTourBadgeProps {
   hasTour: boolean;
-  tourUrl?: string;
+  onOpenTour: () => void;
 }
 
-export const VirtualTourBadge = ({ hasTour, tourUrl }: VirtualTourBadgeProps) => {
+export const VirtualTourBadge = ({ hasTour, onOpenTour }: VirtualTourBadgeProps) => {
   if (!hasTour) return null;
 
   return (
@@ -20,7 +20,7 @@ export const VirtualTourBadge = ({ hasTour, tourUrl }: VirtualTourBadgeProps) =>
       <button
         onClick={(e) => {
           e.stopPropagation();
-          window.open(tourUrl, '_blank');
+          onOpenTour();
         }}
         className="flex items-center gap-1.5 px-2 py-1 bg-black/70 backdrop-blur-sm text-white text-xs rounded-full hover:bg-black/80 transition-colors"
       >
