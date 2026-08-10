@@ -1,59 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, HardHat, Search } from 'lucide-react';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
 import { AddVendorModal } from '@/components/landlord/vendors/AddVendorModal';
 import { Button } from '@/components/ui/Button';
+import { landlordService } from '@/services/landlordService';
 import type { Vendor } from '@/types/landlord';
 
-const mockVendors: Vendor[] = [
-  {
-    id: 'vendor_001',
-    name: 'AquaFlow Plumbers',
-    serviceType: 'Plumbing',
-    phone: '+234 803 555 1122',
-    rating: 4.8,
-    jobsCompleted: 34,
-  },
-  {
-    id: 'vendor_002',
-    name: 'CoolFix HVAC Services',
-    serviceType: 'Appliances / HVAC',
-    phone: '+234 805 555 3344',
-    rating: 4.6,
-    jobsCompleted: 21,
-  },
-  {
-    id: 'vendor_003',
-    name: 'SecureLine Systems',
-    serviceType: 'Security',
-    phone: '+234 812 555 5566',
-    rating: 4.9,
-    jobsCompleted: 15,
-  },
-  {
-    id: 'vendor_004',
-    name: 'NetSpeed ISP',
-    serviceType: 'Internet',
-    phone: '+234 701 555 7788',
-    rating: 4.3,
-    jobsCompleted: 40,
-  },
-];
-
 export default function LandlordVendorsPage() {
-  const [vendors, setVendors] = useState<Vendor[]>(mockVendors);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const handleAddVendor = (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) => {
-    const newVendor: Vendor = { ...data, id: `vendor_${Date.now()}`, rating: 0, jobsCompleted: 0 };
-    setVendors((prev) => [newVendor, ...prev]);
+  useEffect(() => {
+    const fetchVendors = async () => {
+      const response = await landlordService.listVendors();
+      if (response.success && response.data) setVendors(response.data);
+    };
+
+    fetchVendors();
+  }, []);
+
+  const handleAddVendor = async (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) => {
+    const response = await landlordService.addVendor(data);
+    if (response.success && response.data) {
+      setVendors((prev) => [response.data!, ...prev]);
+    }
   };
 
-  const handleRemoveVendor = (id: string) => {
-    setVendors((prev) => prev.filter((v) => v.id !== id));
+  const handleRemoveVendor = async (id: string) => {
+    const response = await landlordService.removeVendor(id);
+    if (response.success) {
+      setVendors((prev) => prev.filter((v) => v.id !== id));
+    }
   };
 
   const filteredVendors = vendors.filter(

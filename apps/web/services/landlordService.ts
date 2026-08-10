@@ -11,6 +11,8 @@ import type {
   Lease,
   Tenant,
   RentPayment,
+  Vendor,
+  LandlordMaintenanceRequest,
 } from '@/types/landlord';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -251,5 +253,55 @@ export const landlordService = {
       link.remove();
       window.URL.revokeObjectURL(url);
     });
+  },
+
+  // ---- Vendors ----
+  async listVendors(): Promise<ApiResponse<Vendor[]>> {
+    return safeCall(() => authFetch('/landlord/vendors'));
+  },
+
+  async addVendor(
+    data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>
+  ): Promise<ApiResponse<Vendor>> {
+    return safeCall(() =>
+      authFetch('/landlord/vendors', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async removeVendor(id: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/landlord/vendors/${id}`, { method: 'DELETE' }));
+  },
+
+  // ---- Maintenance ----
+  async listMaintenanceRequests(
+    status?: string
+  ): Promise<ApiResponse<LandlordMaintenanceRequest[]>> {
+    return safeCall(() => authFetch(`/landlord/maintenance${toQuery({ status })}`));
+  },
+
+  async assignMaintenanceVendor(
+    requestId: string,
+    vendorId: string
+  ): Promise<ApiResponse<LandlordMaintenanceRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/maintenance/${requestId}/assign-vendor`, {
+        method: 'PATCH',
+        body: JSON.stringify({ vendorId }),
+      })
+    );
+  },
+
+  async markMaintenanceResolved(
+    requestId: string
+  ): Promise<ApiResponse<LandlordMaintenanceRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/maintenance/${requestId}/resolve`, { method: 'PATCH' })
+    );
+  },
+
+  async escalateMaintenance(requestId: string): Promise<ApiResponse<LandlordMaintenanceRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/maintenance/${requestId}/escalate`, { method: 'PATCH' })
+    );
   },
 };
