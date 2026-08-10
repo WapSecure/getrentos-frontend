@@ -1,56 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, MessageCircle, Home, Clock } from 'lucide-react';
 import { getInitials, formatDate } from '@/lib/format';
-
-interface TenantReview {
-  id: string;
-  tenantName: string;
-  propertyName: string;
-  rating: number;
-  communication: number;
-  propertyCondition: number;
-  responsiveness: number;
-  comment: string;
-  createdAt: string;
-}
-
-const mockReviews: TenantReview[] = [
-  {
-    id: 'rev_001',
-    tenantName: 'Ifeoma Bello',
-    propertyName: 'Palm Court Residences',
-    rating: 5,
-    communication: 5,
-    propertyCondition: 5,
-    responsiveness: 4,
-    comment: 'Very responsive landlord, always fixes issues quickly and communicates clearly.',
-    createdAt: '2026-07-20T00:00:00.000Z',
-  },
-  {
-    id: 'rev_002',
-    tenantName: 'Ngozi Eze',
-    propertyName: 'Modern Downtown Loft',
-    rating: 5,
-    communication: 5,
-    propertyCondition: 4,
-    responsiveness: 5,
-    comment: 'Great experience overall. The property was well maintained when I moved in.',
-    createdAt: '2026-06-15T00:00:00.000Z',
-  },
-  {
-    id: 'rev_003',
-    tenantName: 'Tunde Bakare',
-    propertyName: 'Sunrise Apartments',
-    rating: 4,
-    communication: 4,
-    propertyCondition: 4,
-    responsiveness: 3,
-    comment: 'Good landlord, though maintenance requests sometimes take a couple of days.',
-    createdAt: '2026-05-02T00:00:00.000Z',
-  },
-];
+import { landlordService, type TenantReview } from '@/services/landlordService';
 
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -64,7 +17,16 @@ const StarRow = ({ rating }: { rating: number }) => (
 );
 
 export default function LandlordReviewsPage() {
-  const [reviews, setReviews] = useState<TenantReview[]>(mockReviews);
+  const [reviews, setReviews] = useState<TenantReview[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const response = await landlordService.listReviews();
+      if (response.success && response.data) setReviews(response.data);
+    };
+
+    fetchReviews();
+  }, []);
 
   const avg = (
     key: keyof Pick<

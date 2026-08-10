@@ -1,52 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BellRing, AlertOctagon, FileText, CalendarClock } from 'lucide-react';
+import { landlordService, type LandlordAutomationSettings } from '@/services/landlordService';
 
 interface AutomationToggle {
-  id: string;
+  id: keyof LandlordAutomationSettings;
   label: string;
   description: string;
   icon: React.ElementType;
-  enabled: boolean;
 }
 
-const initialToggles: AutomationToggle[] = [
+const TOGGLE_META: AutomationToggle[] = [
   {
-    id: 'rent_reminders',
+    id: 'rentReminders',
     label: 'Send Rent Reminders',
     description: 'Automatically remind tenants a few days before rent is due',
     icon: BellRing,
-    enabled: true,
   },
   {
-    id: 'overdue_alerts',
+    id: 'overdueAlerts',
     label: 'Send Overdue Alerts',
     description: 'Notify tenants and yourself when a payment becomes overdue',
     icon: AlertOctagon,
-    enabled: true,
   },
   {
-    id: 'auto_invoices',
+    id: 'autoInvoices',
     label: 'Auto-Generate Invoices',
     description: 'Create a rent invoice automatically each billing cycle',
     icon: FileText,
-    enabled: false,
   },
   {
-    id: 'lease_expiry',
+    id: 'leaseExpiry',
     label: 'Lease Expiry Alerts',
     description: 'Get notified 60 days before a lease is set to expire',
     icon: CalendarClock,
-    enabled: true,
   },
 ];
 
-export const AutomationSettings = () => {
-  const [toggles, setToggles] = useState(initialToggles);
+const DEFAULT_SETTINGS: LandlordAutomationSettings = {
+  rentReminders: true,
+  overdueAlerts: true,
+  autoInvoices: false,
+  leaseExpiry: true,
+};
 
-  const toggle = (id: string) => {
-    setToggles((prev) => prev.map((t) => (t.id === id ? { ...t, enabled: !t.enabled } : t)));
+export const AutomationSettings = () => {
+  const [settings, setSettings] = useState<LandlordAutomationSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const response = await landlordService.getAutomationSettings();
+      if (response.success && response.data) setSettings(response.data);
+    };
+
+    fetchSettings();
+  }, []);
+
+  const toggle = (id: keyof LandlordAutomationSettings) => {
+    const next = { ...settings, [id]: !settings[id] };
+    setSettings(next);
+    landlordService.updateAutomationSettings(next);
   };
 
   return (
@@ -57,7 +71,7 @@ export const AutomationSettings = () => {
       </p>
 
       <div className="space-y-3">
-        {toggles.map((item) => (
+        {TOGGLE_META.map((item) => (
           <div
             key={item.id}
             className="flex items-start justify-between gap-4 p-4 rounded-lg border border-border"
@@ -74,11 +88,11 @@ export const AutomationSettings = () => {
             <button
               onClick={() => toggle(item.id)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
-                item.enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+                settings[item.id] ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${item.enabled ? 'translate-x-6' : 'translate-x-1'}`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.id] ? 'translate-x-6' : 'translate-x-1'}`}
               />
             </button>
           </div>

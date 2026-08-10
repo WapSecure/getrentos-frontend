@@ -1,30 +1,62 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CreditCard, FileText, Wrench, MessageCircle, Star } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
+import { landlordService, type LandlordNotificationPreference } from '@/services/landlordService';
 
-interface NotificationPreference {
-  id: string;
+interface NotificationPreference extends LandlordNotificationPreference {
   label: string;
   icon: React.ElementType;
-  email: boolean;
-  push: boolean;
 }
 
-const initialPreferences: NotificationPreference[] = [
-  { id: 'payments', label: 'Rent Payments Received', icon: CreditCard, email: true, push: true },
-  { id: 'applications', label: 'New Rental Applications', icon: FileText, email: true, push: true },
-  { id: 'maintenance', label: 'Maintenance Requests', icon: Wrench, email: true, push: true },
-  { id: 'messages', label: 'New Messages', icon: MessageCircle, email: true, push: false },
-  { id: 'reviews', label: 'New Reviews', icon: Star, email: false, push: false },
+const PREFERENCE_META: {
+  id: LandlordNotificationPreference['id'];
+  label: string;
+  icon: React.ElementType;
+}[] = [
+  { id: 'payments', label: 'Rent Payments Received', icon: CreditCard },
+  { id: 'applications', label: 'New Rental Applications', icon: FileText },
+  { id: 'maintenance', label: 'Maintenance Requests', icon: Wrench },
+  { id: 'messages', label: 'New Messages', icon: MessageCircle },
+  { id: 'reviews', label: 'New Reviews', icon: Star },
 ];
 
+const DEFAULT_PREFERENCES: NotificationPreference[] = PREFERENCE_META.map((meta) => ({
+  ...meta,
+  email: true,
+  push: true,
+}));
+
 export const NotificationSettings = () => {
-  const [preferences, setPreferences] = useState(initialPreferences);
+  const [preferences, setPreferences] = useState<NotificationPreference[]>(DEFAULT_PREFERENCES);
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      const response = await landlordService.getNotificationPreferences();
+      if (response.success && response.data) {
+        const byId = new Map(response.data.map((p) => [p.id, p]));
+        setPreferences(
+          PREFERENCE_META.map((meta) => ({
+            ...meta,
+            email: byId.get(meta.id)?.email ?? true,
+            push: byId.get(meta.id)?.push ?? true,
+          }))
+        );
+      }
+    };
+
+    fetchPreferences();
+  }, []);
 
   const toggle = (id: string, channel: 'email' | 'push') => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
+  };
+
+  const handleSave = () => {
+    landlordService.updateNotificationPreferences(
+      preferences.map(({ id, email, push }) => ({ id, email, push }))
+    );
   };
 
   return (
@@ -60,7 +92,7 @@ export const NotificationSettings = () => {
         ))}
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+      <SaveButton label="Save Preferences" className="mt-6" onClick={handleSave} />
     </div>
   );
 };

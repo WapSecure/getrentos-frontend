@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
+import {
+  DocumentUploadDialog,
+  type UploadedDocumentData,
+} from '@/components/ui/DocumentUploadDialog';
 import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
 import { formatDate } from '@/lib/format';
+import { landlordService, type LandlordDocument } from '@/services/landlordService';
 
 type DocumentCategory =
   | 'lease_agreements'
@@ -13,72 +17,12 @@ type DocumentCategory =
   | 'escrow_contracts'
   | 'inspection_reports';
 
-interface PortfolioDocument {
-  id: string;
-  name: string;
-  category: DocumentCategory;
-  propertyName: string;
-  uploadedAt: string;
-  sizeLabel: string;
-}
-
 const categoryLabels: Record<DocumentCategory, string> = {
   lease_agreements: 'Lease Agreements',
   ownership_docs: 'Ownership Documents',
   escrow_contracts: 'Escrow Contracts',
   inspection_reports: 'Inspection Reports',
 };
-
-const mockDocuments: PortfolioDocument[] = [
-  {
-    id: 'doc_001',
-    name: 'Lease Agreement - Adaeze Okafor.pdf',
-    category: 'lease_agreements',
-    propertyName: 'Sunrise Apartments, Unit 1A',
-    uploadedAt: '2025-02-01T00:00:00.000Z',
-    sizeLabel: '482 KB',
-  },
-  {
-    id: 'doc_002',
-    name: 'Lease Agreement - Chuka Nwosu.pdf',
-    category: 'lease_agreements',
-    propertyName: 'Sunrise Apartments, Unit 3B',
-    uploadedAt: '2024-11-10T00:00:00.000Z',
-    sizeLabel: '461 KB',
-  },
-  {
-    id: 'doc_003',
-    name: 'Title Deed - Sunrise Apartments.pdf',
-    category: 'ownership_docs',
-    propertyName: 'Sunrise Apartments',
-    uploadedAt: '2024-10-15T00:00:00.000Z',
-    sizeLabel: '1.2 MB',
-  },
-  {
-    id: 'doc_004',
-    name: 'Certificate of Occupancy - Palm Court.pdf',
-    category: 'ownership_docs',
-    propertyName: 'Palm Court Residences',
-    uploadedAt: '2024-09-01T00:00:00.000Z',
-    sizeLabel: '980 KB',
-  },
-  {
-    id: 'doc_005',
-    name: 'Escrow Agreement - Unit 1A.pdf',
-    category: 'escrow_contracts',
-    propertyName: 'Sunrise Apartments, Unit 1A',
-    uploadedAt: '2025-02-01T00:00:00.000Z',
-    sizeLabel: '210 KB',
-  },
-  {
-    id: 'doc_006',
-    name: 'Move-in Inspection - Unit 3B.pdf',
-    category: 'inspection_reports',
-    propertyName: 'Sunrise Apartments, Unit 3B',
-    uploadedAt: '2024-11-10T00:00:00.000Z',
-    sizeLabel: '3.4 MB',
-  },
-];
 
 const categoryFilters: { value: 'all' | DocumentCategory; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -89,23 +33,32 @@ const categoryFilters: { value: 'all' | DocumentCategory; label: string }[] = [
 ];
 
 export default function LandlordDocumentsPage() {
-  const [documents, setDocuments] = useState<PortfolioDocument[]>(mockDocuments);
+  const [documents, setDocuments] = useState<LandlordDocument[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | DocumentCategory>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
-    setDocuments((prev) => [
-      {
-        id: `doc_${Date.now()}`,
-        name: data.name,
-        category: data.category as DocumentCategory,
-        propertyName: 'Unassigned',
-        uploadedAt: new Date().toISOString(),
-        sizeLabel: data.sizeLabel,
-      },
-      ...prev,
-    ]);
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      const response = await landlordService.listDocuments();
+      if (response.success && response.data) setDocuments(response.data);
+    };
+
+    fetchDocuments();
+  }, []);
+
+  const handleUpload = async (data: UploadedDocumentData) => {
+    const response = await landlordService.uploadDocument(data.name, data.category, data.file);
+    if (response.success && response.data) {
+      setDocuments((prev) => [response.data!, ...prev]);
+    }
+  };
+
+  const handleDownload = async (id: string) => {
+    const response = await landlordService.getDocumentDownloadUrl(id);
+    if (response.success && response.data) {
+      window.open(response.data.url, '_blank');
+    }
   };
 
   const filteredDocuments = documents.filter((d) => {
@@ -177,13 +130,13 @@ export default function LandlordDocumentsPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {categoryLabels[doc.category]} • {doc.propertyName}
+                  {categoryLabels[doc.category as DocumentCategory]} • {doc.propertyName}
                 </p>
               </div>
               <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
-              <DocumentRowActions />
+              <DocumentRowActions showShare={false} onDownload={() => handleDownload(doc.id)} />
             </div>
           ))}
         </div>

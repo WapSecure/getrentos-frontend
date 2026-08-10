@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getInitials } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
 import { SaveButton } from '@/components/ui/SaveButton';
+import { landlordService } from '@/services/landlordService';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -12,8 +13,41 @@ interface ProfileSettingsProps {
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('+234 803 000 0000');
+  const [phone, setPhone] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const response = await landlordService.getProfile();
+      if (response.success && response.data) {
+        setFullName(response.data.fullName);
+        setEmail(response.data.email);
+        setPhone(response.data.phone || '');
+        setCompanyName(response.data.companyName || '');
+        setAvatarUrl(response.data.avatarUrl);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSave = () => {
+    landlordService.updateProfile({ fullName, email, phone, companyName });
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingAvatar(true);
+    const response = await landlordService.uploadAvatar(file);
+    setIsUploadingAvatar(false);
+    if (response.success && response.data) {
+      setAvatarUrl(response.data.avatarUrl);
+    }
+  };
 
   return (
     <div>
@@ -23,10 +57,32 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       </p>
 
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">
-          {getInitials(fullName || 'User')}
-        </div>
-        <Button variant="outline" size="sm">
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt={fullName || 'User'}
+            className="w-16 h-16 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">
+            {getInitials(fullName || 'User')}
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarChange}
+          className="hidden"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploadingAvatar}
+          isLoading={isUploadingAvatar}
+        >
           Change Photo
         </Button>
       </div>
@@ -73,7 +129,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
       </div>
 
-      <SaveButton label="Save Changes" className="mt-6" />
+      <SaveButton label="Save Changes" className="mt-6" onClick={handleSave} />
     </div>
   );
 };
