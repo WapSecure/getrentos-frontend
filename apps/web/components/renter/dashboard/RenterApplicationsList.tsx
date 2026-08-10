@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
 type PeriodType = 'month' | 'year' | 'week';
@@ -144,6 +145,8 @@ const formatPrice = (price: number, period: PeriodType) => {
 import { CheckCircle, XCircle } from 'lucide-react';
 
 export const RenterApplicationsList = () => {
+  const { t } = useLanguage();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -153,11 +156,13 @@ export const RenterApplicationsList = () => {
     >
       <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">My Applications</h2>
-          <p className="text-sm text-muted-foreground">Track your rental applications</p>
+          <h2 className="text-lg font-semibold text-foreground">
+            {t('dashboard.applications.title')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t('dashboard.applications.subtitle')}</p>
         </div>
         <Button href="/renter/applications" variant="ghost" size="sm" className="gap-1">
-          View All
+          {t('dashboard.applications.view_all')}
           <Eye className="w-3 h-3" />
         </Button>
       </div>

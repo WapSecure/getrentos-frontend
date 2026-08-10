@@ -1,15 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Search, Home } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface RenterDashboardHeaderProps {
-  greeting: string;
+  greeting: 'morning' | 'afternoon' | 'evening';
   firstName: string;
 }
 
 export const RenterDashboardHeader = ({ greeting, firstName }: RenterDashboardHeaderProps) => {
+  const { t } = useLanguage();
+  const greetingText = t(`dashboard.greeting_${greeting}`);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -19,15 +23,13 @@ export const RenterDashboardHeader = ({ greeting, firstName }: RenterDashboardHe
     >
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-          {greeting}, {firstName}!
+          {greetingText}, {firstName}!
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Here&apos;s what&apos;s happening with your rentals today.
-        </p>
+        <p className="text-muted-foreground mt-1">{t('dashboard.subtitle')}</p>
       </div>
       <Button href="/renter/discover" variant="primary" size="lg" className="gap-2">
         <Search className="w-4 h-4" />
-        Find Property
+        {t('dashboard.find_property')}
       </Button>
     </motion.div>
   );
