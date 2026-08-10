@@ -18,14 +18,9 @@ interface FinancialPoint {
   expenses: number;
 }
 
-const financialData: FinancialPoint[] = [
-  { period: 'Mar', income: 3_400_000, expenses: 620_000 },
-  { period: 'Apr', income: 3_200_000, expenses: 540_000 },
-  { period: 'May', income: 3_650_000, expenses: 780_000 },
-  { period: 'Jun', income: 3_580_000, expenses: 490_000 },
-  { period: 'Jul', income: 3_920_000, expenses: 610_000 },
-  { period: 'Aug', income: 3_750_000, expenses: 705_000 },
-];
+interface FinancialChartProps {
+  data: FinancialPoint[];
+}
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (!active || !payload?.length) return null;
@@ -41,7 +36,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
   );
 };
 
-export const FinancialChart = () => {
+export const FinancialChart = ({ data }: FinancialChartProps) => {
   return (
     <div className="bg-card rounded-2xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
@@ -63,11 +58,7 @@ export const FinancialChart = () => {
 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={financialData}
-            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
-            barGap={4}
-          >
+          <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={4}>
             <CartesianGrid
               vertical={false}
               stroke="currentColor"

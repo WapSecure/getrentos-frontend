@@ -1,5 +1,7 @@
+import { ApiError } from '@/lib/apiClient';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
+import { STORAGE_KEYS } from '@/lib/constants/auth';
 import type {
   Property,
   Unit,
@@ -8,7 +10,30 @@ import type {
   ApplicationStatus,
   Lease,
   Tenant,
+  RentPayment,
 } from '@/types/landlord';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+export interface RentCollectionStats {
+  totalCollected: number;
+  outstandingBalance: number;
+  escrowPending: number;
+  upcomingPayments: number;
+}
+
+export interface FinancialStats {
+  rentalIncome: number;
+  outstandingRent: number;
+  maintenanceCosts: number;
+  netProfit: number;
+}
+
+export interface FinancialChartPoint {
+  period: string;
+  income: number;
+  expenses: number;
+}
 
 export interface LandlordDashboardStats {
   totalProperties: number;
@@ -187,5 +212,44 @@ export const landlordService = {
   // ---- Tenants ----
   async listTenants(): Promise<ApiResponse<Tenant[]>> {
     return safeCall(() => authFetch('/landlord/tenants'));
+  },
+
+  // ---- Payments ----
+  async listPayments(status?: string): Promise<ApiResponse<RentPayment[]>> {
+    return safeCall(() => authFetch(`/landlord/payments${toQuery({ status })}`));
+  },
+
+  async getRentCollectionStats(): Promise<ApiResponse<RentCollectionStats>> {
+    return safeCall(() => authFetch('/landlord/payments/stats'));
+  },
+
+  // ---- Financials ----
+  async getFinancialStats(period: string): Promise<ApiResponse<FinancialStats>> {
+    return safeCall(() => authFetch(`/landlord/financials/stats${toQuery({ period })}`));
+  },
+
+  async getFinancialChart(): Promise<ApiResponse<FinancialChartPoint[]>> {
+    return safeCall(() => authFetch('/landlord/financials/chart'));
+  },
+
+  async exportFinancialsCsv(): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token =
+        typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) : null;
+      const response = await fetch(`${API_BASE_URL}/landlord/financials/export`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new ApiError(response.status, 'Failed to export financials');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'getrentos-financials.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
   },
 };
