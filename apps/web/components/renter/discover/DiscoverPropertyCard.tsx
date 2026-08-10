@@ -31,6 +31,7 @@ interface DiscoverPropertyCardProps {
   onViewDetails: () => void;
   onScheduleViewing: () => void;
   onApply: () => void;
+  onOpenTour: () => void;
 }
 
 export const DiscoverPropertyCard = ({
@@ -41,6 +42,7 @@ export const DiscoverPropertyCard = ({
   onViewDetails,
   onScheduleViewing,
   onApply,
+  onOpenTour,
 }: DiscoverPropertyCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -81,10 +83,7 @@ export const DiscoverPropertyCard = ({
           <Home className="w-12 h-12 text-gray-400 dark:text-gray-600" />
         </div>
 
-        <VirtualTourBadge
-          hasTour={property.hasVirtualTour || false}
-          tourUrl={property.virtualTourUrl}
-        />
+        <VirtualTourBadge hasTour={property.hasVirtualTour || false} onOpenTour={onOpenTour} />
 
         {property.verified && (
           <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full z-10">
