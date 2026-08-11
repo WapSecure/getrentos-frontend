@@ -11,7 +11,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
 
 interface RenterNavbarProps {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
 }
 
 export const RenterNavbar = ({ user }: RenterNavbarProps) => {
