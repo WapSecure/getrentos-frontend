@@ -90,7 +90,7 @@ export type RoleId = (typeof ROLES)[keyof typeof ROLES]['id'];
 
 // Roles that require identity + property/license verification before they can operate.
 // Mirrors ROLES_REQUIRING_VERIFICATION in the backend's roles.constants.ts.
-export const ROLES_REQUIRING_VERIFICATION = ['landlord', 'owner', 'realtor'] as const;
+export const ROLES_REQUIRING_VERIFICATION = ['landlord', 'owner', 'realtor', 'agent'] as const;
 
 export const VERIFICATION_TYPES = {
   IDENTITY: {
