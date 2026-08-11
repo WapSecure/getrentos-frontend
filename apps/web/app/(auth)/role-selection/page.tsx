@@ -32,7 +32,11 @@ export default function RoleSelectionPage() {
     router.back();
   };
 
-  const roleList = Object.values(ROLES).sort((a, b) => a.order - b.order);
+  // Admin/BackOffice is internal-staff-only and provisioned out of band —
+  // never offered as a self-serve signup option.
+  const roleList = Object.values(ROLES)
+    .filter((role) => role.id !== 'admin')
+    .sort((a, b) => a.order - b.order);
 
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">

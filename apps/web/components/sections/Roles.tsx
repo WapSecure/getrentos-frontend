@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Building2, TrendingUp, Search, Users, UserCheck, Settings } from 'lucide-react';
+import { Home, Building2, TrendingUp, Search, Users, UserCheck } from 'lucide-react';
 import { SectionHeader } from '../ui/SectionHeader';
 import { Card } from '../ui/Card';
 
@@ -43,12 +43,6 @@ const roles = [
     name: 'Agent',
     icon: UserCheck,
     description: "Operate on a landlord or owner's behalf within scoped, delegated permissions.",
-  },
-  {
-    id: 'admin',
-    name: 'Admin',
-    icon: Settings,
-    description: 'Verify properties, resolve disputes, monitor fraud, and oversee platform health.',
   },
 ];
 
