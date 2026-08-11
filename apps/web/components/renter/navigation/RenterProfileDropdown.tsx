@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Star } from 'lucide-react';
+import { ChevronDown, Settings, HelpCircle, LogOut, Star } from 'lucide-react';
 import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
 
 interface RenterProfileDropdownProps {
@@ -71,15 +71,7 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
 
             <div className="py-2">
               <Link
-                href="/renter/profile"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <User className="w-4 h-4" />
-                My Profile
-              </Link>
-              <Link
-                href="/renter/settings"
+                href={ROUTES.RENTER_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -87,7 +79,7 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
                 Settings
               </Link>
               <Link
-                href="/renter/trust-score"
+                href={ROUTES.RENTER_TRUST_SCORE}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -95,15 +87,7 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
                 Trust Score Details
               </Link>
               <Link
-                href="/renter/security"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                Security
-              </Link>
-              <Link
-                href="/renter/help"
+                href={ROUTES.RENTER_HELP}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

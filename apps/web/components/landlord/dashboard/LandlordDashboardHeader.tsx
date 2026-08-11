@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface LandlordDashboardHeaderProps {
   greeting: string;
@@ -25,7 +26,7 @@ export const LandlordDashboardHeader = ({ greeting, firstName }: LandlordDashboa
           Here&apos;s how your portfolio is performing today.
         </p>
       </div>
-      <Button href="/landlord/properties" variant="primary" size="lg" className="gap-2">
+      <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary" size="lg" className="gap-2">
         <Plus className="w-4 h-4" />
         Add Property
       </Button>

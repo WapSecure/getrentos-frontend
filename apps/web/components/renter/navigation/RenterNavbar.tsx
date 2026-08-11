@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface RenterNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -78,13 +79,13 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/renter/dashboard"
+                href={ROUTES.RENTER_DASHBOARD}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 {t('nav.dashboard')}
               </Link>
               <Link
-                href="/renter/discover"
+                href={ROUTES.RENTER_DISCOVER}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 {t('nav.discover')}
@@ -212,14 +213,14 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/renter/dashboard"
+                href={ROUTES.RENTER_DASHBOARD}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('nav.dashboard')}
               </Link>
               <Link
-                href="/renter/discover"
+                href={ROUTES.RENTER_DISCOVER}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

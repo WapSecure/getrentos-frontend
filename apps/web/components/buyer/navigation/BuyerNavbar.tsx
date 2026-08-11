@@ -9,6 +9,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { BuyerProfileDropdown } from './BuyerProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface BuyerNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -28,7 +29,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/buyer/discover?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`${ROUTES.BUYER_DISCOVER}?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
   const [isScrolled, setIsScrolled] = useState(false);
@@ -89,13 +90,13 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/buyer/discover"
+                href={ROUTES.BUYER_DISCOVER}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Discover
               </Link>
               <Link
-                href="/buyer/saved"
+                href={ROUTES.BUYER_SAVED}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Saved
@@ -178,7 +179,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href="/buyer/dashboard"
+                          href={ROUTES.BUYER_DASHBOARD}
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -227,14 +228,14 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/buyer/discover"
+                href={ROUTES.BUYER_DISCOVER}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Discover
               </Link>
               <Link
-                href="/buyer/saved"
+                href={ROUTES.BUYER_SAVED}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

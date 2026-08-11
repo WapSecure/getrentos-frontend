@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { ArrowRight } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const CTA = () => {
   return (
@@ -21,7 +22,7 @@ export const CTA = () => {
             Join thousands of users who trust GetRentos for their real estate needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button href="/auth/signup" size="lg">
+            <Button href={ROUTES.SIGNUP} size="lg">
               Create your account
               <ArrowRight className="w-4 h-4" />
             </Button>

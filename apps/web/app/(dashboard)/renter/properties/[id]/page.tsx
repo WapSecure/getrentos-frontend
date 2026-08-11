@@ -29,6 +29,7 @@ import { SimilarProperties } from '@/components/renter/property-detail/SimilarPr
 import { getPropertyById, trackRecentlyViewed } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
+import { ROUTES, buildRoute } from '@/lib/constants/auth';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -69,7 +70,7 @@ export default function PropertyDetailPage() {
         title="Property not found"
         description="This listing may have been removed or the link is incorrect."
         action={
-          <Button variant="primary" onClick={() => router.push('/renter/discover')}>
+          <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
             Back to Discover
           </Button>
         }
@@ -180,7 +181,7 @@ export default function PropertyDetailPage() {
               <Button
                 variant="primary"
                 className="flex-1"
-                onClick={() => router.push(`/renter/properties/${property.id}/apply`)}
+                onClick={() => router.push(buildRoute.renterPropertyApply(property.id))}
               >
                 Apply Now
               </Button>
@@ -273,7 +274,7 @@ export default function PropertyDetailPage() {
                     size="sm"
                     fullWidth
                     className="gap-2"
-                    onClick={() => router.push('/renter/financing')}
+                    onClick={() => router.push(ROUTES.RENTER_FINANCING)}
                   >
                     <Zap className="w-4 h-4" />
                     See Monthly Payment Plans

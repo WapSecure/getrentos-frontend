@@ -8,6 +8,7 @@ import { Property } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { mockProperties, trackRecentlyViewed } from '@/lib/mockProperties';
 import { Home } from 'lucide-react';
+import { buildRoute } from '@/lib/constants/auth';
 
 interface DiscoverPropertyGridProps {
   filters: {
@@ -98,7 +99,7 @@ export const DiscoverPropertyGrid = ({
 
   const handleViewDetails = (property: Property) => {
     trackRecentlyViewed(property);
-    router.push(`/renter/properties/${property.id}`);
+    router.push(buildRoute.renterPropertyDetail(property.id));
   };
 
   const handleScheduleViewing = (property: Property) => {
@@ -112,7 +113,7 @@ export const DiscoverPropertyGrid = ({
   };
 
   const handleApply = (propertyId: string) => {
-    router.push(`/renter/properties/${propertyId}/apply`);
+    router.push(buildRoute.renterPropertyApply(propertyId));
   };
 
   if (isLoading) {

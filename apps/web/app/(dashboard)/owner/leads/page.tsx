@@ -7,6 +7,7 @@ import { BuyerLeadCard } from '@/components/owner/leads/BuyerLeadCard';
 import { ScheduleViewingModal } from '@/components/owner/leads/ScheduleViewingModal';
 import { AssignRealtorModal } from '@/components/owner/leads/AssignRealtorModal';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
+import { ROUTES } from '@/lib/constants/auth';
 
 const mockLeads: BuyerLead[] = [
   {
@@ -74,7 +75,7 @@ export default function OwnerLeadsPage() {
   };
 
   const handleMessage = (lead: BuyerLead) => {
-    router.push(`/owner/messages?lead=${lead.id}`);
+    router.push(`${ROUTES.OWNER_MESSAGES}?lead=${lead.id}`);
   };
 
   const handleScheduleConfirm = (leadId: string) => {

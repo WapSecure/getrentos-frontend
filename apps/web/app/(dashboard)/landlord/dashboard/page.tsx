@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
 
 const EMPTY_STATS: LandlordDashboardStats = {
   totalProperties: 0,
@@ -58,7 +59,7 @@ export default function LandlordDashboardPage() {
             Add your first property to start managing units, tenants, and rent collection in one
             place.
           </p>
-          <Button href="/landlord/properties" variant="primary" className="mt-6">
+          <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary" className="mt-6">
             Add Your First Property
           </Button>
         </div>

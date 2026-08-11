@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface RenterDashboardHeaderProps {
   greeting: 'morning' | 'afternoon' | 'evening';
@@ -27,7 +28,7 @@ export const RenterDashboardHeader = ({ greeting, firstName }: RenterDashboardHe
         </h1>
         <p className="text-muted-foreground mt-1">{t('dashboard.subtitle')}</p>
       </div>
-      <Button href="/renter/discover" variant="primary" size="lg" className="gap-2">
+      <Button href={ROUTES.RENTER_DISCOVER} variant="primary" size="lg" className="gap-2">
         <Search className="w-4 h-4" />
         {t('dashboard.find_property')}
       </Button>

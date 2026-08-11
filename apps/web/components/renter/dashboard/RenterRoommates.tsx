@@ -6,6 +6,7 @@ import { UserPlus, Mail, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
 import { useState } from 'react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface Roommate {
   id: string;
@@ -152,7 +153,7 @@ export const RenterRoommates = () => {
             fullWidth
             size="sm"
             className="mt-2 gap-1"
-            onClick={() => router.push('/renter/payments')}
+            onClick={() => router.push(ROUTES.RENTER_PAYMENTS)}
           >
             <span className="text-sm">₦</span>
             Split Payments

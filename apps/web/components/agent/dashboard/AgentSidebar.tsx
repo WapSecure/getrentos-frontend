@@ -15,6 +15,7 @@ import {
   BadgeCheck,
   Settings,
 } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   label: string;
@@ -23,16 +24,16 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/agent/dashboard', icon: LayoutDashboard },
-  { label: 'Tasks', href: '/agent/tasks', icon: ClipboardList },
-  { label: 'Inspections', href: '/agent/inspections', icon: ClipboardCheck },
-  { label: 'Verifications', href: '/agent/verifications', icon: UserCheck },
-  { label: 'Sync Center', href: '/agent/sync', icon: RefreshCw },
-  { label: 'Documents', href: '/agent/documents', icon: FolderOpen },
-  { label: 'Messages', href: '/agent/messages', icon: MessageCircle },
-  { label: 'Reviews', href: '/agent/reviews', icon: Star },
-  { label: 'Trust Profile', href: '/agent/trust-profile', icon: BadgeCheck },
-  { label: 'Settings', href: '/agent/settings', icon: Settings },
+  { label: 'Dashboard', href: ROUTES.AGENT_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
+  { label: 'Inspections', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
+  { label: 'Verifications', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
+  { label: 'Sync Center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
+  { label: 'Documents', href: ROUTES.AGENT_DOCUMENTS, icon: FolderOpen },
+  { label: 'Messages', href: ROUTES.AGENT_MESSAGES, icon: MessageCircle },
+  { label: 'Reviews', href: ROUTES.AGENT_REVIEWS, icon: Star },
+  { label: 'Trust Profile', href: ROUTES.AGENT_TRUST_PROFILE, icon: BadgeCheck },
+  { label: 'Settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
 ];
 
 export const AgentSidebar = () => {

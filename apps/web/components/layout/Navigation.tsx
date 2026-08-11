@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Logo } from '@/components/ui/Logo';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -19,7 +20,7 @@ export const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsSignedIn(!!localStorage.getItem('auth_token'));
+    setIsSignedIn(!!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN));
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -53,14 +54,14 @@ export const Navigation = () => {
               {!isSignedIn ? (
                 <>
                   <Link
-                    href="/login"
+                    href={ROUTES.LOGIN}
                     className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Sign in
                   </Link>
                   <ThemeToggle />
                   <Link
-                    href="/signup"
+                    href={ROUTES.SIGNUP}
                     className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:bg-primary-hover transition-colors"
                   >
                     Get early access
@@ -69,7 +70,7 @@ export const Navigation = () => {
               ) : (
                 <>
                   <Link
-                    href="/dashboard"
+                    href={ROUTES.DASHBOARD}
                     className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Dashboard
@@ -77,10 +78,10 @@ export const Navigation = () => {
                   <ThemeToggle />
                   <button
                     onClick={() => {
-                      localStorage.removeItem('auth_token');
-                      localStorage.removeItem('user');
+                      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+                      localStorage.removeItem(STORAGE_KEYS.USER);
                       setIsSignedIn(false);
-                      window.location.href = '/';
+                      window.location.href = ROUTES.HOME;
                     }}
                     className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                   >
@@ -129,14 +130,14 @@ export const Navigation = () => {
               {!isSignedIn ? (
                 <>
                   <Link
-                    href="/login"
+                    href={ROUTES.LOGIN}
                     className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Sign in
                   </Link>
                   <Link
-                    href="/signup"
+                    href={ROUTES.SIGNUP}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-center font-medium hover:bg-primary-hover transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -146,7 +147,7 @@ export const Navigation = () => {
               ) : (
                 <>
                   <Link
-                    href="/dashboard"
+                    href={ROUTES.DASHBOARD}
                     className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -154,10 +155,10 @@ export const Navigation = () => {
                   </Link>
                   <button
                     onClick={() => {
-                      localStorage.removeItem('auth_token');
-                      localStorage.removeItem('user');
+                      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+                      localStorage.removeItem(STORAGE_KEYS.USER);
                       setIsSignedIn(false);
-                      window.location.href = '/';
+                      window.location.href = ROUTES.HOME;
                     }}
                     className="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-left"
                   >

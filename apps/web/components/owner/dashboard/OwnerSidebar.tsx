@@ -17,6 +17,7 @@ import {
   BadgeCheck,
   Settings,
 } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   label: string;
@@ -25,18 +26,18 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/owner/dashboard', icon: LayoutDashboard },
-  { label: 'Properties', href: '/owner/properties', icon: Building2 },
-  { label: 'Sale Listings', href: '/owner/listings', icon: Megaphone },
-  { label: 'Buyer Leads', href: '/owner/leads', icon: Users },
-  { label: 'Offers', href: '/owner/offers', icon: Handshake },
-  { label: 'Transactions', href: '/owner/transactions', icon: ShieldCheck },
-  { label: 'Investment Analytics', href: '/owner/analytics', icon: LineChart },
-  { label: 'Documents', href: '/owner/documents', icon: FolderOpen },
-  { label: 'Messages', href: '/owner/messages', icon: MessageCircle },
-  { label: 'Reviews', href: '/owner/reviews', icon: Star },
-  { label: 'Trust Profile', href: '/owner/trust-profile', icon: BadgeCheck },
-  { label: 'Settings', href: '/owner/settings', icon: Settings },
+  { label: 'Dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
+  { label: 'Sale Listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
+  { label: 'Buyer Leads', href: ROUTES.OWNER_LEADS, icon: Users },
+  { label: 'Offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
+  { label: 'Transactions', href: ROUTES.OWNER_TRANSACTIONS, icon: ShieldCheck },
+  { label: 'Investment Analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },
+  { label: 'Documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
+  { label: 'Messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
+  { label: 'Reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
+  { label: 'Trust Profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
+  { label: 'Settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
 ];
 
 export const OwnerSidebar = () => {

@@ -7,6 +7,7 @@ import { BuyerStatsCards } from '@/components/buyer/dashboard/BuyerStatsCards';
 import { BuyerActivityFeed } from '@/components/buyer/dashboard/BuyerActivityFeed';
 import { BuyerQuickActions } from '@/components/buyer/dashboard/BuyerQuickActions';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const mockStats = {
   savedProperties: 4,
@@ -43,7 +44,7 @@ export default function BuyerDashboardPage() {
             Browse verified for-sale properties, save your favorites, and track offers all in one
             place.
           </p>
-          <Button href="/buyer/discover" variant="primary" className="mt-6">
+          <Button href={ROUTES.BUYER_DISCOVER} variant="primary" className="mt-6">
             Discover Properties
           </Button>
         </div>

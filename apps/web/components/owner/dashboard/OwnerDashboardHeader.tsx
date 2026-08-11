@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface OwnerDashboardHeaderProps {
   greeting: string;
@@ -25,7 +26,7 @@ export const OwnerDashboardHeader = ({ greeting, firstName }: OwnerDashboardHead
           Here&apos;s how your property investments are performing.
         </p>
       </div>
-      <Button href="/owner/properties" variant="primary" size="lg" className="gap-2">
+      <Button href={ROUTES.OWNER_PROPERTIES} variant="primary" size="lg" className="gap-2">
         <Plus className="w-4 h-4" />
         Add Property
       </Button>

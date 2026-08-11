@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Zap, Droplets, Wifi, Key } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface Utility {
   id: string;
@@ -88,7 +89,7 @@ export const RenterHomeManagement = () => {
               <h2 className="text-lg font-semibold text-foreground">Home Management</h2>
               <p className="text-sm text-muted-foreground">Track utilities and guest access</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => router.push('/renter/documents')}>
+            <Button variant="ghost" size="sm" onClick={() => router.push(ROUTES.RENTER_DOCUMENTS)}>
               Manage
             </Button>
           </div>

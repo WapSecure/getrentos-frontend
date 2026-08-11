@@ -8,6 +8,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AdminProfileDropdown } from './AdminProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface AdminNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -80,13 +81,13 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
 
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/admin/dashboard"
+                href={ROUTES.ADMIN_DASHBOARD}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
               <Link
-                href="/admin/users"
+                href={ROUTES.ADMIN_USERS}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Users
@@ -166,7 +167,7 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href="/admin/dashboard"
+                          href={ROUTES.ADMIN_DASHBOARD}
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -212,14 +213,14 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/admin/dashboard"
+                href={ROUTES.ADMIN_DASHBOARD}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
-                href="/admin/users"
+                href={ROUTES.ADMIN_USERS}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

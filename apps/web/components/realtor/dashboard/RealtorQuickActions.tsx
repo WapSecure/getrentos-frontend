@@ -2,12 +2,13 @@
 
 import { Megaphone, CalendarClock, UserPlus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Add Listing', href: '/realtor/listings', icon: Megaphone },
-  { label: 'Schedule Viewing', href: '/realtor/viewings', icon: CalendarClock },
-  { label: 'View Leads', href: '/realtor/leads', icon: UserPlus },
-  { label: 'Add Client', href: '/realtor/clients', icon: Users },
+  { label: 'Add Listing', href: ROUTES.REALTOR_LISTINGS, icon: Megaphone },
+  { label: 'Schedule Viewing', href: ROUTES.REALTOR_VIEWINGS, icon: CalendarClock },
+  { label: 'View Leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
+  { label: 'Add Client', href: ROUTES.REALTOR_CLIENTS, icon: Users },
 ];
 
 export const RealtorQuickActions = () => {

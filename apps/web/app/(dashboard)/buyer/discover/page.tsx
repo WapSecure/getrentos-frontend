@@ -6,6 +6,7 @@ import { Search, Building2, ArrowUpDown } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
 import type { BuyerPropertyListing, ListingPropertyType } from '@/types/buyer';
+import { ROUTES } from '@/lib/constants/auth';
 
 const SAVED_PROPERTIES_KEY = 'buyer_saved_properties';
 
@@ -224,13 +225,13 @@ export default function BuyerDiscoverPage() {
         onClose={() => setActiveListing(null)}
         onToggleSave={() => activeListing && toggleSave(activeListing.id)}
         onRequestViewing={() =>
-          activeListing && router.push(`/buyer/viewings?property=${activeListing.id}`)
+          activeListing && router.push(`${ROUTES.BUYER_VIEWINGS}?property=${activeListing.id}`)
         }
         onMakeOffer={() =>
-          activeListing && router.push(`/buyer/offers?property=${activeListing.id}`)
+          activeListing && router.push(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)
         }
         onMessageOwner={() =>
-          activeListing && router.push(`/buyer/messages?property=${activeListing.id}`)
+          activeListing && router.push(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)
         }
       />
     </>

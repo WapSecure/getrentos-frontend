@@ -77,7 +77,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
 
             <div className="py-2">
               <Link
-                href="/agent/settings"
+                href={ROUTES.AGENT_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -85,7 +85,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
                 My Profile
               </Link>
               <Link
-                href="/agent/settings"
+                href={ROUTES.AGENT_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -93,7 +93,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
                 Settings
               </Link>
               <Link
-                href="/agent/tasks"
+                href={ROUTES.AGENT_TASKS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -101,7 +101,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
                 My Tasks
               </Link>
               <Link
-                href="/agent/trust-profile"
+                href={ROUTES.AGENT_TRUST_PROFILE}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -109,7 +109,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
                 Trust Profile
               </Link>
               <Link
-                href="/agent/help"
+                href={ROUTES.AGENT_HELP}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

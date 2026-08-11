@@ -7,6 +7,7 @@ import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react'
 import { Button } from '@/components/ui/Button';
 import { mockProperties } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
+import { ROUTES, buildRoute } from '@/lib/constants/auth';
 
 const recommendedProperties = mockProperties.slice(0, 4);
 
@@ -42,7 +43,7 @@ export const RenterRecommendedProperties = () => {
             Based on your search history and preferences
           </p>
         </div>
-        <Button href="/renter/discover" variant="ghost" size="sm" className="gap-1">
+        <Button href={ROUTES.RENTER_DISCOVER} variant="ghost" size="sm" className="gap-1">
           View All
           <Eye className="w-3 h-3" />
         </Button>
@@ -117,7 +118,7 @@ export const RenterRecommendedProperties = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => router.push(`/renter/properties/${property.id}`)}
+                    onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
                   >
                     View Details
                   </Button>

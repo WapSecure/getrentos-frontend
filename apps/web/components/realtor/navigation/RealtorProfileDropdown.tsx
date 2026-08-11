@@ -69,7 +69,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
 
             <div className="py-2">
               <Link
-                href="/realtor/settings"
+                href={ROUTES.REALTOR_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -77,7 +77,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
                 My Profile
               </Link>
               <Link
-                href="/realtor/settings"
+                href={ROUTES.REALTOR_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -85,7 +85,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
                 Settings
               </Link>
               <Link
-                href="/realtor/clients"
+                href={ROUTES.REALTOR_CLIENTS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -93,7 +93,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
                 My Clients
               </Link>
               <Link
-                href="/realtor/trust-profile"
+                href={ROUTES.REALTOR_TRUST_PROFILE}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -101,7 +101,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
                 Trust Profile
               </Link>
               <Link
-                href="/realtor/help"
+                href={ROUTES.REALTOR_HELP}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

@@ -2,6 +2,7 @@
 
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface RealtorDashboardHeaderProps {
   greeting: string;
@@ -19,7 +20,7 @@ export const RealtorDashboardHeader = ({ greeting, firstName }: RealtorDashboard
           Here&apos;s how your clients and listings are performing.
         </p>
       </div>
-      <Button href="/realtor/listings" variant="primary" className="gap-2">
+      <Button href={ROUTES.REALTOR_LISTINGS} variant="primary" className="gap-2">
         <Plus className="w-4 h-4" />
         Add Listing
       </Button>

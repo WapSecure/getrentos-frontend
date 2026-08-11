@@ -5,6 +5,7 @@ import { MessageCircle, FileCheck, ShieldCheck, Home } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatDate, getInitials } from '@/lib/format';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';
+import { ROUTES } from '@/lib/constants/auth';
 
 const rentStatusConfig: Record<RentPaymentStatus, { label: string; className: string }> = {
   paid: {
@@ -73,11 +74,23 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
       </div>
 
       <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-        <Button href="/landlord/messages" variant="outline" size="sm" fullWidth className="gap-1.5">
+        <Button
+          href={ROUTES.LANDLORD_MESSAGES}
+          variant="outline"
+          size="sm"
+          fullWidth
+          className="gap-1.5"
+        >
           <MessageCircle className="w-3.5 h-3.5" />
           Message
         </Button>
-        <Button href="/landlord/leases" variant="outline" size="sm" fullWidth className="gap-1.5">
+        <Button
+          href={ROUTES.LANDLORD_LEASES}
+          variant="outline"
+          size="sm"
+          fullWidth
+          className="gap-1.5"
+        >
           <FileCheck className="w-3.5 h-3.5" />
           View Lease
         </Button>

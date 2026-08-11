@@ -9,6 +9,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface AgentNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -28,7 +29,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/agent/tasks?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`${ROUTES.AGENT_TASKS}?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
   const [isScrolled, setIsScrolled] = useState(false);
@@ -101,13 +102,13 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
 
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/agent/tasks"
+                href={ROUTES.AGENT_TASKS}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Tasks
               </Link>
               <Link
-                href="/agent/sync"
+                href={ROUTES.AGENT_SYNC}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Sync Center
@@ -201,7 +202,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href="/agent/tasks"
+                          href={ROUTES.AGENT_TASKS}
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -250,14 +251,14 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/agent/tasks"
+                href={ROUTES.AGENT_TASKS}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Tasks
               </Link>
               <Link
-                href="/agent/sync"
+                href={ROUTES.AGENT_SYNC}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

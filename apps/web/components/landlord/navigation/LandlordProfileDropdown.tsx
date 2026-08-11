@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Building2 } from 'lucide-react';
+import { ChevronDown, User, Settings, HelpCircle, LogOut, Building2 } from 'lucide-react';
 import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
 import { getInitials } from '@/lib/format';
 
@@ -69,7 +69,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
 
             <div className="py-2">
               <Link
-                href="/landlord/settings"
+                href={ROUTES.LANDLORD_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -77,7 +77,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
                 My Profile
               </Link>
               <Link
-                href="/landlord/settings"
+                href={ROUTES.LANDLORD_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -85,7 +85,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
                 Settings
               </Link>
               <Link
-                href="/landlord/properties"
+                href={ROUTES.LANDLORD_PROPERTIES}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -93,15 +93,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
                 My Properties
               </Link>
               <Link
-                href="/landlord/settings"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                Security
-              </Link>
-              <Link
-                href="/landlord/help"
+                href={ROUTES.LANDLORD_HELP}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

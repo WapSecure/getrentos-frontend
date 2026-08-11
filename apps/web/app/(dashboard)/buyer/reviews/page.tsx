@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Star, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getInitials, formatDate } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface GivenReview {
   id: string;
@@ -59,7 +60,7 @@ export default function BuyerReviewsPage() {
             </p>
           </div>
         </div>
-        <Button href="/buyer/transactions" variant="outline" size="sm">
+        <Button href={ROUTES.BUYER_TRANSACTIONS} variant="outline" size="sm">
           View Transactions
         </Button>
       </div>

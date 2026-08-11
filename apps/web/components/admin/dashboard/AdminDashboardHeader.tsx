@@ -2,6 +2,7 @@
 
 import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface AdminDashboardHeaderProps {
   greeting: string;
@@ -19,7 +20,7 @@ export const AdminDashboardHeader = ({ greeting, firstName }: AdminDashboardHead
           Here&apos;s the state of the platform today.
         </p>
       </div>
-      <Button href="/admin/verifications" variant="primary" className="gap-2">
+      <Button href={ROUTES.ADMIN_VERIFICATIONS} variant="primary" className="gap-2">
         <ShieldCheck className="w-4 h-4" />
         Review Verifications
       </Button>

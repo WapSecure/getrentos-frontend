@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, UserPlus } from 'lucide-react';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
 import type { RealtorLead, LeadStage } from '@/types/realtor';
+import { ROUTES } from '@/lib/constants/auth';
 
 const mockLeads: RealtorLead[] = [
   {
@@ -136,11 +137,11 @@ export default function RealtorLeadsPage() {
               key={lead.id}
               lead={lead}
               delay={index * 0.05}
-              onMessage={() => router.push(`/realtor/messages?lead=${lead.id}`)}
-              onScheduleViewing={() => router.push(`/realtor/viewings?lead=${lead.id}`)}
+              onMessage={() => router.push(`${ROUTES.REALTOR_MESSAGES}?lead=${lead.id}`)}
+              onScheduleViewing={() => router.push(`${ROUTES.REALTOR_VIEWINGS}?lead=${lead.id}`)}
               onConvertToOffer={() => {
                 updateStage(lead.id, 'offer_made');
-                router.push(`/realtor/offers?lead=${lead.id}`);
+                router.push(`${ROUTES.REALTOR_OFFERS}?lead=${lead.id}`);
               }}
               onCloseWon={() => updateStage(lead.id, 'closed_won')}
               onCloseLost={() => updateStage(lead.id, 'closed_lost')}

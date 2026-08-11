@@ -171,7 +171,8 @@ export const ROUTES = {
   RENTER_USSD_ACCESS: '/renter/ussd-access',
   RENTER_CALENDAR: '/renter/calendar',
   RENTER_ROOMMATES: '/renter/roommates',
-  RENTER_REVIEWS: '/renter/reviews',
+  RENTER_NOTIFICATIONS: '/renter/notifications',
+  RENTER_HELP: '/renter/help',
 
   // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',
@@ -188,6 +189,7 @@ export const ROUTES = {
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SETTINGS: '/landlord/settings',
+  LANDLORD_HELP: '/landlord/help',
 
   // Property Owner specific routes
   OWNER_PROPERTIES: '/owner/properties',
@@ -201,6 +203,7 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_SETTINGS: '/owner/settings',
+  OWNER_HELP: '/owner/help',
 
   // Buyer specific routes
   BUYER_DISCOVER: '/buyer/discover',
@@ -213,6 +216,7 @@ export const ROUTES = {
   BUYER_REVIEWS: '/buyer/reviews',
   BUYER_TRUST_PROFILE: '/buyer/trust-profile',
   BUYER_SETTINGS: '/buyer/settings',
+  BUYER_HELP: '/buyer/help',
 
   // Realtor specific routes
   REALTOR_CLIENTS: '/realtor/clients',
@@ -226,6 +230,7 @@ export const ROUTES = {
   REALTOR_REVIEWS: '/realtor/reviews',
   REALTOR_TRUST_PROFILE: '/realtor/trust-profile',
   REALTOR_SETTINGS: '/realtor/settings',
+  REALTOR_HELP: '/realtor/help',
 
   // Agent specific routes
   AGENT_TASKS: '/agent/tasks',
@@ -237,6 +242,7 @@ export const ROUTES = {
   AGENT_REVIEWS: '/agent/reviews',
   AGENT_TRUST_PROFILE: '/agent/trust-profile',
   AGENT_SETTINGS: '/agent/settings',
+  AGENT_HELP: '/agent/help',
 
   // Admin / BackOffice specific routes
   ADMIN_USERS: '/admin/users',
@@ -249,9 +255,16 @@ export const ROUTES = {
   ADMIN_MESSAGES: '/admin/messages',
   ADMIN_REPORTS: '/admin/reports',
   ADMIN_SETTINGS: '/admin/settings',
+  ADMIN_HELP: '/admin/help',
 } as const;
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
+
+// Dynamic routes need param interpolation, so they're helpers rather than plain constants.
+export const buildRoute = {
+  renterPropertyDetail: (id: string) => `/renter/properties/${id}`,
+  renterPropertyApply: (id: string) => `/renter/properties/${id}/apply`,
+};
 
 export const SIGNIN_CONSTANTS = {
   MAX_LOGIN_ATTEMPTS: 5,

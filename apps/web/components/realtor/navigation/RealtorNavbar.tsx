@@ -9,6 +9,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface RealtorNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -29,7 +30,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/realtor/listings?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`${ROUTES.REALTOR_LISTINGS}?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -89,13 +90,13 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/realtor/dashboard"
+                href={ROUTES.REALTOR_DASHBOARD}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
               <Link
-                href="/realtor/listings"
+                href={ROUTES.REALTOR_LISTINGS}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Listings
@@ -178,7 +179,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href="/realtor/dashboard"
+                          href={ROUTES.REALTOR_DASHBOARD}
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -227,14 +228,14 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/realtor/dashboard"
+                href={ROUTES.REALTOR_DASHBOARD}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
-                href="/realtor/listings"
+                href={ROUTES.REALTOR_LISTINGS}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

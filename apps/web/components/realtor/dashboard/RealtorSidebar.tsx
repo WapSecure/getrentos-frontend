@@ -17,6 +17,7 @@ import {
   BadgeCheck,
   Settings,
 } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   label: string;
@@ -25,18 +26,18 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/realtor/dashboard', icon: LayoutDashboard },
-  { label: 'Clients', href: '/realtor/clients', icon: Users },
-  { label: 'Listings', href: '/realtor/listings', icon: Megaphone },
-  { label: 'Leads', href: '/realtor/leads', icon: UserPlus },
-  { label: 'Viewings', href: '/realtor/viewings', icon: CalendarClock },
-  { label: 'Offers', href: '/realtor/offers', icon: Handshake },
-  { label: 'Commissions', href: '/realtor/commissions', icon: Wallet },
-  { label: 'Documents', href: '/realtor/documents', icon: FolderOpen },
-  { label: 'Messages', href: '/realtor/messages', icon: MessageCircle },
-  { label: 'Reviews', href: '/realtor/reviews', icon: Star },
-  { label: 'Trust Profile', href: '/realtor/trust-profile', icon: BadgeCheck },
-  { label: 'Settings', href: '/realtor/settings', icon: Settings },
+  { label: 'Dashboard', href: ROUTES.REALTOR_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Clients', href: ROUTES.REALTOR_CLIENTS, icon: Users },
+  { label: 'Listings', href: ROUTES.REALTOR_LISTINGS, icon: Megaphone },
+  { label: 'Leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
+  { label: 'Viewings', href: ROUTES.REALTOR_VIEWINGS, icon: CalendarClock },
+  { label: 'Offers', href: ROUTES.REALTOR_OFFERS, icon: Handshake },
+  { label: 'Commissions', href: ROUTES.REALTOR_COMMISSIONS, icon: Wallet },
+  { label: 'Documents', href: ROUTES.REALTOR_DOCUMENTS, icon: FolderOpen },
+  { label: 'Messages', href: ROUTES.REALTOR_MESSAGES, icon: MessageCircle },
+  { label: 'Reviews', href: ROUTES.REALTOR_REVIEWS, icon: Star },
+  { label: 'Trust Profile', href: ROUTES.REALTOR_TRUST_PROFILE, icon: BadgeCheck },
+  { label: 'Settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
 ];
 
 export const RealtorSidebar = () => {

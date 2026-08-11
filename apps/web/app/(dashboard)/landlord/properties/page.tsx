@@ -13,6 +13,7 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Property } from '@/types/landlord';
+import { ROUTES } from '@/lib/constants/auth';
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
 
@@ -179,7 +180,7 @@ export default function LandlordPropertiesPage() {
               key={property.id}
               property={property}
               delay={index * 0.05}
-              onClick={() => router.push(`/landlord/units?property=${property.id}`)}
+              onClick={() => router.push(`${ROUTES.LANDLORD_UNITS}?property=${property.id}`)}
               onEdit={() => setEditingProperty(property)}
               onToggleArchive={() => handleToggleArchive(property.id)}
               onDelete={() => setDeletingPropertyId(property.id)}

@@ -51,31 +51,31 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/admin/settings">
+          <Link href={ROUTES.ADMIN_SETTINGS}>
             <User className="w-4 h-4" />
             My Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/admin/settings">
+          <Link href={ROUTES.ADMIN_SETTINGS}>
             <Settings className="w-4 h-4" />
             Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/admin/users">
+          <Link href={ROUTES.ADMIN_USERS}>
             <Users className="w-4 h-4" />
             User Management
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/admin/audit-logs">
+          <Link href={ROUTES.ADMIN_AUDIT_LOGS}>
             <Shield className="w-4 h-4" />
             Audit Logs
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/admin/help">
+          <Link href={ROUTES.ADMIN_HELP}>
             <HelpCircle className="w-4 h-4" />
             Help Center
           </Link>

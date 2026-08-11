@@ -9,6 +9,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LandlordProfileDropdown } from './LandlordProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface LandlordNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -28,7 +29,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/landlord/properties?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`${ROUTES.LANDLORD_PROPERTIES}?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
   const [isScrolled, setIsScrolled] = useState(false);
@@ -89,13 +90,13 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/landlord/dashboard"
+                href={ROUTES.LANDLORD_DASHBOARD}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
               <Link
-                href="/landlord/properties"
+                href={ROUTES.LANDLORD_PROPERTIES}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Properties
@@ -178,7 +179,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href="/landlord/dashboard"
+                          href={ROUTES.LANDLORD_DASHBOARD}
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -227,14 +228,14 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/landlord/dashboard"
+                href={ROUTES.LANDLORD_DASHBOARD}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
-                href="/landlord/properties"
+                href={ROUTES.LANDLORD_PROPERTIES}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

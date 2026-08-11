@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface VerificationItem {
   label: string;
@@ -112,7 +113,7 @@ export const RenterTrustScoreCard = () => {
         </div>
 
         {/* Action Button */}
-        <Button href="/renter/trust-score" variant="primary" fullWidth className="gap-2">
+        <Button href={ROUTES.RENTER_TRUST_SCORE} variant="primary" fullWidth className="gap-2">
           <TrendingUp className="w-4 h-4" />
           {t('dashboard.trust_score.improve_button')}
           <ArrowRight className="w-3 h-3" />

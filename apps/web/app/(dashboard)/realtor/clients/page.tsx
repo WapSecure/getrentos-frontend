@@ -7,6 +7,7 @@ import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
 import { Button } from '@/components/ui/Button';
 import type { RealtorClient, ClientRole } from '@/types/realtor';
+import { ROUTES } from '@/lib/constants/auth';
 
 const mockClients: RealtorClient[] = [
   {
@@ -144,7 +145,7 @@ export default function RealtorClientsPage() {
               key={client.id}
               client={client}
               delay={index * 0.05}
-              onMessage={() => router.push(`/realtor/messages?client=${client.id}`)}
+              onMessage={() => router.push(`${ROUTES.REALTOR_MESSAGES}?client=${client.id}`)}
             />
           ))}
         </div>

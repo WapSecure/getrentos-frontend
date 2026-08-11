@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { ArrowRight, Shield, Lock, FileCheck, Eye, Sparkles } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const Hero = () => {
   const [mounted, setMounted] = useState(false);
@@ -72,7 +73,7 @@ export const Hero = () => {
             signature.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button href="/signup" size="lg" className="group">
+            <Button href={ROUTES.SIGNUP} size="lg" className="group">
               Get early access
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -161,7 +162,7 @@ export const Hero = () => {
             signature.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button href="/signup" size="lg" className="group">
+            <Button href={ROUTES.SIGNUP} size="lg" className="group">
               Get early access
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>

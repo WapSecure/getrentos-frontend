@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   labelKey: TranslationKey;
@@ -33,24 +34,24 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { labelKey: 'sidebar.dashboard', href: '/renter/dashboard', icon: LayoutDashboard },
-  { labelKey: 'sidebar.discover', href: '/renter/discover', icon: Search },
-  { labelKey: 'sidebar.saved', href: '/renter/saved', icon: Heart },
-  { labelKey: 'sidebar.applications', href: '/renter/applications', icon: FileText },
-  { labelKey: 'sidebar.my_lease', href: '/renter/lease', icon: FileCheck },
-  { labelKey: 'sidebar.payments', href: '/renter/payments', icon: CreditCard },
-  { labelKey: 'sidebar.flex_financing', href: '/renter/financing', icon: Zap },
-  { labelKey: 'sidebar.maintenance', href: '/renter/maintenance', icon: Wrench },
-  { labelKey: 'sidebar.messages', href: '/renter/messages', icon: MessageCircle },
-  { labelKey: 'sidebar.documents', href: '/renter/documents', icon: Home },
-  { labelKey: 'sidebar.roommates', href: '/renter/roommates', icon: Users },
-  { labelKey: 'sidebar.trust_score', href: '/renter/trust-score', icon: Star },
-  { labelKey: 'sidebar.credit_report', href: '/renter/credit-report', icon: TrendingUp },
-  { labelKey: 'sidebar.ussd_access', href: '/renter/ussd-access', icon: Smartphone },
-  { labelKey: 'sidebar.notifications', href: '/renter/notifications', icon: Bell },
-  { labelKey: 'sidebar.calendar', href: '/renter/calendar', icon: Calendar },
-  { labelKey: 'sidebar.settings', href: '/renter/settings', icon: Settings },
-  { labelKey: 'sidebar.help', href: '/renter/help', icon: HelpCircle },
+  { labelKey: 'sidebar.dashboard', href: ROUTES.RENTER_DASHBOARD, icon: LayoutDashboard },
+  { labelKey: 'sidebar.discover', href: ROUTES.RENTER_DISCOVER, icon: Search },
+  { labelKey: 'sidebar.saved', href: ROUTES.RENTER_SAVED, icon: Heart },
+  { labelKey: 'sidebar.applications', href: ROUTES.RENTER_APPLICATIONS, icon: FileText },
+  { labelKey: 'sidebar.my_lease', href: ROUTES.RENTER_LEASE, icon: FileCheck },
+  { labelKey: 'sidebar.payments', href: ROUTES.RENTER_PAYMENTS, icon: CreditCard },
+  { labelKey: 'sidebar.flex_financing', href: ROUTES.RENTER_FINANCING, icon: Zap },
+  { labelKey: 'sidebar.maintenance', href: ROUTES.RENTER_MAINTENANCE, icon: Wrench },
+  { labelKey: 'sidebar.messages', href: ROUTES.RENTER_MESSAGES, icon: MessageCircle },
+  { labelKey: 'sidebar.documents', href: ROUTES.RENTER_DOCUMENTS, icon: Home },
+  { labelKey: 'sidebar.roommates', href: ROUTES.RENTER_ROOMMATES, icon: Users },
+  { labelKey: 'sidebar.trust_score', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
+  { labelKey: 'sidebar.credit_report', href: ROUTES.RENTER_CREDIT_REPORT, icon: TrendingUp },
+  { labelKey: 'sidebar.ussd_access', href: ROUTES.RENTER_USSD_ACCESS, icon: Smartphone },
+  { labelKey: 'sidebar.notifications', href: ROUTES.RENTER_NOTIFICATIONS, icon: Bell },
+  { labelKey: 'sidebar.calendar', href: ROUTES.RENTER_CALENDAR, icon: Calendar },
+  { labelKey: 'sidebar.settings', href: ROUTES.RENTER_SETTINGS, icon: Settings },
+  { labelKey: 'sidebar.help', href: ROUTES.RENTER_HELP, icon: HelpCircle },
 ];
 
 export const RenterSidebar = () => {

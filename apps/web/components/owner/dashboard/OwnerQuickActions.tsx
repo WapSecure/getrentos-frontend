@@ -2,12 +2,13 @@
 
 import { Building2, Megaphone, Handshake, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Add Property', href: '/owner/properties', icon: Building2 },
-  { label: 'Publish Listing', href: '/owner/listings', icon: Megaphone },
-  { label: 'View Offers', href: '/owner/offers', icon: Handshake },
-  { label: 'Upload Ownership Docs', href: '/owner/documents', icon: FileUp },
+  { label: 'Add Property', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
+  { label: 'Publish Listing', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
+  { label: 'View Offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
+  { label: 'Upload Ownership Docs', href: ROUTES.OWNER_DOCUMENTS, icon: FileUp },
 ];
 
 export const OwnerQuickActions = () => {

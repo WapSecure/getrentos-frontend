@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Building2 } from 'lucide-react';
+import { ChevronDown, User, Settings, HelpCircle, LogOut, Building2 } from 'lucide-react';
 import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
 import { getInitials } from '@/lib/format';
 
@@ -69,7 +69,7 @@ export const OwnerProfileDropdown = ({ user }: OwnerProfileDropdownProps) => {
 
             <div className="py-2">
               <Link
-                href="/owner/settings"
+                href={ROUTES.OWNER_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -77,7 +77,7 @@ export const OwnerProfileDropdown = ({ user }: OwnerProfileDropdownProps) => {
                 My Profile
               </Link>
               <Link
-                href="/owner/settings"
+                href={ROUTES.OWNER_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -85,7 +85,7 @@ export const OwnerProfileDropdown = ({ user }: OwnerProfileDropdownProps) => {
                 Settings
               </Link>
               <Link
-                href="/owner/properties"
+                href={ROUTES.OWNER_PROPERTIES}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -93,15 +93,7 @@ export const OwnerProfileDropdown = ({ user }: OwnerProfileDropdownProps) => {
                 My Properties
               </Link>
               <Link
-                href="/owner/settings"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                Security
-              </Link>
-              <Link
-                href="/owner/help"
+                href={ROUTES.OWNER_HELP}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

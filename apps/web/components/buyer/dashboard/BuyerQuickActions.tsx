@@ -2,12 +2,13 @@
 
 import { Search, CalendarClock, Handshake, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Discover Properties', href: '/buyer/discover', icon: Search },
-  { label: 'Request Viewing', href: '/buyer/viewings', icon: CalendarClock },
-  { label: 'View Offers', href: '/buyer/offers', icon: Handshake },
-  { label: 'Upload Documents', href: '/buyer/documents', icon: FileUp },
+  { label: 'Discover Properties', href: ROUTES.BUYER_DISCOVER, icon: Search },
+  { label: 'Request Viewing', href: ROUTES.BUYER_VIEWINGS, icon: CalendarClock },
+  { label: 'View Offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
+  { label: 'Upload Documents', href: ROUTES.BUYER_DOCUMENTS, icon: FileUp },
 ];
 
 export const BuyerQuickActions = () => {

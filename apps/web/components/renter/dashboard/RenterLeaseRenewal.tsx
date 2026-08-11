@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Calendar, Clock, FileText, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface LeaseRenewal {
   property: string;
@@ -105,7 +106,7 @@ export const RenterLeaseRenewal = () => {
           variant="outline"
           fullWidth
           className="gap-2"
-          onClick={() => router.push('/renter/lease')}
+          onClick={() => router.push(ROUTES.RENTER_LEASE)}
         >
           <FileText className="w-4 h-4" />
           Review Lease Terms

@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface BuyerDashboardHeaderProps {
   greeting: string;
@@ -19,7 +20,7 @@ export const BuyerDashboardHeader = ({ greeting, firstName }: BuyerDashboardHead
           Here&apos;s what&apos;s happening with your property search.
         </p>
       </div>
-      <Button href="/buyer/discover" variant="primary" className="gap-2">
+      <Button href={ROUTES.BUYER_DISCOVER} variant="primary" className="gap-2">
         <Search className="w-4 h-4" />
         Discover Properties
       </Button>

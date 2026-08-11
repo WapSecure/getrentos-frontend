@@ -10,7 +10,7 @@ import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
 import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSignup } from '@/hooks/useSignup';
-import { SIGNUP_METHODS, SignupMethod } from '@/lib/constants/auth';
+import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
 
 export default function SignupPage() {
   const [method, setMethod] = useState<SignupMethod>(SIGNUP_METHODS.EMAIL);
@@ -64,17 +64,17 @@ export default function SignupPage() {
   const handleStartOver = () => {
     console.log('Starting over - resetting all state');
     resetSignup();
-    window.location.href = '/signup';
+    window.location.href = ROUTES.SIGNUP;
   };
 
   // If step is 'roles' or 'verification', redirect to those pages
   useEffect(() => {
     if (step === 'roles') {
       console.log('Step is roles, redirecting to /role-selection');
-      window.location.href = '/role-selection';
+      window.location.href = ROUTES.ROLE_SELECTION;
     } else if (step === 'verification') {
       console.log('Step is verification, redirecting to /verification');
-      window.location.href = '/verification';
+      window.location.href = ROUTES.VERIFICATION;
     }
   }, [step]);
 
@@ -223,7 +223,7 @@ export default function SignupPage() {
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{' '}
               <a
-                href="/login"
+                href={ROUTES.LOGIN}
                 className="font-medium text-primary hover:text-primary-hover transition-colors"
               >
                 Sign in

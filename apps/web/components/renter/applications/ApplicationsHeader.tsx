@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FileText, TrendingUp, Clock, CheckCircle, Download, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Application } from '@/types/renter';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface ApplicationsHeaderProps {
   applications: Application[];
@@ -32,7 +33,7 @@ export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeade
             <Download className="w-4 h-4" />
             Export
           </Button>
-          <Button href="/renter/discover" variant="primary" className="gap-2" size="sm">
+          <Button href={ROUTES.RENTER_DISCOVER} variant="primary" className="gap-2" size="sm">
             <Plus className="w-4 h-4" />
             New Application
           </Button>

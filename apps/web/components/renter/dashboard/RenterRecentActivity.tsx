@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Clock, Heart, CheckCircle, TrendingUp, FileText, MessageCircle } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface Activity {
   id: string;
@@ -122,7 +123,7 @@ export const RenterRecentActivity = () => {
 
       <div className="p-3 border-t border-border text-center">
         <button
-          onClick={() => router.push('/renter/notifications')}
+          onClick={() => router.push(ROUTES.RENTER_NOTIFICATIONS)}
           className="text-sm text-primary hover:text-primary-hover transition-colors"
         >
           View all activity

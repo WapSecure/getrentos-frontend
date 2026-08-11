@@ -12,6 +12,7 @@ import {
 import { getPropertyById } from '@/lib/mockProperties';
 import { useRenterUser } from '../../../layout';
 import type { Application } from '@/types/renter';
+import { ROUTES, buildRoute } from '@/lib/constants/auth';
 
 const buildInitialData = (
   property: ReturnType<typeof getPropertyById>,
@@ -49,7 +50,7 @@ export default function PropertyApplyPage() {
         title="Property not found"
         description="This listing may have been removed or the link is incorrect."
         action={
-          <Button variant="primary" onClick={() => router.push('/renter/discover')}>
+          <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
             Back to Discover
           </Button>
         }
@@ -113,10 +114,10 @@ export default function PropertyApplyPage() {
           soon as there&apos;s an update.
         </p>
         <div className="flex items-center justify-center gap-3 mt-6">
-          <Button variant="primary" onClick={() => router.push('/renter/applications')}>
+          <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}>
             View My Applications
           </Button>
-          <Button variant="outline" onClick={() => router.push('/renter/discover')}>
+          <Button variant="outline" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
             Keep Browsing
           </Button>
         </div>
@@ -127,7 +128,7 @@ export default function PropertyApplyPage() {
   return (
     <>
       <button
-        onClick={() => router.push(`/renter/properties/${property.id}`)}
+        onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" />

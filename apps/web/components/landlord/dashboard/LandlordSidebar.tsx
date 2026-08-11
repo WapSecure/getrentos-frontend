@@ -20,6 +20,7 @@ import {
   Star,
   Settings,
 } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   label: string;
@@ -28,21 +29,21 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/landlord/dashboard', icon: LayoutDashboard },
-  { label: 'Properties', href: '/landlord/properties', icon: Building2 },
-  { label: 'Units', href: '/landlord/units', icon: DoorOpen },
-  { label: 'Listings', href: '/landlord/listings', icon: Megaphone },
-  { label: 'Applications', href: '/landlord/applications', icon: FileText },
-  { label: 'Tenants', href: '/landlord/tenants', icon: Users },
-  { label: 'Leases', href: '/landlord/leases', icon: FileCheck },
-  { label: 'Payments', href: '/landlord/payments', icon: CreditCard },
-  { label: 'Maintenance', href: '/landlord/maintenance', icon: Wrench },
-  { label: 'Vendors', href: '/landlord/vendors', icon: HardHat },
-  { label: 'Financials', href: '/landlord/financials', icon: PieChart },
-  { label: 'Documents', href: '/landlord/documents', icon: FolderOpen },
-  { label: 'Messages', href: '/landlord/messages', icon: MessageCircle },
-  { label: 'Reviews', href: '/landlord/reviews', icon: Star },
-  { label: 'Settings', href: '/landlord/settings', icon: Settings },
+  { label: 'Dashboard', href: ROUTES.LANDLORD_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Properties', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
+  { label: 'Units', href: ROUTES.LANDLORD_UNITS, icon: DoorOpen },
+  { label: 'Listings', href: ROUTES.LANDLORD_LISTINGS, icon: Megaphone },
+  { label: 'Applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
+  { label: 'Tenants', href: ROUTES.LANDLORD_TENANTS, icon: Users },
+  { label: 'Leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },
+  { label: 'Payments', href: ROUTES.LANDLORD_PAYMENTS, icon: CreditCard },
+  { label: 'Maintenance', href: ROUTES.LANDLORD_MAINTENANCE, icon: Wrench },
+  { label: 'Vendors', href: ROUTES.LANDLORD_VENDORS, icon: HardHat },
+  { label: 'Financials', href: ROUTES.LANDLORD_FINANCIALS, icon: PieChart },
+  { label: 'Documents', href: ROUTES.LANDLORD_DOCUMENTS, icon: FolderOpen },
+  { label: 'Messages', href: ROUTES.LANDLORD_MESSAGES, icon: MessageCircle },
+  { label: 'Reviews', href: ROUTES.LANDLORD_REVIEWS, icon: Star },
+  { label: 'Settings', href: ROUTES.LANDLORD_SETTINGS, icon: Settings },
 ];
 
 export const LandlordSidebar = () => {

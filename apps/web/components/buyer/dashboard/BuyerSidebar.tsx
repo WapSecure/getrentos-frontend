@@ -16,6 +16,7 @@ import {
   BadgeCheck,
   Settings,
 } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   label: string;
@@ -24,17 +25,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/buyer/dashboard', icon: LayoutDashboard },
-  { label: 'Discover', href: '/buyer/discover', icon: Search },
-  { label: 'Saved Properties', href: '/buyer/saved', icon: Heart },
-  { label: 'Viewing Requests', href: '/buyer/viewings', icon: CalendarClock },
-  { label: 'Offers', href: '/buyer/offers', icon: Handshake },
-  { label: 'Transactions', href: '/buyer/transactions', icon: ShieldCheck },
-  { label: 'Documents', href: '/buyer/documents', icon: FolderOpen },
-  { label: 'Messages', href: '/buyer/messages', icon: MessageCircle },
-  { label: 'Reviews', href: '/buyer/reviews', icon: Star },
-  { label: 'Trust Profile', href: '/buyer/trust-profile', icon: BadgeCheck },
-  { label: 'Settings', href: '/buyer/settings', icon: Settings },
+  { label: 'Dashboard', href: ROUTES.BUYER_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Discover', href: ROUTES.BUYER_DISCOVER, icon: Search },
+  { label: 'Saved Properties', href: ROUTES.BUYER_SAVED, icon: Heart },
+  { label: 'Viewing Requests', href: ROUTES.BUYER_VIEWINGS, icon: CalendarClock },
+  { label: 'Offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
+  { label: 'Transactions', href: ROUTES.BUYER_TRANSACTIONS, icon: ShieldCheck },
+  { label: 'Documents', href: ROUTES.BUYER_DOCUMENTS, icon: FolderOpen },
+  { label: 'Messages', href: ROUTES.BUYER_MESSAGES, icon: MessageCircle },
+  { label: 'Reviews', href: ROUTES.BUYER_REVIEWS, icon: Star },
+  { label: 'Trust Profile', href: ROUTES.BUYER_TRUST_PROFILE, icon: BadgeCheck },
+  { label: 'Settings', href: ROUTES.BUYER_SETTINGS, icon: Settings },
 ];
 
 export const BuyerSidebar = () => {

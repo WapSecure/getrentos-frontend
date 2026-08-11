@@ -23,6 +23,7 @@ import type {
   BuyerEscrowStatus,
   EscrowActivityLogEntry,
 } from '@/types/buyer';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface BuyerEscrowTransactionDetailModalProps {
   transaction: BuyerEscrowTransaction | null;
@@ -260,7 +261,7 @@ export const BuyerEscrowTransactionDetailModal = ({
               <Button
                 variant="outline"
                 className="flex-1 gap-1.5"
-                onClick={() => router.push('/buyer/messages')}
+                onClick={() => router.push(ROUTES.BUYER_MESSAGES)}
               >
                 <LifeBuoy className="w-4 h-4" />
                 Contact Support

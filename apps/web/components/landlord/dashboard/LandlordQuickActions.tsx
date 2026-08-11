@@ -2,12 +2,13 @@
 
 import { Building2, Megaphone, FileText, BellRing } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Add Property', href: '/landlord/properties', icon: Building2 },
-  { label: 'Publish Listing', href: '/landlord/listings', icon: Megaphone },
-  { label: 'View Applications', href: '/landlord/applications', icon: FileText },
-  { label: 'Send Reminder', href: '/landlord/payments', icon: BellRing },
+  { label: 'Add Property', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
+  { label: 'Publish Listing', href: ROUTES.LANDLORD_LISTINGS, icon: Megaphone },
+  { label: 'View Applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
+  { label: 'Send Reminder', href: ROUTES.LANDLORD_PAYMENTS, icon: BellRing },
 ];
 
 export const LandlordQuickActions = () => {

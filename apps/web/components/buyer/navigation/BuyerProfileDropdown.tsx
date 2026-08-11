@@ -69,7 +69,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
 
             <div className="py-2">
               <Link
-                href="/buyer/settings"
+                href={ROUTES.BUYER_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -77,7 +77,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
                 My Profile
               </Link>
               <Link
-                href="/buyer/settings"
+                href={ROUTES.BUYER_SETTINGS}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -85,7 +85,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
                 Settings
               </Link>
               <Link
-                href="/buyer/saved"
+                href={ROUTES.BUYER_SAVED}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -93,7 +93,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
                 Saved Properties
               </Link>
               <Link
-                href="/buyer/trust-profile"
+                href={ROUTES.BUYER_TRUST_PROFILE}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -101,7 +101,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
                 Trust Profile
               </Link>
               <Link
-                href="/buyer/help"
+                href={ROUTES.BUYER_HELP}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

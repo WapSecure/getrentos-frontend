@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Phone, Clock, Star, Shield, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { Property } from '@/types/renter';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface PropertyLandlordCardProps {
   property: Property;
@@ -58,7 +59,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         size="sm"
         fullWidth
         className="gap-2 mt-4"
-        onClick={() => router.push('/renter/messages')}
+        onClick={() => router.push(ROUTES.RENTER_MESSAGES)}
       >
         <MessageCircle className="w-4 h-4" />
         Message Landlord

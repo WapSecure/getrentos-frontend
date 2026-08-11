@@ -6,6 +6,7 @@ import { Heart, Filter, ArrowUpDown } from 'lucide-react';
 import { SavedPropertyCard } from './SavedPropertyCard';
 import { Property } from '@/types/renter';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface SavedPropertiesGridProps {
   properties: Property[];
@@ -104,7 +105,7 @@ export const SavedPropertiesGrid = ({
         </div>
         <h3 className="text-lg font-medium text-foreground">No saved properties yet</h3>
         <p className="text-muted-foreground mt-1">Start exploring and save properties you love</p>
-        <Button href="/renter/discover" variant="primary" className="mt-4">
+        <Button href={ROUTES.RENTER_DISCOVER} variant="primary" className="mt-4">
           Discover Properties
         </Button>
       </motion.div>

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ClipboardList } from 'lucide-react';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';
+import { ROUTES } from '@/lib/constants/auth';
 
 const mockTasks: AgentTask[] = [
   {
@@ -94,9 +95,9 @@ export default function AgentTasksPage() {
   const handleComplete = (task: AgentTask) => {
     updateStatus(task.id, 'completed');
     if (task.type === 'inspection') {
-      router.push(`/agent/inspections?task=${task.id}`);
+      router.push(`${ROUTES.AGENT_INSPECTIONS}?task=${task.id}`);
     } else if (task.type === 'verification') {
-      router.push(`/agent/verifications?task=${task.id}`);
+      router.push(`${ROUTES.AGENT_VERIFICATIONS}?task=${task.id}`);
     }
   };
 

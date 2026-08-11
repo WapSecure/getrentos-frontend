@@ -9,6 +9,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { OwnerProfileDropdown } from './OwnerProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface OwnerNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -28,7 +29,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/owner/properties?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`${ROUTES.OWNER_PROPERTIES}?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
   const [isScrolled, setIsScrolled] = useState(false);
@@ -89,13 +90,13 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
 
             <div className="hidden md:flex items-center gap-6">
               <Link
-                href="/owner/dashboard"
+                href={ROUTES.OWNER_DASHBOARD}
                 className="text-foreground font-medium hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
               <Link
-                href="/owner/properties"
+                href={ROUTES.OWNER_PROPERTIES}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Properties
@@ -178,7 +179,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href="/owner/dashboard"
+                          href={ROUTES.OWNER_DASHBOARD}
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -227,14 +228,14 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
           >
             <div className="flex flex-col p-4 space-y-2">
               <Link
-                href="/owner/dashboard"
+                href={ROUTES.OWNER_DASHBOARD}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link
-                href="/owner/properties"
+                href={ROUTES.OWNER_PROPERTIES}
                 className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

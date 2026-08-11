@@ -10,6 +10,7 @@ import { OwnerActivityFeed } from '@/components/owner/dashboard/OwnerActivityFee
 import { OwnerQuickActions } from '@/components/owner/dashboard/OwnerQuickActions';
 import { Button } from '@/components/ui/Button';
 import type { OwnerProperty } from '@/types/owner';
+import { ROUTES } from '@/lib/constants/auth';
 
 const mockProperties: OwnerProperty[] = [
   {
@@ -92,7 +93,7 @@ export default function OwnerDashboardPage() {
             Add your first property to verify ownership, list it for sale, and track its investment
             performance.
           </p>
-          <Button href="/owner/properties" variant="primary" className="mt-6">
+          <Button href={ROUTES.OWNER_PROPERTIES} variant="primary" className="mt-6">
             Add Your First Property
           </Button>
         </div>

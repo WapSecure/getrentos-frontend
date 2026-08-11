@@ -2,12 +2,13 @@
 
 import { ShieldCheck, Gavel, AlertTriangle, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Review Verifications', href: '/admin/verifications', icon: ShieldCheck },
-  { label: 'View Disputes', href: '/admin/disputes', icon: Gavel },
-  { label: 'Fraud Alerts', href: '/admin/fraud', icon: AlertTriangle },
-  { label: 'Manage Users', href: '/admin/users', icon: Users },
+  { label: 'Review Verifications', href: ROUTES.ADMIN_VERIFICATIONS, icon: ShieldCheck },
+  { label: 'View Disputes', href: ROUTES.ADMIN_DISPUTES, icon: Gavel },
+  { label: 'Fraud Alerts', href: ROUTES.ADMIN_FRAUD, icon: AlertTriangle },
+  { label: 'Manage Users', href: ROUTES.ADMIN_USERS, icon: Users },
 ];
 
 export const AdminQuickActions = () => {

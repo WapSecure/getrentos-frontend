@@ -2,12 +2,13 @@
 
 import { ClipboardCheck, UserCheck, ClipboardList, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Start Inspection', href: '/agent/inspections', icon: ClipboardCheck },
-  { label: 'Log Verification', href: '/agent/verifications', icon: UserCheck },
-  { label: 'View Tasks', href: '/agent/tasks', icon: ClipboardList },
-  { label: 'Sync Center', href: '/agent/sync', icon: RefreshCw },
+  { label: 'Start Inspection', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
+  { label: 'Log Verification', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
+  { label: 'View Tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
+  { label: 'Sync Center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
 ];
 
 export const AgentQuickActions = () => {

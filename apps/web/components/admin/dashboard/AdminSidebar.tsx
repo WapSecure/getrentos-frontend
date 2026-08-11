@@ -16,6 +16,7 @@ import {
   BarChart3,
   Settings,
 } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
   label: string;
@@ -24,17 +25,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Users', href: '/admin/users', icon: Users },
-  { label: 'Verifications', href: '/admin/verifications', icon: ShieldCheck },
-  { label: 'Disputes', href: '/admin/disputes', icon: Gavel },
-  { label: 'Fraud & Risk', href: '/admin/fraud', icon: AlertTriangle },
-  { label: 'Escrow Oversight', href: '/admin/escrow', icon: Landmark },
-  { label: 'Audit Logs', href: '/admin/audit-logs', icon: ScrollText },
-  { label: 'Documents', href: '/admin/documents', icon: FolderOpen },
-  { label: 'Messages', href: '/admin/messages', icon: MessageCircle },
-  { label: 'Reports', href: '/admin/reports', icon: BarChart3 },
-  { label: 'Settings', href: '/admin/settings', icon: Settings },
+  { label: 'Dashboard', href: ROUTES.ADMIN_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Users', href: ROUTES.ADMIN_USERS, icon: Users },
+  { label: 'Verifications', href: ROUTES.ADMIN_VERIFICATIONS, icon: ShieldCheck },
+  { label: 'Disputes', href: ROUTES.ADMIN_DISPUTES, icon: Gavel },
+  { label: 'Fraud & Risk', href: ROUTES.ADMIN_FRAUD, icon: AlertTriangle },
+  { label: 'Escrow Oversight', href: ROUTES.ADMIN_ESCROW, icon: Landmark },
+  { label: 'Audit Logs', href: ROUTES.ADMIN_AUDIT_LOGS, icon: ScrollText },
+  { label: 'Documents', href: ROUTES.ADMIN_DOCUMENTS, icon: FolderOpen },
+  { label: 'Messages', href: ROUTES.ADMIN_MESSAGES, icon: MessageCircle },
+  { label: 'Reports', href: ROUTES.ADMIN_REPORTS, icon: BarChart3 },
+  { label: 'Settings', href: ROUTES.ADMIN_SETTINGS, icon: Settings },
 ];
 
 export const AdminSidebar = () => {

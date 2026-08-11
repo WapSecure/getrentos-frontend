@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { History, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { buildRoute } from '@/lib/constants/auth';
 
 interface RecentlyViewedProperty {
   id: string;
@@ -69,7 +70,7 @@ export const RecentlyViewed = () => {
             transition={{ delay: index * 0.05 }}
             className="p-3 hover:bg-secondary transition-colors"
           >
-            <Link href={`/renter/properties/${property.id}`} className="flex gap-3">
+            <Link href={buildRoute.renterPropertyDetail(property.id)} className="flex gap-3">
               <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center shrink-0">
                 <Eye className="w-5 h-5 text-gray-400" />
               </div>

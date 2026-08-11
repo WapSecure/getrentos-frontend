@@ -144,6 +144,7 @@ const formatPrice = (price: number, period: PeriodType) => {
 };
 
 import { CheckCircle, XCircle } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
@@ -163,7 +164,7 @@ export const RenterApplicationsList = () => {
           </h2>
           <p className="text-sm text-muted-foreground">{t('dashboard.applications.subtitle')}</p>
         </div>
-        <Button href="/renter/applications" variant="ghost" size="sm" className="gap-1">
+        <Button href={ROUTES.RENTER_APPLICATIONS} variant="ghost" size="sm" className="gap-1">
           {t('dashboard.applications.view_all')}
           <Eye className="w-3 h-3" />
         </Button>
@@ -180,7 +181,7 @@ export const RenterApplicationsList = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * index, duration: 0.3 }}
               className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
-              onClick={() => router.push('/renter/applications')}
+              onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
                 <div className="w-full md:w-16 h-16 bg-linear-to-br from-secondary to-muted rounded-xl flex items-center justify-center shrink-0">

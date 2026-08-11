@@ -2,6 +2,7 @@
 
 import { ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface AgentDashboardHeaderProps {
   greeting: string;
@@ -19,7 +20,7 @@ export const AgentDashboardHeader = ({ greeting, firstName }: AgentDashboardHead
           Here&apos;s what&apos;s on your schedule today.
         </p>
       </div>
-      <Button href="/agent/tasks" variant="primary" className="gap-2">
+      <Button href={ROUTES.AGENT_TASKS} variant="primary" className="gap-2">
         <ClipboardList className="w-4 h-4" />
         View Tasks
       </Button>

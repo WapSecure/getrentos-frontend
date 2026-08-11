@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Home, MapPin } from 'lucide-react';
 import { mockProperties } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
+import { buildRoute } from '@/lib/constants/auth';
 
 interface SimilarPropertiesProps {
   currentId: string;
@@ -19,7 +20,7 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
         {similar.map((property) => (
           <Link
             key={property.id}
-            href={`/renter/properties/${property.id}`}
+            href={buildRoute.renterPropertyDetail(property.id)}
             className="block rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="h-24 bg-linear-to-br from-secondary to-muted flex items-center justify-center">

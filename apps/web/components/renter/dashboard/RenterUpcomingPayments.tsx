@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Calendar, Home, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface Payment {
   id: string;
@@ -89,7 +90,7 @@ export const RenterUpcomingPayments = () => {
               <span className="text-lg font-bold text-primary">{formatPrice(payment.amount)}</span>
             </div>
             <Button
-              href="/renter/payments"
+              href={ROUTES.RENTER_PAYMENTS}
               variant={payment.status === 'overdue' ? 'danger' : 'primary'}
               size="sm"
               fullWidth
@@ -103,7 +104,7 @@ export const RenterUpcomingPayments = () => {
       </div>
 
       <div className="p-4 border-t border-border">
-        <Button href="/renter/payments" variant="ghost" size="sm" fullWidth className="gap-1">
+        <Button href={ROUTES.RENTER_PAYMENTS} variant="ghost" size="sm" fullWidth className="gap-1">
           View Payment History
           <ArrowRight className="w-3 h-3" />
         </Button>

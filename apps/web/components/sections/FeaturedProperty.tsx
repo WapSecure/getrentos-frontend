@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { MapPin, Bed, Bath, Square, Building2, TrendingUp } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const FeaturedProperty = () => {
   const ref = useRef(null);
@@ -169,7 +170,7 @@ export const FeaturedProperty = () => {
                   </span>
                 </div>
                 <motion.div whileHover={{ x: 5 }}>
-                  <Button variant="outline" size="sm" href={`/properties/${property.id}`}>
+                  <Button variant="outline" size="sm" href={ROUTES.SIGNUP}>
                     View Details <TrendingUp className="w-3 h-3 ml-1" />
                   </Button>
                 </motion.div>

@@ -7,6 +7,7 @@ import { PropertyListingCard } from '@/components/buyer/discover/PropertyListing
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
 import { Button } from '@/components/ui/Button';
 import type { BuyerPropertyListing } from '@/types/buyer';
+import { ROUTES } from '@/lib/constants/auth';
 
 const SAVED_PROPERTIES_KEY = 'buyer_saved_properties';
 
@@ -120,7 +121,7 @@ export default function BuyerSavedPage() {
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
             Tap the heart icon on any property to save it here for later.
           </p>
-          <Button href="/buyer/discover" variant="primary" className="mt-6">
+          <Button href={ROUTES.BUYER_DISCOVER} variant="primary" className="mt-6">
             Discover Properties
           </Button>
         </div>
@@ -145,13 +146,13 @@ export default function BuyerSavedPage() {
         onClose={() => setActiveListing(null)}
         onToggleSave={() => activeListing && toggleSave(activeListing.id)}
         onRequestViewing={() =>
-          activeListing && router.push(`/buyer/viewings?property=${activeListing.id}`)
+          activeListing && router.push(`${ROUTES.BUYER_VIEWINGS}?property=${activeListing.id}`)
         }
         onMakeOffer={() =>
-          activeListing && router.push(`/buyer/offers?property=${activeListing.id}`)
+          activeListing && router.push(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)
         }
         onMessageOwner={() =>
-          activeListing && router.push(`/buyer/messages?property=${activeListing.id}`)
+          activeListing && router.push(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)
         }
       />
     </>
