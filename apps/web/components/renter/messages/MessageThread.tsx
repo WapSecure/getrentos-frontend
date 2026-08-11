@@ -5,12 +5,12 @@ import { Phone, Video, MoreVertical, Home } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
-import { Conversation, Attachment } from '@/types/messages';
+import { Conversation } from '@/types/messages';
 
 interface MessageThreadProps {
   conversation: Conversation;
-  onSendMessage: (conversationId: string, text: string, attachments?: Attachment[]) => void;
-  currentUser: { fullName: string } | null;
+  onSendMessage: (conversationId: string, text: string, files?: File[]) => void;
+  currentUser: { id?: string; fullName: string } | null;
 }
 
 export const MessageThread = ({ conversation, onSendMessage, currentUser }: MessageThreadProps) => {
@@ -24,9 +24,9 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
     scrollToBottom();
   }, [conversation.messages]);
 
-  const handleSend = (text: string, attachments?: Attachment[]) => {
-    if (text.trim() || (attachments && attachments.length > 0)) {
-      onSendMessage(conversation.id, text, attachments);
+  const handleSend = (text: string, files?: File[]) => {
+    if (text.trim() || (files && files.length > 0)) {
+      onSendMessage(conversation.id, text, files);
     }
   };
 
@@ -79,9 +79,7 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
           <MessageBubble
             key={message.id}
             message={message}
-            isCurrentUser={
-              message.senderId === 'renter_001' || message.senderName === currentUser?.fullName
-            }
+            isCurrentUser={message.senderId === currentUser?.id}
           />
         ))}
         <div ref={messagesEndRef} />

@@ -4,7 +4,7 @@ import type { Property, Application } from '@/types/renter';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
-import type { Conversation } from '@/types/messages';
+import type { Conversation, Reminder } from '@/types/messages';
 
 export interface Roommate {
   id: string;
@@ -248,12 +248,16 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/messages'));
   },
 
-  async sendMessage(conversationId: string, text: string): Promise<ApiResponse<Conversation>> {
+  async sendMessage(
+    conversationId: string,
+    text: string,
+    files: File[] = []
+  ): Promise<ApiResponse<Conversation>> {
+    const formData = new FormData();
+    formData.append('text', text);
+    files.forEach((file) => formData.append('files', file));
     return safeCall(() =>
-      authFetch(`/renter/messages/${conversationId}/messages`, {
-        method: 'POST',
-        body: JSON.stringify({ text }),
-      })
+      authFetch(`/renter/messages/${conversationId}/messages`, { method: 'POST', body: formData })
     );
   },
 
@@ -271,5 +275,30 @@ export const renterService = {
     return safeCall(() =>
       authFetch(`/renter/messages/${conversationId}/archive`, { method: 'PATCH' })
     );
+  },
+
+  // ---- Message reminders ----
+  async listReminders(): Promise<ApiResponse<Reminder[]>> {
+    return safeCall(() => authFetch('/renter/messages/reminders'));
+  },
+
+  async createReminder(data: {
+    message: string;
+    date: string;
+    time: string;
+  }): Promise<ApiResponse<Reminder>> {
+    return safeCall(() =>
+      authFetch('/renter/messages/reminders', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async toggleReminder(id: string): Promise<ApiResponse<Reminder>> {
+    return safeCall(() =>
+      authFetch(`/renter/messages/reminders/${id}/toggle`, { method: 'PATCH' })
+    );
+  },
+
+  async deleteReminder(id: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/renter/messages/reminders/${id}`, { method: 'DELETE' }));
   },
 };

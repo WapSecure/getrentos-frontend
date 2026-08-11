@@ -13,19 +13,26 @@ interface Attachment {
 }
 
 interface MessageInputProps {
-  onSend: (text: string, attachments?: Attachment[]) => void;
+  onSend: (text: string, files?: File[]) => void;
 }
 
 export const MessageInput = ({ onSend }: MessageInputProps) => {
   const [message, setMessage] = useState('');
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const previewAttachments: Attachment[] = files.map((file) => ({
+    name: file.name,
+    type: file.type,
+    size: file.size.toString(),
+    url: URL.createObjectURL(file),
+  }));
+
   const handleSend = () => {
-    if (message.trim() || attachments.length > 0) {
-      onSend(message, attachments);
+    if (message.trim() || files.length > 0) {
+      onSend(message, files);
       setMessage('');
-      setAttachments([]);
+      setFiles([]);
     }
   };
 
@@ -37,15 +44,9 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newAttachments = Array.from(files).map((file) => ({
-        name: file.name,
-        type: file.type,
-        size: file.size.toString(),
-        url: URL.createObjectURL(file),
-      }));
-      setAttachments([...attachments, ...newAttachments]);
+    const selected = e.target.files;
+    if (selected) {
+      setFiles([...files, ...Array.from(selected)]);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -53,7 +54,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
   };
 
   const handleRemoveAttachment = (index: number) => {
-    setAttachments(attachments.filter((_, i) => i !== index));
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   const handleDownloadAttachment = (attachment: Attachment) => {
@@ -62,9 +63,9 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
 
   return (
     <div className="space-y-2">
-      {attachments.length > 0 && (
+      {previewAttachments.length > 0 && (
         <MessageAttachments
-          attachments={attachments}
+          attachments={previewAttachments}
           onDownload={handleDownloadAttachment}
           onRemove={handleRemoveAttachment}
         />
@@ -100,7 +101,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
           </button>
           <Button
             onClick={handleSend}
-            disabled={!message.trim() && attachments.length === 0}
+            disabled={!message.trim() && files.length === 0}
             variant="primary"
             className="p-2.5 rounded-xl"
           >

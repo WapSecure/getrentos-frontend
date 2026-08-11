@@ -12,18 +12,8 @@ import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageLabels } from '@/components/renter/messages/MessageLabels';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
 import { MessageCircle } from 'lucide-react';
-import { Conversation, Attachment, Reminder, ReminderData, FilterState } from '@/types/messages';
+import { Conversation, Reminder, ReminderData, FilterState } from '@/types/messages';
 import { renterService } from '@/services/renterService';
-
-const DEFAULT_REMINDERS: Reminder[] = [
-  {
-    id: 'rem_001',
-    message: 'Follow up on lease agreement',
-    date: '2026-08-15',
-    time: '10:00',
-    active: true,
-  },
-];
 
 export default function MessagesPage() {
   const user = useRenterUser();
@@ -32,13 +22,7 @@ export default function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [selectedLabel, setSelectedLabel] = useState<string>('all');
-  const [reminders, setReminders] = useState<Reminder[]>(() => {
-    if (typeof window === 'undefined') return [];
-    const saved = localStorage.getItem('message_reminders');
-    if (saved) return JSON.parse(saved);
-    localStorage.setItem('message_reminders', JSON.stringify(DEFAULT_REMINDERS));
-    return DEFAULT_REMINDERS;
-  });
+  const [reminders, setReminders] = useState<Reminder[]>([]);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -49,14 +33,16 @@ export default function MessagesPage() {
       }
     };
     loadConversations();
+
+    const loadReminders = async () => {
+      const res = await renterService.listReminders();
+      if (res.success && res.data) setReminders(res.data);
+    };
+    loadReminders();
   }, []);
 
-  const handleSendMessage = async (
-    conversationId: string,
-    text: string,
-    _attachments?: Attachment[]
-  ) => {
-    const res = await renterService.sendMessage(conversationId, text);
+  const handleSendMessage = async (conversationId: string, text: string, files?: File[]) => {
+    const res = await renterService.sendMessage(conversationId, text, files);
     if (res.success && res.data) {
       const updated = res.data;
       setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
@@ -96,27 +82,27 @@ export default function MessagesPage() {
     }
   };
 
-  const handleAddReminder = (reminderData: ReminderData) => {
-    const newReminder: Reminder = {
-      id: `rem_${Date.now()}`,
-      ...reminderData,
-      active: true,
-    };
-    const updated = [...reminders, newReminder];
-    setReminders(updated);
-    localStorage.setItem('message_reminders', JSON.stringify(updated));
+  const handleAddReminder = async (reminderData: ReminderData) => {
+    const res = await renterService.createReminder(reminderData);
+    if (res.success && res.data) {
+      const created = res.data;
+      setReminders((prev) => [...prev, created]);
+    }
   };
 
-  const handleToggleReminder = (id: string) => {
-    const updated = reminders.map((r) => (r.id === id ? { ...r, active: !r.active } : r));
-    setReminders(updated);
-    localStorage.setItem('message_reminders', JSON.stringify(updated));
+  const handleToggleReminder = async (id: string) => {
+    const res = await renterService.toggleReminder(id);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setReminders((prev) => prev.map((r) => (r.id === id ? updated : r)));
+    }
   };
 
-  const handleDeleteReminder = (id: string) => {
-    const updated = reminders.filter((r) => r.id !== id);
-    setReminders(updated);
-    localStorage.setItem('message_reminders', JSON.stringify(updated));
+  const handleDeleteReminder = async (id: string) => {
+    const res = await renterService.deleteReminder(id);
+    if (res.success) {
+      setReminders((prev) => prev.filter((r) => r.id !== id));
+    }
   };
 
   const handleFilterChange = (filters: FilterState) => {
