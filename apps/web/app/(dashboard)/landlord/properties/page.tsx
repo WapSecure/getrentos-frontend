@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyModal';
@@ -17,6 +17,15 @@ export default function LandlordPropertiesPage() {
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);

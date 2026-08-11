@@ -75,7 +75,7 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/help">
+          <Link href="/admin/help">
             <HelpCircle className="w-4 h-4" />
             Help Center
           </Link>

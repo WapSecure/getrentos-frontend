@@ -101,7 +101,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
                 Trust Profile
               </Link>
               <Link
-                href="/help"
+                href="/buyer/help"
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

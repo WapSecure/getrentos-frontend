@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
@@ -32,6 +32,18 @@ export const MessageThread = ({
     if (!draft.trim()) return;
     onSend(draft.trim());
     setDraft('');
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setDraft((prev) =>
+        prev ? `${prev} \ud83d\udcce ${file.name}` : `\ud83d\udcce ${file.name}`
+      );
+    }
+    e.target.value = '';
   };
 
   return (
@@ -91,7 +103,11 @@ export const MessageThread = ({
       </div>
 
       <div className="p-3 border-t border-border flex items-center gap-2">
-        <button className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0">
+        <input ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
+        >
           <Paperclip className="w-4 h-4" />
         </button>
         <input

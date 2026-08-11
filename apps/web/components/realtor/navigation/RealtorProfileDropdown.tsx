@@ -101,7 +101,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
                 Trust Profile
               </Link>
               <Link
-                href="/help"
+                href="/realtor/help"
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

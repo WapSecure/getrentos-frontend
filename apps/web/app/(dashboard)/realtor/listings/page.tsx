@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, Search, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
+import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
 import { Button } from '@/components/ui/Button';
 import type { RealtorClient, RealtorListing, RealtorListingStatus } from '@/types/realtor';
@@ -81,11 +83,21 @@ const mockListings: RealtorListing[] = [
 type StatusFilter = 'all' | RealtorListingStatus;
 
 export default function RealtorListingsPage() {
+  const searchParams = useSearchParams();
   const [clients, setClients] = useState<RealtorClient[]>(mockClients);
   const [listings, setListings] = useState<RealtorListing[]>(mockListings);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [previewListing, setPreviewListing] = useState<RealtorListing | null>(null);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
 
   const handleCreate = (data: Omit<RealtorListing, 'id' | 'createdAt'>) => {
     const newListing: RealtorListing = {
@@ -178,7 +190,12 @@ export default function RealtorListingsPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredListings.map((listing, index) => (
-            <RealtorListingCard key={listing.id} listing={listing} delay={index * 0.05} />
+            <RealtorListingCard
+              key={listing.id}
+              listing={listing}
+              delay={index * 0.05}
+              onClick={() => setPreviewListing(listing)}
+            />
           ))}
         </div>
       )}
@@ -188,6 +205,11 @@ export default function RealtorListingsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         clients={clients}
         onSubmit={handleCreate}
+      />
+
+      <RealtorListingPreviewModal
+        listing={previewListing}
+        onClose={() => setPreviewListing(null)}
       />
     </>
   );
