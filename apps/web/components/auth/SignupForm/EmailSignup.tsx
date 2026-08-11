@@ -76,7 +76,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
             {...register('fullName')}
             onFocus={() => setFocusedField('name')}
             onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full pl-10 pr-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.fullName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="John Doe"
@@ -101,7 +101,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
             {...register('email')}
             onFocus={() => setFocusedField('email')}
             onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full pl-10 pr-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="you@example.com"
@@ -126,7 +126,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
             {...register('password')}
             onFocus={() => setFocusedField('password')}
             onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="Create a password"
@@ -186,7 +186,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
             {...register('confirmPassword')}
             onFocus={() => setFocusedField('confirm')}
             onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="Confirm your password"
@@ -227,15 +227,15 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
           type="checkbox"
           id="terms"
           required
-          className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+          className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
         />
         <label htmlFor="terms" className="text-xs text-gray-600 dark:text-gray-400">
           I agree to the{' '}
-          <a href="/terms" className="text-[#c4a747] hover:underline">
+          <a href="/terms" className="text-primary hover:underline">
             Terms of Service
           </a>{' '}
           and{' '}
-          <a href="/privacy" className="text-[#c4a747] hover:underline">
+          <a href="/privacy" className="text-primary hover:underline">
             Privacy Policy
           </a>
         </label>
@@ -247,10 +247,10 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
         disabled={!isValid || isLoading}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="w-full flex items-center justify-center gap-2 bg-[#c4a747] text-[#0a1a1f] py-3 rounded-xl font-semibold hover:bg-[#a88d3a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
-          <div className="w-5 h-5 border-2 border-[#0a1a1f] border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
         ) : (
           <>
             Create Account

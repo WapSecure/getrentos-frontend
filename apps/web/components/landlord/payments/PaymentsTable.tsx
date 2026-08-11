@@ -115,7 +115,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                   <td className="px-4 py-3">
                     <button
                       onClick={() => onViewDetails(payment)}
-                      className="text-xs font-medium text-primary hover:text-[#a88d3a] whitespace-nowrap"
+                      className="text-xs font-medium text-primary hover:text-primary-hover whitespace-nowrap"
                     >
                       View Details
                     </button>

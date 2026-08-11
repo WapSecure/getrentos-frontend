@@ -16,7 +16,7 @@ import { DownloadApp } from '@/components/sections/DownloadApp';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-[#0a1a1f] transition-colors duration-300">
+    <main className="min-h-screen bg-white dark:bg-background transition-colors duration-300">
       <Navigation />
       <Hero />
       <Stats />

@@ -105,7 +105,7 @@ export const MessageThread = ({
         <button
           onClick={handleSend}
           disabled={!draft.trim()}
-          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-[#a88d3a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
         >
           <Send className="w-4 h-4" />
         </button>

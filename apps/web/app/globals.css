@@ -14,9 +14,10 @@
   --secondary-foreground: #2d2d2d;
   --muted: #f4f5f7;
   --muted-foreground: #5e6167;
-  --accent: rgba(37, 87, 167, 0.08);
-  --accent-foreground: #2557a7;
-  --primary: #2557a7;
+  --accent: rgba(44, 85, 131, 0.07);
+  --accent-foreground: #2c5583;
+  --primary: #2c5583;
+  --primary-hover: #234368;
   --primary-foreground: #ffffff;
   --destructive: #c5221f;
   --destructive-foreground: #ffffff;
@@ -33,10 +34,11 @@
   --secondary-foreground: #e8eaed;
   --muted: #1c1e21;
   --muted-foreground: #9aa0a6;
-  --accent: rgba(93, 155, 255, 0.12);
-  --accent-foreground: #7fb0ff;
-  --primary: #4c8dff;
-  --primary-foreground: #0b1220;
+  --accent: rgba(63, 111, 156, 0.16);
+  --accent-foreground: #8fb4d9;
+  --primary: #3f6f9c;
+  --primary-hover: #4f81b0;
+  --primary-foreground: #ffffff;
   --destructive: #e05a56;
   --destructive-foreground: #1c1e21;
 }
@@ -55,6 +57,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);

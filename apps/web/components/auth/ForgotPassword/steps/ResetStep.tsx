@@ -25,7 +25,7 @@ export const ResetStep = ({
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           placeholder="Enter new password"
         />
       </div>
@@ -38,13 +38,13 @@ export const ResetStep = ({
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           placeholder="Confirm new password"
         />
       </div>
 
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <CheckCircle className="w-4 h-4 text-[#c4a747]" />
+        <CheckCircle className="w-4 h-4 text-primary" />
         <span>Password must be at least 8 characters</span>
       </div>
     </div>

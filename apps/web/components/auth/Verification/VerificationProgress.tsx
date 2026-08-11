@@ -41,7 +41,7 @@ export const VerificationProgress = ({ currentStep }: VerificationProgressProps)
               {index < steps.length - 1 && (
                 <div
                   className={`absolute top-4 left-1/2 w-full h-0.5 -translate-y-1/2 ${
-                    status === 'completed' ? 'bg-[#c4a747]' : 'bg-gray-200 dark:bg-gray-700'
+                    status === 'completed' ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'
                   }`}
                   style={{ width: 'calc(100% - 2rem)', left: 'calc(50% + 1rem)' }}
                 />
@@ -56,9 +56,9 @@ export const VerificationProgress = ({ currentStep }: VerificationProgressProps)
                   }}
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                     status === 'completed'
-                      ? 'bg-[#c4a747] text-white'
+                      ? 'bg-primary text-white'
                       : status === 'current'
-                        ? 'bg-[#c4a747]/20 border-2 border-[#c4a747] text-[#c4a747]'
+                        ? 'bg-primary/20 border-2 border-primary text-primary'
                         : 'bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500'
                   }`}
                 >
@@ -71,7 +71,7 @@ export const VerificationProgress = ({ currentStep }: VerificationProgressProps)
                 <span
                   className={`text-xs mt-2 text-center ${
                     status === 'current'
-                      ? 'text-[#c4a747] font-medium'
+                      ? 'text-primary font-medium'
                       : status === 'completed'
                         ? 'text-gray-700 dark:text-gray-300'
                         : 'text-gray-400 dark:text-gray-500'

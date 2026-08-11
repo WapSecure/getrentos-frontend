@@ -21,7 +21,7 @@ export default function NotFound() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-[#0a1a1f] dark:to-[#0d2a2f] flex flex-col items-center justify-center relative px-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center relative px-6">
       <AnimatedParticles />
 
       <div className="relative z-10 mb-8">
@@ -29,14 +29,12 @@ export default function NotFound() {
       </div>
 
       <div className="relative z-10 text-center max-w-md">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#c4a747]/10 mb-6">
-          <Compass className="w-8 h-8 text-[#c4a747]" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
+          <Compass className="w-8 h-8 text-primary" />
         </div>
 
-        <p className="text-7xl font-bold bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] bg-clip-text text-transparent tracking-tight">
-          404
-        </p>
-        <h1 className="mt-3 text-2xl font-bold text-gray-900 dark:text-white">Page not found</h1>
+        <p className="text-7xl font-bold text-primary tracking-tight">404</p>
+        <h1 className="mt-3 text-2xl font-bold text-foreground">Page not found</h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           The page you&apos;re looking for doesn&apos;t exist or may have been moved.
         </p>

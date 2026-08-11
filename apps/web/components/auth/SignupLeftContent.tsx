@@ -48,12 +48,12 @@ const trustFeatures = [
 
 export const SignupLeftContent = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#0a1a1f] dark:to-[#1a2a2f] transition-all duration-300">
+    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
       {/* Background Pattern - Light mode */}
       <div className="absolute inset-0 opacity-10 lg:opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#c4a747] rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-[#c4a747]/20 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/20 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
@@ -70,15 +70,15 @@ export const SignupLeftContent = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 mb-6">
-              <Sparkles className="w-3 h-3 text-[#c4a747]" />
+              <Sparkles className="w-3 h-3 text-primary" />
               <span className="text-xs font-medium text-gray-700 dark:text-white/80">
                 TRUST-DRIVEN PLATFORM
               </span>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
               Start with trust.
-              <span className="block text-[#c4a747] mt-2">Build your verified profile.</span>
+              <span className="block text-primary mt-2">Build your verified profile.</span>
             </h1>
 
             <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
@@ -94,15 +94,13 @@ export const SignupLeftContent = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#c4a747]/30 transition-all"
+                  className="flex items-start gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-border hover:border-primary/30 transition-all"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#c4a747]/10 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-4 h-4 text-[#c4a747]" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                      {feature.title}
-                    </h3>
+                    <h3 className="text-sm font-semibold text-foreground mb-1">{feature.title}</h3>
                     <p className="text-xs text-gray-500 dark:text-white/60">
                       {feature.description}
                     </p>
@@ -116,14 +114,12 @@ export const SignupLeftContent = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="p-4 rounded-xl bg-gradient-to-r from-[#c4a747]/10 to-transparent border border-[#c4a747]/20"
+              className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  Your Trust Score
-                </span>
+                <span className="text-sm font-medium text-foreground">Your Trust Score</span>
                 <div className="flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                  <CheckCircle className="w-3 h-3 text-primary" />
                   <span className="text-xs text-gray-500 dark:text-white/60">Starts at 0</span>
                 </div>
               </div>
@@ -131,7 +127,7 @@ export const SignupLeftContent = () => {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '0%' }}
-                  className="h-full bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] rounded-full"
+                  className="h-full bg-primary rounded-full"
                 />
               </div>
               <p className="text-xs text-gray-500 dark:text-white/50 mt-2">
@@ -142,19 +138,19 @@ export const SignupLeftContent = () => {
         </div>
 
         {/* Bottom Trust Signals */}
-        <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/10">
+        <div className="mt-12 pt-6 border-t border-border">
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-white/40">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 SOC2 Certified
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 GDPR Compliant
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 24/7 Support
               </span>
             </div>

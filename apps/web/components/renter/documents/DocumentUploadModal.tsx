@@ -160,7 +160,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     <p className="text-sm text-muted-foreground">Drag and drop your file here</p>
                     <p className="text-xs text-gray-500 mt-1">or</p>
                     <label className="cursor-pointer">
-                      <span className="text-sm text-primary hover:text-[#a88d3a]">
+                      <span className="text-sm text-primary hover:text-primary-hover">
                         Browse files
                       </span>
                       <input type="file" onChange={handleFileSelect} className="hidden" />

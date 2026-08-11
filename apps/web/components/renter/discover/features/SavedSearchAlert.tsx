@@ -67,7 +67,7 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 text-sm text-primary hover:text-[#a88d3a] transition-colors"
+        className="flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors"
       >
         <Bell className="w-4 h-4" />
         Save this search

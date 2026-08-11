@@ -29,7 +29,7 @@ export const Navigation = () => {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/80 dark:bg-[#0a1a1f]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10'
+            ? 'bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-border'
             : 'bg-transparent'
         }`}
       >
@@ -61,7 +61,7 @@ export const Navigation = () => {
                   <ThemeToggle />
                   <Link
                     href="/signup"
-                    className="bg-gray-900 dark:bg-[#c4a747] text-white dark:text-gray-900 px-5 py-2 rounded-full text-sm font-medium hover:bg-gray-800 dark:hover:bg-[#b89a3a] transition-colors"
+                    className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:bg-primary-hover transition-colors"
                   >
                     Get early access
                   </Link>
@@ -109,7 +109,7 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-white dark:bg-[#0a1a1f] border-b border-gray-200 dark:border-white/10 md:hidden"
+            className="fixed top-16 left-0 right-0 z-40 bg-white dark:bg-background border-b border-border md:hidden"
           >
             <div className="flex flex-col p-4 space-y-3">
               <Link
@@ -137,7 +137,7 @@ export const Navigation = () => {
                   </Link>
                   <Link
                     href="/signup"
-                    className="px-4 py-2 bg-gray-900 dark:bg-[#c4a747] text-white dark:text-gray-900 rounded-full text-center font-medium hover:bg-gray-800 dark:hover:bg-[#b89a3a] transition-colors"
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-center font-medium hover:bg-primary-hover transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Get early access

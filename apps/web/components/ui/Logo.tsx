@@ -56,13 +56,13 @@ export const Logo = ({ className = '', size = 'md', showText = true }: LogoProps
   return (
     <Link href={dashboardPath} className={`flex items-center gap-2 group ${className}`}>
       <div
-        className={`${currentSize.container} bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] rounded-xl flex items-center justify-center transition-transform group-hover:scale-105`}
+        className={`${currentSize.container} bg-primary rounded-xl flex items-center justify-center transition-transform group-hover:scale-105`}
       >
-        <Shield className={`${currentSize.icon} text-[#0a1a1f]`} />
+        <Shield className={`${currentSize.icon} text-background`} />
       </div>
       {showText && (
         <span
-          className={`font-bold ${currentSize.text} text-gray-900 dark:text-white group-hover:text-[#c4a747] transition-colors`}
+          className={`font-bold ${currentSize.text} text-foreground group-hover:text-primary transition-colors`}
         >
           GetRentos
         </span>

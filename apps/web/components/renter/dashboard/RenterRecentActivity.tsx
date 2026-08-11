@@ -117,7 +117,7 @@ export const RenterRecentActivity = () => {
       </div>
 
       <div className="p-3 border-t border-border text-center">
-        <button className="text-sm text-primary hover:text-[#a88d3a] transition-colors">
+        <button className="text-sm text-primary hover:text-primary-hover transition-colors">
           View all activity
         </button>
       </div>

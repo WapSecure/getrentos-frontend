@@ -54,16 +54,16 @@ export const IdUploadStep = ({
       </button>
 
       <div className="text-center mb-4">
-        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#c4a747]/10 flex items-center justify-center">
-          <Upload className="w-8 h-8 text-[#c4a747]" />
+        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <Upload className="w-8 h-8 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload Your ID</h3>
+        <h3 className="text-lg font-semibold text-foreground">Upload Your ID</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Upload a clear photo of your {selectedIdType ? idTypeNames[selectedIdType] : 'ID'}
         </p>
       </div>
 
-      <label className="block w-full p-8 text-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 cursor-pointer hover:border-[#c4a747] transition-all">
+      <label className="block w-full p-8 text-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 cursor-pointer hover:border-primary transition-all">
         <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <span className="text-sm text-gray-500 dark:text-gray-400">
           Click to upload or drag and drop

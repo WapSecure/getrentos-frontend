@@ -86,7 +86,7 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
                 <div
                   key={index}
                   className={`flex items-center gap-2 p-2 rounded-lg ${
-                    isCurrentUser ? 'bg-[#b89a3a]' : 'bg-white/50 dark:bg-gray-700/50'
+                    isCurrentUser ? 'bg-primary-hover' : 'bg-white/50 dark:bg-gray-700/50'
                   }`}
                 >
                   <span className="text-sm">{renderAttachmentIcon(attachment.type)}</span>

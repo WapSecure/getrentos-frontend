@@ -12,9 +12,9 @@ export const CTA = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-[#c4a747]/10 to-transparent rounded-2xl p-8 md:p-12 border border-[#c4a747]/20"
+          className="bg-gradient-to-r from-primary/10 to-transparent rounded-2xl p-8 md:p-12 border border-primary/20"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Ready to get started?
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">

@@ -149,7 +149,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => handleAssignSubmit(unit.id)}
-                            className="flex-1 text-xs font-medium text-primary-foreground bg-primary rounded-md py-1.5 hover:bg-[#a88d3a]"
+                            className="flex-1 text-xs font-medium text-primary-foreground bg-primary rounded-md py-1.5 hover:bg-primary-hover"
                           >
                             Assign
                           </button>

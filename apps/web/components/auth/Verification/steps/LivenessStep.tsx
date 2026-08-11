@@ -27,11 +27,11 @@ export const LivenessStep = ({ onNextStep, onBack }: LivenessStepProps) => {
         Back
       </button>
 
-      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#c4a747]/10 flex items-center justify-center">
-        <Camera className="w-10 h-10 text-[#c4a747]" />
+      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+        <Camera className="w-10 h-10 text-primary" />
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Liveness Check</h3>
+      <h3 className="text-lg font-semibold text-foreground">Liveness Check</h3>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
         For security purposes, we need to verify that you are a real person. Click the button below
@@ -40,7 +40,7 @@ export const LivenessStep = ({ onNextStep, onBack }: LivenessStepProps) => {
 
       <button
         onClick={handleStartVerification}
-        className="inline-flex items-center gap-2 bg-[#c4a747] text-[#0a1a1f] px-6 py-3 rounded-xl font-semibold hover:bg-[#a88d3a] transition-all"
+        className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all"
       >
         <Camera className="w-4 h-4" />
         Start Verification

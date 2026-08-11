@@ -64,7 +64,7 @@ const steps = [
 export const HowItWorks = () => {
   return (
     <section id="flow" className="py-20 px-4 relative overflow-hidden">
-      <ParticleBackground count={25} color="#c4a747" className="z-0" />
+      <ParticleBackground count={25} color="#2c5583" className="z-0" />
       <div className="max-w-7xl mx-auto relative z-10">
         <SectionHeader
           badge="END-TO-END FLOW"
@@ -86,11 +86,9 @@ export const HowItWorks = () => {
                   {step.number}
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center mb-3">
-                  <step.icon className="w-5 h-5 text-[#c4a747]" />
+                  <step.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {step.title}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
               </Card>
             </motion.div>

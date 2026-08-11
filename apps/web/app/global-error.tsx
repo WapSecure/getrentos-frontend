@@ -9,18 +9,14 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body className="bg-[#f5f7fa] dark:bg-[#0a1a1f]">
+      <body className="bg-[#f5f7fa] dark:bg-background">
         <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] flex items-center justify-center mb-6">
-            <span className="text-2xl font-bold text-[#0a1a1f]">!</span>
+          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-6">
+            <span className="text-2xl font-bold text-background">!</span>
           </div>
 
-          <p className="text-6xl font-bold bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] bg-clip-text text-transparent">
-            500
-          </p>
-          <h1 className="mt-3 text-2xl font-bold text-gray-900 dark:text-white">
-            Something went wrong
-          </h1>
+          <p className="text-6xl font-bold text-primary">500</p>
+          <h1 className="mt-3 text-2xl font-bold text-foreground">Something went wrong</h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
             GetRentos hit an unexpected error and couldn&apos;t load this page.
           </p>
@@ -34,14 +30,14 @@ export default function GlobalError({
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={reset}
-              className="px-6 py-2.5 rounded-full bg-[#c4a747] text-[#0a1a1f] font-medium text-sm hover:bg-[#a88d3a] transition-colors"
+              className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:bg-primary-hover transition-colors"
             >
               Try Again
             </button>
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error replaces the root layout, so next/link's router context can't be relied on here */}
             <a
               href="/"
-              className="px-6 py-2.5 rounded-full border-2 border-gray-300 dark:border-white/30 text-gray-900 dark:text-white font-medium text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              className="px-6 py-2.5 rounded-full border-2 border-gray-300 dark:border-white/30 text-foreground font-medium text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
               Back to Home
             </a>
