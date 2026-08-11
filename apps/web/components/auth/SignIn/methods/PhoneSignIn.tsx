@@ -70,7 +70,10 @@ export const PhoneSignIn = ({
 
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
       localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...user, role: primaryRoleId }));
+      localStorage.setItem(
+        STORAGE_KEYS.USER,
+        JSON.stringify({ ...user, fullName: user.legalName, role: primaryRoleId })
+      );
 
       router.push(getDashboardRoute(primaryRoleId));
       showToast('Successfully signed in! Redirecting...', 'success');

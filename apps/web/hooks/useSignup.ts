@@ -119,7 +119,7 @@ export const useSignup = () => {
       localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
       localStorage.setItem(
         STORAGE_KEYS.USER,
-        JSON.stringify({ ...user, role: data.selectedRoles[0] })
+        JSON.stringify({ ...user, fullName: user.legalName, role: data.selectedRoles[0] })
       );
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 
