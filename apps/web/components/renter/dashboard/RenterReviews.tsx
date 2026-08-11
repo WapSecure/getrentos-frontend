@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star, Star as StarOutline, MessageSquare, ThumbsUp, Clock, User } from 'lucide-react';
+import { Star, Star as StarOutline, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Toast, ToastVariant } from '@/components/ui/Toast';
 import { useState } from 'react';
 
 interface PendingReview {
@@ -36,6 +37,9 @@ export const RenterReviews = () => {
   const [reviewText, setReviewText] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<PendingReview | null>(null);
+  const [pending, setPending] = useState(pendingReviews);
+  const [helpfulVotes, setHelpfulVotes] = useState<Record<number, boolean>>({});
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const handleStartReview = (review: PendingReview) => {
     setSelectedReview(review);
@@ -45,13 +49,33 @@ export const RenterReviews = () => {
   };
 
   const handleSubmitReview = () => {
-    // Submit review logic here
+    if (!selectedReview) return;
+    const existing = localStorage.getItem('renter_submitted_reviews');
+    const submitted = existing ? JSON.parse(existing) : [];
+    submitted.push({
+      id: selectedReview.id,
+      target:
+        selectedReview.type === 'property' ? selectedReview.property : selectedReview.landlord,
+      rating,
+      text: reviewText,
+      date: new Date().toISOString(),
+    });
+    localStorage.setItem('renter_submitted_reviews', JSON.stringify(submitted));
+
+    setPending((prev) => prev.filter((r) => r.id !== selectedReview.id));
     setShowReviewModal(false);
-    // Show success toast
+    setToast({ message: 'Review submitted — thanks for sharing!', variant: 'success' });
+  };
+
+  const toggleHelpful = (index: number) => {
+    setHelpfulVotes((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   return (
     <>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -117,11 +141,11 @@ export const RenterReviews = () => {
           </div>
 
           {/* Pending Reviews */}
-          {pendingReviews.length > 0 && (
+          {pending.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-foreground mb-3">Pending Reviews</h3>
               <div className="space-y-3">
-                {pendingReviews.map((review, index) => (
+                {pending.map((review, index) => (
                   <motion.div
                     key={review.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -166,12 +190,17 @@ export const RenterReviews = () => {
                   <p className="text-xs text-muted-foreground">
                     Great property, excellent location, very responsive landlord!
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <ThumbsUp className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">Helpful</span>
-                    <MessageSquare className="w-3 h-3 text-gray-400 ml-2" />
-                    <span className="text-xs text-gray-500">Reply</span>
-                  </div>
+                  <button
+                    onClick={() => toggleHelpful(index)}
+                    className={`flex items-center gap-1 mt-2 text-xs transition-colors ${
+                      helpfulVotes[index] ? 'text-primary' : 'text-gray-500 hover:text-foreground'
+                    }`}
+                  >
+                    <ThumbsUp
+                      className={`w-3 h-3 ${helpfulVotes[index] ? 'fill-primary text-primary' : 'text-gray-400'}`}
+                    />
+                    <span>{helpfulVotes[index] ? 'Marked helpful' : 'Helpful'}</span>
+                  </button>
                 </div>
               ))}
             </div>
