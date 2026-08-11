@@ -65,6 +65,7 @@ export interface BuyerLead {
   trustScore: number;
   verified: boolean;
   stage: BuyerLeadStage;
+  assignedRealtor?: string;
 }
 
 export interface SaleOffer {

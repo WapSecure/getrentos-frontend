@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
 import { AddOwnerPropertyModal } from '@/components/owner/properties/AddOwnerPropertyModal';
@@ -84,6 +85,15 @@ type VerificationFilter = 'all' | OwnershipVerificationStatus;
 export default function OwnerPropertiesPage() {
   const [properties, setProperties] = useState<OwnerProperty[]>(mockProperties);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusModalProperty, setStatusModalProperty] = useState<OwnerProperty | null>(null);

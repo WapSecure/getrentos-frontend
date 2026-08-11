@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Landmark, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { SaveButton } from '@/components/ui/SaveButton';
 
 export const PayoutSettings = () => {
   const [bankName, setBankName] = useState('GTBank');
@@ -56,9 +56,7 @@ export const PayoutSettings = () => {
         </div>
       </div>
 
-      <Button variant="primary" className="mt-6">
-        Update Payout Account
-      </Button>
+      <SaveButton label="Update Payout Account" className="mt-6" />
     </div>
   );
 };

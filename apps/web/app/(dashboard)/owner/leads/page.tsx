@@ -81,6 +81,12 @@ export default function OwnerLeadsPage() {
     updateStage(leadId, 'viewing_scheduled');
   };
 
+  const handleAssignRealtor = (leadId: string, realtorName: string) => {
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadId ? { ...l, assignedRealtor: realtorName } : l))
+    );
+  };
+
   const handleConvertToOffer = (lead: BuyerLead) => {
     updateStage(lead.id, 'offer_made');
   };
@@ -177,7 +183,7 @@ export default function OwnerLeadsPage() {
       <AssignRealtorModal
         lead={assigningLead}
         onClose={() => setAssigningLead(null)}
-        onAssign={() => {}}
+        onAssign={handleAssignRealtor}
       />
     </>
   );

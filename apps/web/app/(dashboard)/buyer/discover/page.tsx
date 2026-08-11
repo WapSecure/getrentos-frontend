@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Building2, ArrowUpDown } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
@@ -87,6 +87,15 @@ export default function BuyerDiscoverPage() {
   const [listings, setListings] = useState<BuyerPropertyListing[]>(mockListings);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
   const [typeFilter, setTypeFilter] = useState<'all' | ListingPropertyType>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('default');
   const [activeListing, setActiveListing] = useState<BuyerPropertyListing | null>(null);

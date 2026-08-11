@@ -41,6 +41,29 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
 
+  const handleDownload = () => {
+    const lines = [
+      `Lease Agreement`,
+      `Property: ${lease.propertyName} — ${lease.unitName}`,
+      `Tenant: ${lease.tenantName}`,
+      `Lease Start: ${formatDate(lease.leaseStart)}`,
+      `Lease End: ${formatDate(lease.leaseEnd)}`,
+      `Rent Amount: ${formatCurrency(lease.rentAmount)}`,
+      lease.securityDeposit !== undefined
+        ? `Security Deposit: ${formatCurrency(lease.securityDeposit)}`
+        : undefined,
+      `Status: ${status.label}`,
+    ].filter(Boolean);
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `lease-${lease.propertyName}-${lease.unitName}.txt`.replace(/\s+/g, '-');
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -103,7 +126,13 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
         )}
         {lease.status === 'signed' && (
           <>
-            <Button variant="outline" size="sm" fullWidth className="gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              fullWidth
+              className="gap-1.5"
+              onClick={handleDownload}
+            >
               <Download className="w-3.5 h-3.5" />
               Download
             </Button>

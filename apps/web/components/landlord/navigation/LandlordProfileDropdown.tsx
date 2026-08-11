@@ -101,7 +101,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
                 Security
               </Link>
               <Link
-                href="/help"
+                href="/landlord/help"
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

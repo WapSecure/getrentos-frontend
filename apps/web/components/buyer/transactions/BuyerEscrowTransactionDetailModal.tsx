@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   X,
@@ -72,6 +73,7 @@ export const BuyerEscrowTransactionDetailModal = ({
   onClose,
   onMakePayment,
 }: BuyerEscrowTransactionDetailModalProps) => {
+  const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
 
   if (!transaction) return null;
@@ -255,7 +257,11 @@ export const BuyerEscrowTransactionDetailModal = ({
               <Button variant="ghost" className="flex-1" onClick={onClose}>
                 Close
               </Button>
-              <Button variant="outline" className="flex-1 gap-1.5">
+              <Button
+                variant="outline"
+                className="flex-1 gap-1.5"
+                onClick={() => router.push('/buyer/messages')}
+              >
                 <LifeBuoy className="w-4 h-4" />
                 Contact Support
               </Button>
