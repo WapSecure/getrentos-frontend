@@ -1,6 +1,6 @@
 'use client';
 
-import { Megaphone, MapPin, PawPrint, Sofa, CalendarClock, Check } from 'lucide-react';
+import { Megaphone, MapPin, PawPrint, Sofa, CalendarClock, Check, Zap } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing } from '@/types/landlord';
@@ -36,7 +36,9 @@ export const ListingPreviewModal = ({ listing, onClose }: ListingPreviewModalPro
 
               <p className="text-2xl font-bold text-primary mt-3">
                 {formatCurrency(listing.monthlyRent, { compact: true })}
-                <span className="text-sm text-muted-foreground font-normal">/mo</span>
+                <span className="text-sm text-muted-foreground font-normal">
+                  {listing.rentPeriod === 'month' ? '/mo' : '/yr'}
+                </span>
               </p>
               {listing.securityDeposit !== undefined && (
                 <p className="text-xs text-muted-foreground mt-1">
@@ -58,6 +60,11 @@ export const ListingPreviewModal = ({ listing, onClose }: ListingPreviewModalPro
                 {listing.shortLetEnabled && (
                   <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                     Short-let
+                  </span>
+                )}
+                {listing.allowsMonthlyPayment && (
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent text-primary">
+                    <Zap className="w-3 h-3" /> Flex enabled
                   </span>
                 )}
               </div>

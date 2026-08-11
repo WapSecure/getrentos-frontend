@@ -140,6 +140,8 @@ export const landlordService = {
       | 'unitId'
       | 'listingTitle'
       | 'monthlyRent'
+      | 'rentPeriod'
+      | 'allowsMonthlyPayment'
       | 'securityDeposit'
       | 'amenities'
       | 'availabilityDate'

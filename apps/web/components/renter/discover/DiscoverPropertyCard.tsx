@@ -167,7 +167,7 @@ export const DiscoverPropertyCard = ({
 
         <div className="flex flex-wrap gap-3 mt-2 text-xs border-t border-gray-100 dark:border-gray-800 pt-2">
           <CommuteCalculator propertyLocation={property.location} />
-          <RentVsBuyCalculator propertyPrice={property.price * 12} monthlyRent={property.price} />
+          <RentVsBuyCalculator propertyPrice={property.price} monthlyRent={property.price / 12} />
           <NeighborhoodCompare />
         </div>
 

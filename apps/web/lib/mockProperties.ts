@@ -5,8 +5,8 @@ export const mockProperties: Property[] = [
     id: '1',
     title: 'Modern Downtown Loft',
     location: 'Ikeja, Lagos',
-    price: 200000,
-    period: 'month',
+    price: 2400000,
+    period: 'year',
     bedrooms: 2,
     bathrooms: 2,
     size: 1200,
@@ -20,6 +20,7 @@ export const mockProperties: Property[] = [
     landlordRating: 4.9,
     landlordReviews: 156,
     landlordVerified: true,
+    allowsMonthlyPayment: true,
     description:
       'A bright, open-plan loft in the heart of Ikeja with easy access to the airport, Computer Village, and the Ikeja City Mall. Recently renovated with modern fittings throughout, and backed by a landlord with one of the fastest response rates on GetRentos.',
     amenities: [
@@ -37,8 +38,8 @@ export const mockProperties: Property[] = [
     landlordPhone: '+234 803 123 4567',
     availableFrom: '2026-09-01',
     additionalFees: [
-      { label: 'Agency Fee (10%)', amount: 20000 },
-      { label: 'Legal Fee (10%)', amount: 20000 },
+      { label: 'Agency Fee (10%)', amount: 240000 },
+      { label: 'Legal Fee (10%)', amount: 240000 },
       { label: 'Caution Deposit', amount: 200000 },
     ],
     reviews: [
@@ -62,8 +63,8 @@ export const mockProperties: Property[] = [
     id: '2',
     title: 'Cozy Studio Apartment',
     location: 'Victoria Island, Lagos',
-    price: 150000,
-    period: 'month',
+    price: 1800000,
+    period: 'year',
     bedrooms: 1,
     bathrooms: 1,
     size: 650,
@@ -76,6 +77,7 @@ export const mockProperties: Property[] = [
     landlordRating: 4.7,
     landlordReviews: 89,
     landlordVerified: true,
+    allowsMonthlyPayment: false,
     description:
       'A compact, efficient studio in Victoria Island — ideal for young professionals working around Ozumba Mbadiwe or Adeola Odeku. Walking distance to several banks, restaurants, and the waterfront.',
     amenities: [
@@ -91,8 +93,8 @@ export const mockProperties: Property[] = [
     landlordPhone: '+234 805 234 5678',
     availableFrom: '2026-08-20',
     additionalFees: [
-      { label: 'Agency Fee (10%)', amount: 15000 },
-      { label: 'Legal Fee (10%)', amount: 15000 },
+      { label: 'Agency Fee (10%)', amount: 180000 },
+      { label: 'Legal Fee (10%)', amount: 180000 },
       { label: 'Caution Deposit', amount: 150000 },
     ],
     reviews: [
@@ -109,8 +111,8 @@ export const mockProperties: Property[] = [
     id: '3',
     title: 'Luxury Beachfront Villa',
     location: 'Elegushi Beach, Lagos',
-    price: 800000,
-    period: 'month',
+    price: 9600000,
+    period: 'year',
     bedrooms: 4,
     bathrooms: 3,
     size: 3200,
@@ -124,6 +126,7 @@ export const mockProperties: Property[] = [
     landlordRating: 5.0,
     landlordReviews: 234,
     landlordVerified: true,
+    allowsMonthlyPayment: true,
     description:
       'An expansive 4-bedroom villa steps from Elegushi Beach, with a private pool and staff quarters. Finished to a five-star standard — popular with executives and diplomatic staff relocating to Lagos.',
     amenities: [
@@ -142,8 +145,8 @@ export const mockProperties: Property[] = [
     landlordPhone: '+234 802 345 6789',
     availableFrom: '2026-08-15',
     additionalFees: [
-      { label: 'Agency Fee (10%)', amount: 80000 },
-      { label: 'Legal Fee (10%)', amount: 80000 },
+      { label: 'Agency Fee (10%)', amount: 960000 },
+      { label: 'Legal Fee (10%)', amount: 960000 },
       { label: 'Caution Deposit', amount: 800000 },
     ],
     reviews: [
@@ -167,8 +170,8 @@ export const mockProperties: Property[] = [
     id: '4',
     title: 'Executive 3-Bed Apartment',
     location: 'Ikoyi, Lagos',
-    price: 350000,
-    period: 'month',
+    price: 4200000,
+    period: 'year',
     bedrooms: 3,
     bathrooms: 2,
     size: 1800,
@@ -182,6 +185,7 @@ export const mockProperties: Property[] = [
     landlordRating: 4.8,
     landlordReviews: 112,
     landlordVerified: true,
+    allowsMonthlyPayment: false,
     description:
       'A well-appointed 3-bedroom apartment on a quiet Ikoyi close, minutes from the Falomo roundabout. Suited to families who want space without leaving the island.',
     amenities: [
@@ -198,8 +202,8 @@ export const mockProperties: Property[] = [
     landlordPhone: '+234 806 456 7890',
     availableFrom: '2026-09-10',
     additionalFees: [
-      { label: 'Agency Fee (10%)', amount: 35000 },
-      { label: 'Legal Fee (10%)', amount: 35000 },
+      { label: 'Agency Fee (10%)', amount: 420000 },
+      { label: 'Legal Fee (10%)', amount: 420000 },
       { label: 'Caution Deposit', amount: 350000 },
     ],
     reviews: [
@@ -216,8 +220,8 @@ export const mockProperties: Property[] = [
     id: '5',
     title: 'Affordable 2-Bed Flat',
     location: 'Surulere, Lagos',
-    price: 120000,
-    period: 'month',
+    price: 1440000,
+    period: 'year',
     bedrooms: 2,
     bathrooms: 1,
     size: 950,
@@ -230,6 +234,7 @@ export const mockProperties: Property[] = [
     landlordRating: 4.2,
     landlordReviews: 45,
     landlordVerified: false,
+    allowsMonthlyPayment: false,
     description:
       'A budget-friendly 2-bedroom flat in Surulere, close to the National Stadium and Adeniran Ogunsanya Street. A solid option for tenants prioritizing value over finish.',
     amenities: [
@@ -243,8 +248,8 @@ export const mockProperties: Property[] = [
     landlordPhone: '+234 807 567 8901',
     availableFrom: '2026-08-25',
     additionalFees: [
-      { label: 'Agency Fee (10%)', amount: 12000 },
-      { label: 'Legal Fee (10%)', amount: 12000 },
+      { label: 'Agency Fee (10%)', amount: 144000 },
+      { label: 'Legal Fee (10%)', amount: 144000 },
       { label: 'Caution Deposit', amount: 120000 },
     ],
     reviews: [
@@ -262,8 +267,8 @@ export const mockProperties: Property[] = [
     id: '6',
     title: 'Penthouse with Ocean View',
     location: 'Lekki Phase 1, Lagos',
-    price: 550000,
-    period: 'month',
+    price: 6600000,
+    period: 'year',
     bedrooms: 3,
     bathrooms: 2,
     size: 2200,
@@ -277,6 +282,7 @@ export const mockProperties: Property[] = [
     landlordRating: 4.9,
     landlordReviews: 178,
     landlordVerified: true,
+    allowsMonthlyPayment: true,
     description:
       'A top-floor penthouse in Lekki Phase 1 with unobstructed ocean views from a wraparound balcony. Close to the Lekki-Ikoyi Link Bridge and Admiralty Way’s restaurant scene.',
     amenities: [
@@ -294,8 +300,8 @@ export const mockProperties: Property[] = [
     landlordPhone: '+234 809 678 9012',
     availableFrom: '2026-09-05',
     additionalFees: [
-      { label: 'Agency Fee (10%)', amount: 55000 },
-      { label: 'Legal Fee (10%)', amount: 55000 },
+      { label: 'Agency Fee (10%)', amount: 660000 },
+      { label: 'Legal Fee (10%)', amount: 660000 },
       { label: 'Caution Deposit', amount: 550000 },
     ],
     reviews: [

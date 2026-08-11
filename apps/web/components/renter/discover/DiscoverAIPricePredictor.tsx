@@ -12,8 +12,8 @@ interface PricePrediction {
 }
 
 const mockPrediction: PricePrediction = {
-  currentPrice: 200000,
-  predictedPrice: 185000,
+  currentPrice: 2400000,
+  predictedPrice: 2220000,
   confidence: 85,
   trend: 'down',
   recommendation: 'Good time to negotiate - prices are expected to decrease',

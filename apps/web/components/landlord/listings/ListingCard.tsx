@@ -1,7 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Megaphone, MapPin, PawPrint, Sofa, CalendarClock, Play, Pause, Eye } from 'lucide-react';
+import {
+  Megaphone,
+  MapPin,
+  PawPrint,
+  Sofa,
+  CalendarClock,
+  Play,
+  Pause,
+  Eye,
+  Zap,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing, ListingStatus } from '@/types/landlord';
@@ -66,7 +76,9 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
 
         <p className="text-lg font-bold text-primary mt-3">
           {formatCurrency(listing.monthlyRent, { compact: true })}
-          <span className="text-xs text-gray-400 font-normal">/mo</span>
+          <span className="text-xs text-gray-400 font-normal">
+            {listing.rentPeriod === 'month' ? '/mo' : '/yr'}
+          </span>
         </p>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
@@ -83,6 +95,11 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
           {listing.shortLetEnabled && (
             <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
               Short-let
+            </span>
+          )}
+          {listing.allowsMonthlyPayment && (
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent text-primary">
+              <Zap className="w-3 h-3" /> Flex enabled
             </span>
           )}
         </div>
