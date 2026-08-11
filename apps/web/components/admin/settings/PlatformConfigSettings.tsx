@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { adminService } from '@/services/adminService';
-import type { PlatformConfigRole, RoleRequirement } from '@/types/admin';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
+import type { PlatformConfig, PlatformConfigRole, RoleRequirement } from '@/types/admin';
 
 const ROLE_LABELS: Record<PlatformConfigRole, string> = {
   landlord: 'Landlord',
@@ -15,34 +18,42 @@ const ROLE_LABELS: Record<PlatformConfigRole, string> = {
   buyer: 'Buyer',
 };
 
-const DEFAULT_ROLE_REQUIREMENTS: RoleRequirement[] = [
-  { role: 'landlord', requiresVerification: true },
-  { role: 'owner', requiresVerification: true },
-  { role: 'realtor', requiresVerification: true },
-  { role: 'agent', requiresVerification: true },
-  { role: 'renter', requiresVerification: false },
-  { role: 'buyer', requiresVerification: false },
-];
+const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
+  minTrustScore: 60,
+  escrowHoldDays: 3,
+  autoFlagFraud: true,
+  roleRequirements: [
+    { role: 'landlord', requiresVerification: true },
+    { role: 'owner', requiresVerification: true },
+    { role: 'realtor', requiresVerification: true },
+    { role: 'agent', requiresVerification: true },
+    { role: 'renter', requiresVerification: false },
+    { role: 'buyer', requiresVerification: false },
+  ],
+};
 
 export const PlatformConfigSettings = () => {
-  const [minTrustScore, setMinTrustScore] = useState(60);
-  const [escrowHoldDays, setEscrowHoldDays] = useState(3);
-  const [autoFlagFraud, setAutoFlagFraud] = useState(true);
-  const [roleRequirements, setRoleRequirements] =
-    useState<RoleRequirement[]>(DEFAULT_ROLE_REQUIREMENTS);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { data: platformConfig } = useQuery({
+    queryKey: adminKeys.platformConfig,
+    queryFn: () => unwrap(adminService.getPlatformConfig()),
+  });
 
-  useEffect(() => {
-    adminService.getPlatformConfig().then((response) => {
-      if (response.success && response.data) {
-        setMinTrustScore(response.data.minTrustScore);
-        setEscrowHoldDays(response.data.escrowHoldDays);
-        setAutoFlagFraud(response.data.autoFlagFraud);
-        setRoleRequirements(response.data.roleRequirements);
-      }
-    });
-  }, []);
+  return (
+    <PlatformConfigSettingsForm
+      key={platformConfig ? 'loaded' : 'initial'}
+      initial={platformConfig ?? DEFAULT_PLATFORM_CONFIG}
+    />
+  );
+};
+
+const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) => {
+  const [minTrustScore, setMinTrustScore] = useState(initial.minTrustScore);
+  const [escrowHoldDays, setEscrowHoldDays] = useState(initial.escrowHoldDays);
+  const [autoFlagFraud, setAutoFlagFraud] = useState(initial.autoFlagFraud);
+  const [roleRequirements, setRoleRequirements] = useState<RoleRequirement[]>(
+    initial.roleRequirements
+  );
+  const [saved, setSaved] = useState(false);
 
   const toggleRole = (role: PlatformConfigRole) => {
     setRoleRequirements((prev) =>
@@ -52,20 +63,23 @@ export const PlatformConfigSettings = () => {
     );
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    const response = await adminService.updatePlatformConfig({
-      minTrustScore,
-      escrowHoldDays,
-      autoFlagFraud,
-      roleRequirements,
-    });
-    setIsSaving(false);
-    if (response.success) {
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        adminService.updatePlatformConfig({
+          minTrustScore,
+          escrowHoldDays,
+          autoFlagFraud,
+          roleRequirements,
+        })
+      ),
+    onSuccess: () => {
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
-    }
-  };
+    },
+  });
+
+  const handleSave = () => saveMutation.mutate();
 
   return (
     <div>
@@ -148,8 +162,8 @@ export const PlatformConfigSettings = () => {
         variant="primary"
         className="mt-6 gap-1.5"
         onClick={handleSave}
-        disabled={isSaving}
-        isLoading={isSaving}
+        disabled={saveMutation.isPending}
+        isLoading={saveMutation.isPending}
       >
         {saved && <Check className="w-4 h-4" />}
         {saved ? 'Saved' : 'Save Configuration'}

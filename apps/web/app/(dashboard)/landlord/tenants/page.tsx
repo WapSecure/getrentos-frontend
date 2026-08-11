@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
 import { TenantCard } from '@/components/landlord/tenants/TenantCard';
 import { landlordService } from '@/services/landlordService';
-import type { Tenant, RentPaymentStatus } from '@/types/landlord';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import type { RentPaymentStatus } from '@/types/landlord';
 
 const rentStatusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -14,18 +17,13 @@ const rentStatusFilters: { value: 'all' | RentPaymentStatus; label: string }[] =
 ];
 
 export default function LandlordTenantsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [rentFilter, setRentFilter] = useState<'all' | RentPaymentStatus>('all');
 
-  useEffect(() => {
-    const fetchTenants = async () => {
-      const response = await landlordService.listTenants();
-      if (response.success && response.data) setTenants(response.data);
-    };
-
-    fetchTenants();
-  }, []);
+  const { data: tenants = [] } = useQuery({
+    queryKey: landlordKeys.tenants,
+    queryFn: () => unwrap(landlordService.listTenants()),
+  });
 
   const filteredTenants = tenants.filter((t) => {
     const matchesSearch =

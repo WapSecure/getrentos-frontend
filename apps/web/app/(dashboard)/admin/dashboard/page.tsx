@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AdminDashboardHeader } from '@/components/admin/dashboard/AdminDashboardHeader';
 import { AdminStatsCards } from '@/components/admin/dashboard/AdminStatsCards';
 import { PlatformGrowthChart } from '@/components/admin/dashboard/PlatformGrowthChart';
 import { AdminActivityFeed } from '@/components/admin/dashboard/AdminActivityFeed';
 import { AdminQuickActions } from '@/components/admin/dashboard/AdminQuickActions';
 import { adminService, type DashboardStats } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import { useAdminUser } from '../layout';
 
 const EMPTY_STATS: DashboardStats = {
@@ -26,15 +28,10 @@ export default function AdminDashboardPage() {
   if (currentHour >= 12 && currentHour < 18) greeting = 'Good afternoon';
   if (currentHour >= 18) greeting = 'Good evening';
 
-  const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS);
-
-  useEffect(() => {
-    adminService.getDashboardStats().then((response) => {
-      if (response.success && response.data) {
-        setStats(response.data);
-      }
-    });
-  }, []);
+  const { data: stats = EMPTY_STATS } = useQuery({
+    queryKey: adminKeys.dashboardStats,
+    queryFn: () => unwrap(adminService.getDashboardStats()),
+  });
 
   return (
     <>

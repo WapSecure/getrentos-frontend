@@ -1,71 +1,63 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
 import { DisputeResolutionModal } from '@/components/admin/disputes/DisputeResolutionModal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/cn';
 import { adminService } from '@/services/adminService';
-import type { Dispute, DisputeCategory, DisputeMessage, DisputeStatus } from '@/types/admin';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
+import type { DisputeCategory, DisputeStatus } from '@/types/admin';
 
 type StatusFilter = 'all' | DisputeStatus;
 type CategoryFilter = 'all' | DisputeCategory;
 
 export default function AdminDisputesPage() {
-  const [disputes, setDisputes] = useState<Dispute[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [messagesByDispute, setMessagesByDispute] = useState<Record<string, DisputeMessage[]>>({});
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [activeDisputeId, setActiveDisputeId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDisputes = async () => {
-      setIsLoading(true);
-      const response = await adminService.listDisputes();
-      if (response.success && response.data) {
-        setDisputes(response.data);
-      }
-      setIsLoading(false);
-    };
+  const { data: disputes = [], isLoading } = useQuery({
+    queryKey: adminKeys.disputes(),
+    queryFn: () => unwrap(adminService.listDisputes()),
+  });
 
-    fetchDisputes();
-  }, []);
-
-  useEffect(() => {
-    if (!activeDisputeId) return;
-    adminService.getDisputeMessages(activeDisputeId).then((response) => {
-      if (response.success && response.data) {
-        setMessagesByDispute((prev) => ({ ...prev, [activeDisputeId]: response.data! }));
-      }
-    });
-  }, [activeDisputeId]);
+  const { data: activeDisputeMessages = [] } = useQuery({
+    queryKey: adminKeys.disputeMessages(activeDisputeId ?? ''),
+    queryFn: () => unwrap(adminService.getDisputeMessages(activeDisputeId!)),
+    enabled: !!activeDisputeId,
+  });
 
   const activeDispute = disputes.find((d) => d.id === activeDisputeId) || null;
 
-  const handleResolve = async (id: string) => {
-    const response = await adminService.resolveDispute(id);
-    if (response.success) {
-      setDisputes((prev) => prev.map((d) => (d.id === id ? { ...d, status: 'resolved' } : d)));
-    }
-  };
+  const invalidateDisputes = () =>
+    queryClient.invalidateQueries({ queryKey: adminKeys.disputes() });
 
-  const handleEscalate = async (id: string) => {
-    const response = await adminService.escalateDispute(id);
-    if (response.success) {
-      setDisputes((prev) => prev.map((d) => (d.id === id ? { ...d, status: 'escalated' } : d)));
-    }
-  };
+  const resolveMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.resolveDispute(id)),
+    onSuccess: invalidateDisputes,
+  });
 
-  const handleSendMessage = async (id: string, text: string) => {
-    const response = await adminService.sendDisputeMessage(id, text);
-    if (response.success && response.data) {
-      const newMessage = response.data;
-      setMessagesByDispute((prev) => ({ ...prev, [id]: [...(prev[id] || []), newMessage] }));
-    }
-  };
+  const escalateMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.escalateDispute(id)),
+    onSuccess: invalidateDisputes,
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) =>
+      unwrap(adminService.sendDisputeMessage(id, text)),
+    onSuccess: (_, { id }) =>
+      queryClient.invalidateQueries({ queryKey: adminKeys.disputeMessages(id) }),
+  });
+
+  const handleResolve = (id: string) => resolveMutation.mutate(id);
+  const handleEscalate = (id: string) => escalateMutation.mutate(id);
+  const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
 
   const filteredDisputes = disputes.filter((d) => {
     const matchesSearch =
@@ -170,7 +162,7 @@ export default function AdminDisputesPage() {
 
       <DisputeResolutionModal
         dispute={activeDispute}
-        messages={activeDisputeId ? messagesByDispute[activeDisputeId] || [] : []}
+        messages={activeDisputeMessages}
         onClose={() => setActiveDisputeId(null)}
         onResolve={handleResolve}
         onEscalate={handleEscalate}

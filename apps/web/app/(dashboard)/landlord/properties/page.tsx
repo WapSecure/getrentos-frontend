@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyModal';
@@ -9,13 +10,15 @@ import { EditPropertyModal } from '@/components/landlord/properties/EditProperty
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { landlordService } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 import type { Property } from '@/types/landlord';
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
 
 export default function LandlordPropertiesPage() {
   const router = useRouter();
-  const [properties, setProperties] = useState<Property[]>([]);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
 
@@ -31,57 +34,66 @@ export default function LandlordPropertiesPage() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      const response = await landlordService.listProperties();
-      if (response.success && response.data) setProperties(response.data);
-    };
+  const { data: properties = [] } = useQuery({
+    queryKey: landlordKeys.properties,
+    queryFn: () => unwrap(landlordService.listProperties()),
+  });
 
-    fetchProperties();
-  }, []);
+  const invalidateProperties = () =>
+    queryClient.invalidateQueries({ queryKey: landlordKeys.properties });
 
-  const handlePublish = async (
+  const publishMutation = useMutation({
+    mutationFn: (data: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>) => {
+      const { name, type, address, city, state, country, description, totalUnits } = data;
+      return unwrap(
+        landlordService.createProperty({
+          name,
+          type,
+          address,
+          city,
+          state,
+          country,
+          description,
+          totalUnits,
+        })
+      );
+    },
+    onSuccess: invalidateProperties,
+  });
+
+  const editMutation = useMutation({
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>;
+    }) => unwrap(landlordService.updateProperty(id, updates)),
+    onSuccess: invalidateProperties,
+  });
+
+  const toggleArchiveMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.toggleArchiveProperty(id)),
+    onSuccess: invalidateProperties,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.deleteProperty(id)),
+    onSuccess: invalidateProperties,
+  });
+
+  const handlePublish = (
     data: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>
-  ) => {
-    const { name, type, address, city, state, country, description, totalUnits } = data;
-    const response = await landlordService.createProperty({
-      name,
-      type,
-      address,
-      city,
-      state,
-      country,
-      description,
-      totalUnits,
-    });
-    if (response.success && response.data) {
-      setProperties((prev) => [response.data!, ...prev]);
-    }
-  };
+  ) => publishMutation.mutate(data);
 
-  const handleEditSave = async (
+  const handleEditSave = (
     id: string,
     updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>
-  ) => {
-    const response = await landlordService.updateProperty(id, updates);
-    if (response.success && response.data) {
-      setProperties((prev) => prev.map((p) => (p.id === id ? response.data! : p)));
-    }
-  };
+  ) => editMutation.mutate({ id, updates });
 
-  const handleToggleArchive = async (id: string) => {
-    const response = await landlordService.toggleArchiveProperty(id);
-    if (response.success && response.data) {
-      setProperties((prev) => prev.map((p) => (p.id === id ? response.data! : p)));
-    }
-  };
+  const handleToggleArchive = (id: string) => toggleArchiveMutation.mutate(id);
 
-  const handleDelete = async (id: string) => {
-    const response = await landlordService.deleteProperty(id);
-    if (response.success) {
-      setProperties((prev) => prev.filter((p) => p.id !== id));
-    }
-  };
+  const handleDelete = (id: string) => deleteMutation.mutate(id);
 
   const filteredProperties = properties.filter((p) => {
     const matchesSearch =

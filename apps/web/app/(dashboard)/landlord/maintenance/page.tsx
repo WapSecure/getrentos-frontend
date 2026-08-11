@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
 import { landlordService } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 import type { LandlordMaintenanceRequest, Vendor } from '@/types/landlord';
 import type { MaintenanceRequestStatus } from '@/types/maintenance';
 
@@ -17,45 +20,48 @@ const statusFilters: { value: 'all' | MaintenanceRequestStatus; label: string }[
 ];
 
 export default function LandlordMaintenancePage() {
-  const [requests, setRequests] = useState<LandlordMaintenanceRequest[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | MaintenanceRequestStatus>('all');
   const [assigningRequest, setAssigningRequest] = useState<LandlordMaintenanceRequest | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [requestsRes, vendorsRes] = await Promise.all([
-        landlordService.listMaintenanceRequests(),
-        landlordService.listVendors(),
-      ]);
-      if (requestsRes.success && requestsRes.data) setRequests(requestsRes.data);
-      if (vendorsRes.success && vendorsRes.data) setVendors(vendorsRes.data);
-    };
+  const { data: requests = [] } = useQuery({
+    queryKey: landlordKeys.maintenanceRequests(),
+    queryFn: () => unwrap(landlordService.listMaintenanceRequests()),
+  });
 
-    fetchData();
-  }, []);
+  const { data: vendors = [] } = useQuery({
+    queryKey: landlordKeys.vendors,
+    queryFn: () => unwrap(landlordService.listVendors()),
+  });
 
-  const handleAssignVendor = async (requestId: string, vendor: Vendor) => {
-    const response = await landlordService.assignMaintenanceVendor(requestId, vendor.id);
-    if (response.success && response.data) {
-      setRequests((prev) => prev.map((r) => (r.id === requestId ? response.data! : r)));
-    }
-    setAssigningRequest(null);
-  };
+  const invalidateRequests = () =>
+    queryClient.invalidateQueries({ queryKey: landlordKeys.maintenanceRequests() });
 
-  const handleMarkResolved = async (id: string) => {
-    const response = await landlordService.markMaintenanceResolved(id);
-    if (response.success && response.data) {
-      setRequests((prev) => prev.map((r) => (r.id === id ? response.data! : r)));
-    }
-  };
+  const assignVendorMutation = useMutation({
+    mutationFn: ({ requestId, vendorId }: { requestId: string; vendorId: string }) =>
+      unwrap(landlordService.assignMaintenanceVendor(requestId, vendorId)),
+    onSuccess: () => {
+      invalidateRequests();
+      setAssigningRequest(null);
+    },
+  });
 
-  const handleEscalate = async (id: string) => {
-    const response = await landlordService.escalateMaintenance(id);
-    if (response.success && response.data) {
-      setRequests((prev) => prev.map((r) => (r.id === id ? response.data! : r)));
-    }
-  };
+  const markResolvedMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.markMaintenanceResolved(id)),
+    onSuccess: invalidateRequests,
+  });
+
+  const escalateMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.escalateMaintenance(id)),
+    onSuccess: invalidateRequests,
+  });
+
+  const handleAssignVendor = (requestId: string, vendor: Vendor) =>
+    assignVendorMutation.mutate({ requestId, vendorId: vendor.id });
+
+  const handleMarkResolved = (id: string) => markResolvedMutation.mutate(id);
+
+  const handleEscalate = (id: string) => escalateMutation.mutate(id);
 
   const filteredRequests = requests.filter((r) => filter === 'all' || r.status === filter);
   const openCount = requests.filter((r) => r.status !== 'resolved').length;

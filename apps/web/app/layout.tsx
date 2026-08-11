@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import './globals.css';
 
@@ -16,7 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-background`}>
         <ThemeProvider>
-          <LanguageProvider>{children}</LanguageProvider>
+          <QueryProvider>
+            <LanguageProvider>{children}</LanguageProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

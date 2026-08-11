@@ -1,42 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldAlert } from 'lucide-react';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/cn';
 import { adminService } from '@/services/adminService';
-import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
+import type { FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
 type StatusFilter = 'all' | FraudAlertStatus;
 type SeverityFilter = 'all' | FraudAlertSeverity;
 
 export default function AdminFraudPage() {
-  const [alerts, setAlerts] = useState<FraudAlert[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
 
-  useEffect(() => {
-    const fetchAlerts = async () => {
-      setIsLoading(true);
-      const response = await adminService.listFraudAlerts();
-      if (response.success && response.data) {
-        setAlerts(response.data);
-      }
-      setIsLoading(false);
-    };
+  const { data: alerts = [], isLoading } = useQuery({
+    queryKey: adminKeys.fraudAlerts(),
+    queryFn: () => unwrap(adminService.listFraudAlerts()),
+  });
 
-    fetchAlerts();
-  }, []);
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus }) =>
+      unwrap(adminService.updateFraudAlertStatus(id, status)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.fraudAlerts() }),
+  });
 
-  const updateStatus = async (id: string, status: FraudAlertStatus) => {
+  const updateStatus = (id: string, status: FraudAlertStatus) => {
     if (status === 'flagged') return;
-    const response = await adminService.updateFraudAlertStatus(id, status);
-    if (response.success) {
-      setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-    }
+    updateStatusMutation.mutate({ id, status });
   };
 
   const filteredAlerts = alerts.filter((a) => {

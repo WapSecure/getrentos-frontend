@@ -1,40 +1,43 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat, Search } from 'lucide-react';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
 import { AddVendorModal } from '@/components/landlord/vendors/AddVendorModal';
 import { Button } from '@/components/ui/Button';
 import { landlordService } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 import type { Vendor } from '@/types/landlord';
 
 export default function LandlordVendorsPage() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchVendors = async () => {
-      const response = await landlordService.listVendors();
-      if (response.success && response.data) setVendors(response.data);
-    };
+  const { data: vendors = [] } = useQuery({
+    queryKey: landlordKeys.vendors,
+    queryFn: () => unwrap(landlordService.listVendors()),
+  });
 
-    fetchVendors();
-  }, []);
+  const invalidateVendors = () => queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
 
-  const handleAddVendor = async (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) => {
-    const response = await landlordService.addVendor(data);
-    if (response.success && response.data) {
-      setVendors((prev) => [response.data!, ...prev]);
-    }
-  };
+  const addVendorMutation = useMutation({
+    mutationFn: (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) =>
+      unwrap(landlordService.addVendor(data)),
+    onSuccess: invalidateVendors,
+  });
 
-  const handleRemoveVendor = async (id: string) => {
-    const response = await landlordService.removeVendor(id);
-    if (response.success) {
-      setVendors((prev) => prev.filter((v) => v.id !== id));
-    }
-  };
+  const removeVendorMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.removeVendor(id)),
+    onSuccess: invalidateVendors,
+  });
+
+  const handleAddVendor = (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) =>
+    addVendorMutation.mutate(data);
+
+  const handleRemoveVendor = (id: string) => removeVendorMutation.mutate(id);
 
   const filteredVendors = vendors.filter(
     (v) =>

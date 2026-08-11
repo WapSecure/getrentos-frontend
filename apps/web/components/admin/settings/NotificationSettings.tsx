@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Check, ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import type { NotificationPreferenceId } from '@/types/admin';
 
 interface NotificationPreference {
@@ -23,47 +26,53 @@ const PREFERENCE_META: { id: NotificationPreferenceId; label: string; icon: Reac
     { id: 'messages', label: 'New Support Messages', icon: MessageCircle },
   ];
 
-const DEFAULT_PREFERENCES: NotificationPreference[] = PREFERENCE_META.map((meta) => ({
-  ...meta,
-  email: true,
-  push: true,
-}));
+const buildPreferences = (
+  fetched?: { id: NotificationPreferenceId; email: boolean; push: boolean }[]
+): NotificationPreference[] => {
+  const byId = new Map((fetched ?? []).map((p) => [p.id, p]));
+  return PREFERENCE_META.map((meta) => ({
+    ...meta,
+    email: byId.get(meta.id)?.email ?? true,
+    push: byId.get(meta.id)?.push ?? true,
+  }));
+};
 
 export const NotificationSettings = () => {
-  const [preferences, setPreferences] = useState<NotificationPreference[]>(DEFAULT_PREFERENCES);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { data: fetchedPreferences } = useQuery({
+    queryKey: adminKeys.notificationPreferences,
+    queryFn: () => unwrap(adminService.getNotificationPreferences()),
+  });
 
-  useEffect(() => {
-    adminService.getNotificationPreferences().then((response) => {
-      if (response.success && response.data) {
-        const byId = new Map(response.data.map((p) => [p.id, p]));
-        setPreferences(
-          PREFERENCE_META.map((meta) => ({
-            ...meta,
-            email: byId.get(meta.id)?.email ?? true,
-            push: byId.get(meta.id)?.push ?? true,
-          }))
-        );
-      }
-    });
-  }, []);
+  return (
+    <NotificationSettingsForm
+      key={fetchedPreferences ? 'loaded' : 'initial'}
+      initial={buildPreferences(fetchedPreferences)}
+    />
+  );
+};
+
+const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference[] }) => {
+  const [preferences, setPreferences] = useState<NotificationPreference[]>(initial);
+  const [saved, setSaved] = useState(false);
 
   const toggle = (id: string, channel: 'email' | 'push') => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    const response = await adminService.updateNotificationPreferences(
-      preferences.map(({ id, email, push }) => ({ id, email, push }))
-    );
-    setIsSaving(false);
-    if (response.success) {
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        adminService.updateNotificationPreferences(
+          preferences.map(({ id, email, push }) => ({ id, email, push }))
+        )
+      ),
+    onSuccess: () => {
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
-    }
-  };
+    },
+  });
+
+  const handleSave = () => saveMutation.mutate();
 
   return (
     <div>
@@ -102,8 +111,8 @@ export const NotificationSettings = () => {
         variant="primary"
         className="mt-6 gap-1.5"
         onClick={handleSave}
-        disabled={isSaving}
-        isLoading={isSaving}
+        disabled={saveMutation.isPending}
+        isLoading={saveMutation.isPending}
       >
         {saved && <Check className="w-4 h-4" />}
         {saved ? 'Saved' : 'Save Preferences'}

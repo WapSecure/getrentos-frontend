@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { FinancialChart } from '@/components/landlord/financials/FinancialChart';
@@ -8,8 +9,9 @@ import { Button } from '@/components/ui/Button';
 import {
   landlordService,
   type FinancialStats as FinancialStatsData,
-  type FinancialChartPoint,
 } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 
 type ReportPeriod = 'monthly' | 'quarterly' | 'yearly';
 
@@ -28,38 +30,27 @@ const EMPTY_STATS: FinancialStatsData = {
 
 export default function LandlordFinancialsPage() {
   const [period, setPeriod] = useState<ReportPeriod>('monthly');
-  const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
-  const [stats, setStats] = useState<FinancialStatsData>(EMPTY_STATS);
-  const [chartData, setChartData] = useState<FinancialChartPoint[]>([]);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const response = await landlordService.getFinancialStats(period);
-      if (response.success && response.data) setStats(response.data);
-    };
+  const { data: stats = EMPTY_STATS } = useQuery({
+    queryKey: landlordKeys.financialStats(period),
+    queryFn: () => unwrap(landlordService.getFinancialStats(period)),
+  });
 
-    fetchStats();
-  }, [period]);
+  const { data: chartData = [] } = useQuery({
+    queryKey: landlordKeys.financialChart,
+    queryFn: () => unwrap(landlordService.getFinancialChart()),
+  });
 
-  useEffect(() => {
-    const fetchChart = async () => {
-      const response = await landlordService.getFinancialChart();
-      if (response.success && response.data) setChartData(response.data);
-    };
-
-    fetchChart();
-  }, []);
-
-  const handleExport = async () => {
-    setExporting(true);
-    const response = await landlordService.exportFinancialsCsv();
-    setExporting(false);
-    if (response.success) {
+  const exportMutation = useMutation({
+    mutationFn: () => unwrap(landlordService.exportFinancialsCsv()),
+    onSuccess: () => {
       setExported(true);
       window.setTimeout(() => setExported(false), 2500);
-    }
-  };
+    },
+  });
+
+  const handleExport = () => exportMutation.mutate();
 
   const { rentalIncome, outstandingRent, maintenanceCosts, netProfit } = stats;
 
@@ -76,8 +67,8 @@ export default function LandlordFinancialsPage() {
             size="sm"
             className="gap-1.5"
             onClick={handleExport}
-            disabled={exporting}
-            isLoading={exporting}
+            disabled={exportMutation.isPending}
+            isLoading={exportMutation.isPending}
           >
             {exported ? (
               <Check className="w-3.5 h-3.5" />

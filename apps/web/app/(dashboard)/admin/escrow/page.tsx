@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Landmark, Flag } from 'lucide-react';
 import { DataTable, type Column } from '@/components/ui/Table';
 import { Badge, type BadgeVariant } from '@/components/ui/Badge';
@@ -9,6 +10,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import type { PlatformEscrowStatus, PlatformEscrowTransaction } from '@/types/admin';
 
 const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: BadgeVariant }> = {
@@ -25,32 +28,26 @@ type StatusFilter = 'all' | PlatformEscrowStatus;
 const PAGE_SIZE = 10;
 
 export default function AdminEscrowPage() {
-  const [transactions, setTransactions] = useState<PlatformEscrowTransaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setIsLoading(true);
-      const response = await adminService.listEscrowTransactions();
-      if (response.success && response.data) {
-        setTransactions(response.data);
-      }
-      setIsLoading(false);
-    };
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: adminKeys.escrowTransactions(),
+    queryFn: () => unwrap(adminService.listEscrowTransactions()),
+  });
 
-    fetchTransactions();
-  }, []);
+  const toggleFlagMutation = useMutation({
+    mutationFn: ({ id, flagged }: { id: string; flagged: boolean }) =>
+      unwrap(adminService.toggleEscrowFlag(id, flagged)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.escrowTransactions() }),
+  });
 
-  const toggleFlag = async (id: string) => {
-    const current = transactions.find((t) => t.id === id);
+  const toggleFlag = (id: string) => {
+    const current = transactions.find((t: PlatformEscrowTransaction) => t.id === id);
     if (!current) return;
-    const response = await adminService.toggleEscrowFlag(id, !current.flagged);
-    if (response.success) {
-      setTransactions((prev) => prev.map((t) => (t.id === id ? { ...t, flagged: !t.flagged } : t)));
-    }
+    toggleFlagMutation.mutate({ id, flagged: !current.flagged });
   };
 
   const filteredTransactions = transactions.filter((t) => {

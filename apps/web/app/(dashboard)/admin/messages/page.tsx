@@ -1,64 +1,53 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { ConversationList, type Conversation } from '@/components/admin/messages/ConversationList';
-import { MessageThread, type ThreadMessage } from '@/components/admin/messages/MessageThread';
+import { ConversationList } from '@/components/admin/messages/ConversationList';
+import { MessageThread } from '@/components/admin/messages/MessageThread';
 import { cn } from '@/lib/cn';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 
 export default function AdminMessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [messagesByConversation, setMessagesByConversation] = useState<
-    Record<string, ThreadMessage[]>
-  >({});
+  const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchConversations = async () => {
-      const response = await adminService.listConversations();
-      if (response.success && response.data) {
-        setConversations(response.data);
-      }
-    };
+  const { data: conversations = [] } = useQuery({
+    queryKey: adminKeys.conversations(),
+    queryFn: () => unwrap(adminService.listConversations()),
+  });
 
-    fetchConversations();
-  }, []);
+  const { data: activeMessages = [] } = useQuery({
+    queryKey: adminKeys.conversationMessages(activeId ?? ''),
+    queryFn: () => unwrap(adminService.getConversationMessages(activeId!)),
+    enabled: !!activeId,
+  });
 
-  useEffect(() => {
-    if (!activeId) return;
-    adminService.getConversationMessages(activeId).then((response) => {
-      if (response.success && response.data) {
-        setMessagesByConversation((prev) => ({ ...prev, [activeId]: response.data! }));
-      }
-    });
-  }, [activeId]);
+  const markReadMutation = useMutation({
+    mutationFn: (id: string) => adminService.markConversationRead(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.conversations() }),
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) =>
+      unwrap(adminService.sendConversationMessage(id, text)),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.conversationMessages(id) });
+      queryClient.invalidateQueries({ queryKey: adminKeys.conversations() });
+    },
+  });
 
   const handleSelect = (id: string) => {
     setActiveId(id);
-    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)));
-    setMessagesByConversation((prev) => ({
-      ...prev,
-      [id]: (prev[id] || []).map((m) => ({ ...m, read: true })),
-    }));
-    adminService.markConversationRead(id);
+    markReadMutation.mutate(id);
   };
 
-  const handleSend = async (text: string) => {
+  const handleSend = (text: string) => {
     if (!activeId) return;
-    const response = await adminService.sendConversationMessage(activeId, text);
-    if (!response.success || !response.data) return;
-    const newMessage = response.data;
-    setMessagesByConversation((prev) => ({
-      ...prev,
-      [activeId]: [...(prev[activeId] || []), newMessage],
-    }));
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === activeId ? { ...c, lastMessage: text, lastMessageTime: newMessage.timestamp } : c
-      )
-    );
+    sendMutation.mutate({ id: activeId, text });
   };
 
   const filteredConversations = conversations.filter((c) =>
@@ -99,7 +88,7 @@ export default function AdminMessagesPage() {
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
-                messages={messagesByConversation[activeConversation.id] || []}
+                messages={activeMessages}
                 onSend={handleSend}
               />
             </>

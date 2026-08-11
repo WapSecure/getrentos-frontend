@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
 import { Button } from '@/components/ui/Button';
 import { landlordService } from '@/services/landlordService';
-import type { Lease, LeaseStatus, Unit } from '@/types/landlord';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import type { Lease, LeaseStatus } from '@/types/landlord';
 
 const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -18,54 +21,73 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 ];
 
 export default function LandlordLeasesPage() {
-  const [leases, setLeases] = useState<Lease[]>([]);
-  const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [leasesRes, vacantUnitsRes] = await Promise.all([
-        landlordService.listLeases(),
-        landlordService.listVacantUnitsForLease(),
-      ]);
-      if (leasesRes.success && leasesRes.data) setLeases(leasesRes.data);
-      if (vacantUnitsRes.success && vacantUnitsRes.data) setVacantUnits(vacantUnitsRes.data);
-    };
+  const { data: leases = [] } = useQuery({
+    queryKey: landlordKeys.leases(),
+    queryFn: () => unwrap(landlordService.listLeases()),
+  });
 
-    fetchData();
-  }, []);
+  const { data: vacantUnits = [] } = useQuery({
+    queryKey: landlordKeys.vacantUnitsForLease,
+    queryFn: () => unwrap(landlordService.listVacantUnitsForLease()),
+  });
 
-  const handleCreateLease = async (
+  const createLeaseMutation = useMutation({
+    mutationFn: ({
+      data,
+      sendImmediately,
+    }: {
+      data: Omit<Lease, 'id' | 'status' | 'createdAt'>;
+      sendImmediately: boolean;
+    }) => {
+      const { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit } = data;
+      return unwrap(
+        landlordService.createLease(
+          { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit },
+          sendImmediately
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      queryClient.invalidateQueries({ queryKey: landlordKeys.vacantUnitsForLease });
+    },
+  });
+
+  const sendLeaseMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.sendLease(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.leases() }),
+  });
+
+  const renewLeaseMutation = useMutation({
+    mutationFn: ({
+      leaseId,
+      newRent,
+      newEndDate,
+    }: {
+      leaseId: string;
+      newRent: number;
+      newEndDate: string;
+    }) => unwrap(landlordService.renewLease(leaseId, newRent, newEndDate)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      setRenewingLease(null);
+    },
+  });
+
+  const handleCreateLease = (
     data: Omit<Lease, 'id' | 'status' | 'createdAt'>,
     sendImmediately: boolean
-  ) => {
-    const { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit } = data;
-    const response = await landlordService.createLease(
-      { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit },
-      sendImmediately
-    );
-    if (response.success && response.data) {
-      setLeases((prev) => [response.data!, ...prev]);
-      setVacantUnits((prev) => prev.filter((u) => u.id !== data.unitId));
-    }
-  };
+  ) => createLeaseMutation.mutate({ data, sendImmediately });
 
-  const handleSendLease = async (id: string) => {
-    const response = await landlordService.sendLease(id);
-    if (response.success && response.data) {
-      setLeases((prev) => prev.map((l) => (l.id === id ? response.data! : l)));
-    }
-  };
+  const handleSendLease = (id: string) => sendLeaseMutation.mutate(id);
 
-  const handleSendRenewalOffer = async (leaseId: string, newRent: number, newEndDate: string) => {
-    const response = await landlordService.renewLease(leaseId, newRent, newEndDate);
-    if (response.success && response.data) {
-      setLeases((prev) => prev.map((l) => (l.id === leaseId ? response.data! : l)));
-    }
-    setRenewingLease(null);
-  };
+  const handleSendRenewalOffer = (leaseId: string, newRent: number, newEndDate: string) =>
+    renewLeaseMutation.mutate({ leaseId, newRent, newEndDate });
 
   const filteredLeases = leases.filter((l) => filter === 'all' || l.status === filter);
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Search, ScrollText } from 'lucide-react';
 import { DataTable, type Column } from '@/components/ui/Table';
 import { Badge, type BadgeVariant } from '@/components/ui/Badge';
@@ -9,6 +10,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/format';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import type { AuditLogEntry, AuditSeverity } from '@/types/admin';
 
 const severityConfig: Record<AuditSeverity, { label: string; variant: BadgeVariant }> = {
@@ -22,31 +25,24 @@ type SeverityFilter = 'all' | AuditSeverity;
 const PAGE_SIZE = 10;
 
 export default function AdminAuditLogsPage() {
-  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      setIsLoading(true);
-      const response = await adminService.listAuditLogs({
-        search: searchQuery || undefined,
-        severity: severityFilter === 'all' ? undefined : severityFilter,
-        page,
-        limit: PAGE_SIZE,
-      });
-      if (response.success && response.data) {
-        setLogs(response.data.items);
-        setTotal(response.data.total);
-      }
-      setIsLoading(false);
-    };
-
-    fetchLogs();
-  }, [searchQuery, severityFilter, page]);
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.auditLogs({ search: searchQuery, severity: severityFilter, page }),
+    queryFn: () =>
+      unwrap(
+        adminService.listAuditLogs({
+          search: searchQuery || undefined,
+          severity: severityFilter === 'all' ? undefined : severityFilter,
+          page,
+          limit: PAGE_SIZE,
+        })
+      ),
+  });
+  const logs: AuditLogEntry[] = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const severityOptions: { value: SeverityFilter; label: string }[] = [
     { value: 'all', label: 'All' },

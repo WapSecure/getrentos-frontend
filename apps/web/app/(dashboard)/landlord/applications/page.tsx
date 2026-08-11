@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { landlordService } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 import type { ApplicationStatus, RentalApplication } from '@/types/landlord';
 
 const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
@@ -16,29 +19,28 @@ const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
 ];
 
 export default function LandlordApplicationsPage() {
-  const [applications, setApplications] = useState<RentalApplication[]>([]);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      const response = await landlordService.listApplications();
-      if (response.success && response.data) setApplications(response.data);
-    };
+  const { data: applications = [] } = useQuery({
+    queryKey: landlordKeys.applications(),
+    queryFn: () => unwrap(landlordService.listApplications()),
+  });
 
-    fetchApplications();
-  }, []);
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ApplicationStatus }) =>
+      unwrap(landlordService.updateApplicationStatus(id, status)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.applications() });
+      setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
+    },
+  });
 
-  const updateStatus = async (id: string, status: ApplicationStatus) => {
-    const response = await landlordService.updateApplicationStatus(id, status);
-    if (!response.success || !response.data) return;
-    setApplications((prev) => prev.map((a) => (a.id === id ? response.data! : a)));
-    setSelectedApplication((prev) => (prev && prev.id === id ? response.data! : prev));
-  };
-
-  const handleApprove = (id: string) => updateStatus(id, 'approved');
-  const handleReject = (id: string) => updateStatus(id, 'rejected');
-  const handleRequestInfo = (id: string) => updateStatus(id, 'under_review');
+  const handleApprove = (id: string) => updateStatusMutation.mutate({ id, status: 'approved' });
+  const handleReject = (id: string) => updateStatusMutation.mutate({ id, status: 'rejected' });
+  const handleRequestInfo = (id: string) =>
+    updateStatusMutation.mutate({ id, status: 'under_review' });
 
   const filteredApplications = applications.filter((a) => filter === 'all' || a.status === filter);
   const pendingCount = applications.filter((a) => a.status === 'pending').length;

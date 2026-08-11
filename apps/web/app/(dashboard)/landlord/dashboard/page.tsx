@@ -1,7 +1,7 @@
 'use client';
 
 import { useLandlordUser } from '../layout';
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
 import { LandlordDashboardHeader } from '@/components/landlord/dashboard/LandlordDashboardHeader';
 import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStatsCards';
@@ -10,6 +10,8 @@ import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordAc
 import { LandlordQuickActions } from '@/components/landlord/dashboard/LandlordQuickActions';
 import { Button } from '@/components/ui/Button';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 
 const EMPTY_STATS: LandlordDashboardStats = {
   totalProperties: 0,
@@ -22,16 +24,10 @@ const EMPTY_STATS: LandlordDashboardStats = {
 
 export default function LandlordDashboardPage() {
   const user = useLandlordUser();
-  const [stats, setStats] = useState<LandlordDashboardStats>(EMPTY_STATS);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      const response = await landlordService.getDashboardStats();
-      if (response.success && response.data) setStats(response.data);
-    };
-
-    fetchStats();
-  }, []);
+  const { data: stats = EMPTY_STATS } = useQuery({
+    queryKey: landlordKeys.dashboardStats,
+    queryFn: () => unwrap(landlordService.getDashboardStats()),
+  });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();

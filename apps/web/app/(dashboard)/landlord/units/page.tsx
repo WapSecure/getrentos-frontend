@@ -1,13 +1,16 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { Button } from '@/components/ui/Button';
 import { landlordService } from '@/services/landlordService';
-import type { Property, Unit } from '@/types/landlord';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import type { Unit } from '@/types/landlord';
 
 export default function LandlordUnitsPage() {
   return (
@@ -19,56 +22,53 @@ export default function LandlordUnitsPage() {
 
 function LandlordUnitsPageContent() {
   const searchParams = useSearchParams();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [units, setUnits] = useState<Unit[]>([]);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [propertyFilter, setPropertyFilter] = useState<string>(
     searchParams.get('property') || 'all'
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [propertiesRes, unitsRes] = await Promise.all([
-        landlordService.listProperties(),
-        landlordService.listUnits(),
-      ]);
-      if (propertiesRes.success && propertiesRes.data) setProperties(propertiesRes.data);
-      if (unitsRes.success && unitsRes.data) setUnits(unitsRes.data);
-    };
+  const { data: properties = [] } = useQuery({
+    queryKey: landlordKeys.properties,
+    queryFn: () => unwrap(landlordService.listProperties()),
+  });
 
-    fetchData();
-  }, []);
+  const { data: units = [] } = useQuery({
+    queryKey: landlordKeys.units(),
+    queryFn: () => unwrap(landlordService.listUnits()),
+  });
 
-  const handleMarkVacant = async (unitId: string) => {
-    const response = await landlordService.markUnitVacant(unitId);
-    if (response.success && response.data) {
-      setUnits((prev) => prev.map((u) => (u.id === unitId ? response.data! : u)));
-    }
-  };
+  const invalidateUnits = () => queryClient.invalidateQueries({ queryKey: landlordKeys.units() });
 
-  const handleAssignTenant = async (unitId: string, tenantName: string) => {
-    const response = await landlordService.assignUnitTenant(unitId, tenantName);
-    if (response.success && response.data) {
-      setUnits((prev) => prev.map((u) => (u.id === unitId ? response.data! : u)));
-    }
-  };
+  const markVacantMutation = useMutation({
+    mutationFn: (unitId: string) => unwrap(landlordService.markUnitVacant(unitId)),
+    onSuccess: invalidateUnits,
+  });
 
-  const handleAddUnit = async (
-    data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
-  ) => {
-    const { propertyId, unitName, bedrooms, bathrooms, monthlyRent } = data;
-    const response = await landlordService.createUnit({
-      propertyId,
-      unitName,
-      bedrooms,
-      bathrooms,
-      monthlyRent,
-    });
-    if (response.success && response.data) {
-      setUnits((prev) => [response.data!, ...prev]);
-    }
-  };
+  const assignTenantMutation = useMutation({
+    mutationFn: ({ unitId, tenantName }: { unitId: string; tenantName: string }) =>
+      unwrap(landlordService.assignUnitTenant(unitId, tenantName)),
+    onSuccess: invalidateUnits,
+  });
+
+  const addUnitMutation = useMutation({
+    mutationFn: (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => {
+      const { propertyId, unitName, bedrooms, bathrooms, monthlyRent } = data;
+      return unwrap(
+        landlordService.createUnit({ propertyId, unitName, bedrooms, bathrooms, monthlyRent })
+      );
+    },
+    onSuccess: invalidateUnits,
+  });
+
+  const handleMarkVacant = (unitId: string) => markVacantMutation.mutate(unitId);
+
+  const handleAssignTenant = (unitId: string, tenantName: string) =>
+    assignTenantMutation.mutate({ unitId, tenantName });
+
+  const handleAddUnit = (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) =>
+    addUnitMutation.mutate(data);
 
   const filteredUnits = units.filter((u) => {
     const matchesProperty = propertyFilter === 'all' || u.propertyId === propertyFilter;

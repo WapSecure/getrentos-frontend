@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -12,6 +13,8 @@ import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/format';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import type { AdminDocument } from '@/types/admin';
 
 const categoryLabels: Record<AdminDocument['category'], string> = {
@@ -31,35 +34,29 @@ const categoryOptions = (Object.keys(categoryLabels) as AdminDocument['category'
 type CategoryFilter = 'all' | AdminDocument['category'];
 
 export default function AdminDocumentsPage() {
-  const [documents, setDocuments] = useState<AdminDocument[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      setIsLoading(true);
-      const response = await adminService.listDocuments();
-      if (response.success && response.data) {
-        setDocuments(response.data);
-      }
-      setIsLoading(false);
-    };
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: adminKeys.documents(),
+    queryFn: () => unwrap(adminService.listDocuments()),
+  });
 
-    fetchDocuments();
-  }, []);
+  const uploadMutation = useMutation({
+    mutationFn: (data: UploadedDocumentData) =>
+      unwrap(
+        adminService.uploadDocument(
+          data.name,
+          data.category as AdminDocument['category'],
+          data.file
+        )
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.documents() }),
+  });
 
-  const handleUpload = async (data: UploadedDocumentData) => {
-    const response = await adminService.uploadDocument(
-      data.name,
-      data.category as AdminDocument['category'],
-      data.file
-    );
-    if (response.success && response.data) {
-      setDocuments((prev) => [response.data!, ...prev]);
-    }
-  };
+  const handleUpload = (data: UploadedDocumentData) => uploadMutation.mutate(data);
 
   const handleDownload = async (id: string) => {
     const response = await adminService.getDocumentDownloadUrl(id);

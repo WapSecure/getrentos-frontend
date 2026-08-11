@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
 import { PaymentsTable } from '@/components/landlord/payments/PaymentsTable';
@@ -9,6 +10,8 @@ import {
   landlordService,
   type RentCollectionStats as RentCollectionStatsData,
 } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 import type { RentPayment, RentPaymentStatus } from '@/types/landlord';
 
 const EMPTY_STATS: RentCollectionStatsData = {
@@ -26,24 +29,19 @@ const statusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
 ];
 
 export default function LandlordPaymentsPage() {
-  const [payments, setPayments] = useState<RentPayment[]>([]);
-  const [stats, setStats] = useState<RentCollectionStatsData>(EMPTY_STATS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | RentPaymentStatus>('all');
   const [selectedPayment, setSelectedPayment] = useState<RentPayment | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [paymentsRes, statsRes] = await Promise.all([
-        landlordService.listPayments(),
-        landlordService.getRentCollectionStats(),
-      ]);
-      if (paymentsRes.success && paymentsRes.data) setPayments(paymentsRes.data);
-      if (statsRes.success && statsRes.data) setStats(statsRes.data);
-    };
+  const { data: payments = [] } = useQuery({
+    queryKey: landlordKeys.payments(),
+    queryFn: () => unwrap(landlordService.listPayments()),
+  });
 
-    fetchData();
-  }, []);
+  const { data: stats = EMPTY_STATS } = useQuery({
+    queryKey: landlordKeys.rentCollectionStats,
+    queryFn: () => unwrap(landlordService.getRentCollectionStats()),
+  });
 
   const { totalCollected, outstandingBalance, escrowPending, upcomingPayments } = stats;
 

@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/cn';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import type {
   VerificationRequest,
   VerificationRequestStatus,
@@ -17,52 +20,41 @@ type StatusFilter = 'all' | VerificationRequestStatus;
 type TypeFilter = 'all' | VerificationRequestType;
 
 export default function AdminVerificationsPage() {
-  const [requests, setRequests] = useState<VerificationRequest[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
 
-  useEffect(() => {
-    const fetchRequests = async () => {
-      setIsLoading(true);
-      const response = await adminService.listVerifications();
-      if (response.success && response.data) {
-        setRequests(response.data);
-      }
-      setIsLoading(false);
-    };
+  const { data: requests = [], isLoading } = useQuery({
+    queryKey: adminKeys.verifications(),
+    queryFn: () => unwrap(adminService.listVerifications()),
+  });
 
-    fetchRequests();
-  }, []);
+  const invalidateRequests = () =>
+    queryClient.invalidateQueries({ queryKey: adminKeys.verifications() });
 
-  const handleApprove = async (id: string) => {
-    const response = await adminService.approveVerification(id);
-    if (response.success) {
-      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
-    }
-  };
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.approveVerification(id)),
+    onSuccess: invalidateRequests,
+  });
 
-  const handleReject = async (id: string, reason: string) => {
-    const response = await adminService.rejectVerification(id, reason);
-    if (response.success) {
-      setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: 'rejected', rejectionReason: reason } : r))
-      );
-    }
-  };
+  const rejectMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      unwrap(adminService.rejectVerification(id, reason)),
+    onSuccess: invalidateRequests,
+  });
 
-  const handleRequestClarification = async (id: string, reason: string) => {
-    const response = await adminService.requestVerificationClarification(id, reason);
-    if (response.success) {
-      setRequests((prev) =>
-        prev.map((r) =>
-          r.id === id ? { ...r, status: 'needs_clarification', rejectionReason: reason } : r
-        )
-      );
-    }
-  };
+  const requestClarificationMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      unwrap(adminService.requestVerificationClarification(id, reason)),
+    onSuccess: invalidateRequests,
+  });
+
+  const handleApprove = (id: string) => approveMutation.mutate(id);
+  const handleReject = (id: string, reason: string) => rejectMutation.mutate({ id, reason });
+  const handleRequestClarification = (id: string, reason: string) =>
+    requestClarificationMutation.mutate({ id, reason });
 
   const filteredRequests = requests.filter((r) => {
     const matchesSearch =

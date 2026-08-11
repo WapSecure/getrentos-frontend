@@ -36,6 +36,19 @@ export function authFetch<T>(path: string, options: RequestInit = {}): Promise<T
   });
 }
 
+/**
+ * Unwraps a landlordService/adminService-style ApiResponse for use as a
+ * TanStack Query queryFn/mutationFn, which expect a promise that resolves
+ * with the data or rejects — not a { success, data, error } envelope.
+ */
+export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
+  const response = await promise;
+  if (!response.success || response.data === undefined) {
+    throw new Error(response.message || response.error || 'Request failed');
+  }
+  return response.data;
+}
+
 export function toQuery(params: Record<string, string | undefined>): string {
   const entries = Object.entries(params).filter(([, v]) => v && v !== 'all');
   if (entries.length === 0) return '';

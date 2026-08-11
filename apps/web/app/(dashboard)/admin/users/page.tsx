@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
 import { DataTable, type Column } from '@/components/ui/Table';
@@ -10,6 +11,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { getInitials, formatDate } from '@/lib/format';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
 import type { PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
 
 const statusConfig: Record<
@@ -38,34 +41,30 @@ type RoleFilter = 'all' | PlatformRole;
 const PAGE_SIZE = 10;
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<PlatformUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [activeUser, setActiveUser] = useState<PlatformUser | null>(null);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      const response = await adminService.listUsers();
-      if (response.success && response.data) {
-        setUsers(response.data);
-      }
-      setIsLoading(false);
-    };
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: adminKeys.users(),
+    queryFn: () => unwrap(adminService.listUsers()),
+  });
 
-    fetchUsers();
-  }, []);
+  const changeStatusMutation = useMutation({
+    mutationFn: ({ userId, status }: { userId: string; status: UserAccountStatus }) =>
+      unwrap(adminService.updateUserStatus(userId, status)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      setActiveUser(null);
+    },
+  });
 
-  const handleChangeStatus = async (userId: string, status: UserAccountStatus) => {
+  const handleChangeStatus = (userId: string, status: UserAccountStatus) => {
     if (status === 'pending') return;
-    const response = await adminService.updateUserStatus(userId, status);
-    if (response.success && response.data) {
-      setUsers((prev) => prev.map((u) => (u.id === userId ? response.data! : u)));
-    }
-    setActiveUser(null);
+    changeStatusMutation.mutate({ userId, status });
   };
 
   const filteredUsers = users.filter((u) => {

@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Megaphone } from 'lucide-react';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
 import { CreateListingModal } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
 import { Button } from '@/components/ui/Button';
 import { landlordService } from '@/services/landlordService';
-import type { Listing, ListingStatus, Unit } from '@/types/landlord';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import type { Listing, ListingStatus } from '@/types/landlord';
 
 const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -17,64 +20,67 @@ const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
 ];
 
 export default function LandlordListingsPage() {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | ListingStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [listingsRes, vacantUnitsRes] = await Promise.all([
-        landlordService.listListings(),
-        landlordService.listVacantUnits(),
-      ]);
-      if (listingsRes.success && listingsRes.data) setListings(listingsRes.data);
-      if (vacantUnitsRes.success && vacantUnitsRes.data) setVacantUnits(vacantUnitsRes.data);
-    };
+  const { data: listings = [] } = useQuery({
+    queryKey: landlordKeys.listings(),
+    queryFn: () => unwrap(landlordService.listListings()),
+  });
 
-    fetchData();
-  }, []);
+  const { data: vacantUnits = [] } = useQuery({
+    queryKey: landlordKeys.vacantUnits,
+    queryFn: () => unwrap(landlordService.listVacantUnits()),
+  });
 
-  const handlePublish = async (data: Omit<Listing, 'id' | 'status' | 'createdAt'>) => {
-    const {
-      unitId,
-      listingTitle,
-      monthlyRent,
-      rentPeriod,
-      allowsMonthlyPayment,
-      securityDeposit,
-      amenities,
-      availabilityDate,
-      allowPets,
-      furnished,
-      shortLetEnabled,
-    } = data;
-    const response = await landlordService.publishListing({
-      unitId,
-      listingTitle,
-      monthlyRent,
-      rentPeriod,
-      allowsMonthlyPayment,
-      securityDeposit,
-      amenities,
-      availabilityDate,
-      allowPets,
-      furnished,
-      shortLetEnabled,
-    });
-    if (response.success && response.data) {
-      setListings((prev) => [response.data!, ...prev]);
-      setVacantUnits((prev) => prev.filter((u) => u.id !== data.unitId));
-    }
-  };
+  const publishMutation = useMutation({
+    mutationFn: (data: Omit<Listing, 'id' | 'status' | 'createdAt'>) => {
+      const {
+        unitId,
+        listingTitle,
+        monthlyRent,
+        rentPeriod,
+        allowsMonthlyPayment,
+        securityDeposit,
+        amenities,
+        availabilityDate,
+        allowPets,
+        furnished,
+        shortLetEnabled,
+      } = data;
+      return unwrap(
+        landlordService.publishListing({
+          unitId,
+          listingTitle,
+          monthlyRent,
+          rentPeriod,
+          allowsMonthlyPayment,
+          securityDeposit,
+          amenities,
+          availabilityDate,
+          allowPets,
+          furnished,
+          shortLetEnabled,
+        })
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.listings() });
+      queryClient.invalidateQueries({ queryKey: landlordKeys.vacantUnits });
+    },
+  });
 
-  const handleTogglePause = async (id: string) => {
-    const response = await landlordService.toggleListingPause(id);
-    if (response.success && response.data) {
-      setListings((prev) => prev.map((l) => (l.id === id ? response.data! : l)));
-    }
-  };
+  const togglePauseMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.toggleListingPause(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.listings() }),
+  });
+
+  const handlePublish = (data: Omit<Listing, 'id' | 'status' | 'createdAt'>) =>
+    publishMutation.mutate(data);
+
+  const handleTogglePause = (id: string) => togglePauseMutation.mutate(id);
 
   const filteredListings = listings.filter((l) => filter === 'all' || l.status === filter);
 

@@ -1,55 +1,64 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
 import { getInitials } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
 import { adminService } from '@/services/adminService';
+import { unwrap } from '@/lib/apiHelpers';
+import { adminKeys } from '@/lib/queryKeys';
+import type { AdminProfile } from '@/types/admin';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
 }
 
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
-  const [fullName, setFullName] = useState(user?.fullName || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const { data: profile } = useQuery({
+    queryKey: adminKeys.profile,
+    queryFn: () => unwrap(adminService.getProfile()),
+  });
+
+  const initial: AdminProfile = profile ?? {
+    fullName: user?.fullName || '',
+    email: user?.email || '',
+  };
+
+  return <ProfileSettingsForm key={profile ? 'loaded' : 'initial'} initial={initial} />;
+};
+
+const ProfileSettingsForm = ({ initial }: { initial: AdminProfile }) => {
+  const queryClient = useQueryClient();
+  const [fullName, setFullName] = useState(initial.fullName);
+  const [email, setEmail] = useState(initial.email);
+  const [phone, setPhone] = useState(initial.phone || '');
+  const [avatarUrl, setAvatarUrl] = useState(initial.avatarUrl);
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    adminService.getProfile().then((response) => {
-      if (response.success && response.data) {
-        setFullName(response.data.fullName);
-        setEmail(response.data.email);
-        setPhone(response.data.phone || '');
-        setAvatarUrl(response.data.avatarUrl);
-      }
-    });
-  }, []);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    const response = await adminService.updateProfile({ fullName, email, phone });
-    setIsSaving(false);
-    if (response.success) {
+  const saveMutation = useMutation({
+    mutationFn: () => unwrap(adminService.updateProfile({ fullName, email, phone })),
+    onSuccess: () => {
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
-    }
-  };
+    },
+  });
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSave = () => saveMutation.mutate();
+
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (file: File) => unwrap(adminService.uploadAvatar(file)),
+    onSuccess: (data) => {
+      setAvatarUrl(data.avatarUrl);
+      queryClient.invalidateQueries({ queryKey: adminKeys.profile });
+    },
+  });
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploadingAvatar(true);
-    const response = await adminService.uploadAvatar(file);
-    setIsUploadingAvatar(false);
-    if (response.success && response.data) {
-      setAvatarUrl(response.data.avatarUrl);
-    }
+    uploadAvatarMutation.mutate(file);
   };
 
   return (
@@ -81,8 +90,8 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           variant="outline"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          disabled={isUploadingAvatar}
-          isLoading={isUploadingAvatar}
+          disabled={uploadAvatarMutation.isPending}
+          isLoading={uploadAvatarMutation.isPending}
         >
           Change Photo
         </Button>
@@ -122,8 +131,8 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         variant="primary"
         className="mt-6 gap-1.5"
         onClick={handleSave}
-        disabled={isSaving}
-        isLoading={isSaving}
+        disabled={saveMutation.isPending}
+        isLoading={saveMutation.isPending}
       >
         {saved && <Check className="w-4 h-4" />}
         {saved ? 'Saved' : 'Save Changes'}
