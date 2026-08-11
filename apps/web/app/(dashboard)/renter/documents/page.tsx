@@ -12,25 +12,10 @@ import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkA
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
 import { Toast } from '@/components/ui/Toast';
-
-interface Document {
-  id: string;
-  name: string;
-  type: 'lease' | 'receipt' | 'inspection' | 'other';
-  category: string;
-  size: string;
-  uploadedAt: string;
-  updatedAt: string;
-  url: string;
-  isFavorite: boolean;
-  sharedWith?: string[];
-  expiryDate?: string;
-  version: number;
-  status: 'active' | 'expiring' | 'expired';
-  tags?: string[];
-}
+import { renterService, type RenterDocument as Document } from '@/services/renterService';
 
 interface UploadData {
+  file: File;
   name: string;
   type: string;
   category: string;
@@ -48,181 +33,70 @@ export default function DocumentsPage() {
   const [sharingDocumentId, setSharingDocumentId] = useState<string | null>(null);
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
 
-  const loadDocuments = () => {
-    const mockDocuments: Document[] = [
-      {
-        id: 'doc_001',
-        name: 'Lease Agreement - Modern Downtown Loft',
-        type: 'lease',
-        category: 'Lease Agreements',
-        size: '2.4 MB',
-        uploadedAt: '2024-02-15',
-        updatedAt: '2024-02-15',
-        url: '#',
-        isFavorite: true,
-        version: 1,
-        status: 'active',
-        tags: ['lease', 'signed'],
-      },
-      {
-        id: 'doc_002',
-        name: 'Move-in Inspection Report',
-        type: 'inspection',
-        category: 'Inspection Reports',
-        size: '1.8 MB',
-        uploadedAt: '2024-02-28',
-        updatedAt: '2024-02-28',
-        url: '#',
-        isFavorite: false,
-        version: 1,
-        status: 'active',
-        tags: ['inspection', 'move-in'],
-      },
-      {
-        id: 'doc_003',
-        name: 'Rent Receipt - March 2024',
-        type: 'receipt',
-        category: 'Receipts',
-        size: '0.5 MB',
-        uploadedAt: '2024-03-01',
-        updatedAt: '2024-03-01',
-        url: '#',
-        isFavorite: false,
-        version: 1,
-        status: 'active',
-        tags: ['payment', 'rent'],
-      },
-      {
-        id: 'doc_004',
-        name: 'Rent Receipt - April 2024',
-        type: 'receipt',
-        category: 'Receipts',
-        size: '0.5 MB',
-        uploadedAt: '2024-04-01',
-        updatedAt: '2024-04-01',
-        url: '#',
-        isFavorite: false,
-        version: 1,
-        status: 'active',
-        tags: ['payment', 'rent'],
-      },
-      {
-        id: 'doc_005',
-        name: 'Property Insurance Certificate',
-        type: 'other',
-        category: 'Insurance',
-        size: '1.2 MB',
-        uploadedAt: '2024-03-15',
-        updatedAt: '2024-03-15',
-        url: '#',
-        isFavorite: true,
-        expiryDate: '2025-03-15',
-        version: 1,
-        status: 'active',
-        tags: ['insurance', 'certificate'],
-      },
-      {
-        id: 'doc_006',
-        name: 'Lease Renewal Notice',
-        type: 'lease',
-        category: 'Lease Agreements',
-        size: '1.1 MB',
-        uploadedAt: '2024-05-01',
-        updatedAt: '2024-05-01',
-        url: '#',
-        isFavorite: false,
-        version: 2,
-        status: 'active',
-        tags: ['lease', 'renewal'],
-      },
-      {
-        id: 'doc_007',
-        name: 'Rent Receipt - May 2024',
-        type: 'receipt',
-        category: 'Receipts',
-        size: '0.5 MB',
-        uploadedAt: '2024-05-01',
-        updatedAt: '2024-05-01',
-        url: '#',
-        isFavorite: false,
-        version: 1,
-        status: 'active',
-        tags: ['payment', 'rent'],
-      },
-      {
-        id: 'doc_008',
-        name: 'Pet Agreement',
-        type: 'other',
-        category: 'Miscellaneous',
-        size: '0.3 MB',
-        uploadedAt: '2024-03-01',
-        updatedAt: '2024-03-01',
-        url: '#',
-        isFavorite: false,
-        version: 1,
-        status: 'active',
-        tags: ['pet', 'agreement'],
-      },
-    ];
-    setDocuments(mockDocuments);
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadDocuments = async () => {
+      const res = await renterService.listDocuments();
+      if (res.success && res.data) setDocuments(res.data);
+    };
     loadDocuments();
   }, []);
 
-  const handleUpload = (data: UploadData) => {
-    const newDoc: Document = {
-      id: `doc_${Date.now()}`,
-      name: data.name,
-      type: data.type as 'lease' | 'receipt' | 'inspection' | 'other',
-      category: data.category,
-      size: data.size || '0.5 MB',
-      uploadedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      url: '#',
-      isFavorite: false,
-      version: 1,
-      status: 'active',
-      tags: data.tags || [],
-    };
-    setDocuments([newDoc, ...documents]);
+  const handleUpload = async (data: UploadData) => {
+    const res = await renterService.uploadDocument(
+      data.file,
+      data.name,
+      data.type,
+      data.category,
+      data.tags
+    );
+    if (res.success && res.data) {
+      const created = res.data;
+      setDocuments((prev) => [created, ...prev]);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setDocuments(documents.filter((d) => d.id !== id));
-    setSelectedDocuments(selectedDocuments.filter((sid) => sid !== id));
+  const handleDelete = async (id: string) => {
+    const res = await renterService.deleteDocument(id);
+    if (res.success) {
+      setDocuments((prev) => prev.filter((d) => d.id !== id));
+      setSelectedDocuments((prev) => prev.filter((sid) => sid !== id));
+    }
   };
 
-  const handleBulkDelete = () => {
-    setDocuments(documents.filter((d) => !selectedDocuments.includes(d.id)));
+  const handleBulkDelete = async () => {
+    await Promise.all(selectedDocuments.map((id) => renterService.deleteDocument(id)));
+    setDocuments((prev) => prev.filter((d) => !selectedDocuments.includes(d.id)));
     setSelectedDocuments([]);
   };
 
-  const handleToggleFavorite = (id: string) => {
-    setDocuments(documents.map((d) => (d.id === id ? { ...d, isFavorite: !d.isFavorite } : d)));
+  const handleToggleFavorite = async (id: string) => {
+    const res = await renterService.toggleDocumentFavorite(id);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setDocuments((prev) => prev.map((d) => (d.id === id ? updated : d)));
+    }
   };
 
   const handleShare = (id: string) => {
     setSharingDocumentId(id);
   };
 
-  const handleConfirmShare = (email: string) => {
+  const handleConfirmShare = async (email: string) => {
     if (!sharingDocumentId) return;
-    setDocuments((prev) =>
-      prev.map((d) =>
-        d.id === sharingDocumentId
-          ? { ...d, sharedWith: [...new Set([...(d.sharedWith || []), email])] }
-          : d
-      )
-    );
+    const res = await renterService.shareDocument(sharingDocumentId, email);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setDocuments((prev) => prev.map((d) => (d.id === sharingDocumentId ? updated : d)));
+    }
   };
 
-  const handleDownload = (id: string) => {
-    const doc = documents.find((d) => d.id === id);
-    setDownloadToast(doc ? `${doc.name} downloaded` : 'Document downloaded');
-    window.setTimeout(() => setDownloadToast(null), 3000);
+  const handleDownload = async (id: string) => {
+    const res = await renterService.getDocumentDownloadUrl(id);
+    if (res.success && res.data) {
+      window.open(res.data.url, '_blank', 'noopener,noreferrer');
+      setDownloadToast(`${res.data.name} downloaded`);
+      window.setTimeout(() => setDownloadToast(null), 3000);
+    }
   };
 
   const handleSelectDocument = (id: string) => {

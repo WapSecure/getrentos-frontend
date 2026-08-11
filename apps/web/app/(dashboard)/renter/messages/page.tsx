@@ -12,14 +12,18 @@ import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageLabels } from '@/components/renter/messages/MessageLabels';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
 import { MessageCircle } from 'lucide-react';
-import {
-  Conversation,
-  Message,
-  Attachment,
-  Reminder,
-  ReminderData,
-  FilterState,
-} from '@/types/messages';
+import { Conversation, Attachment, Reminder, ReminderData, FilterState } from '@/types/messages';
+import { renterService } from '@/services/renterService';
+
+const DEFAULT_REMINDERS: Reminder[] = [
+  {
+    id: 'rem_001',
+    message: 'Follow up on lease agreement',
+    date: '2026-08-15',
+    time: '10:00',
+    active: true,
+  },
+];
 
 export default function MessagesPage() {
   const user = useRenterUser();
@@ -28,249 +32,68 @@ export default function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [selectedLabel, setSelectedLabel] = useState<string>('all');
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-
-  const loadConversations = () => {
-    const mockConversations: Conversation[] = [
-      {
-        id: 'conv_001',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        participantId: 'landlord_001',
-        participantName: 'Jane Smith',
-        participantRole: 'landlord',
-        lastMessage: 'Great! I will send you the lease agreement shortly.',
-        lastMessageTime: '2024-06-10T14:30:00',
-        unreadCount: 2,
-        isPinned: true,
-        isArchived: false,
-        messages: [
-          {
-            id: 'msg_001',
-            conversationId: 'conv_001',
-            senderId: 'renter_001',
-            senderName: 'John Doe',
-            senderRole: 'renter',
-            text: "Hi Jane, I'm interested in the Modern Downtown Loft. When can I view it?",
-            timestamp: '2024-06-10T10:00:00',
-            read: true,
-          },
-          {
-            id: 'msg_002',
-            conversationId: 'conv_001',
-            senderId: 'landlord_001',
-            senderName: 'Jane Smith',
-            senderRole: 'landlord',
-            text: 'Hello John! The property is available for viewing tomorrow at 2pm.',
-            timestamp: '2024-06-10T12:30:00',
-            read: true,
-          },
-          {
-            id: 'msg_003',
-            conversationId: 'conv_001',
-            senderId: 'renter_001',
-            senderName: 'John Doe',
-            senderRole: 'renter',
-            text: "That works perfectly! I'll be there at 2pm.",
-            timestamp: '2024-06-10T13:15:00',
-            read: true,
-          },
-          {
-            id: 'msg_004',
-            conversationId: 'conv_001',
-            senderId: 'landlord_001',
-            senderName: 'Jane Smith',
-            senderRole: 'landlord',
-            text: 'Great! I will send you the lease agreement shortly.',
-            timestamp: '2024-06-10T14:30:00',
-            read: false,
-          },
-          {
-            id: 'msg_005',
-            conversationId: 'conv_001',
-            senderId: 'landlord_001',
-            senderName: 'Jane Smith',
-            senderRole: 'landlord',
-            text: 'Please bring your ID and proof of income for the application.',
-            timestamp: '2024-06-10T14:32:00',
-            read: false,
-          },
-        ],
-      },
-      {
-        id: 'conv_002',
-        propertyId: 'prop_002',
-        propertyName: 'Cozy Studio Apartment',
-        participantId: 'landlord_002',
-        participantName: 'John Doe',
-        participantRole: 'landlord',
-        lastMessage: "The application has been received. I'll review it today.",
-        lastMessageTime: '2024-06-09T16:45:00',
-        unreadCount: 0,
-        isPinned: false,
-        isArchived: false,
-        messages: [
-          {
-            id: 'msg_006',
-            conversationId: 'conv_002',
-            senderId: 'renter_001',
-            senderName: 'John Doe',
-            senderRole: 'renter',
-            text: "I've submitted the application for the studio apartment.",
-            timestamp: '2024-06-09T15:00:00',
-            read: true,
-          },
-          {
-            id: 'msg_007',
-            conversationId: 'conv_002',
-            senderId: 'landlord_002',
-            senderName: 'John Doe',
-            senderRole: 'landlord',
-            text: "The application has been received. I'll review it today.",
-            timestamp: '2024-06-09T16:45:00',
-            read: true,
-          },
-        ],
-      },
-      {
-        id: 'conv_003',
-        propertyId: 'prop_003',
-        propertyName: 'Luxury Beachfront Villa',
-        participantId: 'realtor_001',
-        participantName: 'Sarah Johnson',
-        participantRole: 'agent',
-        lastMessage: "I'll check the availability and get back to you.",
-        lastMessageTime: '2024-06-08T09:20:00',
-        unreadCount: 1,
-        isPinned: false,
-        isArchived: false,
-        messages: [
-          {
-            id: 'msg_008',
-            conversationId: 'conv_003',
-            senderId: 'renter_001',
-            senderName: 'John Doe',
-            senderRole: 'renter',
-            text: 'Is the luxury villa still available?',
-            timestamp: '2024-06-08T08:00:00',
-            read: true,
-          },
-          {
-            id: 'msg_009',
-            conversationId: 'conv_003',
-            senderId: 'realtor_001',
-            senderName: 'Sarah Johnson',
-            senderRole: 'agent',
-            text: "I'll check the availability and get back to you.",
-            timestamp: '2024-06-08T09:20:00',
-            read: false,
-          },
-        ],
-      },
-    ];
-    setConversations(mockConversations);
-    if (mockConversations.length > 0) {
-      setSelectedConversation(mockConversations[0]);
-    }
-
-    const savedReminders = localStorage.getItem('message_reminders');
-    if (savedReminders) {
-      setReminders(JSON.parse(savedReminders));
-    } else {
-      const mockReminders: Reminder[] = [
-        {
-          id: 'rem_001',
-          message: 'Follow up on lease agreement',
-          date: '2024-06-15',
-          time: '10:00',
-          active: true,
-        },
-        {
-          id: 'rem_002',
-          message: 'Schedule viewing for Modern Downtown Loft',
-          date: '2024-06-12',
-          time: '14:30',
-          active: true,
-        },
-      ];
-      setReminders(mockReminders);
-      localStorage.setItem('message_reminders', JSON.stringify(mockReminders));
-    }
-  };
+  const [reminders, setReminders] = useState<Reminder[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('message_reminders');
+    if (saved) return JSON.parse(saved);
+    localStorage.setItem('message_reminders', JSON.stringify(DEFAULT_REMINDERS));
+    return DEFAULT_REMINDERS;
+  });
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadConversations = async () => {
+      const res = await renterService.listConversations();
+      if (res.success && res.data) {
+        setConversations(res.data);
+        if (res.data.length > 0) setSelectedConversation(res.data[0]);
+      }
+    };
     loadConversations();
   }, []);
 
-  const handleSendMessage = (conversationId: string, text: string, attachments?: Attachment[]) => {
-    const newMessage: Message = {
-      id: `msg_${Date.now()}`,
-      conversationId,
-      senderId: 'renter_001',
-      senderName: user?.fullName || 'You',
-      senderRole: 'renter',
-      text,
-      timestamp: new Date().toISOString(),
-      read: false,
-      attachments,
-    };
-
-    setConversations((prev) =>
-      prev.map((conv) => {
-        if (conv.id === conversationId) {
-          return {
-            ...conv,
-            messages: [...conv.messages, newMessage],
-            lastMessage: text,
-            lastMessageTime: newMessage.timestamp,
-            unreadCount: 0,
-          };
-        }
-        return conv;
-      })
-    );
-
-    if (selectedConversation?.id === conversationId) {
-      setSelectedConversation((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          messages: [...prev.messages, newMessage],
-          lastMessage: text,
-          lastMessageTime: newMessage.timestamp,
-          unreadCount: 0,
-        };
-      });
+  const handleSendMessage = async (
+    conversationId: string,
+    text: string,
+    _attachments?: Attachment[]
+  ) => {
+    const res = await renterService.sendMessage(conversationId, text);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
+      if (selectedConversation?.id === conversationId) {
+        setSelectedConversation(updated);
+      }
     }
   };
 
-  const handleSelectConversation = (conversation: Conversation) => {
+  const handleSelectConversation = async (conversation: Conversation) => {
     setSelectedConversation(conversation);
-    setConversations((prev) =>
-      prev.map((conv) => {
-        if (conv.id === conversation.id) {
-          return { ...conv, unreadCount: 0 };
-        }
-        return conv;
-      })
-    );
+    if (conversation.unreadCount > 0) {
+      const res = await renterService.markConversationRead(conversation.id);
+      if (res.success && res.data) {
+        const updated = res.data;
+        setConversations((prev) =>
+          prev.map((conv) => (conv.id === conversation.id ? updated : conv))
+        );
+        setSelectedConversation(updated);
+      }
+    }
   };
 
-  const handlePinConversation = (conversationId: string) => {
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === conversationId ? { ...conv, isPinned: !conv.isPinned } : conv
-      )
-    );
+  const handlePinConversation = async (conversationId: string) => {
+    const res = await renterService.togglePinConversation(conversationId);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
+    }
   };
 
-  const handleArchiveConversation = (conversationId: string) => {
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === conversationId ? { ...conv, isArchived: !conv.isArchived } : conv
-      )
-    );
+  const handleArchiveConversation = async (conversationId: string) => {
+    const res = await renterService.toggleArchiveConversation(conversationId);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
+    }
   };
 
   const handleAddReminder = (reminderData: ReminderData) => {
