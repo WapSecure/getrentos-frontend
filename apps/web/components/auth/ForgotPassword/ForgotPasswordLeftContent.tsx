@@ -6,9 +6,9 @@ import { Logo } from '@/components/ui/Logo';
 
 export const ForgotPasswordLeftContent = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#0a1a1f] dark:to-[#1a2a2f] transition-all duration-300">
+    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
       <div className="absolute inset-0 opacity-10 lg:opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#c4a747] rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64] rounded-full blur-3xl" />
       </div>
 
@@ -25,15 +25,15 @@ export const ForgotPasswordLeftContent = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 mb-6">
-              <Sparkles className="w-3 h-3 text-[#c4a747]" />
+              <Sparkles className="w-3 h-3 text-primary" />
               <span className="text-xs font-medium text-gray-700 dark:text-white/80">
                 FORGOT PASSWORD
               </span>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
               Don&apos;t worry,
-              <span className="block text-[#c4a747] mt-2">we&apos;ve got your back.</span>
+              <span className="block text-primary mt-2">we&apos;ve got your back.</span>
             </h1>
 
             <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
@@ -43,22 +43,18 @@ export const ForgotPasswordLeftContent = () => {
 
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
-                <Key className="w-5 h-5 text-[#c4a747]" />
+                <Key className="w-5 h-5 text-primary" />
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Secure Reset Process
-                  </h3>
+                  <h3 className="text-sm font-semibold text-foreground">Secure Reset Process</h3>
                   <p className="text-xs text-gray-500 dark:text-white/60">
                     Multi-step verification ensures security
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
-                <Lock className="w-5 h-5 text-[#c4a747]" />
+                <Lock className="w-5 h-5 text-primary" />
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Create Strong Password
-                  </h3>
+                  <h3 className="text-sm font-semibold text-foreground">Create Strong Password</h3>
                   <p className="text-xs text-gray-500 dark:text-white/60">
                     Use a unique password you haven&apos;t used before
                   </p>
@@ -68,16 +64,16 @@ export const ForgotPasswordLeftContent = () => {
           </motion.div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/10">
+        <div className="mt-12 pt-6 border-t border-border">
           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-white/40">
             <span className="flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-[#c4a747]" /> Secure
+              <CheckCircle className="w-3 h-3 text-primary" /> Secure
             </span>
             <span className="flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-[#c4a747]" /> Encrypted
+              <CheckCircle className="w-3 h-3 text-primary" /> Encrypted
             </span>
             <span className="flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-[#c4a747]" /> 24/7 Support
+              <CheckCircle className="w-3 h-3 text-primary" /> 24/7 Support
             </span>
           </div>
         </div>

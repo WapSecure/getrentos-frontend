@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { VerificationLeftContent, VerificationRightContent } from '@/components/auth/Verification';
 import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSignup } from '@/hooks/useSignup';
 import { ROUTES, getDashboardRoute } from '@/lib/constants/auth';
 
@@ -50,14 +51,18 @@ export default function VerificationPage() {
   const showBackButton = currentStep !== 'processing' && currentStep !== 'complete';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-[#0a1a1f] dark:to-[#0d2a2f] flex relative">
+    <div className="min-h-screen bg-background flex relative">
       <AnimatedParticles />
+
+      <div className="fixed top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
 
       {/* Back Button - Top Left */}
       {showBackButton && (
         <button
           onClick={handleBack}
-          className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+          className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
           aria-label="Go back"
         >
           <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />

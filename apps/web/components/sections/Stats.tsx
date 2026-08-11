@@ -59,8 +59,11 @@ export const Stats = () => {
   const isInView = useInView(ref, { once: true });
 
   return (
-    <section ref={ref} className="py-20 px-4 bg-gray-50 dark:bg-[#0d1a1f] relative overflow-hidden">
-      <ParticleBackground count={40} color="#c4a747" className="z-0" />
+    <section
+      ref={ref}
+      className="py-20 px-4 bg-gray-50 dark:bg-background relative overflow-hidden"
+    >
+      <ParticleBackground count={40} color="#2c5583" className="z-0" />
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -68,10 +71,10 @@ export const Stats = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-block px-3 py-1 bg-gray-200 dark:bg-white/10 rounded-full text-xs font-medium text-[#c4a747] mb-4">
+          <div className="inline-block px-3 py-1 bg-gray-200 dark:bg-white/10 rounded-full text-xs font-medium text-primary mb-4">
             PLATFORM METRICS
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Trusted by thousands
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -88,11 +91,11 @@ export const Stats = () => {
               transition={{ delay: index * 0.1, duration: 0.5 }}
               className="relative group"
             >
-              <div className="relative bg-white dark:bg-[#1a2a2f] rounded-2xl p-6 text-center border border-gray-200 dark:border-white/10 group-hover:border-[#c4a747]/30 transition-all duration-300">
+              <div className="relative bg-card rounded-2xl p-6 text-center border border-border group-hover:border-primary/30 transition-all duration-300">
                 <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center mx-auto mb-4">
-                  <stat.icon className="w-6 h-6 text-[#c4a747]" />
+                  <stat.icon className="w-6 h-6 text-primary" />
                 </div>
-                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="text-4xl font-bold text-foreground mb-2">
                   <CountUp value={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
                 </div>
                 <p className="text-gray-600 dark:text-gray-400">{stat.label}</p>

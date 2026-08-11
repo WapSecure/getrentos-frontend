@@ -122,10 +122,10 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
 
         {/* Mobile Header */}
         <div className="lg:hidden text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] rounded-2xl mb-4">
-            <Shield className="w-6 h-6 text-white dark:text-[#0a1a1f]" />
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-2xl mb-4">
+            <Shield className="w-6 h-6 text-white dark:text-background" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Reset Password</h2>
+          <h2 className="text-2xl font-bold text-foreground">Reset Password</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             We&apos;ll help you get back into your account
           </p>

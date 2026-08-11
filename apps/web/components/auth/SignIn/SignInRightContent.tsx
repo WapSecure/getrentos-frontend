@@ -104,7 +104,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="fixed top-6 left-6 lg:static lg:mb-6 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+          className="fixed top-6 left-6 lg:static lg:mb-6 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           <span className="text-sm text-gray-700 dark:text-gray-300">Back</span>
@@ -112,10 +112,10 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
         {/* Mobile Header */}
         <div className="lg:hidden text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] rounded-2xl mb-4">
-            <Shield className="w-6 h-6 text-white dark:text-[#0a1a1f]" />
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-2xl mb-4">
+            <Shield className="w-6 h-6 text-white dark:text-background" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
+          <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Sign in to continue your property journey
           </p>
@@ -137,7 +137,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             onClick={() => setMethod('email')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
               method === 'email'
-                ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+                ? 'bg-card text-primary shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -148,7 +148,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             onClick={() => setMethod('phone')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
               method === 'phone'
-                ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+                ? 'bg-card text-primary shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -159,7 +159,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             onClick={() => setMethod('magic-link')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
               method === 'magic-link'
-                ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+                ? 'bg-card text-primary shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -177,18 +177,11 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             Don&apos;t have an account?{' '}
             <a
               href={ROUTES.SIGNUP}
-              className="font-medium text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+              className="font-medium text-primary hover:text-primary-hover transition-colors"
             >
               Create one now
             </a>
           </p>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-6 p-3 rounded-lg bg-gray-50 dark:bg-white/5 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Demo Credentials</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Email: demo@getrentos.com</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Password: demo123</p>
         </div>
       </div>
     </div>

@@ -90,7 +90,10 @@ export const PaymentNotifications = ({
                 <p className="text-xs text-gray-500">{unreadCount} unread</p>
               </div>
               {unreadCount > 0 && (
-                <button onClick={onClearAll} className="text-xs text-primary hover:text-[#a88d3a]">
+                <button
+                  onClick={onClearAll}
+                  className="text-xs text-primary hover:text-primary-hover"
+                >
                   Clear all
                 </button>
               )}

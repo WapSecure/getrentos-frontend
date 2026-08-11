@@ -63,7 +63,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           }}
           className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
             method === 'email'
-              ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+              ? 'bg-card text-primary shadow-sm'
               : 'text-gray-600 dark:text-gray-400'
           }`}
         >
@@ -79,7 +79,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           }}
           className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
             method === 'phone'
-              ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+              ? 'bg-card text-primary shadow-sm'
               : 'text-gray-600 dark:text-gray-400'
           }`}
         >
@@ -98,7 +98,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
             value={identifier}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
-            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               touched && error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder={method === 'email' ? 'you@example.com' : '+1 234 567 8900'}

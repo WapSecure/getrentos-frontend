@@ -43,7 +43,7 @@ const features = [
 export const Features = () => {
   return (
     <section id="features" className="py-20 px-4 relative overflow-hidden">
-      <ParticleBackground count={30} color="#c4a747" className="z-0" />
+      <ParticleBackground count={30} color="#2c5583" className="z-0" />
       <div className="max-w-7xl mx-auto relative z-10">
         <SectionHeader
           badge="PLATFORM FEATURES"
@@ -54,11 +54,9 @@ export const Features = () => {
           {features.map((feature, index) => (
             <Card key={index} className="p-6 text-center" delay={index * 0.05}>
               <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center mx-auto mb-4">
-                <feature.icon className="w-6 h-6 text-[#c4a747]" />
+                <feature.icon className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {feature.title}
-              </h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
             </Card>
           ))}

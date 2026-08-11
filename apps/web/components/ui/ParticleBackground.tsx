@@ -12,7 +12,7 @@ interface Particle {
   opacity: number;
 }
 
-export const ParticleBackground = ({ count = 50, color = '#c4a747', className = '' }) => {
+export const ParticleBackground = ({ count = 50, color = '#2c5583', className = '' }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const initialized = useRef(false);

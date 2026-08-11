@@ -56,7 +56,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
           <input
             type="email"
             {...register('identifier')}
-            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.identifier
                 ? 'border-red-500'
                 : touchedFields.identifier

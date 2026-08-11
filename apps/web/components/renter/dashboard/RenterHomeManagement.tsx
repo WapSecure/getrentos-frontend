@@ -132,7 +132,7 @@ export const RenterHomeManagement = () => {
                 <p className="text-xs text-gray-500">Expires: Sep 15, 2024</p>
               </div>
             </div>
-            <button className="text-xs text-primary hover:text-[#a88d3a]">Generate</button>
+            <button className="text-xs text-primary hover:text-primary-hover">Generate</button>
           </div>
         </div>
       </div>

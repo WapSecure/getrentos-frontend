@@ -86,7 +86,7 @@ export const EmailSignIn = ({
           <input
             type="email"
             {...register('identifier')}
-            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all ${
+            className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.identifier
                 ? 'border-red-500'
                 : touchedFields.identifier
@@ -115,7 +115,7 @@ export const EmailSignIn = ({
           <input
             type={showPassword ? 'text' : 'password'}
             {...register('password')}
-            className="w-full px-4 py-3 border rounded-xl bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all pr-10"
+            className="w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-10"
             placeholder="Enter your password"
           />
           <button
@@ -134,13 +134,13 @@ export const EmailSignIn = ({
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#c4a747] focus:ring-[#c4a747]"
+            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
           />
           <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
         </label>
         <a
           href={ROUTES.FORGOT_PASSWORD}
-          className="text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+          className="text-sm text-primary hover:text-primary-hover transition-colors"
         >
           Forgot password?
         </a>

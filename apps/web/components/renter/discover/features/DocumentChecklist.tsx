@@ -127,7 +127,7 @@ export const DocumentChecklist = () => {
                   <button
                     onClick={() => handleUpload(doc.id)}
                     disabled={isUploading === doc.id}
-                    className="flex items-center gap-1 text-xs text-primary hover:text-[#a88d3a]"
+                    className="flex items-center gap-1 text-xs text-primary hover:text-primary-hover"
                   >
                     {isUploading === doc.id ? (
                       <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />

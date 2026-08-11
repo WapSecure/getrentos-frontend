@@ -7,12 +7,12 @@ import { VerificationBenefits } from './VerificationBenefits';
 
 export const VerificationLeftContent = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#0a1a1f] dark:to-[#1a2a2f] transition-all duration-300">
+    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10 lg:opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#c4a747] rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-[#c4a747]/20 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/20 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
@@ -29,15 +29,15 @@ export const VerificationLeftContent = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 mb-6">
-              <Sparkles className="w-3 h-3 text-[#c4a747]" />
+              <Sparkles className="w-3 h-3 text-primary" />
               <span className="text-xs font-medium text-gray-700 dark:text-white/80">
                 VERIFICATION REQUIRED
               </span>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
               Verify Your Identity
-              <span className="block text-[#c4a747] mt-2">Unlock Full Platform Access</span>
+              <span className="block text-primary mt-2">Unlock Full Platform Access</span>
             </h1>
 
             <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
@@ -52,13 +52,11 @@ export const VerificationLeftContent = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="p-4 rounded-xl bg-gradient-to-r from-[#c4a747]/10 to-transparent border border-[#c4a747]/20"
+              className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20"
             >
               <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-4 h-4 text-[#c4a747]" />
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  Your Data is Secure
-                </span>
+                <Shield className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Your Data is Secure</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-white/50">
                 Your documents are encrypted and only used for verification purposes. We comply with
@@ -69,19 +67,19 @@ export const VerificationLeftContent = () => {
         </div>
 
         {/* Bottom Trust Signals */}
-        <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/10">
+        <div className="mt-12 pt-6 border-t border-border">
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-white/40">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 SOC2 Certified
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 GDPR Compliant
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 256-bit Encryption
               </span>
             </div>

@@ -74,17 +74,15 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-[#1a2a2f] rounded-2xl max-w-md w-full mx-4 overflow-hidden"
+        className="bg-card rounded-2xl max-w-md w-full mx-4 overflow-hidden"
       >
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#c4a747]/10 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-[#c4a747]" />
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Identity Verification
-              </h2>
+              <h2 className="text-xl font-bold text-foreground">Identity Verification</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Required for platform access
               </p>
@@ -104,9 +102,9 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
                       setSelectedIdType(type.id);
                       setStep('id-upload');
                     }}
-                    className="w-full p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#c4a747] hover:bg-[#c4a747]/5 transition-all"
+                    className="w-full p-4 text-left rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all"
                   >
-                    <div className="font-semibold text-gray-900 dark:text-white">{type.name}</div>
+                    <div className="font-semibold text-foreground">{type.name}</div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       {type.description}
                     </div>
@@ -121,7 +119,7 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
               <p className="text-gray-600 dark:text-gray-300">
                 Upload a clear photo of your {idTypes.find((t) => t.id === selectedIdType)?.name}
               </p>
-              <label className="block w-full p-8 text-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 cursor-pointer hover:border-[#c4a747] transition-all">
+              <label className="block w-full p-8 text-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 cursor-pointer hover:border-primary transition-all">
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Click to upload or drag and drop
@@ -148,14 +146,14 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
               </div>
               <button
                 onClick={capturePhoto}
-                className="w-full flex items-center justify-center gap-2 bg-[#c4a747] text-[#0a1a1f] py-3 rounded-xl font-semibold"
+                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold"
               >
                 <Camera className="w-4 h-4" />
                 Capture Photo
               </button>
               <button
                 onClick={startLivenessCheck}
-                className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-[#c4a747]"
+                className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-primary"
               >
                 Retry Camera Access
               </button>
@@ -164,12 +162,10 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
 
           {step === 'processing' && (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#c4a747]/10 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-[#c4a747] border-t-transparent rounded-full animate-spin" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Verifying Identity
-              </h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Verifying Identity</h3>
               <p className="text-gray-500 dark:text-gray-400">
                 Please wait while we verify your documents...
               </p>
@@ -181,9 +177,7 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Verification Complete!
-              </h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Verification Complete!</h3>
               <p className="text-gray-500 dark:text-gray-400">
                 Your identity has been verified successfully.
               </p>
@@ -192,10 +186,10 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
         </div>
 
         {onSkip && step === 'id-select' && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-t border-border">
             <button
               onClick={onSkip}
-              className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-[#c4a747] text-center"
+              className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-primary text-center"
             >
               Skip for now (Limited access)
             </button>

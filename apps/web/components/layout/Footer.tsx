@@ -42,11 +42,11 @@ export const Footer = () => {
       initial="hidden"
       animate={controls}
       variants={containerVariants}
-      className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#0a1a1f] dark:to-[#0d2a2f] border-t border-gray-200 dark:border-white/10"
+      className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-muted border-t border-border"
     >
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-r from-[#c4a747]/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-[#2e7d64]/5 to-transparent rounded-full blur-3xl" />
       </div>
 
@@ -64,21 +64,21 @@ export const Footer = () => {
               <motion.a
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 href="#"
-                className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#c4a747] hover:text-white transition-all"
+                className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-all"
               >
                 <Twitter className="w-4 h-4" />
               </motion.a>
               <motion.a
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 href="#"
-                className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#c4a747] hover:text-white transition-all"
+                className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-all"
               >
                 <Linkedin className="w-4 h-4" />
               </motion.a>
               <motion.a
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 href="#"
-                className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#c4a747] hover:text-white transition-all"
+                className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-all"
               >
                 <Github className="w-4 h-4" />
               </motion.a>
@@ -87,7 +87,7 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
               Quick Links
             </h3>
             <ul className="space-y-2">
@@ -95,7 +95,7 @@ export const Footer = () => {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#c4a747] transition-colors duration-200"
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200"
                   >
                     {item}
                   </Link>
@@ -106,7 +106,7 @@ export const Footer = () => {
 
           {/* Support */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
               Support
             </h3>
             <ul className="space-y-2">
@@ -115,7 +115,7 @@ export const Footer = () => {
                   <li key={item}>
                     <Link
                       href="#"
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#c4a747] transition-colors duration-200"
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200"
                     >
                       {item}
                     </Link>
@@ -127,20 +127,20 @@ export const Footer = () => {
 
           {/* Contact Info */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
               Contact Us
             </h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Mail className="w-4 h-4 text-[#c4a747]" />
+                <Mail className="w-4 h-4 text-primary" />
                 <span>support@getrentos.com</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Phone className="w-4 h-4 text-[#c4a747]" />
+                <Phone className="w-4 h-4 text-primary" />
                 <span>+1 (555) 123-4567</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <MapPin className="w-4 h-4 text-[#c4a747] mt-0.5" />
+                <MapPin className="w-4 h-4 text-primary mt-0.5" />
                 <span>123 Property Street, Real Estate City, RE 12345</span>
               </li>
             </ul>
@@ -148,10 +148,7 @@ export const Footer = () => {
         </div>
 
         {/* Divider */}
-        <motion.div
-          variants={itemVariants}
-          className="border-t border-gray-200 dark:border-white/10 my-8"
-        />
+        <motion.div variants={itemVariants} className="border-t border-border my-8" />
 
         {/* Bottom Bar */}
         <motion.div
@@ -161,25 +158,25 @@ export const Footer = () => {
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-[#c4a747] transition-colors"
+              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-[#c4a747] transition-colors"
+              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
             >
               Terms of Service
             </Link>
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-[#c4a747] transition-colors"
+              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
             >
               Cookie Policy
             </Link>
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-[#c4a747] transition-colors"
+              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
             >
               GDPR Compliance
             </Link>
@@ -200,7 +197,7 @@ export const Footer = () => {
         {/* Trust Badge */}
         <motion.div
           variants={itemVariants}
-          className="text-center mt-6 pt-4 border-t border-gray-200 dark:border-white/10"
+          className="text-center mt-6 pt-4 border-t border-border"
         >
           <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500 dark:text-gray-500">
             <span className="flex items-center gap-1">

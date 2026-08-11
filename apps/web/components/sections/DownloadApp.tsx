@@ -12,14 +12,14 @@ export const DownloadApp = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-[#1a2a2f] dark:to-[#0f2a38] rounded-2xl p-8 md:p-12 border border-gray-200 dark:border-white/10"
+          className="bg-secondary rounded-2xl p-8 md:p-12 border border-border"
         >
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="inline-block px-3 py-1 bg-gray-200 dark:bg-white/10 rounded-full text-xs font-medium text-[#c4a747] mb-4">
+              <div className="inline-block px-3 py-1 bg-gray-200 dark:bg-white/10 rounded-full text-xs font-medium text-primary mb-4">
                 MOBILE APP
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                 Get the full experience on your phone
               </h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -43,8 +43,8 @@ export const DownloadApp = () => {
                 transition={{ duration: 4, repeat: Infinity }}
                 className="text-center"
               >
-                <div className="w-48 h-48 bg-white dark:bg-white/5 rounded-2xl flex flex-col items-center justify-center border border-gray-200 dark:border-white/10 shadow-sm">
-                  <Smartphone className="w-16 h-16 text-[#c4a747] mb-3" />
+                <div className="w-48 h-48 bg-white dark:bg-white/5 rounded-2xl flex flex-col items-center justify-center border border-border shadow-sm">
+                  <Smartphone className="w-16 h-16 text-primary mb-3" />
                   <QrCode className="w-12 h-12 text-gray-400 dark:text-gray-500" />
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-3">Scan to download</p>
                 </div>

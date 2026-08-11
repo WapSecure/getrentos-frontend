@@ -12,7 +12,7 @@ interface Particle {
   delay: number;
 }
 
-export const AnimatedParticles = ({ count = 30, color = 'rgba(196, 167, 71, 0.2)' }) => {
+export const AnimatedParticles = ({ count = 30, color = 'rgba(44, 85, 131, 0.2)' }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [mounted, setMounted] = useState(false);
 

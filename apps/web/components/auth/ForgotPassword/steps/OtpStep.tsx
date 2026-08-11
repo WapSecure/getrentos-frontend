@@ -69,13 +69,11 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#c4a747]/10 flex items-center justify-center"
+          className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center"
         >
-          <CheckCircle className="w-8 h-8 text-[#c4a747]" />
+          <CheckCircle className="w-8 h-8 text-primary" />
         </motion.div>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Verify Your {method}
-        </h3>
+        <h3 className="text-xl font-semibold text-foreground mb-2">Verify Your {method}</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           We sent a verification code to <span className="font-medium">{identifier}</span>
         </p>
@@ -90,7 +88,7 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
             inputMode="numeric"
             value={otpArray[index] || ''}
             onChange={(e) => handleOtpChange(index, e.target.value)}
-            className="w-12 h-12 text-center text-xl font-semibold border rounded-lg bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all"
+            className="w-12 h-12 text-center text-xl font-semibold border rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             maxLength={1}
           />
         ))}
@@ -102,7 +100,7 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         ) : (
           <button
             onClick={handleResend}
-            className="text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+            className="text-sm text-primary hover:text-primary-hover transition-colors"
           >
             Resend code
           </button>

@@ -35,10 +35,10 @@ export const IdSelectionStep = ({
       className="space-y-4"
     >
       <div className="text-center mb-4">
-        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#c4a747]/10 flex items-center justify-center">
-          <IdCard className="w-8 h-8 text-[#c4a747]" />
+        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <IdCard className="w-8 h-8 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Select ID Type</h3>
+        <h3 className="text-lg font-semibold text-foreground">Select ID Type</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Choose your preferred government-issued ID
         </p>
@@ -49,14 +49,14 @@ export const IdSelectionStep = ({
           <button
             key={type.id}
             onClick={() => handleSelectId(type.id)}
-            className="w-full p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#c4a747] hover:bg-[#c4a747]/5 transition-all"
+            className="w-full p-4 text-left rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center">
                 <IdCardIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </div>
               <div className="flex-1">
-                <div className="font-semibold text-gray-900 dark:text-white">{type.name}</div>
+                <div className="font-semibold text-foreground">{type.name}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">{type.issuer}</div>
               </div>
               <ArrowLeft className="w-4 h-4 text-gray-400 rotate-180" />
@@ -69,7 +69,7 @@ export const IdSelectionStep = ({
       <div className="mt-6 text-center">
         <button
           onClick={onSkip}
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-[#c4a747] transition-colors"
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
         >
           Skip for now (Limited access)
         </button>

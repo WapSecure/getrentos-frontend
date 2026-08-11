@@ -50,23 +50,21 @@ export const Hero = () => {
   if (!mounted) {
     return (
       <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#0a1a1f] dark:via-[#0d2a2f] dark:to-[#0a1a1f]">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-[#c4a747]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute inset-0 bg-background">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64]/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-[#c4a747]/5 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c4a747]/10 border border-[#c4a747]/20 mb-6">
-            <Sparkles className="w-4 h-4 text-[#c4a747]" />
-            <span className="text-sm font-medium text-[#c4a747]">Trust-Driven Platform</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Trust-Driven Platform</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6">
             The trust-driven
-            <span className="block bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] bg-clip-text text-transparent">
-              property operating system.
-            </span>
+            <span className="block text-primary">property operating system.</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
             One workspace for renters, landlords, owners, buyers, realtors and agents. Verified
@@ -83,10 +81,10 @@ export const Hero = () => {
             </Button>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 pt-8 border-t border-gray-200 dark:border-white/10">
+          <div className="flex flex-wrap justify-center gap-6 pt-8 border-t border-border">
             {trustItems.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <item.icon className="w-4 h-4 text-[#c4a747]" />
+                <item.icon className="w-4 h-4 text-primary" />
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                   {item.text}
                 </span>
@@ -106,10 +104,10 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#0a1a1f] dark:via-[#0d2a2f] dark:to-[#0a1a1f]">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#c4a747]/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute inset-0 bg-background">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64]/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-[#c4a747]/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
       </div>
 
       {particles.length > 0 && dimensions.width > 0 && (
@@ -117,7 +115,7 @@ export const Hero = () => {
           {particles.map((particle, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-[#c4a747]/30 rounded-full"
+              className="absolute w-1 h-1 bg-primary/30 rounded-full"
               initial={{
                 x: particle.x,
                 y: particle.y,
@@ -147,17 +145,15 @@ export const Hero = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring' }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c4a747]/10 border border-[#c4a747]/20 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
           >
-            <Sparkles className="w-4 h-4 text-[#c4a747]" />
-            <span className="text-sm font-medium text-[#c4a747]">Trust-Driven Platform</span>
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Trust-Driven Platform</span>
           </motion.div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6">
             The trust-driven
-            <span className="block bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] bg-clip-text text-transparent">
-              property operating system.
-            </span>
+            <span className="block text-primary">property operating system.</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
             One workspace for renters, landlords, owners, buyers, realtors and agents. Verified
@@ -174,7 +170,7 @@ export const Hero = () => {
             </Button>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 pt-8 border-t border-gray-200 dark:border-white/10">
+          <div className="flex flex-wrap justify-center gap-6 pt-8 border-t border-border">
             {trustItems.map((item, idx) => (
               <motion.div
                 key={idx}
@@ -183,7 +179,7 @@ export const Hero = () => {
                 transition={{ delay: idx * 0.1 }}
                 className="flex items-center gap-2"
               >
-                <item.icon className="w-4 h-4 text-[#c4a747]" />
+                <item.icon className="w-4 h-4 text-primary" />
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                   {item.text}
                 </span>

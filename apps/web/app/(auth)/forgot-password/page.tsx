@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ForgotPasswordLeftContent } from '@/components/auth/ForgotPassword/ForgotPasswordLeftContent';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPassword/ForgotPasswordForm';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
@@ -23,8 +24,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-[#0a1a1f] dark:to-[#0d2a2f] flex relative">
+    <div className="min-h-screen bg-background flex relative">
       <AnimatedParticles />
+      <div className="fixed top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}

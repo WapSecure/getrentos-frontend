@@ -154,7 +154,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
                         {unreadCount > 0 && (
                           <button
                             onClick={handleMarkAllAsRead}
-                            className="text-xs text-primary hover:text-[#a88d3a]"
+                            className="text-xs text-primary hover:text-primary-hover"
                           >
                             Mark all as read
                           </button>
@@ -190,7 +190,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
                       <div className="p-2 border-t border-border">
                         <Link
                           href="/agent/tasks"
-                          className="block w-full text-center text-sm text-primary hover:text-[#a88d3a] py-1"
+                          className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
                           View all tasks

@@ -83,15 +83,13 @@ export const OtpVerification = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#c4a747]/10 flex items-center justify-center">
-          <CheckCircle className="w-6 h-6 text-[#c4a747]" />
+        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <CheckCircle className="w-6 h-6 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-          Verify your {method}
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground mb-1">Verify your {method}</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           We sent a verification code to{' '}
-          <span className="font-medium text-gray-900 dark:text-white">{identifier}</span>
+          <span className="font-medium text-foreground">{identifier}</span>
         </p>
       </div>
 
@@ -105,7 +103,7 @@ export const OtpVerification = ({
             inputMode="numeric"
             value={digit}
             onChange={(e) => handleOtpChange(index, e.target.value)}
-            className="w-12 h-12 text-center text-xl font-semibold border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2a2f] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#c4a747] focus:border-transparent transition-all"
+            className="w-12 h-12 text-center text-xl font-semibold border border-gray-300 dark:border-gray-600 rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             maxLength={1}
           />
         ))}
@@ -121,7 +119,7 @@ export const OtpVerification = ({
           <button
             onClick={handleResend}
             disabled={isLoading}
-            className="inline-flex items-center gap-1 text-sm text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
             Resend code
@@ -135,10 +133,10 @@ export const OtpVerification = ({
         disabled={otp.join('').length !== AUTH_CONSTANTS.OTP_LENGTH || isLoading}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="w-full flex items-center justify-center gap-2 bg-[#c4a747] text-[#0a1a1f] py-3 rounded-xl font-semibold hover:bg-[#a88d3a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
-          <div className="w-5 h-5 border-2 border-[#0a1a1f] border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
         ) : (
           <>
             Verify & Continue

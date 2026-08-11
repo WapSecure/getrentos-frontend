@@ -37,10 +37,10 @@ export const TrustSecurity = () => {
     <section className="py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-block px-3 py-1 bg-gray-200 dark:bg-white/10 rounded-full text-xs font-medium text-[#c4a747] mb-4">
+          <div className="inline-block px-3 py-1 bg-gray-200 dark:bg-white/10 rounded-full text-xs font-medium text-primary mb-4">
             TRUST & SECURITY
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Your security is our priority
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -59,14 +59,12 @@ export const TrustSecurity = () => {
               whileHover={{ scale: 1.05 }}
               className="relative group"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#c4a747]/0 to-[#c4a747]/0 group-hover:from-[#c4a747]/5 group-hover:to-transparent rounded-2xl transition-all duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:to-transparent rounded-2xl transition-all duration-300" />
               <div className="relative p-6 text-center">
                 <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-6 h-6 text-[#c4a747]" />
+                  <feature.icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {feature.title}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
               </div>
             </motion.div>

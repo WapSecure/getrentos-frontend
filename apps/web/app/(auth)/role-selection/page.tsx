@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
 import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle';
 import { Logo } from '@/components/ui/Logo';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSignup } from '@/hooks/useSignup';
 import { ROLES } from '@/lib/constants/auth';
 
@@ -34,19 +35,23 @@ export default function RoleSelectionPage() {
   const roleList = Object.values(ROLES).sort((a, b) => a.order - b.order);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-[#0a1a1f] dark:to-[#0d2a2f] py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       {/* Back Button */}
       <motion.button
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
         onClick={handleBack}
-        className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+        className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
         aria-label="Go back"
       >
         <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
         <span className="text-sm text-gray-700 dark:text-gray-300">Back</span>
       </motion.button>
+
+      <div className="fixed top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -59,9 +64,7 @@ export default function RoleSelectionPage() {
           <div className="flex justify-center mb-4">
             <Logo size="lg" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Choose your role(s)
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Choose your role(s)</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">
             Select how you&apos;ll use GetRentos to get a personalized experience
           </p>
@@ -114,13 +117,13 @@ export default function RoleSelectionPage() {
           <button
             onClick={handleContinue}
             disabled={signupData.selectedRoles.length === 0 || isLoading}
-            className="w-full flex items-center justify-center gap-2 bg-[#c4a747] text-[#0a1a1f] py-3 rounded-xl font-semibold hover:bg-[#a88d3a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                className="w-5 h-5 border-2 border-[#0a1a1f] border-t-transparent rounded-full"
+                className="w-5 h-5 border-2 border-background border-t-transparent rounded-full"
               />
             ) : (
               <>

@@ -8,6 +8,7 @@ import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
 import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod } from '@/lib/constants/auth';
 
@@ -78,13 +79,13 @@ export default function SignupPage() {
   }, [step]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-[#0a1a1f] dark:to-[#0d2a2f] flex relative">
+    <div className="min-h-screen bg-background flex relative">
       <AnimatedParticles />
 
       {/* Back Button - Top Left */}
       <button
         onClick={handleBack}
-        className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+        className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
         aria-label="Go back"
       >
         <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
@@ -96,12 +97,16 @@ export default function SignupPage() {
       {/* Start Over Button */}
       <button
         onClick={handleStartOver}
-        className="fixed top-6 left-28 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+        className="fixed top-6 left-28 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
         aria-label="Start over"
       >
         <RefreshCw className="w-4 h-4 text-gray-700 dark:text-gray-300" />
         <span className="text-sm text-gray-700 dark:text-gray-300">Start Over</span>
       </button>
+
+      <div className="fixed top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
 
       {/* Left Side - Content */}
       <SignupLeftContent />
@@ -111,10 +116,10 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#c4a747] to-[#e8d5a3] rounded-2xl mb-4">
-              <Shield className="w-6 h-6 text-white dark:text-[#0a1a1f]" />
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-2xl mb-4">
+              <Shield className="w-6 h-6 text-white dark:text-background" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-foreground">
               {step === 'signup' ? 'Create an account' : 'Verify your identity'}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -125,11 +130,11 @@ export default function SignupPage() {
           </div>
 
           {/* Debug Info - Remove in production */}
-          <div className="mb-4 p-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          {/* <div className="mb-4 p-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
             <div>Debug: Step = {step}</div>
             <div>Debug: IsVerified = {signupData.isVerified ? 'true' : 'false'}</div>
             <div>Debug: Selected Roles = {signupData.selectedRoles.join(', ') || 'none'}</div>
-          </div>
+          </div> */}
 
           {/* Error Display */}
           <AnimatePresence>
@@ -161,7 +166,7 @@ export default function SignupPage() {
                     onClick={() => setMethod(SIGNUP_METHODS.EMAIL)}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                       method === SIGNUP_METHODS.EMAIL
-                        ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+                        ? 'bg-card text-primary shadow-sm'
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -172,7 +177,7 @@ export default function SignupPage() {
                     onClick={() => setMethod(SIGNUP_METHODS.PHONE)}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                       method === SIGNUP_METHODS.PHONE
-                        ? 'bg-white dark:bg-[#1a2a2f] text-[#c4a747] shadow-sm'
+                        ? 'bg-card text-primary shadow-sm'
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -219,7 +224,7 @@ export default function SignupPage() {
               Already have an account?{' '}
               <a
                 href="/login"
-                className="font-medium text-[#c4a747] hover:text-[#a88d3a] transition-colors"
+                className="font-medium text-primary hover:text-primary-hover transition-colors"
               >
                 Sign in
               </a>
@@ -227,18 +232,18 @@ export default function SignupPage() {
           )}
 
           {/* Trust Badges for Mobile */}
-          <div className="lg:hidden mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+          <div className="lg:hidden mt-8 pt-6 border-t border-border">
             <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 SOC2 Certified
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 GDPR Compliant
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-[#c4a747]" />
+                <CheckCircle className="w-3 h-3 text-primary" />
                 24/7 Support
               </span>
             </div>

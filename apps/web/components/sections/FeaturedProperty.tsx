@@ -56,7 +56,7 @@ export const FeaturedProperty = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="bg-white dark:bg-[#1a2a2f] rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-xl"
+          className="bg-card rounded-2xl overflow-hidden border border-border shadow-xl"
         >
           <div className="grid lg:grid-cols-2">
             {/* Content Side */}
@@ -82,7 +82,7 @@ export const FeaturedProperty = () => {
               </motion.div>
 
               <motion.h2
-                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2"
+                className="text-3xl md:text-4xl font-bold text-foreground mb-2"
                 initial={{ x: -20, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -91,7 +91,7 @@ export const FeaturedProperty = () => {
               </motion.h2>
 
               <motion.p
-                className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2"
+                className="text-4xl md:text-5xl font-bold text-foreground mb-2"
                 initial={{ scale: 0.9, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.5, type: 'spring' }}
@@ -142,7 +142,7 @@ export const FeaturedProperty = () => {
                   <motion.span
                     key={badge}
                     className="trust-badge cursor-pointer"
-                    whileHover={{ scale: 1.05, backgroundColor: 'rgba(196, 167, 71, 0.2)' }}
+                    whileHover={{ scale: 1.05, backgroundColor: 'rgba(44, 85, 131, 0.2)' }}
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.8 + idx * 0.1 }}
@@ -178,7 +178,7 @@ export const FeaturedProperty = () => {
 
             {/* Image Side */}
             <motion.div
-              className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#2a4a5a]/50 dark:to-[#0f2a38] min-h-[300px] flex items-center justify-center relative overflow-hidden"
+              className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-muted/50 dark:to-muted min-h-[300px] flex items-center justify-center relative overflow-hidden"
               initial={{ x: 50, opacity: 0 }}
               whileInView={{ x: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -191,7 +191,7 @@ export const FeaturedProperty = () => {
 
               {/* Animated gradient overlay */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-tr from-[#c4a747]/0 via-[#c4a747]/5 to-transparent"
+                className="absolute inset-0 bg-gradient-to-tr from-primary/0 via-primary/5 to-transparent"
                 animate={{
                   x: ['-100%', '100%'],
                 }}
