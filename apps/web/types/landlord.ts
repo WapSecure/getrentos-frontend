@@ -12,6 +12,7 @@ export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejec
 export type LeaseStatus = 'draft' | 'sent' | 'signed' | 'expired';
 export type RentPaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing';
 export type EscrowStatus = 'held' | 'pending_review' | 'released' | 'frozen';
+export type RentPeriod = 'year' | 'month';
 
 export interface Property {
   id: string;
@@ -52,7 +53,12 @@ export interface Listing {
   propertyName: string;
   unitName: string;
   listingTitle: string;
+  /** Rent amount for whichever cadence `rentPeriod` specifies. Field name kept as `monthlyRent` for API compatibility. */
   monthlyRent: number;
+  /** Billing cadence for `monthlyRent`. Yearly upfront is the Nigerian market default. */
+  rentPeriod: RentPeriod;
+  /** Whether the landlord will accept the tenant repaying in monthly installments via GetRentos Flex, instead of the full amount upfront. Only meaningful when rentPeriod is 'year'. */
+  allowsMonthlyPayment: boolean;
   securityDeposit?: number;
   amenities: string[];
   availabilityDate: string;

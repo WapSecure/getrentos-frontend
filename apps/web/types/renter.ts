@@ -43,6 +43,8 @@ export interface Property {
   availableFrom?: string;
   additionalFees?: PropertyFee[];
   reviews?: PropertyReview[];
+  /** Whether the landlord allows paying this property's rent in monthly installments (GetRentos Flex), instead of the standard upfront yearly payment. */
+  allowsMonthlyPayment?: boolean;
 }
 
 export interface Document {

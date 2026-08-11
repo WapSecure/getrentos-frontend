@@ -15,6 +15,8 @@ import {
   Calendar,
   Check,
   Search,
+  Zap,
+  Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -250,6 +252,42 @@ export default function PropertyDetailPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {property.period === 'year' && (
+            <div className="bg-card border border-border rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Payment Options</h3>
+              {property.allowsMonthlyPayment ? (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2 text-sm">
+                    <Zap className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                    <p className="text-muted-foreground">
+                      This landlord accepts monthly installments via{' '}
+                      <span className="text-foreground font-medium">GetRentos Flex</span> — we pay
+                      the full year upfront, you repay us monthly.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    fullWidth
+                    className="gap-2"
+                    onClick={() => router.push('/renter/financing')}
+                  >
+                    <Zap className="w-4 h-4" />
+                    See Monthly Payment Plans
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 text-sm">
+                  <Lock className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-muted-foreground">
+                    This landlord requires the full year&apos;s rent upfront — monthly installments
+                    aren&apos;t available for this property.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

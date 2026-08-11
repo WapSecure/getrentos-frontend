@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import type { Listing, Unit } from '@/types/landlord';
+import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -24,6 +24,8 @@ export const CreateListingModal = ({
   const [unitId, setUnitId] = useState('');
   const [listingTitle, setListingTitle] = useState('');
   const [monthlyRent, setMonthlyRent] = useState('');
+  const [rentPeriod, setRentPeriod] = useState<RentPeriod>('year');
+  const [allowsMonthlyPayment, setAllowsMonthlyPayment] = useState(false);
   const [securityDeposit, setSecurityDeposit] = useState('');
   const [availabilityDate, setAvailabilityDate] = useState('');
   const [amenities, setAmenities] = useState<string[]>([]);
@@ -47,6 +49,8 @@ export const CreateListingModal = ({
     setUnitId('');
     setListingTitle('');
     setMonthlyRent('');
+    setRentPeriod('year');
+    setAllowsMonthlyPayment(false);
     setSecurityDeposit('');
     setAvailabilityDate('');
     setAmenities([]);
@@ -78,6 +82,8 @@ export const CreateListingModal = ({
       unitName: selectedUnit.unitName,
       listingTitle: listingTitle.trim(),
       monthlyRent: Number(monthlyRent),
+      rentPeriod,
+      allowsMonthlyPayment: rentPeriod === 'year' ? allowsMonthlyPayment : false,
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
       amenities,
       availabilityDate,
@@ -147,10 +153,37 @@ export const CreateListingModal = ({
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">
+                      Rent Period <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                      {(['year', 'month'] as RentPeriod[]).map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setRentPeriod(p)}
+                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                            rentPeriod === p
+                              ? 'bg-accent border-primary text-primary'
+                              : 'border-border text-muted-foreground hover:border-gray-300'
+                          }`}
+                        >
+                          {p === 'year' ? 'Yearly (recommended)' : 'Monthly'}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Most Nigerian landlords let tenants a full year upfront. Choose monthly only
+                      for short-let or month-to-month arrangements.
+                    </p>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Monthly Rent (₦) <span className="text-red-500">*</span>
+                        {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="number"
@@ -172,6 +205,27 @@ export const CreateListingModal = ({
                       />
                     </div>
                   </div>
+
+                  {rentPeriod === 'year' && (
+                    <label className="flex items-start gap-2 text-sm text-foreground p-3 rounded-lg bg-accent border border-primary/20">
+                      <input
+                        type="checkbox"
+                        checked={allowsMonthlyPayment}
+                        onChange={(e) => setAllowsMonthlyPayment(e.target.checked)}
+                        className="w-4 h-4 mt-0.5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                      />
+                      <span>
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <Zap className="w-3.5 h-3.5 text-primary" />
+                          Allow monthly installments via GetRentos Flex
+                        </span>
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          GetRentos pays you the full year upfront; the tenant repays us monthly.
+                          Leave unchecked to require the full year from the tenant directly.
+                        </span>
+                      </span>
+                    </label>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
