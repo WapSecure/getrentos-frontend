@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -146,6 +147,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
+  const router = useRouter();
 
   return (
     <motion.div
@@ -178,6 +180,7 @@ export const RenterApplicationsList = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * index, duration: 0.3 }}
               className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
+              onClick={() => router.push('/renter/applications')}
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
                 <div className="w-full md:w-16 h-16 bg-linear-to-br from-secondary to-muted rounded-xl flex items-center justify-center shrink-0">

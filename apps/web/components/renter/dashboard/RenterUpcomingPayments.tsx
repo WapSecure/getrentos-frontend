@@ -89,6 +89,7 @@ export const RenterUpcomingPayments = () => {
               <span className="text-lg font-bold text-primary">{formatPrice(payment.amount)}</span>
             </div>
             <Button
+              href="/renter/payments"
               variant={payment.status === 'overdue' ? 'danger' : 'primary'}
               size="sm"
               fullWidth

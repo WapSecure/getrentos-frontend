@@ -1,96 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { mockProperties } from '@/lib/mockProperties';
+import { formatPrice } from '@/types/renter';
 
-type PeriodType = 'month' | 'year' | 'week';
-
-interface Property {
-  id: string;
-  title: string;
-  location: string;
-  price: number;
-  period: PeriodType;
-  bedrooms: number;
-  bathrooms: number;
-  size: number;
-  rating: number;
-  verified: boolean;
-  image: string;
-}
-
-const recommendedProperties: Property[] = [
-  {
-    id: '1',
-    title: 'Modern Downtown Loft',
-    location: 'Ikeja, Lagos',
-    price: 200000,
-    period: 'month',
-    bedrooms: 2,
-    bathrooms: 2,
-    size: 1200,
-    rating: 4.8,
-    verified: true,
-    image: '/images/prop1.jpg',
-  },
-  {
-    id: '2',
-    title: 'Cozy Studio Apartment',
-    location: 'Victoria Island, Lagos',
-    price: 150000,
-    period: 'month',
-    bedrooms: 1,
-    bathrooms: 1,
-    size: 650,
-    rating: 4.6,
-    verified: true,
-    image: '/images/prop2.jpg',
-  },
-  {
-    id: '3',
-    title: 'Executive 3-Bed Apartment',
-    location: 'Ikoyi, Lagos',
-    price: 350000,
-    period: 'month',
-    bedrooms: 3,
-    bathrooms: 2,
-    size: 1800,
-    rating: 4.9,
-    verified: true,
-    image: '/images/prop3.jpg',
-  },
-  {
-    id: '4',
-    title: 'Affordable 2-Bed Flat',
-    location: 'Surulere, Lagos',
-    price: 120000,
-    period: 'month',
-    bedrooms: 2,
-    bathrooms: 1,
-    size: 950,
-    rating: 4.5,
-    verified: false,
-    image: '/images/prop4.jpg',
-  },
-];
-
-const formatPrice = (price: number, period: PeriodType) => {
-  const formatter = new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  const periodMap: Record<PeriodType, string> = {
-    month: '/mo',
-    year: '/yr',
-    week: '/wk',
-  };
-  return `${formatter.format(price)}${periodMap[period]}`;
-};
+const recommendedProperties = mockProperties.slice(0, 4);
 
 export const RenterRecommendedProperties = () => {
+  const router = useRouter();
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('renter_saved_properties');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSavedIds(saved ? JSON.parse(saved) : []);
+  }, []);
+
+  const toggleSave = (propertyId: string) => {
+    const current = localStorage.getItem('renter_saved_properties');
+    let ids: string[] = current ? JSON.parse(current) : [];
+    ids = ids.includes(propertyId) ? ids.filter((id) => id !== propertyId) : [...ids, propertyId];
+    localStorage.setItem('renter_saved_properties', JSON.stringify(ids));
+    setSavedIds(ids);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -136,8 +73,13 @@ export const RenterRecommendedProperties = () => {
                     Verified
                   </span>
                 )}
-                <button className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors">
-                  <Heart className="w-3 h-3 text-gray-600" />
+                <button
+                  onClick={() => toggleSave(property.id)}
+                  className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors"
+                >
+                  <Heart
+                    className={`w-3 h-3 ${savedIds.includes(property.id) ? 'text-red-500 fill-red-500' : 'text-gray-600'}`}
+                  />
                 </button>
               </div>
 
@@ -172,7 +114,11 @@ export const RenterRecommendedProperties = () => {
                   <span className="text-lg font-bold text-primary">
                     {formatPrice(property.price, property.period)}
                   </span>
-                  <Button size="sm" variant="outline">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push(`/renter/properties/${property.id}`)}
+                  >
                     View Details
                   </Button>
                 </div>

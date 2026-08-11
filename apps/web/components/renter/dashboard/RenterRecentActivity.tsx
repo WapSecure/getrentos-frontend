@@ -1,16 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  Clock,
-  Home,
-  Heart,
-  CheckCircle,
-  TrendingUp,
-  FileText,
-  MessageCircle,
-  Bell,
-} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Clock, Heart, CheckCircle, TrendingUp, FileText, MessageCircle } from 'lucide-react';
 
 interface Activity {
   id: string;
@@ -64,6 +56,15 @@ const activities: Activity[] = [
   },
 ];
 
+const activityRoutes: Record<Activity['type'], string> = {
+  application: '/renter/applications',
+  saved: '/renter/saved',
+  approved: '/renter/applications',
+  score: '/renter/trust-score',
+  message: '/renter/messages',
+  payment: '/renter/payments',
+};
+
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -79,6 +80,8 @@ const formatTimeAgo = (dateString: string) => {
 };
 
 export const RenterRecentActivity = () => {
+  const router = useRouter();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -99,6 +102,7 @@ export const RenterRecentActivity = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.45 + index * 0.03, duration: 0.3 }}
             className="p-3 hover:bg-secondary transition-colors cursor-pointer"
+            onClick={() => router.push(activityRoutes[activity.type])}
           >
             <div className="flex items-start gap-3">
               <div className={`p-2 rounded-lg bg-secondary`}>
@@ -117,7 +121,10 @@ export const RenterRecentActivity = () => {
       </div>
 
       <div className="p-3 border-t border-border text-center">
-        <button className="text-sm text-primary hover:text-primary-hover transition-colors">
+        <button
+          onClick={() => router.push('/renter/notifications')}
+          className="text-sm text-primary hover:text-primary-hover transition-colors"
+        >
           View all activity
         </button>
       </div>

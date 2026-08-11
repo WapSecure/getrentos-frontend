@@ -112,7 +112,7 @@ export const RenterTrustScoreCard = () => {
         </div>
 
         {/* Action Button */}
-        <Button href="/renter/verification" variant="primary" fullWidth className="gap-2">
+        <Button href="/renter/trust-score" variant="primary" fullWidth className="gap-2">
           <TrendingUp className="w-4 h-4" />
           {t('dashboard.trust_score.improve_button')}
           <ArrowRight className="w-3 h-3" />
