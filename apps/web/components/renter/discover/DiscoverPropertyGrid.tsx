@@ -6,7 +6,8 @@ import { DiscoverPropertyCard } from './DiscoverPropertyCard';
 import { VirtualTourViewerModal } from './features/VirtualTourViewerModal';
 import { Property } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
-import { mockProperties, trackRecentlyViewed } from '@/lib/mockProperties';
+import { trackRecentlyViewed } from '@/lib/mockProperties';
+import { renterService } from '@/services/renterService';
 import { Home } from 'lucide-react';
 
 interface DiscoverPropertyGridProps {
@@ -32,69 +33,30 @@ export const DiscoverPropertyGrid = ({
   onCompare,
 }: DiscoverPropertyGridProps) => {
   const router = useRouter();
-  const [properties, setProperties] = useState(mockProperties);
-  const [isLoading, setIsLoading] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [tourProperty, setTourProperty] = useState<Property | null>(null);
   const [tourInitialMode, setTourInitialMode] = useState<TourModalMode>('tour');
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    setTimeout(() => {
-      let filtered = [...mockProperties];
-
-      if (filters.search) {
-        const query = filters.search.toLowerCase();
-        filtered = filtered.filter(
-          (p) => p.title.toLowerCase().includes(query) || p.location.toLowerCase().includes(query)
-        );
-      }
-      if (filters.location) {
-        filtered = filtered.filter((p) =>
-          p.location.toLowerCase().includes(filters.location.toLowerCase())
-        );
-      }
-      if (filters.minPrice) {
-        filtered = filtered.filter((p) => p.price >= parseInt(filters.minPrice));
-      }
-      if (filters.maxPrice) {
-        filtered = filtered.filter((p) => p.price <= parseInt(filters.maxPrice));
-      }
-      if (filters.bedrooms) {
-        const beds = parseInt(filters.bedrooms);
-        filtered = filtered.filter((p) => p.bedrooms >= beds);
-      }
-      if (filters.bathrooms) {
-        const baths = parseInt(filters.bathrooms);
-        filtered = filtered.filter((p) => p.bathrooms >= baths);
-      }
-      if (filters.propertyType) {
-        filtered = filtered.filter((p) =>
-          p.title.toLowerCase().includes(filters.propertyType.toLowerCase())
-        );
-      }
-      if (filters.verifiedOnly) {
-        filtered = filtered.filter((p) => p.verified);
-      }
-
-      setProperties(filtered);
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      const response = await renterService.listListings({
+        search: filters.search,
+        location: filters.location,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        bedrooms: filters.bedrooms,
+        bathrooms: filters.bathrooms,
+        propertyType: filters.propertyType,
+        verifiedOnly: filters.verifiedOnly,
+      });
+      if (response.success && response.data) setProperties(response.data);
       setIsLoading(false);
-    }, 300);
+    };
+
+    fetchProperties();
   }, [filters]);
-
-  const handleSave = (propertyId: string) => {
-    const currentSaved = localStorage.getItem('renter_saved_properties');
-    let savedIds: string[] = currentSaved ? JSON.parse(currentSaved) : [];
-
-    if (savedIds.includes(propertyId)) {
-      savedIds = savedIds.filter((id) => id !== propertyId);
-    } else {
-      savedIds.push(propertyId);
-    }
-
-    localStorage.setItem('renter_saved_properties', JSON.stringify(savedIds));
-    onSave(propertyId);
-  };
 
   const handleViewDetails = (property: Property) => {
     trackRecentlyViewed(property);
@@ -144,7 +106,7 @@ export const DiscoverPropertyGrid = ({
           key={property.id}
           property={property}
           isSaved={savedProperties.includes(property.id)}
-          onSave={() => handleSave(property.id)}
+          onSave={() => onSave(property.id)}
           onCompare={() => onCompare(property)}
           onViewDetails={() => handleViewDetails(property)}
           onScheduleViewing={() => handleScheduleViewing(property)}

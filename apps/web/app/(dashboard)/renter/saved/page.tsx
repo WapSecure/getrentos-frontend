@@ -12,6 +12,7 @@ import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
 import { Toast } from '@/components/ui/Toast';
 import { Property } from '@/types/renter';
+import { renterService } from '@/services/renterService';
 
 interface Wishlist {
   id: string;
@@ -21,7 +22,18 @@ interface Wishlist {
 
 export default function SavedPage() {
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
-  const [wishlists, setWishlists] = useState<Wishlist[]>([]);
+  const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('renter_wishlists');
+    if (saved) return JSON.parse(saved);
+    const defaultWishlists = [
+      { id: '1', name: 'Dream Homes', propertyIds: [] },
+      { id: '2', name: 'Budget Options', propertyIds: [] },
+      { id: '3', name: 'To Visit', propertyIds: [] },
+    ];
+    localStorage.setItem('renter_wishlists', JSON.stringify(defaultWishlists));
+    return defaultWishlists;
+  });
   const [selectedWishlist, setSelectedWishlist] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'rating'>('recent');
@@ -33,176 +45,20 @@ export default function SavedPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [shareToast, setShareToast] = useState<string | null>(null);
 
-  // Load saved properties with mock data
-  const loadSavedProperties = () => {
-    const saved = localStorage.getItem('renter_saved_properties');
-    let savedIds: string[] = [];
-
-    if (saved) {
-      savedIds = JSON.parse(saved);
-    }
-
-    // Mock properties data
-    const mockProperties: Property[] = [
-      {
-        id: '1',
-        title: 'Modern Downtown Loft',
-        location: 'Ikeja, Lagos',
-        price: 200000,
-        period: 'month',
-        bedrooms: 2,
-        bathrooms: 2,
-        size: 1200,
-        rating: 4.8,
-        verified: true,
-        image: '',
-        score: 92,
-        hasVirtualTour: true,
-        virtualTourUrl: '#',
-        landlordResponseRate: 95,
-        landlordRating: 4.9,
-        landlordReviews: 156,
-        landlordVerified: true,
-      },
-      {
-        id: '2',
-        title: 'Cozy Studio Apartment',
-        location: 'Victoria Island, Lagos',
-        price: 150000,
-        period: 'month',
-        bedrooms: 1,
-        bathrooms: 1,
-        size: 650,
-        rating: 4.6,
-        verified: true,
-        image: '',
-        score: 78,
-        hasVirtualTour: false,
-        landlordResponseRate: 88,
-        landlordRating: 4.7,
-        landlordReviews: 89,
-        landlordVerified: true,
-      },
-      {
-        id: '3',
-        title: 'Luxury Beachfront Villa',
-        location: 'Elegushi Beach, Lagos',
-        price: 800000,
-        period: 'month',
-        bedrooms: 4,
-        bathrooms: 3,
-        size: 3200,
-        rating: 4.9,
-        verified: true,
-        image: '',
-        score: 96,
-        hasVirtualTour: true,
-        virtualTourUrl: '#',
-        landlordResponseRate: 98,
-        landlordRating: 5.0,
-        landlordReviews: 234,
-        landlordVerified: true,
-      },
-      {
-        id: '4',
-        title: 'Executive 3-Bed Apartment',
-        location: 'Ikoyi, Lagos',
-        price: 350000,
-        period: 'month',
-        bedrooms: 3,
-        bathrooms: 2,
-        size: 1800,
-        rating: 4.7,
-        verified: true,
-        image: '',
-        score: 85,
-        hasVirtualTour: true,
-        virtualTourUrl: '#',
-        landlordResponseRate: 92,
-        landlordRating: 4.8,
-        landlordReviews: 112,
-        landlordVerified: true,
-      },
-      {
-        id: '5',
-        title: 'Affordable 2-Bed Flat',
-        location: 'Surulere, Lagos',
-        price: 120000,
-        period: 'month',
-        bedrooms: 2,
-        bathrooms: 1,
-        size: 950,
-        rating: 4.5,
-        verified: false,
-        image: '',
-        score: 65,
-        hasVirtualTour: false,
-        landlordResponseRate: 75,
-        landlordRating: 4.2,
-        landlordReviews: 45,
-        landlordVerified: false,
-      },
-      {
-        id: '6',
-        title: 'Penthouse with Ocean View',
-        location: 'Lekki Phase 1, Lagos',
-        price: 550000,
-        period: 'month',
-        bedrooms: 3,
-        bathrooms: 2,
-        size: 2200,
-        rating: 4.9,
-        verified: true,
-        image: '',
-        score: 94,
-        hasVirtualTour: true,
-        virtualTourUrl: '#',
-        landlordResponseRate: 96,
-        landlordRating: 4.9,
-        landlordReviews: 178,
-        landlordVerified: true,
-      },
-    ];
-
-    // If no saved IDs, use first 3 as default saved
-    if (savedIds.length === 0) {
-      const defaultSaved = ['1', '2', '5'];
-      localStorage.setItem('renter_saved_properties', JSON.stringify(defaultSaved));
-      const filtered = mockProperties.filter((p) => defaultSaved.includes(p.id));
-      setSavedProperties(filtered);
-    } else {
-      const filtered = mockProperties.filter((p) => savedIds.includes(p.id));
-      setSavedProperties(filtered);
-    }
-  };
-
-  const loadWishlists = () => {
-    const saved = localStorage.getItem('renter_wishlists');
-    if (saved) {
-      setWishlists(JSON.parse(saved));
-    } else {
-      const defaultWishlists = [
-        { id: '1', name: 'Dream Homes', propertyIds: [] },
-        { id: '2', name: 'Budget Options', propertyIds: [] },
-        { id: '3', name: 'To Visit', propertyIds: [] },
-      ];
-      setWishlists(defaultWishlists);
-      localStorage.setItem('renter_wishlists', JSON.stringify(defaultWishlists));
-    }
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadSavedProperties();
-    loadWishlists();
+    const fetchSavedProperties = async () => {
+      const response = await renterService.listSavedListings();
+      if (response.success && response.data) setSavedProperties(response.data);
+    };
+
+    fetchSavedProperties();
   }, []);
 
-  const handleRemoveProperty = (propertyId: string) => {
-    const updated = savedProperties.filter((p) => p.id !== propertyId);
-    setSavedProperties(updated);
-    const savedIds = updated.map((p) => p.id);
-    localStorage.setItem('renter_saved_properties', JSON.stringify(savedIds));
-    setSelectedProperties(selectedProperties.filter((id) => id !== propertyId));
+  const handleRemoveProperty = async (propertyId: string) => {
+    const response = await renterService.unsaveListing(propertyId);
+    if (!response.success) return;
+    setSavedProperties((prev) => prev.filter((p) => p.id !== propertyId));
+    setSelectedProperties((prev) => prev.filter((id) => id !== propertyId));
   };
 
   const handleMoveToWishlist = (propertyId: string, wishlistId: string) => {
@@ -228,11 +84,9 @@ export default function SavedPage() {
     setSelectedProperties([]);
   };
 
-  const handleDeleteSelected = () => {
-    const updated = savedProperties.filter((p) => !selectedProperties.includes(p.id));
-    setSavedProperties(updated);
-    const savedIds = updated.map((p) => p.id);
-    localStorage.setItem('renter_saved_properties', JSON.stringify(savedIds));
+  const handleDeleteSelected = async () => {
+    await Promise.all(selectedProperties.map((id) => renterService.unsaveListing(id)));
+    setSavedProperties((prev) => prev.filter((p) => !selectedProperties.includes(p.id)));
     setSelectedProperties([]);
   };
 

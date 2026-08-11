@@ -9,6 +9,7 @@ import { ApplicationAnalytics } from '@/components/renter/applications/Applicati
 import { ApplicationRecommendations } from '@/components/renter/applications/ApplicationRecommendations';
 import { ApplicationExport } from '@/components/renter/applications/ApplicationExport';
 import { Application } from '@/types/renter';
+import { renterService } from '@/services/renterService';
 
 interface Note {
   id: string;
@@ -25,177 +26,19 @@ export default function ApplicationsPage() {
   const [sortBy, setSortBy] = useState<'recent' | 'property' | 'status'>('recent');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [showExportModal, setShowExportModal] = useState(false);
-  const [notes, setNotes] = useState<Record<string, Note[]>>({});
-
-  // Move loadApplications BEFORE useEffect
-  const loadApplications = () => {
-    const mockApplications: Application[] = [
-      {
-        id: '1',
-        propertyId: 'prop_001',
-        title: 'Modern Downtown Loft',
-        address: '420 Main St, Ikeja, Lagos',
-        status: 'under_review',
-        date: '2024-06-07',
-        price: 200000,
-        period: 'month',
-        bedrooms: 2,
-        bathrooms: 2,
-        size: 1200,
-        image: '',
-        applicationDate: '2024-06-07',
-        moveInDate: '2024-07-01',
-        leaseTerm: '12 months',
-        documents: [
-          { name: 'Government ID', uploaded: true, required: true },
-          { name: 'Proof of Income', uploaded: true, required: true },
-          { name: 'Bank Statement', uploaded: true, required: true },
-          { name: 'Reference Letter', uploaded: false, required: false },
-        ],
-        landlord: {
-          name: 'Jane Smith',
-          email: 'jane.smith@email.com',
-          phone: '+1 234 567 8900',
-          responseRate: 95,
-          rating: 4.9,
-        },
-        applicationNotes: 'Great property, perfect location for my commute',
-        timeline: [
-          { stage: 'Application Submitted', date: '2024-06-07', completed: true },
-          { stage: 'Under Review', date: '2024-06-08', completed: true },
-          { stage: 'Landlord Decision', date: '2024-06-14', completed: false },
-          { stage: 'Move-in', date: '2024-07-01', completed: false },
-        ],
-      },
-      {
-        id: '2',
-        propertyId: 'prop_002',
-        title: 'Cozy Studio Apartment',
-        address: '123 Victoria Island, Lagos',
-        status: 'pending',
-        date: '2024-06-05',
-        price: 150000,
-        period: 'month',
-        bedrooms: 1,
-        bathrooms: 1,
-        size: 650,
-        image: '',
-        applicationDate: '2024-06-05',
-        moveInDate: '2024-07-15',
-        leaseTerm: '6 months',
-        documents: [
-          { name: 'Government ID', uploaded: true, required: true },
-          { name: 'Proof of Income', uploaded: false, required: true },
-          { name: 'Bank Statement', uploaded: false, required: true },
-        ],
-        landlord: {
-          name: 'John Doe',
-          email: 'john.doe@email.com',
-          phone: '+1 234 567 8901',
-          responseRate: 88,
-          rating: 4.7,
-        },
-        applicationNotes: '',
-        timeline: [
-          { stage: 'Application Submitted', date: '2024-06-05', completed: true },
-          { stage: 'Under Review', date: '2024-06-07', completed: false },
-          { stage: 'Landlord Decision', date: 'Pending', completed: false },
-          { stage: 'Move-in', date: '2024-07-15', completed: false },
-        ],
-      },
-      {
-        id: '3',
-        propertyId: 'prop_003',
-        title: 'Luxury Beachfront Villa',
-        address: '456 Elegushi Beach, Lagos',
-        status: 'approved',
-        date: '2024-05-28',
-        price: 800000,
-        period: 'month',
-        bedrooms: 4,
-        bathrooms: 3,
-        size: 3200,
-        image: '',
-        applicationDate: '2024-05-28',
-        moveInDate: '2024-06-15',
-        leaseTerm: '24 months',
-        documents: [
-          { name: 'Government ID', uploaded: true, required: true },
-          { name: 'Proof of Income', uploaded: true, required: true },
-          { name: 'Bank Statement', uploaded: true, required: true },
-          { name: 'Reference Letter', uploaded: true, required: false },
-        ],
-        landlord: {
-          name: 'Sarah Williams',
-          email: 'sarah.williams@email.com',
-          phone: '+1 234 567 8902',
-          responseRate: 98,
-          rating: 5.0,
-        },
-        applicationNotes: 'Approved! Landlord was very responsive',
-        timeline: [
-          { stage: 'Application Submitted', date: '2024-05-28', completed: true },
-          { stage: 'Under Review', date: '2024-05-29', completed: true },
-          { stage: 'Landlord Decision', date: '2024-06-02', completed: true },
-          { stage: 'Move-in', date: '2024-06-15', completed: false },
-        ],
-      },
-      {
-        id: '4',
-        propertyId: 'prop_004',
-        title: 'Affordable 2-Bed Flat',
-        address: '321 Surulere, Lagos',
-        status: 'rejected',
-        date: '2024-05-20',
-        price: 120000,
-        period: 'month',
-        bedrooms: 2,
-        bathrooms: 1,
-        size: 950,
-        image: '',
-        applicationDate: '2024-05-20',
-        moveInDate: '2024-06-01',
-        leaseTerm: '12 months',
-        documents: [
-          { name: 'Government ID', uploaded: true, required: true },
-          { name: 'Proof of Income', uploaded: true, required: true },
-          { name: 'Bank Statement', uploaded: true, required: true },
-        ],
-        landlord: {
-          name: 'Michael Brown',
-          email: 'michael.brown@email.com',
-          phone: '+1 234 567 8903',
-          responseRate: 75,
-          rating: 4.2,
-        },
-        applicationNotes: 'Application was rejected due to high competition',
-        timeline: [
-          { stage: 'Application Submitted', date: '2024-05-20', completed: true },
-          { stage: 'Under Review', date: '2024-05-22', completed: true },
-          { stage: 'Landlord Decision', date: '2024-05-25', completed: true },
-          { stage: 'Move-in', date: 'Cancelled', completed: false },
-        ],
-      },
-    ];
-
-    const submitted = localStorage.getItem('renter_submitted_applications');
-    const submittedApplications: Application[] = submitted ? JSON.parse(submitted) : [];
-
-    setApplications([...submittedApplications, ...mockApplications]);
-  };
-
-  const loadNotes = () => {
+  const [notes, setNotes] = useState<Record<string, Note[]>>(() => {
+    if (typeof window === 'undefined') return {};
     const saved = localStorage.getItem('application_notes');
-    if (saved) {
-      setNotes(JSON.parse(saved));
-    }
-  };
+    return saved ? JSON.parse(saved) : {};
+  });
 
-  // Now useEffect can safely call the functions
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadApplications();
-    loadNotes();
+    const fetchApplications = async () => {
+      const response = await renterService.listMyApplications();
+      if (response.success && response.data) setApplications(response.data);
+    };
+
+    fetchApplications();
   }, []);
 
   const saveNotes = (updatedNotes: Record<string, Note[]>) => {
@@ -237,10 +80,13 @@ export default function ApplicationsPage() {
     saveNotes(updated);
   };
 
-  const handleWithdrawApplication = (applicationId: string) => {
-    setApplications((prev) =>
-      prev.map((app) => (app.id === applicationId ? { ...app, status: 'rejected' as const } : app))
-    );
+  const handleWithdrawApplication = async (applicationId: string) => {
+    const response = await renterService.withdrawApplication(applicationId);
+    if (response.success && response.data) {
+      setApplications((prev) =>
+        prev.map((app) => (app.id === applicationId ? response.data! : app))
+      );
+    }
   };
 
   return (
