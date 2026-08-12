@@ -11,11 +11,8 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import type {
-  MaintenanceRequest,
-  MaintenanceCategory,
-  MaintenancePriority,
-} from '@/types/maintenance';
+import type { MaintenanceRequest } from '@/types/maintenance';
+import { renterService } from '@/services/renterService';
 
 interface ReportData {
   title: string;
@@ -28,91 +25,37 @@ export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
 
-  const loadMaintenanceRequests = () => {
-    const mockRequests: MaintenanceRequest[] = [
-      {
-        id: 'maint_001',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        title: 'Leaking Faucet in Kitchen',
-        category: 'plumbing',
-        description: 'The kitchen faucet has been leaking continuously for 2 days.',
-        priority: 'medium',
-        status: 'assigned',
-        images: [],
-        assignedVendorId: 'vendor_001',
-        assignedVendorName: 'Quick Plumbing Services',
-        createdAt: '2024-06-07T10:30:00',
-        updatedAt: '2024-06-08T14:20:00',
-        slaResponseTime: 4,
-      },
-      {
-        id: 'maint_002',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        title: 'AC Not Cooling Properly',
-        category: 'appliances',
-        description: 'The AC unit is blowing warm air.',
-        priority: 'urgent',
-        status: 'in_progress',
-        images: [],
-        assignedVendorId: 'vendor_002',
-        assignedVendorName: 'CoolTech AC Services',
-        createdAt: '2024-06-05T09:15:00',
-        updatedAt: '2024-06-06T16:00:00',
-        slaResponseTime: 2,
-      },
-      {
-        id: 'maint_003',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        title: 'Internet Connection Intermittent',
-        category: 'internet',
-        description: 'WiFi keeps disconnecting every 10-15 minutes.',
-        priority: 'high',
-        status: 'submitted',
-        images: [],
-        createdAt: '2024-06-10T08:45:00',
-        updatedAt: '2024-06-10T08:45:00',
-      },
-    ];
-    setRequests(mockRequests);
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadMaintenanceRequests = async () => {
+      const res = await renterService.listMaintenanceRequests();
+      if (res.success && res.data) setRequests(res.data);
+    };
     loadMaintenanceRequests();
   }, []);
 
-  const handleReportIssue = (data: ReportData) => {
-    const newRequest: MaintenanceRequest = {
-      id: `maint_${Date.now()}`,
-      propertyId: 'prop_001',
-      propertyName: 'Modern Downtown Loft',
-      title: data.title,
-      category: data.category as MaintenanceCategory,
-      priority: data.priority as MaintenancePriority,
-      description: data.description,
-      status: 'submitted',
-      images: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setRequests([newRequest, ...requests]);
+  const handleReportIssue = async (data: ReportData) => {
+    const res = await renterService.createMaintenanceRequest(data);
+    if (res.success && res.data) {
+      const created = res.data;
+      setRequests((prev) => [created, ...prev]);
+    }
   };
 
-  const handleUpdateStatus = (id: string, status: MaintenanceRequest['status']) => {
-    setRequests((prev) =>
-      prev.map((req) =>
-        req.id === id ? { ...req, status, updatedAt: new Date().toISOString() } : req
-      )
-    );
+  const handleUpdateStatus = async (id: string, status: MaintenanceRequest['status']) => {
+    if (status !== 'cancelled') return;
+    const res = await renterService.cancelMaintenanceRequest(id);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
+    }
   };
 
-  const handleRateVendor = (id: string, rating: number) => {
-    setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, vendorRating: rating } : req))
-    );
+  const handleRateVendor = async (id: string, rating: number) => {
+    const res = await renterService.rateVendor(id, rating);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
+    }
   };
 
   const handleCall = (phone: string) => {

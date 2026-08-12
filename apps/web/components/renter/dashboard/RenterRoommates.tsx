@@ -13,42 +13,32 @@ import {
   Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { useState } from 'react';
-
-interface Roommate {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  sharePercentage: number;
-  status: 'active' | 'pending' | 'inactive';
-  joinedDate: string;
-}
-
-const roommates: Roommate[] = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    phone: '+1 234 567 8901',
-    sharePercentage: 50,
-    status: 'active',
-    joinedDate: '2024-01-15',
-  },
-  {
-    id: '2',
-    name: 'Michael Chen',
-    email: 'michael@example.com',
-    phone: '+1 234 567 8902',
-    sharePercentage: 50,
-    status: 'active',
-    joinedDate: '2024-01-15',
-  },
-];
+import { useEffect, useState } from 'react';
+import { renterService, type Roommate } from '@/services/renterService';
 
 export const RenterRoommates = () => {
+  const [roommates, setRoommates] = useState<Roommate[]>([]);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listRoommates();
+      if (res.success && res.data) setRoommates(res.data);
+    };
+    load();
+  }, []);
+
+  const handleSendInvite = async () => {
+    if (!inviteEmail) return;
+    const res = await renterService.inviteRoommate(inviteEmail);
+    if (res.success && res.data) {
+      const created = res.data;
+      setRoommates((prev) => [...prev, created]);
+      setInviteEmail('');
+      setShowInvite(false);
+    }
+  };
 
   const totalShare = roommates.reduce((sum, r) => sum + r.sharePercentage, 0);
 
@@ -82,7 +72,9 @@ export const RenterRoommates = () => {
               onChange={(e) => setInviteEmail(e.target.value)}
               className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <Button size="sm">Send Invite</Button>
+            <Button size="sm" onClick={handleSendInvite}>
+              Send Invite
+            </Button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
             They&apos;ll need to accept to join your household

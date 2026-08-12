@@ -24,10 +24,17 @@ interface Lease {
 interface LeaseRenewalOfferProps {
   renewalOffer: RenewalOffer;
   lease: Lease;
+  onRespond: (offerId: string, action: 'accept' | 'decline') => Promise<void>;
 }
 
-export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProps) => {
-  const [response, setResponse] = useState<'accepted' | 'declined' | null>(null);
+export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenewalOfferProps) => {
+  const [response, setResponse] = useState<'accepted' | 'declined' | null>(
+    renewalOffer.status === 'accepted'
+      ? 'accepted'
+      : renewalOffer.status === 'declined'
+        ? 'declined'
+        : null
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -49,7 +56,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease }: LeaseRenewalOfferProp
 
   const handleResponse = async (action: 'accept' | 'decline') => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await onRespond(renewalOffer.id, action);
     setResponse(action === 'accept' ? 'accepted' : 'declined');
     setIsLoading(false);
   };

@@ -1,29 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Calendar, Clock, FileText, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-
-interface LeaseRenewal {
-  property: string;
-  currentEndDate: string;
-  renewalOfferDate: string;
-  newRentAmount: number;
-  currentRentAmount: number;
-  increasePercentage: number;
-  status: 'pending' | 'reviewed' | 'accepted' | 'declined';
-}
-
-const renewalData: LeaseRenewal = {
-  property: 'Modern Downtown Loft',
-  currentEndDate: '2025-03-01',
-  renewalOfferDate: '2025-01-15',
-  newRentAmount: 210000,
-  currentRentAmount: 200000,
-  increasePercentage: 5,
-  status: 'pending',
-};
+import { renterService, type Lease } from '@/services/renterService';
+import type { RenewalOffer } from '@/types/lease';
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -35,9 +18,25 @@ const formatDate = (dateString: string) => {
 
 export const RenterLeaseRenewal = () => {
   const router = useRouter();
-  const daysUntilOffer = Math.ceil(
-    (new Date(renewalData.renewalOfferDate).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60 * 24)
+  const [lease, setLease] = useState<Lease | null>(null);
+  const [renewalOffer, setRenewalOffer] = useState<RenewalOffer | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const [leaseRes, offerRes] = await Promise.all([
+        renterService.getLease(),
+        renterService.getRenewalOffer(),
+      ]);
+      if (leaseRes.success && leaseRes.data) setLease(leaseRes.data);
+      if (offerRes.success && offerRes.data) setRenewalOffer(offerRes.data);
+    };
+    load();
+  }, []);
+
+  if (!lease) return null;
+
+  const daysUntilEnd = Math.ceil(
+    (new Date(lease.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
 
   return (
@@ -60,10 +59,12 @@ export const RenterLeaseRenewal = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                Renewal Offer Coming Soon
+                {renewalOffer ? 'Renewal Offer Available' : 'No Renewal Offer Yet'}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                Your landlord will send a renewal offer in {daysUntilOffer} days
+                {renewalOffer
+                  ? `Your landlord sent a renewal offer on ${formatDate(renewalOffer.offerDate)}`
+                  : `Your lease ends in ${daysUntilEnd} days`}
               </p>
             </div>
           </div>
@@ -72,33 +73,33 @@ export const RenterLeaseRenewal = () => {
         <div className="space-y-3 mb-4">
           <div className="flex justify-between items-center py-2">
             <span className="text-sm text-muted-foreground">Property</span>
-            <span className="text-sm font-medium text-foreground">{renewalData.property}</span>
+            <span className="text-sm font-medium text-foreground">{lease.propertyName}</span>
           </div>
           <div className="flex justify-between items-center py-2 border-t border-border">
             <span className="text-sm text-muted-foreground">Current Lease Ends</span>
-            <span className="text-sm font-medium text-foreground">
-              {formatDate(renewalData.currentEndDate)}
-            </span>
+            <span className="text-sm font-medium text-foreground">{formatDate(lease.endDate)}</span>
           </div>
           <div className="flex justify-between items-center py-2 border-t border-border">
             <span className="text-sm text-muted-foreground">Current Rent</span>
             <span className="text-sm font-medium text-foreground">
               {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
-                renewalData.currentRentAmount
+                lease.rentAmount
               )}
               /mo
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-t border-border">
-            <span className="text-sm text-muted-foreground">Expected Increase</span>
-            <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-              {renewalData.increasePercentage}% (
-              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
-                renewalData.newRentAmount - renewalData.currentRentAmount
-              )}
-              )
-            </span>
-          </div>
+          {renewalOffer && (
+            <div className="flex justify-between items-center py-2 border-t border-border">
+              <span className="text-sm text-muted-foreground">Expected Increase</span>
+              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                {renewalOffer.increasePercentage}% (
+                {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
+                  renewalOffer.newRentAmount - lease.rentAmount
+                )}
+                )
+              </span>
+            </div>
+          )}
         </div>
 
         <Button

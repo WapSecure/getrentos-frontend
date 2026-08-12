@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera, User, Mail, Phone, MapPin } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
+import { renterService } from '@/services/renterService';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -12,14 +13,32 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
-    phone: '+1 234 567 8900',
+    phone: '',
     location: 'Ikeja, Lagos',
     bio: 'Tech enthusiast and property lover',
   });
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.getProfile();
+      if (res.success && res.data) {
+        setFormData((prev) => ({
+          ...prev,
+          fullName: res.data!.fullName,
+          email: res.data!.email,
+          phone: res.data!.phone || '',
+        }));
+      }
+    };
+    load();
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Profile updated:', formData);
+    await renterService.updateProfile({
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+    });
   };
 
   return (

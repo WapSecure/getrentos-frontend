@@ -1,94 +1,15 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { renterService } from '@/services/renterService';
+import type { Application } from '@/types/renter';
 
 type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
 type PeriodType = 'month' | 'year' | 'week';
-
-interface Application {
-  id: string;
-  title: string;
-  address: string;
-  status: ApplicationStatus;
-  date: string;
-  price: number;
-  period: PeriodType;
-  bedrooms: number;
-  bathrooms: number;
-  size: number;
-  image: string;
-}
-
-const applications: Application[] = [
-  {
-    id: '1',
-    title: 'Modern Downtown Loft',
-    address: '420 Main St, Ikeja, Lagos',
-    status: 'under_review',
-    date: '2024-06-07',
-    price: 200000,
-    period: 'month',
-    bedrooms: 2,
-    bathrooms: 2,
-    size: 1200,
-    image: '/images/property1.jpg',
-  },
-  {
-    id: '2',
-    title: 'Cozy Studio Apartment',
-    address: '123 Victoria Island, Lagos',
-    status: 'pending',
-    date: '2024-06-05',
-    price: 150000,
-    period: 'month',
-    bedrooms: 1,
-    bathrooms: 1,
-    size: 650,
-    image: '/images/property2.jpg',
-  },
-  {
-    id: '3',
-    title: 'Luxury Beachfront Villa',
-    address: '456 Elegushi Beach, Lagos',
-    status: 'approved',
-    date: '2024-05-28',
-    price: 800000,
-    period: 'month',
-    bedrooms: 4,
-    bathrooms: 3,
-    size: 3200,
-    image: '/images/property3.jpg',
-  },
-  {
-    id: '4',
-    title: 'Executive 3-Bed Apartment',
-    address: '789 Ikoyi, Lagos',
-    status: 'under_review',
-    date: '2024-05-25',
-    price: 350000,
-    period: 'month',
-    bedrooms: 3,
-    bathrooms: 2,
-    size: 1800,
-    image: '/images/property4.jpg',
-  },
-  {
-    id: '5',
-    title: 'Affordable 2-Bed Flat',
-    address: '321 Surulere, Lagos',
-    status: 'pending',
-    date: '2024-05-20',
-    price: 120000,
-    period: 'month',
-    bedrooms: 2,
-    bathrooms: 1,
-    size: 950,
-    image: '/images/property5.jpg',
-  },
-];
 
 const statusConfig: Record<
   ApplicationStatus,
@@ -146,6 +67,15 @@ import { CheckCircle, XCircle } from 'lucide-react';
 
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
+  const [applications, setApplications] = useState<Application[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listMyApplications();
+      if (res.success && res.data) setApplications(res.data.slice(0, 5));
+    };
+    load();
+  }, []);
 
   return (
     <motion.div

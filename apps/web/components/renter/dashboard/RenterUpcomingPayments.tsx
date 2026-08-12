@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Home, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { renterService } from '@/services/renterService';
 
 interface Payment {
   id: string;
@@ -11,23 +13,6 @@ interface Payment {
   dueDate: string;
   status: 'upcoming' | 'overdue' | 'paid';
 }
-
-const upcomingPayments: Payment[] = [
-  {
-    id: '1',
-    property: 'Modern Downtown Loft',
-    amount: 200000,
-    dueDate: '2024-09-01',
-    status: 'upcoming',
-  },
-  {
-    id: '2',
-    property: 'Cozy Studio Apartment',
-    amount: 150000,
-    dueDate: '2024-08-25',
-    status: 'overdue',
-  },
-];
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -44,6 +29,28 @@ const formatPrice = (amount: number) => {
 };
 
 export const RenterUpcomingPayments = () => {
+  const [upcomingPayments, setUpcomingPayments] = useState<Payment[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listPayments();
+      if (res.success && res.data) {
+        setUpcomingPayments(
+          res.data
+            .filter((p) => p.status === 'pending' || p.status === 'overdue')
+            .map((p) => ({
+              id: p.id,
+              property: p.propertyName,
+              amount: p.amount,
+              dueDate: p.dueDate,
+              status: p.status === 'overdue' ? 'overdue' : 'upcoming',
+            }))
+        );
+      }
+    };
+    load();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -89,6 +96,7 @@ export const RenterUpcomingPayments = () => {
               <span className="text-lg font-bold text-primary">{formatPrice(payment.amount)}</span>
             </div>
             <Button
+              href="/renter/payments"
               variant={payment.status === 'overdue' ? 'danger' : 'primary'}
               size="sm"
               fullWidth

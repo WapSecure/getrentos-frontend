@@ -1,68 +1,35 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Clock,
-  Home,
   Heart,
   CheckCircle,
   TrendingUp,
   FileText,
   MessageCircle,
+  Wrench,
   Bell,
 } from 'lucide-react';
+import { renterService } from '@/services/renterService';
 
 interface Activity {
   id: string;
-  type: 'application' | 'saved' | 'approved' | 'score' | 'message' | 'payment';
   title: string;
   time: string;
   icon: React.ElementType;
   iconColor: string;
 }
 
-const activities: Activity[] = [
-  {
-    id: '1',
-    type: 'application',
-    title: 'Application submitted for Modern Loft',
-    time: '2024-06-07T10:30:00',
-    icon: FileText,
-    iconColor: 'text-blue-500',
-  },
-  {
-    id: '2',
-    type: 'saved',
-    title: 'Saved Spacious Townhouse',
-    time: '2024-06-06T14:20:00',
-    icon: Heart,
-    iconColor: 'text-pink-500',
-  },
-  {
-    id: '3',
-    type: 'approved',
-    title: 'Application approved for Victorian Home',
-    time: '2024-06-04T09:15:00',
-    icon: CheckCircle,
-    iconColor: 'text-green-500',
-  },
-  {
-    id: '4',
-    type: 'score',
-    title: 'Trust score increased to 87',
-    time: '2024-06-03T16:45:00',
-    icon: TrendingUp,
-    iconColor: 'text-primary',
-  },
-  {
-    id: '5',
-    type: 'message',
-    title: 'New message from Landlord about maintenance',
-    time: '2024-06-02T11:00:00',
-    icon: MessageCircle,
-    iconColor: 'text-purple-500',
-  },
-];
+const iconByType: Record<string, { icon: React.ElementType; color: string }> = {
+  application: { icon: FileText, color: 'text-blue-500' },
+  message: { icon: MessageCircle, color: 'text-purple-500' },
+  payment: { icon: TrendingUp, color: 'text-primary' },
+  maintenance: { icon: Wrench, color: 'text-orange-500' },
+  lease: { icon: Heart, color: 'text-pink-500' },
+  system: { icon: CheckCircle, color: 'text-green-500' },
+};
 
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
@@ -79,6 +46,29 @@ const formatTimeAgo = (dateString: string) => {
 };
 
 export const RenterRecentActivity = () => {
+  const [activities, setActivities] = useState<Activity[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listNotifications();
+      if (res.success && res.data) {
+        setActivities(
+          res.data.slice(0, 5).map((n) => {
+            const mapped = iconByType[n.type] || { icon: Bell, color: 'text-gray-500' };
+            return {
+              id: n.id,
+              title: n.title,
+              time: n.createdAt,
+              icon: mapped.icon,
+              iconColor: mapped.color,
+            };
+          })
+        );
+      }
+    };
+    load();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

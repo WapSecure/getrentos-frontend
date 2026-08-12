@@ -3,19 +3,28 @@
 import { useState } from 'react';
 import { Download, FileText, FileSpreadsheet, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { renterService } from '@/services/renterService';
 
 export const DataExport = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState('pdf');
   const [completed, setCompleted] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      setCompleted(true);
-      setTimeout(() => setCompleted(false), 3000);
-    }, 2000);
+    const res = await renterService.exportData();
+    if (res.success && res.data) {
+      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `getrentos-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    setIsExporting(false);
+    setCompleted(true);
+    setTimeout(() => setCompleted(false), 3000);
   };
 
   return (

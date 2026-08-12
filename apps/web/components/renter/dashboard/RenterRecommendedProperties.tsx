@@ -1,79 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { renterService } from '@/services/renterService';
+import type { Property } from '@/types/renter';
 
 type PeriodType = 'month' | 'year' | 'week';
-
-interface Property {
-  id: string;
-  title: string;
-  location: string;
-  price: number;
-  period: PeriodType;
-  bedrooms: number;
-  bathrooms: number;
-  size: number;
-  rating: number;
-  verified: boolean;
-  image: string;
-}
-
-const recommendedProperties: Property[] = [
-  {
-    id: '1',
-    title: 'Modern Downtown Loft',
-    location: 'Ikeja, Lagos',
-    price: 200000,
-    period: 'month',
-    bedrooms: 2,
-    bathrooms: 2,
-    size: 1200,
-    rating: 4.8,
-    verified: true,
-    image: '/images/prop1.jpg',
-  },
-  {
-    id: '2',
-    title: 'Cozy Studio Apartment',
-    location: 'Victoria Island, Lagos',
-    price: 150000,
-    period: 'month',
-    bedrooms: 1,
-    bathrooms: 1,
-    size: 650,
-    rating: 4.6,
-    verified: true,
-    image: '/images/prop2.jpg',
-  },
-  {
-    id: '3',
-    title: 'Executive 3-Bed Apartment',
-    location: 'Ikoyi, Lagos',
-    price: 350000,
-    period: 'month',
-    bedrooms: 3,
-    bathrooms: 2,
-    size: 1800,
-    rating: 4.9,
-    verified: true,
-    image: '/images/prop3.jpg',
-  },
-  {
-    id: '4',
-    title: 'Affordable 2-Bed Flat',
-    location: 'Surulere, Lagos',
-    price: 120000,
-    period: 'month',
-    bedrooms: 2,
-    bathrooms: 1,
-    size: 950,
-    rating: 4.5,
-    verified: false,
-    image: '/images/prop4.jpg',
-  },
-];
 
 const formatPrice = (price: number, period: PeriodType) => {
   const formatter = new Intl.NumberFormat('en-NG', {
@@ -91,6 +25,16 @@ const formatPrice = (price: number, period: PeriodType) => {
 };
 
 export const RenterRecommendedProperties = () => {
+  const [recommendedProperties, setRecommendedProperties] = useState<Property[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listListings();
+      if (res.success && res.data) setRecommendedProperties(res.data.slice(0, 4));
+    };
+    load();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

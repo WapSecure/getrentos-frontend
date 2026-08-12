@@ -1,21 +1,34 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AlertTriangle, Trash2, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { renterService } from '@/services/renterService';
+import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
 
 export const AccountDeletion = () => {
+  const router = useRouter();
   const [step, setStep] = useState<'confirm' | 'verify' | 'complete'>('confirm');
   const [confirmText, setConfirmText] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = () => {
-    if (confirmText !== 'delete my account') return;
+  const handleDelete = async () => {
+    if (confirmText !== 'delete my account' || !password) return;
     setIsDeleting(true);
-    setTimeout(() => {
-      setIsDeleting(false);
+    setError(null);
+    const res = await renterService.deleteAccount(password);
+    setIsDeleting(false);
+    if (res.success) {
       setStep('complete');
-    }, 2000);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      setTimeout(() => router.push(ROUTES.LOGIN), 2000);
+    } else {
+      setError(res.message || 'Failed to delete account');
+    }
   };
 
   if (step === 'complete') {
@@ -65,12 +78,27 @@ export const AccountDeletion = () => {
         />
       </div>
 
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-foreground mb-2">
+          Enter your password to confirm
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full px-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
+        />
+      </div>
+
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+
       <Button
         variant="danger"
         fullWidth
         className="mt-6 gap-2"
         onClick={handleDelete}
-        disabled={confirmText !== 'delete my account' || isDeleting}
+        disabled={confirmText !== 'delete my account' || !password || isDeleting}
         isLoading={isDeleting}
       >
         <Trash2 className="w-4 h-4" />
