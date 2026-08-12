@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   MapPin,
@@ -28,10 +29,11 @@ import { PropertyReviews } from '@/components/renter/property-detail/PropertyRev
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
 import { trackRecentlyViewed } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
-import type { Property } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -43,38 +45,49 @@ const nairaFormatter = new Intl.NumberFormat('en-NG', {
 export default function PropertyDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [property, setProperty] = useState<Property | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const [isSaved, setIsSaved] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [tourMode, setTourMode] = useState<TourModalMode>('tour');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  useEffect(() => {
-    const fetchProperty = async () => {
-      setIsLoading(true);
-      const [propertyRes, savedRes] = await Promise.all([
-        renterService.getListing(params.id),
-        renterService.listSavedListings(),
-      ]);
-      if (propertyRes.success && propertyRes.data) {
-        setProperty(propertyRes.data);
-        trackRecentlyViewed(propertyRes.data);
-      }
-      if (savedRes.success && savedRes.data) {
-        setIsSaved(savedRes.data.some((p) => p.id === params.id));
-      }
-      setIsLoading(false);
-    };
+  const { data: property = null, isLoading } = useQuery({
+    queryKey: renterKeys.listing(params.id),
+    queryFn: async () => {
+      const data = await unwrap(renterService.getListing(params.id));
+      trackRecentlyViewed(data);
+      return data;
+    },
+  });
 
-    fetchProperty();
-  }, [params.id]);
+  const { data: savedListings = [] } = useQuery({
+    queryKey: renterKeys.savedListings,
+    queryFn: () => unwrap(renterService.listSavedListings()),
+  });
+  const isSaved = savedListings.some((p) => p.id === params.id);
 
   const showToast = (message: string, variant: ToastVariant) => {
     setToast({ message, variant });
     setTimeout(() => setToast(null), 3000);
   };
+
+  const saveMutation = useMutation({
+    mutationFn: () => unwrap(renterService.saveListing(property?.id ?? '')),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+      showToast('Property saved successfully!', 'success');
+    },
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: () => unwrap(renterService.unsaveListing(property?.id ?? '')),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+      showToast('Property removed from saved', 'info');
+    },
+  });
 
   if (isLoading) {
     return (
@@ -99,19 +112,7 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const handleToggleSave = async () => {
-    const response = isSaved
-      ? await renterService.unsaveListing(property.id)
-      : await renterService.saveListing(property.id);
-
-    if (!response.success) return;
-
-    showToast(
-      isSaved ? 'Property removed from saved' : 'Property saved successfully!',
-      isSaved ? 'info' : 'success'
-    );
-    setIsSaved(!isSaved);
-  };
+  const handleToggleSave = () => (isSaved ? unsaveMutation.mutate() : saveMutation.mutate());
 
   const handleCompare = () => {
     showToast('Added to comparison — open Discover to view your comparison list', 'info');

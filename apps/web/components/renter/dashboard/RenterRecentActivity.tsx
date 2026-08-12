@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 type ActivityType = 'application' | 'message' | 'payment' | 'maintenance' | 'lease' | 'system';
 
@@ -61,29 +63,21 @@ const formatTimeAgo = (dateString: string) => {
 
 export const RenterRecentActivity = () => {
   const router = useRouter();
-  const [activities, setActivities] = useState<Activity[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listNotifications();
-      if (res.success && res.data) {
-        setActivities(
-          res.data.slice(0, 5).map((n) => {
-            const mapped = iconByType[n.type] || { icon: Bell, color: 'text-gray-500' };
-            return {
-              id: n.id,
-              type: n.type,
-              title: n.title,
-              time: n.createdAt,
-              icon: mapped.icon,
-              iconColor: mapped.color,
-            };
-          })
-        );
-      }
+  const { data: notifications = [] } = useQuery({
+    queryKey: renterKeys.notifications,
+    queryFn: () => unwrap(renterService.listNotifications()),
+  });
+  const activities: Activity[] = notifications.slice(0, 5).map((n) => {
+    const mapped = iconByType[n.type] || { icon: Bell, color: 'text-gray-500' };
+    return {
+      id: n.id,
+      type: n.type,
+      title: n.title,
+      time: n.createdAt,
+      icon: mapped.icon,
+      iconColor: mapped.color,
     };
-    load();
-  }, []);
+  });
 
   return (
     <motion.div

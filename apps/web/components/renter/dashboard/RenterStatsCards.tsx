@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart, FileText, MessageCircle, Calendar, Home, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -117,39 +119,29 @@ const StatCard = ({
 
 export const RenterStatsCards = () => {
   const { t } = useLanguage();
-  const [savedCount, setSavedCount] = useState(0);
-  const [applicationsCount, setApplicationsCount] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [viewingsCount, setViewingsCount] = useState(0);
-  const [leaseStatus, setLeaseStatus] = useState('—');
-  const [totalRentPaid, setTotalRentPaid] = useState(0);
 
-  useEffect(() => {
-    const load = async () => {
-      const [statsRes, leaseRes, paymentsRes] = await Promise.all([
-        renterService.getDashboardStats(),
-        renterService.getLease(),
-        renterService.listPayments(),
-      ]);
-      if (statsRes.success && statsRes.data) {
-        setSavedCount(statsRes.data.savedPropertiesCount);
-        setApplicationsCount(statsRes.data.activeApplicationsCount);
-        setUnreadCount(statsRes.data.unreadMessagesCount);
-        setViewingsCount(statsRes.data.upcomingViewingsCount);
-      }
-      if (leaseRes.success && leaseRes.data) {
-        setLeaseStatus(
-          leaseRes.data.status.charAt(0).toUpperCase() + leaseRes.data.status.slice(1)
-        );
-      }
-      if (paymentsRes.success && paymentsRes.data) {
-        setTotalRentPaid(
-          paymentsRes.data.filter((p) => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0)
-        );
-      }
-    };
-    load();
-  }, []);
+  const { data: dashboardStats } = useQuery({
+    queryKey: renterKeys.dashboardStats,
+    queryFn: () => unwrap(renterService.getDashboardStats()),
+  });
+  const savedCount = dashboardStats?.savedPropertiesCount ?? 0;
+  const applicationsCount = dashboardStats?.activeApplicationsCount ?? 0;
+  const unreadCount = dashboardStats?.unreadMessagesCount ?? 0;
+  const viewingsCount = dashboardStats?.upcomingViewingsCount ?? 0;
+
+  const { data: lease } = useQuery({
+    queryKey: renterKeys.lease,
+    queryFn: () => unwrap(renterService.getLease()),
+  });
+  const leaseStatus = lease ? lease.status.charAt(0).toUpperCase() + lease.status.slice(1) : '—';
+
+  const { data: payments = [] } = useQuery({
+    queryKey: renterKeys.payments,
+    queryFn: () => unwrap(renterService.listPayments()),
+  });
+  const totalRentPaid = payments
+    .filter((p) => p.status === 'paid')
+    .reduce((sum, p) => sum + p.amount, 0);
 
   const stats = [
     {

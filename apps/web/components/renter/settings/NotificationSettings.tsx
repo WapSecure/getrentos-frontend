@@ -1,19 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  Bell,
-  Mail,
-  Smartphone,
-  MessageCircle,
-  FileText,
-  CreditCard,
-  Wrench,
-  Home,
-  Check,
-} from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
 
 interface NotificationPreference {
   id: string;
@@ -37,70 +31,89 @@ const CATEGORY_META: { category: string; id: string; label: string; icon: React.
   { category: 'system', id: 'system', label: 'System & Trust Score', icon: Bell },
 ];
 
-export const NotificationSettings = () => {
-  const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listNotificationPreferences();
-      if (res.success && res.data) {
-        const byCategory = new Map(res.data.map((p) => [p.category, p]));
-        setPreferences(
-          CATEGORY_META.map((meta) => {
-            const pref = byCategory.get(meta.category);
-            const channels = {
-              email: pref?.email ?? true,
-              push: pref?.push ?? true,
-              inApp: pref?.inApp ?? true,
-            };
-            return {
-              id: meta.id,
-              category: meta.category,
-              label: meta.label,
-              icon: meta.icon,
-              enabled: channels.email || channels.push || channels.inApp,
-              channels,
-            };
-          })
-        );
-      }
+const buildPreferences = (fetched?: FetchedPreference[]): NotificationPreference[] => {
+  const byCategory = new Map((fetched ?? []).map((p) => [p.category, p]));
+  return CATEGORY_META.map((meta) => {
+    const pref = byCategory.get(meta.category);
+    const channels = {
+      email: pref?.email ?? true,
+      push: pref?.push ?? true,
+      inApp: pref?.inApp ?? true,
     };
-    load();
-  }, []);
+    return {
+      id: meta.id,
+      category: meta.category,
+      label: meta.label,
+      icon: meta.icon,
+      enabled: channels.email || channels.push || channels.inApp,
+      channels,
+    };
+  });
+};
 
-  const togglePreference = async (id: string) => {
-    const pref = preferences.find((p) => p.id === id);
-    if (!pref) return;
-    const enabled = !pref.enabled;
-    const res = await renterService.updateNotificationPreference(pref.category, {
-      email: enabled,
-      push: enabled,
-      inApp: enabled,
-    });
-    if (res.success && res.data) {
-      const updated = res.data;
+export const NotificationSettings = () => {
+  const { data: fetched } = useQuery({
+    queryKey: renterKeys.notificationPreferences,
+    queryFn: () => unwrap(renterService.listNotificationPreferences()),
+  });
+
+  return (
+    <NotificationSettingsForm
+      key={fetched ? 'loaded' : 'initial'}
+      initial={buildPreferences(fetched)}
+    />
+  );
+};
+
+const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference[] }) => {
+  const [preferences, setPreferences] = useState<NotificationPreference[]>(initial);
+
+  const togglePreferenceMutation = useMutation({
+    mutationFn: ({ category, enabled }: { prefId: string; category: string; enabled: boolean }) =>
+      unwrap(
+        renterService.updateNotificationPreference(category, {
+          email: enabled,
+          push: enabled,
+          inApp: enabled,
+        })
+      ),
+    onSuccess: (updated, { prefId }) => {
       setPreferences((prev) =>
         prev.map((p) =>
-          p.id === id
+          p.id === prefId
             ? {
                 ...p,
-                enabled,
+                enabled: updated.email || updated.push || updated.inApp,
                 channels: { email: updated.email, push: updated.push, inApp: updated.inApp },
               }
             : p
         )
       );
-    }
+    },
+  });
+
+  const togglePreference = (id: string) => {
+    const pref = preferences.find((p) => p.id === id);
+    if (!pref) return;
+    togglePreferenceMutation.mutate({
+      prefId: id,
+      category: pref.category,
+      enabled: !pref.enabled,
+    });
   };
 
-  const toggleChannel = async (prefId: string, channel: 'email' | 'push' | 'inApp') => {
-    const pref = preferences.find((p) => p.id === prefId);
-    if (!pref) return;
-    const res = await renterService.updateNotificationPreference(pref.category, {
-      [channel]: !pref.channels[channel],
-    });
-    if (res.success && res.data) {
-      const updated = res.data;
+  const toggleChannelMutation = useMutation({
+    mutationFn: ({
+      category,
+      channel,
+      value,
+    }: {
+      prefId: string;
+      category: string;
+      channel: 'email' | 'push' | 'inApp';
+      value: boolean;
+    }) => unwrap(renterService.updateNotificationPreference(category, { [channel]: value })),
+    onSuccess: (updated, { prefId }) => {
       setPreferences((prev) =>
         prev.map((p) =>
           p.id === prefId
@@ -108,7 +121,18 @@ export const NotificationSettings = () => {
             : p
         )
       );
-    }
+    },
+  });
+
+  const toggleChannel = (prefId: string, channel: 'email' | 'push' | 'inApp') => {
+    const pref = preferences.find((p) => p.id === prefId);
+    if (!pref) return;
+    toggleChannelMutation.mutate({
+      prefId,
+      category: pref.category,
+      channel,
+      value: !pref.channels[channel],
+    });
   };
 
   return (

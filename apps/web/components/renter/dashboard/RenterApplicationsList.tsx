@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
-import type { Application } from '@/types/renter';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
 type PeriodType = 'month' | 'year' | 'week';
@@ -70,15 +71,11 @@ import { ROUTES } from '@/lib/constants/auth';
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
   const router = useRouter();
-  const [applications, setApplications] = useState<Application[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listMyApplications();
-      if (res.success && res.data) setApplications(res.data.slice(0, 5));
-    };
-    load();
-  }, []);
+  const { data: allApplications = [] } = useQuery({
+    queryKey: renterKeys.applications,
+    queryFn: () => unwrap(renterService.listMyApplications()),
+  });
+  const applications = allApplications.slice(0, 5);
 
   return (
     <motion.div

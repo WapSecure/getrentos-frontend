@@ -1,31 +1,32 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Download, FileText, FileSpreadsheet, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
 
 export const DataExport = () => {
-  const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState('pdf');
   const [completed, setCompleted] = useState(false);
 
-  const handleExport = async () => {
-    setIsExporting(true);
-    const res = await renterService.exportData();
-    if (res.success && res.data) {
-      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+  const exportMutation = useMutation({
+    mutationFn: () => unwrap(renterService.exportData()),
+    onSuccess: (data) => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `getrentos-data-export-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
-    }
-    setIsExporting(false);
-    setCompleted(true);
-    setTimeout(() => setCompleted(false), 3000);
-  };
+      setCompleted(true);
+      setTimeout(() => setCompleted(false), 3000);
+    },
+  });
+
+  const handleExport = () => exportMutation.mutate();
 
   return (
     <div>
@@ -86,12 +87,12 @@ export const DataExport = () => {
           variant="primary"
           fullWidth
           onClick={handleExport}
-          disabled={isExporting}
-          isLoading={isExporting}
+          disabled={exportMutation.isPending}
+          isLoading={exportMutation.isPending}
           className="gap-2"
         >
           {completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-          {completed ? 'Exported!' : isExporting ? 'Exporting...' : 'Export Data'}
+          {completed ? 'Exported!' : exportMutation.isPending ? 'Exporting...' : 'Export Data'}
         </Button>
       </div>
     </div>

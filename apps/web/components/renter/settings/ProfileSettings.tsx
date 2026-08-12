@@ -1,44 +1,61 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, MapPin } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
 }
 
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
+  const { data: profile } = useQuery({
+    queryKey: renterKeys.profile,
+    queryFn: () => unwrap(renterService.getProfile()),
+  });
+
+  const initial = {
+    fullName: profile?.fullName ?? user?.fullName ?? '',
+    email: profile?.email ?? user?.email ?? '',
+    phone: profile?.phone ?? '',
+  };
+
+  return <ProfileSettingsForm key={profile ? 'loaded' : 'initial'} initial={initial} user={user} />;
+};
+
+const ProfileSettingsForm = ({
+  initial,
+  user,
+}: {
+  initial: { fullName: string; email: string; phone: string };
+  user: { fullName: string; email: string; role?: string } | null;
+}) => {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || '',
-    email: user?.email || '',
-    phone: '',
+    ...initial,
     location: 'Ikeja, Lagos',
     bio: 'Tech enthusiast and property lover',
   });
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.getProfile();
-      if (res.success && res.data) {
-        setFormData((prev) => ({
-          ...prev,
-          fullName: res.data!.fullName,
-          email: res.data!.email,
-          phone: res.data!.phone || '',
-        }));
-      }
-    };
-    load();
-  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const updateMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        renterService.updateProfile({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+        })
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.profile }),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    await renterService.updateProfile({
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-    });
+    updateMutation.mutate();
   };
 
   return (

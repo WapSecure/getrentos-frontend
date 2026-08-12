@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RoommatesHeader } from '@/components/renter/roommates/RoommatesHeader';
 import { RoommatesStats } from '@/components/renter/roommates/RoommatesStats';
 import { RoommatesList } from '@/components/renter/roommates/RoommatesList';
@@ -9,74 +10,71 @@ import { ExpenseTracker } from '@/components/renter/roommates/ExpenseTracker';
 import { RoommateTasks } from '@/components/renter/roommates/RoommateTasks';
 import { InviteRoommateModal } from '@/components/renter/roommates/InviteRoommateModal';
 import { RoommateAgreementModal } from '@/components/renter/roommates/RoommateAgreementModal';
-import {
-  renterService,
-  type Roommate,
-  type RoommateExpense as Expense,
-} from '@/services/renterService';
+import { renterService, type RoommateExpense as Expense } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function RoommatesPage() {
-  const [roommates, setRoommates] = useState<Roommate[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const queryClient = useQueryClient();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showAgreementModal, setShowAgreementModal] = useState(false);
 
-  useEffect(() => {
-    const loadRoommates = async () => {
-      const [roommatesRes, expensesRes] = await Promise.all([
-        renterService.listRoommates(),
-        renterService.listRoommateExpenses(),
-      ]);
-      if (roommatesRes.success && roommatesRes.data) setRoommates(roommatesRes.data);
-      if (expensesRes.success && expensesRes.data) setExpenses(expensesRes.data);
-    };
-    loadRoommates();
-  }, []);
+  const { data: roommates = [] } = useQuery({
+    queryKey: renterKeys.roommates,
+    queryFn: () => unwrap(renterService.listRoommates()),
+  });
+  const { data: expenses = [] } = useQuery({
+    queryKey: renterKeys.roommateExpenses,
+    queryFn: () => unwrap(renterService.listRoommateExpenses()),
+  });
 
-  const handleInvite = async (data: { email: string; message: string }) => {
-    const res = await renterService.inviteRoommate(data.email, data.message);
-    if (res.success && res.data) {
-      const created = res.data;
-      setRoommates((prev) => [...prev, created]);
-    }
-  };
+  const invalidateRoommates = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.roommates });
 
-  const handleRemoveRoommate = async (id: string) => {
-    const res = await renterService.removeRoommate(id);
-    if (res.success) {
-      setRoommates((prev) => prev.filter((r) => r.id !== id));
-    }
-  };
+  const inviteMutation = useMutation({
+    mutationFn: (data: { email: string; message: string }) =>
+      unwrap(renterService.inviteRoommate(data.email, data.message)),
+    onSuccess: invalidateRoommates,
+  });
 
-  const handleUpdateShare = async (id: string, percentage: number) => {
-    const res = await renterService.updateRoommateShare(id, percentage);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setRoommates((prev) => prev.map((r) => (r.id === id ? updated : r)));
-    }
-  };
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.removeRoommate(id)),
+    onSuccess: invalidateRoommates,
+  });
 
-  const handleAddExpense = async (expense: Expense) => {
-    const res = await renterService.addRoommateExpense({
-      description: expense.description,
-      amount: expense.amount,
-      paidBy: expense.paidBy,
-      splitAmong: expense.splitAmong,
-      category: expense.category,
-    });
-    if (res.success && res.data) {
-      const created = res.data;
-      setExpenses((prev) => [...prev, created]);
-    }
-  };
+  const updateShareMutation = useMutation({
+    mutationFn: ({ id, percentage }: { id: string; percentage: number }) =>
+      unwrap(renterService.updateRoommateShare(id, percentage)),
+    onSuccess: invalidateRoommates,
+  });
 
-  const handleCompleteTask = async (roommateId: string, task: string) => {
-    const res = await renterService.completeRoommateTask(roommateId, task);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setRoommates((prev) => prev.map((r) => (r.id === roommateId ? updated : r)));
-    }
-  };
+  const addExpenseMutation = useMutation({
+    mutationFn: (expense: Expense) =>
+      unwrap(
+        renterService.addRoommateExpense({
+          description: expense.description,
+          amount: expense.amount,
+          paidBy: expense.paidBy,
+          splitAmong: expense.splitAmong,
+          category: expense.category,
+        })
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.roommateExpenses }),
+  });
+
+  const completeTaskMutation = useMutation({
+    mutationFn: ({ roommateId, task }: { roommateId: string; task: string }) =>
+      unwrap(renterService.completeRoommateTask(roommateId, task)),
+    onSuccess: invalidateRoommates,
+  });
+
+  const handleInvite = (data: { email: string; message: string }) => inviteMutation.mutate(data);
+  const handleRemoveRoommate = (id: string) => removeMutation.mutate(id);
+  const handleUpdateShare = (id: string, percentage: number) =>
+    updateShareMutation.mutate({ id, percentage });
+  const handleAddExpense = (expense: Expense) => addExpenseMutation.mutate(expense);
+  const handleCompleteTask = (roommateId: string, task: string) =>
+    completeTaskMutation.mutate({ roommateId, task });
 
   return (
     <>

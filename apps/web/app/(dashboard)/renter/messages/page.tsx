@@ -1,7 +1,8 @@
 'use client';
 
 import { useRenterUser } from '../layout';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessagesHeader } from '@/components/renter/messages/MessagesHeader';
 import { MessageConversationList } from '@/components/renter/messages/MessageConversationList';
 import { MessageThread } from '@/components/renter/messages/MessageThread';
@@ -12,98 +13,102 @@ import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageLabels } from '@/components/renter/messages/MessageLabels';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
 import { MessageCircle } from 'lucide-react';
-import { Conversation, Reminder, ReminderData, FilterState } from '@/types/messages';
+import { Conversation, FilterState } from '@/types/messages';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function MessagesPage() {
   const user = useRenterUser();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const queryClient = useQueryClient();
+  const { data: conversations = [] } = useQuery({
+    queryKey: renterKeys.conversations,
+    queryFn: () => unwrap(renterService.listConversations()),
+  });
+  const { data: reminders = [] } = useQuery({
+    queryKey: renterKeys.reminders,
+    queryFn: () => unwrap(renterService.listReminders()),
+  });
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const selectedConversation =
+    conversations.find((c) => c.id === selectedConversationId) ?? conversations[0] ?? null;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [selectedLabel, setSelectedLabel] = useState<string>('all');
-  const [reminders, setReminders] = useState<Reminder[]>([]);
 
-  useEffect(() => {
-    const loadConversations = async () => {
-      const res = await renterService.listConversations();
-      if (res.success && res.data) {
-        setConversations(res.data);
-        if (res.data.length > 0) setSelectedConversation(res.data[0]);
-      }
-    };
-    loadConversations();
+  const invalidateConversations = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.conversations });
+  const invalidateReminders = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.reminders });
 
-    const loadReminders = async () => {
-      const res = await renterService.listReminders();
-      if (res.success && res.data) setReminders(res.data);
-    };
-    loadReminders();
-  }, []);
+  const sendMessageMutation = useMutation({
+    mutationFn: ({
+      conversationId,
+      text,
+      files,
+    }: {
+      conversationId: string;
+      text: string;
+      files?: File[];
+    }) => unwrap(renterService.sendMessage(conversationId, text, files)),
+    onSuccess: invalidateConversations,
+  });
 
-  const handleSendMessage = async (conversationId: string, text: string, files?: File[]) => {
-    const res = await renterService.sendMessage(conversationId, text, files);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
-      if (selectedConversation?.id === conversationId) {
-        setSelectedConversation(updated);
-      }
-    }
-  };
+  const markReadMutation = useMutation({
+    mutationFn: (conversationId: string) =>
+      unwrap(renterService.markConversationRead(conversationId)),
+    onSuccess: invalidateConversations,
+  });
 
-  const handleSelectConversation = async (conversation: Conversation) => {
-    setSelectedConversation(conversation);
+  const pinMutation = useMutation({
+    mutationFn: (conversationId: string) =>
+      unwrap(renterService.togglePinConversation(conversationId)),
+    onSuccess: invalidateConversations,
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: (conversationId: string) =>
+      unwrap(renterService.toggleArchiveConversation(conversationId)),
+    onSuccess: invalidateConversations,
+  });
+
+  const addReminderMutation = useMutation({
+    mutationFn: (reminderData: { message: string; date: string; time: string }) =>
+      unwrap(renterService.createReminder(reminderData)),
+    onSuccess: invalidateReminders,
+  });
+
+  const toggleReminderMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.toggleReminder(id)),
+    onSuccess: invalidateReminders,
+  });
+
+  const deleteReminderMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.deleteReminder(id)),
+    onSuccess: invalidateReminders,
+  });
+
+  const handleSendMessage = (conversationId: string, text: string, files?: File[]) =>
+    sendMessageMutation.mutate({ conversationId, text, files });
+
+  const handleSelectConversation = (conversation: Conversation) => {
+    setSelectedConversationId(conversation.id);
     if (conversation.unreadCount > 0) {
-      const res = await renterService.markConversationRead(conversation.id);
-      if (res.success && res.data) {
-        const updated = res.data;
-        setConversations((prev) =>
-          prev.map((conv) => (conv.id === conversation.id ? updated : conv))
-        );
-        setSelectedConversation(updated);
-      }
+      markReadMutation.mutate(conversation.id);
     }
   };
 
-  const handlePinConversation = async (conversationId: string) => {
-    const res = await renterService.togglePinConversation(conversationId);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
-    }
-  };
+  const handlePinConversation = (conversationId: string) => pinMutation.mutate(conversationId);
 
-  const handleArchiveConversation = async (conversationId: string) => {
-    const res = await renterService.toggleArchiveConversation(conversationId);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setConversations((prev) => prev.map((conv) => (conv.id === conversationId ? updated : conv)));
-    }
-  };
+  const handleArchiveConversation = (conversationId: string) =>
+    archiveMutation.mutate(conversationId);
 
-  const handleAddReminder = async (reminderData: ReminderData) => {
-    const res = await renterService.createReminder(reminderData);
-    if (res.success && res.data) {
-      const created = res.data;
-      setReminders((prev) => [...prev, created]);
-    }
-  };
+  const handleAddReminder = (reminderData: { message: string; date: string; time: string }) =>
+    addReminderMutation.mutate(reminderData);
 
-  const handleToggleReminder = async (id: string) => {
-    const res = await renterService.toggleReminder(id);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setReminders((prev) => prev.map((r) => (r.id === id ? updated : r)));
-    }
-  };
+  const handleToggleReminder = (id: string) => toggleReminderMutation.mutate(id);
 
-  const handleDeleteReminder = async (id: string) => {
-    const res = await renterService.deleteReminder(id);
-    if (res.success) {
-      setReminders((prev) => prev.filter((r) => r.id !== id));
-    }
-  };
+  const handleDeleteReminder = (id: string) => deleteReminderMutation.mutate(id);
 
   const handleFilterChange = (filters: FilterState) => {
     setFilterType(filters.type);

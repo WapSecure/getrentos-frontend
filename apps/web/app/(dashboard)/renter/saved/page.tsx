@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SavedPropertiesHeader } from '@/components/renter/saved/SavedPropertiesHeader';
 import { SavedPropertiesFilters } from '@/components/renter/saved/SavedPropertiesFilters';
 import { SavedPropertiesGrid } from '@/components/renter/saved/SavedPropertiesGrid';
@@ -11,8 +12,9 @@ import { SavedAIRecommendations } from '@/components/renter/saved/SavedAIRecomme
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
 import { Toast } from '@/components/ui/Toast';
-import { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface Wishlist {
   id: string;
@@ -21,7 +23,11 @@ interface Wishlist {
 }
 
 export default function SavedPage() {
-  const [savedProperties, setSavedProperties] = useState<Property[]>([]);
+  const queryClient = useQueryClient();
+  const { data: savedProperties = [] } = useQuery({
+    queryKey: renterKeys.savedListings,
+    queryFn: () => unwrap(renterService.listSavedListings()),
+  });
   const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
     if (typeof window === 'undefined') return [];
     const saved = localStorage.getItem('renter_wishlists');
@@ -45,21 +51,20 @@ export default function SavedPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [shareToast, setShareToast] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSavedProperties = async () => {
-      const response = await renterService.listSavedListings();
-      if (response.success && response.data) setSavedProperties(response.data);
-    };
-
-    fetchSavedProperties();
-  }, []);
-
-  const handleRemoveProperty = async (propertyId: string) => {
-    const response = await renterService.unsaveListing(propertyId);
-    if (!response.success) return;
-    setSavedProperties((prev) => prev.filter((p) => p.id !== propertyId));
-    setSelectedProperties((prev) => prev.filter((id) => id !== propertyId));
+  const invalidateSaved = () => {
+    queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+    queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
   };
+
+  const unsaveMutation = useMutation({
+    mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
+    onSuccess: (_, propertyId) => {
+      invalidateSaved();
+      setSelectedProperties((prev) => prev.filter((id) => id !== propertyId));
+    },
+  });
+
+  const handleRemoveProperty = (propertyId: string) => unsaveMutation.mutate(propertyId);
 
   const handleMoveToWishlist = (propertyId: string, wishlistId: string) => {
     const updatedWishlists = wishlists.map((w) => {
@@ -84,11 +89,16 @@ export default function SavedPage() {
     setSelectedProperties([]);
   };
 
-  const handleDeleteSelected = async () => {
-    await Promise.all(selectedProperties.map((id) => renterService.unsaveListing(id)));
-    setSavedProperties((prev) => prev.filter((p) => !selectedProperties.includes(p.id)));
-    setSelectedProperties([]);
-  };
+  const bulkUnsaveMutation = useMutation({
+    mutationFn: (ids: string[]) =>
+      Promise.all(ids.map((id) => unwrap(renterService.unsaveListing(id)))),
+    onSuccess: () => {
+      invalidateSaved();
+      setSelectedProperties([]);
+    },
+  });
+
+  const handleDeleteSelected = () => bulkUnsaveMutation.mutate(selectedProperties);
 
   const handleShareSelected = () => {
     setShareToast(

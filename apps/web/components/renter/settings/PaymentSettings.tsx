@@ -1,30 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { CreditCard, Building2, Wallet, Plus, Trash2, Check } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { CreditCard, Building2, Wallet, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { renterService, type PaymentMethod } from '@/services/renterService';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const PaymentSettings = () => {
-  const [methods, setMethods] = useState<PaymentMethod[]>([]);
+  const queryClient = useQueryClient();
+  const { data: methods = [] } = useQuery({
+    queryKey: renterKeys.paymentMethods,
+    queryFn: () => unwrap(renterService.listPaymentMethods()),
+  });
 
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listPaymentMethods();
-      if (res.success && res.data) setMethods(res.data);
-    };
-    load();
-  }, []);
+  const invalidateMethods = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.paymentMethods });
 
-  const handleSetDefault = async (id: string) => {
-    const res = await renterService.setDefaultPaymentMethod(id);
-    if (res.success && res.data) setMethods(res.data);
-  };
+  const setDefaultMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
+    onSuccess: invalidateMethods,
+  });
 
-  const handleRemove = async (id: string) => {
-    const res = await renterService.removePaymentMethod(id);
-    if (res.success) setMethods((prev) => prev.filter((m) => m.id !== id));
-  };
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
+    onSuccess: invalidateMethods,
+  });
+
+  const handleSetDefault = (id: string) => setDefaultMutation.mutate(id);
+  const handleRemove = (id: string) => removeMutation.mutate(id);
 
   return (
     <div>
@@ -75,7 +80,7 @@ export const PaymentSettings = () => {
           );
         })}
 
-        <Button href="/renter/payments" variant="outline" fullWidth className="gap-2">
+        <Button href={ROUTES.RENTER_PAYMENTS} variant="outline" fullWidth className="gap-2">
           <Plus className="w-4 h-4" />
           Add Payment Method
         </Button>

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DiscoverFilters } from '@/components/renter/discover/DiscoverFilters';
 import { DiscoverSearchBar } from '@/components/renter/discover/DiscoverSearchBar';
 import { DiscoverPropertyGrid } from '@/components/renter/discover/DiscoverPropertyGrid';
@@ -16,10 +17,12 @@ import { SavedSearchAlert } from '@/components/renter/discover/features/SavedSea
 import { Toast, ToastVariant } from '@/components/ui/Toast';
 import { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function DiscoverPage() {
+  const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
-  const [savedProperties, setSavedProperties] = useState<string[]>([]);
   const [compareList, setCompareList] = useState<Property[]>([]);
   const [showCompareDrawer, setShowCompareDrawer] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
@@ -34,36 +37,40 @@ export default function DiscoverPage() {
     search: '',
   });
 
-  useEffect(() => {
-    const fetchSaved = async () => {
-      const response = await renterService.listSavedListings();
-      if (response.success && response.data) {
-        setSavedProperties(response.data.map((p) => p.id));
-      }
-    };
-
-    fetchSaved();
-  }, []);
+  const { data: savedListings = [] } = useQuery({
+    queryKey: renterKeys.savedListings,
+    queryFn: () => unwrap(renterService.listSavedListings()),
+  });
+  const savedProperties = savedListings.map((p) => p.id);
 
   const showToast = (message: string, variant: ToastVariant) => {
     setToast({ message, variant });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleSaveProperty = async (propertyId: string) => {
-    const isSaved = savedProperties.includes(propertyId);
-    const response = isSaved
-      ? await renterService.unsaveListing(propertyId)
-      : await renterService.saveListing(propertyId);
-
-    if (!response.success) return;
-
-    if (isSaved) {
-      setSavedProperties((prev) => prev.filter((id) => id !== propertyId));
-      showToast('Property removed from saved', 'info');
-    } else {
-      setSavedProperties((prev) => [...prev, propertyId]);
+  const saveMutation = useMutation({
+    mutationFn: (propertyId: string) => unwrap(renterService.saveListing(propertyId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
       showToast('Property saved successfully!', 'success');
+    },
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+      showToast('Property removed from saved', 'info');
+    },
+  });
+
+  const handleSaveProperty = (propertyId: string) => {
+    if (savedProperties.includes(propertyId)) {
+      unsaveMutation.mutate(propertyId);
+    } else {
+      saveMutation.mutate(propertyId);
     }
   };
 

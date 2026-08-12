@@ -1,8 +1,10 @@
+import type { RenterListingsFilters } from '@/services/renterService';
+
 /**
  * Centralized TanStack Query key factories for the pages backed by a real
- * API (landlordService / adminService). Keeping these here instead of
- * inlining tuples in every page avoids typo-based cache misses and makes
- * invalidation call sites easy to audit.
+ * API (landlordService / adminService / renterService). Keeping these here
+ * instead of inlining tuples in every page avoids typo-based cache misses
+ * and makes invalidation call sites easy to audit.
  */
 export const landlordKeys = {
   dashboardStats: ['landlord', 'dashboardStats'] as const,
@@ -62,4 +64,42 @@ export const adminKeys = {
   profile: ['admin', 'profile'] as const,
   notificationPreferences: ['admin', 'notificationPreferences'] as const,
   platformConfig: ['admin', 'platformConfig'] as const,
+};
+
+export const renterKeys = {
+  dashboardStats: ['renter', 'dashboardStats'] as const,
+  listings: (filters?: RenterListingsFilters) =>
+    [
+      'renter',
+      'listings',
+      filters?.search ?? '',
+      filters?.location ?? '',
+      filters?.minPrice ?? '',
+      filters?.maxPrice ?? '',
+      filters?.bedrooms ?? '',
+      filters?.bathrooms ?? '',
+      filters?.propertyType ?? '',
+      filters?.verifiedOnly ?? false,
+    ] as const,
+  listing: (id: string) => ['renter', 'listing', id] as const,
+  savedListings: ['renter', 'savedListings'] as const,
+  applications: ['renter', 'applications'] as const,
+  roommates: ['renter', 'roommates'] as const,
+  roommateExpenses: ['renter', 'roommateExpenses'] as const,
+  calendarEvents: ['renter', 'calendarEvents'] as const,
+  trustScore: ['renter', 'trustScore'] as const,
+  documents: ['renter', 'documents'] as const,
+  conversations: ['renter', 'conversations'] as const,
+  reminders: ['renter', 'reminders'] as const,
+  lease: ['renter', 'lease'] as const,
+  rentIncreases: ['renter', 'rentIncreases'] as const,
+  upcomingPaymentReminders: ['renter', 'upcomingPaymentReminders'] as const,
+  renewalOffer: ['renter', 'renewalOffer'] as const,
+  payments: ['renter', 'payments'] as const,
+  receipts: ['renter', 'receipts'] as const,
+  paymentMethods: ['renter', 'paymentMethods'] as const,
+  maintenanceRequests: ['renter', 'maintenanceRequests'] as const,
+  notifications: ['renter', 'notifications'] as const,
+  notificationPreferences: ['renter', 'notificationPreferences'] as const,
+  profile: ['renter', 'profile'] as const,
 };
