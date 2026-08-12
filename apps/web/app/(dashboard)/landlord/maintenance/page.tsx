@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
@@ -63,8 +63,14 @@ export default function LandlordMaintenancePage() {
 
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
 
-  const filteredRequests = requests.filter((r) => filter === 'all' || r.status === filter);
-  const openCount = requests.filter((r) => r.status !== 'resolved').length;
+  const filteredRequests = useMemo(
+    () => requests.filter((r) => filter === 'all' || r.status === filter),
+    [requests, filter]
+  );
+  const openCount = useMemo(
+    () => requests.filter((r) => r.status !== 'resolved').length,
+    [requests]
+  );
 
   return (
     <>

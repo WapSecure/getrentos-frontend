@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
@@ -70,14 +70,18 @@ function LandlordUnitsPageContent() {
   const handleAddUnit = (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) =>
     addUnitMutation.mutate(data);
 
-  const filteredUnits = units.filter((u) => {
-    const matchesProperty = propertyFilter === 'all' || u.propertyId === propertyFilter;
-    const matchesSearch =
-      u.unitName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.propertyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.tenantName || '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesProperty && matchesSearch;
-  });
+  const filteredUnits = useMemo(
+    () =>
+      units.filter((u) => {
+        const matchesProperty = propertyFilter === 'all' || u.propertyId === propertyFilter;
+        const matchesSearch =
+          u.unitName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          u.propertyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (u.tenantName || '').toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesProperty && matchesSearch;
+      }),
+    [units, propertyFilter, searchQuery]
+  );
 
   return (
     <>

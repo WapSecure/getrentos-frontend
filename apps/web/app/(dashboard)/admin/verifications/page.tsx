@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
@@ -56,14 +56,23 @@ export default function AdminVerificationsPage() {
   const handleRequestClarification = (id: string, reason: string) =>
     requestClarificationMutation.mutate({ id, reason });
 
-  const filteredRequests = requests.filter((r) => {
-    const matchesSearch =
-      r.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.subjectLabel.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-    const matchesType = typeFilter === 'all' || r.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const filteredRequests = useMemo(
+    () =>
+      requests.filter((r) => {
+        const matchesSearch =
+          r.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.subjectLabel.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+        const matchesType = typeFilter === 'all' || r.type === typeFilter;
+        return matchesSearch && matchesStatus && matchesType;
+      }),
+    [requests, searchQuery, statusFilter, typeFilter]
+  );
+
+  const pendingReviewCount = useMemo(
+    () => requests.filter((r) => r.status === 'pending_review').length,
+    [requests]
+  );
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -85,9 +94,7 @@ export default function AdminVerificationsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Verification Queue</h1>
         <p className="text-muted-foreground mt-1">
-          {requests.filter((r) => r.status === 'pending_review').length} request
-          {requests.filter((r) => r.status === 'pending_review').length === 1 ? '' : 's'} awaiting
-          review
+          {pendingReviewCount} request{pendingReviewCount === 1 ? '' : 's'} awaiting review
         </p>
       </div>
 

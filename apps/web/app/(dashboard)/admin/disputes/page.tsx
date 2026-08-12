@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
@@ -59,15 +59,24 @@ export default function AdminDisputesPage() {
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
   const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
 
-  const filteredDisputes = disputes.filter((d) => {
-    const matchesSearch =
-      d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.raisedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.against.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || d.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || d.category === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+  const filteredDisputes = useMemo(
+    () =>
+      disputes.filter((d) => {
+        const matchesSearch =
+          d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          d.raisedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          d.against.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || d.status === statusFilter;
+        const matchesCategory = categoryFilter === 'all' || d.category === categoryFilter;
+        return matchesSearch && matchesStatus && matchesCategory;
+      }),
+    [disputes, searchQuery, statusFilter, categoryFilter]
+  );
+
+  const activeDisputeCount = useMemo(
+    () => disputes.filter((d) => d.status === 'open' || d.status === 'under_review').length,
+    [disputes]
+  );
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -91,12 +100,8 @@ export default function AdminDisputesPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Dispute &amp; Arbitration</h1>
         <p className="text-muted-foreground mt-1">
-          {disputes.filter((d) => d.status === 'open' || d.status === 'under_review').length} active
-          dispute
-          {disputes.filter((d) => d.status === 'open' || d.status === 'under_review').length === 1
-            ? ''
-            : 's'}{' '}
-          requiring attention
+          {activeDisputeCount} active dispute{activeDisputeCount === 1 ? '' : 's'} requiring
+          attention
         </p>
       </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldAlert } from 'lucide-react';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
@@ -36,14 +36,20 @@ export default function AdminFraudPage() {
     updateStatusMutation.mutate({ id, status });
   };
 
-  const filteredAlerts = alerts.filter((a) => {
-    const matchesSearch =
-      a.subjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.relatedEntity.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
-    const matchesSeverity = severityFilter === 'all' || a.severity === severityFilter;
-    return matchesSearch && matchesStatus && matchesSeverity;
-  });
+  const filteredAlerts = useMemo(
+    () =>
+      alerts.filter((a) => {
+        const matchesSearch =
+          a.subjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          a.relatedEntity.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
+        const matchesSeverity = severityFilter === 'all' || a.severity === severityFilter;
+        return matchesSearch && matchesStatus && matchesSeverity;
+      }),
+    [alerts, searchQuery, statusFilter, severityFilter]
+  );
+
+  const flaggedCount = useMemo(() => alerts.filter((a) => a.status === 'flagged').length, [alerts]);
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -66,8 +72,7 @@ export default function AdminFraudPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Fraud &amp; Risk Review</h1>
         <p className="text-muted-foreground mt-1">
-          {alerts.filter((a) => a.status === 'flagged').length} alert
-          {alerts.filter((a) => a.status === 'flagged').length === 1 ? '' : 's'} awaiting triage
+          {flaggedCount} alert{flaggedCount === 1 ? '' : 's'} awaiting triage
         </p>
       </div>
 

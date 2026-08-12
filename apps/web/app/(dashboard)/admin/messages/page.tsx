@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { ConversationList } from '@/components/admin/messages/ConversationList';
@@ -50,8 +50,12 @@ export default function AdminMessagesPage() {
     sendMutation.mutate({ id: activeId, text });
   };
 
-  const filteredConversations = conversations.filter((c) =>
-    c.participantName.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredConversations = useMemo(
+    () =>
+      conversations.filter((c) =>
+        c.participantName.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [conversations, searchQuery]
   );
   const activeConversation = conversations.find((c) => c.id === activeId);
 

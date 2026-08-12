@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
@@ -89,7 +89,15 @@ export default function LandlordLeasesPage() {
   const handleSendRenewalOffer = (leaseId: string, newRent: number, newEndDate: string) =>
     renewLeaseMutation.mutate({ leaseId, newRent, newEndDate });
 
-  const filteredLeases = leases.filter((l) => filter === 'all' || l.status === filter);
+  const filteredLeases = useMemo(
+    () => leases.filter((l) => filter === 'all' || l.status === filter),
+    [leases, filter]
+  );
+
+  const activeLeaseCount = useMemo(
+    () => leases.filter((l) => l.status === 'signed').length,
+    [leases]
+  );
 
   return (
     <>
@@ -97,8 +105,7 @@ export default function LandlordLeasesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Leases</h1>
           <p className="text-muted-foreground mt-1">
-            {leases.filter((l) => l.status === 'signed').length} active lease
-            {leases.filter((l) => l.status === 'signed').length === 1 ? '' : 's'}
+            {activeLeaseCount} active lease{activeLeaseCount === 1 ? '' : 's'}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>

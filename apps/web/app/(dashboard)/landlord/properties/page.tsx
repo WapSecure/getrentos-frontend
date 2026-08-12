@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Building2 } from 'lucide-react';
@@ -96,13 +96,17 @@ export default function LandlordPropertiesPage() {
 
   const handleDelete = (id: string) => deleteMutation.mutate(id);
 
-  const filteredProperties = properties.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.city.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || p.verificationStatus === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredProperties = useMemo(
+    () =>
+      properties.filter((p) => {
+        const matchesSearch =
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.city.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filter === 'all' || p.verificationStatus === filter;
+        return matchesSearch && matchesFilter;
+      }),
+    [properties, searchQuery, filter]
+  );
 
   const filterOptions: { value: VerificationFilter; label: string }[] = [
     { value: 'all', label: 'All' },

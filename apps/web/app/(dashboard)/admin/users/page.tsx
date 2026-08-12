@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
@@ -67,16 +67,23 @@ export default function AdminUsersPage() {
     changeStatusMutation.mutate({ userId, status });
   };
 
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
-    const matchesRole = roleFilter === 'all' || u.roles.includes(roleFilter);
-    return matchesSearch && matchesStatus && matchesRole;
-  });
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((u) => {
+        const matchesSearch =
+          u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
+        const matchesRole = roleFilter === 'all' || u.roles.includes(roleFilter);
+        return matchesSearch && matchesStatus && matchesRole;
+      }),
+    [users, searchQuery, statusFilter, roleFilter]
+  );
 
-  const pagedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pagedUsers = useMemo(
+    () => filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredUsers, page]
+  );
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },

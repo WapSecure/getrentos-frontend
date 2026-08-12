@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Megaphone } from 'lucide-react';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
@@ -82,7 +82,15 @@ export default function LandlordListingsPage() {
 
   const handleTogglePause = (id: string) => togglePauseMutation.mutate(id);
 
-  const filteredListings = listings.filter((l) => filter === 'all' || l.status === filter);
+  const filteredListings = useMemo(
+    () => listings.filter((l) => filter === 'all' || l.status === filter),
+    [listings, filter]
+  );
+
+  const publishedCount = useMemo(
+    () => listings.filter((l) => l.status === 'published').length,
+    [listings]
+  );
 
   return (
     <>
@@ -90,9 +98,8 @@ export default function LandlordListingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Listings</h1>
           <p className="text-muted-foreground mt-1">
-            {listings.filter((l) => l.status === 'published').length} active listing
-            {listings.filter((l) => l.status === 'published').length === 1 ? '' : 's'} •{' '}
-            {vacantUnits.length} vacant unit{vacantUnits.length === 1 ? '' : 's'} unlisted
+            {publishedCount} active listing{publishedCount === 1 ? '' : 's'} • {vacantUnits.length}{' '}
+            vacant unit{vacantUnits.length === 1 ? '' : 's'} unlisted
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>

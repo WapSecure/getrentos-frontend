@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat, Search } from 'lucide-react';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
@@ -39,10 +39,14 @@ export default function LandlordVendorsPage() {
 
   const handleRemoveVendor = (id: string) => removeVendorMutation.mutate(id);
 
-  const filteredVendors = vendors.filter(
-    (v) =>
-      v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.serviceType.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredVendors = useMemo(
+    () =>
+      vendors.filter(
+        (v) =>
+          v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          v.serviceType.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [vendors, searchQuery]
   );
 
   return (

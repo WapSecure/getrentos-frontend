@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
@@ -42,8 +42,14 @@ export default function LandlordApplicationsPage() {
   const handleRequestInfo = (id: string) =>
     updateStatusMutation.mutate({ id, status: 'under_review' });
 
-  const filteredApplications = applications.filter((a) => filter === 'all' || a.status === filter);
-  const pendingCount = applications.filter((a) => a.status === 'pending').length;
+  const filteredApplications = useMemo(
+    () => applications.filter((a) => filter === 'all' || a.status === filter),
+    [applications, filter]
+  );
+  const pendingCount = useMemo(
+    () => applications.filter((a) => a.status === 'pending').length,
+    [applications]
+  );
 
   return (
     <>

@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { translations, type Language, type TranslationKey } from './translations';
 
 const STORAGE_KEY = 'getrentos_language';
@@ -30,16 +38,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const setLanguage = (next: Language) => {
+  const setLanguage = useCallback((next: Language) => {
     setLanguageState(next);
     localStorage.setItem(STORAGE_KEY, next);
-  };
+  }, []);
 
-  const t = (key: TranslationKey) => translations[language][key];
+  const t = useCallback((key: TranslationKey) => translations[language][key], [language]);
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t]);
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };

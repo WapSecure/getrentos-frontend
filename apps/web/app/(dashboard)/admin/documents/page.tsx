@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -65,11 +65,15 @@ export default function AdminDocumentsPage() {
     }
   };
 
-  const filteredDocuments = documents.filter((d) => {
-    const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || d.category === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredDocuments = useMemo(
+    () =>
+      documents.filter((d) => {
+        const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filter === 'all' || d.category === filter;
+        return matchesSearch && matchesFilter;
+      }),
+    [documents, searchQuery, filter]
+  );
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
 import { TenantCard } from '@/components/landlord/tenants/TenantCard';
@@ -25,13 +25,17 @@ export default function LandlordTenantsPage() {
     queryFn: () => unwrap(landlordService.listTenants()),
   });
 
-  const filteredTenants = tenants.filter((t) => {
-    const matchesSearch =
-      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = rentFilter === 'all' || t.rentStatus === rentFilter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredTenants = useMemo(
+    () =>
+      tenants.filter((t) => {
+        const matchesSearch =
+          t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          t.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = rentFilter === 'all' || t.rentStatus === rentFilter;
+        return matchesSearch && matchesFilter;
+      }),
+    [tenants, searchQuery, rentFilter]
+  );
 
   return (
     <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
@@ -45,13 +45,17 @@ export default function LandlordPaymentsPage() {
 
   const { totalCollected, outstandingBalance, escrowPending, upcomingPayments } = stats;
 
-  const filteredPayments = payments.filter((p) => {
-    const matchesSearch =
-      p.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || p.status === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredPayments = useMemo(
+    () =>
+      payments.filter((p) => {
+        const matchesSearch =
+          p.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filter === 'all' || p.status === filter;
+        return matchesSearch && matchesFilter;
+      }),
+    [payments, searchQuery, filter]
+  );
 
   return (
     <>
