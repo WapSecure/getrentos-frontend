@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Moon, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { TimePicker } from '@/components/ui/TimePicker';
 
 export const DoNotDisturb = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -53,21 +54,11 @@ export const DoNotDisturb = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-foreground mb-1">Start Time</label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <TimePicker value={startTime} onChange={setStartTime} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-foreground mb-1">End Time</label>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <TimePicker value={endTime} onChange={setEndTime} />
               </div>
             </div>
           )}

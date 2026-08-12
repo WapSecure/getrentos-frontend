@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { formatCurrency } from '@/lib/format';
 import type { Lease } from '@/types/landlord';
 
@@ -81,12 +82,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
                 <label className="block text-sm font-medium text-foreground mb-1">
                   New Lease End Date
                 </label>
-                <input
-                  type="date"
-                  value={newEndDate}
-                  onChange={(e) => setNewEndDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <DatePicker value={newEndDate} onChange={setNewEndDate} />
               </div>
             </div>
 

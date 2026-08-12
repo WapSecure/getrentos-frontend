@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Clock, MapPin, Bell, Repeat } from 'lucide-react';
+import { X, MapPin, Bell, Repeat } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { TimePicker } from '@/components/ui/TimePicker';
 import type {
   CalendarEvent,
   CalendarEventFormData,
@@ -106,15 +108,10 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Date <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+                <DatePicker
+                  value={formData.date}
+                  onChange={(v) => setFormData({ ...formData, date: v })}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -122,27 +119,17 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Start Time
                   </label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="time"
-                      value={formData.startTime}
-                      onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
+                  <TimePicker
+                    value={formData.startTime}
+                    onChange={(v) => setFormData({ ...formData, startTime: v })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">End Time</label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="time"
-                      value={formData.endTime}
-                      onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
+                  <TimePicker
+                    value={formData.endTime}
+                    onChange={(v) => setFormData({ ...formData, endTime: v })}
+                  />
                 </div>
               </div>
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check, Upload, FileText, User, Briefcase, ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 
 export interface ApplicationFormData {
@@ -183,11 +184,10 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Preferred move-in date">
-                <input
-                  type="date"
+                <DatePicker
                   value={data.moveInDate}
-                  onChange={(e) => update('moveInDate', e.target.value)}
-                  className={inputClass}
+                  onChange={(v) => update('moveInDate', v)}
+                  min={new Date().toISOString().slice(0, 10)}
                 />
               </Field>
               <Field label="Lease term">

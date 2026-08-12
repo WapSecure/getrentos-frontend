@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { TimePicker } from '@/components/ui/TimePicker';
 
 interface Reminder {
   id: string;
@@ -93,17 +95,15 @@ export const MessageReminders = ({
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <div className="flex gap-2">
-                <input
-                  type="date"
+                <DatePicker
                   value={newReminder.date}
-                  onChange={(e) => setNewReminder({ ...newReminder, date: e.target.value })}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(v) => setNewReminder({ ...newReminder, date: v })}
+                  className="flex-1"
                 />
-                <input
-                  type="time"
+                <TimePicker
                   value={newReminder.time}
-                  onChange={(e) => setNewReminder({ ...newReminder, time: e.target.value })}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(v) => setNewReminder({ ...newReminder, time: v })}
+                  className="flex-1"
                 />
               </div>
               <div className="flex gap-2">

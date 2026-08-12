@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { Lease, Unit } from '@/types/landlord';
 
 interface CreateLeaseModalProps {
@@ -140,23 +141,13 @@ export const CreateLeaseModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Lease Start <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="date"
-                        value={leaseStart}
-                        onChange={(e) => setLeaseStart(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <DatePicker value={leaseStart} onChange={setLeaseStart} />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Lease End <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="date"
-                        value={leaseEnd}
-                        onChange={(e) => setLeaseEnd(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <DatePicker value={leaseEnd} onChange={setLeaseEnd} min={leaseStart} />
                     </div>
                   </div>
 

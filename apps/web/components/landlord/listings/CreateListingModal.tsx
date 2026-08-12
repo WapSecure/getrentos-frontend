@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 
 interface CreateListingModalProps {
@@ -231,12 +232,7 @@ export const CreateListingModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Availability Date <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="date"
-                      value={availabilityDate}
-                      onChange={(e) => setAvailabilityDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                    <DatePicker value={availabilityDate} onChange={setAvailabilityDate} />
                   </div>
 
                   <div>

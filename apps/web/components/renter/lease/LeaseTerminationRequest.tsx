@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, X, FileText, Calendar, MessageSquare } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 interface LeaseTerminationRequestProps {
   leaseId: string;
@@ -83,11 +84,10 @@ export const LeaseTerminationRequest = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Proposed Move-Out Date
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={noticeDate}
-                  onChange={(e) => setNoticeDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  onChange={setNoticeDate}
+                  min={new Date().toISOString().slice(0, 10)}
                 />
               </div>
 

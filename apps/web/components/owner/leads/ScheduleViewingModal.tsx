@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { TimePicker } from '@/components/ui/TimePicker';
 import type { BuyerLead } from '@/types/owner';
 
 interface ScheduleViewingModalProps {
@@ -67,21 +69,11 @@ export const ScheduleViewingModal = ({ lead, onClose, onSchedule }: ScheduleView
                 <>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Date</label>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                    <DatePicker value={date} onChange={setDate} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Time</label>
-                    <input
-                      type="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                    <TimePicker value={time} onChange={setTime} />
                   </div>
                 </>
               )}

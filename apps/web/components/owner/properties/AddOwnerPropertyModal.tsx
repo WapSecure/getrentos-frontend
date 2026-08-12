@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { OwnerProperty } from '@/types/owner';
 
 interface AddOwnerPropertyModalProps {
@@ -257,11 +258,10 @@ export const AddOwnerPropertyModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Purchase Date
                     </label>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={form.purchaseDate}
-                      onChange={(e) => update('purchaseDate', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      onChange={(v) => update('purchaseDate', v)}
+                      max={new Date().toISOString().slice(0, 10)}
                     />
                   </div>
                 </>
