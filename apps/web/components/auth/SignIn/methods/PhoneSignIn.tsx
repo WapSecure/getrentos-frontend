@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { BACKEND_ROLE_TO_ID, ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import { ToastVariant } from '@/components/ui/Toast';
 import { authService } from '@/services/authService';
+import { useMutation } from '@tanstack/react-query';
 
 const phoneSchema = z.object({
   identifier: z
@@ -44,6 +45,9 @@ export const PhoneSignIn = ({
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const loginMutation = useMutation({
+    mutationFn: ({ identifier, password }: PhoneFormData) => authService.login(identifier, password),
+  });
 
   const {
     register,
@@ -61,8 +65,7 @@ export const PhoneSignIn = ({
     }
 
     setIsLoading(true);
-
-    const response = await authService.login(data.identifier, data.password);
+    const response = await loginMutation.mutateAsync(data);
 
     if (response.success && response.data) {
       const { accessToken, refreshToken, ...user } = response.data;
@@ -160,8 +163,8 @@ export const PhoneSignIn = ({
         variant="primary"
         size="lg"
         fullWidth
-        disabled={!isValid || isLoading || isLocked}
-        isLoading={isLoading}
+        disabled={!isValid || isLoading || loginMutation.isPending || isLocked}
+        isLoading={isLoading || loginMutation.isPending}
       >
         <LogIn className="w-4 h-4" />
         Sign In

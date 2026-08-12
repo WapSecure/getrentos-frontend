@@ -19,10 +19,10 @@ interface CalendarMonthViewProps {
 }
 
 const typeColors: Record<string, string> = {
-  viewing: '#3b82f6',
-  payment: '#10b981',
-  maintenance: '#f59e0b',
-  lease: '#8b5cf6',
+  viewing: 'var(--info)',
+  payment: 'var(--success)',
+  maintenance: 'var(--warning)',
+  lease: 'var(--purple)',
   personal: 'var(--primary)',
 };
 
@@ -47,7 +47,7 @@ export const CalendarMonthView = ({
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="grid grid-cols-7 border-b border-border">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
           <div key={day} className="p-2 text-center text-xs font-medium text-muted-foreground">
@@ -60,7 +60,7 @@ export const CalendarMonthView = ({
         {paddingDays.map((_, index) => (
           <div
             key={`padding-${index}`}
-            className="h-24 p-1 border-r border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20"
+            className="h-24 p-1 border-r border-b border-border bg-muted"
           />
         ))}
 
@@ -71,8 +71,8 @@ export const CalendarMonthView = ({
           return (
             <div
               key={day.toString()}
-              className={`h-24 p-1 border-r border-b border-gray-100 dark:border-gray-800 hover:bg-secondary transition-colors cursor-pointer ${
-                isTodayDate ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+              className={`h-24 p-1 border-r border-b border-border hover:bg-secondary transition-colors cursor-pointer ${
+                isTodayDate ? 'bg-accent/70' : ''
               }`}
             >
               <div className="flex flex-col h-full">
@@ -100,7 +100,7 @@ export const CalendarMonthView = ({
                     </div>
                   ))}
                   {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-gray-500 px-1">
+                    <div className="text-[10px] text-muted-foreground px-1">
                       +{dayEvents.length - 3} more
                     </div>
                   )}

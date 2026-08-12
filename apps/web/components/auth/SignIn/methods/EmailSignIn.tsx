@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { BACKEND_ROLE_TO_ID, ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import { ToastVariant } from '@/components/ui/Toast';
 import { authService } from '@/services/authService';
+import { useMutation } from '@tanstack/react-query';
 
 const emailSchema = z.object({
   identifier: z.string().email('Please enter a valid email address'),
@@ -38,6 +39,9 @@ export const EmailSignIn = ({
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const loginMutation = useMutation({
+    mutationFn: ({ identifier, password }: EmailFormData) => authService.login(identifier, password),
+  });
 
   const {
     register,
@@ -55,8 +59,7 @@ export const EmailSignIn = ({
     }
 
     setIsLoading(true);
-
-    const response = await authService.login(data.identifier, data.password);
+    const response = await loginMutation.mutateAsync(data);
 
     if (response.success && response.data) {
       const { accessToken, refreshToken, ...user } = response.data;
@@ -154,8 +157,8 @@ export const EmailSignIn = ({
         variant="primary"
         size="lg"
         fullWidth
-        disabled={!isValid || isLoading || isLocked}
-        isLoading={isLoading}
+        disabled={!isValid || isLoading || loginMutation.isPending || isLocked}
+        isLoading={isLoading || loginMutation.isPending}
       >
         <LogIn className="w-4 h-4" />
         Sign In

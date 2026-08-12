@@ -10,10 +10,10 @@ interface CalendarWeekViewProps {
 }
 
 const typeColors: Record<string, string> = {
-  viewing: '#3b82f6',
-  payment: '#10b981',
-  maintenance: '#f59e0b',
-  lease: '#8b5cf6',
+  viewing: 'var(--info)',
+  payment: 'var(--success)',
+  maintenance: 'var(--warning)',
+  lease: 'var(--purple)',
   personal: 'var(--primary)',
 };
 
@@ -40,7 +40,7 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="overflow-x-auto">
         <div className="min-w-[700px]">
           {/* Header */}
@@ -50,7 +50,7 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
               <div
                 key={index}
                 className={`p-2 text-center ${
-                  isToday(day) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                  isToday(day) ? 'bg-accent/70' : ''
                 }`}
               >
                 <div className="text-xs font-medium text-muted-foreground">
@@ -72,9 +72,9 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="grid grid-cols-8 border-b border-gray-100 dark:border-gray-800"
+                className="grid grid-cols-8 border-b border-border"
               >
-                <div className="p-1 text-right text-xs text-gray-400 pr-2 w-16">{hour}:00</div>
+                <div className="p-1 text-right text-xs text-muted-foreground pr-2 w-16">{hour}:00</div>
                 {days.map((day, dayIndex) => {
                   const dayEvents = getEventsForDay(day);
                   const dayEventsAtHour = dayEvents.filter((event) => {
@@ -85,7 +85,7 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
                   return (
                     <div
                       key={dayIndex}
-                      className="h-12 relative border-l border-gray-100 dark:border-gray-800"
+                      className="h-12 relative border-l border-border"
                     >
                       {dayEventsAtHour.map((event) => {
                         const position = getEventPosition(event);

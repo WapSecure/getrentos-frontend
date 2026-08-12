@@ -10,10 +10,10 @@ interface CalendarDayViewProps {
 }
 
 const typeColors: Record<string, string> = {
-  viewing: '#3b82f6',
-  payment: '#10b981',
-  maintenance: '#f59e0b',
-  lease: '#8b5cf6',
+  viewing: 'var(--info)',
+  payment: 'var(--success)',
+  maintenance: 'var(--warning)',
+  lease: 'var(--purple)',
   personal: 'var(--primary)',
 };
 
@@ -34,12 +34,12 @@ export const CalendarDayView = ({ events, currentDate, onEventClick }: CalendarD
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
         <div className="text-center">
           <div className="text-lg font-semibold text-foreground">{format(currentDate, 'EEEE')}</div>
           <div className="text-sm text-muted-foreground">{format(currentDate, 'MMMM d, yyyy')}</div>
-          <div className="text-xs text-gray-400 mt-1">{dayEvents.length} events scheduled</div>
+          <div className="text-xs text-muted-foreground mt-1">{dayEvents.length} events scheduled</div>
         </div>
       </div>
 
@@ -53,9 +53,9 @@ export const CalendarDayView = ({ events, currentDate, onEventClick }: CalendarD
           return (
             <div
               key={hour}
-              className="flex border-b border-gray-100 dark:border-gray-800 last:border-0"
+              className="flex border-b border-border last:border-0"
             >
-              <div className="w-16 py-2 text-right text-xs text-gray-400 pr-2 shrink-0">
+              <div className="w-16 py-2 text-right text-xs text-muted-foreground pr-2 shrink-0">
                 {hour}:00
               </div>
               <div className="flex-1 py-1 relative min-h-[48px] pl-2">

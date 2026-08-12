@@ -23,20 +23,17 @@ interface CalendarEventListProps {
 }
 
 const typeColors: Record<string, { bg: string; text: string }> = {
-  viewing: { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' },
-  payment: { bg: 'bg-green-50 dark:bg-green-900/20', text: 'text-green-600 dark:text-green-400' },
-  maintenance: {
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-    text: 'text-yellow-600 dark:text-yellow-400',
-  },
-  lease: { bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-600 dark:text-purple-400' },
-  personal: { bg: 'bg-gray-50 dark:bg-gray-800', text: 'text-muted-foreground' },
+  viewing: { bg: 'bg-info-subtle', text: 'text-info' },
+  payment: { bg: 'bg-success-subtle', text: 'text-success' },
+  maintenance: { bg: 'bg-warning-subtle', text: 'text-warning' },
+  lease: { bg: 'bg-purple-subtle', text: 'text-purple' },
+  personal: { bg: 'bg-secondary', text: 'text-muted-foreground' },
 };
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  upcoming: { label: 'Upcoming', icon: Clock, color: 'text-blue-600' },
-  completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-600' },
-  cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-red-600' },
+  upcoming: { label: 'Upcoming', icon: Clock, color: 'text-info' },
+  completed: { label: 'Completed', icon: CheckCircle, color: 'text-success' },
+  cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-destructive' },
 };
 
 const formatDate = (dateString: string) => {
@@ -58,7 +55,7 @@ export const CalendarEventList = ({
   });
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
@@ -67,7 +64,7 @@ export const CalendarEventList = ({
           <Calendar className="w-4 h-4 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Upcoming Events</h3>
-            <p className="text-xs text-gray-500">{events.length} events</p>
+            <p className="text-xs text-muted-foreground">{events.length} events</p>
           </div>
         </div>
         <Button variant="ghost" size="sm" className="p-1 h-auto">
@@ -91,7 +88,7 @@ export const CalendarEventList = ({
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${typeStyle.bg} ${typeStyle.text}`}
+                        className={`text-xs px-2 py-0.5 rounded-full capitalize ${typeStyle.bg} ${typeStyle.text}`}
                         >
                           {event.type}
                         </span>
@@ -105,14 +102,14 @@ export const CalendarEventList = ({
                         {formatDate(event.date)} • {event.startTime} - {event.endTime}
                       </p>
                       {event.location && (
-                        <p className="text-xs text-gray-400 mt-0.5">📍 {event.location}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">📍 {event.location}</p>
                       )}
                     </div>
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-1 h-auto text-blue-500 hover:text-blue-700"
+                        className="p-1 h-auto text-info hover:text-primary"
                         title={
                           event.status === 'completed' ? 'Mark as upcoming' : 'Mark as completed'
                         }
@@ -127,7 +124,7 @@ export const CalendarEventList = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-1 h-auto text-gray-500 hover:text-gray-700"
+                        className="p-1 h-auto text-muted-foreground hover:text-foreground"
                         title="Edit event"
                         onClick={() => onEditEvent(event)}
                       >
@@ -136,7 +133,7 @@ export const CalendarEventList = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-1 h-auto text-red-500 hover:text-red-700"
+                        className="p-1 h-auto text-destructive hover:text-destructive"
                         title="Delete event"
                         onClick={() => onDeleteEvent(event.id)}
                       >

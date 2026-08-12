@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { authService } from '@/services/authService';
 import {
@@ -24,8 +25,30 @@ export const useSignup = () => {
     setCanAddMoreRoles,
     reset,
   } = useSignupStore();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const sendOtpMutation = useMutation({
+    mutationFn: ({ identifier, method }: { identifier: string; method: 'email' | 'phone' }) =>
+      authService.sendOtp(identifier, method, 'signup'),
+  });
+  const verifyOtpMutation = useMutation({
+    mutationFn: (otp: string) => authService.verifyOtp(otp, otpReference || ''),
+  });
+  const resendOtpMutation = useMutation({
+    mutationFn: (reference: string) => authService.resendOtp(reference),
+  });
+  const createAccountMutation = useMutation({
+    mutationFn: () =>
+      authService.createAccount({
+        email: data.method === 'email' ? data.email : undefined,
+        phone: data.method === 'phone' ? data.phone : undefined,
+        fullName: data.fullName,
+        password: data.password,
+        method: data.method,
+        selectedRoles: data.selectedRoles,
+        reference: otpReference || '',
+      }),
+  });
 
   useEffect(() => {
     console.log('Current signup state:', {
@@ -37,10 +60,9 @@ export const useSignup = () => {
 
   const sendOtp = async (identifier: string, method: 'email' | 'phone') => {
     console.log('Sending OTP to:', identifier, method);
-    setIsLoading(true);
     setError(null);
 
-    const response = await authService.sendOtp(identifier, method, 'signup');
+    const response = await sendOtpMutation.mutateAsync({ identifier, method });
     console.log('Send OTP response:', response);
 
     if (response.success && response.data) {
@@ -51,16 +73,14 @@ export const useSignup = () => {
       setError(response.message || 'Failed to send OTP');
     }
 
-    setIsLoading(false);
     return response.success;
   };
 
   const verifyOtp = async (otp: string) => {
     console.log('Verifying OTP:', otp);
-    setIsLoading(true);
     setError(null);
 
-    const response = await authService.verifyOtp(otp, otpReference || '');
+    const response = await verifyOtpMutation.mutateAsync(otp);
     console.log('Verify OTP response:', response);
 
     if (response.success && response.data) {
@@ -71,46 +91,33 @@ export const useSignup = () => {
       setError(response.message || 'Invalid OTP');
     }
 
-    setIsLoading(false);
     return response.success;
   };
 
   const resendOtp = async () => {
     if (!otpReference) return false;
 
-    setIsLoading(true);
     setError(null);
 
-    const response = await authService.resendOtp(otpReference);
+    const response = await resendOtpMutation.mutateAsync(otpReference);
 
     if (!response.success) {
       setError(response.message || 'Failed to resend OTP');
     }
 
-    setIsLoading(false);
     return response.success;
   };
 
   const createAccount = async () => {
     console.log('Creating account with data:', data);
-    setIsLoading(true);
     setError(null);
 
     if (!otpReference) {
       setError('Your verification session expired. Please start over.');
-      setIsLoading(false);
       return false;
     }
 
-    const response = await authService.createAccount({
-      email: data.method === 'email' ? data.email : undefined,
-      phone: data.method === 'phone' ? data.phone : undefined,
-      fullName: data.fullName,
-      password: data.password,
-      method: data.method,
-      selectedRoles: data.selectedRoles,
-      reference: otpReference,
-    });
+    const response = await createAccountMutation.mutateAsync();
     console.log('Create account response:', response);
 
     if (response.success && response.data) {
@@ -137,7 +144,6 @@ export const useSignup = () => {
       setError(response.message || 'Failed to create account');
     }
 
-    setIsLoading(false);
     return response.success;
   };
 
@@ -157,7 +163,11 @@ export const useSignup = () => {
   return {
     signupData: data,
     step,
-    isLoading,
+    isLoading:
+      sendOtpMutation.isPending ||
+      verifyOtpMutation.isPending ||
+      resendOtpMutation.isPending ||
+      createAccountMutation.isPending,
     error,
     canAddMoreRoles,
     sendOtp,
