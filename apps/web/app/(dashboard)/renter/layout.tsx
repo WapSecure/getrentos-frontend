@@ -13,7 +13,13 @@ import {
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
 
-export type RenterUser = { fullName: string; email: string; role?: string; roles?: string[] };
+export type RenterUser = {
+  id?: string;
+  fullName: string;
+  email: string;
+  role?: string;
+  roles?: string[];
+};
 
 const RenterUserContext = createContext<RenterUser | null>(null);
 

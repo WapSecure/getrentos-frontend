@@ -15,6 +15,7 @@ import { DocumentChecklist } from '@/components/renter/discover/features/Documen
 import { SavedSearchAlert } from '@/components/renter/discover/features/SavedSearchAlert';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
 import { Property } from '@/types/renter';
+import { renterService } from '@/services/renterService';
 
 export default function DiscoverPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
@@ -34,11 +35,14 @@ export default function DiscoverPage() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('renter_saved_properties');
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSavedProperties(JSON.parse(saved));
-    }
+    const fetchSaved = async () => {
+      const response = await renterService.listSavedListings();
+      if (response.success && response.data) {
+        setSavedProperties(response.data.map((p) => p.id));
+      }
+    };
+
+    fetchSaved();
   }, []);
 
   const showToast = (message: string, variant: ToastVariant) => {
@@ -46,20 +50,21 @@ export default function DiscoverPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleSaveProperty = (propertyId: string) => {
-    const currentSaved = localStorage.getItem('renter_saved_properties');
-    let savedIds: string[] = currentSaved ? JSON.parse(currentSaved) : [];
+  const handleSaveProperty = async (propertyId: string) => {
+    const isSaved = savedProperties.includes(propertyId);
+    const response = isSaved
+      ? await renterService.unsaveListing(propertyId)
+      : await renterService.saveListing(propertyId);
 
-    if (savedIds.includes(propertyId)) {
-      savedIds = savedIds.filter((id) => id !== propertyId);
+    if (!response.success) return;
+
+    if (isSaved) {
+      setSavedProperties((prev) => prev.filter((id) => id !== propertyId));
       showToast('Property removed from saved', 'info');
     } else {
-      savedIds.push(propertyId);
+      setSavedProperties((prev) => [...prev, propertyId]);
       showToast('Property saved successfully!', 'success');
     }
-
-    localStorage.setItem('renter_saved_properties', JSON.stringify(savedIds));
-    setSavedProperties(savedIds);
   };
 
   const handleCompare = (property: Property) => {

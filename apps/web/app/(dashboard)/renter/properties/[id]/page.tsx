@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -26,10 +26,12 @@ import { PropertyGallery } from '@/components/renter/property-detail/PropertyGal
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
-import { getPropertyById, trackRecentlyViewed } from '@/lib/mockProperties';
+import { trackRecentlyViewed } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
+import type { Property } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
+import { renterService } from '@/services/renterService';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -41,7 +43,8 @@ const nairaFormatter = new Intl.NumberFormat('en-NG', {
 export default function PropertyDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const property = useMemo(() => getPropertyById(params.id), [params.id]);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isSaved, setIsSaved] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
@@ -49,19 +52,37 @@ export default function PropertyDetailPage() {
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   useEffect(() => {
-    if (!property) return;
-    trackRecentlyViewed(property);
+    const fetchProperty = async () => {
+      setIsLoading(true);
+      const [propertyRes, savedRes] = await Promise.all([
+        renterService.getListing(params.id),
+        renterService.listSavedListings(),
+      ]);
+      if (propertyRes.success && propertyRes.data) {
+        setProperty(propertyRes.data);
+        trackRecentlyViewed(propertyRes.data);
+      }
+      if (savedRes.success && savedRes.data) {
+        setIsSaved(savedRes.data.some((p) => p.id === params.id));
+      }
+      setIsLoading(false);
+    };
 
-    const saved = localStorage.getItem('renter_saved_properties');
-    const savedIds: string[] = saved ? JSON.parse(saved) : [];
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsSaved(savedIds.includes(property.id));
-  }, [property]);
+    fetchProperty();
+  }, [params.id]);
 
   const showToast = (message: string, variant: ToastVariant) => {
     setToast({ message, variant });
     setTimeout(() => setToast(null), 3000);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -78,19 +99,17 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const handleToggleSave = () => {
-    const saved = localStorage.getItem('renter_saved_properties');
-    let savedIds: string[] = saved ? JSON.parse(saved) : [];
+  const handleToggleSave = async () => {
+    const response = isSaved
+      ? await renterService.unsaveListing(property.id)
+      : await renterService.saveListing(property.id);
 
-    if (savedIds.includes(property.id)) {
-      savedIds = savedIds.filter((id) => id !== property.id);
-      showToast('Property removed from saved', 'info');
-    } else {
-      savedIds.push(property.id);
-      showToast('Property saved successfully!', 'success');
-    }
+    if (!response.success) return;
 
-    localStorage.setItem('renter_saved_properties', JSON.stringify(savedIds));
+    showToast(
+      isSaved ? 'Property removed from saved' : 'Property saved successfully!',
+      isSaved ? 'info' : 'success'
+    );
     setIsSaved(!isSaved);
   };
 

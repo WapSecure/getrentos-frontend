@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Lock, Mail, Phone, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { renterService } from '@/services/renterService';
 
 interface AccountSettingsProps {
   user: { email: string; role?: string } | null;
@@ -12,17 +13,38 @@ export const AccountSettings = ({ user }: AccountSettingsProps) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('+1 234 567 8900');
+  const [phone, setPhone] = useState('');
 
-  const handlePasswordUpdate = (e: React.FormEvent) => {
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.getProfile();
+      if (res.success && res.data) setPhone(res.data.phone || '');
+    };
+    load();
+  }, []);
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Password updated');
+    setPasswordError(null);
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+    const res = await renterService.updatePassword(currentPassword, newPassword);
+    if (res.success) {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      setPasswordError(res.message || 'Failed to update password');
+    }
   };
 
-  const handleEmailUpdate = (e: React.FormEvent) => {
+  const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Email updated:', email);
+    await renterService.updateProfile({ email, phone });
   };
 
   return (
@@ -79,6 +101,7 @@ export const AccountSettings = ({ user }: AccountSettingsProps) => {
               />
             </div>
           </div>
+          {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
           <Button type="submit" variant="primary">
             Update Password
           </Button>

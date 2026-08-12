@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CreditCard, Building2, Wallet, Plus, Trash2, Check, X } from 'lucide-react';
+import { CreditCard, Building2, Wallet, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface PaymentMethod {
@@ -14,33 +14,17 @@ interface PaymentMethod {
   isDefault: boolean;
 }
 
-export const PaymentMethods = () => {
-  const [methods, setMethods] = useState<PaymentMethod[]>([
-    {
-      id: '1',
-      type: 'card',
-      name: 'Visa •••• 4242',
-      last4: '4242',
-      expiry: '12/26',
-      isDefault: true,
-    },
-    {
-      id: '2',
-      type: 'card',
-      name: 'Mastercard •••• 8888',
-      last4: '8888',
-      expiry: '08/25',
-      isDefault: false,
-    },
-    {
-      id: '3',
-      type: 'bank',
-      name: 'GTBank •••• 1234',
-      last4: '1234',
-      isDefault: false,
-    },
-  ]);
+interface PaymentMethodsProps {
+  methods: PaymentMethod[];
+  onSetDefault: (id: string) => Promise<void>;
+  onRemove: (id: string) => Promise<void>;
+  onAdd: (data: { last4: string; expiry: string }) => Promise<void>;
+}
+
+export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: PaymentMethodsProps) => {
   const [showAdd, setShowAdd] = useState(false);
+  const [last4, setLast4] = useState('');
+  const [expiry, setExpiry] = useState('');
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -55,17 +39,12 @@ export const PaymentMethods = () => {
     }
   };
 
-  const handleSetDefault = (id: string) => {
-    setMethods(
-      methods.map((m) => ({
-        ...m,
-        isDefault: m.id === id,
-      }))
-    );
-  };
-
-  const handleRemove = (id: string) => {
-    setMethods(methods.filter((m) => m.id !== id));
+  const handleAdd = async () => {
+    if (!last4 || !expiry) return;
+    await onAdd({ last4, expiry });
+    setLast4('');
+    setExpiry('');
+    setShowAdd(false);
   };
 
   return (
@@ -113,14 +92,14 @@ export const PaymentMethods = () => {
                 )}
                 {!method.isDefault && (
                   <button
-                    onClick={() => handleSetDefault(method.id)}
+                    onClick={() => onSetDefault(method.id)}
                     className="text-xs text-primary hover:underline"
                   >
                     Set Default
                   </button>
                 )}
                 <button
-                  onClick={() => handleRemove(method.id)}
+                  onClick={() => onRemove(method.id)}
                   className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-3 h-3 text-red-500" />
@@ -136,15 +115,22 @@ export const PaymentMethods = () => {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Card number"
+              value={last4}
+              onChange={(e) => setLast4(e.target.value)}
+              placeholder="Last 4 digits"
+              maxLength={4}
               className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <input
               type="text"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
               placeholder="MM/YY"
               className="w-20 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <Button size="sm">Add</Button>
+            <Button size="sm" onClick={handleAdd}>
+              Add
+            </Button>
           </div>
         </div>
       )}

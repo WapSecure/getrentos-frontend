@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/Button';
 interface DocumentUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: UploadData) => void;
+  onSubmit: (data: UploadData) => Promise<void> | void;
 }
 
 interface UploadData {
+  file: File;
   name: string;
   type: string;
   category: string;
@@ -73,39 +74,29 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!file) return;
     setIsUploading(true);
-    setProgress(0);
+    setProgress(60);
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
-    setTimeout(() => {
-      setIsUploading(false);
-      const uploadData: UploadData = {
-        name: name || file.name,
-        type,
-        category,
-        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-        tags: tags
-          .split(',')
-          .map((t: string) => t.trim())
-          .filter(Boolean),
-      };
-      onSubmit(uploadData);
-      onClose();
-      setFile(null);
-      setName('');
-      setTags('');
-    }, 3000);
+    const uploadData: UploadData = {
+      file,
+      name: name || file.name,
+      type,
+      category,
+      size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+      tags: tags
+        .split(',')
+        .map((t: string) => t.trim())
+        .filter(Boolean),
+    };
+    await onSubmit(uploadData);
+    setProgress(100);
+    setIsUploading(false);
+    onClose();
+    setFile(null);
+    setName('');
+    setTags('');
   };
 
   return (

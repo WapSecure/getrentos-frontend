@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Bell,
   Mail,
@@ -13,9 +13,11 @@ import {
   Check,
 } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
+import { renterService } from '@/services/renterService';
 
 interface NotificationPreference {
   id: string;
+  category: string;
   label: string;
   icon: React.ElementType;
   enabled: boolean;
@@ -26,62 +28,87 @@ interface NotificationPreference {
   };
 }
 
-export const NotificationSettings = () => {
-  const [preferences, setPreferences] = useState<NotificationPreference[]>([
-    {
-      id: 'applications',
-      label: 'Application Updates',
-      icon: FileText,
-      enabled: true,
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: 'messages',
-      label: 'Messages',
-      icon: MessageCircle,
-      enabled: true,
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: 'payments',
-      label: 'Payment Alerts',
-      icon: CreditCard,
-      enabled: true,
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: 'maintenance',
-      label: 'Maintenance Updates',
-      icon: Wrench,
-      enabled: true,
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: 'lease',
-      label: 'Lease Reminders',
-      icon: Home,
-      enabled: true,
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: 'promotions',
-      label: 'Promotions & Offers',
-      icon: Bell,
-      enabled: false,
-      channels: { email: true, push: false, inApp: false },
-    },
-  ]);
+const CATEGORY_META: { category: string; id: string; label: string; icon: React.ElementType }[] = [
+  { category: 'application', id: 'applications', label: 'Application Updates', icon: FileText },
+  { category: 'message', id: 'messages', label: 'Messages', icon: MessageCircle },
+  { category: 'payment', id: 'payments', label: 'Payment Alerts', icon: CreditCard },
+  { category: 'maintenance', id: 'maintenance', label: 'Maintenance Updates', icon: Wrench },
+  { category: 'lease', id: 'lease', label: 'Lease Reminders', icon: Home },
+  { category: 'system', id: 'system', label: 'System & Trust Score', icon: Bell },
+];
 
-  const togglePreference = (id: string) => {
-    setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, enabled: !p.enabled } : p)));
+export const NotificationSettings = () => {
+  const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listNotificationPreferences();
+      if (res.success && res.data) {
+        const byCategory = new Map(res.data.map((p) => [p.category, p]));
+        setPreferences(
+          CATEGORY_META.map((meta) => {
+            const pref = byCategory.get(meta.category);
+            const channels = {
+              email: pref?.email ?? true,
+              push: pref?.push ?? true,
+              inApp: pref?.inApp ?? true,
+            };
+            return {
+              id: meta.id,
+              category: meta.category,
+              label: meta.label,
+              icon: meta.icon,
+              enabled: channels.email || channels.push || channels.inApp,
+              channels,
+            };
+          })
+        );
+      }
+    };
+    load();
+  }, []);
+
+  const togglePreference = async (id: string) => {
+    const pref = preferences.find((p) => p.id === id);
+    if (!pref) return;
+    const enabled = !pref.enabled;
+    const res = await renterService.updateNotificationPreference(pref.category, {
+      email: enabled,
+      push: enabled,
+      inApp: enabled,
+    });
+    if (res.success && res.data) {
+      const updated = res.data;
+      setPreferences((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                enabled,
+                channels: { email: updated.email, push: updated.push, inApp: updated.inApp },
+              }
+            : p
+        )
+      );
+    }
   };
 
-  const toggleChannel = (prefId: string, channel: 'email' | 'push' | 'inApp') => {
-    setPreferences((prev) =>
-      prev.map((p) =>
-        p.id === prefId ? { ...p, channels: { ...p.channels, [channel]: !p.channels[channel] } } : p
-      )
-    );
+  const toggleChannel = async (prefId: string, channel: 'email' | 'push' | 'inApp') => {
+    const pref = preferences.find((p) => p.id === prefId);
+    if (!pref) return;
+    const res = await renterService.updateNotificationPreference(pref.category, {
+      [channel]: !pref.channels[channel],
+    });
+    if (res.success && res.data) {
+      const updated = res.data;
+      setPreferences((prev) =>
+        prev.map((p) =>
+          p.id === prefId
+            ? { ...p, channels: { email: updated.email, push: updated.push, inApp: updated.inApp } }
+            : p
+        )
+      );
+    }
   };
 
   return (

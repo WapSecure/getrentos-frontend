@@ -9,11 +9,12 @@ import { DatePicker } from '@/components/ui/DatePicker';
 interface LeaseTerminationRequestProps {
   leaseId: string;
   propertyName: string;
+  onSubmit: (noticeDate: string, reason: string) => Promise<void>;
 }
 
 export const LeaseTerminationRequest = ({
-  leaseId,
   propertyName,
+  onSubmit,
 }: LeaseTerminationRequestProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [noticeDate, setNoticeDate] = useState('');
@@ -22,9 +23,11 @@ export const LeaseTerminationRequest = ({
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await onSubmit(noticeDate, reason);
     setIsSubmitting(false);
     setIsOpen(false);
+    setNoticeDate('');
+    setReason('');
   };
 
   return (

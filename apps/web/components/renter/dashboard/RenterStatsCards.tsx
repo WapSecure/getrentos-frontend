@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, FileText, MessageCircle, Calendar, Home, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { renterService } from '@/services/renterService';
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -115,12 +117,45 @@ const StatCard = ({
 
 export const RenterStatsCards = () => {
   const { t } = useLanguage();
+  const [savedCount, setSavedCount] = useState(0);
+  const [applicationsCount, setApplicationsCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [viewingsCount, setViewingsCount] = useState(0);
+  const [leaseStatus, setLeaseStatus] = useState('—');
+  const [totalRentPaid, setTotalRentPaid] = useState(0);
+
+  useEffect(() => {
+    const load = async () => {
+      const [statsRes, leaseRes, paymentsRes] = await Promise.all([
+        renterService.getDashboardStats(),
+        renterService.getLease(),
+        renterService.listPayments(),
+      ]);
+      if (statsRes.success && statsRes.data) {
+        setSavedCount(statsRes.data.savedPropertiesCount);
+        setApplicationsCount(statsRes.data.activeApplicationsCount);
+        setUnreadCount(statsRes.data.unreadMessagesCount);
+        setViewingsCount(statsRes.data.upcomingViewingsCount);
+      }
+      if (leaseRes.success && leaseRes.data) {
+        setLeaseStatus(
+          leaseRes.data.status.charAt(0).toUpperCase() + leaseRes.data.status.slice(1)
+        );
+      }
+      if (paymentsRes.success && paymentsRes.data) {
+        setTotalRentPaid(
+          paymentsRes.data.filter((p) => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0)
+        );
+      }
+    };
+    load();
+  }, []);
 
   const stats = [
     {
       icon: Heart,
       label: t('dashboard.stats.saved_properties'),
-      value: 12,
+      value: savedCount,
       subtitle: t('dashboard.stats.saved_properties_subtitle'),
       color: 'pink',
       delay: 0,
@@ -128,7 +163,7 @@ export const RenterStatsCards = () => {
     {
       icon: FileText,
       label: t('dashboard.stats.active_applications'),
-      value: 3,
+      value: applicationsCount,
       subtitle: t('dashboard.stats.active_applications_subtitle'),
       color: 'blue',
       delay: 0.05,
@@ -136,7 +171,7 @@ export const RenterStatsCards = () => {
     {
       icon: MessageCircle,
       label: t('dashboard.stats.unread_messages'),
-      value: 8,
+      value: unreadCount,
       subtitle: t('dashboard.stats.unread_messages_subtitle'),
       color: 'green',
       delay: 0.1,
@@ -144,7 +179,7 @@ export const RenterStatsCards = () => {
     {
       icon: Calendar,
       label: t('dashboard.stats.viewings_scheduled'),
-      value: 2,
+      value: viewingsCount,
       subtitle: t('dashboard.stats.viewings_scheduled_subtitle'),
       color: 'orange',
       delay: 0.15,
@@ -152,7 +187,7 @@ export const RenterStatsCards = () => {
     {
       icon: Home,
       label: t('dashboard.stats.current_lease'),
-      value: 'Active',
+      value: leaseStatus,
       subtitle: t('dashboard.stats.current_lease_subtitle'),
       color: 'purple',
       delay: 0.2,
@@ -160,7 +195,7 @@ export const RenterStatsCards = () => {
     {
       icon: CreditCard,
       label: t('dashboard.stats.total_rent_paid'),
-      value: 2450000,
+      value: totalRentPaid,
       subtitle: t('dashboard.stats.total_rent_paid_subtitle'),
       color: 'emerald',
       delay: 0.25,

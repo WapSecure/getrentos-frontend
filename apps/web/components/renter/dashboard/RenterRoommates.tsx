@@ -5,56 +5,42 @@ import { useRouter } from 'next/navigation';
 import { UserPlus, Mail, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ROUTES } from '@/lib/constants/auth';
-
-interface Roommate {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  sharePercentage: number;
-  status: 'active' | 'pending' | 'inactive';
-  joinedDate: string;
-}
-
-const roommates: Roommate[] = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    phone: '+1 234 567 8901',
-    sharePercentage: 50,
-    status: 'active',
-    joinedDate: '2024-01-15',
-  },
-  {
-    id: '2',
-    name: 'Michael Chen',
-    email: 'michael@example.com',
-    phone: '+1 234 567 8902',
-    sharePercentage: 50,
-    status: 'active',
-    joinedDate: '2024-01-15',
-  },
-];
+import { renterService, type Roommate } from '@/services/renterService';
 
 export const RenterRoommates = () => {
   const router = useRouter();
+  const [roommates, setRoommates] = useState<Roommate[]>([]);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listRoommates();
+      if (res.success && res.data) setRoommates(res.data);
+    };
+    load();
+  }, []);
+
   const totalShare = roommates.reduce((sum, r) => sum + r.sharePercentage, 0);
 
-  const handleSendInvite = () => {
+  const handleSendInvite = async () => {
     if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
       setToast({ message: 'Enter a valid email address', variant: 'error' });
       return;
     }
-    setToast({ message: `Invite sent to ${inviteEmail}`, variant: 'success' });
-    setInviteEmail('');
-    setShowInvite(false);
+    const res = await renterService.inviteRoommate(inviteEmail);
+    if (res.success && res.data) {
+      const created = res.data;
+      setRoommates((prev) => [...prev, created]);
+      setToast({ message: `Invite sent to ${inviteEmail}`, variant: 'success' });
+      setInviteEmail('');
+      setShowInvite(false);
+    } else {
+      setToast({ message: res.message || 'Failed to send invite', variant: 'error' });
+    }
   };
 
   return (

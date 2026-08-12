@@ -1,4 +1,5 @@
 export interface RenewalOffer {
+  id: string;
   offerDate: string;
   newRentAmount: number;
   increasePercentage: number;

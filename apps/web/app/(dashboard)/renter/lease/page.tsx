@@ -15,132 +15,59 @@ import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaym
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
 import { FileText } from 'lucide-react';
 import type { RenewalOffer } from '@/types/lease';
-
-interface Lease {
-  id: string;
-  propertyId: string;
-  propertyName: string;
-  address: string;
-  startDate: string;
-  endDate: string;
-  rentAmount: number;
-  securityDeposit: number;
-  renewalTerms: string;
-  status: 'active' | 'expiring' | 'expired';
-  landlord: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  documents: {
-    name: string;
-    type: string;
-    uploadedAt: string;
-    url: string;
-  }[];
-  timeline: {
-    date: string;
-    event: string;
-    description: string;
-  }[];
-  paymentHistory: {
-    month: string;
-    amount: number;
-    status: 'paid' | 'pending' | 'overdue';
-    date: string;
-  }[];
-}
+import { renterService, type Lease } from '@/services/renterService';
 
 export default function LeasePage() {
   const [lease, setLease] = useState<Lease | null>(null);
   const [renewalOffer, setRenewalOffer] = useState<RenewalOffer | null>(null);
-
-  const loadLeaseData = () => {
-    const mockLease: Lease = {
-      id: 'lease_001',
-      propertyId: 'prop_001',
-      propertyName: 'Modern Downtown Loft',
-      address: '420 Main St, Ikeja, Lagos',
-      startDate: '2024-03-01',
-      endDate: '2025-03-01',
-      rentAmount: 200000,
-      securityDeposit: 400000,
-      renewalTerms: 'Annual renewal with 5% increase',
-      status: 'active',
-      landlord: {
-        name: 'Jane Smith',
-        email: 'jane.smith@email.com',
-        phone: '+1 234 567 8900',
-      },
-      documents: [
-        {
-          name: 'Lease Agreement',
-          type: 'PDF',
-          uploadedAt: '2024-02-15',
-          url: '#',
-        },
-        {
-          name: 'Move-in Inspection Report',
-          type: 'PDF',
-          uploadedAt: '2024-02-28',
-          url: '#',
-        },
-        {
-          name: 'Rent Receipt - March 2024',
-          type: 'PDF',
-          uploadedAt: '2024-03-01',
-          url: '#',
-        },
-      ],
-      timeline: [
-        {
-          date: '2024-02-15',
-          event: 'Lease Signed',
-          description: 'Digital lease agreement signed by both parties',
-        },
-        {
-          date: '2024-02-28',
-          event: 'Move-in Inspection',
-          description: 'Move-in inspection completed',
-        },
-        {
-          date: '2024-03-01',
-          event: 'Lease Started',
-          description: 'Lease period officially began',
-        },
-        {
-          date: '2024-03-01',
-          event: 'First Rent Payment',
-          description: 'Rent payment for March 2024 processed',
-        },
-      ],
-      paymentHistory: [
-        { month: 'March 2024', amount: 200000, status: 'paid', date: '2024-03-01' },
-        { month: 'April 2024', amount: 200000, status: 'paid', date: '2024-04-01' },
-        { month: 'May 2024', amount: 200000, status: 'paid', date: '2024-05-01' },
-        { month: 'June 2024', amount: 200000, status: 'pending', date: '2024-06-01' },
-      ],
-    };
-    setLease(mockLease);
-  };
-
-  const loadRenewalOffer = () => {
-    const mockRenewalOffer: RenewalOffer = {
-      offerDate: '2024-12-15',
-      newRentAmount: 210000,
-      increasePercentage: 5,
-      newEndDate: '2026-03-01',
-      status: 'pending',
-      terms: 'Annual renewal with 5% increase. New lease term: 12 months.',
-    };
-    setRenewalOffer(mockRenewalOffer);
-  };
+  const [rentIncreases, setRentIncreases] = useState<
+    {
+      date: string;
+      oldAmount: number;
+      newAmount: number;
+      percentageChange: number;
+      reason: string;
+    }[]
+  >([]);
+  const [paymentReminders, setPaymentReminders] = useState<
+    {
+      id: string;
+      dueDate: string;
+      amount: number;
+      propertyName: string;
+      status: 'upcoming';
+      daysRemaining: number;
+    }[]
+  >([]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadLeaseData = async () => {
+      const [leaseRes, offerRes, increasesRes, remindersRes] = await Promise.all([
+        renterService.getLease(),
+        renterService.getRenewalOffer(),
+        renterService.getRentIncreases(),
+        renterService.getUpcomingPaymentReminders(),
+      ]);
+      if (leaseRes.success && leaseRes.data) setLease(leaseRes.data);
+      if (offerRes.success && offerRes.data) setRenewalOffer(offerRes.data);
+      if (increasesRes.success && increasesRes.data) setRentIncreases(increasesRes.data);
+      if (remindersRes.success && remindersRes.data) setPaymentReminders(remindersRes.data);
+    };
     loadLeaseData();
-    loadRenewalOffer();
   }, []);
+
+  const handleRespondToOffer = async (offerId: string, action: 'accept' | 'decline') => {
+    const res = await renterService.respondToRenewalOffer(offerId, action);
+    if (res.success && res.data) {
+      setRenewalOffer(res.data);
+      const leaseRes = await renterService.getLease();
+      if (leaseRes.success && leaseRes.data) setLease(leaseRes.data);
+    }
+  };
+
+  const handleRequestTermination = async (noticeDate: string, reason: string) => {
+    await renterService.requestLeaseTermination(noticeDate, reason);
+  };
 
   if (!lease) {
     return (
@@ -156,35 +83,6 @@ export default function LeasePage() {
     );
   }
 
-  const rentIncreases = [
-    {
-      date: '2023-03-01',
-      oldAmount: 180000,
-      newAmount: 200000,
-      percentageChange: 11.1,
-      reason: 'Annual increase',
-    },
-  ];
-
-  const paymentReminders = [
-    {
-      id: '1',
-      dueDate: '2024-07-01',
-      amount: 200000,
-      propertyName: 'Modern Downtown Loft',
-      status: 'upcoming' as const,
-      daysRemaining: 15,
-    },
-    {
-      id: '2',
-      dueDate: '2024-08-01',
-      amount: 200000,
-      propertyName: 'Modern Downtown Loft',
-      status: 'upcoming' as const,
-      daysRemaining: 45,
-    },
-  ];
-
   return (
     <>
       <LeaseHeader lease={lease} renewalOffer={renewalOffer} />
@@ -198,12 +96,22 @@ export default function LeasePage() {
           <UpcomingPaymentReminders reminders={paymentReminders} />
         </div>
         <div className="space-y-6">
-          {renewalOffer && <LeaseRenewalOffer renewalOffer={renewalOffer} lease={lease} />}
+          {renewalOffer && (
+            <LeaseRenewalOffer
+              renewalOffer={renewalOffer}
+              lease={lease}
+              onRespond={handleRespondToOffer}
+            />
+          )}
           <LeasePaymentSchedule payments={lease.paymentHistory} />
           <LeaseDocuments documents={lease.documents} />
           <RentIncreaseHistory increases={rentIncreases} />
           <LeaseMoveOutChecklist />
-          <LeaseTerminationRequest leaseId={lease.id} propertyName={lease.propertyName} />
+          <LeaseTerminationRequest
+            leaseId={lease.id}
+            propertyName={lease.propertyName}
+            onSubmit={handleRequestTermination}
+          />
         </div>
       </div>
     </>
