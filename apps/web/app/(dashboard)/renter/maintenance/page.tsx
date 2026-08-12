@@ -24,6 +24,16 @@ interface ReportData {
 export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [emergencyContacts, setEmergencyContacts] = useState<
+    {
+      id: string;
+      name: string;
+      role: string;
+      phone: string;
+      email: string;
+      availableHours: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const loadMaintenanceRequests = async () => {
@@ -31,6 +41,23 @@ export default function MaintenancePage() {
       if (res.success && res.data) setRequests(res.data);
     };
     loadMaintenanceRequests();
+
+    const loadLandlordContact = async () => {
+      const res = await renterService.getLease();
+      if (res.success && res.data) {
+        setEmergencyContacts([
+          {
+            id: 'landlord',
+            name: res.data.landlord.name,
+            role: 'Landlord',
+            phone: res.data.landlord.phone,
+            email: res.data.landlord.email,
+            availableHours: 'Contact via message for fastest response',
+          },
+        ]);
+      }
+    };
+    loadLandlordContact();
   }, []);
 
   const handleReportIssue = async (data: ReportData) => {
@@ -86,25 +113,6 @@ export default function MaintenancePage() {
       assignedVendor: 'PestControl Pro',
       status: 'scheduled' as const,
       type: 'routine' as const,
-    },
-  ];
-
-  const emergencyContacts = [
-    {
-      id: 'ec_001',
-      name: 'Jane Smith',
-      role: 'Property Manager',
-      phone: '+1 234 567 8900',
-      email: 'jane.smith@email.com',
-      availableHours: '24/7',
-    },
-    {
-      id: 'ec_002',
-      name: 'John Doe',
-      role: 'Maintenance Coordinator',
-      phone: '+1 234 567 8901',
-      email: 'john.doe@email.com',
-      availableHours: '8am - 6pm',
     },
   ];
 

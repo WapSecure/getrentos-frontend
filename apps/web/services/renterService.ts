@@ -9,6 +9,30 @@ import type { RenewalOffer } from '@/types/lease';
 import type { MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
 
+export interface SavedSearch {
+  id: string;
+  name: string;
+  filters: {
+    location?: string;
+    bedrooms?: number;
+    maxPrice?: number;
+    propertyType?: string;
+    verifiedOnly?: boolean;
+  };
+  createdAt: string;
+  alertsEnabled: boolean;
+  lastRun: string;
+  newMatches: number;
+}
+
+export interface MoveInChecklistItem {
+  key: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  required: boolean;
+}
+
 export interface Lease {
   id: string;
   propertyId: string;
@@ -604,6 +628,45 @@ export const renterService = {
         method: 'DELETE',
         body: JSON.stringify({ password }),
       })
+    );
+  },
+
+  // ---- Saved searches ----
+  async listSavedSearches(): Promise<ApiResponse<SavedSearch[]>> {
+    return safeCall(() => authFetch('/renter/saved-searches'));
+  },
+
+  async createSavedSearch(data: {
+    name: string;
+    location?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    propertyType?: string;
+    verifiedOnly?: boolean;
+  }): Promise<ApiResponse<SavedSearch>> {
+    return safeCall(() =>
+      authFetch('/renter/saved-searches', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async toggleSavedSearchAlerts(id: string): Promise<ApiResponse<SavedSearch>> {
+    return safeCall(() => authFetch(`/renter/saved-searches/${id}/alerts`, { method: 'PATCH' }));
+  },
+
+  async deleteSavedSearch(id: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/renter/saved-searches/${id}`, { method: 'DELETE' }));
+  },
+
+  // ---- Move-in checklist ----
+  async getMoveInChecklist(): Promise<ApiResponse<MoveInChecklistItem[]>> {
+    return safeCall(() => authFetch('/renter/dashboard/move-in-checklist'));
+  },
+
+  async toggleMoveInChecklistItem(key: string): Promise<ApiResponse<MoveInChecklistItem>> {
+    return safeCall(() =>
+      authFetch(`/renter/dashboard/move-in-checklist/${key}/toggle`, { method: 'PATCH' })
     );
   },
 };
