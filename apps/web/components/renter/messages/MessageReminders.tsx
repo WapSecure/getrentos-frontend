@@ -70,7 +70,11 @@ export const MessageReminders = ({
             size="sm"
             variant="ghost"
             className="gap-1"
-            onClick={() => setIsAdding(!isAdding)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(true);
+              setIsAdding(!isAdding);
+            }}
           >
             <Plus className="w-3 h-3" />
             Add

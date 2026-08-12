@@ -5,28 +5,38 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { mockProperties } from '@/lib/mockProperties';
-import { formatPrice } from '@/types/renter';
+import { formatPrice, type Property } from '@/types/renter';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
-
-const recommendedProperties = mockProperties.slice(0, 4);
+import { renterService } from '@/services/renterService';
 
 export const RenterRecommendedProperties = () => {
   const router = useRouter();
+  const [recommendedProperties, setRecommendedProperties] = useState<Property[]>([]);
   const [savedIds, setSavedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('renter_saved_properties');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSavedIds(saved ? JSON.parse(saved) : []);
+    const load = async () => {
+      const [listingsRes, savedRes] = await Promise.all([
+        renterService.listListings(),
+        renterService.listSavedListings(),
+      ]);
+      if (listingsRes.success && listingsRes.data)
+        setRecommendedProperties(listingsRes.data.slice(0, 4));
+      if (savedRes.success && savedRes.data) setSavedIds(savedRes.data.map((p) => p.id));
+    };
+    load();
   }, []);
 
-  const toggleSave = (propertyId: string) => {
-    const current = localStorage.getItem('renter_saved_properties');
-    let ids: string[] = current ? JSON.parse(current) : [];
-    ids = ids.includes(propertyId) ? ids.filter((id) => id !== propertyId) : [...ids, propertyId];
-    localStorage.setItem('renter_saved_properties', JSON.stringify(ids));
-    setSavedIds(ids);
+  const toggleSave = async (propertyId: string) => {
+    const isSaved = savedIds.includes(propertyId);
+    const res = isSaved
+      ? await renterService.unsaveListing(propertyId)
+      : await renterService.saveListing(propertyId);
+    if (res.success) {
+      setSavedIds((prev) =>
+        isSaved ? prev.filter((id) => id !== propertyId) : [...prev, propertyId]
+      );
+    }
   };
 
   return (

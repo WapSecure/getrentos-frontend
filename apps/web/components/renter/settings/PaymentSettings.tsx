@@ -1,49 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CreditCard, Building2, Wallet, Plus, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-
-interface PaymentMethod {
-  id: string;
-  type: 'card' | 'bank' | 'wallet';
-  name: string;
-  last4?: string;
-  expiry?: string;
-  isDefault: boolean;
-}
+import { renterService, type PaymentMethod } from '@/services/renterService';
 
 export const PaymentSettings = () => {
-  const [methods, setMethods] = useState<PaymentMethod[]>([
-    {
-      id: '1',
-      type: 'card',
-      name: 'Visa •••• 4242',
-      last4: '4242',
-      expiry: '12/26',
-      isDefault: true,
-    },
-    {
-      id: '2',
-      type: 'card',
-      name: 'Mastercard •••• 8888',
-      last4: '8888',
-      expiry: '08/25',
-      isDefault: false,
-    },
-  ]);
+  const [methods, setMethods] = useState<PaymentMethod[]>([]);
 
-  const handleSetDefault = (id: string) => {
-    setMethods(
-      methods.map((m) => ({
-        ...m,
-        isDefault: m.id === id,
-      }))
-    );
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listPaymentMethods();
+      if (res.success && res.data) setMethods(res.data);
+    };
+    load();
+  }, []);
+
+  const handleSetDefault = async (id: string) => {
+    const res = await renterService.setDefaultPaymentMethod(id);
+    if (res.success && res.data) setMethods(res.data);
   };
 
-  const handleRemove = (id: string) => {
-    setMethods(methods.filter((m) => m.id !== id));
+  const handleRemove = async (id: string) => {
+    const res = await renterService.removePaymentMethod(id);
+    if (res.success) setMethods((prev) => prev.filter((m) => m.id !== id));
   };
 
   return (
@@ -95,7 +75,7 @@ export const PaymentSettings = () => {
           );
         })}
 
-        <Button variant="outline" fullWidth className="gap-2">
+        <Button href="/renter/payments" variant="outline" fullWidth className="gap-2">
           <Plus className="w-4 h-4" />
           Add Payment Method
         </Button>

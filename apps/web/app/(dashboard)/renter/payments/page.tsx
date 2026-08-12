@@ -12,30 +12,12 @@ import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentRece
 import { PaymentNotifications } from '@/components/renter/payments/PaymentNotifications';
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
 import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
-
-interface Payment {
-  id: string;
-  propertyId: string;
-  propertyName: string;
-  amount: number;
-  date: string;
-  status: 'paid' | 'pending' | 'overdue' | 'processing';
-  method: 'card' | 'bank_transfer' | 'wallet';
-  receiptUrl?: string;
-  description: string;
-  dueDate: string;
-  escrowStatus: 'held' | 'released' | 'pending';
-}
-
-interface Receipt {
-  id: string;
-  paymentId: string;
-  propertyName: string;
-  amount: number;
-  date: string;
-  fileName: string;
-  url: string;
-}
+import {
+  renterService,
+  type Payment,
+  type Receipt,
+  type PaymentMethod as PaymentMethodModel,
+} from '@/services/renterService';
 
 interface Notification {
   id: string;
@@ -46,142 +28,29 @@ interface Notification {
   read: boolean;
 }
 
+type DisplayPayment = Omit<Payment, 'method'> & { method: 'card' | 'bank_transfer' | 'wallet' };
+
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<DisplayPayment[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodModel[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
 
-  const loadPayments = () => {
-    const mockPayments: Payment[] = [
-      {
-        id: 'pay_001',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        amount: 200000,
-        date: '2024-06-01',
-        status: 'paid',
-        method: 'card',
-        receiptUrl: '#',
-        description: 'Rent payment for June 2024',
-        dueDate: '2024-06-01',
-        escrowStatus: 'released',
-      },
-      {
-        id: 'pay_002',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        amount: 200000,
-        date: '2024-05-01',
-        status: 'paid',
-        method: 'bank_transfer',
-        receiptUrl: '#',
-        description: 'Rent payment for May 2024',
-        dueDate: '2024-05-01',
-        escrowStatus: 'released',
-      },
-      {
-        id: 'pay_003',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        amount: 200000,
-        date: '2024-06-25',
-        status: 'pending',
-        method: 'card',
-        receiptUrl: '#',
-        description: 'Rent payment for July 2024',
-        dueDate: '2024-07-01',
-        escrowStatus: 'held',
-      },
-      {
-        id: 'pay_004',
-        propertyId: 'prop_002',
-        propertyName: 'Cozy Studio Apartment',
-        amount: 150000,
-        date: '2024-06-15',
-        status: 'overdue',
-        method: 'bank_transfer',
-        receiptUrl: '#',
-        description: 'Rent payment for June 2024',
-        dueDate: '2024-06-01',
-        escrowStatus: 'held',
-      },
-      {
-        id: 'pay_005',
-        propertyId: 'prop_003',
-        propertyName: 'Luxury Beachfront Villa',
-        amount: 800000,
-        date: '2024-05-15',
-        status: 'paid',
-        method: 'wallet',
-        receiptUrl: '#',
-        description: 'Rent payment for May 2024',
-        dueDate: '2024-05-01',
-        escrowStatus: 'released',
-      },
-      {
-        id: 'pay_006',
-        propertyId: 'prop_001',
-        propertyName: 'Modern Downtown Loft',
-        amount: 200000,
-        date: '2024-07-01',
-        status: 'processing',
-        method: 'card',
-        receiptUrl: '#',
-        description: 'Rent payment for July 2024',
-        dueDate: '2024-07-01',
-        escrowStatus: 'held',
-      },
-    ];
-    setPayments(mockPayments);
-
-    // Generate receipts from paid payments
-    const mockReceipts: Receipt[] = mockPayments
-      .filter((p) => p.status === 'paid')
-      .map((p) => ({
-        id: `rec_${p.id}`,
-        paymentId: p.id,
-        propertyName: p.propertyName,
-        amount: p.amount,
-        date: p.date,
-        fileName: `Rent_Receipt_${p.propertyName}_${p.date}.pdf`,
-        url: '#',
-      }));
-    setReceipts(mockReceipts);
-
-    // Generate notifications
-    const mockNotifications: Notification[] = [
-      {
-        id: 'notif_001',
-        type: 'success',
-        title: 'Payment Successful',
-        message: 'Rent payment of ₦200,000 for Modern Downtown Loft was successful.',
-        date: '2024-06-01T10:30:00',
-        read: false,
-      },
-      {
-        id: 'notif_002',
-        type: 'warning',
-        title: 'Payment Reminder',
-        message: 'Rent payment of ₦150,000 for Cozy Studio Apartment is due in 3 days.',
-        date: '2024-05-29T08:00:00',
-        read: false,
-      },
-      {
-        id: 'notif_003',
-        type: 'info',
-        title: 'Receipt Available',
-        message: 'Download your rent receipt for May 2024 payment.',
-        date: '2024-05-15T14:20:00',
-        read: true,
-      },
-    ];
-    setNotifications(mockNotifications);
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadPayments = async () => {
+      const [paymentsRes, receiptsRes, methodsRes] = await Promise.all([
+        renterService.listPayments(),
+        renterService.listReceipts(),
+        renterService.listPaymentMethods(),
+      ]);
+      if (paymentsRes.success && paymentsRes.data) {
+        setPayments(paymentsRes.data.map((p) => ({ ...p, method: p.method ?? 'card' })));
+      }
+      if (receiptsRes.success && receiptsRes.data) setReceipts(receiptsRes.data);
+      if (methodsRes.success && methodsRes.data) setPaymentMethods(methodsRes.data);
+    };
     loadPayments();
   }, []);
 
@@ -192,7 +61,7 @@ export default function PaymentsPage() {
     ]);
   };
 
-  const handlePayNow = (paymentId: string) => {
+  const handlePayNow = async (paymentId: string) => {
     const payment = payments.find((p) => p.id === paymentId);
     if (!payment) return;
 
@@ -200,31 +69,20 @@ export default function PaymentsPage() {
       prev.map((p) => (p.id === paymentId ? { ...p, status: 'processing' } : p))
     );
 
-    window.setTimeout(() => {
-      const paidDate = new Date().toISOString().slice(0, 10);
-      setReceipts((prevReceipts) => [
-        {
-          id: `rec_${paymentId}_${Date.now()}`,
-          paymentId,
-          propertyName: payment.propertyName,
-          amount: payment.amount,
-          date: paidDate,
-          fileName: `Rent_Receipt_${payment.propertyName}_${paidDate}.pdf`,
-          url: '#',
-        },
-        ...prevReceipts,
-      ]);
+    const res = await renterService.payNow(paymentId, payment.method ?? 'card');
+    if (res.success && res.data) {
+      const updated: DisplayPayment = { ...res.data, method: res.data.method ?? 'card' };
+      setPayments((prev) => prev.map((p) => (p.id === paymentId ? updated : p)));
+      const receiptsRes = await renterService.listReceipts();
+      if (receiptsRes.success && receiptsRes.data) setReceipts(receiptsRes.data);
       pushNotification({
         type: 'success',
         title: 'Payment Successful',
         message: `Rent payment of ₦${payment.amount.toLocaleString()} for ${payment.propertyName} was successful.`,
       });
-      setPayments((prev) =>
-        prev.map((p) =>
-          p.id === paymentId ? { ...p, status: 'paid', escrowStatus: 'held', date: paidDate } : p
-        )
-      );
-    }, 1800);
+    } else {
+      setPayments((prev) => prev.map((p) => (p.id === paymentId ? payment : p)));
+    }
   };
 
   const handleDownloadReceipt = (receiptId: string) => {
@@ -246,14 +104,19 @@ export default function PaymentsPage() {
     setDisputingPaymentId(paymentId);
   };
 
-  const handleSubmitDispute = (reason: string) => {
+  const handleSubmitDispute = async (reason: string) => {
     if (!disputingPaymentId) return;
     const payment = payments.find((p) => p.id === disputingPaymentId);
-    pushNotification({
-      type: 'info',
-      title: 'Dispute Submitted',
-      message: `Your dispute for ${payment?.propertyName ?? 'this payment'} has been submitted for review: "${reason}"`,
-    });
+    const res = await renterService.disputePayment(disputingPaymentId, reason);
+    if (res.success && res.data) {
+      const updated: DisplayPayment = { ...res.data, method: res.data.method ?? 'card' };
+      setPayments((prev) => prev.map((p) => (p.id === disputingPaymentId ? updated : p)));
+      pushNotification({
+        type: 'info',
+        title: 'Dispute Submitted',
+        message: `Your dispute for ${payment?.propertyName ?? 'this payment'} has been submitted for review: "${reason}"`,
+      });
+    }
     setDisputingPaymentId(null);
   };
 
@@ -263,6 +126,29 @@ export default function PaymentsPage() {
 
   const handleClearAllNotifications = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const handleSetDefaultPaymentMethod = async (id: string) => {
+    const res = await renterService.setDefaultPaymentMethod(id);
+    if (res.success && res.data) setPaymentMethods(res.data);
+  };
+
+  const handleRemovePaymentMethod = async (id: string) => {
+    const res = await renterService.removePaymentMethod(id);
+    if (res.success) setPaymentMethods((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const handleAddPaymentMethod = async (data: { last4: string; expiry: string }) => {
+    const res = await renterService.addPaymentMethod({
+      type: 'card',
+      name: `Card ending ${data.last4}`,
+      last4: data.last4,
+      expiry: data.expiry,
+    });
+    if (res.success && res.data) {
+      const created = res.data;
+      setPaymentMethods((prev) => [...prev, created]);
+    }
   };
 
   return (
@@ -291,7 +177,12 @@ export default function PaymentsPage() {
             onClearAll={handleClearAllNotifications}
           />
           <PaymentSchedule payments={payments} />
-          <PaymentMethods />
+          <PaymentMethods
+            methods={paymentMethods}
+            onSetDefault={handleSetDefaultPaymentMethod}
+            onRemove={handleRemovePaymentMethod}
+            onAdd={handleAddPaymentMethod}
+          />
           <AutoPaySetup />
           <PaymentAnalytics payments={payments} />
         </div>

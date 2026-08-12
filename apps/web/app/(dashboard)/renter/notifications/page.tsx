@@ -11,6 +11,7 @@ import { DoNotDisturb } from '@/components/renter/notifications/DoNotDisturb';
 import { NotificationSearch } from '@/components/renter/notifications/NotificationSearch';
 import { NotificationSound } from '@/components/renter/notifications/NotificationSound';
 import { Notification } from '@/types/notification';
+import { renterService } from '@/services/renterService';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -18,124 +19,41 @@ export default function NotificationsPage() {
   const [filterRead, setFilterRead] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadNotifications = () => {
-    const mockNotifications: Notification[] = [
-      {
-        id: '1',
-        type: 'application',
-        title: 'Application Update',
-        message: 'Your application for Modern Downtown Loft is under review',
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-        action: {
-          label: 'View Application',
-          url: '/renter/applications',
-        },
-        metadata: {
-          applicationId: 'app_001',
-          propertyId: 'prop_001',
-        },
-      },
-      {
-        id: '2',
-        type: 'message',
-        title: 'New Message',
-        message: 'Jane Smith sent you a message about the lease agreement',
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        action: {
-          label: 'View Message',
-          url: '/renter/messages',
-        },
-        metadata: {
-          messageId: 'msg_001',
-          sender: 'Jane Smith',
-        },
-      },
-      {
-        id: '3',
-        type: 'payment',
-        title: 'Payment Confirmed',
-        message: 'Your rent payment of ₦200,000 for June 2024 was successful',
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-        action: {
-          label: 'View Receipt',
-          url: '/renter/payments',
-        },
-        metadata: {
-          paymentId: 'pay_001',
-          amount: 200000,
-        },
-      },
-      {
-        id: '4',
-        type: 'maintenance',
-        title: 'Maintenance Update',
-        message: 'Quick Plumbing Services has been assigned to your maintenance request',
-        read: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-        action: {
-          label: 'Track Progress',
-          url: '/renter/maintenance',
-        },
-        metadata: {
-          maintenanceId: 'maint_001',
-        },
-      },
-      {
-        id: '5',
-        type: 'lease',
-        title: 'Lease Renewal Reminder',
-        message: 'Your lease is expiring in 30 days. Review your renewal options.',
-        read: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-        action: {
-          label: 'View Lease',
-          url: '/renter/lease',
-        },
-        metadata: {
-          leaseId: 'lease_001',
-        },
-      },
-      {
-        id: '6',
-        type: 'system',
-        title: 'Trust Score Update',
-        message: 'Your trust score has increased to 78! Keep up the good work.',
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-        action: {
-          label: 'View Trust Score',
-          url: '/renter/trust-score',
-        },
-        metadata: {
-          trustScore: 78,
-        },
-      },
-    ];
-    setNotifications(mockNotifications);
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadNotifications = async () => {
+      const res = await renterService.listNotifications();
+      if (res.success && res.data) setNotifications(res.data);
+    };
     loadNotifications();
   }, []);
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAsRead = async (id: string) => {
+    const res = await renterService.markNotificationAsRead(id);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setNotifications((prev) => prev.map((n) => (n.id === id ? updated : n)));
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = async () => {
+    const res = await renterService.markAllNotificationsAsRead();
+    if (res.success) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const handleDelete = async (id: string) => {
+    const res = await renterService.deleteNotification(id);
+    if (res.success) {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    }
   };
 
-  const handleClearAll = () => {
-    setNotifications([]);
+  const handleClearAll = async () => {
+    const res = await renterService.clearAllNotifications();
+    if (res.success) {
+      setNotifications([]);
+    }
   };
 
   const filteredNotifications = notifications.filter((n) => {

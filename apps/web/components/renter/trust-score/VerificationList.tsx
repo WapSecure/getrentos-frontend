@@ -1,12 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Shield,
   CheckCircle,
-  XCircle,
   Clock,
-  AlertCircle,
   Phone,
   Mail,
   User,
@@ -32,17 +30,23 @@ interface VerificationListProps {
 }
 
 export const VerificationList = ({ verifications }: VerificationListProps) => {
-  const [items, setItems] = useState(verifications);
+  const [locallyVerifiedIds, setLocallyVerifiedIds] = useState<Set<string>>(new Set());
+
+  const items = useMemo(
+    () =>
+      verifications.map((item) =>
+        !item.verified && locallyVerifiedIds.has(item.id)
+          ? { ...item, verified: true, date: new Date().toISOString() }
+          : item
+      ),
+    [verifications, locallyVerifiedIds]
+  );
 
   const verifiedCount = items.filter((v) => v.verified).length;
   const totalCount = items.length;
 
   const handleVerify = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, verified: true, date: new Date().toISOString() } : item
-      )
-    );
+    setLocallyVerifiedIds((prev) => new Set(prev).add(id));
   };
 
   return (

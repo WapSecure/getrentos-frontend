@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Shield,
@@ -8,6 +9,8 @@ import {
   TrendingUp,
   ArrowRight,
   Phone,
+  Mail,
+  User,
   FileText,
   CreditCard,
   Users,
@@ -16,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
+import { renterService } from '@/services/renterService';
 
 interface VerificationItem {
   label: string;
@@ -23,20 +27,40 @@ interface VerificationItem {
   icon: React.ElementType;
 }
 
-const verificationItems: VerificationItem[] = [
-  { label: 'Identity Verified', verified: true, icon: Shield },
-  { label: 'Phone Verified', verified: true, icon: Phone },
-  { label: 'Email Verified', verified: true, icon: CheckCircle },
-  { label: 'Background Check', verified: false, icon: FileText },
-  { label: 'Credit Report', verified: false, icon: CreditCard },
-  { label: 'References Added', verified: false, icon: Users },
-];
+const iconMap: Record<string, React.ElementType> = {
+  Shield,
+  Phone,
+  Mail,
+  User,
+  FileText,
+  CreditCard,
+  Users,
+};
 
 export const RenterTrustScoreCard = () => {
   const { t } = useLanguage();
-  const trustScore = 78;
+  const [trustScore, setTrustScore] = useState(0);
+  const [verificationItems, setVerificationItems] = useState<VerificationItem[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.getTrustScore();
+      if (res.success && res.data) {
+        setTrustScore(res.data.trustScore);
+        setVerificationItems(
+          res.data.verifications.map((v) => ({
+            label: v.label,
+            verified: v.verified,
+            icon: iconMap[v.icon] || Shield,
+          }))
+        );
+      }
+    };
+    load();
+  }, []);
+
   const verifiedCount = verificationItems.filter((item) => item.verified).length;
-  const totalCount = verificationItems.length;
+  const totalCount = verificationItems.length || 1;
 
   return (
     <motion.div

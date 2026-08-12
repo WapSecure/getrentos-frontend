@@ -8,6 +8,7 @@ import { CalendarEventList } from '@/components/renter/calendar/CalendarEventLis
 import { CalendarEventModal } from '@/components/renter/calendar/CalendarEventModal';
 import { CalendarSync } from '@/components/renter/calendar/CalendarSync';
 import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/types/calendar';
+import { renterService } from '@/services/renterService';
 
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -16,88 +17,27 @@ export default function CalendarPage() {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
 
-  const loadEvents = () => {
-    const mockEvents: CalendarEvent[] = [
-      {
-        id: '1',
-        title: 'Property Viewing - Modern Downtown Loft',
-        description: 'Walkthrough of the 2-bedroom apartment',
-        date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString(),
-        startTime: '14:00',
-        endTime: '15:00',
-        type: 'viewing',
-        status: 'upcoming',
-        location: '420 Main St, Ikeja, Lagos',
-        notes: 'Bring ID and proof of income',
-        reminder: true,
-        color: '#3b82f6',
-      },
-      {
-        id: '2',
-        title: 'Rent Payment Due',
-        description: 'Monthly rent payment',
-        date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5).toISOString(),
-        startTime: '09:00',
-        endTime: '09:00',
-        type: 'payment',
-        status: 'upcoming',
-        reminder: true,
-        color: '#10b981',
-      },
-      {
-        id: '3',
-        title: 'Maintenance: AC Service',
-        description: 'Routine AC maintenance',
-        date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
-        startTime: '10:00',
-        endTime: '12:00',
-        type: 'maintenance',
-        status: 'upcoming',
-        location: 'Modern Downtown Loft',
-        reminder: true,
-        color: '#f59e0b',
-      },
-      {
-        id: '4',
-        title: 'Lease Renewal Meeting',
-        description: 'Discuss lease renewal terms',
-        date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString(),
-        startTime: '15:30',
-        endTime: '16:30',
-        type: 'lease',
-        status: 'upcoming',
-        location: 'Virtual Meeting',
-        reminder: true,
-        color: '#8b5cf6',
-      },
-      {
-        id: '5',
-        title: 'Move-in Inspection',
-        description: 'Final move-in inspection',
-        date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
-        startTime: '09:00',
-        endTime: '11:00',
-        type: 'viewing',
-        status: 'completed',
-        location: 'Modern Downtown Loft',
-        reminder: false,
-        color: '#6b7280',
-      },
-    ];
-    setEvents(mockEvents);
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const loadEvents = async () => {
+      const res = await renterService.listCalendarEvents();
+      if (res.success && res.data) setEvents(res.data);
+    };
     loadEvents();
   }, []);
 
-  const handleUpdateEvent = (id: string, updates: Partial<CalendarEvent>) => {
-    setEvents((prev) => prev.map((event) => (event.id === id ? { ...event, ...updates } : event)));
+  const handleUpdateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
+    const res = await renterService.updateCalendarEvent(id, updates);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setEvents((prev) => prev.map((event) => (event.id === id ? updated : event)));
+    }
   };
 
-  const handleDeleteEvent = (id: string) => {
-    setEvents((prev) => prev.filter((event) => event.id !== id));
+  const handleDeleteEvent = async (id: string) => {
+    const res = await renterService.deleteCalendarEvent(id);
+    if (res.success) {
+      setEvents((prev) => prev.filter((event) => event.id !== id));
+    }
   };
 
   const openAddEventModal = () => {
@@ -115,16 +55,15 @@ export default function CalendarPage() {
     setEditingEvent(null);
   };
 
-  const handleSaveEvent = (formData: CalendarEventFormData) => {
+  const handleSaveEvent = async (formData: CalendarEventFormData) => {
     if (editingEvent) {
-      handleUpdateEvent(editingEvent.id, formData);
+      await handleUpdateEvent(editingEvent.id, formData);
     } else {
-      const newEvent: CalendarEvent = {
-        id: `event_${Date.now()}`,
-        status: 'upcoming',
-        ...formData,
-      };
-      setEvents((prev) => [...prev, newEvent]);
+      const res = await renterService.createCalendarEvent(formData);
+      if (res.success && res.data) {
+        const created = res.data;
+        setEvents((prev) => [...prev, created]);
+      }
     }
   };
 

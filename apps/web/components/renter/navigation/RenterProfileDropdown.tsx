@@ -4,11 +4,17 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Settings, HelpCircle, LogOut, Star } from 'lucide-react';
-import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
+import { ChevronDown, Settings, HelpCircle, LogOut, Star, Repeat, Check } from 'lucide-react';
+import {
+  BACKEND_ROLE_TO_ID,
+  ROLES,
+  ROUTES,
+  STORAGE_KEYS,
+  getDashboardRoute,
+} from '@/lib/constants/auth';
 
 interface RenterProfileDropdownProps {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
 }
 
 export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
@@ -30,6 +36,25 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
     router.push(ROUTES.LOGIN);
+  };
+
+  const roleDefs = Object.values(ROLES);
+  const userRoleIds = Array.from(
+    new Set((user?.roles || []).map((r) => BACKEND_ROLE_TO_ID[r]).filter(Boolean))
+  );
+  const otherRoles = userRoleIds
+    .filter((id) => id !== 'renter')
+    .map((id) => roleDefs.find((r) => r.id === id))
+    .filter((r): r is (typeof roleDefs)[number] => !!r);
+
+  const handleSwitchRole = (roleId: string) => {
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...parsed, role: roleId }));
+    }
+    setIsOpen(false);
+    router.push(getDashboardRoute(roleId));
   };
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
@@ -68,6 +93,31 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
               <p className="text-sm font-semibold text-foreground">{user?.fullName || 'User'}</p>
               <p className="text-xs text-muted-foreground">Renter</p>
             </div>
+
+            {otherRoles.length > 0 && (
+              <div className="py-2 border-b border-border">
+                <p className="px-4 pb-1 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Repeat className="w-3 h-3" />
+                  Switch role
+                </p>
+                <button
+                  className="w-full flex items-center justify-between px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+                  disabled
+                >
+                  <span>Renter</span>
+                  <Check className="w-3.5 h-3.5 text-primary" />
+                </button>
+                {otherRoles.map((role) => (
+                  <button
+                    key={role.id}
+                    onClick={() => handleSwitchRole(role.id)}
+                    className="w-full flex items-center px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+                  >
+                    {role.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="py-2">
               <Link

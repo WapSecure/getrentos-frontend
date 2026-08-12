@@ -12,7 +12,7 @@ import { RenterProfileDropdown } from './RenterProfileDropdown';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface RenterNavbarProps {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
 }
 
 export const RenterNavbar = ({ user }: RenterNavbarProps) => {
