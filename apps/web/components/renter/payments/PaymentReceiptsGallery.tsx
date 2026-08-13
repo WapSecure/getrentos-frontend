@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Search, Calendar, Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
 
 interface Receipt {
   id: string;
@@ -144,8 +145,8 @@ export const PaymentReceiptsGallery = ({
         )}
       </div>
 
-      {/* Receipt Preview Modal */}
-      {showPreview && selectedReceipt && (
+      {/* Receipt details remain visible alongside the reusable file viewer. */}
+      {showPreview && selectedReceipt && !selectedReceipt.url && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -203,6 +204,7 @@ export const PaymentReceiptsGallery = ({
           </motion.div>
         </div>
       )}
+      <FilePreviewDialog open={showPreview && Boolean(selectedReceipt?.url)} onOpenChange={(open) => !open && setShowPreview(false)} file={selectedReceipt?.url ? { url: selectedReceipt.url, name: selectedReceipt.fileName, mimeType: 'application/pdf' } : null} />
     </>
   );
 };

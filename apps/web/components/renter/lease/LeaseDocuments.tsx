@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
 
 interface Document {
   name: string;
@@ -16,6 +18,7 @@ interface LeaseDocumentsProps {
 }
 
 export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -64,10 +67,10 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
               </div>
             </div>
             <div className="flex gap-1">
-              <Button size="sm" variant="ghost" className="px-2">
+              <Button size="sm" variant="ghost" className="px-2" onClick={() => setPreviewDocument(doc)}>
                 <Eye className="w-3 h-3" />
               </Button>
-              <Button size="sm" variant="ghost" className="px-2">
+              <Button size="sm" variant="ghost" className="px-2" onClick={() => window.open(doc.url, '_blank', 'noopener,noreferrer')}>
                 <Download className="w-3 h-3" />
               </Button>
             </div>
@@ -80,6 +83,7 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
           View All Documents
         </Button>
       </div>
+      <FilePreviewDialog open={Boolean(previewDocument)} onOpenChange={(open) => !open && setPreviewDocument(null)} file={previewDocument ? { url: previewDocument.url, name: previewDocument.name, mimeType: previewDocument.type } : null} />
     </motion.div>
   );
 };
