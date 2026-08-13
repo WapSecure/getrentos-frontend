@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
   ConversationList,
@@ -8,129 +8,35 @@ import {
 } from '@/components/landlord/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/landlord/messages/MessageThread';
 import { cn } from '@/lib/cn';
-
-const mockConversations: Conversation[] = [
-  {
-    id: 'conv_001',
-    participantName: 'Chuka Nwosu',
-    participantRole: 'Tenant',
-    lastMessage: 'Thanks, I will send the plumber access tomorrow morning.',
-    lastMessageTime: '2026-08-06T15:40:00.000Z',
-    unreadCount: 2,
-  },
-  {
-    id: 'conv_002',
-    participantName: 'AquaFlow Plumbers',
-    participantRole: 'Vendor',
-    lastMessage: 'We can be there by 10am on Friday.',
-    lastMessageTime: '2026-08-06T11:15:00.000Z',
-    unreadCount: 0,
-  },
-  {
-    id: 'conv_003',
-    participantName: 'Bisi Adewale',
-    participantRole: 'Applicant',
-    lastMessage: 'I have uploaded my bank statement, please check.',
-    lastMessageTime: '2026-08-05T09:05:00.000Z',
-    unreadCount: 1,
-  },
-  {
-    id: 'conv_004',
-    participantName: 'Ifeoma Bello',
-    participantRole: 'Tenant',
-    lastMessage: 'Received, thank you!',
-    lastMessageTime: '2026-08-01T18:20:00.000Z',
-    unreadCount: 0,
-  },
-];
-
-const mockMessages: Record<string, ThreadMessage[]> = {
-  conv_001: [
-    {
-      id: 'm1',
-      senderId: 'contact',
-      text: 'Hi, the kitchen faucet is still leaking.',
-      timestamp: '2026-08-06T15:20:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'landlord',
-      text: 'Thanks for the update — I have assigned a plumber to look at it this week.',
-      timestamp: '2026-08-06T15:25:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm3',
-      senderId: 'contact',
-      text: 'Great, what time should I expect them?',
-      timestamp: '2026-08-06T15:32:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm4',
-      senderId: 'contact',
-      text: 'Thanks, I will send the plumber access tomorrow morning.',
-      timestamp: '2026-08-06T15:40:00.000Z',
-      read: false,
-    },
-  ],
-  conv_002: [
-    {
-      id: 'm1',
-      senderId: 'landlord',
-      text: 'Can you attend to Unit 3B this week for a leaking faucet?',
-      timestamp: '2026-08-06T10:50:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'contact',
-      text: 'We can be there by 10am on Friday.',
-      timestamp: '2026-08-06T11:15:00.000Z',
-      read: true,
-    },
-  ],
-  conv_003: [
-    {
-      id: 'm1',
-      senderId: 'landlord',
-      text: 'Your bank statement document is still missing from your application.',
-      timestamp: '2026-08-05T08:50:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'contact',
-      text: 'I have uploaded my bank statement, please check.',
-      timestamp: '2026-08-05T09:05:00.000Z',
-      read: false,
-    },
-  ],
-  conv_004: [
-    {
-      id: 'm1',
-      senderId: 'landlord',
-      text: 'Your renewal offer has been sent — let me know if you have questions.',
-      timestamp: '2026-08-01T18:00:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'contact',
-      text: 'Received, thank you!',
-      timestamp: '2026-08-01T18:20:00.000Z',
-      read: true,
-    },
-  ],
-};
+import { landlordService } from '@/services/landlordService';
 
 export default function LandlordMessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [messagesByConversation, setMessagesByConversation] =
-    useState<Record<string, ThreadMessage[]>>(mockMessages);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [messagesByConversation, setMessagesByConversation] = useState<
+    Record<string, ThreadMessage[]>
+  >({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      const response = await landlordService.listConversations();
+      if (response.success && response.data) {
+        setConversations(response.data);
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    if (!activeId) return;
+    landlordService.getConversationMessages(activeId).then((response) => {
+      if (response.success && response.data) {
+        setMessagesByConversation((prev) => ({ ...prev, [activeId]: response.data! }));
+      }
+    });
+  }, [activeId]);
 
   const handleSelect = (id: string) => {
     setActiveId(id);
@@ -139,17 +45,14 @@ export default function LandlordMessagesPage() {
       ...prev,
       [id]: (prev[id] || []).map((m) => ({ ...m, read: true })),
     }));
+    landlordService.markConversationRead(id);
   };
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     if (!activeId) return;
-    const newMessage: ThreadMessage = {
-      id: `m_${Date.now()}`,
-      senderId: 'landlord',
-      text,
-      timestamp: new Date().toISOString(),
-      read: false,
-    };
+    const response = await landlordService.sendConversationMessage(activeId, text);
+    if (!response.success || !response.data) return;
+    const newMessage = response.data;
     setMessagesByConversation((prev) => ({
       ...prev,
       [activeId]: [...(prev[activeId] || []), newMessage],
