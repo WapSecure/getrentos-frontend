@@ -119,7 +119,7 @@ export const GeoInsightsPanel = ({
           <p className="max-w-sm text-xs text-muted-foreground">
             {isError
               ? 'We could not load insights for this listing right now.'
-              : 'Location data for this property is being prepared. Once the platform is configured with a Google Maps key, real neighborhood data and commute times will appear here.'}
+              : 'Location data for this property is being prepared. Real neighborhood data and commute times will appear here once it is ready.'}
           </p>
         </div>
       ) : (

@@ -53,7 +53,7 @@ export interface Property {
   allowsMonthlyPayment?: boolean;
 }
 
-// ---- Real map / neighborhood insights (Google Maps + optional AI) ----
+// ---- Real map / neighborhood insights (OpenStreetMap + optional AI) ----
 
 export interface NearbyPlace {
   name: string;

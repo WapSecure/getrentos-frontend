@@ -24,7 +24,7 @@ interface DiscoverMapViewProps {
   filters: DiscoverFilters;
 }
 
-/** Real Google Maps view of the filtered rental listings. */
+/** Keyless OpenStreetMap view of the filtered rental listings. */
 export const DiscoverMapView = ({ filters }: DiscoverMapViewProps) => {
   const listingsFilters = {
     search: filters.search,

@@ -199,7 +199,7 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/listings/${id}`));
   },
 
-  /** Real map + neighborhood/property insights for a listing (Google Maps + optional AI). */
+  /** Real map + neighborhood/property insights for a listing (OpenStreetMap + optional AI). */
   async getGeoInsights(id: string, destination?: string): Promise<ApiResponse<GeoInsights>> {
     const query = destination ? `?destination=${encodeURIComponent(destination)}` : '';
     return safeCall(() => authFetch(`/renter/listings/${id}/geo-insights${query}`));
