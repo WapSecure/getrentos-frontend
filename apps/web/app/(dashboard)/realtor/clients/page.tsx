@@ -4,66 +4,41 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Users } from 'lucide-react';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
 import { Button } from '@/components/ui/Button';
 import type { RealtorClient, ClientRole } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
-
-const mockClients: RealtorClient[] = [
-  {
-    id: 'client_001',
-    clientName: 'Adaeze Okafor',
-    role: 'owner',
-    email: 'adaeze@example.com',
-    phone: '+234 803 555 0101',
-    status: 'active',
-    propertiesRepresented: 3,
-    joinedDate: '2025-11-10T00:00:00.000Z',
-  },
-  {
-    id: 'client_002',
-    clientName: 'Emeka Chukwu',
-    role: 'landlord',
-    email: 'emeka@example.com',
-    phone: '+234 802 444 7781',
-    status: 'active',
-    propertiesRepresented: 5,
-    joinedDate: '2025-09-02T00:00:00.000Z',
-  },
-  {
-    id: 'client_003',
-    clientName: 'Chioma Adaobi',
-    role: 'owner',
-    email: 'chioma@example.com',
-    phone: '+234 701 233 9090',
-    status: 'pending',
-    propertiesRepresented: 1,
-    joinedDate: '2026-07-28T00:00:00.000Z',
-  },
-];
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { mapRealtorClient, realtorService } from '@/services/realtorService';
 
 type RoleFilter = 'all' | ClientRole;
 
 export default function RealtorClientsPage() {
   const router = useRouter();
-  const [clients, setClients] = useState<RealtorClient[]>(mockClients);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: clients = [], isLoading } = useQuery({
+    queryKey: realtorKeys.clients,
+    queryFn: async () => (await unwrap(realtorService.listClients())).map(mapRealtorClient),
+  });
+  const inviteClient = useMutation({
+    mutationFn: (email: string) => unwrap(realtorService.inviteClient(email)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.clients });
+      setIsAddModalOpen(false);
+    },
+  });
 
   const handleAddClient = (
     data: Omit<RealtorClient, 'id' | 'status' | 'propertiesRepresented' | 'joinedDate'>
   ) => {
-    const newClient: RealtorClient = {
-      ...data,
-      id: `client_${Date.now()}`,
-      status: 'pending',
-      propertiesRepresented: 0,
-      joinedDate: new Date().toISOString(),
-    };
-    setClients((prev) => [newClient, ...prev]);
+    inviteClient.mutate(data.email);
   };
 
   const filteredClients = clients.filter((c) => {
@@ -121,7 +96,11 @@ export default function RealtorClientsPage() {
         </div>
       </div>
 
-      {filteredClients.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
+          Loading clients…
+        </div>
+      ) : filteredClients.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Users className="w-8 h-8 text-primary" />

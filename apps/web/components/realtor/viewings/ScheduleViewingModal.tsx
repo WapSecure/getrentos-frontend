@@ -12,12 +12,14 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 import type { RealtorLead, ViewingAppointment } from '@/types/realtor';
 
+export type CreateViewingInput = Omit<ViewingAppointment, 'id' | 'status'> & { leadId: string };
+
 interface ScheduleViewingModalProps {
   isOpen: boolean;
   onClose: () => void;
   leads: RealtorLead[];
   defaultLeadId?: string;
-  onSubmit: (appointment: Omit<ViewingAppointment, 'id' | 'status'>) => void;
+  onSubmit: (appointment: CreateViewingInput) => void;
 }
 
 export const ScheduleViewingModal = ({
@@ -45,6 +47,7 @@ export const ScheduleViewingModal = ({
   const handleSubmit = () => {
     if (!selectedLead) return;
     onSubmit({
+      leadId,
       leadName: selectedLead.leadName,
       listingId: selectedLead.listingId,
       listingTitle: selectedLead.listingTitle,

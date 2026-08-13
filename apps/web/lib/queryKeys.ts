@@ -116,5 +116,6 @@ export const realtorKeys = {
   offers: ['realtor', 'offers'] as const,
   documents: ['realtor', 'documents'] as const,
   conversations: ['realtor', 'conversations'] as const,
-  conversationMessages: (id: string) => ['realtor', 'conversations', id, 'messages'] as const,
+  conversationMessages: (conversationId: string) =>
+    ['realtor', 'conversations', conversationId, 'messages'] as const,
 };

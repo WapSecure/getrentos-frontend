@@ -103,7 +103,7 @@ export interface Commission {
 export interface RealtorDocument {
   id: string;
   name: string;
-  category: 'agency_agreement' | 'listing_contract' | 'closing_document' | 'license';
+  category: 'agency_agreement' | 'listing_contract' | 'closing_document' | 'license' | 'other';
   clientName?: string;
   uploadedAt: string;
   sizeLabel: string;

@@ -10,8 +10,7 @@ export const AUTH_CONSTANTS = {
  * authentication surface accepts the same input format. */
 export const VALIDATION_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE:
-    /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,6}[-\s.]?[0-9]{1,6}$/,
+  PHONE: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,6}[-\s.]?[0-9]{1,6}$/,
   DIGITS_ONLY: /^\d*$/,
   NON_DIGITS: /\D/g,
 } as const;
@@ -199,6 +198,7 @@ export const ROUTES = {
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SETTINGS: '/landlord/settings',
+  LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',
 
   // Property Owner specific routes
@@ -213,6 +213,7 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_SETTINGS: '/owner/settings',
+  OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
 
   // Buyer specific routes
@@ -319,7 +320,8 @@ export const getDashboardRoute = (roleId: string): string => {
 // Helper function to get role from stored user
 export const getUserRole = (): string | null => {
   if (typeof window === 'undefined') return null;
-  const storedUser = localStorage.getItem(STORAGE_KEYS.USER) || sessionStorage.getItem(STORAGE_KEYS.USER);
+  const storedUser =
+    localStorage.getItem(STORAGE_KEYS.USER) || sessionStorage.getItem(STORAGE_KEYS.USER);
   if (storedUser) {
     try {
       const user = JSON.parse(storedUser);

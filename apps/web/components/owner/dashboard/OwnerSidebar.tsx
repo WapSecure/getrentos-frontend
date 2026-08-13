@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Star,
   BadgeCheck,
+  UserRoundCheck,
   Settings,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
@@ -35,6 +36,7 @@ const navItems: NavItem[] = [
   { label: 'Investment Analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },
   { label: 'Documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
   { label: 'Messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
+  { label: 'Realtor Access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
   { label: 'Reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
   { label: 'Trust Profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
   { label: 'Settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
