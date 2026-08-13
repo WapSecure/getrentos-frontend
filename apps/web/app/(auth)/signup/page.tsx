@@ -26,34 +26,19 @@ export default function SignupPage() {
     resetSignup,
   } = useSignup();
 
-  // Clear any stale signup data on page load
-  useEffect(() => {
-    console.log('SignupPage mounted - Current step:', step);
-    console.log('SignupPage mounted - Current data:', signupData);
-  }, []);
-
-  // Debug log when step changes
-  useEffect(() => {
-    console.log('Step changed to:', step);
-  }, [step]);
-
   const handleSendOtp = async (identifier: string) => {
-    console.log('handleSendOtp called with:', identifier, method);
     await sendOtp(identifier, method);
   };
 
   const handleVerifyOtp = async (otp: string) => {
-    console.log('handleVerifyOtp called with:', otp);
     await verifyOtp(otp);
   };
 
   const handleResendOtp = async () => {
-    console.log('handleResendOtp called');
     await resendOtp();
   };
 
   const handleBack = () => {
-    console.log('handleBack called - current step:', step);
     if (step === 'otp') {
       setStep('signup');
     } else if (step === 'signup') {
@@ -62,7 +47,6 @@ export default function SignupPage() {
   };
 
   const handleStartOver = () => {
-    console.log('Starting over - resetting all state');
     resetSignup();
     window.location.href = ROUTES.SIGNUP;
   };
@@ -70,10 +54,8 @@ export default function SignupPage() {
   // If step is 'roles' or 'verification', redirect to those pages
   useEffect(() => {
     if (step === 'roles') {
-      console.log('Step is roles, redirecting to /role-selection');
       window.location.href = ROUTES.ROLE_SELECTION;
     } else if (step === 'verification') {
-      console.log('Step is verification, redirecting to /verification');
       window.location.href = ROUTES.VERIFICATION;
     }
   }, [step]);
@@ -128,13 +110,6 @@ export default function SignupPage() {
                 : 'Enter the verification code sent to your device'}
             </p>
           </div>
-
-          {/* Debug Info - Remove in production */}
-          {/* <div className="mb-4 p-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <div>Debug: Step = {step}</div>
-            <div>Debug: IsVerified = {signupData.isVerified ? 'true' : 'false'}</div>
-            <div>Debug: Selected Roles = {signupData.selectedRoles.join(', ') || 'none'}</div>
-          </div> */}
 
           {/* Error Display */}
           <AnimatePresence>

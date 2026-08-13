@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, Trash2, X, Check } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { AlertTriangle, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { renterService } from '@/services/renterService';
-import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
+import { ROUTES } from '@/lib/constants/auth';
+import { clearAuthSession } from '@/lib/authStorage';
 
 export const AccountDeletion = () => {
   const router = useRouter();
@@ -13,22 +15,24 @@ export const AccountDeletion = () => {
   const [confirmText, setConfirmText] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = async () => {
+  const deleteMutation = useMutation({
+    mutationFn: () => renterService.deleteAccount(password),
+    onSuccess: (res) => {
+      if (res.success) {
+        setStep('complete');
+        clearAuthSession();
+        setTimeout(() => router.push(ROUTES.LOGIN), 2000);
+      } else {
+        setError(res.message || 'Failed to delete account');
+      }
+    },
+  });
+
+  const handleDelete = () => {
     if (confirmText !== 'delete my account' || !password) return;
-    setIsDeleting(true);
     setError(null);
-    const res = await renterService.deleteAccount(password);
-    setIsDeleting(false);
-    if (res.success) {
-      setStep('complete');
-      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      setTimeout(() => router.push(ROUTES.LOGIN), 2000);
-    } else {
-      setError(res.message || 'Failed to delete account');
-    }
+    deleteMutation.mutate();
   };
 
   if (step === 'complete') {
@@ -98,11 +102,11 @@ export const AccountDeletion = () => {
         fullWidth
         className="mt-6 gap-2"
         onClick={handleDelete}
-        disabled={confirmText !== 'delete my account' || !password || isDeleting}
-        isLoading={isDeleting}
+        disabled={confirmText !== 'delete my account' || !password || deleteMutation.isPending}
+        isLoading={deleteMutation.isPending}
       >
         <Trash2 className="w-4 h-4" />
-        {isDeleting ? 'Deleting...' : 'Delete Account'}
+        {deleteMutation.isPending ? 'Deleting...' : 'Delete Account'}
       </Button>
     </div>
   );

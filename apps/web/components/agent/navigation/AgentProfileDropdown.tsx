@@ -13,7 +13,8 @@ import {
   Shield,
   ClipboardList,
 } from 'lucide-react';
-import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
+import { ROUTES } from '@/lib/constants/auth';
+import { clearAuthSession } from '@/lib/authStorage';
 import { getInitials } from '@/lib/format';
 
 interface AgentProfileDropdownProps {
@@ -36,8 +37,7 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    clearAuthSession();
     router.push(ROUTES.LOGIN);
   };
 

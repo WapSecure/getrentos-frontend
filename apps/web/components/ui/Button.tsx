@@ -45,15 +45,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2';
+      'inline-flex items-center justify-center gap-2 font-medium tracking-[-0.01em] transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background';
 
     const variants = {
       primary:
-        'bg-primary text-primary-foreground hover:opacity-90 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed',
       secondary:
         'bg-secondary text-secondary-foreground border border-border hover:opacity-80 focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       outline:
-        'bg-transparent text-foreground border-2 border-border hover:bg-secondary focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-card text-foreground border border-border hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed',
       ghost:
         'bg-transparent text-muted-foreground hover:bg-secondary focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       danger:

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   Shield,
@@ -20,6 +20,8 @@ import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface VerificationItem {
   label: string;
@@ -39,25 +41,16 @@ const iconMap: Record<string, React.ElementType> = {
 
 export const RenterTrustScoreCard = () => {
   const { t } = useLanguage();
-  const [trustScore, setTrustScore] = useState(0);
-  const [verificationItems, setVerificationItems] = useState<VerificationItem[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.getTrustScore();
-      if (res.success && res.data) {
-        setTrustScore(res.data.trustScore);
-        setVerificationItems(
-          res.data.verifications.map((v) => ({
-            label: v.label,
-            verified: v.verified,
-            icon: iconMap[v.icon] || Shield,
-          }))
-        );
-      }
-    };
-    load();
-  }, []);
+  const { data } = useQuery({
+    queryKey: renterKeys.trustScore,
+    queryFn: () => unwrap(renterService.getTrustScore()),
+  });
+  const trustScore = data?.trustScore ?? 0;
+  const verificationItems: VerificationItem[] = (data?.verifications ?? []).map((v) => ({
+    label: v.label,
+    verified: v.verified,
+    icon: iconMap[v.icon] || Shield,
+  }));
 
   const verifiedCount = verificationItems.filter((item) => item.verified).length;
   const totalCount = verificationItems.length || 1;

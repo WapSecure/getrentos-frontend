@@ -28,7 +28,7 @@ const eventTypes: { value: CalendarEventType; label: string }[] = [
   { value: 'personal', label: 'Personal' },
 ];
 
-const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', 'var(--primary)', '#ef4444', '#ec4899'];
+const colors = ['var(--info)', 'var(--success)', 'var(--warning)', 'var(--purple)', 'var(--primary)', 'var(--destructive)'];
 
 const getInitialFormData = (event?: CalendarEvent | null): CalendarEventFormData => ({
   title: event?.title || '',
@@ -61,7 +61,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full mx-4 overflow-hidden"
+            className="bg-card rounded-2xl border border-border shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
@@ -72,7 +72,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   {event ? 'Update event details' : 'Create a new event'}
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -173,7 +173,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                       onClick={() => setFormData({ ...formData, color })}
                       className={`w-8 h-8 rounded-full border-2 transition-all ${
                         formData.color === color
-                          ? 'border-gray-900 dark:border-white scale-110'
+                          ? 'border-foreground scale-110'
                           : 'border-transparent'
                       }`}
                       style={{ backgroundColor: color }}

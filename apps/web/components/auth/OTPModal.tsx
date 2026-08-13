@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OTPModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export const OTPModal = ({
   onVerify,
   onResend,
 }: OTPModalProps) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [timeLeft, setTimeLeft] = useState(300);
   const [canResend, setCanResend] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -45,24 +46,12 @@ export const OTPModal = ({
   useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setOtp(['', '', '', '', '', '']);
+      setOtp(Array(6).fill(''));
       setTimeLeft(300);
       setCanResend(false);
       setError(null);
     }
   }, [isOpen]);
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    if (!/^\d*$/.test(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    setError(null);
-    if (value && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
-    }
-  };
 
   const handleVerify = async () => {
     const otpValue = otp.join('');
@@ -83,7 +72,7 @@ export const OTPModal = ({
   const handleResend = async () => {
     setCanResend(false);
     setTimeLeft(300);
-    setOtp(['', '', '', '', '', '']);
+    setOtp(Array(6).fill(''));
     await onResend();
   };
 
@@ -139,19 +128,8 @@ export const OTPModal = ({
               </div>
             )}
 
-            <div className="flex justify-center gap-2 mb-6">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  inputMode="numeric"
-                  value={digit}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
-                  className="w-12 h-12 text-center text-xl font-semibold border rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  maxLength={1}
-                />
-              ))}
+            <div className="mb-6">
+              <OtpInput value={otp} onChange={(value) => { setOtp(value); setError(null); }} disabled={isVerifying} />
             </div>
 
             <div className="text-center mb-6">

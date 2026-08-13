@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalendarHeader } from '@/components/renter/calendar/CalendarHeader';
 import { CalendarView } from '@/components/renter/calendar/CalendarView';
 import { CalendarStats } from '@/components/renter/calendar/CalendarStats';
@@ -9,36 +10,44 @@ import { CalendarEventModal } from '@/components/renter/calendar/CalendarEventMo
 import { CalendarSync } from '@/components/renter/calendar/CalendarSync';
 import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/types/calendar';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function CalendarPage() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const queryClient = useQueryClient();
+  const { data: events = [] } = useQuery({
+    queryKey: renterKeys.calendarEvents,
+    queryFn: () => unwrap(renterService.listCalendarEvents()),
+  });
   const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
 
-  useEffect(() => {
-    const loadEvents = async () => {
-      const res = await renterService.listCalendarEvents();
-      if (res.success && res.data) setEvents(res.data);
-    };
-    loadEvents();
-  }, []);
+  const invalidateEvents = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.calendarEvents });
+
+  const createEventMutation = useMutation({
+    mutationFn: (data: CalendarEventFormData) => unwrap(renterService.createCalendarEvent(data)),
+    onSuccess: invalidateEvents,
+  });
+
+  const updateEventMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<CalendarEvent> }) =>
+      unwrap(renterService.updateCalendarEvent(id, updates)),
+    onSuccess: invalidateEvents,
+  });
+
+  const deleteEventMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.deleteCalendarEvent(id)),
+    onSuccess: invalidateEvents,
+  });
 
   const handleUpdateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
-    const res = await renterService.updateCalendarEvent(id, updates);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setEvents((prev) => prev.map((event) => (event.id === id ? updated : event)));
-    }
+    await updateEventMutation.mutateAsync({ id, updates });
   };
 
-  const handleDeleteEvent = async (id: string) => {
-    const res = await renterService.deleteCalendarEvent(id);
-    if (res.success) {
-      setEvents((prev) => prev.filter((event) => event.id !== id));
-    }
-  };
+  const handleDeleteEvent = (id: string) => deleteEventMutation.mutate(id);
 
   const openAddEventModal = () => {
     setEditingEvent(null);
@@ -59,11 +68,7 @@ export default function CalendarPage() {
     if (editingEvent) {
       await handleUpdateEvent(editingEvent.id, formData);
     } else {
-      const res = await renterService.createCalendarEvent(formData);
-      if (res.success && res.data) {
-        const created = res.data;
-        setEvents((prev) => [...prev, created]);
-      }
+      await createEventMutation.mutateAsync(formData);
     }
   };
 

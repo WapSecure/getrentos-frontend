@@ -6,6 +6,16 @@ export const AUTH_CONSTANTS = {
   PASSWORD_MAX_LENGTH: 50,
 } as const;
 
+/** Shared client-side validation patterns. Keep these centralized so every
+ * authentication surface accepts the same input format. */
+export const VALIDATION_PATTERNS = {
+  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PHONE:
+    /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,6}[-\s.]?[0-9]{1,6}$/,
+  DIGITS_ONLY: /^\d*$/,
+  NON_DIGITS: /\D/g,
+} as const;
+
 export const SIGNUP_METHODS = {
   EMAIL: 'email',
   PHONE: 'phone',
@@ -313,7 +323,7 @@ export const getDashboardRoute = (roleId: string): string => {
 // Helper function to get role from stored user
 export const getUserRole = (): string | null => {
   if (typeof window === 'undefined') return null;
-  const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+  const storedUser = localStorage.getItem(STORAGE_KEYS.USER) || sessionStorage.getItem(STORAGE_KEYS.USER);
   if (storedUser) {
     try {
       const user = JSON.parse(storedUser);
@@ -328,5 +338,7 @@ export const getUserRole = (): string | null => {
 // Helper function to check if user is authenticated
 export const isAuthenticated = (): boolean => {
   if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  return !!(
+    localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+  );
 };

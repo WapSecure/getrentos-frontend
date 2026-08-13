@@ -6,7 +6,8 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Logo } from '@/components/ui/Logo';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
+import { ROUTES, isAuthenticated } from '@/lib/constants/auth';
+import { clearAuthSession } from '@/lib/authStorage';
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,7 +21,7 @@ export const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsSignedIn(!!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN));
+    setIsSignedIn(isAuthenticated());
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -78,8 +79,7 @@ export const Navigation = () => {
                   <ThemeToggle />
                   <button
                     onClick={() => {
-                      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-                      localStorage.removeItem(STORAGE_KEYS.USER);
+                      clearAuthSession();
                       setIsSignedIn(false);
                       window.location.href = ROUTES.HOME;
                     }}
@@ -155,8 +155,7 @@ export const Navigation = () => {
                   </Link>
                   <button
                     onClick={() => {
-                      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-                      localStorage.removeItem(STORAGE_KEYS.USER);
+                      clearAuthSession();
                       setIsSignedIn(false);
                       window.location.href = ROUTES.HOME;
                     }}

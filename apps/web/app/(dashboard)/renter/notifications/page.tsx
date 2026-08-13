@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotificationsHeader } from '@/components/renter/notifications/NotificationsHeader';
 import { NotificationsStats } from '@/components/renter/notifications/NotificationsStats';
 import { NotificationsList } from '@/components/renter/notifications/NotificationsList';
@@ -10,51 +11,47 @@ import { NotificationAnalytics } from '@/components/renter/notifications/Notific
 import { DoNotDisturb } from '@/components/renter/notifications/DoNotDisturb';
 import { NotificationSearch } from '@/components/renter/notifications/NotificationSearch';
 import { NotificationSound } from '@/components/renter/notifications/NotificationSound';
-import { Notification } from '@/types/notification';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const queryClient = useQueryClient();
+  const { data: notifications = [] } = useQuery({
+    queryKey: renterKeys.notifications,
+    queryFn: () => unwrap(renterService.listNotifications()),
+  });
   const [filterType, setFilterType] = useState<string>('all');
   const [filterRead, setFilterRead] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const loadNotifications = async () => {
-      const res = await renterService.listNotifications();
-      if (res.success && res.data) setNotifications(res.data);
-    };
-    loadNotifications();
-  }, []);
+  const invalidateNotifications = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
 
-  const handleMarkAsRead = async (id: string) => {
-    const res = await renterService.markNotificationAsRead(id);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setNotifications((prev) => prev.map((n) => (n.id === id ? updated : n)));
-    }
-  };
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),
+    onSuccess: invalidateNotifications,
+  });
 
-  const handleMarkAllAsRead = async () => {
-    const res = await renterService.markAllNotificationsAsRead();
-    if (res.success) {
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    }
-  };
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
+    onSuccess: invalidateNotifications,
+  });
 
-  const handleDelete = async (id: string) => {
-    const res = await renterService.deleteNotification(id);
-    if (res.success) {
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.deleteNotification(id)),
+    onSuccess: invalidateNotifications,
+  });
 
-  const handleClearAll = async () => {
-    const res = await renterService.clearAllNotifications();
-    if (res.success) {
-      setNotifications([]);
-    }
-  };
+  const clearAllMutation = useMutation({
+    mutationFn: () => unwrap(renterService.clearAllNotifications()),
+    onSuccess: invalidateNotifications,
+  });
+
+  const handleMarkAsRead = (id: string) => markAsReadMutation.mutate(id);
+  const handleMarkAllAsRead = () => markAllAsReadMutation.mutate();
+  const handleDelete = (id: string) => deleteMutation.mutate(id);
+  const handleClearAll = () => clearAllMutation.mutate();
 
   const filteredNotifications = notifications.filter((n) => {
     const matchesType = filterType === 'all' || n.type === filterType;

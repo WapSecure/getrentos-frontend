@@ -1,7 +1,7 @@
 import { ApiError } from '@/lib/apiClient';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import { STORAGE_KEYS } from '@/lib/constants/auth';
+import { getAuthToken } from '@/lib/authStorage';
 import type {
   Property,
   Unit,
@@ -238,8 +238,7 @@ export const landlordService = {
 
   async exportFinancialsCsv(): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const token =
-        typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) : null;
+      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/landlord/financials/export`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

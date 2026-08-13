@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MaintenanceHeader } from '@/components/renter/maintenance/MaintenanceHeader';
 import { MaintenanceStats } from '@/components/renter/maintenance/MaintenanceStats';
 import { MaintenanceList } from '@/components/renter/maintenance/MaintenanceList';
@@ -11,8 +12,10 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import type { MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface ReportData {
   title: string;
@@ -22,7 +25,11 @@ interface ReportData {
 }
 
 export default function MaintenancePage() {
-  const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
+  const queryClient = useQueryClient();
+  const { data: requests = [] } = useQuery({
+    queryKey: renterKeys.maintenanceRequests,
+    queryFn: () => unwrap(renterService.listMaintenanceRequests()),
+  });
   const [showReportModal, setShowReportModal] = useState(false);
   const [emergencyContacts, setEmergencyContacts] = useState<
     {
@@ -35,55 +42,34 @@ export default function MaintenancePage() {
     }[]
   >([]);
 
-  useEffect(() => {
-    const loadMaintenanceRequests = async () => {
-      const res = await renterService.listMaintenanceRequests();
-      if (res.success && res.data) setRequests(res.data);
-    };
-    loadMaintenanceRequests();
+  const invalidateRequests = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.maintenanceRequests });
 
-    const loadLandlordContact = async () => {
-      const res = await renterService.getLease();
-      if (res.success && res.data) {
-        setEmergencyContacts([
-          {
-            id: 'landlord',
-            name: res.data.landlord.name,
-            role: 'Landlord',
-            phone: res.data.landlord.phone,
-            email: res.data.landlord.email,
-            availableHours: 'Contact via message for fastest response',
-          },
-        ]);
-      }
-    };
-    loadLandlordContact();
-  }, []);
+  const createMutation = useMutation({
+    mutationFn: (data: ReportData) => unwrap(renterService.createMaintenanceRequest(data)),
+    onSuccess: invalidateRequests,
+  });
 
-  const handleReportIssue = async (data: ReportData) => {
-    const res = await renterService.createMaintenanceRequest(data);
-    if (res.success && res.data) {
-      const created = res.data;
-      setRequests((prev) => [created, ...prev]);
-    }
-  };
+  const cancelMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.cancelMaintenanceRequest(id)),
+    onSuccess: invalidateRequests,
+  });
 
-  const handleUpdateStatus = async (id: string, status: MaintenanceRequest['status']) => {
+  const rateVendorMutation = useMutation({
+    mutationFn: ({ id, rating }: { id: string; rating: number }) =>
+      unwrap(renterService.rateVendor(id, rating)),
+    onSuccess: invalidateRequests,
+  });
+
+  const handleReportIssue = (data: ReportData) => createMutation.mutate(data);
+
+  const handleUpdateStatus = (id: string, status: MaintenanceRequest['status']) => {
     if (status !== 'cancelled') return;
-    const res = await renterService.cancelMaintenanceRequest(id);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
-    }
+    cancelMutation.mutate(id);
   };
 
-  const handleRateVendor = async (id: string, rating: number) => {
-    const res = await renterService.rateVendor(id, rating);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
-    }
-  };
+  const handleRateVendor = (id: string, rating: number) =>
+    rateVendorMutation.mutate({ id, rating });
 
   const handleCall = (phone: string) => {
     window.location.href = `tel:${phone}`;

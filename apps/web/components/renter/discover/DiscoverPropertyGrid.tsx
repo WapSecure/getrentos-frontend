@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { DiscoverPropertyCard } from './DiscoverPropertyCard';
 import { VirtualTourViewerModal } from './features/VirtualTourViewerModal';
 import { Property } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { trackRecentlyViewed } from '@/lib/mockProperties';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 import { Home } from 'lucide-react';
 import { buildRoute } from '@/lib/constants/auth';
 
@@ -34,30 +37,24 @@ export const DiscoverPropertyGrid = ({
   onCompare,
 }: DiscoverPropertyGridProps) => {
   const router = useRouter();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [tourProperty, setTourProperty] = useState<Property | null>(null);
   const [tourInitialMode, setTourInitialMode] = useState<TourModalMode>('tour');
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      setIsLoading(true);
-      const response = await renterService.listListings({
-        search: filters.search,
-        location: filters.location,
-        minPrice: filters.minPrice,
-        maxPrice: filters.maxPrice,
-        bedrooms: filters.bedrooms,
-        bathrooms: filters.bathrooms,
-        propertyType: filters.propertyType,
-        verifiedOnly: filters.verifiedOnly,
-      });
-      if (response.success && response.data) setProperties(response.data);
-      setIsLoading(false);
-    };
+  const listingsFilters = {
+    search: filters.search,
+    location: filters.location,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    bedrooms: filters.bedrooms,
+    bathrooms: filters.bathrooms,
+    propertyType: filters.propertyType,
+    verifiedOnly: filters.verifiedOnly,
+  };
 
-    fetchProperties();
-  }, [filters]);
+  const { data: properties = [], isLoading } = useQuery({
+    queryKey: renterKeys.listings(listingsFilters),
+    queryFn: () => unwrap(renterService.listListings(listingsFilters)),
+  });
 
   const handleViewDetails = (property: Property) => {
     trackRecentlyViewed(property);

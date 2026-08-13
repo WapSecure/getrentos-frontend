@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LeaseHeader } from '@/components/renter/lease/LeaseHeader';
 import { LeaseStats } from '@/components/renter/lease/LeaseStats';
 import { LeaseDetails } from '@/components/renter/lease/LeaseDetails';
@@ -14,59 +14,51 @@ import { RentIncreaseHistory } from '@/components/renter/lease/RentIncreaseHisto
 import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaymentReminders';
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
 import { FileText } from 'lucide-react';
-import type { RenewalOffer } from '@/types/lease';
-import { renterService, type Lease } from '@/services/renterService';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function LeasePage() {
-  const [lease, setLease] = useState<Lease | null>(null);
-  const [renewalOffer, setRenewalOffer] = useState<RenewalOffer | null>(null);
-  const [rentIncreases, setRentIncreases] = useState<
-    {
-      date: string;
-      oldAmount: number;
-      newAmount: number;
-      percentageChange: number;
-      reason: string;
-    }[]
-  >([]);
-  const [paymentReminders, setPaymentReminders] = useState<
-    {
-      id: string;
-      dueDate: string;
-      amount: number;
-      propertyName: string;
-      status: 'upcoming';
-      daysRemaining: number;
-    }[]
-  >([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const loadLeaseData = async () => {
-      const [leaseRes, offerRes, increasesRes, remindersRes] = await Promise.all([
-        renterService.getLease(),
-        renterService.getRenewalOffer(),
-        renterService.getRentIncreases(),
-        renterService.getUpcomingPaymentReminders(),
-      ]);
-      if (leaseRes.success && leaseRes.data) setLease(leaseRes.data);
-      if (offerRes.success && offerRes.data) setRenewalOffer(offerRes.data);
-      if (increasesRes.success && increasesRes.data) setRentIncreases(increasesRes.data);
-      if (remindersRes.success && remindersRes.data) setPaymentReminders(remindersRes.data);
-    };
-    loadLeaseData();
-  }, []);
+  const { data: lease = null } = useQuery({
+    queryKey: renterKeys.lease,
+    queryFn: () => unwrap(renterService.getLease()),
+  });
+  const { data: renewalOffer = null } = useQuery({
+    queryKey: renterKeys.renewalOffer,
+    queryFn: () => unwrap(renterService.getRenewalOffer()),
+  });
+  const { data: rentIncreases = [] } = useQuery({
+    queryKey: renterKeys.rentIncreases,
+    queryFn: () => unwrap(renterService.getRentIncreases()),
+  });
+  const { data: paymentReminders = [] } = useQuery({
+    queryKey: renterKeys.upcomingPaymentReminders,
+    queryFn: () => unwrap(renterService.getUpcomingPaymentReminders()),
+  });
+
+  const respondToOfferMutation = useMutation({
+    mutationFn: ({ offerId, action }: { offerId: string; action: 'accept' | 'decline' }) =>
+      unwrap(renterService.respondToRenewalOffer(offerId, action)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.renewalOffer });
+      queryClient.invalidateQueries({ queryKey: renterKeys.lease });
+    },
+  });
+
+  const requestTerminationMutation = useMutation({
+    mutationFn: ({ noticeDate, reason }: { noticeDate: string; reason: string }) =>
+      unwrap(renterService.requestLeaseTermination(noticeDate, reason)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.lease }),
+  });
 
   const handleRespondToOffer = async (offerId: string, action: 'accept' | 'decline') => {
-    const res = await renterService.respondToRenewalOffer(offerId, action);
-    if (res.success && res.data) {
-      setRenewalOffer(res.data);
-      const leaseRes = await renterService.getLease();
-      if (leaseRes.success && leaseRes.data) setLease(leaseRes.data);
-    }
+    await respondToOfferMutation.mutateAsync({ offerId, action });
   };
 
   const handleRequestTermination = async (noticeDate: string, reason: string) => {
-    await renterService.requestLeaseTermination(noticeDate, reason);
+    await requestTerminationMutation.mutateAsync({ noticeDate, reason });
   };
 
   if (!lease) {

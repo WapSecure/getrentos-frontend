@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -13,6 +14,8 @@ import { useRenterUser } from '../../../layout';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 const buildInitialData = (
   property: Property | null,
@@ -39,21 +42,28 @@ const buildInitialData = (
 export default function PropertyApplyPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const user = useRenterUser();
-  const [property, setProperty] = useState<Property | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  useEffect(() => {
-    const fetchProperty = async () => {
-      setIsLoading(true);
-      const response = await renterService.getListing(params.id);
-      if (response.success && response.data) setProperty(response.data);
-      setIsLoading(false);
-    };
+  const { data: property = null, isLoading } = useQuery({
+    queryKey: renterKeys.listing(params.id),
+    queryFn: () => unwrap(renterService.getListing(params.id)),
+  });
 
-    fetchProperty();
-  }, [params.id]);
+  const submitMutation = useMutation({
+    mutationFn: (data: ApplicationFormData) =>
+      unwrap(renterService.submitApplication(property?.id ?? '', data)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.applications });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+      setSubmitted(true);
+    },
+  });
+
+  const handleSubmit = async (data: ApplicationFormData) => {
+    await submitMutation.mutateAsync(data);
+  };
 
   if (isLoading) {
     return (
@@ -77,11 +87,6 @@ export default function PropertyApplyPage() {
       />
     );
   }
-
-  const handleSubmit = async (data: ApplicationFormData) => {
-    const response = await renterService.submitApplication(property.id, data);
-    if (response.success) setSubmitted(true);
-  };
 
   if (submitted) {
     return (

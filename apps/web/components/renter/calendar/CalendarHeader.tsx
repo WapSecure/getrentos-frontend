@@ -63,7 +63,7 @@ export const CalendarHeader = ({
     <div className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
+          <h1 className="type-title">Calendar</h1>
           <p className="text-muted-foreground mt-1">Manage your property schedule and events</p>
         </div>
 
@@ -94,12 +94,12 @@ export const CalendarHeader = ({
 
         <div className="flex-1" />
 
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg">
+        <div className="flex gap-1 p-1 bg-secondary rounded-xl" aria-label="Calendar view">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setViewMode('month')}
-            className={`p-1.5 ${viewMode === 'month' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
+            className={`p-1.5 ${viewMode === 'month' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
           >
             <LayoutGrid className="w-4 h-4" />
           </Button>
@@ -107,7 +107,7 @@ export const CalendarHeader = ({
             variant="ghost"
             size="sm"
             onClick={() => setViewMode('week')}
-            className={`p-1.5 ${viewMode === 'week' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
+            className={`p-1.5 ${viewMode === 'week' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
           >
             <List className="w-4 h-4" />
           </Button>
@@ -115,7 +115,7 @@ export const CalendarHeader = ({
             variant="ghost"
             size="sm"
             onClick={() => setViewMode('day')}
-            className={`p-1.5 ${viewMode === 'day' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
+            className={`p-1.5 ${viewMode === 'day' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
           >
             <CalendarIcon className="w-4 h-4" />
           </Button>

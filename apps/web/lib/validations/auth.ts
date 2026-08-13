@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AUTH_CONSTANTS, ERROR_MESSAGES } from '../constants/auth';
+import { AUTH_CONSTANTS, ERROR_MESSAGES, VALIDATION_PATTERNS } from '../constants/auth';
 
 export const emailSchema = z
   .object({
@@ -22,7 +22,7 @@ export const phoneSchema = z
       .string()
       .min(10, ERROR_MESSAGES.INVALID_PHONE)
       .regex(
-        /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,6}[-\s\.]?[0-9]{1,6}$/,
+        VALIDATION_PATTERNS.PHONE,
         ERROR_MESSAGES.INVALID_PHONE
       ),
     fullName: z.string().min(1, ERROR_MESSAGES.REQUIRED_FIELD),

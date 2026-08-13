@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DocumentsHeader } from '@/components/renter/documents/DocumentsHeader';
 import { DocumentsStats } from '@/components/renter/documents/DocumentsStats';
 import { DocumentsList } from '@/components/renter/documents/DocumentsList';
@@ -12,7 +13,9 @@ import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkA
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
 import { Toast } from '@/components/ui/Toast';
-import { renterService, type RenterDocument as Document } from '@/services/renterService';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface UploadData {
   file: File;
@@ -24,7 +27,11 @@ interface UploadData {
 }
 
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const queryClient = useQueryClient();
+  const { data: documents = [] } = useQuery({
+    queryKey: renterKeys.documents,
+    queryFn: () => unwrap(renterService.listDocuments()),
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -33,61 +40,57 @@ export default function DocumentsPage() {
   const [sharingDocumentId, setSharingDocumentId] = useState<string | null>(null);
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadDocuments = async () => {
-      const res = await renterService.listDocuments();
-      if (res.success && res.data) setDocuments(res.data);
-    };
-    loadDocuments();
-  }, []);
+  const invalidateDocuments = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.documents });
 
-  const handleUpload = async (data: UploadData) => {
-    const res = await renterService.uploadDocument(
-      data.file,
-      data.name,
-      data.type,
-      data.category,
-      data.tags
-    );
-    if (res.success && res.data) {
-      const created = res.data;
-      setDocuments((prev) => [created, ...prev]);
-    }
-  };
+  const uploadMutation = useMutation({
+    mutationFn: (data: UploadData) =>
+      unwrap(
+        renterService.uploadDocument(data.file, data.name, data.type, data.category, data.tags)
+      ),
+    onSuccess: invalidateDocuments,
+  });
 
-  const handleDelete = async (id: string) => {
-    const res = await renterService.deleteDocument(id);
-    if (res.success) {
-      setDocuments((prev) => prev.filter((d) => d.id !== id));
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.deleteDocument(id)),
+    onSuccess: (_, id) => {
+      invalidateDocuments();
       setSelectedDocuments((prev) => prev.filter((sid) => sid !== id));
-    }
-  };
+    },
+  });
 
-  const handleBulkDelete = async () => {
-    await Promise.all(selectedDocuments.map((id) => renterService.deleteDocument(id)));
-    setDocuments((prev) => prev.filter((d) => !selectedDocuments.includes(d.id)));
-    setSelectedDocuments([]);
-  };
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: string[]) =>
+      Promise.all(ids.map((id) => unwrap(renterService.deleteDocument(id)))),
+    onSuccess: () => {
+      invalidateDocuments();
+      setSelectedDocuments([]);
+    },
+  });
 
-  const handleToggleFavorite = async (id: string) => {
-    const res = await renterService.toggleDocumentFavorite(id);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setDocuments((prev) => prev.map((d) => (d.id === id ? updated : d)));
-    }
-  };
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.toggleDocumentFavorite(id)),
+    onSuccess: invalidateDocuments,
+  });
+
+  const shareMutation = useMutation({
+    mutationFn: ({ id, email }: { id: string; email: string }) =>
+      unwrap(renterService.shareDocument(id, email)),
+    onSuccess: invalidateDocuments,
+  });
+
+  const handleUpload = (data: UploadData) => uploadMutation.mutate(data);
+  const handleDelete = (id: string) => deleteMutation.mutate(id);
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedDocuments);
+  const handleToggleFavorite = (id: string) => toggleFavoriteMutation.mutate(id);
 
   const handleShare = (id: string) => {
     setSharingDocumentId(id);
   };
 
-  const handleConfirmShare = async (email: string) => {
+  const handleConfirmShare = (email: string) => {
     if (!sharingDocumentId) return;
-    const res = await renterService.shareDocument(sharingDocumentId, email);
-    if (res.success && res.data) {
-      const updated = res.data;
-      setDocuments((prev) => prev.map((d) => (d.id === sharingDocumentId ? updated : d)));
-    }
+    shareMutation.mutate({ id: sharingDocumentId, email });
   };
 
   const handleDownload = async (id: string) => {

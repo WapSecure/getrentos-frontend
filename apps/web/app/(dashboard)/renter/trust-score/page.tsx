@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TrustScoreHeader } from '@/components/renter/trust-score/TrustScoreHeader';
 import { TrustScoreStats } from '@/components/renter/trust-score/TrustScoreStats';
 import { TrustScoreRing } from '@/components/renter/trust-score/TrustScoreRing';
@@ -15,27 +15,19 @@ import { ScoreFactors } from '@/components/renter/trust-score/ScoreFactors';
 import { TrustScoreTips } from '@/components/renter/trust-score/TrustScoreTips';
 import { ScoreForecast } from '@/components/renter/trust-score/ScoreForecast';
 import { ScoreNotifications } from '@/components/renter/trust-score/ScoreNotifications';
-import { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export default function TrustScorePage() {
-  const [trustScore, setTrustScore] = useState(0);
-  const [verifications, setVerifications] = useState<VerificationItem[]>([]);
-  const [history, setHistory] = useState<TrustScoreHistoryItem[]>([]);
-  const [badges, setBadges] = useState<Badge[]>([]);
-
-  useEffect(() => {
-    const loadTrustScoreData = async () => {
-      const res = await renterService.getTrustScore();
-      if (res.success && res.data) {
-        setTrustScore(res.data.trustScore);
-        setVerifications(res.data.verifications);
-        setHistory(res.data.history);
-        setBadges(res.data.badges);
-      }
-    };
-    loadTrustScoreData();
-  }, []);
+  const { data } = useQuery({
+    queryKey: renterKeys.trustScore,
+    queryFn: () => unwrap(renterService.getTrustScore()),
+  });
+  const trustScore = data?.trustScore ?? 0;
+  const verifications = data?.verifications ?? [];
+  const history = data?.history ?? [];
+  const badges = data?.badges ?? [];
 
   return (
     <>

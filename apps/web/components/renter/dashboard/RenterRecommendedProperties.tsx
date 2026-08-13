@@ -1,41 +1,52 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { formatPrice, type Property } from '@/types/renter';
+import { formatPrice } from '@/types/renter';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export const RenterRecommendedProperties = () => {
   const router = useRouter();
-  const [recommendedProperties, setRecommendedProperties] = useState<Property[]>([]);
-  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const load = async () => {
-      const [listingsRes, savedRes] = await Promise.all([
-        renterService.listListings(),
-        renterService.listSavedListings(),
-      ]);
-      if (listingsRes.success && listingsRes.data)
-        setRecommendedProperties(listingsRes.data.slice(0, 4));
-      if (savedRes.success && savedRes.data) setSavedIds(savedRes.data.map((p) => p.id));
-    };
-    load();
-  }, []);
+  const { data: listings = [] } = useQuery({
+    queryKey: renterKeys.listings(),
+    queryFn: () => unwrap(renterService.listListings()),
+  });
+  const recommendedProperties = listings.slice(0, 4);
 
-  const toggleSave = async (propertyId: string) => {
-    const isSaved = savedIds.includes(propertyId);
-    const res = isSaved
-      ? await renterService.unsaveListing(propertyId)
-      : await renterService.saveListing(propertyId);
-    if (res.success) {
-      setSavedIds((prev) =>
-        isSaved ? prev.filter((id) => id !== propertyId) : [...prev, propertyId]
-      );
+  const { data: savedListings = [] } = useQuery({
+    queryKey: renterKeys.savedListings,
+    queryFn: () => unwrap(renterService.listSavedListings()),
+  });
+  const savedIds = savedListings.map((p) => p.id);
+
+  const invalidateSaved = () => {
+    queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+    queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+  };
+
+  const saveMutation = useMutation({
+    mutationFn: (propertyId: string) => unwrap(renterService.saveListing(propertyId)),
+    onSuccess: invalidateSaved,
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
+    onSuccess: invalidateSaved,
+  });
+
+  const toggleSave = (propertyId: string) => {
+    if (savedIds.includes(propertyId)) {
+      unsaveMutation.mutate(propertyId);
+    } else {
+      saveMutation.mutate(propertyId);
     }
   };
 

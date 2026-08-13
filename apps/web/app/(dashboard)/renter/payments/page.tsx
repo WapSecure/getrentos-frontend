@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentsHeader } from '@/components/renter/payments/PaymentsHeader';
 import { PaymentsStats } from '@/components/renter/payments/PaymentsStats';
 import { PaymentsList } from '@/components/renter/payments/PaymentsList';
@@ -12,12 +13,9 @@ import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentRece
 import { PaymentNotifications } from '@/components/renter/payments/PaymentNotifications';
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
 import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
-import {
-  renterService,
-  type Payment,
-  type Receipt,
-  type PaymentMethod as PaymentMethodModel,
-} from '@/services/renterService';
+import { renterService, type Payment } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface Notification {
   id: string;
@@ -31,28 +29,23 @@ interface Notification {
 type DisplayPayment = Omit<Payment, 'method'> & { method: 'card' | 'bank_transfer' | 'wallet' };
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<DisplayPayment[]>([]);
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodModel[]>([]);
+  const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadPayments = async () => {
-      const [paymentsRes, receiptsRes, methodsRes] = await Promise.all([
-        renterService.listPayments(),
-        renterService.listReceipts(),
-        renterService.listPaymentMethods(),
-      ]);
-      if (paymentsRes.success && paymentsRes.data) {
-        setPayments(paymentsRes.data.map((p) => ({ ...p, method: p.method ?? 'card' })));
-      }
-      if (receiptsRes.success && receiptsRes.data) setReceipts(receiptsRes.data);
-      if (methodsRes.success && methodsRes.data) setPaymentMethods(methodsRes.data);
-    };
-    loadPayments();
-  }, []);
+  const { data: rawPayments = [] } = useQuery({
+    queryKey: renterKeys.payments,
+    queryFn: () => unwrap(renterService.listPayments()),
+  });
+  const { data: receipts = [] } = useQuery({
+    queryKey: renterKeys.receipts,
+    queryFn: () => unwrap(renterService.listReceipts()),
+  });
+  const { data: paymentMethods = [] } = useQuery({
+    queryKey: renterKeys.paymentMethods,
+    queryFn: () => unwrap(renterService.listPaymentMethods()),
+  });
 
   const pushNotification = (notification: Omit<Notification, 'id' | 'date' | 'read'>) => {
     setNotifications((prev) => [
@@ -61,28 +54,32 @@ export default function PaymentsPage() {
     ]);
   };
 
-  const handlePayNow = async (paymentId: string) => {
-    const payment = payments.find((p) => p.id === paymentId);
-    if (!payment) return;
-
-    setPayments((prev) =>
-      prev.map((p) => (p.id === paymentId ? { ...p, status: 'processing' } : p))
-    );
-
-    const res = await renterService.payNow(paymentId, payment.method ?? 'card');
-    if (res.success && res.data) {
-      const updated: DisplayPayment = { ...res.data, method: res.data.method ?? 'card' };
-      setPayments((prev) => prev.map((p) => (p.id === paymentId ? updated : p)));
-      const receiptsRes = await renterService.listReceipts();
-      if (receiptsRes.success && receiptsRes.data) setReceipts(receiptsRes.data);
+  const payNowMutation = useMutation({
+    mutationFn: ({ paymentId, method }: { paymentId: string; method?: string }) =>
+      unwrap(renterService.payNow(paymentId, method)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.payments });
+      queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
       pushNotification({
         type: 'success',
         title: 'Payment Successful',
-        message: `Rent payment of ₦${payment.amount.toLocaleString()} for ${payment.propertyName} was successful.`,
+        message: `Rent payment of ₦${updated.amount.toLocaleString()} for ${updated.propertyName} was successful.`,
       });
-    } else {
-      setPayments((prev) => prev.map((p) => (p.id === paymentId ? payment : p)));
+    },
+  });
+
+  const payments: DisplayPayment[] = rawPayments.map((p) => {
+    const method = p.method ?? 'card';
+    if (payNowMutation.isPending && payNowMutation.variables?.paymentId === p.id) {
+      return { ...p, method, status: 'processing' };
     }
+    return { ...p, method };
+  });
+
+  const handlePayNow = (paymentId: string) => {
+    const payment = payments.find((p) => p.id === paymentId);
+    if (!payment) return;
+    payNowMutation.mutate({ paymentId, method: payment.method });
   };
 
   const handleDownloadReceipt = (receiptId: string) => {
@@ -104,19 +101,22 @@ export default function PaymentsPage() {
     setDisputingPaymentId(paymentId);
   };
 
-  const handleSubmitDispute = async (reason: string) => {
-    if (!disputingPaymentId) return;
-    const payment = payments.find((p) => p.id === disputingPaymentId);
-    const res = await renterService.disputePayment(disputingPaymentId, reason);
-    if (res.success && res.data) {
-      const updated: DisplayPayment = { ...res.data, method: res.data.method ?? 'card' };
-      setPayments((prev) => prev.map((p) => (p.id === disputingPaymentId ? updated : p)));
+  const disputeMutation = useMutation({
+    mutationFn: ({ paymentId, reason }: { paymentId: string; reason: string }) =>
+      unwrap(renterService.disputePayment(paymentId, reason)),
+    onSuccess: (updated, { reason }) => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       pushNotification({
         type: 'info',
         title: 'Dispute Submitted',
-        message: `Your dispute for ${payment?.propertyName ?? 'this payment'} has been submitted for review: "${reason}"`,
+        message: `Your dispute for ${updated.propertyName} has been submitted for review: "${reason}"`,
       });
-    }
+    },
+  });
+
+  const handleSubmitDispute = async (reason: string) => {
+    if (!disputingPaymentId) return;
+    await disputeMutation.mutateAsync({ paymentId: disputingPaymentId, reason });
     setDisputingPaymentId(null);
   };
 
@@ -128,27 +128,40 @@ export default function PaymentsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
+  const invalidatePaymentMethods = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.paymentMethods });
+
+  const setDefaultPaymentMethodMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
+    onSuccess: invalidatePaymentMethods,
+  });
+
+  const removePaymentMethodMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
+    onSuccess: invalidatePaymentMethods,
+  });
+
+  const addPaymentMethodMutation = useMutation({
+    mutationFn: (data: { last4: string; expiry: string }) =>
+      unwrap(
+        renterService.addPaymentMethod({
+          type: 'card',
+          name: `Card ending ${data.last4}`,
+          last4: data.last4,
+          expiry: data.expiry,
+        })
+      ),
+    onSuccess: invalidatePaymentMethods,
+  });
+
   const handleSetDefaultPaymentMethod = async (id: string) => {
-    const res = await renterService.setDefaultPaymentMethod(id);
-    if (res.success && res.data) setPaymentMethods(res.data);
+    await setDefaultPaymentMethodMutation.mutateAsync(id);
   };
-
   const handleRemovePaymentMethod = async (id: string) => {
-    const res = await renterService.removePaymentMethod(id);
-    if (res.success) setPaymentMethods((prev) => prev.filter((m) => m.id !== id));
+    await removePaymentMethodMutation.mutateAsync(id);
   };
-
   const handleAddPaymentMethod = async (data: { last4: string; expiry: string }) => {
-    const res = await renterService.addPaymentMethod({
-      type: 'card',
-      name: `Card ending ${data.last4}`,
-      last4: data.last4,
-      expiry: data.expiry,
-    });
-    if (res.success && res.data) {
-      const created = res.data;
-      setPaymentMethods((prev) => [...prev, created]);
-    }
+    await addPaymentMethodMutation.mutateAsync(data);
   };
 
   return (

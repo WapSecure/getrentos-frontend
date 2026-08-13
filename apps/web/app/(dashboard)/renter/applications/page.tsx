@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApplicationsHeader } from '@/components/renter/applications/ApplicationsHeader';
 import { ApplicationsStats } from '@/components/renter/applications/ApplicationsStats';
 import { ApplicationsFilterSort } from '@/components/renter/applications/ApplicationsFilterSort';
@@ -8,8 +9,9 @@ import { ApplicationsList } from '@/components/renter/applications/ApplicationsL
 import { ApplicationAnalytics } from '@/components/renter/applications/ApplicationAnalytics';
 import { ApplicationRecommendations } from '@/components/renter/applications/ApplicationRecommendations';
 import { ApplicationExport } from '@/components/renter/applications/ApplicationExport';
-import { Application } from '@/types/renter';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface Note {
   id: string;
@@ -19,7 +21,11 @@ interface Note {
 }
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
+  const queryClient = useQueryClient();
+  const { data: applications = [] } = useQuery({
+    queryKey: renterKeys.applications,
+    queryFn: () => unwrap(renterService.listMyApplications()),
+  });
   const [filterStatus, setFilterStatus] = useState<
     'all' | 'pending' | 'under_review' | 'approved' | 'rejected'
   >('all');
@@ -31,15 +37,6 @@ export default function ApplicationsPage() {
     const saved = localStorage.getItem('application_notes');
     return saved ? JSON.parse(saved) : {};
   });
-
-  useEffect(() => {
-    const fetchApplications = async () => {
-      const response = await renterService.listMyApplications();
-      if (response.success && response.data) setApplications(response.data);
-    };
-
-    fetchApplications();
-  }, []);
 
   const saveNotes = (updatedNotes: Record<string, Note[]>) => {
     localStorage.setItem('application_notes', JSON.stringify(updatedNotes));
@@ -80,14 +77,16 @@ export default function ApplicationsPage() {
     saveNotes(updated);
   };
 
-  const handleWithdrawApplication = async (applicationId: string) => {
-    const response = await renterService.withdrawApplication(applicationId);
-    if (response.success && response.data) {
-      setApplications((prev) =>
-        prev.map((app) => (app.id === applicationId ? response.data! : app))
-      );
-    }
-  };
+  const withdrawMutation = useMutation({
+    mutationFn: (applicationId: string) => unwrap(renterService.withdrawApplication(applicationId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.applications });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+    },
+  });
+
+  const handleWithdrawApplication = (applicationId: string) =>
+    withdrawMutation.mutate(applicationId);
 
   return (
     <>

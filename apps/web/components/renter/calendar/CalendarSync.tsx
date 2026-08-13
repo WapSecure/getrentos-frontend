@@ -16,7 +16,7 @@ export const CalendarSync = () => {
   ];
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
@@ -25,7 +25,7 @@ export const CalendarSync = () => {
           <Calendar className="w-4 h-4 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Calendar Sync</h3>
-            <p className="text-xs text-gray-500">Sync with external calendars</p>
+            <p className="text-xs text-muted-foreground">Sync with external calendars</p>
           </div>
         </div>
         <Button variant="ghost" size="sm" className="p-1 h-auto">
@@ -40,7 +40,7 @@ export const CalendarSync = () => {
             <button
               onClick={() => setSyncEnabled(!syncEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                syncEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+                syncEnabled ? 'bg-primary' : 'bg-border'
               }`}
             >
               <span
@@ -65,7 +65,7 @@ export const CalendarSync = () => {
                       className={`p-2 rounded-lg text-center border transition-colors ${
                         syncProvider === provider.id
                           ? 'border-primary bg-accent'
-                          : 'border-border hover:border-gray-300'
+                          : 'border-border hover:border-muted-foreground'
                       }`}
                     >
                       <div className="text-2xl">{provider.icon}</div>

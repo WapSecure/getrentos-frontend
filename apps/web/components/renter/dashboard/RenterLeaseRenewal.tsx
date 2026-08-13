@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, FileText, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Calendar, FileText, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ROUTES } from '@/lib/constants/auth';
-import { renterService, type Lease } from '@/services/renterService';
-import type { RenewalOffer } from '@/types/lease';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -19,20 +20,14 @@ const formatDate = (dateString: string) => {
 
 export const RenterLeaseRenewal = () => {
   const router = useRouter();
-  const [lease, setLease] = useState<Lease | null>(null);
-  const [renewalOffer, setRenewalOffer] = useState<RenewalOffer | null>(null);
-
-  useEffect(() => {
-    const load = async () => {
-      const [leaseRes, offerRes] = await Promise.all([
-        renterService.getLease(),
-        renterService.getRenewalOffer(),
-      ]);
-      if (leaseRes.success && leaseRes.data) setLease(leaseRes.data);
-      if (offerRes.success && offerRes.data) setRenewalOffer(offerRes.data);
-    };
-    load();
-  }, []);
+  const { data: lease = null } = useQuery({
+    queryKey: renterKeys.lease,
+    queryFn: () => unwrap(renterService.getLease()),
+  });
+  const { data: renewalOffer = null } = useQuery({
+    queryKey: renterKeys.renewalOffer,
+    queryFn: () => unwrap(renterService.getRenewalOffer()),
+  });
 
   if (!lease) return null;
 

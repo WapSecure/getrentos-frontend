@@ -9,6 +9,7 @@ import { RequestStep } from './steps/RequestStep';
 import { OtpStep } from './steps/OtpStep';
 import { ResetStep } from './steps/ResetStep';
 import { authService } from '@/services/authService';
+import { useMutation } from '@tanstack/react-query';
 
 interface ForgotPasswordFormProps {
   onSuccess: () => void;
@@ -20,11 +21,25 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   const [step, setStep] = useState<'request' | 'otp' | 'reset'>('request');
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [identifier, setIdentifier] = useState('');
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [reference, setReference] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const sendCodeMutation = useMutation({
+    mutationFn: () => authService.sendOtp(identifier, method, 'password_reset'),
+  });
+  const resendCodeMutation = useMutation({
+    mutationFn: (otpReference: string) => authService.resendOtp(otpReference),
+  });
+  const verifyOtpMutation = useMutation({
+    mutationFn: ({ otpCode, otpReference }: { otpCode: string; otpReference: string }) =>
+      authService.verifyOtp(otpCode, otpReference),
+  });
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ otpReference, password }: { otpReference: string; password: string }) =>
+      authService.resetPassword(otpReference, password),
+  });
 
   const handleSendCode = async () => {
     if (!identifier) {
@@ -32,7 +47,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
       return;
     }
     setIsLoading(true);
-    const response = await authService.sendOtp(identifier, method, 'password_reset');
+    const response = await sendCodeMutation.mutateAsync();
     setIsLoading(false);
 
     if (response.success && response.data) {
@@ -46,7 +61,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
 
   const handleResendCode = async () => {
     if (!reference) return;
-    const response = await authService.resendOtp(reference);
+    const response = await resendCodeMutation.mutateAsync(reference);
     if (response.success) {
       showToast(`Verification code resent to your ${method}`, 'success');
     } else {
@@ -55,7 +70,8 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   };
 
   const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
+    const otpValue = otp.join('');
+    if (otpValue.length !== 6) {
       showToast('Please enter the 6-digit verification code', 'error');
       return;
     }
@@ -66,7 +82,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
     }
 
     setIsLoading(true);
-    const response = await authService.verifyOtp(otp, reference);
+    const response = await verifyOtpMutation.mutateAsync({ otpCode: otpValue, otpReference: reference });
     setIsLoading(false);
 
     if (response.success && response.data?.verified) {
@@ -92,7 +108,10 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
     }
 
     setIsLoading(true);
-    const response = await authService.resetPassword(reference, newPassword);
+    const response = await resetPasswordMutation.mutateAsync({
+      otpReference: reference,
+      password: newPassword,
+    });
     setIsLoading(false);
 
     if (response.success) {

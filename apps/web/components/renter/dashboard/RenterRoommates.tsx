@@ -2,45 +2,49 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Mail, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ROUTES } from '@/lib/constants/auth';
-import { renterService, type Roommate } from '@/services/renterService';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export const RenterRoommates = () => {
   const router = useRouter();
-  const [roommates, setRoommates] = useState<Roommate[]>([]);
+  const queryClient = useQueryClient();
+  const { data: roommates = [] } = useQuery({
+    queryKey: renterKeys.roommates,
+    queryFn: () => unwrap(renterService.listRoommates()),
+  });
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listRoommates();
-      if (res.success && res.data) setRoommates(res.data);
-    };
-    load();
-  }, []);
-
   const totalShare = roommates.reduce((sum, r) => sum + r.sharePercentage, 0);
 
-  const handleSendInvite = async () => {
+  const inviteMutation = useMutation({
+    mutationFn: (email: string) => renterService.inviteRoommate(email),
+    onSuccess: (res) => {
+      if (res.success && res.data) {
+        queryClient.invalidateQueries({ queryKey: renterKeys.roommates });
+        setToast({ message: `Invite sent to ${inviteEmail}`, variant: 'success' });
+        setInviteEmail('');
+        setShowInvite(false);
+      } else {
+        setToast({ message: res.message || 'Failed to send invite', variant: 'error' });
+      }
+    },
+  });
+
+  const handleSendInvite = () => {
     if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
       setToast({ message: 'Enter a valid email address', variant: 'error' });
       return;
     }
-    const res = await renterService.inviteRoommate(inviteEmail);
-    if (res.success && res.data) {
-      const created = res.data;
-      setRoommates((prev) => [...prev, created]);
-      setToast({ message: `Invite sent to ${inviteEmail}`, variant: 'success' });
-      setInviteEmail('');
-      setShowInvite(false);
-    } else {
-      setToast({ message: res.message || 'Failed to send invite', variant: 'error' });
-    }
+    inviteMutation.mutate(inviteEmail);
   };
 
   return (

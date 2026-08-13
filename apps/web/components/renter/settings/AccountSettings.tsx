@@ -1,50 +1,71 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Lock, Mail, Phone, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Lock, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface AccountSettingsProps {
   user: { email: string; role?: string } | null;
 }
 
 export const AccountSettings = ({ user }: AccountSettingsProps) => {
+  const { data: profile } = useQuery({
+    queryKey: renterKeys.profile,
+    queryFn: () => unwrap(renterService.getProfile()),
+  });
+
+  const initial = {
+    email: profile?.email ?? user?.email ?? '',
+    phone: profile?.phone ?? '',
+  };
+
+  return <AccountSettingsForm key={profile ? 'loaded' : 'initial'} initial={initial} />;
+};
+
+const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: string } }) => {
+  const queryClient = useQueryClient();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState(initial.email);
+  const [phone, setPhone] = useState(initial.phone);
 
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.getProfile();
-      if (res.success && res.data) setPhone(res.data.phone || '');
-    };
-    load();
-  }, []);
+  const updatePasswordMutation = useMutation({
+    mutationFn: () => renterService.updatePassword(currentPassword, newPassword),
+    onSuccess: (res) => {
+      if (res.success) {
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setPasswordError(res.message || 'Failed to update password');
+      }
+    },
+  });
 
-  const handlePasswordUpdate = async (e: React.FormEvent) => {
+  const handlePasswordUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
     if (newPassword !== confirmPassword) {
       setPasswordError('New passwords do not match');
       return;
     }
-    const res = await renterService.updatePassword(currentPassword, newPassword);
-    if (res.success) {
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } else {
-      setPasswordError(res.message || 'Failed to update password');
-    }
+    updatePasswordMutation.mutate();
   };
 
-  const handleEmailUpdate = async (e: React.FormEvent) => {
+  const updateProfileMutation = useMutation({
+    mutationFn: () => unwrap(renterService.updateProfile({ email, phone })),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.profile }),
+  });
+
+  const handleEmailUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    await renterService.updateProfile({ email, phone });
+    updateProfileMutation.mutate();
   };
 
   return (
@@ -102,7 +123,7 @@ export const AccountSettings = ({ user }: AccountSettingsProps) => {
             </div>
           </div>
           {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" isLoading={updatePasswordMutation.isPending}>
             Update Password
           </Button>
         </form>
@@ -135,7 +156,7 @@ export const AccountSettings = ({ user }: AccountSettingsProps) => {
               />
             </div>
           </div>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" isLoading={updateProfileMutation.isPending}>
             Update Contact Info
           </Button>
         </form>

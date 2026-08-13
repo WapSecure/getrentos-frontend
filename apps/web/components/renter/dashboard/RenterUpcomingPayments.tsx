@@ -1,19 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Calendar, Home, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
-
-interface Payment {
-  id: string;
-  property: string;
-  amount: number;
-  dueDate: string;
-  status: 'upcoming' | 'overdue' | 'paid';
-}
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -30,27 +24,19 @@ const formatPrice = (amount: number) => {
 };
 
 export const RenterUpcomingPayments = () => {
-  const [upcomingPayments, setUpcomingPayments] = useState<Payment[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listPayments();
-      if (res.success && res.data) {
-        setUpcomingPayments(
-          res.data
-            .filter((p) => p.status === 'pending' || p.status === 'overdue')
-            .map((p) => ({
-              id: p.id,
-              property: p.propertyName,
-              amount: p.amount,
-              dueDate: p.dueDate,
-              status: p.status === 'overdue' ? 'overdue' : 'upcoming',
-            }))
-        );
-      }
-    };
-    load();
-  }, []);
+  const { data: payments = [] } = useQuery({
+    queryKey: renterKeys.payments,
+    queryFn: () => unwrap(renterService.listPayments()),
+  });
+  const upcomingPayments = payments
+    .filter((p) => p.status === 'pending' || p.status === 'overdue')
+    .map((p) => ({
+      id: p.id,
+      property: p.propertyName,
+      amount: p.amount,
+      dueDate: p.dueDate,
+      status: (p.status === 'overdue' ? 'overdue' : 'upcoming') as 'upcoming' | 'overdue',
+    }));
 
   return (
     <motion.div
