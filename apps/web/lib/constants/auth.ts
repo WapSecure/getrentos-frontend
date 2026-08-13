@@ -265,6 +265,7 @@ export const ROUTES = {
   ADMIN_MESSAGES: '/admin/messages',
   ADMIN_REPORTS: '/admin/reports',
   ADMIN_SETTINGS: '/admin/settings',
+  ADMIN_ACCESS: '/admin/access',
   ADMIN_HELP: '/admin/help',
 } as const;
 
@@ -290,8 +291,6 @@ export const SIGNIN_METHODS = {
 
 export type SigninMethod = (typeof SIGNIN_METHODS)[keyof typeof SIGNIN_METHODS];
 
-// Maps backend RoleType values (e.g. "PROPERTY_OWNER") back to frontend role ids ('owner').
-// Mirrors PUBLIC_ROLE_MAP in the backend's roles.constants.ts, inverted.
 export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   RENTER: 'renter',
   LANDLORD: 'landlord',
@@ -299,14 +298,11 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   PROPERTY_BUYER: 'buyer',
   REALTOR: 'realtor',
   AGENT: 'agent',
-  // Internal staff roles all collapse to 'admin' on the frontend, matching
-  // the backend's roleTypeToPublicId fallback.
   BACKOFFICE_ADMIN: 'admin',
   SUPER_ADMIN: 'admin',
   VERIFICATION_OFFICER: 'admin',
 };
 
-// Helper function to get dashboard route by role
 export const getDashboardRoute = (roleId: string): string => {
   const roleMap: Record<string, string> = {
     renter: ROUTES.RENTER_DASHBOARD,

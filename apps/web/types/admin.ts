@@ -6,6 +6,45 @@ export type PlatformRole =
   | 'realtor'
   | 'agent'
   | 'admin';
+
+export type AdminStaffRole =
+  | 'backoffice_admin'
+  | 'super_admin'
+  | 'verification_officer'
+  | 'fraud_analyst'
+  | 'dispute_officer'
+  | 'escrow_officer'
+  | 'finance_approver'
+  | 'compliance_manager'
+  | 'support_agent';
+
+export type AdminPermission =
+  | 'dashboard.view'
+  | 'users.view'
+  | 'users.manage'
+  | 'verifications.review'
+  | 'verifications.approve'
+  | 'disputes.review'
+  | 'disputes.resolve'
+  | 'fraud.review'
+  | 'fraud.freeze'
+  | 'escrow.view'
+  | 'escrow.approve'
+  | 'audit.view'
+  | 'documents.manage'
+  | 'messages.manage'
+  | 'reports.view'
+  | 'platform.configure'
+  | 'staff.manage';
+
+export interface AdminStaffMember {
+  id: string;
+  legalName: string;
+  email: string | null;
+  accountStatus: UserAccountStatus;
+  lastLoginAt: string | null;
+  roles: { role: AdminStaffRole }[];
+}
 export type UserAccountStatus = 'active' | 'suspended' | 'pending' | 'banned';
 export type VerificationRequestType = 'identity' | 'property' | 'license';
 export type VerificationRequestStatus =

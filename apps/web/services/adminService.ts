@@ -21,6 +21,8 @@ import type {
   NotificationPreference,
   PlatformConfig,
   AdminProfile,
+  AdminStaffMember,
+  AdminStaffRole,
 } from '@/types/admin';
 
 export interface DashboardStats {
@@ -42,6 +44,20 @@ export interface PaginatedAuditLogs {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const adminService = {
+  // ---- Staff access ----
+  async listStaff(): Promise<ApiResponse<AdminStaffMember[]>> {
+    return safeCall(() => authFetch('/admin/access/staff'));
+  },
+
+  async updateStaffRoles(id: string, roles: AdminStaffRole[]): Promise<ApiResponse<AdminStaffMember>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/staff/${id}/roles`, {
+        method: 'PUT',
+        body: JSON.stringify({ roles: roles.map((role) => role.toUpperCase()) }),
+      })
+    );
+  },
+
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     return safeCall(() => authFetch('/admin/dashboard/stats'));
   },

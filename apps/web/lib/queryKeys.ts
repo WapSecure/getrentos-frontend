@@ -64,6 +64,7 @@ export const adminKeys = {
   profile: ['admin', 'profile'] as const,
   notificationPreferences: ['admin', 'notificationPreferences'] as const,
   platformConfig: ['admin', 'platformConfig'] as const,
+  staff: ['admin', 'staff'] as const,
 };
 
 export const renterKeys = {

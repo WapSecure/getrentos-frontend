@@ -15,36 +15,41 @@ import {
   MessageCircle,
   BarChart3,
   Settings,
+  KeyRound,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import type { AdminPermission } from '@/types/admin';
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
+  permission: AdminPermission;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: ROUTES.ADMIN_DASHBOARD, icon: LayoutDashboard },
-  { label: 'Users', href: ROUTES.ADMIN_USERS, icon: Users },
-  { label: 'Verifications', href: ROUTES.ADMIN_VERIFICATIONS, icon: ShieldCheck },
-  { label: 'Disputes', href: ROUTES.ADMIN_DISPUTES, icon: Gavel },
-  { label: 'Fraud & Risk', href: ROUTES.ADMIN_FRAUD, icon: AlertTriangle },
-  { label: 'Escrow Oversight', href: ROUTES.ADMIN_ESCROW, icon: Landmark },
-  { label: 'Audit Logs', href: ROUTES.ADMIN_AUDIT_LOGS, icon: ScrollText },
-  { label: 'Documents', href: ROUTES.ADMIN_DOCUMENTS, icon: FolderOpen },
-  { label: 'Messages', href: ROUTES.ADMIN_MESSAGES, icon: MessageCircle },
-  { label: 'Reports', href: ROUTES.ADMIN_REPORTS, icon: BarChart3 },
-  { label: 'Settings', href: ROUTES.ADMIN_SETTINGS, icon: Settings },
+  { label: 'Dashboard', href: ROUTES.ADMIN_DASHBOARD, icon: LayoutDashboard, permission: 'dashboard.view' },
+  { label: 'Users', href: ROUTES.ADMIN_USERS, icon: Users, permission: 'users.view' },
+  { label: 'Verifications', href: ROUTES.ADMIN_VERIFICATIONS, icon: ShieldCheck, permission: 'verifications.review' },
+  { label: 'Disputes', href: ROUTES.ADMIN_DISPUTES, icon: Gavel, permission: 'disputes.review' },
+  { label: 'Fraud & Risk', href: ROUTES.ADMIN_FRAUD, icon: AlertTriangle, permission: 'fraud.review' },
+  { label: 'Escrow Oversight', href: ROUTES.ADMIN_ESCROW, icon: Landmark, permission: 'escrow.view' },
+  { label: 'Audit Logs', href: ROUTES.ADMIN_AUDIT_LOGS, icon: ScrollText, permission: 'audit.view' },
+  { label: 'Documents', href: ROUTES.ADMIN_DOCUMENTS, icon: FolderOpen, permission: 'documents.manage' },
+  { label: 'Messages', href: ROUTES.ADMIN_MESSAGES, icon: MessageCircle, permission: 'messages.manage' },
+  { label: 'Reports', href: ROUTES.ADMIN_REPORTS, icon: BarChart3, permission: 'reports.view' },
+  { label: 'Settings', href: ROUTES.ADMIN_SETTINGS, icon: Settings, permission: 'platform.configure' },
+  { label: 'Access & Roles', href: ROUTES.ADMIN_ACCESS, icon: KeyRound, permission: 'staff.manage' },
 ];
 
-export const AdminSidebar = () => {
+export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const pathname = usePathname();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
       <nav className="p-4 space-y-1">
-        {navItems.map((item, index) => {
+        {navItems.filter((item) => hasAdminPermission(roles, item.permission)).map((item, index) => {
           const isActive = pathname === item.href;
           return (
             <motion.div

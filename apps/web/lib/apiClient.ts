@@ -1,5 +1,9 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://')) {
+  throw new Error('NEXT_PUBLIC_API_URL must use https:// in production');
+}
+
 export class ApiError extends Error {
   status: number;
   details?: unknown;

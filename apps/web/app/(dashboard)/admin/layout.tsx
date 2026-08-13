@@ -12,6 +12,8 @@ import {
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import { usePathname } from 'next/navigation';
 
 export type AdminUser = { fullName: string; email: string; role?: string; roles?: string[] };
 
@@ -22,6 +24,7 @@ export const useAdminUser = () => useContext(AdminUserContext);
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,6 +45,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           return;
         }
 
+        const needsStaffAccess = pathname === ROUTES.ADMIN_ACCESS;
+        if (needsStaffAccess && !hasAdminPermission(parsedUser.roles, 'staff.manage')) {
+          router.replace(ROUTES.ADMIN_DASHBOARD);
+          return;
+        }
+
         setUser(parsedUser);
       }
 
@@ -49,7 +58,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     };
 
     checkAuth();
-  }, [router]);
+  }, [pathname, router]);
 
   if (isLoading) {
     return <PageLoadingState />;
@@ -60,7 +69,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div className="min-h-screen bg-background">
         <AdminNavbar user={user} />
         <div className="flex">
-          <AdminSidebar />
+          <AdminSidebar roles={user?.roles} />
           <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
