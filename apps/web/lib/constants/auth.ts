@@ -199,6 +199,7 @@ export const ROUTES = {
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SETTINGS: '/landlord/settings',
+  LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',
 
   // Property Owner specific routes
@@ -213,6 +214,7 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_SETTINGS: '/owner/settings',
+  OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
 
   // Buyer specific routes

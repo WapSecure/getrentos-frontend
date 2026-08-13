@@ -7,62 +7,60 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
-import type { RealtorClient, RealtorListing, ListingCategory } from '@/types/realtor';
+import type { RealtorClient, ListingCategory } from '@/types/realtor';
+
+export interface RealtorClientProperty {
+  id: string;
+  clientId: string;
+  title: string;
+}
+
+export interface CreateRealtorListingInput {
+  propertyId: string;
+  title: string;
+  category: ListingCategory;
+  price: number;
+}
 
 interface CreateListingModalProps {
   isOpen: boolean;
   onClose: () => void;
   clients: RealtorClient[];
-  onSubmit: (listing: Omit<RealtorListing, 'id' | 'createdAt'>) => void;
+  properties: RealtorClientProperty[];
+  onSubmit: (listing: CreateRealtorListingInput) => void;
 }
-
-const propertyTypes = ['Apartment', 'Duplex', 'Bungalow', 'Terrace', 'Land', 'Commercial'];
 
 export const CreateListingModal = ({
   isOpen,
   onClose,
   clients,
+  properties,
   onSubmit,
 }: CreateListingModalProps) => {
   const [clientId, setClientId] = useState('');
+  const [propertyId, setPropertyId] = useState('');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<ListingCategory>('sale');
-  const [propertyType, setPropertyType] = useState('Apartment');
   const [price, setPrice] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('Lagos');
-  const [bedrooms, setBedrooms] = useState('');
-  const [bathrooms, setBathrooms] = useState('');
 
   const selectedClient = clients.find((c) => c.id === clientId);
 
   const handleClose = () => {
     setClientId('');
+    setPropertyId('');
     setTitle('');
     setCategory('sale');
-    setPropertyType('Apartment');
     setPrice('');
-    setCity('');
-    setState('Lagos');
-    setBedrooms('');
-    setBathrooms('');
     onClose();
   };
 
-  const handleSubmit = (status: RealtorListing['status']) => {
+  const handleSubmit = () => {
     if (!selectedClient) return;
     onSubmit({
-      clientId: selectedClient.id,
-      clientName: selectedClient.clientName,
+      propertyId,
       title,
       category,
-      propertyType,
       price: Number(price) || 0,
-      city,
-      state,
-      bedrooms: bedrooms ? Number(bedrooms) : undefined,
-      bathrooms: bathrooms ? Number(bathrooms) : undefined,
-      status,
     });
     handleClose();
   };
@@ -97,9 +95,22 @@ export const CreateListingModal = ({
                     </label>
                     <Select
                       value={clientId}
-                      onValueChange={setClientId}
+                      onValueChange={(value) => { setClientId(value); setPropertyId(''); }}
                       placeholder="Select a client"
                       options={clients.map((client) => ({ value: client.id, label: `${client.clientName} (${client.role === 'owner' ? 'Owner' : 'Landlord'})` }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Assigned property <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={propertyId}
+                      onValueChange={setPropertyId}
+                      placeholder={clientId ? 'Select an assigned property' : 'Select a client first'}
+                      disabled={!clientId}
+                      options={properties.filter((property) => property.clientId === clientId).map((property) => ({ value: property.id, label: property.title }))}
                     />
                   </div>
 
@@ -140,17 +151,6 @@ export const CreateListingModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Property Type
-                    </label>
-                    <Select
-                      value={propertyType}
-                      onValueChange={setPropertyType}
-                      options={propertyTypes.map((propertyTypeOption) => ({ value: propertyTypeOption, label: propertyTypeOption }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
                       {category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'}{' '}
                       <span className="text-red-500">*</span>
                     </label>
@@ -163,77 +163,20 @@ export const CreateListingModal = ({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">City</label>
-                      <LegacyInput
-                        type="text"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        State
-                      </label>
-                      <LegacyInput
-                        type="text"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Bedrooms
-                      </label>
-                      <LegacyInput
-                        type="number"
-                        min={0}
-                        value={bedrooms}
-                        onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Bathrooms
-                      </label>
-                      <LegacyInput
-                        type="number"
-                        min={0}
-                        value={bathrooms}
-                        onChange={(e) => setBathrooms(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
                 </>
               )}
             </div>
 
             {clients.length > 0 && (
-              <div className="p-4 border-t border-border flex gap-3 shrink-0">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => handleSubmit('draft')}
-                  disabled={!clientId || !title || !price}
-                >
-                  Save Draft
-                </Button>
+              <div className="p-4 border-t border-border flex justify-end shrink-0">
                 <Button
                   variant="primary"
-                  className="flex-1 gap-1.5"
-                  onClick={() => handleSubmit('pending_approval')}
-                  disabled={!clientId || !title || !price}
+                  className="gap-1.5"
+                  onClick={handleSubmit}
+                  disabled={!clientId || !propertyId || !title || !price}
                 >
                   <Check className="w-3.5 h-3.5" />
-                  Submit for Approval
+                  Create draft
                 </Button>
               </div>
             )}

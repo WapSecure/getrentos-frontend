@@ -6,18 +6,14 @@ import { RealtorStatsCards } from '@/components/realtor/dashboard/RealtorStatsCa
 import { RealtorCommissionChart } from '@/components/realtor/dashboard/RealtorCommissionChart';
 import { RealtorActivityFeed } from '@/components/realtor/dashboard/RealtorActivityFeed';
 import { RealtorQuickActions } from '@/components/realtor/dashboard/RealtorQuickActions';
-
-const mockStats = {
-  activeClients: 5,
-  activeListings: 7,
-  activeLeads: 9,
-  upcomingViewings: 3,
-  pendingOffers: 2,
-  commissionYtd: 8_230_000,
-};
+import { useQuery } from '@tanstack/react-query';
+import { realtorService } from '@/services/realtorService';
+import { realtorKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 
 export default function RealtorDashboardPage() {
   const user = useRealtorUser();
+  const { data: stats } = useQuery({ queryKey: realtorKeys.dashboard, queryFn: () => unwrap(realtorService.getDashboard()) });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -29,7 +25,7 @@ export default function RealtorDashboardPage() {
     <>
       <RealtorDashboardHeader greeting={greeting} firstName={firstName} />
 
-      <RealtorStatsCards {...mockStats} />
+      <RealtorStatsCards activeClients={stats?.activeClients ?? 0} activeListings={stats?.publishedListings ?? 0} activeLeads={stats?.activeLeads ?? 0} upcomingViewings={stats?.upcomingViewings ?? 0} pendingOffers={stats?.offerCount ?? 0} commissionYtd={0} />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

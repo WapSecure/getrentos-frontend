@@ -4,64 +4,36 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, UserPlus } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Search, UserPlus } from 'lucide-react';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
-import type { RealtorLead, LeadStage } from '@/types/realtor';
+import type { LeadStage } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
-
-const mockLeads: RealtorLead[] = [
-  {
-    id: 'lead_001',
-    leadName: 'Ngozi Adeyemi',
-    leadType: 'buyer',
-    email: 'ngozi@example.com',
-    phone: '+234 802 444 7781',
-    listingId: 'listing_001',
-    listingTitle: 'Luxury 3-Bed Apartment with Ocean Views',
-    trustScore: 87,
-    verified: true,
-    stage: 'viewing_scheduled',
-    inquiryDate: '2026-08-06T13:10:00.000Z',
-  },
-  {
-    id: 'lead_002',
-    leadName: 'David Okoro',
-    leadType: 'renter',
-    email: 'david@example.com',
-    phone: '+234 701 233 9090',
-    listingId: 'listing_002',
-    listingTitle: 'Modern 2-Bed Flat, Ikeja GRA',
-    trustScore: 74,
-    verified: true,
-    stage: 'contacted',
-    inquiryDate: '2026-08-05T09:00:00.000Z',
-  },
-  {
-    id: 'lead_003',
-    leadName: 'Blessing Eze',
-    leadType: 'buyer',
-    email: 'blessing@example.com',
-    phone: '+234 909 112 6633',
-    listingId: 'listing_003',
-    listingTitle: 'Spacious 4-Bed Duplex in Lekki',
-    trustScore: 91,
-    verified: true,
-    stage: 'new',
-    inquiryDate: '2026-08-07T08:20:00.000Z',
-  },
-];
+import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { mapRealtorLead, mapRealtorListing, realtorService } from '@/services/realtorService';
 
 type StageFilter = 'all' | LeadStage;
 
 export default function RealtorLeadsPage() {
   const router = useRouter();
-  const [leads, setLeads] = useState<RealtorLead[]>(mockLeads);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StageFilter>('all');
-
-  const updateStage = (leadId: string, stage: LeadStage) => {
-    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage } : l)));
-  };
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newLead, setNewLead] = useState({ fullName: '', email: '', phone: '', listingId: '' });
+  const { data: leads = [], isLoading } = useQuery({
+    queryKey: realtorKeys.leads,
+    queryFn: async () => (await unwrap(realtorService.listLeads())).map(mapRealtorLead),
+  });
+  const queryClient = useQueryClient();
+  const updateLead = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'CLOSED' | 'LOST' }) => unwrap(realtorService.updateLeadStatus(id, status)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.leads }),
+  });
+  const { data: listings = [] } = useQuery({ queryKey: realtorKeys.listings, queryFn: async () => (await unwrap(realtorService.listListings())).map(mapRealtorListing) });
+  const createLead = useMutation({ mutationFn: () => unwrap(realtorService.createLead({ ...newLead, listingId: newLead.listingId || undefined })), onSuccess: () => { queryClient.invalidateQueries({ queryKey: realtorKeys.leads }); setNewLead({ fullName: '', email: '', phone: '', listingId: '' }); setIsCreateOpen(false); } });
 
   const filteredLeads = leads.filter((l) => {
     const matchesSearch =
@@ -83,8 +55,9 @@ export default function RealtorLeadsPage() {
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <h1 className="text-2xl font-bold text-foreground">Leads</h1>
+        <Button className="gap-2" onClick={() => setIsCreateOpen(true)}><Plus className="h-4 w-4" />Add lead</Button>
         <p className="text-muted-foreground mt-1">
           {leads.length} lead{leads.length === 1 ? '' : 's'} across your listings
         </p>
@@ -118,7 +91,9 @@ export default function RealtorLeadsPage() {
         </div>
       </div>
 
-      {filteredLeads.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">Loading leads…</div>
+      ) : filteredLeads.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <UserPlus className="w-8 h-8 text-primary" />
@@ -141,16 +116,14 @@ export default function RealtorLeadsPage() {
               delay={index * 0.05}
               onMessage={() => router.push(`${ROUTES.REALTOR_MESSAGES}?lead=${lead.id}`)}
               onScheduleViewing={() => router.push(`${ROUTES.REALTOR_VIEWINGS}?lead=${lead.id}`)}
-              onConvertToOffer={() => {
-                updateStage(lead.id, 'offer_made');
-                router.push(`${ROUTES.REALTOR_OFFERS}?lead=${lead.id}`);
-              }}
-              onCloseWon={() => updateStage(lead.id, 'closed_won')}
-              onCloseLost={() => updateStage(lead.id, 'closed_lost')}
+              onConvertToOffer={() => router.push(`${ROUTES.REALTOR_OFFERS}?lead=${lead.id}`)}
+              onCloseWon={() => updateLead.mutate({ id: lead.id, status: 'CLOSED' })}
+              onCloseLost={() => updateLead.mutate({ id: lead.id, status: 'LOST' })}
             />
           ))}
         </div>
       )}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}><DialogContent><div className="p-5 space-y-3"><DialogTitle>Add lead</DialogTitle>{(['fullName', 'email', 'phone'] as const).map((field) => <input key={field} value={newLead[field]} onChange={(event) => setNewLead((value) => ({ ...value, [field]: event.target.value }))} placeholder={field === 'fullName' ? 'Full name' : field === 'email' ? 'Email address' : 'Phone number'} className="w-full rounded-lg border border-border bg-card px-3 py-2" />)}<select value={newLead.listingId} onChange={(event) => setNewLead((value) => ({ ...value, listingId: event.target.value }))} className="w-full rounded-lg border border-border bg-card px-3 py-2"><option value="">No listing yet</option>{listings.map((listing) => <option key={listing.id} value={listing.id}>{listing.title}</option>)}</select><Button fullWidth isLoading={createLead.isPending} disabled={!newLead.fullName} onClick={() => createLead.mutate()}>Create lead</Button></div></DialogContent></Dialog>
     </>
   );
 }

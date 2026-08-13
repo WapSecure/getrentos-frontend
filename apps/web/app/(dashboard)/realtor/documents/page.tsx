@@ -3,74 +3,45 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
 import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
+import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
 import { formatDate } from '@/lib/format';
 import type { RealtorDocument } from '@/types/realtor';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { realtorService } from '@/services/realtorService';
 
 const categoryLabels: Record<RealtorDocument['category'], string> = {
   agency_agreement: 'Agency Agreement',
   listing_contract: 'Listing Contract',
   closing_document: 'Closing Document',
   license: 'Realtor License',
+  other: 'Other',
 };
-
-const mockDocuments: RealtorDocument[] = [
-  {
-    id: 'doc_001',
-    name: 'Real Estate Agent License 2026.pdf',
-    category: 'license',
-    uploadedAt: '2026-01-05T00:00:00.000Z',
-    sizeLabel: '310 KB',
-  },
-  {
-    id: 'doc_002',
-    name: 'Agency Agreement - Adaeze Okafor.pdf',
-    category: 'agency_agreement',
-    clientName: 'Adaeze Okafor',
-    uploadedAt: '2025-11-10T00:00:00.000Z',
-    sizeLabel: '420 KB',
-  },
-  {
-    id: 'doc_003',
-    name: 'Listing Contract - Ocean View Towers.pdf',
-    category: 'listing_contract',
-    clientName: 'Adaeze Okafor',
-    uploadedAt: '2026-06-01T00:00:00.000Z',
-    sizeLabel: '380 KB',
-  },
-  {
-    id: 'doc_004',
-    name: 'Closing Documents - Surulere Duplex.pdf',
-    category: 'closing_document',
-    clientName: 'Tobi Fashola',
-    uploadedAt: '2026-06-14T00:00:00.000Z',
-    sizeLabel: '1.1 MB',
-  },
-];
 
 type CategoryFilter = 'all' | RealtorDocument['category'];
 
 export default function RealtorDocumentsPage() {
-  const [documents, setDocuments] = useState<RealtorDocument[]>(mockDocuments);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
+  const queryClient = useQueryClient();
+  const { data: documents = [] } = useQuery({
+    queryKey: realtorKeys.documents,
+    queryFn: async () => {
+      const records = await unwrap(realtorService.listDocuments()) as Array<{ id: string; name: string; category: string; createdAt: string; sizeBytes: number; client?: { legalName: string } | null }>;
+      return records.map((doc) => ({ id: doc.id, name: doc.name, category: doc.category.toLowerCase() as RealtorDocument['category'], clientName: doc.client?.legalName, uploadedAt: doc.createdAt, sizeLabel: doc.sizeBytes < 1024 * 1024 ? `${Math.round(doc.sizeBytes / 1024)} KB` : `${(doc.sizeBytes / (1024 * 1024)).toFixed(1)} MB` }));
+    },
+  });
+  const upload = useMutation({ mutationFn: (data: { file: File; name: string; category: string }) => unwrap(realtorService.uploadDocument(data.file, data.name, data.category)), onSuccess: () => { queryClient.invalidateQueries({ queryKey: realtorKeys.documents }); setIsUploadOpen(false); } });
+  const previewDocument = async (id: string) => setPreview(await unwrap(realtorService.getDocumentDownload(id)));
 
-  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
-    setDocuments((prev) => [
-      {
-        id: `doc_${Date.now()}`,
-        name: data.name,
-        category: data.category as RealtorDocument['category'],
-        uploadedAt: new Date().toISOString(),
-        sizeLabel: data.sizeLabel,
-      },
-      ...prev,
-    ]);
-  };
+  const handleUpload = (data: { name: string; category: string; file: File }) => upload.mutate(data);
 
   const filteredDocuments = documents.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -155,7 +126,7 @@ export default function RealtorDocumentsPage() {
               <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
-              <DocumentRowActions showShare={false} />
+              <DocumentRowActions showShare={false} onDownload={() => previewDocument(doc.id)} />
             </div>
           ))}
         </div>
@@ -169,6 +140,7 @@ export default function RealtorDocumentsPage() {
           .map((c) => ({ value: c.value, label: c.label }))}
         onUpload={handleUpload}
       />
+      <FilePreviewDialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)} file={preview ? { name: preview.name, url: preview.url } : null} />
     </>
   );
 }

@@ -3,49 +3,29 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Handshake } from 'lucide-react';
 import { RealtorOfferCard } from '@/components/realtor/offers/RealtorOfferCard';
 import { RealtorOfferNegotiationModal } from '@/components/realtor/offers/RealtorOfferNegotiationModal';
-import type { RealtorOffer, RealtorOfferStatus, OfferThreadMessage } from '@/types/realtor';
-
-const mockOffers: RealtorOffer[] = [
-  {
-    id: 'offer_001',
-    listingId: 'listing_003',
-    listingTitle: 'Spacious 4-Bed Duplex in Lekki',
-    clientName: 'Adaeze Okafor',
-    leadName: 'Blessing Eze',
-    offerAmount: 85_000_000,
-    askingPrice: 95_000_000,
-    status: 'submitted',
-    submittedAt: '2026-08-07T09:30:00.000Z',
-  },
-];
-
-const initialMessages: Record<string, OfferThreadMessage[]> = {
-  offer_001: [
-    {
-      id: 'm1',
-      offerId: 'offer_001',
-      senderId: 'lead',
-      senderName: 'Blessing Eze',
-      type: 'offer',
-      amount: 85_000_000,
-      text: 'Submitted an offer of',
-      timestamp: '2026-08-07T09:30:00.000Z',
-    },
-  ],
-};
+import type { RealtorOfferStatus, OfferThreadMessage } from '@/types/realtor';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { mapRealtorOffer, realtorService } from '@/services/realtorService';
 
 type StatusFilter = 'all' | RealtorOfferStatus;
 
 export default function RealtorOffersPage() {
-  const [offers, setOffers] = useState<RealtorOffer[]>(mockOffers);
   const [messagesByOffer, setMessagesByOffer] =
-    useState<Record<string, OfferThreadMessage[]>>(initialMessages);
+    useState<Record<string, OfferThreadMessage[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { data: offers = [], isLoading } = useQuery({ queryKey: realtorKeys.offers, queryFn: async () => (await unwrap(realtorService.listOffers())).map(mapRealtorOffer) });
+  const counterOffer = useMutation({
+    mutationFn: ({ id, amount, message }: { id: string; amount: number; message?: string }) => unwrap(realtorService.counterOffer(id, { amount, message })),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.offers }),
+  });
 
   const appendMessage = (offerId: string, message: OfferThreadMessage) => {
     setMessagesByOffer((prev) => ({
@@ -54,36 +34,8 @@ export default function RealtorOffersPage() {
     }));
   };
 
-  const handleAccept = (offerId: string) => {
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: 'accepted' } : o)));
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'realtor',
-      senderName: 'You',
-      type: 'accepted',
-      text: 'Offer accepted on behalf of client',
-      timestamp: new Date().toISOString(),
-    });
-  };
-
-  const handleReject = (offerId: string) => {
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: 'rejected' } : o)));
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'realtor',
-      senderName: 'You',
-      type: 'rejected',
-      text: 'Offer rejected on behalf of client',
-      timestamp: new Date().toISOString(),
-    });
-  };
-
   const handleCounter = (offerId: string, amount: number, note: string) => {
-    setOffers((prev) =>
-      prev.map((o) => (o.id === offerId ? { ...o, status: 'countered', offerAmount: amount } : o))
-    );
+    counterOffer.mutate({ id: offerId, amount, message: note || undefined });
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -105,18 +57,6 @@ export default function RealtorOffersPage() {
         timestamp: new Date().toISOString(),
       });
     }
-  };
-
-  const handleSendMessage = (offerId: string, text: string) => {
-    appendMessage(offerId, {
-      id: `msg_${Date.now()}`,
-      offerId,
-      senderId: 'realtor',
-      senderName: 'You',
-      type: 'message',
-      text,
-      timestamp: new Date().toISOString(),
-    });
   };
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
@@ -172,7 +112,9 @@ export default function RealtorOffersPage() {
         </div>
       </div>
 
-      {filteredOffers.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">Loading offers…</div>
+      ) : filteredOffers.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Handshake className="w-8 h-8 text-primary" />
@@ -203,10 +145,7 @@ export default function RealtorOffersPage() {
         offer={activeOffer}
         messages={activeOfferId ? messagesByOffer[activeOfferId] || [] : []}
         onClose={() => setActiveOfferId(null)}
-        onAccept={handleAccept}
-        onReject={handleReject}
         onCounter={handleCounter}
-        onSendMessage={handleSendMessage}
       />
     </>
   );

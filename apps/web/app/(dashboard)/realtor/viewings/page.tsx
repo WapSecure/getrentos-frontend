@@ -2,81 +2,38 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingCard } from '@/components/realtor/viewings/ViewingCard';
 import { ScheduleViewingModal } from '@/components/realtor/viewings/ScheduleViewingModal';
+import type { CreateViewingInput } from '@/components/realtor/viewings/ScheduleViewingModal';
 import { Button } from '@/components/ui/Button';
-import type { ViewingAppointment, RealtorLead } from '@/types/realtor';
-
-const mockLeads: RealtorLead[] = [
-  {
-    id: 'lead_001',
-    leadName: 'Ngozi Adeyemi',
-    leadType: 'buyer',
-    email: 'ngozi@example.com',
-    phone: '',
-    listingId: 'listing_001',
-    listingTitle: 'Luxury 3-Bed Apartment with Ocean Views',
-    trustScore: 87,
-    verified: true,
-    stage: 'viewing_scheduled',
-    inquiryDate: '2026-08-06T13:10:00.000Z',
-  },
-  {
-    id: 'lead_002',
-    leadName: 'David Okoro',
-    leadType: 'renter',
-    email: 'david@example.com',
-    phone: '',
-    listingId: 'listing_002',
-    listingTitle: 'Modern 2-Bed Flat, Ikeja GRA',
-    trustScore: 74,
-    verified: true,
-    stage: 'contacted',
-    inquiryDate: '2026-08-05T09:00:00.000Z',
-  },
-];
-
-const mockViewings: ViewingAppointment[] = [
-  {
-    id: 'view_001',
-    leadName: 'Ngozi Adeyemi',
-    listingId: 'listing_001',
-    listingTitle: 'Luxury 3-Bed Apartment with Ocean Views',
-    scheduledDate: '2026-08-10',
-    scheduledTime: '11:00',
-    status: 'confirmed',
-  },
-  {
-    id: 'view_002',
-    leadName: 'David Okoro',
-    listingId: 'listing_002',
-    listingTitle: 'Modern 2-Bed Flat, Ikeja GRA',
-    scheduledDate: '2026-08-12',
-    scheduledTime: '15:30',
-    status: 'pending',
-  },
-];
+import type { ViewingAppointment } from '@/types/realtor';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { mapRealtorLead, mapRealtorViewing, realtorService } from '@/services/realtorService';
 
 function RealtorViewingsPageContent() {
   const searchParams = useSearchParams();
   const defaultLeadId = searchParams.get('lead') || undefined;
 
-  const [viewings, setViewings] = useState<ViewingAppointment[]>(mockViewings);
   const [isModalOpen, setIsModalOpen] = useState(!!defaultLeadId);
+  const queryClient = useQueryClient();
+  const { data: viewings = [], isLoading } = useQuery({ queryKey: realtorKeys.viewings, queryFn: async () => (await unwrap(realtorService.listViewings())).map(mapRealtorViewing) });
+  const { data: leads = [] } = useQuery({ queryKey: realtorKeys.leads, queryFn: async () => (await unwrap(realtorService.listLeads())).map(mapRealtorLead) });
+  const createViewing = useMutation({
+    mutationFn: (appointment: Omit<ViewingAppointment, 'id' | 'status'> & { leadId: string }) => unwrap(realtorService.createViewing({ listingId: appointment.listingId, leadId: appointment.leadId, scheduledAt: `${appointment.scheduledDate}T${appointment.scheduledTime}:00.000Z`, notes: appointment.notes })),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: realtorKeys.viewings }); setIsModalOpen(false); },
+  });
+  const updateViewing = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' }) => unwrap(realtorService.updateViewingStatus(id, status)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.viewings }),
+  });
 
-  const handleSubmit = (appointment: Omit<ViewingAppointment, 'id' | 'status'>) => {
-    const newViewing: ViewingAppointment = {
-      ...appointment,
-      id: `view_${Date.now()}`,
-      status: 'pending',
-    };
-    setViewings((prev) => [newViewing, ...prev]);
+  const handleSubmit = (appointment: CreateViewingInput) => {
+    createViewing.mutate(appointment);
   };
 
-  const updateStatus = (id: string, status: ViewingAppointment['status']) => {
-    setViewings((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
-  };
 
   return (
     <>
@@ -93,7 +50,9 @@ function RealtorViewingsPageContent() {
         </Button>
       </div>
 
-      {viewings.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-card border border-border rounded-lg p-12 text-center text-sm text-muted-foreground">Loading viewings…</div>
+      ) : viewings.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <CalendarClock className="w-8 h-8 text-primary" />
@@ -110,9 +69,9 @@ function RealtorViewingsPageContent() {
               key={viewing.id}
               viewing={viewing}
               delay={index * 0.05}
-              onConfirm={() => updateStatus(viewing.id, 'confirmed')}
-              onComplete={() => updateStatus(viewing.id, 'completed')}
-              onCancel={() => updateStatus(viewing.id, 'cancelled')}
+              onConfirm={() => updateViewing.mutate({ id: viewing.id, status: 'CONFIRMED' })}
+              onComplete={() => updateViewing.mutate({ id: viewing.id, status: 'COMPLETED' })}
+              onCancel={() => updateViewing.mutate({ id: viewing.id, status: 'CANCELLED' })}
             />
           ))}
         </div>
@@ -121,7 +80,7 @@ function RealtorViewingsPageContent() {
       <ScheduleViewingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        leads={mockLeads}
+        leads={leads}
         defaultLeadId={defaultLeadId}
         onSubmit={handleSubmit}
       />

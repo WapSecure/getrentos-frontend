@@ -4,94 +4,54 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
 import { Button } from '@/components/ui/Button';
 import type { RealtorClient, RealtorListing, RealtorListingStatus } from '@/types/realtor';
-
-const mockClients: RealtorClient[] = [
-  {
-    id: 'client_001',
-    clientName: 'Adaeze Okafor',
-    role: 'owner',
-    email: 'adaeze@example.com',
-    phone: '',
-    status: 'active',
-    propertiesRepresented: 3,
-    joinedDate: '2025-11-10T00:00:00.000Z',
-  },
-  {
-    id: 'client_002',
-    clientName: 'Emeka Chukwu',
-    role: 'landlord',
-    email: 'emeka@example.com',
-    phone: '',
-    status: 'active',
-    propertiesRepresented: 5,
-    joinedDate: '2025-09-02T00:00:00.000Z',
-  },
-];
-
-const mockListings: RealtorListing[] = [
-  {
-    id: 'listing_001',
-    clientId: 'client_001',
-    clientName: 'Adaeze Okafor',
-    title: 'Luxury 3-Bed Apartment with Ocean Views',
-    category: 'sale',
-    propertyType: 'Apartment',
-    price: 148_000_000,
-    city: 'Victoria Island',
-    state: 'Lagos',
-    bedrooms: 3,
-    bathrooms: 3,
-    status: 'published',
-    createdAt: '2026-06-01T00:00:00.000Z',
-  },
-  {
-    id: 'listing_002',
-    clientId: 'client_002',
-    clientName: 'Emeka Chukwu',
-    title: 'Modern 2-Bed Flat, Ikeja GRA',
-    category: 'rental',
-    propertyType: 'Apartment',
-    price: 3_200_000,
-    city: 'Ikeja',
-    state: 'Lagos',
-    bedrooms: 2,
-    bathrooms: 2,
-    status: 'published',
-    createdAt: '2026-05-15T00:00:00.000Z',
-  },
-  {
-    id: 'listing_003',
-    clientId: 'client_001',
-    clientName: 'Adaeze Okafor',
-    title: 'Spacious 4-Bed Duplex in Lekki',
-    category: 'sale',
-    propertyType: 'Duplex',
-    price: 95_000_000,
-    city: 'Lekki',
-    state: 'Lagos',
-    bedrooms: 4,
-    bathrooms: 4,
-    status: 'pending_approval',
-    createdAt: '2026-08-01T00:00:00.000Z',
-  },
-];
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { mapRealtorClient, mapRealtorListing, realtorService, type RealtorClientApi } from '@/services/realtorService';
+import type { CreateRealtorListingInput, RealtorClientProperty } from '@/components/realtor/listings/CreateListingModal';
 
 type StatusFilter = 'all' | RealtorListingStatus;
 
 export default function RealtorListingsPage() {
   const searchParams = useSearchParams();
-  const [clients, setClients] = useState<RealtorClient[]>(mockClients);
-  const [listings, setListings] = useState<RealtorListing[]>(mockListings);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewListing, setPreviewListing] = useState<RealtorListing | null>(null);
+  const queryClient = useQueryClient();
+  const { data: listings = [], isLoading } = useQuery({
+    queryKey: realtorKeys.listings,
+    queryFn: async () => (await unwrap(realtorService.listListings())).map(mapRealtorListing),
+  });
+  const { data: clientRelationships = [] } = useQuery({
+    queryKey: realtorKeys.clients,
+    queryFn: () => unwrap(realtorService.listClients()),
+  });
+  const clients = clientRelationships.map(mapRealtorClient);
+  const clientProperties: RealtorClientProperty[] = clientRelationships.flatMap((client: RealtorClientApi) =>
+    client.status === 'ACTIVE'
+      ? client.properties.map(({ property }) => ({ id: property.id, clientId: client.id, title: property.title }))
+      : [],
+  );
+  const createListing = useMutation({
+    mutationFn: (listing: CreateRealtorListingInput) =>
+      unwrap(realtorService.createListing({
+        propertyId: listing.propertyId,
+        listingTitle: listing.title,
+        listingType: listing.category === 'sale' ? 'SALE' : 'RENT',
+        price: listing.price,
+      })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.listings });
+      setIsCreateModalOpen(false);
+    },
+  });
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -101,14 +61,7 @@ export default function RealtorListingsPage() {
     }
   }, [searchParams]);
 
-  const handleCreate = (data: Omit<RealtorListing, 'id' | 'createdAt'>) => {
-    const newListing: RealtorListing = {
-      ...data,
-      id: `listing_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    setListings((prev) => [newListing, ...prev]);
-  };
+  const handleCreate = (data: CreateRealtorListingInput) => createListing.mutate(data);
 
   const filteredListings = listings.filter((l) => {
     const matchesSearch =
@@ -170,7 +123,9 @@ export default function RealtorListingsPage() {
         </div>
       </div>
 
-      {filteredListings.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">Loading listings…</div>
+      ) : filteredListings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Megaphone className="w-8 h-8 text-primary" />
@@ -206,6 +161,7 @@ export default function RealtorListingsPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         clients={clients}
+        properties={clientProperties}
         onSubmit={handleCreate}
       />
 
