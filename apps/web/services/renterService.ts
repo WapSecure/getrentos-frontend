@@ -1,6 +1,6 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { Property, Application } from '@/types/renter';
+import type { Property, Application, GeoInsights } from '@/types/renter';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
@@ -197,6 +197,12 @@ export const renterService = {
 
   async getListing(id: string): Promise<ApiResponse<Property>> {
     return safeCall(() => authFetch(`/renter/listings/${id}`));
+  },
+
+  /** Real map + neighborhood/property insights for a listing (Google Maps + optional AI). */
+  async getGeoInsights(id: string, destination?: string): Promise<ApiResponse<GeoInsights>> {
+    const query = destination ? `?destination=${encodeURIComponent(destination)}` : '';
+    return safeCall(() => authFetch(`/renter/listings/${id}/geo-insights${query}`));
   },
 
   // ---- Saved listings ----
