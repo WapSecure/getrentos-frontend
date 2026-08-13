@@ -8,10 +8,10 @@ import { PageLoadingState } from '@/components/ui/Skeleton';
 import {
   ROUTES,
   isAuthenticated,
-  STORAGE_KEYS,
   getDashboardRoute,
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
+import { getStoredUser } from '@/lib/authStorage';
 
 export type RenterUser = {
   id?: string;
@@ -39,12 +39,9 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
         return;
       }
 
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser: RenterUser = JSON.parse(storedUser);
+      const parsedUser = getStoredUser<RenterUser>();
+      if (parsedUser) {
 
-        // A user can hold multiple roles (e.g. Renter + Renter); gate on whether
-        // ANY of them is renter-equivalent, not just the primary `role` field.
         const hasRenterRole = (parsedUser.roles || []).some(
           (r) => BACKEND_ROLE_TO_ID[r] === 'renter'
         );

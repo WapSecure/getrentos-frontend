@@ -8,10 +8,10 @@ import { PageLoadingState } from '@/components/ui/Skeleton';
 import {
   ROUTES,
   isAuthenticated,
-  STORAGE_KEYS,
   getDashboardRoute,
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
+import { getStoredUser } from '@/lib/authStorage';
 
 export type AgentUser = { fullName: string; email: string; role?: string; roles?: string[] };
 
@@ -33,12 +33,9 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
         return;
       }
 
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      if (storedUser) {
-        const parsedUser: AgentUser = JSON.parse(storedUser);
+      const parsedUser = getStoredUser<AgentUser>();
+      if (parsedUser) {
 
-        // A user can hold multiple roles (e.g. Renter + Agent); gate on whether
-        // ANY of them is agent-equivalent, not just the primary `role` field.
         const hasAgentRole = (parsedUser.roles || []).some(
           (r) => BACKEND_ROLE_TO_ID[r] === 'agent'
         );

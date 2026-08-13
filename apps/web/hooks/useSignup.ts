@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useSignupStore } from '@/lib/store/signupStore';
@@ -50,25 +50,14 @@ export const useSignup = () => {
       }),
   });
 
-  useEffect(() => {
-    console.log('Current signup state:', {
-      step,
-      isVerified: data.isVerified,
-      selectedRoles: data.selectedRoles,
-    });
-  }, [data, step]);
-
   const sendOtp = async (identifier: string, method: 'email' | 'phone') => {
-    console.log('Sending OTP to:', identifier, method);
     setError(null);
 
     const response = await sendOtpMutation.mutateAsync({ identifier, method });
-    console.log('Send OTP response:', response);
 
     if (response.success && response.data) {
       setOtpReference(response.data.reference);
       setStep('otp');
-      console.log('Step changed to OTP');
     } else {
       setError(response.message || 'Failed to send OTP');
     }
@@ -77,15 +66,12 @@ export const useSignup = () => {
   };
 
   const verifyOtp = async (otp: string) => {
-    console.log('Verifying OTP:', otp);
     setError(null);
 
     const response = await verifyOtpMutation.mutateAsync(otp);
-    console.log('Verify OTP response:', response);
 
     if (response.success && response.data) {
       setData({ isVerified: true });
-      console.log('OTP verified, navigating to role selection');
       router.push(ROUTES.ROLE_SELECTION);
     } else {
       setError(response.message || 'Invalid OTP');
@@ -109,7 +95,6 @@ export const useSignup = () => {
   };
 
   const createAccount = async () => {
-    console.log('Creating account with data:', data);
     setError(null);
 
     if (!otpReference) {
@@ -118,7 +103,6 @@ export const useSignup = () => {
     }
 
     const response = await createAccountMutation.mutateAsync();
-    console.log('Create account response:', response);
 
     if (response.success && response.data) {
       const { accessToken, refreshToken, expiresIn: _expiresIn, ...user } = response.data;

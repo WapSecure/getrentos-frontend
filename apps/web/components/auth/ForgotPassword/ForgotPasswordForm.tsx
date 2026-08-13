@@ -21,7 +21,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   const [step, setStep] = useState<'request' | 'otp' | 'reset'>('request');
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [identifier, setIdentifier] = useState('');
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [reference, setReference] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -70,7 +70,8 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   };
 
   const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
+    const otpValue = otp.join('');
+    if (otpValue.length !== 6) {
       showToast('Please enter the 6-digit verification code', 'error');
       return;
     }
@@ -81,7 +82,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
     }
 
     setIsLoading(true);
-    const response = await verifyOtpMutation.mutateAsync({ otpCode: otp, otpReference: reference });
+    const response = await verifyOtpMutation.mutateAsync({ otpCode: otpValue, otpReference: reference });
     setIsLoading(false);
 
     if (response.success && response.data?.verified) {

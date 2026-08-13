@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User, Settings, HelpCircle, LogOut, Building2 } from 'lucide-react';
-import { ROUTES, STORAGE_KEYS } from '@/lib/constants/auth';
+import { ROUTES  } from '@/lib/constants/auth';
+import { clearAuthSession } from '@/lib/authStorage';
 import { getInitials } from '@/lib/format';
 
 interface LandlordProfileDropdownProps {
@@ -28,8 +29,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    clearAuthSession();
     router.push(ROUTES.LOGIN);
   };
 

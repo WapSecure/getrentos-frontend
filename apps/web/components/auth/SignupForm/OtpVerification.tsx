@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
 import { AUTH_CONSTANTS } from '@/lib/constants/auth';
+import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpVerificationProps {
   identifier: string;
@@ -21,7 +22,7 @@ export const OtpVerification = ({
   onResend,
   isLoading,
 }: OtpVerificationProps) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState<string[]>(Array(AUTH_CONSTANTS.OTP_LENGTH).fill(''));
   const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.OTP_EXPIRY_MINUTES * 60);
   const [canResend, setCanResend] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,21 +44,6 @@ export const OtpVerification = ({
     }
   }, [timeLeft]);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
   const handleSubmit = () => {
     const otpValue = otp.join('');
     if (otpValue.length === AUTH_CONSTANTS.OTP_LENGTH) {
@@ -70,7 +56,7 @@ export const OtpVerification = ({
       await onResend();
       setTimeLeft(AUTH_CONSTANTS.OTP_EXPIRY_MINUTES * 60);
       setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
+      setOtp(Array(AUTH_CONSTANTS.OTP_LENGTH).fill(''));
     }
   };
 
@@ -94,20 +80,7 @@ export const OtpVerification = ({
       </div>
 
       {/* OTP Inputs */}
-      <div className="flex justify-center gap-2">
-        {otp.map((digit, index) => (
-          <input
-            key={index}
-            id={`otp-${index}`}
-            type="text"
-            inputMode="numeric"
-            value={digit}
-            onChange={(e) => handleOtpChange(index, e.target.value)}
-            className="w-12 h-12 text-center text-xl font-semibold border border-gray-300 dark:border-gray-600 rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-            maxLength={1}
-          />
-        ))}
-      </div>
+      <OtpInput value={otp} onChange={setOtp} disabled={isLoading} />
 
       {/* Timer & Resend */}
       <div className="text-center">

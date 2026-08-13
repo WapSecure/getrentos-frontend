@@ -12,6 +12,7 @@ import {
   STORAGE_KEYS,
   getDashboardRoute,
 } from '@/lib/constants/auth';
+import { clearAuthSession, getStoredUser } from '@/lib/authStorage';
 
 interface RenterProfileDropdownProps {
   user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
@@ -33,8 +34,7 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    clearAuthSession();
     router.push(ROUTES.LOGIN);
   };
 
@@ -48,10 +48,11 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
     .filter((r): r is (typeof roleDefs)[number] => !!r);
 
   const handleSwitchRole = (roleId: string) => {
-    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...parsed, role: roleId }));
+    // Role switching should update the active storage scope (persistent or session-only).
+    const parsed = getStoredUser<Record<string, unknown>>();
+    if (parsed) {
+      const storage = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) ? localStorage : sessionStorage;
+      storage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...parsed, role: roleId }));
     }
     setIsOpen(false);
     router.push(getDashboardRoute(roleId));

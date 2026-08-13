@@ -1,5 +1,5 @@
 import { apiFetch, ApiError } from '@/lib/apiClient';
-import { STORAGE_KEYS } from '@/lib/constants/auth';
+import { getAuthToken } from '@/lib/authStorage';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -25,8 +25,7 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
 }
 
 export function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) : null;
+  const token = getAuthToken();
   return apiFetch<T>(path, {
     ...options,
     headers: {
@@ -36,11 +35,6 @@ export function authFetch<T>(path: string, options: RequestInit = {}): Promise<T
   });
 }
 
-/**
- * Unwraps a landlordService/adminService-style ApiResponse for use as a
- * TanStack Query queryFn/mutationFn, which expect a promise that resolves
- * with the data or rejects — not a { success, data, error } envelope.
- */
 export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   const response = await promise;
   if (!response.success || response.data === undefined) {

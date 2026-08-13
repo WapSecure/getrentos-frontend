@@ -7,19 +7,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { BACKEND_ROLE_TO_ID, ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
+import {
+  BACKEND_ROLE_TO_ID,
+  ROUTES,
+  STORAGE_KEYS,
+  VALIDATION_PATTERNS,
+  getDashboardRoute,
+} from '@/lib/constants/auth';
 import { ToastVariant } from '@/components/ui/Toast';
 import { authService } from '@/services/authService';
 import { useMutation } from '@tanstack/react-query';
+import { saveAuthSession } from '@/lib/authStorage';
 
 const phoneSchema = z.object({
   identifier: z
     .string()
     .min(10, 'Please enter a valid phone number')
-    .regex(
-      /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,6}[-\s\.]?[0-9]{1,6}$/,
-      'Invalid phone number format'
-    ),
+    .regex(VALIDATION_PATTERNS.PHONE, 'Invalid phone number format'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -71,11 +75,9 @@ export const PhoneSignIn = ({
       const { accessToken, refreshToken, ...user } = response.data;
       const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
 
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-      localStorage.setItem(
-        STORAGE_KEYS.USER,
-        JSON.stringify({ ...user, fullName: user.legalName, role: primaryRoleId })
+      saveAuthSession(
+        { accessToken, refreshToken, user: { ...user, fullName: user.legalName, role: primaryRoleId } },
+        rememberMe
       );
 
       router.push(getDashboardRoute(primaryRoleId));

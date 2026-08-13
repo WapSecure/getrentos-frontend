@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpStepProps {
   method: 'email' | 'phone';
   identifier: string;
-  otp: string;
-  setOtp: (value: string) => void;
+  otp: string[];
+  setOtp: (value: string[]) => void;
   onBack: () => void;
   onResend: () => void | Promise<void>;
 }
@@ -42,19 +43,6 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    if (!/^\d*$/.test(value)) return;
-    const newOtp = otp.split('');
-    newOtp[index] = value;
-    setOtp(newOtp.join(''));
-    if (value && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
-    }
-  };
-
-  const otpArray = otp.padEnd(6, '').split('').slice(0, 6);
-
   return (
     <div className="space-y-6">
       <button
@@ -79,20 +67,7 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         </p>
       </div>
 
-      <div className="flex justify-center gap-2">
-        {[0, 1, 2, 3, 4, 5].map((index) => (
-          <input
-            key={index}
-            id={`otp-${index}`}
-            type="text"
-            inputMode="numeric"
-            value={otpArray[index] || ''}
-            onChange={(e) => handleOtpChange(index, e.target.value)}
-            className="w-12 h-12 text-center text-xl font-semibold border rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-            maxLength={1}
-          />
-        ))}
-      </div>
+      <OtpInput value={otp} onChange={setOtp} />
 
       <div className="text-center">
         {!canResend ? (

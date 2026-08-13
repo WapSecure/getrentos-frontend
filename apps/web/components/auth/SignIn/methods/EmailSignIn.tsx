@@ -7,10 +7,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { BACKEND_ROLE_TO_ID, ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
+import { BACKEND_ROLE_TO_ID, ROUTES, getDashboardRoute } from '@/lib/constants/auth';
 import { ToastVariant } from '@/components/ui/Toast';
 import { authService } from '@/services/authService';
 import { useMutation } from '@tanstack/react-query';
+import { saveAuthSession } from '@/lib/authStorage';
 
 const emailSchema = z.object({
   identifier: z.string().email('Please enter a valid email address'),
@@ -65,11 +66,9 @@ export const EmailSignIn = ({
       const { accessToken, refreshToken, ...user } = response.data;
       const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
 
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-      localStorage.setItem(
-        STORAGE_KEYS.USER,
-        JSON.stringify({ ...user, fullName: user.legalName, role: primaryRoleId })
+      saveAuthSession(
+        { accessToken, refreshToken, user: { ...user, fullName: user.legalName, role: primaryRoleId } },
+        rememberMe
       );
 
       router.push(getDashboardRoute(primaryRoleId));

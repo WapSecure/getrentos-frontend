@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, Phone, CheckCircle, XCircle } from 'lucide-react';
+import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
 
 interface RequestStepProps {
   method: 'email' | 'phone';
@@ -15,17 +16,14 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
   const [error, setError] = useState('');
 
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) return 'Email is required';
-    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    if (!VALIDATION_PATTERNS.EMAIL.test(email)) return 'Please enter a valid email address';
     return '';
   };
 
   const validatePhone = (phone: string) => {
-    const phoneRegex =
-      /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,6}[-\s\.]?[0-9]{1,6}$/;
     if (!phone) return 'Phone number is required';
-    if (!phoneRegex.test(phone)) return 'Please enter a valid phone number (e.g., +1 234 567 8900)';
+    if (!VALIDATION_PATTERNS.PHONE.test(phone)) return 'Please enter a valid phone number (e.g., +1 234 567 8900)';
     return '';
   };
 
