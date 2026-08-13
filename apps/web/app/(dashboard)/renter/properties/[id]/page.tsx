@@ -27,6 +27,7 @@ import { PropertyGallery } from '@/components/renter/property-detail/PropertyGal
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
+import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
 import { trackRecentlyViewed } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
@@ -245,6 +246,8 @@ export default function PropertyDetailPage() {
               </div>
             </div>
           )}
+
+          <GeoInsightsPanel listingId={property.id} title={property.title} />
 
           {property.reviews && <PropertyReviews reviews={property.reviews} />}
 

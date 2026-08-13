@@ -84,6 +84,7 @@ export const renterKeys = {
       filters?.verifiedOnly ?? false,
     ] as const,
   listing: (id: string) => ['renter', 'listing', id] as const,
+  geoInsights: (id: string) => ['renter', 'listing', id, 'geo-insights'] as const,
   savedListings: ['renter', 'savedListings'] as const,
   applications: ['renter', 'applications'] as const,
   roommates: ['renter', 'roommates'] as const,
@@ -113,4 +114,7 @@ export const realtorKeys = {
   leads: ['realtor', 'leads'] as const,
   viewings: ['realtor', 'viewings'] as const,
   offers: ['realtor', 'offers'] as const,
+  documents: ['realtor', 'documents'] as const,
+  conversations: ['realtor', 'conversations'] as const,
+  conversationMessages: (id: string) => ['realtor', 'conversations', id, 'messages'] as const,
 };

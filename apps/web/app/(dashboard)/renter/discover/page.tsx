@@ -168,7 +168,7 @@ export default function DiscoverPage() {
               onCompare={handleCompare}
             />
           ) : (
-            <DiscoverMapView />
+            <DiscoverMapView filters={filters} />
           )}
         </div>
 

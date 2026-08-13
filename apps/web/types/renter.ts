@@ -20,6 +20,12 @@ export interface Property {
   id: string;
   title: string;
   location: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   price: number;
   period: PeriodType;
   bedrooms: number;
@@ -45,6 +51,55 @@ export interface Property {
   reviews?: PropertyReview[];
   /** Whether the landlord allows paying this property's rent in monthly installments (GetRentos Flex), instead of the standard upfront yearly payment. */
   allowsMonthlyPayment?: boolean;
+}
+
+// ---- Real map / neighborhood insights (OpenStreetMap + optional AI) ----
+
+export interface NearbyPlace {
+  name: string;
+  address: string;
+  rating: number | null;
+  userRatingsTotal: number | null;
+  distanceMeters: number;
+}
+
+export interface TravelModeResult {
+  durationSeconds: number;
+  durationText: string;
+  distanceMeters: number;
+  distanceText: string;
+}
+
+export interface TravelTimes {
+  destination: string;
+  destinationCoords: { latitude: number; longitude: number };
+  modes: Partial<Record<'driving' | 'transit' | 'walking', TravelModeResult | null>>;
+}
+
+export interface GeoInsights {
+  listingId: string;
+  propertyId: string;
+  title: string;
+  latitude: number | null;
+  longitude: number | null;
+  formattedAddress: string | null;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  neighborhood: Record<string, NearbyPlace[]> | null;
+  travelTimes: TravelTimes | null;
+  pricing: {
+    price: number;
+    sizeSqm: number | null;
+    pricePerSqm: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
+  };
+  walkability: { score: number; label: string; summary: string } | null;
+  aiSummary: string | null;
+  generatedAt: string;
+  cacheTtlSeconds: number;
 }
 
 export interface Document {
