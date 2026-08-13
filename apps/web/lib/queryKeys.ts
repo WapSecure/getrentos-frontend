@@ -65,6 +65,7 @@ export const adminKeys = {
   notificationPreferences: ['admin', 'notificationPreferences'] as const,
   platformConfig: ['admin', 'platformConfig'] as const,
   staff: ['admin', 'staff'] as const,
+  staffApprovals: ['admin', 'staffApprovals'] as const,
 };
 
 export const renterKeys = {
@@ -103,4 +104,13 @@ export const renterKeys = {
   notifications: ['renter', 'notifications'] as const,
   notificationPreferences: ['renter', 'notificationPreferences'] as const,
   profile: ['renter', 'profile'] as const,
+};
+
+export const realtorKeys = {
+  dashboard: ['realtor', 'dashboard'] as const,
+  clients: ['realtor', 'clients'] as const,
+  listings: ['realtor', 'listings'] as const,
+  leads: ['realtor', 'leads'] as const,
+  viewings: ['realtor', 'viewings'] as const,
+  offers: ['realtor', 'offers'] as const,
 };

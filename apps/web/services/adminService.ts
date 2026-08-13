@@ -22,6 +22,7 @@ import type {
   PlatformConfig,
   AdminProfile,
   AdminStaffMember,
+  AdminStaffApproval,
   AdminStaffRole,
 } from '@/types/admin';
 
@@ -43,17 +44,145 @@ export interface PaginatedAuditLogs {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+/** Raw staff rows as returned by the backend (enums are uppercase). */
+interface RawStaffRow {
+  id: string;
+  legalName: string;
+  email: string | null;
+  accountStatus: string;
+  lastLoginAt: string | null;
+  roles: { role: string }[];
+  staffApproval?: {
+    id: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    createdAt: string;
+    createdBy: { id: string; legalName: string; email: string };
+  } | null;
+}
+
+interface RawApprovalRow {
+  id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  createdBy: { id: string; legalName: string; email: string; roles: { role: string }[] };
+  staffUser: {
+    id: string;
+    email: string | null;
+    legalName: string;
+    accountStatus: string;
+    roles: { role: string }[];
+  };
+}
+
+/** Maps a backend staff row to the lowercase shape the UI consumes. */
+function normalizeStaffRow(row: RawStaffRow): AdminStaffMember {
+  return {
+    ...row,
+    accountStatus: row.accountStatus.toLowerCase() as AdminStaffMember['accountStatus'],
+    roles: row.roles.map((r) => ({ role: r.role.toLowerCase() as AdminStaffRole })),
+    staffApproval: row.staffApproval ?? null,
+  };
+}
+
+function normalizeApprovalRow(row: RawApprovalRow): AdminStaffApproval {
+  return {
+    ...row,
+    createdBy: {
+      ...row.createdBy,
+      roles: row.createdBy.roles.map((r) => ({ role: r.role.toLowerCase() as AdminStaffRole })),
+    },
+    staffUser: {
+      ...row.staffUser,
+      accountStatus: row.staffUser.accountStatus.toLowerCase(),
+      roles: row.staffUser.roles.map((r) => ({ role: r.role.toLowerCase() as AdminStaffRole })),
+    },
+  };
+}
+
 export const adminService = {
   // ---- Staff access ----
   async listStaff(): Promise<ApiResponse<AdminStaffMember[]>> {
-    return safeCall(() => authFetch('/admin/access/staff'));
+    return safeCall(async () => {
+      const rows = await authFetch<RawStaffRow[]>('/admin/access/staff');
+      return rows.map(normalizeStaffRow);
+    });
   },
 
-  async updateStaffRoles(id: string, roles: AdminStaffRole[]): Promise<ApiResponse<AdminStaffMember>> {
+  async createStaff(input: {
+    email: string;
+    legalName: string;
+    password: string;
+    roles: AdminStaffRole[];
+  }): Promise<ApiResponse<AdminStaffMember & { approval?: { id: string; status: string } }>> {
+    return safeCall(() =>
+      authFetch('/admin/access/staff', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: input.email,
+          legalName: input.legalName,
+          password: input.password,
+          roles: input.roles.map((role) => role.toUpperCase()),
+        }),
+      })
+    );
+  },
+
+  async updateStaffRoles(
+    id: string,
+    roles: AdminStaffRole[]
+  ): Promise<ApiResponse<AdminStaffMember>> {
     return safeCall(() =>
       authFetch(`/admin/access/staff/${id}/roles`, {
         method: 'PUT',
         body: JSON.stringify({ roles: roles.map((role) => role.toUpperCase()) }),
+      })
+    );
+  },
+
+  async setStaffStatus(
+    id: string,
+    status: 'active' | 'suspended'
+  ): Promise<ApiResponse<AdminStaffMember>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/staff/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+    );
+  },
+
+  async resetStaffPassword(
+    id: string,
+    newPassword: string
+  ): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/staff/${id}/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify({ newPassword }),
+      })
+    );
+  },
+
+  async listApprovals(): Promise<ApiResponse<AdminStaffApproval[]>> {
+    return safeCall(async () => {
+      const rows = await authFetch<RawApprovalRow[]>('/admin/access/approvals');
+      return rows.map(normalizeApprovalRow);
+    });
+  },
+
+  async approveStaff(approvalId: string): Promise<ApiResponse<AdminStaffApproval>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/approvals/${approvalId}/approve`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  async rejectStaff(approvalId: string, reason: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/approvals/${approvalId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
       })
     );
   },

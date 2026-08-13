@@ -35,16 +35,47 @@ export type AdminPermission =
   | 'messages.manage'
   | 'reports.view'
   | 'platform.configure'
-  | 'staff.manage';
+  | 'staff.manage'
+  | 'staff.create'
+  | 'staff.approve';
+
+export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
 export interface AdminStaffMember {
   id: string;
   legalName: string;
   email: string | null;
-  accountStatus: UserAccountStatus;
+  accountStatus: AdminStaffStatus;
   lastLoginAt: string | null;
   roles: { role: AdminStaffRole }[];
+  /** Present when this account was created pending approval. */
+  staffApproval?: {
+    id: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    createdAt: string;
+    createdBy: { id: string; legalName: string; email: string };
+  } | null;
 }
+
+export interface AdminStaffApproval {
+  id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  createdBy: {
+    id: string;
+    legalName: string;
+    email: string;
+    roles: { role: AdminStaffRole }[];
+  };
+  staffUser: {
+    id: string;
+    email: string | null;
+    legalName: string;
+    accountStatus: string;
+    roles: { role: AdminStaffRole }[];
+  };
+}
+
 export type UserAccountStatus = 'active' | 'suspended' | 'pending' | 'banned';
 export type VerificationRequestType = 'identity' | 'property' | 'license';
 export type VerificationRequestStatus =

@@ -12,7 +12,7 @@ import {
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
-import { hasAdminPermission } from '@/lib/adminAccess';
+import { hasStaffAccess } from '@/lib/adminAccess';
 import { usePathname } from 'next/navigation';
 
 export type AdminUser = { fullName: string; email: string; role?: string; roles?: string[] };
@@ -38,7 +38,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       const parsedUser = getStoredUser<AdminUser>();
       if (parsedUser) {
-
         const isAdmin = (parsedUser.roles || []).some((r) => BACKEND_ROLE_TO_ID[r] === 'admin');
         if (!isAdmin) {
           router.replace(getDashboardRoute(parsedUser.role || 'renter'));
@@ -46,7 +45,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         }
 
         const needsStaffAccess = pathname === ROUTES.ADMIN_ACCESS;
-        if (needsStaffAccess && !hasAdminPermission(parsedUser.roles, 'staff.manage')) {
+        // Anyone who can manage, create, or approve staff may open the page;
+        // the sections render according to what they are allowed to do.
+        if (needsStaffAccess && !hasStaffAccess(parsedUser.roles)) {
           router.replace(ROUTES.ADMIN_DASHBOARD);
           return;
         }
