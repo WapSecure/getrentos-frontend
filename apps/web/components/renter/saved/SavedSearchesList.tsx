@@ -1,75 +1,39 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, BellOff, Trash2, Clock, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-
-interface SearchFilters {
-  location?: string;
-  bedrooms?: number;
-  maxPrice?: number;
-  propertyType?: string;
-  verifiedOnly?: boolean;
-}
-
-interface SavedSearch {
-  id: string;
-  name: string;
-  filters: SearchFilters;
-  createdAt: string;
-  alertsEnabled: boolean;
-  lastRun: string;
-  newMatches: number;
-}
+import { renterService, type SavedSearch } from '@/services/renterService';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const SavedSearchesList = () => {
+  const router = useRouter();
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('saved_searches');
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSavedSearches(JSON.parse(saved));
-    } else {
-      const mockSearches: SavedSearch[] = [
-        {
-          id: '1',
-          name: '2-bed in Ikeja under ₦200k',
-          filters: { location: 'Ikeja', bedrooms: 2, maxPrice: 200000 },
-          createdAt: '2024-06-01',
-          alertsEnabled: true,
-          lastRun: '2024-06-10',
-          newMatches: 3,
-        },
-        {
-          id: '2',
-          name: 'Studio in VI',
-          filters: { location: 'Victoria Island', propertyType: 'studio', maxPrice: 150000 },
-          createdAt: '2024-06-05',
-          alertsEnabled: false,
-          lastRun: '2024-06-09',
-          newMatches: 0,
-        },
-      ];
-      setSavedSearches(mockSearches);
-      localStorage.setItem('saved_searches', JSON.stringify(mockSearches));
-    }
+    const load = async () => {
+      const res = await renterService.listSavedSearches();
+      if (res.success && res.data) setSavedSearches(res.data);
+    };
+    load();
   }, []);
 
-  const toggleAlerts = (id: string) => {
-    const updated = savedSearches.map((s) =>
-      s.id === id ? { ...s, alertsEnabled: !s.alertsEnabled } : s
-    );
-    setSavedSearches(updated);
-    localStorage.setItem('saved_searches', JSON.stringify(updated));
+  const toggleAlerts = async (id: string) => {
+    const res = await renterService.toggleSavedSearchAlerts(id);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setSavedSearches((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    }
   };
 
-  const deleteSearch = (id: string) => {
-    const updated = savedSearches.filter((s) => s.id !== id);
-    setSavedSearches(updated);
-    localStorage.setItem('saved_searches', JSON.stringify(updated));
+  const deleteSearch = async (id: string) => {
+    const res = await renterService.deleteSavedSearch(id);
+    if (res.success) {
+      setSavedSearches((prev) => prev.filter((s) => s.id !== id));
+    }
   };
 
   if (savedSearches.length === 0) {
@@ -98,7 +62,12 @@ export const SavedSearchesList = () => {
             <h3 className="font-semibold text-foreground">Saved Searches</h3>
             <p className="text-xs text-gray-500">{savedSearches.length} active searches</p>
           </div>
-          <Button size="sm" variant="ghost" className="gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1"
+            onClick={() => router.push(ROUTES.RENTER_DISCOVER)}
+          >
             <Search className="w-3 h-3" />
             New Search
           </Button>
@@ -171,7 +140,13 @@ export const SavedSearchesList = () => {
                         </button>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline" fullWidth className="gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      fullWidth
+                      className="gap-1"
+                      onClick={() => router.push(ROUTES.RENTER_DISCOVER)}
+                    >
                       <Search className="w-3 h-3" />
                       Run Search Again
                     </Button>

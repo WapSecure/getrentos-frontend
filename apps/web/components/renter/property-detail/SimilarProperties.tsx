@@ -1,15 +1,27 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Home, MapPin } from 'lucide-react';
-import { mockProperties } from '@/lib/mockProperties';
-import { formatPrice } from '@/types/renter';
-import { buildRoute } from '@/lib/constants/auth';
+import { formatPrice, type Property } from '@/types/renter';
+import { renterService } from '@/services/renterService';
 
 interface SimilarPropertiesProps {
   currentId: string;
 }
 
 export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
-  const similar = mockProperties.filter((p) => p.id !== currentId).slice(0, 3);
+  const [similar, setSimilar] = useState<Property[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.listListings();
+      if (res.success && res.data) {
+        setSimilar(res.data.filter((p) => p.id !== currentId).slice(0, 3));
+      }
+    };
+    load();
+  }, [currentId]);
 
   if (similar.length === 0) return null;
 
@@ -20,7 +32,7 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
         {similar.map((property) => (
           <Link
             key={property.id}
-            href={buildRoute.renterPropertyDetail(property.id)}
+            href={`/renter/properties/${property.id}`}
             className="block rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="h-24 bg-linear-to-br from-secondary to-muted flex items-center justify-center">
