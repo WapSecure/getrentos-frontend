@@ -4,74 +4,38 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Circle, Camera, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
-import { useRef, useState } from 'react';
-
-interface ChecklistItem {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  required: boolean;
-}
-
-const checklistItems: ChecklistItem[] = [
-  {
-    id: '1',
-    title: 'Document Property Condition',
-    description: 'Take photos of each room',
-    completed: false,
-    required: true,
-  },
-  {
-    id: '2',
-    title: 'Note Existing Damages',
-    description: 'Document any pre-existing issues',
-    completed: false,
-    required: true,
-  },
-  {
-    id: '3',
-    title: 'Test Appliances',
-    description: 'Ensure all appliances work',
-    completed: true,
-    required: false,
-  },
-  {
-    id: '4',
-    title: 'Check Utilities',
-    description: 'Verify water, electricity, internet',
-    completed: false,
-    required: true,
-  },
-  {
-    id: '5',
-    title: 'Review Lease Terms',
-    description: 'Confirm move-in date and conditions',
-    completed: false,
-    required: true,
-  },
-];
+import { useEffect, useRef, useState } from 'react';
+import { renterService, type MoveInChecklistItem } from '@/services/renterService';
 
 export const RenterMoveInChecklist = () => {
-  const [items, setItems] = useState(checklistItems);
+  const [items, setItems] = useState<MoveInChecklistItem[]>([]);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const completedCount = items.filter((i) => i.completed).length;
-  const totalCount = items.length;
+  const totalCount = items.length || 1;
 
-  const toggleItem = (id: string) => {
-    setItems(
-      items.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item))
-    );
+  useEffect(() => {
+    const load = async () => {
+      const res = await renterService.getMoveInChecklist();
+      if (res.success && res.data) setItems(res.data);
+    };
+    load();
+  }, []);
+
+  const toggleItem = async (key: string) => {
+    const res = await renterService.toggleMoveInChecklistItem(key);
+    if (res.success && res.data) {
+      const updated = res.data;
+      setItems((prev) => prev.map((item) => (item.key === key ? updated : item)));
+    }
   };
 
-  const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setItems(
-        items.map((item) =>
-          item.title === 'Document Property Condition' ? { ...item, completed: true } : item
-        )
-      );
+      const existing = items.find((item) => item.key === 'document_condition');
+      if (existing && !existing.completed) {
+        await toggleItem('document_condition');
+      }
       setToast({ message: 'Photo uploaded', variant: 'success' });
     }
     e.target.value = '';
@@ -123,12 +87,12 @@ export const RenterMoveInChecklist = () => {
         <div className="p-4 space-y-3">
           {items.map((item, index) => (
             <motion.div
-              key={item.id}
+              key={item.key}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 + index * 0.05, duration: 0.3 }}
               className="flex items-start gap-3 p-2 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
-              onClick={() => toggleItem(item.id)}
+              onClick={() => toggleItem(item.key)}
             >
               <button className="mt-0.5">
                 {item.completed ? (
@@ -148,7 +112,7 @@ export const RenterMoveInChecklist = () => {
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
               </div>
-              {item.title === 'Document Property Condition' && (
+              {item.key === 'document_condition' && (
                 <Button
                   size="sm"
                   variant="ghost"
