@@ -1,9 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
-
 import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { LegacyInput } from '@/components/ui/LegacyInput';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 
@@ -14,12 +13,11 @@ export interface ThreadMessage {
   timestamp: string;
   read: boolean;
 }
-
 interface MessageThreadProps {
   contactName: string;
   contactRole: string;
   messages: ThreadMessage[];
-  onSend: (text: string) => void;
+  onSend: (text: string, files: File[]) => void;
 }
 
 export const MessageThread = ({
@@ -29,25 +27,14 @@ export const MessageThread = ({
   onSend,
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
-
-  const handleSend = () => {
-    if (!draft.trim()) return;
-    onSend(draft.trim());
-    setDraft('');
-  };
-
+  const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setDraft((prev) =>
-        prev ? `${prev} \ud83d\udcce ${file.name}` : `\ud83d\udcce ${file.name}`
-      );
-    }
-    e.target.value = '';
+  const handleSend = () => {
+    if (!draft.trim() && files.length === 0) return;
+    onSend(draft.trim(), files);
+    setDraft('');
+    setFiles([]);
   };
-
   return (
     <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
       <div className="p-4 border-b border-border flex items-center gap-3">
@@ -59,7 +46,6 @@ export const MessageThread = ({
           <p className="text-xs text-gray-400">{contactRole}</p>
         </div>
       </div>
-
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
@@ -75,11 +61,7 @@ export const MessageThread = ({
                 className={`flex ${isRealtor ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-2xl px-3.5 py-2 ${
-                    isRealtor
-                      ? 'bg-primary text-primary-foreground rounded-br-sm'
-                      : 'bg-secondary text-foreground rounded-bl-sm'
-                  }`}
+                  className={`max-w-[70%] rounded-2xl px-3.5 py-2 ${isRealtor ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-foreground rounded-bl-sm'}`}
                 >
                   <p className="text-sm">{message.text}</p>
                   <div
@@ -103,30 +85,55 @@ export const MessageThread = ({
           })
         )}
       </div>
-
-      <div className="p-3 border-t border-border flex items-center gap-2">
-        <LegacyInput ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
-        >
-          <Paperclip className="w-4 h-4" />
-        </button>
-        <LegacyInput
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type a message..."
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!draft.trim()}
-          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+      <div className="border-t border-border p-3">
+        {files.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-1">
+            {files.map((file) => (
+              <button
+                key={`${file.name}-${file.lastModified}`}
+                onClick={() => setFiles((current) => current.filter((item) => item !== file))}
+                className="rounded bg-secondary px-2 py-1 text-xs"
+              >
+                {file.name} ×
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <LegacyInput
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(event) => {
+              setFiles((current) =>
+                [...current, ...Array.from(event.target.files || [])].slice(0, 5)
+              );
+              event.target.value = '';
+            }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
+          <LegacyInput
+            type="text"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleSend()}
+            placeholder="Type a message..."
+            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!draft.trim() && files.length === 0}
+            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Share2, FileText, Star, StarOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { FilePreview } from '@/components/ui/FilePreview';
 
 interface Document {
   id: string;
@@ -75,16 +76,7 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
             </div>
 
             <div className="p-6">
-              {/* Document Preview */}
-              <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-8 text-center min-h-[200px] flex items-center justify-center">
-                <div className="text-center">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-sm text-muted-foreground">{document.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {document.size} • v{document.version}
-                  </p>
-                </div>
-              </div>
+              <FilePreview url={document.url} name={document.name} mimeType={document.type} />
 
               {/* Document Details */}
               <div className="grid grid-cols-2 gap-4 mt-6">
@@ -137,7 +129,11 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
 
               {/* Actions */}
               <div className="flex gap-3 mt-6 pt-4 border-t border-border">
-                <Button variant="primary" className="flex-1 gap-2">
+                <Button
+                  variant="primary"
+                  className="flex-1 gap-2"
+                  onClick={() => window.open(document.url, '_blank', 'noopener,noreferrer')}
+                >
                   <Download className="w-4 h-4" />
                   Download
                 </Button>
