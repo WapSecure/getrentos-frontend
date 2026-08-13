@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import {
   Folder,
@@ -116,7 +118,7 @@ export const DocumentCategories = ({
         {isAddingCategory ? (
           <div className="mt-2 p-2 border-t border-border">
             <div className="flex gap-2">
-              <input
+              <LegacyInput
                 type="text"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}

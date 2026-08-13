@@ -7,6 +7,7 @@ import type { AdminPermission, AdminStaffRole } from '@/types/admin';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@/lib/apiHelpers';
 import { adminKeys } from '@/lib/queryKeys';
+import { Select } from '@/components/ui/Select';
 
 const permissionLabels: Record<AdminPermission, string> = {
   'dashboard.view': 'View operations dashboard',
@@ -100,19 +101,14 @@ export default function AdminAccessPage() {
                     <p className="font-medium text-foreground">{member.legalName}</p>
                     <p className="text-sm text-muted-foreground">{member.email ?? 'No email address'}</p>
                   </div>
-                  <select
-                    aria-label={`Role for ${member.legalName}`}
+                  <Select
+                    ariaLabel={`Role for ${member.legalName}`}
                     value={currentRole}
                     disabled={updateRolesMutation.isPending}
-                    onChange={(event) =>
-                      updateRolesMutation.mutate({ id: member.id, role: event.target.value as AdminStaffRole })
-                    }
-                    className="rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {Object.entries(ADMIN_ROLE_DETAILS).map(([role, details]) => (
-                      <option key={role} value={role}>{details.label}</option>
-                    ))}
-                  </select>
+                    onValueChange={(role) => updateRolesMutation.mutate({ id: member.id, role: role as AdminStaffRole })}
+                    options={Object.entries(ADMIN_ROLE_DETAILS).map(([role, details]) => ({ value: role, label: details.label }))}
+                    className="w-full sm:w-60"
+                  />
                 </div>
               );
             })}

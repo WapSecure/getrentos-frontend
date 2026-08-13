@@ -1,10 +1,15 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, Image as ImageIcon, Video } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
+import { Select } from '@/components/ui/Select';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
 
 interface CreateSaleListingModalProps {
@@ -159,25 +164,19 @@ export const CreateSaleListingModal = ({
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Property <span className="text-red-500">*</span>
                         </label>
-                        <select
+                        <Select
                           value={form.propertyId}
-                          onChange={(e) => update('propertyId', e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                          <option value="">Select a verified property</option>
-                          {verifiedProperties.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name}
-                            </option>
-                          ))}
-                        </select>
+                          onValueChange={(value) => update('propertyId', value)}
+                          placeholder="Select a verified property"
+                          options={verifiedProperties.map((property) => ({ value: property.id, label: property.name }))}
+                        />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Listing Title <span className="text-red-500">*</span>
                         </label>
-                        <input
+                        <LegacyInput
                           type="text"
                           value={form.listingTitle}
                           onChange={(e) => update('listingTitle', e.target.value)}
@@ -190,7 +189,7 @@ export const CreateSaleListingModal = ({
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Asking Price (₦) <span className="text-red-500">*</span>
                         </label>
-                        <input
+                        <LegacyInput
                           type="number"
                           min={0}
                           value={form.askingPrice}
@@ -211,7 +210,7 @@ export const CreateSaleListingModal = ({
                           <label className="block text-sm font-medium text-foreground mb-1">
                             Size (sqm)
                           </label>
-                          <input
+                          <LegacyInput
                             type="number"
                             min={0}
                             value={form.propertySize}
@@ -223,7 +222,7 @@ export const CreateSaleListingModal = ({
                           <label className="block text-sm font-medium text-foreground mb-1">
                             Bedrooms
                           </label>
-                          <input
+                          <LegacyInput
                             type="number"
                             min={0}
                             value={form.bedrooms}
@@ -235,7 +234,7 @@ export const CreateSaleListingModal = ({
                           <label className="block text-sm font-medium text-foreground mb-1">
                             Bathrooms
                           </label>
-                          <input
+                          <LegacyInput
                             type="number"
                             min={0}
                             value={form.bathrooms}
@@ -249,7 +248,7 @@ export const CreateSaleListingModal = ({
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Description
                         </label>
-                        <textarea
+                        <Textarea
                           value={form.description}
                           onChange={(e) => update('description', e.target.value)}
                           rows={3}
@@ -286,7 +285,7 @@ export const CreateSaleListingModal = ({
                     </button>
                   </div>
                   <label className="flex items-center gap-2 text-sm text-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={form.hasVideoTour}
                       onChange={(e) => update('hasVideoTour', e.target.checked)}
@@ -313,7 +312,7 @@ export const CreateSaleListingModal = ({
                             : 'border-border text-muted-foreground'
                         }`}
                       >
-                        <input
+                        <LegacyInput
                           type="checkbox"
                           checked={form.features.includes(feature)}
                           onChange={() => toggleFeature(feature)}
@@ -408,7 +407,7 @@ const UploadField = ({
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-      <input
+      <LegacyInput
         type="file"
         className="hidden"
         onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}

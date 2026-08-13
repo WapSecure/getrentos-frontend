@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useRef } from 'react';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
 
@@ -42,7 +44,7 @@ export function OtpInput({
   return (
     <div className="flex justify-center gap-2" aria-label="Verification code">
       {digits.map((digit, index) => (
-        <input
+        <LegacyInput
           key={index}
           ref={(element) => {
             inputRefs.current[index] = element;

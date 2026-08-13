@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
@@ -150,7 +154,7 @@ export const AddOwnerPropertyModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Property Name <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={form.name}
                       onChange={(e) => update('name', e.target.value)}
@@ -163,7 +167,7 @@ export const AddOwnerPropertyModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Property Type
                     </label>
-                    <select
+                    <LegacySelect
                       value={form.propertyType}
                       onChange={(e) => update('propertyType', e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -173,14 +177,14 @@ export const AddOwnerPropertyModal = ({
                           {t}
                         </option>
                       ))}
-                    </select>
+                    </LegacySelect>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Registered Owner Name <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={form.ownerName}
                       onChange={(e) => update('ownerName', e.target.value)}
@@ -193,7 +197,7 @@ export const AddOwnerPropertyModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Address <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={form.address}
                       onChange={(e) => update('address', e.target.value)}
@@ -207,7 +211,7 @@ export const AddOwnerPropertyModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         City <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <LegacyInput
                         type="text"
                         value={form.city}
                         onChange={(e) => update('city', e.target.value)}
@@ -218,7 +222,7 @@ export const AddOwnerPropertyModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         State <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <LegacyInput
                         type="text"
                         value={form.state}
                         onChange={(e) => update('state', e.target.value)}
@@ -232,7 +236,7 @@ export const AddOwnerPropertyModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Purchase Price (₦)
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         min={0}
                         value={form.purchasePrice}
@@ -244,7 +248,7 @@ export const AddOwnerPropertyModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Estimated Value (₦)
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         min={0}
                         value={form.estimatedValue}
@@ -319,7 +323,7 @@ export const AddOwnerPropertyModal = ({
                     />
                   </div>
                   <label className="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={form.declared}
                       onChange={(e) => update('declared', e.target.checked)}
@@ -411,7 +415,7 @@ const UploadField = ({
     <div>
       <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-        <input
+        <LegacyInput
           type="file"
           className="hidden"
           onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}

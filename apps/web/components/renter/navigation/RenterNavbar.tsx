@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,7 +98,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             <div className="hidden md:flex flex-1 max-w-md mx-4">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
+                <LegacyInput
                   type="text"
                   placeholder={t('nav.search_placeholder')}
                   className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -192,7 +194,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
           <div className="md:hidden py-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <LegacyInput
                 type="text"
                 placeholder={t('nav.search_placeholder')}
                 className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"

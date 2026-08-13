@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { MessageCircle, CheckCircle2, Smartphone, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -75,7 +77,7 @@ export const WhatsAppSettings = () => {
             </label>
             <div className="relative">
               <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
+              <LegacyInput
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -101,7 +103,7 @@ export const WhatsAppSettings = () => {
             <label className="block text-sm font-medium text-foreground mb-1">
               Verification Code
             </label>
-            <input
+            <LegacyInput
               type="text"
               inputMode="numeric"
               value={code}

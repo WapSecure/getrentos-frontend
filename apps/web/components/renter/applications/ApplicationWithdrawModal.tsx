@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
@@ -99,7 +101,7 @@ export const ApplicationWithdrawModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1.5">
                     Reason for withdrawal
                   </label>
-                  <select
+                  <LegacySelect
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -110,7 +112,7 @@ export const ApplicationWithdrawModal = ({
                         {r}
                       </option>
                     ))}
-                  </select>
+                  </LegacySelect>
                 </div>
 
                 <div className="flex gap-3">

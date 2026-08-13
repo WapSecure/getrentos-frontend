@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Bed, Bath, UserPlus, DoorClosed, MoreVertical } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
@@ -137,7 +139,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                         <label className="block text-xs font-medium text-foreground mb-1.5">
                           Tenant name
                         </label>
-                        <input
+                        <LegacyInput
                           type="text"
                           autoFocus
                           value={tenantNameInput}

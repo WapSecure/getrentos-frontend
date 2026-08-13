@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, X, Save } from 'lucide-react';
@@ -86,7 +88,7 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
               <p className="text-xs text-muted-foreground mb-3">
                 Get notified when new properties match your criteria
               </p>
-              <input
+              <LegacyInput
                 type="text"
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}

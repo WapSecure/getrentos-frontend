@@ -40,7 +40,7 @@ export const DialogContent = ({ children, className, showClose = true }: DialogC
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md max-h-[90vh] overflow-y-auto bg-card border border-border rounded-lg focus:outline-none',
+          'fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-border bg-card shadow-[0_24px_80px_rgba(0,0,0,0.28)] focus:outline-none',
           className
         )}
       >

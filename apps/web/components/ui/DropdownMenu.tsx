@@ -17,7 +17,7 @@ export const DropdownMenuContent = ({
       sideOffset={sideOffset}
       align={align}
       className={cn(
-        'z-50 w-64 rounded-lg border border-border bg-card shadow-lg focus:outline-none',
+        'z-[70] w-64 rounded-2xl border border-border bg-card p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none',
         className
       )}
       {...props}
@@ -28,8 +28,8 @@ export const DropdownMenuContent = ({
 export const DropdownMenuItem = ({ className, ...props }: RadixDropdown.DropdownMenuItemProps) => (
   <RadixDropdown.Item
     className={cn(
-      'flex items-center gap-3 px-4 py-2 text-sm text-foreground cursor-pointer outline-none transition-colors',
-      'hover:bg-secondary focus:bg-secondary data-disabled:opacity-50 data-disabled:cursor-not-allowed',
+      'flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground outline-none transition-colors',
+      'hover:bg-secondary focus:bg-secondary data-disabled:cursor-not-allowed data-disabled:opacity-50',
       className
     )}
     {...props}

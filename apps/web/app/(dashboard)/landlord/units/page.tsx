@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -107,7 +111,7 @@ function LandlordUnitsPageContent() {
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <LegacyInput
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -115,7 +119,7 @@ function LandlordUnitsPageContent() {
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-        <select
+        <LegacySelect
           value={propertyFilter}
           onChange={(e) => setPropertyFilter(e.target.value)}
           className="px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -126,7 +130,7 @@ function LandlordUnitsPageContent() {
               {p.name}
             </option>
           ))}
-        </select>
+        </LegacySelect>
       </div>
 
       <UnitsTable

@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Wifi } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
@@ -77,7 +79,7 @@ export const FieldPreferencesSettings = () => {
           <label className="block text-sm font-medium text-foreground mb-1">
             Max Tasks Per Day
           </label>
-          <input
+          <LegacyInput
             type="number"
             min={1}
             max={20}

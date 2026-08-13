@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -123,7 +125,7 @@ export const NotificationPreferences = () => {
               {pref.enabled && (
                 <div className="mt-3 pt-3 border-t border-border flex gap-4">
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={pref.channels.email}
                       onChange={() => toggleChannel(pref.id, 'email')}
@@ -132,7 +134,7 @@ export const NotificationPreferences = () => {
                     Email
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={pref.channels.push}
                       onChange={() => toggleChannel(pref.id, 'push')}
@@ -141,7 +143,7 @@ export const NotificationPreferences = () => {
                     Push
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={pref.channels.inApp}
                       onChange={() => toggleChannel(pref.id, 'inApp')}

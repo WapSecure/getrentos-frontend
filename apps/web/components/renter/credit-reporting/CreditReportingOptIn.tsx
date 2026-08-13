@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { TrendingUp, ShieldCheck, Building2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -86,7 +88,7 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
           </div>
 
           <label className="flex items-start gap-2 cursor-pointer mb-4">
-            <input
+            <LegacyInput
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}

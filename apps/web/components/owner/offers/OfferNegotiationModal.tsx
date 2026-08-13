@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Check, XCircle, RefreshCcw, Send } from 'lucide-react';
@@ -132,7 +134,7 @@ export const OfferNegotiationModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Counter Amount (₦)
                   </label>
-                  <input
+                  <LegacyInput
                     type="number"
                     min={0}
                     value={counterAmount}
@@ -144,7 +146,7 @@ export const OfferNegotiationModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Note (optional)
                   </label>
-                  <input
+                  <LegacyInput
                     type="text"
                     value={counterNote}
                     onChange={(e) => setCounterNote(e.target.value)}
@@ -197,7 +199,7 @@ export const OfferNegotiationModal = ({
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <input
+                  <LegacyInput
                     type="text"
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}

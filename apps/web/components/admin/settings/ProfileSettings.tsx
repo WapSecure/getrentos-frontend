@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
@@ -79,7 +81,7 @@ const ProfileSettingsForm = ({ initial }: { initial: AdminProfile }) => {
             {getInitials(fullName || 'Admin')}
           </div>
         )}
-        <input
+        <LegacyInput
           ref={fileInputRef}
           type="file"
           accept="image/*"
@@ -100,7 +102,7 @@ const ProfileSettingsForm = ({ initial }: { initial: AdminProfile }) => {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <input
+          <LegacyInput
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -109,7 +111,7 @@ const ProfileSettingsForm = ({ initial }: { initial: AdminProfile }) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <input
+          <LegacyInput
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -118,7 +120,7 @@ const ProfileSettingsForm = ({ initial }: { initial: AdminProfile }) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <input
+          <LegacyInput
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}

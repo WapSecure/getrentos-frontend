@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, Building2, Wallet, Plus, Trash2 } from 'lucide-react';
@@ -113,7 +115,7 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
       {showAdd && (
         <div className="p-4 border-t border-border">
           <div className="flex gap-2">
-            <input
+            <LegacyInput
               type="text"
               value={last4}
               onChange={(e) => setLast4(e.target.value)}
@@ -121,7 +123,7 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
               maxLength={4}
               className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <input
+            <LegacyInput
               type="text"
               value={expiry}
               onChange={(e) => setExpiry(e.target.value)}

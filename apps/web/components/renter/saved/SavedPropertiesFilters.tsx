@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { LayoutGrid, List, ChevronDown } from 'lucide-react';
 
 interface SavedPropertiesFiltersProps {
@@ -53,7 +55,7 @@ export const SavedPropertiesFilters = ({
 
       <div className="flex items-center gap-3">
         <div className="relative">
-          <select
+          <LegacySelect
             value={sortBy}
             onChange={(e) =>
               setSortBy(e.target.value as 'recent' | 'price-low' | 'price-high' | 'rating')
@@ -65,7 +67,7 @@ export const SavedPropertiesFilters = ({
                 {option.label}
               </option>
             ))}
-          </select>
+          </LegacySelect>
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
 

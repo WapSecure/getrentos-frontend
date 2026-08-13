@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
@@ -139,7 +141,7 @@ export const OwnerVerificationStatusModal = ({
                     Upload updated document
                   </label>
                   <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-                    <input
+                    <LegacyInput
                       type="file"
                       className="hidden"
                       onChange={(e) => setResubmitFileName(e.target.files?.[0]?.name || '')}

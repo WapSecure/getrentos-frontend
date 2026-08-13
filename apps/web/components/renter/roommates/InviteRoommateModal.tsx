@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, UserPlus } from 'lucide-react';
@@ -56,7 +60,7 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
                   Email Address <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2">
-                  <input
+                  <LegacyInput
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -82,7 +86,7 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Personal Message (Optional)
                 </label>
-                <textarea
+                <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Hi! I'd like to invite you to join my household on GetRentos..."

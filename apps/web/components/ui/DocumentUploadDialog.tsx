@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Upload as UploadIcon, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
+import { Field } from '@/components/ui/Field';
+import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/cn';
 
 export interface UploadedDocumentData {
@@ -126,20 +128,13 @@ export const DocumentUploadDialog = ({
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Category</label>
-            <select
+          <Field label="Category">
+            <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {categories.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              onValueChange={setCategory}
+              options={categories}
+            />
+          </Field>
 
           <Button
             variant="primary"

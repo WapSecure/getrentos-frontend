@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
@@ -29,7 +31,7 @@ export const BusinessPreferencesSettings = () => {
           <label className="block text-sm font-medium text-foreground mb-1">
             Default Commission Rate (%)
           </label>
-          <input
+          <LegacyInput
             type="number"
             min={0}
             max={100}

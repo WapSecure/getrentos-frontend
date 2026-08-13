@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -74,7 +76,7 @@ export const RenterRoommates = () => {
         {showInvite && (
           <div className="p-4 border-b border-border bg-gray-50 dark:bg-white/5">
             <div className="flex gap-2">
-              <input
+              <LegacyInput
                 type="email"
                 placeholder="Enter roommate's email"
                 value={inviteEmail}

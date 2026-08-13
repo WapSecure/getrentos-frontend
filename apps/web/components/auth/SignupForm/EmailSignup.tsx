@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Input } from '@/components/ui/Input';
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -71,7 +75,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
           className={`relative transition-all duration-200 ${focusedField === 'name' ? 'transform scale-[1.02]' : ''}`}
         >
           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-          <input
+          <Input
             type="text"
             {...register('fullName')}
             onFocus={() => setFocusedField('name')}
@@ -96,7 +100,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
           className={`relative transition-all duration-200 ${focusedField === 'email' ? 'transform scale-[1.02]' : ''}`}
         >
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-          <input
+          <Input
             type="email"
             {...register('email')}
             onFocus={() => setFocusedField('email')}
@@ -121,7 +125,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
           className={`relative transition-all duration-200 ${focusedField === 'password' ? 'transform scale-[1.02]' : ''}`}
         >
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-          <input
+          <Input
             type={showPassword ? 'text' : 'password'}
             {...register('password')}
             onFocus={() => setFocusedField('password')}
@@ -181,7 +185,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
           className={`relative transition-all duration-200 ${focusedField === 'confirm' ? 'transform scale-[1.02]' : ''}`}
         >
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-          <input
+          <Input
             type={showConfirmPassword ? 'text' : 'password'}
             {...register('confirmPassword')}
             onFocus={() => setFocusedField('confirm')}
@@ -223,7 +227,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
 
       {/* Terms Agreement */}
       <div className="flex items-start gap-2">
-        <input
+        <LegacyInput
           type="checkbox"
           id="terms"
           required

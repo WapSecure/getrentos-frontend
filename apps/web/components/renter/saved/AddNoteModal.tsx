@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save } from 'lucide-react';
@@ -48,7 +50,7 @@ export const AddNoteModal = ({
             </div>
 
             <div className="p-4">
-              <textarea
+              <Textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add your personal notes about this property..."

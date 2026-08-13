@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Lock, Mail, Phone } from 'lucide-react';
@@ -85,7 +87,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <LegacyInput
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
@@ -98,7 +100,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             <label className="block text-sm font-medium text-foreground mb-1">New Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <LegacyInput
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -113,7 +115,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <LegacyInput
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -136,7 +138,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <LegacyInput
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -148,7 +150,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <LegacyInput
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}

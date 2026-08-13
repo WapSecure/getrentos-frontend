@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -73,7 +75,7 @@ export const AccountDeletion = () => {
         <label className="block text-sm font-medium text-foreground mb-2">
           To confirm, type <span className="font-bold">delete my account</span> below
         </label>
-        <input
+        <LegacyInput
           type="text"
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}
@@ -86,7 +88,7 @@ export const AccountDeletion = () => {
         <label className="block text-sm font-medium text-foreground mb-2">
           Enter your password to confirm
         </label>
-        <input
+        <LegacyInput
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
@@ -98,7 +100,7 @@ export const LeaseTerminationRequest = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Reason for Termination
                 </label>
-                <textarea
+                <Textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Please provide details..."

@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, MapPin } from 'lucide-react';
@@ -85,7 +89,7 @@ const ProfileSettingsForm = ({
           <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <LegacyInput
               type="text"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -98,7 +102,7 @@ const ProfileSettingsForm = ({
           <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <LegacyInput
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -111,7 +115,7 @@ const ProfileSettingsForm = ({
           <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <LegacyInput
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -124,7 +128,7 @@ const ProfileSettingsForm = ({
           <label className="block text-sm font-medium text-foreground mb-1">Location</label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <LegacyInput
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -135,7 +139,7 @@ const ProfileSettingsForm = ({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Bio</label>
-          <textarea
+          <Textarea
             value={formData.bio}
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             rows={3}

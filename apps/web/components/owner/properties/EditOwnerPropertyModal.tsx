@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
@@ -77,7 +79,7 @@ const EditOwnerPropertyForm = ({
       <div className="p-4 space-y-3">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Property Name</label>
-          <input
+          <LegacyInput
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -87,7 +89,7 @@ const EditOwnerPropertyForm = ({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Property Type</label>
-          <input
+          <LegacyInput
             type="text"
             value={propertyType}
             onChange={(e) => setPropertyType(e.target.value)}
@@ -98,7 +100,7 @@ const EditOwnerPropertyForm = ({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Address</label>
-          <input
+          <LegacyInput
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -109,7 +111,7 @@ const EditOwnerPropertyForm = ({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">City</label>
-            <input
+            <LegacyInput
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -118,7 +120,7 @@ const EditOwnerPropertyForm = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">State</label>
-            <input
+            <LegacyInput
               type="text"
               value={state}
               onChange={(e) => setState(e.target.value)}
@@ -131,7 +133,7 @@ const EditOwnerPropertyForm = ({
           <label className="block text-sm font-medium text-foreground mb-1">
             Estimated Value (₦)
           </label>
-          <input
+          <LegacyInput
             type="number"
             min={0}
             value={estimatedValue}

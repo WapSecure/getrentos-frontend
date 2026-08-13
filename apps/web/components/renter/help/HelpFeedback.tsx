@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { Star, Send } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -67,7 +69,7 @@ export const HelpFeedback = () => {
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Your Feedback</label>
-          <textarea
+          <Textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
             placeholder="Tell us what you think..."

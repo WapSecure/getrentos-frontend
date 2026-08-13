@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Upload, CheckCircle, AlertCircle, Shield } from 'lucide-react';
@@ -124,7 +126,7 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Click to upload or drag and drop
                 </span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleIdUpload} />
+                <LegacyInput type="file" accept="image/*" className="hidden" onChange={handleIdUpload} />
               </label>
             </div>
           )}

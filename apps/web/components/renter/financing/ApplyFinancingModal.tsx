@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { ShieldCheck, Zap } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
@@ -118,7 +120,7 @@ export const ApplyFinancingModal = ({
             </div>
 
             <label className="flex items-start gap-2 cursor-pointer">
-              <input
+              <LegacyInput
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}

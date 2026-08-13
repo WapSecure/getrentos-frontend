@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FileText, Check, Users, Clock, Home, DollarSign } from 'lucide-react';
@@ -131,7 +133,7 @@ export const RoommateAgreementModal = ({
               </div>
 
               <div className="flex items-start gap-2 pt-4 border-t border-border">
-                <input
+                <LegacyInput
                   type="checkbox"
                   id="agree"
                   checked={agreed}

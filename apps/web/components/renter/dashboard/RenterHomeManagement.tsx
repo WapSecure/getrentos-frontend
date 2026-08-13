@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -154,7 +156,7 @@ export const RenterHomeManagement = () => {
 
             {showAddGuest && (
               <div className="flex gap-2 mb-3">
-                <input
+                <LegacyInput
                   type="text"
                   placeholder="Guest name"
                   value={guestName}

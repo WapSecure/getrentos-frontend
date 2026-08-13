@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { Check, XCircle, HelpCircle, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
@@ -97,7 +99,7 @@ export const ReviewVerificationModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   {mode === 'reject' ? 'Reason for rejection' : 'What clarification is needed?'}
                 </label>
-                <textarea
+                <Textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}

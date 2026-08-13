@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
@@ -45,7 +47,7 @@ export const DisputePaymentDialog = ({
             <label className="block text-sm font-medium text-foreground mb-1">
               Reason for dispute
             </label>
-            <textarea
+            <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={4}

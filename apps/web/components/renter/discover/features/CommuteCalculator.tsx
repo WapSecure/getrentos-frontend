@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Car, Bus, Train, Clock, Navigation, X } from 'lucide-react';
@@ -70,7 +72,7 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
                   To (work/school)
                 </label>
                 <div className="flex gap-2">
-                  <input
+                  <LegacyInput
                     type="text"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}

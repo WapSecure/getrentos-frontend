@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Wrench, Clock, CheckCircle } from 'lucide-react';
@@ -87,7 +91,7 @@ export const MaintenanceList = ({
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
+                <LegacyInput
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -96,7 +100,7 @@ export const MaintenanceList = ({
                 />
               </div>
 
-              <select
+              <LegacySelect
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -106,9 +110,9 @@ export const MaintenanceList = ({
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
 
-              <select
+              <LegacySelect
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
                 className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -118,7 +122,7 @@ export const MaintenanceList = ({
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
             </div>
           </div>
         </div>

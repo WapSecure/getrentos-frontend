@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -7,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import {
   BACKEND_ROLE_TO_ID,
   ROUTES,
@@ -97,16 +100,11 @@ export const PhoneSignIn = ({
           Phone Number
         </label>
         <div className="relative">
-          <input
+          <Input
             type="tel"
             {...register('identifier')}
-            className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.identifier
-                ? 'border-red-500'
-                : touchedFields.identifier
-                  ? 'border-green-500'
-                  : 'border-gray-300 dark:border-gray-600'
-            }`}
+            className={errors.identifier ? 'border-red-500' : touchedFields.identifier ? 'border-green-500' : undefined}
+            inputClassName="py-3"
             placeholder="+1 234 567 8900"
           />
           {touchedFields.identifier && !errors.identifier && (
@@ -126,10 +124,10 @@ export const PhoneSignIn = ({
           Password
         </label>
         <div className="relative">
-          <input
+          <Input
             type={showPassword ? 'text' : 'password'}
             {...register('password')}
-            className="w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-10"
+            inputClassName="py-3 pr-8"
             placeholder="Enter your password"
           />
           <button
@@ -144,7 +142,7 @@ export const PhoneSignIn = ({
 
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2">
-          <input
+          <LegacyInput
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}

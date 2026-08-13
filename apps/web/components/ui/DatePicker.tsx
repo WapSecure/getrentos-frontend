@@ -78,7 +78,7 @@ export const DatePicker = ({
           type="button"
           disabled={disabled}
           className={cn(
-            'w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-card text-left text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed',
+            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm shadow-[0_1px_1px_rgba(0,0,0,0.02)] transition-[border-color,box-shadow] duration-150 focus:border-primary/70 focus:outline-none focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60',
             className
           )}
         >
@@ -103,31 +103,31 @@ export const DatePicker = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.12 }}
-                className="z-50 w-72 rounded-lg border border-border bg-card p-3 shadow-lg focus:outline-none"
+                className="z-[70] w-72 rounded-2xl border border-border bg-card p-3 shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none"
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setViewMonth((m) => subMonths(m, 1))}
-                    className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                    className="rounded-lg p-1.5 transition-colors hover:bg-secondary focus:outline-none focus:ring-4 focus:ring-primary/12"
                     aria-label="Previous month"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-sm font-medium text-foreground">
+                  <span aria-live="polite" className="text-sm font-semibold tracking-[-0.02em] text-foreground">
                     {format(viewMonth, 'MMMM yyyy')}
                   </span>
                   <button
                     type="button"
                     onClick={() => setViewMonth((m) => addMonths(m, 1))}
-                    className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                    className="rounded-lg p-1.5 transition-colors hover:bg-secondary focus:outline-none focus:ring-4 focus:ring-primary/12"
                     aria-label="Next month"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 mb-1">
+                <div className="mb-1 grid grid-cols-7 gap-1">
                   {WEEKDAY_LABELS.map((label) => (
                     <div
                       key={label}
@@ -152,10 +152,10 @@ export const DatePicker = ({
                         onClick={() => handleSelect(day)}
                         disabled={dayDisabled}
                         className={cn(
-                          'h-8 w-8 rounded-lg text-sm transition-colors flex items-center justify-center',
+                          'flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary',
                           isSameMonth(day, viewMonth) ? 'text-foreground' : 'text-muted-foreground',
                           isSelected
-                            ? 'bg-primary text-primary-foreground font-medium'
+                            ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
                             : 'hover:bg-secondary',
                           isToday(day) && !isSelected && 'ring-1 ring-inset ring-primary',
                           dayDisabled && 'opacity-30 pointer-events-none'
@@ -170,7 +170,7 @@ export const DatePicker = ({
                 <button
                   type="button"
                   onClick={() => handleSelect(new Date())}
-                  className="mt-3 w-full text-center text-xs font-medium text-primary hover:underline py-1"
+                  className="mt-3 w-full rounded-lg py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-accent focus:outline-none focus:ring-4 focus:ring-primary/12"
                 >
                   Today
                 </button>

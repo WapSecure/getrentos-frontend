@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState, useRef } from 'react';
 import { Send, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -73,7 +77,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
 
       <div className="flex items-end gap-2">
         <div className="flex-1 relative">
-          <textarea
+          <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -85,7 +89,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
         </div>
 
         <div className="flex items-center gap-1">
-          <input
+          <LegacyInput
             ref={fileInputRef}
             type="file"
             multiple

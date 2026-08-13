@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -68,7 +72,7 @@ export const AddVendorModal = ({ isOpen, onClose, onSave }: AddVendorModalProps)
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Vendor Name <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -80,7 +84,7 @@ export const AddVendorModal = ({ isOpen, onClose, onSave }: AddVendorModalProps)
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Service Type
                 </label>
-                <select
+                <LegacySelect
                   value={serviceType}
                   onChange={(e) => setServiceType(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -90,13 +94,13 @@ export const AddVendorModal = ({ isOpen, onClose, onSave }: AddVendorModalProps)
                       {type}
                     </option>
                   ))}
-                </select>
+                </LegacySelect>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Phone <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}

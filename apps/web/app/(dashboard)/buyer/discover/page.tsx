@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Building2, ArrowUpDown } from 'lucide-react';
@@ -153,7 +155,7 @@ export default function BuyerDiscoverPage() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
+          <LegacyInput
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

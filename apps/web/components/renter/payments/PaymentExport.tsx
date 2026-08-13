@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, FileText, FileSpreadsheet, X, Check, Calendar } from 'lucide-react';
@@ -124,7 +126,7 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
               {/* Date Range */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Date Range</label>
-                <select
+                <LegacySelect
                   value={dateRange}
                   onChange={(e) =>
                     setDateRange(e.target.value as 'all' | 'last3' | 'last6' | 'last12')
@@ -135,7 +137,7 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
                   <option value="last3">Last 3 Months</option>
                   <option value="last6">Last 6 Months</option>
                   <option value="last12">Last 12 Months</option>
-                </select>
+                </LegacySelect>
               </div>
 
               {/* Export Options */}

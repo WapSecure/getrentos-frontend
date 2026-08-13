@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
@@ -171,7 +173,7 @@ export default function OwnerAnalyticsPage() {
                 <tr key={m.propertyId} className="hover:bg-secondary transition-colors">
                   {isComparing && (
                     <td className="p-4">
-                      <input
+                      <LegacyInput
                         type="checkbox"
                         checked={compareIds.includes(m.propertyId)}
                         onChange={() => toggleCompare(m.propertyId)}

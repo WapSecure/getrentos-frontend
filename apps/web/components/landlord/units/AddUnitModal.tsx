@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -83,7 +87,7 @@ export const AddUnitModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Property <span className="text-red-500">*</span>
                 </label>
-                <select
+                <LegacySelect
                   value={propertyId}
                   onChange={(e) => setSelectedPropertyId(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -93,14 +97,14 @@ export const AddUnitModal = ({
                       {p.name}
                     </option>
                   ))}
-                </select>
+                </LegacySelect>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Unit Name <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="text"
                   value={unitName}
                   onChange={(e) => setUnitName(e.target.value)}
@@ -112,7 +116,7 @@ export const AddUnitModal = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
-                  <input
+                  <LegacyInput
                     type="number"
                     min={0}
                     value={bedrooms}
@@ -124,7 +128,7 @@ export const AddUnitModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Bathrooms
                   </label>
-                  <input
+                  <LegacyInput
                     type="number"
                     min={0}
                     value={bathrooms}
@@ -138,7 +142,7 @@ export const AddUnitModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Monthly Rent (₦) <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="number"
                   min={0}
                   value={monthlyRent}

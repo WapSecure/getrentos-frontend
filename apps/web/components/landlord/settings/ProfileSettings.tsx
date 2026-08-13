@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useRef, useState } from 'react';
 import { getInitials } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
@@ -40,7 +42,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             {getInitials(fullName || 'User')}
           </div>
         )}
-        <input
+        <LegacyInput
           ref={fileInputRef}
           type="file"
           accept="image/*"
@@ -55,7 +57,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <input
+          <LegacyInput
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -64,7 +66,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <input
+          <LegacyInput
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -73,7 +75,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <input
+          <LegacyInput
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -84,7 +86,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           <label className="block text-sm font-medium text-foreground mb-1">
             Company / Business Name <span className="text-gray-400 font-normal">(optional)</span>
           </label>
-          <input
+          <LegacyInput
             type="text"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}

@@ -1,5 +1,11 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Camera, AlertCircle, FileText } from 'lucide-react';
@@ -105,7 +111,7 @@ export const ReportMaintenanceModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Issue Title <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
@@ -121,7 +127,7 @@ export const ReportMaintenanceModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Category <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <LegacySelect
                     value={formData.category}
                     onChange={(e) => handleChange('category', e.target.value)}
                     className={`w-full px-3 py-2 rounded-lg border ${errors.category ? 'border-red-500' : 'border-border'} bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary`}
@@ -132,7 +138,7 @@ export const ReportMaintenanceModal = ({
                         {cat.icon} {cat.label}
                       </option>
                     ))}
-                  </select>
+                  </LegacySelect>
                   {errors.category && (
                     <p className="text-xs text-red-500 mt-1">{errors.category}</p>
                   )}
@@ -142,7 +148,7 @@ export const ReportMaintenanceModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Priority <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <LegacySelect
                     value={formData.priority}
                     onChange={(e) => handleChange('priority', e.target.value)}
                     className={`w-full px-3 py-2 rounded-lg border ${errors.priority ? 'border-red-500' : 'border-border'} bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary`}
@@ -153,7 +159,7 @@ export const ReportMaintenanceModal = ({
                         {p.label} - {p.description}
                       </option>
                     ))}
-                  </select>
+                  </LegacySelect>
                   {errors.priority && (
                     <p className="text-xs text-red-500 mt-1">{errors.priority}</p>
                   )}
@@ -165,7 +171,7 @@ export const ReportMaintenanceModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Description <span className="text-red-500">*</span>
                 </label>
-                <textarea
+                <Textarea
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   placeholder="Detailed description of the issue..."

@@ -1,10 +1,13 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { Select } from '@/components/ui/Select';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 
 interface CreateListingModalProps {
@@ -128,25 +131,19 @@ export const CreateListingModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Unit <span className="text-red-500">*</span>
                     </label>
-                    <select
+                    <Select
                       value={unitId}
-                      onChange={(e) => handleUnitChange(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Select a vacant unit</option>
-                      {vacantUnits.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.propertyName} — {u.unitName}
-                        </option>
-                      ))}
-                    </select>
+                      onValueChange={handleUnitChange}
+                      placeholder="Select a vacant unit"
+                      options={vacantUnits.map((unit) => ({ value: unit.id, label: `${unit.propertyName} — ${unit.unitName}` }))}
+                    />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Listing Title <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={listingTitle}
                       onChange={(e) => setListingTitle(e.target.value)}
@@ -186,7 +183,7 @@ export const CreateListingModal = ({
                         {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
                         <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         value={monthlyRent}
                         onChange={(e) => setMonthlyRent(e.target.value)}
@@ -197,7 +194,7 @@ export const CreateListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Security Deposit (₦)
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         value={securityDeposit}
                         onChange={(e) => setSecurityDeposit(e.target.value)}
@@ -209,7 +206,7 @@ export const CreateListingModal = ({
 
                   {rentPeriod === 'year' && (
                     <label className="flex items-start gap-2 text-sm text-foreground p-3 rounded-lg bg-accent border border-primary/20">
-                      <input
+                      <LegacyInput
                         type="checkbox"
                         checked={allowsMonthlyPayment}
                         onChange={(e) => setAllowsMonthlyPayment(e.target.checked)}
@@ -259,7 +256,7 @@ export const CreateListingModal = ({
 
                   <div className="flex flex-wrap gap-4">
                     <label className="flex items-center gap-2 text-sm text-foreground">
-                      <input
+                      <LegacyInput
                         type="checkbox"
                         checked={allowPets}
                         onChange={(e) => setAllowPets(e.target.checked)}
@@ -268,7 +265,7 @@ export const CreateListingModal = ({
                       Allow pets
                     </label>
                     <label className="flex items-center gap-2 text-sm text-foreground">
-                      <input
+                      <LegacyInput
                         type="checkbox"
                         checked={furnished}
                         onChange={(e) => setFurnished(e.target.checked)}
@@ -277,7 +274,7 @@ export const CreateListingModal = ({
                       Furnished
                     </label>
                     <label className="flex items-center gap-2 text-sm text-foreground">
-                      <input
+                      <LegacyInput
                         type="checkbox"
                         checked={shortLetEnabled}
                         onChange={(e) => setShortLetEnabled(e.target.checked)}

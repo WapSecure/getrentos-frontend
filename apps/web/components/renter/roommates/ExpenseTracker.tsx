@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { DollarSign, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -129,7 +133,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
         <div className="p-4 pt-0">
           {showAddExpense && (
             <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
-              <input
+              <LegacyInput
                 type="text"
                 value={newExpense.description}
                 onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
@@ -137,14 +141,14 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <div className="flex gap-2">
-                <input
+                <LegacyInput
                   type="number"
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
                   placeholder="Amount"
                   className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <select
+                <LegacySelect
                   value={newExpense.category}
                   onChange={(e) =>
                     setNewExpense({ ...newExpense, category: handleCategoryChange(e.target.value) })
@@ -155,9 +159,9 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                   <option value="utilities">Utilities</option>
                   <option value="groceries">Groceries</option>
                   <option value="other">Other</option>
-                </select>
+                </LegacySelect>
               </div>
-              <select
+              <LegacySelect
                 value={newExpense.paidBy}
                 onChange={(e) => setNewExpense({ ...newExpense, paidBy: e.target.value })}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -168,7 +172,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                     {r.name}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
               <div className="flex gap-2">
                 <Button
                   size="sm"

@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
@@ -81,7 +85,7 @@ const EditPropertyForm = ({
       <div className="p-4 space-y-3">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Property Name</label>
-          <input
+          <LegacyInput
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -91,7 +95,7 @@ const EditPropertyForm = ({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Property Type</label>
-          <select
+          <LegacySelect
             value={type}
             onChange={(e) => setType(e.target.value as PropertyType)}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -101,12 +105,12 @@ const EditPropertyForm = ({
                 {t.label}
               </option>
             ))}
-          </select>
+          </LegacySelect>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Address</label>
-          <input
+          <LegacyInput
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -117,7 +121,7 @@ const EditPropertyForm = ({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">City</label>
-            <input
+            <LegacyInput
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -126,7 +130,7 @@ const EditPropertyForm = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">State</label>
-            <input
+            <LegacyInput
               type="text"
               value={state}
               onChange={(e) => setState(e.target.value)}
@@ -137,7 +141,7 @@ const EditPropertyForm = ({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Number of Units</label>
-          <input
+          <LegacyInput
             type="number"
             min={1}
             value={totalUnits}

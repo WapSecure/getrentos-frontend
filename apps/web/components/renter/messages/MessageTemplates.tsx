@@ -1,5 +1,11 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { FileText, Plus, Edit2, Trash2, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -169,21 +175,21 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
         <div className="p-3 pt-0 space-y-3 max-h-96 overflow-y-auto">
           {isAdding && (
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
-              <input
+              <LegacyInput
                 type="text"
                 value={newTemplate.name}
                 onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
                 placeholder="Template name"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <textarea
+              <Textarea
                 value={newTemplate.content}
                 onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
                 placeholder="Template content..."
                 rows={3}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <select
+              <LegacySelect
                 value={newTemplate.category}
                 onChange={(e) =>
                   setNewTemplate({ ...newTemplate, category: handleCategoryChange(e.target.value) })
@@ -195,7 +201,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                     {categoryLabels[cat]}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
               <div className="flex gap-2">
                 <Button
                   size="sm"
@@ -218,19 +224,19 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
             >
               {editingId === template.id && editTemplate ? (
                 <div className="space-y-3">
-                  <input
+                  <LegacyInput
                     type="text"
                     value={editTemplate.name}
                     onChange={(e) => setEditTemplate({ ...editTemplate, name: e.target.value })}
                     className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <textarea
+                  <Textarea
                     value={editTemplate.content}
                     onChange={(e) => setEditTemplate({ ...editTemplate, content: e.target.value })}
                     rows={3}
                     className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <select
+                  <LegacySelect
                     value={editTemplate.category}
                     onChange={(e) =>
                       setEditTemplate({
@@ -245,7 +251,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                         {categoryLabels[cat]}
                       </option>
                     ))}
-                  </select>
+                  </LegacySelect>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveEdit}>
                       Save

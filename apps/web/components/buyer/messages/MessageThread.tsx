@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
 import { getInitials } from '@/lib/format';
@@ -100,14 +102,14 @@ export const MessageThread = ({
       </div>
 
       <div className="p-3 border-t border-border flex items-center gap-2">
-        <input ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
+        <LegacyInput ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
         <button
           onClick={() => fileInputRef.current?.click()}
           className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
         >
           <Paperclip className="w-4 h-4" />
         </button>
-        <input
+        <LegacyInput
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Mail, Phone, CheckCircle, XCircle } from 'lucide-react';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
+import { Input } from '@/components/ui/Input';
 
 interface RequestStepProps {
   method: 'email' | 'phone';
@@ -91,14 +92,13 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           {method === 'email' ? 'Email Address' : 'Phone Number'}
         </label>
         <div className="relative">
-          <input
+          <Input
             type={method === 'email' ? 'email' : 'tel'}
             value={identifier}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
-            className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              touched && error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
+            className={touched && error ? 'border-red-500' : undefined}
+            inputClassName="py-3"
             placeholder={method === 'email' ? 'you@example.com' : '+1 234 567 8900'}
           />
           {touched && !error && identifier && (

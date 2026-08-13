@@ -119,6 +119,52 @@
     letter-spacing: inherit;
   }
 
+  /* A single visual baseline for legacy form markup while screens are migrated to
+     the composable controls in components/ui. The browser fields remain fully
+     semantic (important for password managers and mobile keyboards), but no
+     longer carry the platform's unstyled default presentation. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background-color: var(--color-card);
+    color: var(--color-foreground);
+    box-shadow: 0 1px 1px rgb(0 0 0 / 0.02);
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+  select:focus,
+  textarea:focus {
+    border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent);
+    outline: none;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):disabled,
+  select:disabled,
+  textarea:disabled {
+    cursor: not-allowed;
+    background-color: color-mix(in srgb, var(--color-secondary) 65%, transparent);
+    opacity: 0.6;
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2.5rem;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-muted-foreground) 50%), linear-gradient(135deg, var(--color-muted-foreground) 50%, transparent 50%);
+    background-position: calc(100% - 1rem) calc(50% - 2px), calc(100% - 0.7rem) calc(50% - 2px);
+    background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+    background-repeat: no-repeat;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--color-primary);
+  }
+
   h1,
   h2,
   h3,
@@ -199,5 +245,20 @@
   
   .status-dot-active {
     background-color: #059669;
+  }
+
+  .control-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .control-hint {
+    margin-top: 0.375rem;
+    color: var(--color-muted-foreground);
+    font-size: 0.75rem;
   }
 }

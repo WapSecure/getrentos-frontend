@@ -1,9 +1,12 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import type { RealtorClient, RealtorListing, ListingCategory } from '@/types/realtor';
 
 interface CreateListingModalProps {
@@ -92,18 +95,12 @@ export const CreateListingModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Client <span className="text-red-500">*</span>
                     </label>
-                    <select
+                    <Select
                       value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Select a client</option>
-                      {clients.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.clientName} ({c.role === 'owner' ? 'Owner' : 'Landlord'})
-                        </option>
-                      ))}
-                    </select>
+                      onValueChange={setClientId}
+                      placeholder="Select a client"
+                      options={clients.map((client) => ({ value: client.id, label: `${client.clientName} (${client.role === 'owner' ? 'Owner' : 'Landlord'})` }))}
+                    />
                   </div>
 
                   <div>
@@ -132,7 +129,7 @@ export const CreateListingModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Listing Title <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
@@ -145,17 +142,11 @@ export const CreateListingModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Property Type
                     </label>
-                    <select
+                    <Select
                       value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {propertyTypes.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
+                      onValueChange={setPropertyType}
+                      options={propertyTypes.map((propertyTypeOption) => ({ value: propertyTypeOption, label: propertyTypeOption }))}
+                    />
                   </div>
 
                   <div>
@@ -163,7 +154,7 @@ export const CreateListingModal = ({
                       {category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'}{' '}
                       <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="number"
                       min={0}
                       value={price}
@@ -175,7 +166,7 @@ export const CreateListingModal = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">City</label>
-                      <input
+                      <LegacyInput
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
@@ -186,7 +177,7 @@ export const CreateListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         State
                       </label>
-                      <input
+                      <LegacyInput
                         type="text"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
@@ -200,7 +191,7 @@ export const CreateListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Bedrooms
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         min={0}
                         value={bedrooms}
@@ -212,7 +203,7 @@ export const CreateListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Bathrooms
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         min={0}
                         value={bathrooms}

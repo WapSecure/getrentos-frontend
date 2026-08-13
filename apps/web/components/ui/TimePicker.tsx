@@ -60,7 +60,7 @@ export const TimePicker = ({
           type="button"
           disabled={disabled}
           className={cn(
-            'w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-card text-left text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed',
+            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm shadow-[0_1px_1px_rgba(0,0,0,0.02)] transition-[border-color,box-shadow] duration-150 focus:border-primary/70 focus:outline-none focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60',
             className
           )}
         >
@@ -85,27 +85,33 @@ export const TimePicker = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.12 }}
-                className="z-50 w-40 rounded-lg border border-border bg-card p-1.5 shadow-lg focus:outline-none max-h-64 overflow-y-auto"
+                className="z-[70] w-52 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none"
               >
-                {options.map((option) => {
-                  const isSelected = option.value === value;
-                  return (
-                    <button
-                      key={option.value}
-                      ref={isSelected ? selectedRef : undefined}
-                      type="button"
-                      onClick={() => handleSelect(option.value)}
-                      className={cn(
-                        'w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors',
-                        isSelected
-                          ? 'bg-primary text-primary-foreground font-medium'
-                          : 'text-foreground hover:bg-secondary'
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
+                <div className="border-b border-border bg-secondary/55 px-3 py-2.5">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Time</p>
+                  <p aria-live="polite" className="mt-0.5 text-lg font-semibold tracking-[-0.03em] text-foreground">{selectedLabel ?? placeholder}</p>
+                </div>
+                <div className="max-h-56 overflow-y-auto p-1.5">
+                  {options.map((option) => {
+                    const isSelected = option.value === value;
+                    return (
+                      <button
+                        key={option.value}
+                        ref={isSelected ? selectedRef : undefined}
+                        type="button"
+                        onClick={() => handleSelect(option.value)}
+                        className={cn(
+                          'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary',
+                          isSelected
+                            ? 'bg-primary text-primary-foreground font-medium'
+                            : 'text-foreground hover:bg-secondary'
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </motion.div>
             </RadixPopover.Content>
           </RadixPopover.Portal>

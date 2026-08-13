@@ -1,5 +1,9 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock } from 'lucide-react';
@@ -73,7 +77,7 @@ export const ScheduleViewingModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Lead <span className="text-red-500">*</span>
                 </label>
-                <select
+                <LegacySelect
                   value={leadId}
                   onChange={(e) => setLeadId(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -84,7 +88,7 @@ export const ScheduleViewingModal = ({
                       {l.leadName} — {l.listingTitle}
                     </option>
                   ))}
-                </select>
+                </LegacySelect>
               </div>
 
               <div>
@@ -101,7 +105,7 @@ export const ScheduleViewingModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Notes <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <textarea
+                <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}

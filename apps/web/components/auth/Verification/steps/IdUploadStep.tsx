@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { ArrowLeft, Upload } from 'lucide-react';
 import { VerificationStep } from '@/app/(auth)/verification/page';
 
@@ -69,7 +71,7 @@ export const IdUploadStep = ({
           Click to upload or drag and drop
         </span>
         <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-        <input type="file" accept="image/*" className="hidden" onChange={handleIdUpload} />
+        <LegacyInput type="file" accept="image/*" className="hidden" onChange={handleIdUpload} />
       </label>
 
       <div className="text-center">

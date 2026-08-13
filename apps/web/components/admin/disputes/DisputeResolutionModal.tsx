@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Send } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
@@ -109,7 +111,7 @@ export const DisputeResolutionModal = ({
               </div>
             )}
             <div className="flex gap-2">
-              <input
+              <LegacyInput
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}

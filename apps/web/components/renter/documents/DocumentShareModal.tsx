@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Clock, Shield } from 'lucide-react';
@@ -67,7 +71,7 @@ export const DocumentShareModal = ({
                   Share with email
                 </label>
                 <div className="flex gap-2">
-                  <input
+                  <LegacyInput
                     type="email"
                     value={shareEmail}
                     onChange={(e) => setShareEmail(e.target.value)}
@@ -110,7 +114,7 @@ export const DocumentShareModal = ({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500">Expires after</span>
-                  <select
+                  <LegacySelect
                     value={expiryDays}
                     onChange={(e) => setExpiryDays(Number(e.target.value))}
                     className="px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -119,7 +123,7 @@ export const DocumentShareModal = ({
                     <option value={7}>7 days</option>
                     <option value={30}>30 days</option>
                     <option value={90}>90 days</option>
-                  </select>
+                  </LegacySelect>
                 </div>
               </div>
 

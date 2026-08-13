@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { Volume2, VolumeX, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -59,7 +61,7 @@ export const NotificationSound = () => {
           {isEnabled && (
             <div>
               <label className="block text-xs font-medium text-foreground mb-1">Sound Type</label>
-              <select
+              <LegacySelect
                 value={selectedSound}
                 onChange={(e) => setSelectedSound(e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -69,7 +71,7 @@ export const NotificationSound = () => {
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
             </div>
           )}
         </div>

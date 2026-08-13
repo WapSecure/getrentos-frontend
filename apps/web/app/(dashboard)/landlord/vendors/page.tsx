@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat, Search } from 'lucide-react';
@@ -66,7 +68,7 @@ export default function LandlordVendorsPage() {
 
       <div className="relative max-w-sm mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
+        <LegacyInput
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

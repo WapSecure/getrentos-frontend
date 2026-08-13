@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldAlert } from 'lucide-react';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/cn';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -78,26 +80,20 @@ export default function AdminFraudPage() {
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by subject or entity..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            leadingIcon={<Search className="h-4 w-4" />}
           />
         </div>
-        <select
+        <Select
           value={severityFilter}
-          onChange={(e) => setSeverityFilter(e.target.value as SeverityFilter)}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-fit"
-        >
-          {severityOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onValueChange={(value) => setSeverityFilter(value as SeverityFilter)}
+          options={severityOptions}
+          className="w-full sm:w-48"
+        />
       </div>
 
       <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">

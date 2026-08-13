@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/Input';
 
 interface ResetStepProps {
   newPassword: string;
@@ -21,11 +22,11 @@ export const ResetStep = ({
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           New Password
         </label>
-        <input
+        <Input
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+          inputClassName="py-3"
           placeholder="Enter new password"
         />
       </div>
@@ -34,11 +35,11 @@ export const ResetStep = ({
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           Confirm Password
         </label>
-        <input
+        <Input
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+          inputClassName="py-3"
           placeholder="Confirm new password"
         />
       </div>

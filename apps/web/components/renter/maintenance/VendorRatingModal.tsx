@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, MessageCircle } from 'lucide-react';
@@ -81,7 +83,7 @@ export const VendorRatingModal = ({ isOpen, onClose, onSubmit }: VendorRatingMod
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Feedback (Optional)
                 </label>
-                <textarea
+                <Textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder="Share your experience..."

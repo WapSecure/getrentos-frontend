@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Plus, Trash2, Camera, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import type {
   AgentTask,
   PropertyInspection,
@@ -95,30 +97,23 @@ export const NewInspectionModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Task <span className="text-red-500">*</span>
                 </label>
-                <select
+                <Select
                   value={taskId}
-                  onChange={(e) => setTaskId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select an inspection task</option>
-                  {tasks.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.title} — {t.propertyAddress}
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={setTaskId}
+                  placeholder="Select an inspection task"
+                  options={tasks.map((task) => ({ value: task.id, label: `${task.title} — ${task.propertyAddress}` }))}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Client Name <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder={selectedTask?.assignedBy || 'Client name'}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -134,26 +129,20 @@ export const NewInspectionModal = ({
                   {rooms.map((room, index) => (
                     <div key={index} className="p-3 rounded-lg border border-border space-y-2">
                       <div className="flex gap-2">
-                        <input
+                        <Input
                           type="text"
                           value={room.room}
                           onChange={(e) => updateRoom(index, 'room', e.target.value)}
                           placeholder="e.g. Living Room"
-                          className="flex-1 px-3 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="flex-1"
+                          inputClassName="py-1.5"
                         />
-                        <select
+                        <Select
                           value={room.condition}
-                          onChange={(e) =>
-                            updateRoom(index, 'condition', e.target.value as RoomCondition)
-                          }
-                          className="px-2 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                          {conditionOptions.map((c) => (
-                            <option key={c} value={c}>
-                              {c.charAt(0).toUpperCase() + c.slice(1)}
-                            </option>
-                          ))}
-                        </select>
+                          onValueChange={(value) => updateRoom(index, 'condition', value as RoomCondition)}
+                          options={conditionOptions.map((condition) => ({ value: condition, label: condition.charAt(0).toUpperCase() + condition.slice(1) }))}
+                          className="min-h-9 w-32"
+                        />
                         {rooms.length > 1 && (
                           <button
                             onClick={() => removeRoom(index)}
@@ -163,12 +152,12 @@ export const NewInspectionModal = ({
                           </button>
                         )}
                       </div>
-                      <input
+                      <Input
                         type="text"
                         value={room.notes}
                         onChange={(e) => updateRoom(index, 'notes', e.target.value)}
                         placeholder="Notes (optional)"
-                        className="w-full px-3 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        inputClassName="py-1.5"
                       />
                       <button
                         type="button"

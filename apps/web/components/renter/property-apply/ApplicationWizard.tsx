@@ -1,5 +1,11 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { Check, Upload, FileText, User, Briefcase, ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -116,7 +122,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
         {stepIndex === 0 && (
           <div className="space-y-3">
             <Field label="Full name">
-              <input
+              <LegacyInput
                 value={data.fullName}
                 onChange={(e) => update('fullName', e.target.value)}
                 className={inputClass}
@@ -124,7 +130,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
               />
             </Field>
             <Field label="Email">
-              <input
+              <LegacyInput
                 type="email"
                 value={data.email}
                 onChange={(e) => update('email', e.target.value)}
@@ -133,7 +139,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
               />
             </Field>
             <Field label="Phone number">
-              <input
+              <LegacyInput
                 value={data.phone}
                 onChange={(e) => update('phone', e.target.value)}
                 className={inputClass}
@@ -141,7 +147,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
               />
             </Field>
             <Field label="Current address">
-              <input
+              <LegacyInput
                 value={data.currentAddress}
                 onChange={(e) => update('currentAddress', e.target.value)}
                 className={inputClass}
@@ -154,7 +160,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
         {stepIndex === 1 && (
           <div className="space-y-3">
             <Field label="Employer">
-              <input
+              <LegacyInput
                 value={data.employer}
                 onChange={(e) => update('employer', e.target.value)}
                 className={inputClass}
@@ -162,7 +168,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
               />
             </Field>
             <Field label="Employment status">
-              <select
+              <LegacySelect
                 value={data.employmentStatus}
                 onChange={(e) => update('employmentStatus', e.target.value)}
                 className={inputClass}
@@ -171,10 +177,10 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                 <option value="Self-employed">Self-employed</option>
                 <option value="Business owner">Business owner</option>
                 <option value="Student">Student</option>
-              </select>
+              </LegacySelect>
             </Field>
             <Field label="Monthly income (₦)">
-              <input
+              <LegacyInput
                 inputMode="numeric"
                 value={data.monthlyIncome}
                 onChange={(e) => update('monthlyIncome', e.target.value.replace(/[^0-9]/g, ''))}
@@ -191,7 +197,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                 />
               </Field>
               <Field label="Lease term">
-                <select
+                <LegacySelect
                   value={data.leaseTerm}
                   onChange={(e) => update('leaseTerm', e.target.value)}
                   className={inputClass}
@@ -199,7 +205,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                   <option value="6 months">6 months</option>
                   <option value="12 months">12 months</option>
                   <option value="24 months">24 months</option>
-                </select>
+                </LegacySelect>
               </Field>
             </div>
           </div>
@@ -241,7 +247,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
               </div>
             ))}
             <Field label="Additional notes for the landlord (optional)">
-              <textarea
+              <Textarea
                 value={data.notes}
                 onChange={(e) => update('notes', e.target.value)}
                 className={`${inputClass} min-h-20`}

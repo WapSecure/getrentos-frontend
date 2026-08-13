@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { Search } from 'lucide-react';
 import { getInitials, formatRelativeTime } from '@/lib/format';
 
@@ -32,7 +34,7 @@ export const ConversationList = ({
       <div className="p-3 border-b border-border">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
+          <LegacyInput
             type="text"
             value={searchQuery}
             onChange={(e) => onSearch(e.target.value)}

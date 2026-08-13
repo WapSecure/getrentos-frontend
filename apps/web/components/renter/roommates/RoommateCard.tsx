@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import {
   Mail,
@@ -145,7 +147,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
           <div className="text-right">
             {isEditingShare ? (
               <div className="flex items-center gap-1">
-                <input
+                <LegacyInput
                   type="number"
                   value={sharePercentage}
                   onChange={(e) => setSharePercentage(Number(e.target.value))}

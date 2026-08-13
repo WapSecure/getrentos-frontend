@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { LayoutGrid, List, ChevronDown } from 'lucide-react';
 
 interface ApplicationsFilterSortProps {
@@ -56,7 +58,7 @@ export const ApplicationsFilterSort = ({
 
       <div className="flex items-center gap-3">
         <div className="relative">
-          <select
+          <LegacySelect
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'recent' | 'property' | 'status')}
             className="appearance-none px-4 py-1.5 pr-8 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
@@ -66,7 +68,7 @@ export const ApplicationsFilterSort = ({
                 {option.label}
               </option>
             ))}
-          </select>
+          </LegacySelect>
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
 

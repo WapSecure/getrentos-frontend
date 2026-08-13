@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCcw } from 'lucide-react';
@@ -66,7 +68,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
                 <label className="block text-sm font-medium text-foreground mb-1">
                   New Monthly Rent (₦)
                 </label>
-                <input
+                <LegacyInput
                   type="number"
                   value={newRent}
                   onChange={(e) => setNewRent(e.target.value)}

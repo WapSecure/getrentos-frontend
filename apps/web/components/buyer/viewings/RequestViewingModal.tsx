@@ -6,6 +6,8 @@ import { X, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import type { BuyerPropertyListing } from '@/types/buyer';
 
 interface RequestViewingModalProps {
@@ -63,18 +65,12 @@ export const RequestViewingModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Property <span className="text-red-500">*</span>
                 </label>
-                <select
+                <Select
                   value={propertyId}
-                  onChange={(e) => setPropertyId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select a property</option>
-                  {listings.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.title}
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={setPropertyId}
+                  placeholder="Select a property"
+                  options={listings.map((listing) => ({ value: listing.id, label: listing.title }))}
+                />
               </div>
 
               <div>
@@ -91,12 +87,11 @@ export const RequestViewingModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Notes <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <textarea
+                <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   placeholder="Anything the owner should know"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>

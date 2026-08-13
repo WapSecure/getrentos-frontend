@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { LayoutGrid, List, FileText, Check, ArrowDownUp } from 'lucide-react';
 import { DocumentCard } from './DocumentCard';
@@ -118,7 +120,7 @@ export const DocumentsList = ({
 
         <div className="flex items-center gap-2">
           <div className="relative">
-            <select
+            <LegacySelect
               value={sortBy}
               onChange={handleSortChange}
               className="appearance-none px-3 py-1.5 pr-8 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -126,7 +128,7 @@ export const DocumentsList = ({
               <option value="name">Sort by Name</option>
               <option value="date">Sort by Date</option>
               <option value="size">Sort by Size</option>
-            </select>
+            </LegacySelect>
             <ArrowDownUp className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
 

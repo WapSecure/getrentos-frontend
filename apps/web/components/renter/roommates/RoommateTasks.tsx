@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { Clipboard, Circle, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -58,14 +62,14 @@ export const RoommateTasks = ({ roommates, onCompleteTask }: RoommateTasksProps)
         <div className="p-4 pt-0 space-y-3">
           {/* Add Task */}
           <div className="flex gap-2">
-            <input
+            <LegacyInput
               type="text"
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               placeholder="New task..."
               className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <select
+            <LegacySelect
               value={selectedRoommate || ''}
               onChange={(e) => setSelectedRoommate(e.target.value)}
               className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -76,7 +80,7 @@ export const RoommateTasks = ({ roommates, onCompleteTask }: RoommateTasksProps)
                   {r.name}
                 </option>
               ))}
-            </select>
+            </LegacySelect>
             <Button
               size="sm"
               onClick={handleAddTask}

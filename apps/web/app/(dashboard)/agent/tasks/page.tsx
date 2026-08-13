@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ClipboardList } from 'lucide-react';
@@ -138,7 +142,7 @@ export default function AgentTasksPage() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
+          <LegacyInput
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -146,7 +150,7 @@ export default function AgentTasksPage() {
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-        <select
+        <LegacySelect
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
           className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-fit"
@@ -156,7 +160,7 @@ export default function AgentTasksPage() {
               {option.label}
             </option>
           ))}
-        </select>
+        </LegacySelect>
       </div>
 
       <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">

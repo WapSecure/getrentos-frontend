@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { motion } from 'framer-motion';
 import { CheckCircle, Circle, Camera, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -86,7 +88,7 @@ export const RenterMoveInChecklist = () => {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
-      <input
+      <LegacyInput
         ref={fileInputRef}
         type="file"
         accept="image/*"

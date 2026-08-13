@@ -1,9 +1,13 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
 
 interface MakeOfferModalProps {
@@ -81,18 +85,12 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Property <span className="text-red-500">*</span>
                 </label>
-                <select
+                <Select
                   value={propertyId}
-                  onChange={(e) => setPropertyId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select a property</option>
-                  {listings.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.title}
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={setPropertyId}
+                  placeholder="Select a property"
+                  options={listings.map((listing) => ({ value: listing.id, label: listing.title }))}
+                />
                 {selectedListing && (
                   <p className="text-xs text-gray-400 mt-1">
                     Asking price: ₦{selectedListing.askingPrice.toLocaleString()}
@@ -104,7 +102,7 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Offer Amount (₦) <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="number"
                   min={0}
                   value={offerAmount}
@@ -139,7 +137,7 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Deposit Amount (₦) <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <input
+                <LegacyInput
                   type="number"
                   min={0}
                   value={depositAmount}
@@ -152,12 +150,11 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Message to Owner <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <textarea
+                <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}
                   placeholder="e.g. Pre-approved and ready to close quickly"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>

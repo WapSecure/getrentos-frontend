@@ -21,7 +21,7 @@ export const Card = ({
   static: isStatic = false,
 }: CardProps) => {
   const baseClassName = cn(
-    'bg-card border border-border rounded-lg overflow-hidden transition-all duration-300',
+    'overflow-hidden rounded-2xl border border-border/90 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300',
     className
   );
 

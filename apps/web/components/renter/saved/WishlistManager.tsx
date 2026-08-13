@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, FolderPlus, Trash2, MoreHorizontal, Check, Bookmark } from 'lucide-react';
@@ -104,7 +106,7 @@ export const WishlistManager = ({
           <div key={wishlist.id} className="relative">
             {editingId === wishlist.id ? (
               <div className="p-2 flex gap-2">
-                <input
+                <LegacyInput
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
@@ -169,7 +171,7 @@ export const WishlistManager = ({
               exit={{ opacity: 0, height: 0 }}
               className="mt-2 p-2 border-t border-border"
             >
-              <input
+              <LegacyInput
                 type="text"
                 value={newWishlistName}
                 onChange={(e) => setNewWishlistName(e.target.value)}

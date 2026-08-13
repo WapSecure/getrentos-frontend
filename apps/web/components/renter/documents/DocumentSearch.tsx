@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { Search, X, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -26,7 +30,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
+          <LegacyInput
             type="text"
             value={searchTerm}
             onChange={(e) => onSearch(e.target.value)}
@@ -56,7 +60,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
 
       {showFilters && (
         <div className="flex flex-wrap gap-2 p-3 bg-card rounded-xl border border-border">
-          <select
+          <LegacySelect
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
             className="px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -66,8 +70,8 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
             <option value="receipt">Receipt</option>
             <option value="inspection">Inspection</option>
             <option value="other">Other</option>
-          </select>
-          <select
+          </LegacySelect>
+          <LegacySelect
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
             className="px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -76,7 +80,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
             <option value="active">Active</option>
             <option value="expiring">Expiring</option>
             <option value="expired">Expired</option>
-          </select>
+          </LegacySelect>
           <Button size="sm" variant="ghost">
             Apply Filters
           </Button>

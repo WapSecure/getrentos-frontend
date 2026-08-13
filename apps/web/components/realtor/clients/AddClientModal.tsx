@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, UserPlus } from 'lucide-react';
@@ -55,7 +57,7 @@ export const AddClientModal = ({ isOpen, onClose, onSubmit }: AddClientModalProp
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Client Name <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="text"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
@@ -67,7 +69,7 @@ export const AddClientModal = ({ isOpen, onClose, onSubmit }: AddClientModalProp
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Email <span className="text-red-500">*</span>
                 </label>
-                <input
+                <LegacyInput
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -77,7 +79,7 @@ export const AddClientModal = ({ isOpen, onClose, onSubmit }: AddClientModalProp
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Phone</label>
-                <input
+                <LegacyInput
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}

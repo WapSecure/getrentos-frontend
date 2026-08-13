@@ -6,6 +6,11 @@ import { X, MapPin, Bell, Repeat } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { Field } from '@/components/ui/Field';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import type {
   CalendarEvent,
   CalendarEventFormData,
@@ -78,31 +83,23 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             </div>
 
             <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
+              <Field label="Title" required>
+                <Input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Event title"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Description
-                </label>
-                <textarea
+              <Field label="Description">
+                <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Event description"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-              </div>
+              </Field>
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
@@ -133,36 +130,23 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Event Type</label>
-                <select
+              <Field label="Event Type">
+                <Select
                   value={formData.type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, type: e.target.value as CalendarEventType })
-                  }
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {eventTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  onValueChange={(value) => setFormData({ ...formData, type: value as CalendarEventType })}
+                  options={eventTypes}
+                />
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Location</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="Event location"
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
+              <Field label="Location">
+                <Input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="Event location"
+                  leadingIcon={<MapPin className="h-4 w-4" />}
+                />
+              </Field>
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Color</label>
@@ -184,11 +168,9 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
 
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={formData.reminder}
-                    onChange={(e) => setFormData({ ...formData, reminder: e.target.checked })}
-                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                  <Checkbox
+                    checked={Boolean(formData.reminder)}
+                    onCheckedChange={(reminder) => setFormData({ ...formData, reminder })}
                   />
                   <Bell className="w-4 h-4" />
                   Set Reminder
@@ -196,18 +178,17 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
 
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <Repeat className="w-4 h-4" />
-                  <select
+                  <Select
                     value={formData.recurrence}
-                    onChange={(e) =>
-                      setFormData({ ...formData, recurrence: e.target.value as CalendarRecurrence })
-                    }
-                    className="px-2 py-1 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="none">None</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
+                    onValueChange={(value) => setFormData({ ...formData, recurrence: value as CalendarRecurrence })}
+                    options={[
+                      { value: 'none', label: 'None' },
+                      { value: 'daily', label: 'Daily' },
+                      { value: 'weekly', label: 'Weekly' },
+                      { value: 'monthly', label: 'Monthly' },
+                    ]}
+                    className="min-h-9 w-32"
+                  />
                 </label>
               </div>
             </div>

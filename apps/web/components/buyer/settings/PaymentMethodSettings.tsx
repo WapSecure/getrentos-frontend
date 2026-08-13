@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Landmark, CheckCircle2 } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
@@ -28,7 +30,7 @@ export const PaymentMethodSettings = () => {
           <label className="block text-sm font-medium text-foreground mb-1">Bank Name</label>
           <div className="relative">
             <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <LegacyInput
               type="text"
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
@@ -38,7 +40,7 @@ export const PaymentMethodSettings = () => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Account Number</label>
-          <input
+          <LegacyInput
             type="text"
             value={accountNumber}
             onChange={(e) => setAccountNumber(e.target.value)}
@@ -47,7 +49,7 @@ export const PaymentMethodSettings = () => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Account Name</label>
-          <input
+          <LegacyInput
             type="text"
             value={accountName}
             onChange={(e) => setAccountName(e.target.value)}

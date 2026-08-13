@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { RefreshCcw, Percent } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
@@ -23,7 +25,7 @@ export const PreferencesSettings = () => {
           </label>
           <div className="relative">
             <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <LegacyInput
               type="number"
               min={0}
               max={100}

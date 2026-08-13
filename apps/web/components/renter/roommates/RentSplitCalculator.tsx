@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -89,7 +91,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
           <label className="block text-sm font-medium text-foreground mb-1">
             Total Monthly Rent
           </label>
-          <input
+          <LegacyInput
             type="number"
             value={totalRent}
             onChange={handleTotalRentChange}
@@ -132,7 +134,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
             {roommates.map((r) => (
               <div key={r.id} className="flex items-center gap-2">
                 <span className="text-sm text-foreground flex-1">{r.name}</span>
-                <input
+                <LegacyInput
                   type="number"
                   value={customShares[r.id] || 0}
                   onChange={(e) => handleCustomShareChange(r.id, Number(e.target.value))}

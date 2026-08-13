@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Tag, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -91,7 +93,7 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
         {isAdding && (
           <div className="p-2 mt-2 border-t border-border space-y-2">
             <div className="flex gap-2">
-              <input
+              <LegacyInput
                 type="text"
                 value={newLabelName}
                 onChange={(e) => setNewLabelName(e.target.value)}

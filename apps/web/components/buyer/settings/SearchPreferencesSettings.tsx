@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { SaveButton } from '@/components/ui/SaveButton';
@@ -30,7 +32,7 @@ export const SearchPreferencesSettings = () => {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Min Budget (₦)</label>
-            <input
+            <LegacyInput
               type="number"
               min={0}
               value={minBudget}
@@ -40,7 +42,7 @@ export const SearchPreferencesSettings = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Max Budget (₦)</label>
-            <input
+            <LegacyInput
               type="number"
               min={0}
               value={maxBudget}
@@ -76,7 +78,7 @@ export const SearchPreferencesSettings = () => {
           <label className="block text-sm font-medium text-foreground mb-1">
             Preferred Locations
           </label>
-          <input
+          <LegacyInput
             type="text"
             value={preferredLocations}
             onChange={(e) => setPreferredLocations(e.target.value)}

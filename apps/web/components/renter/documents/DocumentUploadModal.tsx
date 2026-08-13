@@ -1,9 +1,14 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Field } from '@/components/ui/Field';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -154,7 +159,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                       <span className="text-sm text-primary hover:text-primary-hover">
                         Browse files
                       </span>
-                      <input type="file" onChange={handleFileSelect} className="hidden" />
+                      <LegacyInput type="file" onChange={handleFileSelect} className="hidden" />
                     </label>
                     <p className="text-xs text-gray-400 mt-2">PDF, DOC, JPG, PNG up to 10MB</p>
                   </>
@@ -162,67 +167,41 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
               </div>
 
               <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Document Name
-                  </label>
-                  <input
+                <Field label="Document Name">
+                  <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter document name"
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </div>
+                </Field>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Document Type
-                    </label>
-                    <select
+                  <Field label="Document Type">
+                    <Select
                       value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {documentTypes.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                      onValueChange={setType}
+                      options={documentTypes}
+                    />
+                  </Field>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Category
-                    </label>
-                    <select
+                  <Field label="Category">
+                    <Select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                      onValueChange={setCategory}
+                      options={categories.map((categoryOption) => ({ value: categoryOption, label: categoryOption }))}
+                    />
+                  </Field>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Tags (comma separated)
-                  </label>
-                  <input
+                <Field label="Tags (comma separated)">
+                  <Input
                     type="text"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="e.g., important, signed, lease"
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </div>
+                </Field>
               </div>
 
               {isUploading && (

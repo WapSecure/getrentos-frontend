@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -91,7 +93,7 @@ export const MessageReminders = ({
         <div className="p-3 pt-0 space-y-2 max-h-64 overflow-y-auto">
           {isAdding && (
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-2">
-              <input
+              <LegacyInput
                 type="text"
                 value={newReminder.message}
                 onChange={(e) => setNewReminder({ ...newReminder, message: e.target.value })}

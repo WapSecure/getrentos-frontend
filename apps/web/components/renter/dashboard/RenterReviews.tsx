@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { motion } from 'framer-motion';
 import { Star, Star as StarOutline, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -243,7 +245,7 @@ export const RenterReviews = () => {
               </div>
 
               {/* Review Text */}
-              <textarea
+              <Textarea
                 placeholder="Share your experience..."
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}

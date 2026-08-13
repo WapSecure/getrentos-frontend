@@ -2,17 +2,15 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Repeat, Calendar, CheckCircle, Shield, Zap } from 'lucide-react';
+import { Repeat, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
+import { Switch } from '@/components/ui/Switch';
 
 export const AutoPaySetup = () => {
   const [enabled, setEnabled] = useState(false);
   const [frequency, setFrequency] = useState('monthly');
   const [dayOfMonth, setDayOfMonth] = useState(1);
-
-  const handleToggle = () => {
-    setEnabled(!enabled);
-  };
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -22,18 +20,7 @@ export const AutoPaySetup = () => {
             <Repeat className="w-4 h-4 text-primary" />
             <h3 className="font-semibold text-foreground">AutoPay</h3>
           </div>
-          <button
-            onClick={handleToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                enabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
+          <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Enable AutoPay" />
         </div>
         <p className="text-xs text-muted-foreground mt-1">
           Automatically pay rent on time every month
@@ -50,32 +37,22 @@ export const AutoPaySetup = () => {
             <label className="block text-sm font-medium text-foreground mb-1">
               Payment Frequency
             </label>
-            <select
+            <Select
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="yearly">Yearly</option>
-            </select>
+              onValueChange={setFrequency}
+              options={[{ value: 'monthly', label: 'Monthly' }, { value: 'quarterly', label: 'Quarterly' }, { value: 'yearly', label: 'Yearly' }]}
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               Payment Day of Month
             </label>
-            <select
-              value={dayOfMonth}
-              onChange={(e) => setDayOfMonth(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={String(dayOfMonth)}
+              onValueChange={(value) => setDayOfMonth(Number(value))}
+              options={Array.from({ length: 28 }, (_, index) => ({ value: String(index + 1), label: String(index + 1) }))}
+            />
           </div>
 
           <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">

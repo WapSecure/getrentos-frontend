@@ -75,7 +75,7 @@ export const StatCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-lg bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+      className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.10)]"
     >
       <div className="relative p-4">
         <div
@@ -89,7 +89,7 @@ export const StatCard = ({
 
         <div>
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
-          <p className={cn('font-bold text-foreground tracking-tight', valueSize)}>
+          <p className={cn('font-semibold tracking-[-0.03em] text-foreground', valueSize)}>
             {formattedValue}
           </p>
           {subtitle && <p className="text-xs text-muted-foreground/70 mt-1">{subtitle}</p>}

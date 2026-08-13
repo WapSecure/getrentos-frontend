@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,7 +55,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
           Email Address
         </label>
         <div className="relative">
-          <input
+          <LegacyInput
             type="email"
             {...register('identifier')}
             className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${

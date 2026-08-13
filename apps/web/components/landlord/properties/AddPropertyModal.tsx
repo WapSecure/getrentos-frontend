@@ -1,5 +1,11 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { Textarea } from '@/components/ui/Textarea';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, FileText, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
@@ -137,7 +143,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Property Name <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={form.name}
                       onChange={(e) => update('name', e.target.value)}
@@ -150,7 +156,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Property Type
                     </label>
-                    <select
+                    <LegacySelect
                       value={form.type}
                       onChange={(e) => update('type', e.target.value as PropertyType)}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -160,14 +166,14 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                           {t.label}
                         </option>
                       ))}
-                    </select>
+                    </LegacySelect>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Address <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={form.address}
                       onChange={(e) => update('address', e.target.value)}
@@ -181,7 +187,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       <label className="block text-sm font-medium text-foreground mb-1">
                         City <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <LegacyInput
                         type="text"
                         value={form.city}
                         onChange={(e) => update('city', e.target.value)}
@@ -192,7 +198,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       <label className="block text-sm font-medium text-foreground mb-1">
                         State <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <LegacyInput
                         type="text"
                         value={form.state}
                         onChange={(e) => update('state', e.target.value)}
@@ -205,7 +211,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Number of Units
                     </label>
-                    <input
+                    <LegacyInput
                       type="number"
                       min={1}
                       value={form.totalUnits}
@@ -218,7 +224,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Description
                     </label>
-                    <textarea
+                    <Textarea
                       value={form.description}
                       onChange={(e) => update('description', e.target.value)}
                       rows={2}
@@ -254,7 +260,7 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     </button>
                   </div>
                   <label className="flex items-center gap-2 text-sm text-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={form.hasVideoTour}
                       onChange={(e) => update('hasVideoTour', e.target.checked)}
@@ -384,7 +390,7 @@ const UploadField = ({
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-        <input
+        <LegacyInput
           type="file"
           className="hidden"
           onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}

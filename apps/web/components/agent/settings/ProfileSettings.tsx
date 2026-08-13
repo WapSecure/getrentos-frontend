@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useRef, useState } from 'react';
 import { getInitials } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
@@ -38,7 +42,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             {getInitials(fullName || 'User')}
           </div>
         )}
-        <input
+        <LegacyInput
           ref={fileInputRef}
           type="file"
           accept="image/*"
@@ -53,7 +57,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <input
+          <LegacyInput
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -62,7 +66,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <input
+          <LegacyInput
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -71,7 +75,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <input
+          <LegacyInput
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -80,7 +84,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Vehicle Type</label>
-          <select
+          <LegacySelect
             value={vehicleType}
             onChange={(e) => setVehicleType(e.target.value)}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -89,7 +93,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             <option>Motorcycle</option>
             <option>Public Transport</option>
             <option>None</option>
-          </select>
+          </LegacySelect>
         </div>
       </div>
 

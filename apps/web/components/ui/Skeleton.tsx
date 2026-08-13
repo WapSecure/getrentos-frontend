@@ -1,7 +1,7 @@
 import { cn } from '@/lib/cn';
 
 export const Skeleton = ({ className }: { className?: string }) => {
-  return <div className={cn('animate-pulse rounded-md bg-muted', className)} />;
+  return <div className={cn('animate-pulse rounded-lg bg-gradient-to-r from-muted via-secondary to-muted bg-[length:200%_100%]', className)} />;
 };
 
 export const PageLoadingState = () => {
@@ -14,7 +14,7 @@ export const PageLoadingState = () => {
 
 export const TableSkeleton = ({ rows = 6, columns = 5 }: { rows?: number; columns?: number }) => {
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="divide-y divide-border">
         {Array.from({ length: rows }).map((_, rowIndex) => (
           <div key={rowIndex} className="flex items-center gap-6 p-4">

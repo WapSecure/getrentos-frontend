@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -82,7 +86,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
             {/* Location */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Location</label>
-              <input
+              <LegacyInput
                 type="text"
                 value={filters.location}
                 onChange={(e) => handleChange('location', e.target.value)}
@@ -97,14 +101,14 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
                 Price Range (₦)
               </label>
               <div className="flex gap-2">
-                <input
+                <LegacyInput
                   type="number"
                   value={filters.minPrice}
                   onChange={(e) => handleChange('minPrice', e.target.value)}
                   placeholder="Min"
                   className="w-1/2 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <input
+                <LegacyInput
                   type="number"
                   value={filters.maxPrice}
                   onChange={(e) => handleChange('maxPrice', e.target.value)}
@@ -117,7 +121,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
             {/* Bedrooms */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
-              <select
+              <LegacySelect
                 value={filters.bedrooms}
                 onChange={(e) => handleChange('bedrooms', e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -127,13 +131,13 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
                     {option} {option !== 'Any' && option !== '5+' ? 'bed' : ''}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
             </div>
 
             {/* Bathrooms */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Bathrooms</label>
-              <select
+              <LegacySelect
                 value={filters.bathrooms}
                 onChange={(e) => handleChange('bathrooms', e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -143,7 +147,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
                     {option} {option !== 'Any' && option !== '4+' ? 'bath' : ''}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
             </div>
 
             {/* Property Type */}
@@ -151,7 +155,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
               <label className="block text-sm font-medium text-foreground mb-1">
                 Property Type
               </label>
-              <select
+              <LegacySelect
                 value={filters.propertyType}
                 onChange={(e) => handleChange('propertyType', e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -162,13 +166,13 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
                     {type}
                   </option>
                 ))}
-              </select>
+              </LegacySelect>
             </div>
 
             {/* Verified Only Toggle */}
             <div className="flex items-center">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
+                <LegacyInput
                   type="checkbox"
                   checked={filters.verifiedOnly}
                   onChange={(e) => handleChange('verifiedOnly', e.target.checked)}

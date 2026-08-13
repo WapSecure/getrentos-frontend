@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calculator, DollarSign, X, Info, TrendingUp, Home, Wallet } from 'lucide-react';
@@ -145,7 +149,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                     </label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
+                      <LegacyInput
                         type="number"
                         value={downPayment}
                         onChange={(e) => setDownPayment(Number(e.target.value))}
@@ -164,7 +168,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Interest Rate (%)
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         step="0.5"
                         value={interestRate}
@@ -176,7 +180,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Loan Term
                       </label>
-                      <select
+                      <LegacySelect
                         value={loanTerm}
                         onChange={(e) => setLoanTerm(Number(e.target.value))}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -184,7 +188,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                         <option value={15}>15 years</option>
                         <option value={20}>20 years</option>
                         <option value={30}>30 years</option>
-                      </select>
+                      </LegacySelect>
                     </div>
                   </div>
                 </div>

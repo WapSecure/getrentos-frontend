@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Select } from '@/components/ui/Select';
 
 interface FilterState {
   type: string;
@@ -57,29 +58,19 @@ export const MessageFilters = ({
         <div className="p-3 pt-0 grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-foreground mb-1">Message Type</label>
-            <select
+            <Select
               value={filters.type}
-              onChange={(e) => handleFilterChange('type', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">All Messages</option>
-              <option value="unread">Unread</option>
-              <option value="read">Read</option>
-              <option value="sent">Sent by Me</option>
-            </select>
+              onValueChange={(value) => handleFilterChange('type', value)}
+              options={[{ value: 'all', label: 'All Messages' }, { value: 'unread', label: 'Unread' }, { value: 'read', label: 'Read' }, { value: 'sent', label: 'Sent by Me' }]}
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-foreground mb-1">Sort By</label>
-            <select
+            <Select
               value={filters.sortBy}
-              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="recent">Most Recent</option>
-              <option value="oldest">Oldest</option>
-              <option value="unread">Unread First</option>
-              <option value="property">By Property</option>
-            </select>
+              onValueChange={(value) => handleFilterChange('sortBy', value)}
+              options={[{ value: 'recent', label: 'Most Recent' }, { value: 'oldest', label: 'Oldest' }, { value: 'unread', label: 'Unread First' }, { value: 'property', label: 'By Property' }]}
+            />
           </div>
         </div>
       )}

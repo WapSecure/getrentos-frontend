@@ -1,5 +1,9 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
+import { LegacySelect } from '@/components/ui/LegacySelect';
+
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -109,7 +113,7 @@ export const CreateLeaseModal = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Unit <span className="text-red-500">*</span>
                     </label>
-                    <select
+                    <LegacySelect
                       value={unitId}
                       onChange={(e) => handleUnitChange(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -120,14 +124,14 @@ export const CreateLeaseModal = ({
                           {u.propertyName} — {u.unitName}
                         </option>
                       ))}
-                    </select>
+                    </LegacySelect>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Tenant Name <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <LegacyInput
                       type="text"
                       value={tenantName}
                       onChange={(e) => setTenantName(e.target.value)}
@@ -156,7 +160,7 @@ export const CreateLeaseModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Rent Amount (₦) <span className="text-red-500">*</span>
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         value={rentAmount}
                         onChange={(e) => setRentAmount(e.target.value)}
@@ -167,7 +171,7 @@ export const CreateLeaseModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Deposit (₦)
                       </label>
-                      <input
+                      <LegacyInput
                         type="number"
                         value={securityDeposit}
                         onChange={(e) => setSecurityDeposit(e.target.value)}

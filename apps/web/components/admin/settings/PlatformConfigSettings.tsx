@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
@@ -93,7 +95,7 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
           <label className="block text-sm font-medium text-foreground mb-1">
             Minimum Trust Score for Auto-Approval
           </label>
-          <input
+          <LegacyInput
             type="number"
             min={0}
             max={100}
@@ -107,7 +109,7 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
           <label className="block text-sm font-medium text-foreground mb-1">
             Escrow Verification Hold Period (days)
           </label>
-          <input
+          <LegacyInput
             type="number"
             min={0}
             max={30}

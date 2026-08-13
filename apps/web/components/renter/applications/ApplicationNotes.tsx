@@ -1,5 +1,7 @@
 'use client';
 
+import { Textarea } from '@/components/ui/Textarea';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit2, Trash2, Clock } from 'lucide-react';
@@ -83,7 +85,7 @@ export const ApplicationNotes = ({
           exit={{ opacity: 0, height: 0 }}
           className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border"
         >
-          <textarea
+          <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Add your notes about this application..."
@@ -116,7 +118,7 @@ export const ApplicationNotes = ({
           >
             {editingId === note.id ? (
               <div className="space-y-2">
-                <textarea
+                <Textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   rows={2}

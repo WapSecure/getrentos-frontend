@@ -1,5 +1,7 @@
 'use client';
 
+import { LegacyInput } from '@/components/ui/LegacyInput';
+
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from 'lucide-react';
@@ -173,7 +175,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
               {pref.enabled && (
                 <div className="mt-3 pt-3 border-t border-border flex gap-4">
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={pref.channels.email}
                       onChange={() => toggleChannel(pref.id, 'email')}
@@ -182,7 +184,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
                     Email
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={pref.channels.push}
                       onChange={() => toggleChannel(pref.id, 'push')}
@@ -191,7 +193,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
                     Push
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
+                    <LegacyInput
                       type="checkbox"
                       checked={pref.channels.inApp}
                       onChange={() => toggleChannel(pref.id, 'inApp')}
