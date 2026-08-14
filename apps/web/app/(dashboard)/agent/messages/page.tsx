@@ -9,72 +9,12 @@ import { cn } from '@/lib/cn';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
-
-const mockConversations: Conversation[] = [
-  {
-    id: 'conv_001',
-    participantName: 'GetRentos Dispatch',
-    participantRole: 'Dispatcher',
-    lastMessage: 'New inspection assigned for Ocean View Towers.',
-    lastMessageTime: '2026-08-08T09:20:00.000Z',
-    unreadCount: 1,
-  },
-  {
-    id: 'conv_002',
-    participantName: 'Adaeze Okafor',
-    participantRole: 'Client',
-    lastMessage: 'Please let me know once the tenant verification is done.',
-    lastMessageTime: '2026-08-07T16:00:00.000Z',
-    unreadCount: 0,
-  },
-  {
-    id: 'conv_003',
-    participantName: 'GetRentos Support',
-    participantRole: 'Support',
-    lastMessage: 'Your offline sync completed successfully.',
-    lastMessageTime: '2026-08-07T18:00:00.000Z',
-    unreadCount: 0,
-  },
-];
-
-const mockMessages: Record<string, ThreadMessage[]> = {
-  conv_001: [
-    {
-      id: 'm1',
-      senderId: 'contact',
-      text: 'New inspection assigned for Ocean View Towers.',
-      timestamp: '2026-08-08T09:20:00.000Z',
-      read: false,
-    },
-  ],
-  conv_002: [
-    {
-      id: 'm1',
-      senderId: 'agent',
-      text: 'On my way to verify the tenant now.',
-      timestamp: '2026-08-07T15:50:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'contact',
-      text: 'Please let me know once the tenant verification is done.',
-      timestamp: '2026-08-07T16:00:00.000Z',
-      read: true,
-    },
-  ],
-  conv_003: [
-    {
-      id: 'm1',
-      senderId: 'contact',
-      text: 'Your offline sync completed successfully.',
-      timestamp: '2026-08-07T18:00:00.000Z',
-      read: true,
-    },
-  ],
-};
+import { useAgentUser } from '../layout';
+import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
+import { enqueueAgentBinaryOperation } from '@/lib/agentBinaryQueue';
 
 export default function AgentMessagesPage() {
+  const agent = useAgentUser();
   const queryClient = useQueryClient();
   const { data: conversationApi = [] } = useQuery({
     queryKey: agentKeys.conversations,
@@ -90,6 +30,17 @@ export default function AgentMessagesPage() {
   }));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: clients = [] } = useQuery({
+    queryKey: agentKeys.clients,
+    queryFn: () => unwrap(agentService.listAgentClients()),
+  });
+  const startConversation = useMutation({
+    mutationFn: (clientId: string) => unwrap(agentService.startConversation(clientId)),
+    onSuccess: (conversation: { id: string }) => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.conversations });
+      setActiveId(conversation.id);
+    },
+  });
   const { data: messageApi = [] } = useQuery({
     queryKey: agentKeys.conversationMessages(activeId || 'none'),
     queryFn: () => unwrap(agentService.getMessages(activeId!)),
@@ -97,18 +48,29 @@ export default function AgentMessagesPage() {
   });
   const messages: ThreadMessage[] = messageApi.map((item) => ({
     id: item.id,
-    senderId: item.senderId === 'agent' ? 'agent' : 'contact',
+    senderId: item.senderId === agent?.id ? 'agent' : 'contact',
     text: item.text,
     timestamp: item.createdAt,
     read: item.read,
   }));
   const send = useMutation({
-    mutationFn: (text: string) => unwrap(agentService.sendMessage(activeId!, text)),
+    mutationFn: ({ text, files }: { text: string; files: File[] }) =>
+      unwrap(agentService.sendMessage(activeId!, text, files)),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: agentKeys.conversationMessages(activeId || 'none'),
       });
       queryClient.invalidateQueries({ queryKey: agentKeys.conversations });
+    },
+    onError: (_error, payload) => {
+      if (!activeId) return;
+      if (payload.files.length)
+        void enqueueAgentBinaryOperation(
+          'message',
+          { id: activeId, text: payload.text },
+          payload.files
+        );
+      else agentOfflineQueue.enqueue('message', { id: activeId, text: payload.text, files: [] });
     },
   });
 
@@ -116,9 +78,9 @@ export default function AgentMessagesPage() {
     setActiveId(id);
   };
 
-  const handleSend = (text: string) => {
+  const handleSend = (text: string, files: File[]) => {
     if (!activeId) return;
-    send.mutate(text);
+    send.mutate({ text, files });
   };
 
   const filteredConversations = conversations.filter((c) =>
@@ -129,7 +91,27 @@ export default function AgentMessagesPage() {
   return (
     <div className="h-[calc(100vh-8rem)]">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+          <select
+            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            defaultValue=""
+            onChange={(event) => {
+              if (event.target.value) startConversation.mutate(event.target.value);
+              event.currentTarget.value = '';
+            }}
+            disabled={startConversation.isPending}
+          >
+            <option value="">New conversation</option>
+            {clients
+              .filter((item) => item.status === 'ACTIVE')
+              .map((item) => (
+                <option key={item.client.id} value={item.client.id}>
+                  {item.client.legalName}
+                </option>
+              ))}
+          </select>
+        </div>
         <p className="text-muted-foreground mt-1">
           Communicate with dispatch, clients, and support
         </p>
