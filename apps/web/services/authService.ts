@@ -100,6 +100,11 @@ export const authService = {
     );
   },
 
+  /** URL to start OAuth sign-in for a provider (browser redirect). */
+  oauthUrl(provider: string): string {
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/auth/oauth/${provider}`;
+  },
+
   async resetPassword(
     reference: string,
     newPassword: string

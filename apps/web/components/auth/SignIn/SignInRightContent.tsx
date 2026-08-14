@@ -6,6 +6,7 @@ import { Shield, ArrowLeft, Mail, Phone, Fingerprint } from 'lucide-react';
 import { EmailSignIn } from './methods/EmailSignIn';
 import { PhoneSignIn } from './methods/PhoneSignIn';
 import { MagicLinkSignIn } from './methods/MagicLinkSignIn';
+import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
@@ -170,6 +171,11 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
         {/* Dynamic Form */}
         {renderMethodComponent()}
+
+        {/* OAuth (Google) */}
+        <div className="mt-5">
+          <OAuthSignIn />
+        </div>
 
         {/* Sign Up Link */}
         <div className="mt-6 text-center">
