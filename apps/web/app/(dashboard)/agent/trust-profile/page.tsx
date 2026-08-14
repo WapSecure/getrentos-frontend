@@ -5,6 +5,11 @@ import { TrustScoreRing } from '@/components/agent/trust/TrustScoreRing';
 import { VerificationList } from '@/components/agent/trust/VerificationList';
 import { TrustBadges } from '@/components/agent/trust/TrustBadges';
 import type { VerificationItem, Badge } from '@/types/trust-score';
+import { useQuery } from '@tanstack/react-query';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
+import { useAgentUser } from '../layout';
 
 const mockVerifications: VerificationItem[] = [
   {
@@ -73,11 +78,14 @@ const mockBadges: Badge[] = [
 ];
 
 export default function AgentTrustProfilePage() {
+  const user = useAgentUser();
+  const { data: dashboard } = useQuery({ queryKey: agentKeys.dashboard, queryFn: () => unwrap(agentService.getDashboard()) });
+  const { data: profile } = useQuery({ queryKey: agentKeys.profile, queryFn: () => unwrap(agentService.getProfile()) });
   const keyStats = [
-    { icon: ClipboardCheck, label: 'Tasks Completed', value: '24' },
-    { icon: Clock, label: 'Avg. Response Time', value: '< 1 hr' },
-    { icon: RefreshCw, label: 'Sync Success Rate', value: '98%' },
-    { icon: Star, label: 'Avg. Rating', value: '4.8 / 5' },
+    { icon: ClipboardCheck, label: 'Tasks Completed', value: String(dashboard?.completedTasks ?? 0) },
+    { icon: Clock, label: 'Tasks In Progress', value: String(dashboard?.inProgressTasks ?? 0) },
+    { icon: RefreshCw, label: 'Assigned Properties', value: String(dashboard?.assignedProperties ?? 0) },
+    { icon: Star, label: 'Overdue Tasks', value: String(dashboard?.overdueTasks ?? 0) },
   ];
 
   return (
@@ -91,7 +99,7 @@ export default function AgentTrustProfilePage() {
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-card rounded-2xl border border-border p-6 flex items-center justify-center">
-          <TrustScoreRing score={89} />
+          <TrustScoreRing score={profile?.trustScore ?? (user ? 0 : 0)} />
         </div>
 
         <div className="lg:col-span-2 grid grid-cols-2 gap-4">

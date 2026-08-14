@@ -19,7 +19,7 @@ interface MessageThreadProps {
   contactName: string;
   contactRole: string;
   messages: ThreadMessage[];
-  onSend: (text: string) => void;
+  onSend: (text: string, files: File[]) => void;
 }
 
 export const MessageThread = ({
@@ -29,22 +29,20 @@ export const MessageThread = ({
   onSend,
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
 
   const handleSend = () => {
-    if (!draft.trim()) return;
-    onSend(draft.trim());
+    if (!draft.trim() && files.length === 0) return;
+    onSend(draft.trim(), files);
     setDraft('');
+    setFiles([]);
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setDraft((prev) =>
-        prev ? `${prev} \ud83d\udcce ${file.name}` : `\ud83d\udcce ${file.name}`
-      );
-    }
+    if (file) setFiles((prev) => [...prev, file]);
     e.target.value = '';
   };
 
@@ -119,7 +117,7 @@ export const MessageThread = ({
         />
         <button
           onClick={handleSend}
-          disabled={!draft.trim()}
+          disabled={!draft.trim() && files.length === 0}
           className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
         >
           <Send className="w-4 h-4" />

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { AgentNavbar } from '@/components/agent/navigation/AgentNavbar';
 import { AgentSidebar } from '@/components/agent/dashboard/AgentSidebar';
+import { AgentOfflineQueueSync } from '@/components/agent/AgentOfflineQueueSync';
 import { PageLoadingState } from '@/components/ui/Skeleton';
 import {
   ROUTES,
@@ -13,7 +14,7 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 
-export type AgentUser = { fullName: string; email: string; role?: string; roles?: string[] };
+export type AgentUser = { id?: string; fullName: string; email: string; role?: string; roles?: string[] };
 
 const AgentUserContext = createContext<AgentUser | null>(null);
 
@@ -60,6 +61,7 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
   return (
     <AgentUserContext.Provider value={user}>
       <div className="min-h-screen bg-background">
+        <AgentOfflineQueueSync />
         <AgentNavbar user={user} />
         <div className="flex">
           <AgentSidebar />

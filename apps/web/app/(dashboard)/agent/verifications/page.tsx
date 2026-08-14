@@ -11,6 +11,7 @@ import type { VerificationVisit } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
+import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
 
 function AgentVerificationsPageContent() {
   const searchParams = useSearchParams();
@@ -43,6 +44,7 @@ function AgentVerificationsPageContent() {
       queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
       queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
     },
+    onError: (_error, visit) => agentOfflineQueue.enqueue('verification', { taskId: visit.taskId, subjectName: visit.subjectName, subjectType: visit.subjectType.toUpperCase(), idVerified: visit.idVerified, addressConfirmed: visit.addressConfirmed, notes: visit.notes || undefined }),
   });
 
   const handleSubmit = (data: Omit<VerificationVisit, 'id' | 'syncStatus'>) => {

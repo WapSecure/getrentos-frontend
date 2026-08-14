@@ -14,6 +14,7 @@ import type { AgentDocument } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
+import { enqueueAgentBinaryOperation } from '@/lib/agentBinaryQueue';
 
 const categoryLabels: Record<AgentDocument['category'], string> = {
   inspection_report: 'Inspection Report',
@@ -33,6 +34,7 @@ export default function AgentDocumentsPage() {
   const upload = useMutation({
     mutationFn: agentService.uploadDocument,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: agentKeys.documents }),
+    onError: (_error, payload) => void enqueueAgentBinaryOperation('document', { name: payload.name, category: payload.category }, [payload.file]),
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');

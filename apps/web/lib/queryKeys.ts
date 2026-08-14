@@ -116,6 +116,7 @@ export const realtorKeys = {
 
 export const agentKeys = {
   dashboard: ['agent', 'dashboard'] as const,
+  profile: ['agent', 'profile'] as const,
   tasks: ['agent', 'tasks'] as const,
   properties: ['agent', 'properties'] as const,
   inspections: ['agent', 'inspections'] as const,
