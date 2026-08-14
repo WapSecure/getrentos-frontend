@@ -1,11 +1,5 @@
 import type { RenterListingsFilters } from '@/services/renterService';
 
-/**
- * Centralized TanStack Query key factories for the pages backed by a real
- * API (landlordService / adminService / renterService). Keeping these here
- * instead of inlining tuples in every page avoids typo-based cache misses
- * and makes invalidation call sites easy to audit.
- */
 export const landlordKeys = {
   dashboardStats: ['landlord', 'dashboardStats'] as const,
   properties: ['landlord', 'properties'] as const,
@@ -118,4 +112,12 @@ export const realtorKeys = {
   conversations: ['realtor', 'conversations'] as const,
   conversationMessages: (conversationId: string) =>
     ['realtor', 'conversations', conversationId, 'messages'] as const,
+};
+
+export const agentKeys = {
+  dashboard: ['agent', 'dashboard'] as const,
+  tasks: ['agent', 'tasks'] as const,
+  properties: ['agent', 'properties'] as const,
+  inspections: ['agent', 'inspections'] as const,
+  clients: ['agent', 'clients'] as const,
 };

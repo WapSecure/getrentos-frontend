@@ -5,55 +5,17 @@ import { AgentDashboardHeader } from '@/components/agent/dashboard/AgentDashboar
 import { AgentStatsCards } from '@/components/agent/dashboard/AgentStatsCards';
 import { AgentTaskList } from '@/components/agent/dashboard/AgentTaskList';
 import { AgentQuickActions } from '@/components/agent/dashboard/AgentQuickActions';
-import type { AgentTask } from '@/types/agent';
-
-const mockStats = {
-  todaysTasks: 3,
-  completedThisWeek: 8,
-  pendingSync: 2,
-  overdueTasks: 1,
-  avgRating: 4.7,
-  avgResponseTime: '< 1 hr',
-};
-
-const mockTodaysTasks: AgentTask[] = [
-  {
-    id: 'task_001',
-    type: 'inspection',
-    title: 'Move-out Inspection',
-    propertyAddress: 'Ocean View Towers, Unit 4B',
-    assignedBy: 'GetRentos Admin',
-    assignedByRole: 'admin',
-    priority: 'high',
-    status: 'assigned',
-    dueDate: '2026-08-08T14:00:00.000Z',
-  },
-  {
-    id: 'task_002',
-    type: 'verification',
-    title: 'Tenant Identity Verification',
-    propertyAddress: 'Palm Court Villa, Unit 2',
-    assignedBy: 'Adaeze Okafor',
-    assignedByRole: 'landlord',
-    priority: 'medium',
-    status: 'assigned',
-    dueDate: '2026-08-08T16:30:00.000Z',
-  },
-  {
-    id: 'task_003',
-    type: 'valuation',
-    title: 'Property Valuation Visit',
-    propertyAddress: 'Ikeja GRA Townhouse',
-    assignedBy: 'Segun Alabi',
-    assignedByRole: 'owner',
-    priority: 'low',
-    status: 'overdue',
-    dueDate: '2026-08-07T12:00:00.000Z',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { agentService, mapAgentTask } from '@/services/agentService';
+import { agentKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 
 export default function AgentDashboardPage() {
   const user = useAgentUser();
+  const { data: dashboard } = useQuery({
+    queryKey: agentKeys.dashboard,
+    queryFn: () => unwrap(agentService.getDashboard()),
+  });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -65,11 +27,18 @@ export default function AgentDashboardPage() {
     <>
       <AgentDashboardHeader greeting={greeting} firstName={firstName} />
 
-      <AgentStatsCards {...mockStats} />
+      <AgentStatsCards
+        todaysTasks={dashboard?.assignedTasks ?? 0}
+        completedThisWeek={dashboard?.completedTasks ?? 0}
+        pendingSync={dashboard?.inProgressTasks ?? 0}
+        overdueTasks={dashboard?.overdueTasks ?? 0}
+        avgRating={0}
+        avgResponseTime="—"
+      />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <AgentTaskList tasks={mockTodaysTasks} />
+          <AgentTaskList tasks={(dashboard?.upcomingTasks ?? []).map(mapAgentTask)} />
         </div>
         <div>
           <AgentQuickActions />

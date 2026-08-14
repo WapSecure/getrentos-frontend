@@ -7,74 +7,24 @@ import { LegacySelect } from '@/components/ui/LegacySelect';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ClipboardList } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';
 import { ROUTES } from '@/lib/constants/auth';
-
-const mockTasks: AgentTask[] = [
-  {
-    id: 'task_001',
-    type: 'inspection',
-    title: 'Move-out Inspection',
-    propertyAddress: 'Ocean View Towers, Unit 4B',
-    assignedBy: 'GetRentos Admin',
-    assignedByRole: 'admin',
-    priority: 'high',
-    status: 'assigned',
-    dueDate: '2026-08-08T14:00:00.000Z',
-  },
-  {
-    id: 'task_002',
-    type: 'verification',
-    title: 'Tenant Identity Verification',
-    propertyAddress: 'Palm Court Villa, Unit 2',
-    assignedBy: 'Adaeze Okafor',
-    assignedByRole: 'landlord',
-    priority: 'medium',
-    status: 'assigned',
-    dueDate: '2026-08-08T16:30:00.000Z',
-  },
-  {
-    id: 'task_003',
-    type: 'valuation',
-    title: 'Property Valuation Visit',
-    propertyAddress: 'Ikeja GRA Townhouse',
-    assignedBy: 'Segun Alabi',
-    assignedByRole: 'owner',
-    priority: 'low',
-    status: 'overdue',
-    dueDate: '2026-08-07T12:00:00.000Z',
-  },
-  {
-    id: 'task_004',
-    type: 'inspection',
-    title: 'Move-in Inspection',
-    propertyAddress: 'Surulere Family Duplex',
-    assignedBy: 'GetRentos Admin',
-    assignedByRole: 'admin',
-    priority: 'medium',
-    status: 'in_progress',
-    dueDate: '2026-08-08T10:00:00.000Z',
-  },
-  {
-    id: 'task_005',
-    type: 'document_pickup',
-    title: 'Pick up signed lease',
-    propertyAddress: 'Modern 2-Bed Flat, Ikeja GRA',
-    assignedBy: 'Emeka Chukwu',
-    assignedByRole: 'landlord',
-    priority: 'low',
-    status: 'completed',
-    dueDate: '2026-08-05T00:00:00.000Z',
-  },
-];
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
 
 type StatusFilter = 'all' | TaskStatus;
 type TypeFilter = 'all' | TaskType;
 
 export default function AgentTasksPage() {
   const router = useRouter();
-  const [tasks, setTasks] = useState<AgentTask[]>(mockTasks);
+  const queryClient = useQueryClient();
+  const { data: tasks = [], error } = useQuery({
+    queryKey: agentKeys.tasks,
+    queryFn: () => unwrap(agentService.listTasks()),
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
 
@@ -88,16 +38,21 @@ export default function AgentTasksPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
 
-  const updateStatus = (taskId: string, status: TaskStatus) => {
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status } : t)));
-  };
+  const updateStatus = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
+      unwrap(agentService.updateTaskStatus(taskId, status.toUpperCase() as Uppercase<TaskStatus>)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
+      queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
+    },
+  });
 
   const handleStart = (task: AgentTask) => {
-    updateStatus(task.id, 'in_progress');
+    updateStatus.mutate({ taskId: task.id, status: 'in_progress' });
   };
 
   const handleComplete = (task: AgentTask) => {
-    updateStatus(task.id, 'completed');
+    updateStatus.mutate({ taskId: task.id, status: 'completed' });
     if (task.type === 'inspection') {
       router.push(`${ROUTES.AGENT_INSPECTIONS}?task=${task.id}`);
     } else if (task.type === 'verification') {
@@ -138,6 +93,17 @@ export default function AgentTasksPage() {
           {tasks.length} task{tasks.length === 1 ? '' : 's'} assigned to you
         </p>
       </div>
+
+      {error && (
+        <p className="mb-4 text-sm text-red-600" role="alert">
+          Unable to load tasks. Please refresh and try again.
+        </p>
+      )}
+      {updateStatus.error && (
+        <p className="mb-4 text-sm text-red-600" role="alert">
+          Unable to update that task. Please try again.
+        </p>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
@@ -202,7 +168,7 @@ export default function AgentTasksPage() {
               delay={index * 0.05}
               onStart={() => handleStart(task)}
               onComplete={() => handleComplete(task)}
-              onCancel={() => updateStatus(task.id, 'cancelled')}
+              onCancel={() => updateStatus.mutate({ taskId: task.id, status: 'cancelled' })}
             />
           ))}
         </div>
