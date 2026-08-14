@@ -1,71 +1,26 @@
 'use client';
 
 import { useOwnerUser } from '../layout';
-import { useState } from 'react';
 import { Building2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { OwnerDashboardHeader } from '@/components/owner/dashboard/OwnerDashboardHeader';
 import { OwnerStatsCards } from '@/components/owner/dashboard/OwnerStatsCards';
 import { OwnerPortfolioChart } from '@/components/owner/dashboard/OwnerPortfolioChart';
 import { OwnerActivityFeed } from '@/components/owner/dashboard/OwnerActivityFeed';
 import { OwnerQuickActions } from '@/components/owner/dashboard/OwnerQuickActions';
 import { Button } from '@/components/ui/Button';
-import type { OwnerProperty } from '@/types/owner';
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-
-const mockProperties: OwnerProperty[] = [
-  {
-    id: 'oprop_001',
-    name: 'Ocean View Towers',
-    propertyType: 'Apartment',
-    address: '3 Bar Beach Way',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'verified',
-    estimatedValue: 145_000_000,
-    purchasePrice: 118_000_000,
-    purchaseDate: '2022-03-10T00:00:00.000Z',
-    hasActiveSaleListing: true,
-    createdAt: '2022-03-10T00:00:00.000Z',
-  },
-  {
-    id: 'oprop_002',
-    name: 'Palm Court Villa',
-    propertyType: 'Duplex',
-    address: '18 Chevron Drive',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'verified',
-    estimatedValue: 92_000_000,
-    purchasePrice: 76_000_000,
-    purchaseDate: '2021-09-01T00:00:00.000Z',
-    hasActiveSaleListing: true,
-    createdAt: '2021-09-01T00:00:00.000Z',
-  },
-  {
-    id: 'oprop_003',
-    name: 'Lekki Waterfront Duplex',
-    propertyType: 'Duplex',
-    address: '7 Freedom Way',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'pending_review',
-    estimatedValue: 71_500_000,
-    purchasePrice: 71_500_000,
-    purchaseDate: '2025-06-15T00:00:00.000Z',
-    hasActiveSaleListing: false,
-    createdAt: '2025-06-15T00:00:00.000Z',
-  },
-];
 
 export default function OwnerDashboardPage() {
   const user = useOwnerUser();
-  const [properties] = useState<OwnerProperty[]>(mockProperties);
+
+  const { data: dashboard, isLoading } = useQuery({
+    queryKey: ownerKeys.dashboard,
+    queryFn: () => unwrap(ownerService.getDashboard()),
+  });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -73,17 +28,13 @@ export default function OwnerDashboardPage() {
   if (currentHour >= 12 && currentHour < 18) greeting = 'Good afternoon';
   if (currentHour >= 18) greeting = 'Good evening';
 
-  const totalPortfolioValue = properties.reduce((sum, p) => sum + p.estimatedValue, 0);
-  const activeSaleListings = properties.filter((p) => p.hasActiveSaleListing).length;
-  const buyerInquiries = 5;
-  const pendingOffers = 2;
-  const completedSales = 3;
+  const totalProperties = dashboard?.totalProperties ?? 0;
 
   return (
     <>
       <OwnerDashboardHeader greeting={greeting} firstName={firstName} />
 
-      {properties.length === 0 ? (
+      {!isLoading && totalProperties === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
@@ -100,12 +51,15 @@ export default function OwnerDashboardPage() {
       ) : (
         <>
           <OwnerStatsCards
-            totalProperties={properties.length}
-            activeSaleListings={activeSaleListings}
-            buyerInquiries={buyerInquiries}
-            pendingOffers={pendingOffers}
-            totalPortfolioValue={totalPortfolioValue}
-            completedSales={completedSales}
+            totalProperties={dashboard?.totalProperties ?? 0}
+            activeSaleListings={dashboard?.activeListings ?? 0}
+            buyerInquiries={
+              dashboard?.recentActivity.filter((a) => a.type === 'offer' || a.type === 'viewing')
+                .length ?? 0
+            }
+            pendingOffers={dashboard?.pendingOffers ?? 0}
+            totalPortfolioValue={dashboard?.portfolioValue ?? 0}
+            completedSales={0}
           />
 
           <div className="grid lg:grid-cols-3 gap-6">

@@ -3,90 +3,54 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, ClipboardCheck } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';
 import { InspectionDetailModal } from '@/components/agent/inspections/InspectionDetailModal';
 import { Button } from '@/components/ui/Button';
-import type { PropertyInspection, AgentTask } from '@/types/agent';
-
-const mockTasks: AgentTask[] = [
-  {
-    id: 'task_001',
-    type: 'inspection',
-    title: 'Move-out Inspection',
-    propertyAddress: 'Ocean View Towers, Unit 4B',
-    assignedBy: 'GetRentos Admin',
-    assignedByRole: 'admin',
-    priority: 'high',
-    status: 'assigned',
-    dueDate: '2026-08-08T14:00:00.000Z',
-  },
-  {
-    id: 'task_004',
-    type: 'inspection',
-    title: 'Move-in Inspection',
-    propertyAddress: 'Surulere Family Duplex',
-    assignedBy: 'GetRentos Admin',
-    assignedByRole: 'admin',
-    priority: 'medium',
-    status: 'in_progress',
-    dueDate: '2026-08-08T10:00:00.000Z',
-  },
-];
-
-const mockInspections: PropertyInspection[] = [
-  {
-    id: 'insp_001',
-    taskId: 'task_prev_001',
-    propertyAddress: 'Ikeja GRA Townhouse',
-    clientName: 'Segun Alabi',
-    scheduledDate: '2026-08-05T00:00:00.000Z',
-    status: 'completed',
-    rooms: [
-      { room: 'Living Room', condition: 'good', notes: 'Minor scuff on wall', photoCount: 2 },
-      { room: 'Kitchen', condition: 'excellent', notes: '', photoCount: 3 },
-      { room: 'Master Bedroom', condition: 'good', notes: '', photoCount: 1 },
-    ],
-    overallCondition: 'good',
-    syncStatus: 'synced',
-  },
-  {
-    id: 'insp_002',
-    taskId: 'task_prev_002',
-    propertyAddress: 'Modern 2-Bed Flat, Ikeja GRA',
-    clientName: 'Emeka Chukwu',
-    scheduledDate: '2026-08-07T00:00:00.000Z',
-    status: 'completed',
-    rooms: [
-      { room: 'Living Room', condition: 'fair', notes: 'Carpet stain near window', photoCount: 4 },
-      { room: 'Bathroom', condition: 'poor', notes: 'Leaking tap needs repair', photoCount: 2 },
-    ],
-    overallCondition: 'fair',
-    syncStatus: 'pending',
-  },
-];
+import type { PropertyInspection } from '@/types/agent';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
 
 function AgentInspectionsPageContent() {
   const searchParams = useSearchParams();
   const defaultTaskId = searchParams.get('task') || undefined;
 
-  const [inspections, setInspections] = useState<PropertyInspection[]>(mockInspections);
   const [isModalOpen, setIsModalOpen] = useState(!!defaultTaskId);
   const [activeInspectionId, setActiveInspectionId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { data: inspections = [], error } = useQuery({
+    queryKey: agentKeys.inspections,
+    queryFn: () => unwrap(agentService.listInspections()),
+  });
+  const { data: tasks = [] } = useQuery({
+    queryKey: agentKeys.tasks,
+    queryFn: () => unwrap(agentService.listTasks()),
+  });
+  const submitInspection = useMutation({
+    mutationFn: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus'>) =>
+      unwrap(
+        agentService.submitInspection({
+          taskId: inspection.taskId,
+          scheduledAt: inspection.scheduledDate,
+          rooms: inspection.rooms,
+          clientName: inspection.clientName,
+          overallCondition: inspection.overallCondition,
+        })
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.inspections });
+      queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
+      queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
+    },
+  });
 
   const handleSubmit = (data: Omit<PropertyInspection, 'id' | 'syncStatus'>) => {
-    const newInspection: PropertyInspection = {
-      ...data,
-      id: `insp_${Date.now()}`,
-      syncStatus: 'pending',
-    };
-    setInspections((prev) => [newInspection, ...prev]);
+    submitInspection.mutate(data);
   };
 
   const handleSync = (inspectionId: string) => {
-    setInspections((prev) =>
-      prev.map((i) => (i.id === inspectionId ? { ...i, syncStatus: 'synced' } : i))
-    );
     setActiveInspectionId(null);
   };
 
@@ -106,6 +70,12 @@ function AgentInspectionsPageContent() {
           New Inspection
         </Button>
       </div>
+
+      {(error || submitInspection.error) && (
+        <p className="mb-4 text-sm text-red-600" role="alert">
+          Unable to save inspection changes. Please try again.
+        </p>
+      )}
 
       {inspections.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
@@ -133,7 +103,7 @@ function AgentInspectionsPageContent() {
       <NewInspectionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        tasks={mockTasks}
+        tasks={tasks.filter((task) => task.type === 'inspection' && task.status !== 'completed')}
         defaultTaskId={defaultTaskId}
         onSubmit={handleSubmit}
       />

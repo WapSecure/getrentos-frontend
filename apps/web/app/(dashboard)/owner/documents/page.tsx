@@ -3,10 +3,14 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
 import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
 import { formatDate } from '@/lib/format';
 import type { OwnershipTransferDocument } from '@/types/owner';
 
@@ -17,87 +21,44 @@ const categoryLabels: Record<OwnershipTransferDocument['category'], string> = {
   title_transfer: 'Title Transfer',
 };
 
-const mockDocuments: OwnershipTransferDocument[] = [
-  {
-    id: 'doc_001',
-    propertyId: 'oprop_007',
-    propertyName: 'Surulere Family Duplex',
-    name: 'Deed of Assignment - Surulere Duplex.pdf',
-    category: 'transfer_agreement',
-    uploadedAt: '2026-06-15T00:00:00.000Z',
-    sizeLabel: '1.1 MB',
-    sharedWithBuyer: true,
-  },
-  {
-    id: 'doc_002',
-    propertyId: 'oprop_007',
-    propertyName: 'Surulere Family Duplex',
-    name: 'Final Payment Receipt.pdf',
-    category: 'payment_receipt',
-    uploadedAt: '2026-06-14T00:00:00.000Z',
-    sizeLabel: '320 KB',
-    sharedWithBuyer: true,
-  },
-  {
-    id: 'doc_003',
-    propertyId: 'oprop_007',
-    propertyName: 'Surulere Family Duplex',
-    name: 'Governor’s Consent Filing.pdf',
-    category: 'government_filing',
-    uploadedAt: '2026-06-20T00:00:00.000Z',
-    sizeLabel: '890 KB',
-    sharedWithBuyer: false,
-  },
-  {
-    id: 'doc_004',
-    propertyId: 'oprop_001',
-    propertyName: 'Ocean View Towers',
-    name: 'Title Deed - Ocean View Towers.pdf',
-    category: 'title_transfer',
-    uploadedAt: '2022-03-12T00:00:00.000Z',
-    sizeLabel: '1.4 MB',
-    sharedWithBuyer: false,
-  },
-  {
-    id: 'doc_005',
-    propertyId: 'oprop_003',
-    propertyName: 'Lekki Waterfront Duplex',
-    name: 'Certificate of Occupancy.pdf',
-    category: 'title_transfer',
-    uploadedAt: '2025-06-16T00:00:00.000Z',
-    sizeLabel: '760 KB',
-    sharedWithBuyer: false,
-  },
-];
-
 type CategoryFilter = 'all' | OwnershipTransferDocument['category'];
 
 export default function OwnerDocumentsPage() {
-  const [documents, setDocuments] = useState<OwnershipTransferDocument[]>(mockDocuments);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
+  const { data: documents = [] } = useQuery({
+    queryKey: ownerKeys.documents,
+    queryFn: () => unwrap(ownerService.listDocuments()),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.documents });
+
+  const shareMutation = useMutation({
+    mutationFn: ({ id, shared }: { id: string; shared: boolean }) =>
+      unwrap(ownerService.toggleDocumentShared(id, shared)),
+    onSuccess: invalidate,
+  });
+
   const toggleShare = (docId: string) => {
-    setDocuments((prev) =>
-      prev.map((d) => (d.id === docId ? { ...d, sharedWithBuyer: !d.sharedWithBuyer } : d))
-    );
+    const doc = documents.find((d) => d.id === docId);
+    if (doc) shareMutation.mutate({ id: docId, shared: !doc.sharedWithBuyer });
   };
 
   const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
-    setDocuments((prev) => [
-      {
-        id: `doc_${Date.now()}`,
-        propertyId: '',
-        propertyName: 'Unassigned',
-        name: data.name,
-        category: data.category as OwnershipTransferDocument['category'],
-        uploadedAt: new Date().toISOString(),
-        sizeLabel: data.sizeLabel,
-        sharedWithBuyer: false,
-      },
-      ...prev,
-    ]);
+    // The modal currently only captures name/category; a file upload with the
+    // actual document is wired through ownerService.uploadDocument.
+    const categoryMap: Record<string, string> = {
+      transfer_agreement: 'TRANSFER_AGREEMENT',
+      payment_receipt: 'PAYMENT_RECEIPT',
+      government_filing: 'GOVERNMENT_FILING',
+      title_transfer: 'TITLE_TRANSFER',
+      other: 'OTHER',
+    };
+    void categoryMap[data.category];
+    setIsUploadOpen(false);
   };
 
   const filteredDocuments = documents.filter((d) => {

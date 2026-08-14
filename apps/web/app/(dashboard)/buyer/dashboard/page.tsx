@@ -2,27 +2,29 @@
 
 import { useBuyerUser } from '../layout';
 import { Search } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { BuyerDashboardHeader } from '@/components/buyer/dashboard/BuyerDashboardHeader';
 import { BuyerStatsCards } from '@/components/buyer/dashboard/BuyerStatsCards';
 import { BuyerActivityFeed } from '@/components/buyer/dashboard/BuyerActivityFeed';
 import { BuyerQuickActions } from '@/components/buyer/dashboard/BuyerQuickActions';
 import { Button } from '@/components/ui/Button';
+import { buyerService } from '@/services/buyerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-
-const mockStats = {
-  savedProperties: 4,
-  upcomingViewings: 2,
-  activeOffers: 1,
-  activeTransactions: 1,
-  documentsUploaded: 3,
-  completedPurchases: 0,
-};
 
 export default function BuyerDashboardPage() {
   const user = useBuyerUser();
 
+  const { data: dashboard, isLoading } = useQuery({
+    queryKey: buyerKeys.dashboard,
+    queryFn: () => unwrap(buyerService.getDashboard()),
+  });
+
   const hasActivity =
-    mockStats.savedProperties > 0 || mockStats.activeOffers > 0 || mockStats.activeTransactions > 0;
+    !isLoading &&
+    dashboard != null &&
+    (dashboard.savedListings > 0 || dashboard.activeOffers > 0 || dashboard.activeTransactions > 0);
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -34,7 +36,7 @@ export default function BuyerDashboardPage() {
     <>
       <BuyerDashboardHeader greeting={greeting} firstName={firstName} />
 
-      {!hasActivity ? (
+      {!isLoading && !hasActivity ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Search className="w-8 h-8 text-primary" />
@@ -50,7 +52,14 @@ export default function BuyerDashboardPage() {
         </div>
       ) : (
         <>
-          <BuyerStatsCards {...mockStats} />
+          <BuyerStatsCards
+            savedProperties={dashboard?.savedListings ?? 0}
+            upcomingViewings={dashboard?.upcomingViewings ?? 0}
+            activeOffers={dashboard?.activeOffers ?? 0}
+            activeTransactions={dashboard?.activeTransactions ?? 0}
+            documentsUploaded={0}
+            completedPurchases={0}
+          />
 
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">

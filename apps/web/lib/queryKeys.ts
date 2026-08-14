@@ -119,5 +119,40 @@ export const agentKeys = {
   tasks: ['agent', 'tasks'] as const,
   properties: ['agent', 'properties'] as const,
   inspections: ['agent', 'inspections'] as const,
+  verifications: ['agent', 'verifications'] as const,
+  documents: ['agent', 'documents'] as const,
+  conversations: ['agent', 'conversations'] as const,
+  conversationMessages: (id: string) => ['agent', 'conversations', id, 'messages'] as const,
   clients: ['agent', 'clients'] as const,
+};
+
+export const ownerKeys = {
+  dashboard: ['owner', 'dashboard'] as const,
+  properties: ['owner', 'properties'] as const,
+  listings: ['owner', 'listings'] as const,
+  offers: ['owner', 'offers'] as const,
+  transactions: ['owner', 'transactions'] as const,
+  analytics: ['owner', 'analytics'] as const,
+  leads: ['owner', 'leads'] as const,
+  documents: ['owner', 'documents'] as const,
+  reviews: ['owner', 'reviews'] as const,
+  profile: ['owner', 'profile'] as const,
+  conversations: ['owner', 'conversations'] as const,
+  messages: (conversationId: string) =>
+    ['owner', 'conversations', conversationId, 'messages'] as const,
+};
+
+export const buyerKeys = {
+  dashboard: ['buyer', 'dashboard'] as const,
+  listings: ['buyer', 'listings'] as const,
+  saved: ['buyer', 'saved'] as const,
+  viewings: ['buyer', 'viewings'] as const,
+  offers: ['buyer', 'offers'] as const,
+  transactions: ['buyer', 'transactions'] as const,
+  documents: ['buyer', 'documents'] as const,
+  reviews: ['buyer', 'reviews'] as const,
+  profile: ['buyer', 'profile'] as const,
+  conversations: ['buyer', 'conversations'] as const,
+  messages: (conversationId: string) =>
+    ['buyer', 'conversations', conversationId, 'messages'] as const,
 };

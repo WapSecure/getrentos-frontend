@@ -1,122 +1,85 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { ConversationList, type Conversation } from '@/components/buyer/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/buyer/messages/MessageThread';
 import { cn } from '@/lib/cn';
+import { buyerService, type BuyerConversation, type BuyerMessage } from '@/services/buyerService';
+import { buyerKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 
-const mockConversations: Conversation[] = [
-  {
-    id: 'conv_001',
-    participantName: 'Adaeze Okafor',
-    participantRole: 'Owner',
-    lastMessage: 'Happy to discuss once you submit a formal offer.',
-    lastMessageTime: '2026-08-07T09:28:00.000Z',
-    unreadCount: 1,
-  },
-  {
-    id: 'conv_002',
-    participantName: 'Chidinma Nwosu',
-    participantRole: 'Realtor',
-    lastMessage: 'I can arrange a viewing for Saturday if that works for you.',
-    lastMessageTime: '2026-08-06T15:00:00.000Z',
-    unreadCount: 0,
-  },
-  {
-    id: 'conv_003',
-    participantName: 'GetRentos Support',
-    participantRole: 'Support',
-    lastMessage: 'Your proof of funds document has been received.',
-    lastMessageTime: '2026-08-05T10:00:00.000Z',
-    unreadCount: 0,
-  },
-];
-
-const mockMessages: Record<string, ThreadMessage[]> = {
-  conv_001: [
-    {
-      id: 'm1',
-      senderId: 'buyer',
-      text: 'Hi, is the asking price negotiable?',
-      timestamp: '2026-08-07T09:20:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'contact',
-      text: 'Happy to discuss once you submit a formal offer.',
-      timestamp: '2026-08-07T09:28:00.000Z',
-      read: false,
-    },
-  ],
-  conv_002: [
-    {
-      id: 'm1',
-      senderId: 'buyer',
-      text: 'Could we schedule a viewing this weekend?',
-      timestamp: '2026-08-06T14:50:00.000Z',
-      read: true,
-    },
-    {
-      id: 'm2',
-      senderId: 'contact',
-      text: 'I can arrange a viewing for Saturday if that works for you.',
-      timestamp: '2026-08-06T15:00:00.000Z',
-      read: true,
-    },
-  ],
-  conv_003: [
-    {
-      id: 'm1',
-      senderId: 'contact',
-      text: 'Your proof of funds document has been received.',
-      timestamp: '2026-08-05T10:00:00.000Z',
-      read: true,
-    },
-  ],
+const roleLabel = (role: string): Conversation['participantRole'] => {
+  if (role === 'realtor') return 'Realtor';
+  if (role === 'owner') return 'Owner';
+  return 'Support';
 };
 
+const toConversation = (c: BuyerConversation): Conversation => ({
+  id: c.id,
+  participantName: c.participantName,
+  participantRole: roleLabel(c.participantRole),
+  lastMessage: c.lastMessage,
+  lastMessageTime: c.lastMessageTime,
+  unreadCount: c.unreadCount,
+});
+
+const toThreadMessage = (m: BuyerMessage): ThreadMessage => ({
+  id: m.id,
+  senderId: m.senderRole === 'buyer' ? 'buyer' : 'contact',
+  text: m.text,
+  timestamp: m.timestamp,
+  read: m.read,
+});
+
 export default function BuyerMessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [messagesByConversation, setMessagesByConversation] =
-    useState<Record<string, ThreadMessage[]>>(mockMessages);
+  const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { data: conversations = [] } = useQuery({
+    queryKey: buyerKeys.conversations,
+    queryFn: () => unwrap(buyerService.listConversations()),
+  });
+
+  const { data: activeMessages = [] } = useQuery({
+    queryKey: buyerKeys.messages(activeId ?? ''),
+    queryFn: () => unwrap(buyerService.listMessages(activeId!)),
+    enabled: !!activeId,
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: ({ conversationId, text }: { conversationId: string; text: string }) =>
+      unwrap(buyerService.sendMessage(conversationId, text)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: buyerKeys.conversations });
+      queryClient.invalidateQueries({ queryKey: buyerKeys.messages(activeId ?? '') });
+    },
+  });
+
+  const markReadMutation = useMutation({
+    mutationFn: (conversationId: string) =>
+      unwrap(buyerService.markConversationRead(conversationId)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.conversations }),
+  });
+
   const handleSelect = (id: string) => {
     setActiveId(id);
-    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)));
-    setMessagesByConversation((prev) => ({
-      ...prev,
-      [id]: (prev[id] || []).map((m) => ({ ...m, read: true })),
-    }));
+    const conv = conversations.find((c) => c.id === id);
+    if (conv && conv.unreadCount > 0) markReadMutation.mutate(id);
   };
 
   const handleSend = (text: string) => {
     if (!activeId) return;
-    const newMessage: ThreadMessage = {
-      id: `m_${Date.now()}`,
-      senderId: 'buyer',
-      text,
-      timestamp: new Date().toISOString(),
-      read: false,
-    };
-    setMessagesByConversation((prev) => ({
-      ...prev,
-      [activeId]: [...(prev[activeId] || []), newMessage],
-    }));
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === activeId ? { ...c, lastMessage: text, lastMessageTime: newMessage.timestamp } : c
-      )
-    );
+    sendMutation.mutate({ conversationId: activeId, text });
   };
 
-  const filteredConversations = conversations.filter((c) =>
-    c.participantName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredConversations = conversations
+    .map(toConversation)
+    .filter((c) => c.participantName.toLowerCase().includes(searchQuery.toLowerCase()));
   const activeConversation = conversations.find((c) => c.id === activeId);
+  const threadMessages: ThreadMessage[] = activeMessages.map(toThreadMessage);
 
   return (
     <div className="h-[calc(100vh-8rem)]">
@@ -149,7 +112,7 @@ export default function BuyerMessagesPage() {
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
-                messages={messagesByConversation[activeConversation.id] || []}
+                messages={threadMessages}
                 onSend={handleSend}
               />
             </>

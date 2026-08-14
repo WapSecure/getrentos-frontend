@@ -1,53 +1,14 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
 import { TrustScoreRing } from '@/components/owner/trust/TrustScoreRing';
 import { VerificationList } from '@/components/owner/trust/VerificationList';
 import { TrustBadges } from '@/components/owner/trust/TrustBadges';
+import { ownerService } from '@/services/ownerService';
+import { ownerKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 import type { VerificationItem, Badge } from '@/types/trust-score';
-
-const mockVerifications: VerificationItem[] = [
-  {
-    id: 'identity',
-    label: 'Identity Verified',
-    verified: true,
-    date: '2022-02-14T00:00:00.000Z',
-    description: 'Government-issued ID confirmed',
-    icon: 'Shield',
-  },
-  {
-    id: 'phone',
-    label: 'Phone Number Verified',
-    verified: true,
-    date: '2022-02-14T00:00:00.000Z',
-    description: 'Contact number confirmed via OTP',
-    icon: 'Phone',
-  },
-  {
-    id: 'email',
-    label: 'Email Verified',
-    verified: true,
-    date: '2022-02-14T00:00:00.000Z',
-    description: 'Email address confirmed',
-    icon: 'Mail',
-  },
-  {
-    id: 'property_ownership',
-    label: 'Property Ownership Verified',
-    verified: true,
-    date: '2022-03-12T00:00:00.000Z',
-    description: 'At least one property has passed ownership review',
-    icon: 'Building2',
-  },
-  {
-    id: 'bank_account',
-    label: 'Payout Bank Account Verified',
-    verified: true,
-    date: '2022-02-20T00:00:00.000Z',
-    description: 'Bank account confirmed for escrow payouts',
-    icon: 'Landmark',
-  },
-];
 
 const mockBadges: Badge[] = [
   {
@@ -81,11 +42,63 @@ const mockBadges: Badge[] = [
 ];
 
 export default function OwnerTrustProfilePage() {
+  const { data: profile } = useQuery({
+    queryKey: ownerKeys.profile,
+    queryFn: () => unwrap(ownerService.getProfile()),
+  });
+
+  const trustScore = profile?.trustScore ?? 88;
+  const verificationStatus = profile?.verificationStatus ?? 'PENDING';
+  const identityVerified = verificationStatus !== 'PENDING' && verificationStatus !== 'UNVERIFIED';
+
+  const verifications: VerificationItem[] = [
+    {
+      id: 'identity',
+      label: 'Identity Verified',
+      verified: identityVerified,
+      date: '2022-02-14T00:00:00.000Z',
+      description: 'Government-issued ID confirmed',
+      icon: 'Shield',
+    },
+    {
+      id: 'phone',
+      label: 'Phone Number Verified',
+      verified: true,
+      date: '2022-02-14T00:00:00.000Z',
+      description: 'Contact number confirmed via OTP',
+      icon: 'Phone',
+    },
+    {
+      id: 'email',
+      label: 'Email Verified',
+      verified: true,
+      date: '2022-02-14T00:00:00.000Z',
+      description: 'Email address confirmed',
+      icon: 'Mail',
+    },
+    {
+      id: 'property_ownership',
+      label: 'Property Ownership Verified',
+      verified: identityVerified,
+      date: '2022-03-12T00:00:00.000Z',
+      description: 'At least one property has passed ownership review',
+      icon: 'Building2',
+    },
+    {
+      id: 'bank_account',
+      label: 'Payout Bank Account Verified',
+      verified: true,
+      date: '2022-02-20T00:00:00.000Z',
+      description: 'Bank account confirmed for escrow payouts',
+      icon: 'Landmark',
+    },
+  ];
+
   const keyStats = [
     { icon: MessageCircle, label: 'Response Rate', value: '96%' },
     { icon: Clock, label: 'Avg. Response Time', value: '< 3 hrs' },
     { icon: ShieldCheck, label: 'Completed Sales', value: '3' },
-    { icon: Star, label: 'Avg. Rating', value: '4.3 / 5' },
+    { icon: Star, label: 'Trust Score', value: `${trustScore} / 100` },
   ];
 
   return (
@@ -99,7 +112,7 @@ export default function OwnerTrustProfilePage() {
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-card rounded-2xl border border-border p-6 flex items-center justify-center">
-          <TrustScoreRing score={88} />
+          <TrustScoreRing score={trustScore} />
         </div>
 
         <div className="lg:col-span-2 grid grid-cols-2 gap-4">
@@ -116,7 +129,7 @@ export default function OwnerTrustProfilePage() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <VerificationList verifications={mockVerifications} />
+        <VerificationList verifications={verifications} />
         <TrustBadges badges={mockBadges} />
       </div>
     </>

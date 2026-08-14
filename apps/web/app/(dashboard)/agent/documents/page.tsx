@@ -3,12 +3,17 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
 import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
+import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
 import { formatDate } from '@/lib/format';
 import type { AgentDocument } from '@/types/agent';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
 
 const categoryLabels: Record<AgentDocument['category'], string> = {
   inspection_report: 'Inspection Report',
@@ -17,51 +22,29 @@ const categoryLabels: Record<AgentDocument['category'], string> = {
   agreement: 'Agreement',
 };
 
-const mockDocuments: AgentDocument[] = [
-  {
-    id: 'doc_001',
-    name: 'Move-out Inspection Report - Ikeja GRA.pdf',
-    category: 'inspection_report',
-    relatedTo: 'Ikeja GRA Townhouse',
-    uploadedAt: '2026-08-05T00:00:00.000Z',
-    sizeLabel: '2.4 MB',
-  },
-  {
-    id: 'doc_002',
-    name: 'Tenant Verification Form - David Okoro.pdf',
-    category: 'verification_form',
-    relatedTo: 'Modern 2-Bed Flat, Ikeja GRA',
-    uploadedAt: '2026-08-07T00:00:00.000Z',
-    sizeLabel: '410 KB',
-  },
-  {
-    id: 'doc_003',
-    name: 'Field Agent Service Agreement.pdf',
-    category: 'agreement',
-    uploadedAt: '2026-01-05T00:00:00.000Z',
-    sizeLabel: '320 KB',
-  },
-];
-
 type CategoryFilter = 'all' | AgentDocument['category'];
 
 export default function AgentDocumentsPage() {
-  const [documents, setDocuments] = useState<AgentDocument[]>(mockDocuments);
+  const queryClient = useQueryClient();
+  const { data: documents = [], error } = useQuery({
+    queryKey: agentKeys.documents,
+    queryFn: () => unwrap(agentService.listDocuments()),
+  });
+  const upload = useMutation({
+    mutationFn: agentService.uploadDocument,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: agentKeys.documents }),
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
 
-  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
-    setDocuments((prev) => [
-      {
-        id: `doc_${Date.now()}`,
-        name: data.name,
-        category: data.category as AgentDocument['category'],
-        uploadedAt: new Date().toISOString(),
-        sizeLabel: data.sizeLabel,
-      },
-      ...prev,
-    ]);
+  const handleUpload = async (data: { name: string; category: string; file: File }) => {
+    await unwrap(upload.mutateAsync({ file: data.file, name: data.name, category: data.category }));
+  };
+  const handleDownload = async (id: string) => {
+    const file = await unwrap(agentService.getDocumentDownload(id));
+    setPreview(file);
   };
 
   const filteredDocuments = documents.filter((d) => {
@@ -93,6 +76,11 @@ export default function AgentDocumentsPage() {
           Upload Document
         </Button>
       </div>
+      {(error || upload.error) && (
+        <p className="mb-4 text-sm text-red-600" role="alert">
+          Unable to load or upload documents. Please try again.
+        </p>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -147,7 +135,10 @@ export default function AgentDocumentsPage() {
               <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
-              <DocumentRowActions showShare={false} />
+              <DocumentRowActions
+                showShare={false}
+                onDownload={() => void handleDownload(doc.id)}
+              />
             </div>
           ))}
         </div>
@@ -160,6 +151,11 @@ export default function AgentDocumentsPage() {
           .filter((c) => c.value !== 'all')
           .map((c) => ({ value: c.value, label: c.label }))}
         onUpload={handleUpload}
+      />
+      <FilePreviewDialog
+        open={Boolean(preview)}
+        onOpenChange={(open) => !open && setPreview(null)}
+        file={preview}
       />
     </>
   );

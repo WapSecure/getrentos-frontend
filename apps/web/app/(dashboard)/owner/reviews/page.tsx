@@ -1,58 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Star, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
 import { getInitials, formatDate } from '@/lib/format';
-
-interface BuyerReview {
-  id: string;
-  buyerName: string;
-  propertyName: string;
-  rating: number;
-  communication: number;
-  transparency: number;
-  responsiveness: number;
-  comment: string;
-  createdAt: string;
-}
-
-const mockReviews: BuyerReview[] = [
-  {
-    id: 'rev_001',
-    buyerName: 'Tobi Fashola',
-    propertyName: 'Surulere Family Duplex',
-    rating: 5,
-    communication: 5,
-    transparency: 5,
-    responsiveness: 4,
-    comment:
-      'Smooth transaction from start to finish. All documents were accurate and the owner was very responsive.',
-    createdAt: '2026-06-16T00:00:00.000Z',
-  },
-  {
-    id: 'rev_002',
-    buyerName: 'Amaka Obi',
-    propertyName: 'Banana Island Penthouse',
-    rating: 3,
-    communication: 4,
-    transparency: 3,
-    responsiveness: 3,
-    comment:
-      'Deal is still in progress, but there was a discrepancy in the plot size that took time to clarify.',
-    createdAt: '2026-07-18T00:00:00.000Z',
-  },
-  {
-    id: 'rev_003',
-    buyerName: 'Chioma Adaobi',
-    propertyName: 'Ocean View Towers',
-    rating: 5,
-    communication: 5,
-    transparency: 5,
-    responsiveness: 5,
-    comment: 'Excellent experience — honest pricing and quick to respond to every question.',
-    createdAt: '2026-05-30T00:00:00.000Z',
-  },
-];
+import { ownerService, type OwnerReview } from '@/services/ownerService';
+import { ownerKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -66,17 +19,19 @@ const StarRow = ({ rating }: { rating: number }) => (
 );
 
 export default function OwnerReviewsPage() {
-  const [reviews, setReviews] = useState<BuyerReview[]>(mockReviews);
+  const { data: reviews = [] } = useQuery({
+    queryKey: ownerKeys.reviews,
+    queryFn: () => unwrap(ownerService.listReviews()),
+  });
 
-  const avg = (
-    key: keyof Pick<BuyerReview, 'rating' | 'communication' | 'transparency' | 'responsiveness'>
-  ) => (reviews.length ? reviews.reduce((sum, r) => sum + r[key], 0) / reviews.length : 0);
+  const overallRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
 
-  const overallRating = avg('rating');
   const categories = [
-    { label: 'Communication', icon: MessageCircle, value: avg('communication') },
-    { label: 'Transparency', icon: ShieldCheck, value: avg('transparency') },
-    { label: 'Responsiveness', icon: Clock, value: avg('responsiveness') },
+    { label: 'Communication', icon: MessageCircle, value: overallRating },
+    { label: 'Transparency', icon: ShieldCheck, value: overallRating },
+    { label: 'Responsiveness', icon: Clock, value: overallRating },
   ];
 
   return (
@@ -115,21 +70,21 @@ export default function OwnerReviewsPage() {
       </div>
 
       <div className="space-y-4">
-        {reviews.map((review) => (
+        {reviews.map((review: OwnerReview) => (
           <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
-                  {getInitials(review.buyerName)}
+                  {getInitials(review.author)}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">{review.buyerName}</p>
-                  <p className="text-xs text-muted-foreground">{review.propertyName}</p>
+                  <p className="text-sm font-medium text-foreground">{review.author}</p>
+                  <p className="text-xs text-muted-foreground">{review.category}</p>
                 </div>
               </div>
               <div className="text-right shrink-0">
                 <StarRow rating={review.rating} />
-                <p className="text-xs text-gray-400 mt-1">{formatDate(review.createdAt)}</p>
+                <p className="text-xs text-gray-400 mt-1">{formatDate(review.date)}</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>

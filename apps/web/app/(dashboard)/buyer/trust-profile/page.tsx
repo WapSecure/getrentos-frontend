@@ -1,52 +1,14 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
 import { TrustScoreRing } from '@/components/buyer/trust/TrustScoreRing';
 import { VerificationList } from '@/components/buyer/trust/VerificationList';
 import { TrustBadges } from '@/components/buyer/trust/TrustBadges';
+import { buyerService } from '@/services/buyerService';
+import { buyerKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 import type { VerificationItem, Badge } from '@/types/trust-score';
-
-const mockVerifications: VerificationItem[] = [
-  {
-    id: 'identity',
-    label: 'Identity Verified',
-    verified: true,
-    date: '2026-01-10T00:00:00.000Z',
-    description: 'Government-issued ID confirmed',
-    icon: 'Shield',
-  },
-  {
-    id: 'phone',
-    label: 'Phone Number Verified',
-    verified: true,
-    date: '2026-01-10T00:00:00.000Z',
-    description: 'Contact number confirmed via OTP',
-    icon: 'Phone',
-  },
-  {
-    id: 'email',
-    label: 'Email Verified',
-    verified: true,
-    date: '2026-01-10T00:00:00.000Z',
-    description: 'Email address confirmed',
-    icon: 'Mail',
-  },
-  {
-    id: 'proof_of_funds',
-    label: 'Proof of Funds Verified',
-    verified: true,
-    date: '2026-07-15T00:00:00.000Z',
-    description: 'Bank statement or mortgage pre-approval on file',
-    icon: 'CreditCard',
-  },
-  {
-    id: 'bank_account',
-    label: 'Payment Account Verified',
-    verified: false,
-    description: 'Add a verified bank account for faster escrow payments',
-    icon: 'Landmark',
-  },
-];
 
 const mockBadges: Badge[] = [
   {
@@ -80,11 +42,61 @@ const mockBadges: Badge[] = [
 ];
 
 export default function BuyerTrustProfilePage() {
+  const { data: profile } = useQuery({
+    queryKey: buyerKeys.profile,
+    queryFn: () => unwrap(buyerService.getProfile()),
+  });
+
+  const trustScore = profile?.trustScore ?? 82;
+  const verificationStatus = profile?.verificationStatus ?? 'PENDING';
+
+  const verifications: VerificationItem[] = [
+    {
+      id: 'identity',
+      label: 'Identity Verified',
+      verified: verificationStatus !== 'PENDING' && verificationStatus !== 'UNVERIFIED',
+      date: '2026-01-10T00:00:00.000Z',
+      description: 'Government-issued ID confirmed',
+      icon: 'Shield',
+    },
+    {
+      id: 'phone',
+      label: 'Phone Number Verified',
+      verified: true,
+      date: '2026-01-10T00:00:00.000Z',
+      description: 'Contact number confirmed via OTP',
+      icon: 'Phone',
+    },
+    {
+      id: 'email',
+      label: 'Email Verified',
+      verified: true,
+      date: '2026-01-10T00:00:00.000Z',
+      description: 'Email address confirmed',
+      icon: 'Mail',
+    },
+    {
+      id: 'proof_of_funds',
+      label: 'Proof of Funds Verified',
+      verified: true,
+      date: '2026-07-15T00:00:00.000Z',
+      description: 'Bank statement or mortgage pre-approval on file',
+      icon: 'CreditCard',
+    },
+    {
+      id: 'bank_account',
+      label: 'Payment Account Verified',
+      verified: false,
+      description: 'Add a verified bank account for faster escrow payments',
+      icon: 'Landmark',
+    },
+  ];
+
   const keyStats = [
     { icon: MessageCircle, label: 'Response Rate', value: '94%' },
     { icon: Clock, label: 'Avg. Response Time', value: '< 4 hrs' },
     { icon: ShieldCheck, label: 'Completed Purchases', value: '1' },
-    { icon: Star, label: 'Avg. Rating Given', value: '5.0 / 5' },
+    { icon: Star, label: 'Trust Score', value: `${trustScore} / 100` },
   ];
 
   return (
@@ -98,7 +110,7 @@ export default function BuyerTrustProfilePage() {
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-card rounded-2xl border border-border p-6 flex items-center justify-center">
-          <TrustScoreRing score={82} />
+          <TrustScoreRing score={trustScore} />
         </div>
 
         <div className="lg:col-span-2 grid grid-cols-2 gap-4">
@@ -115,7 +127,7 @@ export default function BuyerTrustProfilePage() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <VerificationList verifications={mockVerifications} />
+        <VerificationList verifications={verifications} />
         <TrustBadges badges={mockBadges} />
       </div>
     </>

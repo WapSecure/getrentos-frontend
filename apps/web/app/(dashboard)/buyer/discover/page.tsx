@@ -4,93 +4,40 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Building2, ArrowUpDown } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
+import { buyerService } from '@/services/buyerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerPropertyListing, ListingPropertyType } from '@/types/buyer';
 import { ROUTES } from '@/lib/constants/auth';
 
 const SAVED_PROPERTIES_KEY = 'buyer_saved_properties';
 
-const mockListings: BuyerPropertyListing[] = [
-  {
-    id: 'listing_001',
-    title: 'Luxury 3-Bed Apartment with Ocean Views',
-    propertyType: 'Apartment',
-    askingPrice: 148_000_000,
-    address: '3 Bar Beach Way',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    bedrooms: 3,
-    bathrooms: 3,
-    propertySize: 210,
-    features: ['Swimming Pool', 'Gym', 'Parking', '24/7 Security', 'Waterfront View'],
-    description: 'A stunning waterfront apartment with panoramic ocean views and premium finishes.',
-    ownerName: 'Adaeze Okafor',
-    ownerVerified: true,
-    listedDate: '2026-06-01T00:00:00.000Z',
-  },
-  {
-    id: 'listing_002',
-    title: 'Spacious 4-Bed Duplex in Lekki',
-    propertyType: 'Duplex',
-    askingPrice: 95_000_000,
-    address: '18 Chevron Drive',
-    city: 'Lekki',
-    state: 'Lagos',
-    bedrooms: 4,
-    bathrooms: 4,
-    propertySize: 320,
-    features: ['Parking', '24/7 Security', 'Garden', 'Furnished'],
-    description: 'Family-friendly duplex in a secure, gated Lekki estate.',
-    ownerName: 'Adaeze Okafor',
-    ownerVerified: true,
-    listedDate: '2026-05-12T00:00:00.000Z',
-  },
-  {
-    id: 'listing_003',
-    title: 'Modern 2-Bed Waterfront Duplex',
-    propertyType: 'Duplex',
-    askingPrice: 71_500_000,
-    address: '7 Freedom Way',
-    city: 'Lekki',
-    state: 'Lagos',
-    bedrooms: 2,
-    bathrooms: 2,
-    propertySize: 180,
-    features: ['Waterfront View', 'Balcony', 'Parking'],
-    description: 'A cozy waterfront duplex, perfect for a small family or investment.',
-    ownerName: 'Segun Alabi',
-    ownerVerified: true,
-    listedDate: '2026-07-02T00:00:00.000Z',
-  },
-  {
-    id: 'listing_004',
-    title: 'Elegant Bungalow in Ikoyi',
-    propertyType: 'Bungalow',
-    askingPrice: 210_000_000,
-    address: '11 Bourdillon Road',
-    city: 'Ikoyi',
-    state: 'Lagos',
-    bedrooms: 5,
-    bathrooms: 5,
-    propertySize: 460,
-    features: ['Swimming Pool', 'Boys Quarters', 'Garden', 'Solar Power', '24/7 Security'],
-    description: 'A heritage bungalow on one of Ikoyi’s most prestigious streets.',
-    ownerName: 'Chioma Adaobi',
-    ownerVerified: false,
-    listedDate: '2026-04-20T00:00:00.000Z',
-  },
-];
-
 type SortOrder = 'default' | 'price_asc' | 'price_desc';
 
 export default function BuyerDiscoverPage() {
   const router = useRouter();
-  const [listings, setListings] = useState<BuyerPropertyListing[]>(mockListings);
+  const queryClient = useQueryClient();
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
+
+  const { data: listings = [], isLoading } = useQuery({
+    queryKey: buyerKeys.listings,
+    queryFn: () => unwrap(buyerService.discover({})),
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (listingId: string) => unwrap(buyerService.saveListing(listingId)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
+  });
+  const unsaveMutation = useMutation({
+    mutationFn: (listingId: string) => unwrap(buyerService.unsaveListing(listingId)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
+  });
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -110,6 +57,7 @@ export default function BuyerDiscoverPage() {
   }, []);
 
   const toggleSave = (propertyId: string) => {
+    const isSaved = savedIds.includes(propertyId);
     setSavedIds((prev) => {
       const next = prev.includes(propertyId)
         ? prev.filter((id) => id !== propertyId)
@@ -117,6 +65,11 @@ export default function BuyerDiscoverPage() {
       localStorage.setItem(SAVED_PROPERTIES_KEY, JSON.stringify(next));
       return next;
     });
+    if (isSaved) {
+      unsaveMutation.mutate(propertyId);
+    } else {
+      saveMutation.mutate(propertyId);
+    }
   };
 
   const filteredListings = listings

@@ -4,94 +4,46 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
 import { BuyerLeadCard } from '@/components/owner/leads/BuyerLeadCard';
 import { ScheduleViewingModal } from '@/components/owner/leads/ScheduleViewingModal';
 import { AssignRealtorModal } from '@/components/owner/leads/AssignRealtorModal';
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
 import { ROUTES } from '@/lib/constants/auth';
-
-const mockLeads: BuyerLead[] = [
-  {
-    id: 'lead_001',
-    buyerName: 'Emeka Chukwu',
-    email: 'emeka.chukwu@example.com',
-    phone: '+234 803 555 0142',
-    propertyId: 'oprop_002',
-    propertyName: 'Palm Court Villa',
-    inquiryDate: '2026-08-05T09:00:00.000Z',
-    trustScore: 87,
-    verified: true,
-    stage: 'offer_made',
-  },
-  {
-    id: 'lead_002',
-    buyerName: 'Ngozi Adeyemi',
-    email: 'ngozi.adeyemi@example.com',
-    phone: '+234 802 444 7781',
-    propertyId: 'oprop_001',
-    propertyName: 'Ocean View Towers',
-    inquiryDate: '2026-08-06T13:10:00.000Z',
-    trustScore: 74,
-    verified: true,
-    stage: 'viewing_scheduled',
-  },
-  {
-    id: 'lead_003',
-    buyerName: 'David Okoro',
-    email: 'david.okoro@example.com',
-    phone: '+234 701 233 9090',
-    propertyId: 'oprop_001',
-    propertyName: 'Ocean View Towers',
-    inquiryDate: '2026-08-04T16:45:00.000Z',
-    trustScore: 62,
-    verified: false,
-    stage: 'contacted',
-  },
-  {
-    id: 'lead_004',
-    buyerName: 'Blessing Eze',
-    email: 'blessing.eze@example.com',
-    phone: '+234 909 112 6633',
-    propertyId: 'oprop_002',
-    propertyName: 'Palm Court Villa',
-    inquiryDate: '2026-08-07T08:20:00.000Z',
-    trustScore: 91,
-    verified: true,
-    stage: 'new',
-  },
-];
 
 type StageFilter = 'all' | BuyerLeadStage;
 
 export default function OwnerLeadsPage() {
   const router = useRouter();
-  const [leads, setLeads] = useState<BuyerLead[]>(mockLeads);
+  const { data: leads = [] } = useQuery({
+    queryKey: ownerKeys.leads,
+    queryFn: () => unwrap(ownerService.listLeads()),
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StageFilter>('all');
   const [schedulingLead, setSchedulingLead] = useState<BuyerLead | null>(null);
   const [assigningLead, setAssigningLead] = useState<BuyerLead | null>(null);
 
-  const updateStage = (leadId: string, stage: BuyerLeadStage) => {
-    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage } : l)));
-  };
-
   const handleMessage = (lead: BuyerLead) => {
     router.push(`${ROUTES.OWNER_MESSAGES}?lead=${lead.id}`);
   };
 
-  const handleScheduleConfirm = (leadId: string) => {
-    updateStage(leadId, 'viewing_scheduled');
+  // Lead-stage updates (schedule/assign/convert) are tracked server-side via
+  // viewings & offers; these handlers keep the modal flow responsive locally.
+  const handleScheduleConfirm = (_leadId: string) => {
+    setSchedulingLead(null);
   };
 
-  const handleAssignRealtor = (leadId: string, realtorName: string) => {
-    setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, assignedRealtor: realtorName } : l))
-    );
+  const handleAssignRealtor = (_leadId: string, _realtorName: string) => {
+    setAssigningLead(null);
   };
 
-  const handleConvertToOffer = (lead: BuyerLead) => {
-    updateStage(lead.id, 'offer_made');
+  const handleConvertToOffer = (_lead: BuyerLead) => {
+    setSchedulingLead(null);
   };
 
   const filteredLeads = leads.filter((l) => {

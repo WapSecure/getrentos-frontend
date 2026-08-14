@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { ConversationList, type Conversation } from '@/components/agent/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/agent/messages/MessageThread';
 import { cn } from '@/lib/cn';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
 
 const mockConversations: Conversation[] = [
   {
@@ -71,39 +75,50 @@ const mockMessages: Record<string, ThreadMessage[]> = {
 };
 
 export default function AgentMessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [messagesByConversation, setMessagesByConversation] =
-    useState<Record<string, ThreadMessage[]>>(mockMessages);
+  const queryClient = useQueryClient();
+  const { data: conversationApi = [] } = useQuery({
+    queryKey: agentKeys.conversations,
+    queryFn: () => unwrap(agentService.listConversations()),
+  });
+  const conversations: Conversation[] = conversationApi.map((item) => ({
+    id: item.id,
+    participantName: item.client.legalName || 'Client',
+    participantRole: 'Client',
+    lastMessage: item.lastMessage || '',
+    lastMessageTime: item.lastMessageAt || new Date().toISOString(),
+    unreadCount: 0,
+  }));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: messageApi = [] } = useQuery({
+    queryKey: agentKeys.conversationMessages(activeId || 'none'),
+    queryFn: () => unwrap(agentService.getMessages(activeId!)),
+    enabled: Boolean(activeId),
+  });
+  const messages: ThreadMessage[] = messageApi.map((item) => ({
+    id: item.id,
+    senderId: item.senderId === 'agent' ? 'agent' : 'contact',
+    text: item.text,
+    timestamp: item.createdAt,
+    read: item.read,
+  }));
+  const send = useMutation({
+    mutationFn: (text: string) => unwrap(agentService.sendMessage(activeId!, text)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: agentKeys.conversationMessages(activeId || 'none'),
+      });
+      queryClient.invalidateQueries({ queryKey: agentKeys.conversations });
+    },
+  });
 
   const handleSelect = (id: string) => {
     setActiveId(id);
-    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)));
-    setMessagesByConversation((prev) => ({
-      ...prev,
-      [id]: (prev[id] || []).map((m) => ({ ...m, read: true })),
-    }));
   };
 
   const handleSend = (text: string) => {
     if (!activeId) return;
-    const newMessage: ThreadMessage = {
-      id: `m_${Date.now()}`,
-      senderId: 'agent',
-      text,
-      timestamp: new Date().toISOString(),
-      read: false,
-    };
-    setMessagesByConversation((prev) => ({
-      ...prev,
-      [activeId]: [...(prev[activeId] || []), newMessage],
-    }));
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === activeId ? { ...c, lastMessage: text, lastMessageTime: newMessage.timestamp } : c
-      )
-    );
+    send.mutate(text);
   };
 
   const filteredConversations = conversations.filter((c) =>
@@ -144,7 +159,7 @@ export default function AgentMessagesPage() {
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
-                messages={messagesByConversation[activeConversation.id] || []}
+                messages={messages}
                 onSend={handleSend}
               />
             </>

@@ -3,102 +3,68 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Megaphone } from 'lucide-react';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
 import { CreateSaleListingModal } from '@/components/owner/listings/CreateSaleListingModal';
 import { ManageListingModal } from '@/components/owner/listings/ManageListingModal';
 import { Button } from '@/components/ui/Button';
-import type { OwnerProperty, SaleListing, SaleListingStatus } from '@/types/owner';
-
-const mockOwnerProperties: OwnerProperty[] = [
-  {
-    id: 'oprop_001',
-    name: 'Ocean View Towers',
-    propertyType: 'Apartment',
-    address: '3 Bar Beach Way',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'verified',
-    estimatedValue: 145_000_000,
-    purchasePrice: 118_000_000,
-    purchaseDate: '2022-03-10T00:00:00.000Z',
-    hasActiveSaleListing: true,
-    createdAt: '2022-03-10T00:00:00.000Z',
-  },
-  {
-    id: 'oprop_002',
-    name: 'Palm Court Villa',
-    propertyType: 'Duplex',
-    address: '18 Chevron Drive',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'verified',
-    estimatedValue: 92_000_000,
-    purchasePrice: 76_000_000,
-    purchaseDate: '2021-09-01T00:00:00.000Z',
-    hasActiveSaleListing: true,
-    createdAt: '2021-09-01T00:00:00.000Z',
-  },
-];
-
-const mockListings: SaleListing[] = [
-  {
-    id: 'listing_001',
-    propertyId: 'oprop_001',
-    propertyName: 'Ocean View Towers',
-    listingTitle: 'Luxury 3-Bed Apartment with Ocean Views',
-    propertyType: 'Apartment',
-    askingPrice: 148_000_000,
-    description: 'A stunning waterfront apartment with panoramic ocean views and premium finishes.',
-    propertySize: 210,
-    bedrooms: 3,
-    bathrooms: 3,
-    features: ['Swimming Pool', 'Gym', 'Parking', '24/7 Security', 'Waterfront View'],
-    status: 'published',
-    createdAt: '2026-06-01T00:00:00.000Z',
-  },
-  {
-    id: 'listing_002',
-    propertyId: 'oprop_002',
-    propertyName: 'Palm Court Villa',
-    listingTitle: 'Spacious 4-Bed Duplex in Lekki',
-    propertyType: 'Duplex',
-    askingPrice: 95_000_000,
-    description: 'Family-friendly duplex in a secure, gated Lekki estate.',
-    propertySize: 320,
-    bedrooms: 4,
-    bathrooms: 4,
-    features: ['Parking', '24/7 Security', 'Garden', 'Furnished'],
-    status: 'paused',
-    createdAt: '2026-05-12T00:00:00.000Z',
-  },
-];
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
+import type { SaleListing, SaleListingStatus } from '@/types/owner';
 
 type StatusFilter = 'all' | SaleListingStatus;
 
 export default function OwnerListingsPage() {
-  const [properties] = useState<OwnerProperty[]>(mockOwnerProperties);
-  const [listings, setListings] = useState<SaleListing[]>(mockListings);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [manageListing, setManageListing] = useState<SaleListing | null>(null);
 
+  const { data: listings = [], isLoading } = useQuery({
+    queryKey: ownerKeys.listings,
+    queryFn: () => unwrap(ownerService.listListings()),
+  });
+
+  const { data: properties = [] } = useQuery({
+    queryKey: ownerKeys.properties,
+    queryFn: () => unwrap(ownerService.listProperties()),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.listings });
+
+  const createMutation = useMutation({
+    mutationFn: (data: {
+      propertyId: string;
+      price: number;
+      listingTitle?: string;
+      amenities?: string[];
+    }) => unwrap(ownerService.createListing(data)),
+    onSuccess: invalidate,
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: SaleListingStatus }) =>
+      unwrap(
+        ownerService.setListingStatus(id, status.toUpperCase() as 'PUBLISHED' | 'PAUSED' | 'CLOSED')
+      ),
+    onSuccess: invalidate,
+  });
+
   const handleCreate = (data: Omit<SaleListing, 'id' | 'createdAt'>) => {
-    const newListing: SaleListing = {
-      ...data,
-      id: `listing_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    setListings((prev) => [newListing, ...prev]);
+    createMutation.mutate({
+      propertyId: data.propertyId,
+      price: data.askingPrice,
+      listingTitle: data.listingTitle,
+      amenities: data.features,
+    });
+    setIsCreateModalOpen(false);
   };
 
   const handleChangeStatus = (listingId: string, status: SaleListingStatus) => {
-    setListings((prev) => prev.map((l) => (l.id === listingId ? { ...l, status } : l)));
+    statusMutation.mutate({ id: listingId, status });
   };
 
   const verifiedProperties = properties.filter((p) => p.verificationStatus === 'verified');
@@ -125,7 +91,9 @@ export default function OwnerListingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Sale Listings</h1>
           <p className="text-muted-foreground mt-1">
-            {listings.length} listing{listings.length === 1 ? '' : 's'} across your portfolio
+            {isLoading
+              ? 'Loading…'
+              : `${listings.length} listing${listings.length === 1 ? '' : 's'} across your portfolio`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
@@ -162,7 +130,7 @@ export default function OwnerListingsPage() {
         </div>
       </div>
 
-      {filteredListings.length === 0 ? (
+      {!isLoading && filteredListings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Megaphone className="w-8 h-8 text-primary" />

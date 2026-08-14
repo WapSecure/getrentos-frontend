@@ -4,65 +4,17 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Handshake } from 'lucide-react';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
 import { Button } from '@/components/ui/Button';
+import { buyerService } from '@/services/buyerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
 import { cn } from '@/lib/cn';
-import type {
-  BuyerOffer,
-  BuyerOfferStatus,
-  BuyerOfferMessage,
-  BuyerPropertyListing,
-} from '@/types/buyer';
-
-const mockListings: BuyerPropertyListing[] = [
-  {
-    id: 'listing_001',
-    title: 'Luxury 3-Bed Apartment with Ocean Views',
-    propertyType: 'Apartment',
-    askingPrice: 148_000_000,
-    address: '3 Bar Beach Way',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    features: [],
-    description: '',
-    ownerName: 'Adaeze Okafor',
-    ownerVerified: true,
-    listedDate: '2026-06-01T00:00:00.000Z',
-  },
-  {
-    id: 'listing_002',
-    title: 'Spacious 4-Bed Duplex in Lekki',
-    propertyType: 'Duplex',
-    askingPrice: 95_000_000,
-    address: '18 Chevron Drive',
-    city: 'Lekki',
-    state: 'Lagos',
-    features: [],
-    description: '',
-    ownerName: 'Adaeze Okafor',
-    ownerVerified: true,
-    listedDate: '2026-05-12T00:00:00.000Z',
-  },
-];
-
-const mockOffers: BuyerOffer[] = [
-  {
-    id: 'offer_001',
-    propertyId: 'listing_002',
-    propertyTitle: 'Spacious 4-Bed Duplex in Lekki',
-    ownerName: 'Adaeze Okafor',
-    offerAmount: 85_000_000,
-    askingPrice: 95_000_000,
-    financingType: 'mortgage',
-    depositAmount: 8_500_000,
-    message: 'Pre-approved for mortgage financing, ready to move quickly.',
-    status: 'submitted',
-    submittedAt: '2026-08-07T09:30:00.000Z',
-  },
-];
+import type { BuyerOffer, BuyerOfferStatus, BuyerOfferMessage } from '@/types/buyer';
 
 const initialMessages: Record<string, BuyerOfferMessage[]> = {
   offer_001: [
@@ -93,8 +45,34 @@ type StatusFilter = 'all' | BuyerOfferStatus;
 function BuyerOffersPageContent() {
   const searchParams = useSearchParams();
   const defaultPropertyId = searchParams.get('property') || undefined;
+  const queryClient = useQueryClient();
 
-  const [offers, setOffers] = useState<BuyerOffer[]>(mockOffers);
+  const { data: offers = [] } = useQuery({
+    queryKey: buyerKeys.offers,
+    queryFn: () => unwrap(buyerService.listOffers()),
+  });
+
+  const { data: listings = [] } = useQuery({
+    queryKey: buyerKeys.listings,
+    queryFn: () => unwrap(buyerService.discover({})),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.offers });
+
+  const createMutation = useMutation({
+    mutationFn: (data: {
+      listingId: string;
+      amount: number;
+      financingType?: string;
+      message?: string;
+    }) => unwrap(buyerService.createOffer(data)),
+    onSuccess: invalidate,
+  });
+  const withdrawMutation = useMutation({
+    mutationFn: (id: string) => unwrap(buyerService.withdrawOffer(id)),
+    onSuccess: invalidate,
+  });
+
   const [messagesByOffer, setMessagesByOffer] =
     useState<Record<string, BuyerOfferMessage[]>>(initialMessages);
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,27 +88,27 @@ function BuyerOffersPageContent() {
   };
 
   const handleMakeOffer = (offerData: Omit<BuyerOffer, 'id' | 'status' | 'submittedAt'>) => {
-    const newOffer: BuyerOffer = {
-      ...offerData,
-      id: `offer_${Date.now()}`,
-      status: 'submitted',
-      submittedAt: new Date().toISOString(),
-    };
-    setOffers((prev) => [newOffer, ...prev]);
-    appendMessage(newOffer.id, {
+    createMutation.mutate({
+      listingId: offerData.propertyId,
+      amount: offerData.offerAmount,
+      financingType: offerData.financingType,
+      message: offerData.message,
+    });
+    setIsMakeOfferOpen(false);
+    const optimisticId = `offer_${Date.now()}`;
+    appendMessage(optimisticId, {
       id: `m_${Date.now()}`,
-      offerId: newOffer.id,
+      offerId: optimisticId,
       senderId: 'buyer',
       senderName: 'You',
       type: 'offer',
-      amount: newOffer.offerAmount,
+      amount: offerData.offerAmount,
       text: 'Submitted an offer of',
-      timestamp: newOffer.submittedAt,
+      timestamp: new Date().toISOString(),
     });
   };
 
   const handleAcceptCounter = (offerId: string) => {
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: 'accepted' } : o)));
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -143,7 +121,7 @@ function BuyerOffersPageContent() {
   };
 
   const handleWithdraw = (offerId: string) => {
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: 'closed' } : o)));
+    withdrawMutation.mutate(offerId);
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -156,9 +134,6 @@ function BuyerOffersPageContent() {
   };
 
   const handleCounter = (offerId: string, amount: number, note: string) => {
-    setOffers((prev) =>
-      prev.map((o) => (o.id === offerId ? { ...o, status: 'countered', offerAmount: amount } : o))
-    );
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -284,7 +259,7 @@ function BuyerOffersPageContent() {
       <MakeOfferModal
         isOpen={isMakeOfferOpen}
         onClose={() => setIsMakeOfferOpen(false)}
-        listings={mockListings}
+        listings={listings}
         defaultPropertyId={defaultPropertyId}
         onSubmit={handleMakeOffer}
       />

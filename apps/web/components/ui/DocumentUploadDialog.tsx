@@ -19,7 +19,7 @@ interface DocumentUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   categories: { value: string; label: string }[];
-  onUpload: (data: UploadedDocumentData) => void;
+  onUpload: (data: UploadedDocumentData) => void | Promise<void>;
 }
 
 export const DocumentUploadDialog = ({
@@ -58,11 +58,11 @@ export const DocumentUploadDialog = ({
     if (e.dataTransfer.files?.[0]) setFile(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!file) return;
     setIsUploading(true);
-    setTimeout(() => {
-      onUpload({
+    try {
+      await onUpload({
         name: file.name,
         category,
         sizeLabel: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
@@ -70,7 +70,9 @@ export const DocumentUploadDialog = ({
       });
       reset();
       onOpenChange(false);
-    }, 1200);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -129,11 +131,7 @@ export const DocumentUploadDialog = ({
           </div>
 
           <Field label="Category">
-            <Select
-              value={category}
-              onValueChange={setCategory}
-              options={categories}
-            />
+            <Select value={category} onValueChange={setCategory} options={categories} />
           </Field>
 
           <Button

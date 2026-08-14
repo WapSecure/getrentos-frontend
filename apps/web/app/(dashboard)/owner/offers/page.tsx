@@ -3,40 +3,14 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Handshake } from 'lucide-react';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
-import type { SaleOffer, OfferStatus, OfferMessage } from '@/types/owner';
-
-const mockOffers: SaleOffer[] = [
-  {
-    id: 'offer_001',
-    buyerId: 'lead_001',
-    buyerName: 'Emeka Chukwu',
-    propertyId: 'oprop_002',
-    propertyName: 'Palm Court Villa',
-    offerAmount: 85_000_000,
-    askingPrice: 95_000_000,
-    financingType: 'mortgage',
-    depositAmount: 8_500_000,
-    message: 'Pre-approved for mortgage financing, ready to move quickly.',
-    status: 'submitted',
-    submittedAt: '2026-08-07T09:30:00.000Z',
-  },
-  {
-    id: 'offer_002',
-    buyerId: 'lead_005',
-    buyerName: 'Chioma Adaobi',
-    propertyId: 'oprop_001',
-    propertyName: 'Ocean View Towers',
-    offerAmount: 140_000_000,
-    askingPrice: 148_000_000,
-    financingType: 'cash',
-    depositAmount: 14_000_000,
-    status: 'countered',
-    submittedAt: '2026-08-04T11:00:00.000Z',
-  },
-];
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
+import type { OfferStatus, OfferMessage } from '@/types/owner';
 
 const initialMessages: Record<string, OfferMessage[]> = {
   offer_001: [
@@ -87,12 +61,33 @@ const initialMessages: Record<string, OfferMessage[]> = {
 type StatusFilter = 'all' | OfferStatus;
 
 export default function OwnerOffersPage() {
-  const [offers, setOffers] = useState<SaleOffer[]>(mockOffers);
+  const queryClient = useQueryClient();
   const [messagesByOffer, setMessagesByOffer] =
     useState<Record<string, OfferMessage[]>>(initialMessages);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
+
+  const { data: offers = [], isLoading } = useQuery({
+    queryKey: ownerKeys.offers,
+    queryFn: () => unwrap(ownerService.listOffers()),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.offers });
+
+  const acceptMutation = useMutation({
+    mutationFn: (offerId: string) => unwrap(ownerService.acceptOffer(offerId)),
+    onSuccess: invalidate,
+  });
+  const rejectMutation = useMutation({
+    mutationFn: (offerId: string) => unwrap(ownerService.rejectOffer(offerId)),
+    onSuccess: invalidate,
+  });
+  const counterMutation = useMutation({
+    mutationFn: ({ offerId, amount, note }: { offerId: string; amount: number; note?: string }) =>
+      unwrap(ownerService.counterOffer(offerId, amount, note)),
+    onSuccess: invalidate,
+  });
 
   const appendMessage = (offerId: string, message: OfferMessage) => {
     setMessagesByOffer((prev) => ({
@@ -102,7 +97,7 @@ export default function OwnerOffersPage() {
   };
 
   const handleAccept = (offerId: string) => {
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: 'accepted' } : o)));
+    acceptMutation.mutate(offerId);
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -115,7 +110,7 @@ export default function OwnerOffersPage() {
   };
 
   const handleReject = (offerId: string) => {
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: 'rejected' } : o)));
+    rejectMutation.mutate(offerId);
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -128,9 +123,7 @@ export default function OwnerOffersPage() {
   };
 
   const handleCounter = (offerId: string, amount: number, note: string) => {
-    setOffers((prev) =>
-      prev.map((o) => (o.id === offerId ? { ...o, status: 'countered', offerAmount: amount } : o))
-    );
+    counterMutation.mutate({ offerId, amount, note });
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -189,7 +182,9 @@ export default function OwnerOffersPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Offers</h1>
         <p className="text-muted-foreground mt-1">
-          {offers.length} offer{offers.length === 1 ? '' : 's'} across your sale listings
+          {isLoading
+            ? 'Loading…'
+            : `${offers.length} offer${offers.length === 1 ? '' : 's'} across your sale listings`}
         </p>
       </div>
 
@@ -221,7 +216,7 @@ export default function OwnerOffersPage() {
         </div>
       </div>
 
-      {filteredOffers.length === 0 ? (
+      {!isLoading && filteredOffers.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Handshake className="w-8 h-8 text-primary" />

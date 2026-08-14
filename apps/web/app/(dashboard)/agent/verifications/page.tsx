@@ -3,68 +3,50 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, UserCheck } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationCard } from '@/components/agent/verifications/VerificationCard';
 import { NewVerificationModal } from '@/components/agent/verifications/NewVerificationModal';
 import { Button } from '@/components/ui/Button';
-import type { VerificationVisit, AgentTask } from '@/types/agent';
-
-const mockTasks: AgentTask[] = [
-  {
-    id: 'task_002',
-    type: 'verification',
-    title: 'Tenant Identity Verification',
-    propertyAddress: 'Palm Court Villa, Unit 2',
-    assignedBy: 'Adaeze Okafor',
-    assignedByRole: 'landlord',
-    priority: 'medium',
-    status: 'assigned',
-    dueDate: '2026-08-08T16:30:00.000Z',
-  },
-];
-
-const mockVisits: VerificationVisit[] = [
-  {
-    id: 'ver_001',
-    taskId: 'task_prev_003',
-    subjectName: 'Ngozi Adeyemi',
-    subjectType: 'buyer',
-    address: 'Ocean View Towers',
-    scheduledDate: '2026-08-06T00:00:00.000Z',
-    status: 'completed',
-    idVerified: true,
-    addressConfirmed: true,
-    notes: 'National ID matched, current address confirmed via utility bill.',
-    syncStatus: 'synced',
-  },
-  {
-    id: 'ver_002',
-    taskId: 'task_prev_004',
-    subjectName: 'David Okoro',
-    subjectType: 'tenant',
-    address: 'Modern 2-Bed Flat, Ikeja GRA',
-    scheduledDate: '2026-08-07T00:00:00.000Z',
-    status: 'completed',
-    idVerified: true,
-    addressConfirmed: false,
-    notes: 'ID confirmed, address verification pending landlord letter.',
-    syncStatus: 'pending',
-  },
-];
+import type { VerificationVisit } from '@/types/agent';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
 
 function AgentVerificationsPageContent() {
   const searchParams = useSearchParams();
   const defaultTaskId = searchParams.get('task') || undefined;
 
-  const [visits, setVisits] = useState<VerificationVisit[]>(mockVisits);
   const [isModalOpen, setIsModalOpen] = useState(!!defaultTaskId);
+  const queryClient = useQueryClient();
+  const { data: visits = [], error } = useQuery({
+    queryKey: agentKeys.verifications,
+    queryFn: () => unwrap(agentService.listVerifications()),
+  });
+  const { data: tasks = [] } = useQuery({
+    queryKey: agentKeys.tasks,
+    queryFn: () => unwrap(agentService.listTasks()),
+  });
+  const submitVerification = useMutation({
+    mutationFn: (visit: Omit<VerificationVisit, 'id' | 'syncStatus'>) =>
+      unwrap(
+        agentService.submitVerification({
+          taskId: visit.taskId,
+          subjectName: visit.subjectName,
+          subjectType: visit.subjectType.toUpperCase() as 'TENANT' | 'BUYER' | 'PROPERTY',
+          idVerified: visit.idVerified,
+          addressConfirmed: visit.addressConfirmed,
+          notes: visit.notes || undefined,
+        })
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.verifications });
+      queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
+      queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
+    },
+  });
 
   const handleSubmit = (data: Omit<VerificationVisit, 'id' | 'syncStatus'>) => {
-    const newVisit: VerificationVisit = {
-      ...data,
-      id: `ver_${Date.now()}`,
-      syncStatus: 'pending',
-    };
-    setVisits((prev) => [newVisit, ...prev]);
+    submitVerification.mutate(data);
   };
 
   return (
@@ -81,6 +63,12 @@ function AgentVerificationsPageContent() {
           Log Verification
         </Button>
       </div>
+
+      {(error || submitVerification.error) && (
+        <p className="mb-4 text-sm text-red-600" role="alert">
+          Unable to save verification changes. Please try again.
+        </p>
+      )}
 
       {visits.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
@@ -103,7 +91,7 @@ function AgentVerificationsPageContent() {
       <NewVerificationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        tasks={mockTasks}
+        tasks={tasks.filter((task) => task.type === 'verification' && task.status !== 'completed')}
         defaultTaskId={defaultTaskId}
         onSubmit={handleSubmit}
       />

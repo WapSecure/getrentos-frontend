@@ -3,125 +3,42 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
-import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
-
-const mockTransactions: BuyerEscrowTransaction[] = [
-  {
-    id: 'txn_001',
-    offerId: 'offer_002',
-    propertyId: 'listing_005',
-    propertyTitle: 'Ikeja GRA Townhouse',
-    ownerName: 'Segun Alabi',
-    purchasePrice: 68_000_000,
-    escrowStatus: 'deposit_pending',
-    milestones: [
-      { label: 'Deposit received', completed: false },
-      { label: 'Funds held in escrow', completed: false },
-      { label: 'Ownership verification', completed: false },
-      { label: 'Final payment', completed: false },
-      { label: 'Funds released', completed: false },
-    ],
-    activityLog: [
-      {
-        id: 'log_001',
-        actor: 'owner',
-        action: 'Accepted your offer of ₦68,000,000',
-        timestamp: '2026-08-01T10:00:00.000Z',
-      },
-      {
-        id: 'log_002',
-        actor: 'system',
-        action: 'Escrow transaction opened — awaiting your deposit',
-        timestamp: '2026-08-01T10:05:00.000Z',
-      },
-    ],
-    createdAt: '2026-08-01T00:00:00.000Z',
-  },
-  {
-    id: 'txn_002',
-    offerId: 'offer_003',
-    propertyId: 'listing_006',
-    propertyTitle: 'Surulere Family Duplex',
-    ownerName: 'Tobi Fashola',
-    purchasePrice: 54_500_000,
-    escrowStatus: 'released',
-    milestones: [
-      { label: 'Deposit received', completed: true },
-      { label: 'Funds held in escrow', completed: true },
-      { label: 'Ownership verification', completed: true },
-      { label: 'Final payment', completed: true },
-      { label: 'Funds released', completed: true },
-    ],
-    activityLog: [
-      {
-        id: 'log_001',
-        actor: 'buyer',
-        action: 'Submitted earnest deposit of ₦5,450,000 into escrow',
-        timestamp: '2026-05-02T09:00:00.000Z',
-      },
-      {
-        id: 'log_002',
-        actor: 'system',
-        action: 'Deposit confirmed and funds moved to held status',
-        timestamp: '2026-05-02T09:10:00.000Z',
-      },
-      {
-        id: 'log_003',
-        actor: 'compliance',
-        action: 'Ownership verification approved',
-        timestamp: '2026-05-10T13:20:00.000Z',
-      },
-      {
-        id: 'log_004',
-        actor: 'buyer',
-        action: 'Remitted final payment balance',
-        timestamp: '2026-06-12T10:15:00.000Z',
-      },
-      {
-        id: 'log_005',
-        actor: 'system',
-        action: 'Funds released to owner — ownership transferred to you',
-        timestamp: '2026-06-14T09:00:00.000Z',
-      },
-    ],
-    createdAt: '2026-05-02T00:00:00.000Z',
-    releasedAt: '2026-06-14T00:00:00.000Z',
-  },
-];
+import { buyerService } from '@/services/buyerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
+import type { BuyerEscrowStatus } from '@/types/buyer';
 
 type StatusFilter = 'all' | BuyerEscrowStatus;
 
 export default function BuyerTransactionsPage() {
-  const [transactions, setTransactions] = useState<BuyerEscrowTransaction[]>(mockTransactions);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeTransactionId, setActiveTransactionId] = useState<string | null>(null);
 
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: buyerKeys.transactions,
+    queryFn: () => unwrap(buyerService.listTransactions()),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.transactions });
+
+  const depositMutation = useMutation({
+    mutationFn: (id: string) => unwrap(buyerService.depositTransaction(id)),
+    onSuccess: invalidate,
+  });
+  const releaseMutation = useMutation({
+    mutationFn: (id: string) => unwrap(buyerService.releaseTransaction(id)),
+    onSuccess: invalidate,
+  });
+
   const handleMakePayment = (transactionId: string, stage: 'deposit' | 'final') => {
-    setTransactions((prev) =>
-      prev.map((t) => {
-        if (t.id !== transactionId) return t;
-        const nextStatus: BuyerEscrowStatus = stage === 'deposit' ? 'funds_held' : 'released';
-        const newLog = {
-          id: `log_${Date.now()}`,
-          actor: 'buyer' as const,
-          action:
-            stage === 'deposit'
-              ? 'Submitted earnest deposit into escrow'
-              : 'Remitted final payment balance',
-          timestamp: new Date().toISOString(),
-        };
-        return {
-          ...t,
-          escrowStatus: nextStatus,
-          activityLog: [...t.activityLog, newLog],
-          releasedAt: stage === 'final' ? new Date().toISOString() : t.releasedAt,
-        };
-      })
-    );
+    if (stage === 'deposit') depositMutation.mutate(transactionId);
+    else releaseMutation.mutate(transactionId);
   };
 
   const activeTransaction = transactions.find((t) => t.id === activeTransactionId) || null;
@@ -149,7 +66,9 @@ export default function BuyerTransactionsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Transactions</h1>
         <p className="text-muted-foreground mt-1">
-          {transactions.length} purchase transaction{transactions.length === 1 ? '' : 's'} in escrow
+          {isLoading
+            ? 'Loading…'
+            : `${transactions.length} purchase transaction${transactions.length === 1 ? '' : 's'} in escrow`}
         </p>
       </div>
 

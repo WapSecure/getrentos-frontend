@@ -3,54 +3,22 @@
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
 import { ROIComparisonChart } from '@/components/owner/analytics/ROIComparisonChart';
 import { Button } from '@/components/ui/Button';
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import type { InvestmentMetrics } from '@/types/owner';
 
-const mockMetrics: InvestmentMetrics[] = [
-  {
-    propertyId: 'oprop_001',
-    propertyName: 'Ocean View Towers',
-    purchasePrice: 118_000_000,
-    currentValue: 145_000_000,
-    appreciationRate: 22.9,
-    rentalYield: undefined,
-    roiPercentage: 22.9,
-  },
-  {
-    propertyId: 'oprop_002',
-    propertyName: 'Palm Court Villa',
-    purchasePrice: 76_000_000,
-    currentValue: 92_000_000,
-    appreciationRate: 21.1,
-    rentalYield: undefined,
-    roiPercentage: 21.1,
-  },
-  {
-    propertyId: 'oprop_003',
-    propertyName: 'Lekki Waterfront Duplex',
-    purchasePrice: 71_500_000,
-    currentValue: 71_500_000,
-    appreciationRate: 0,
-    rentalYield: undefined,
-    roiPercentage: 0,
-  },
-  {
-    propertyId: 'oprop_004',
-    propertyName: 'Ikoyi Heritage House',
-    purchasePrice: 175_000_000,
-    currentValue: 210_000_000,
-    appreciationRate: 20,
-    rentalYield: 6.4,
-    roiPercentage: 26.4,
-  },
-];
-
 export default function OwnerAnalyticsPage() {
-  const [metrics, setMetrics] = useState<InvestmentMetrics[]>(mockMetrics);
+  const { data: metrics = [] } = useQuery({
+    queryKey: ownerKeys.analytics,
+    queryFn: () => unwrap(ownerService.getAnalyticsMetrics()),
+  });
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
   const [convertingProperty, setConvertingProperty] = useState<InvestmentMetrics | null>(null);

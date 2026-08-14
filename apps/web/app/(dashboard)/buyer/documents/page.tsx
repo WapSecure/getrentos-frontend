@@ -5,9 +5,16 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 import { useState } from 'react';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
+import {
+  DocumentUploadDialog,
+  type UploadedDocumentData,
+} from '@/components/ui/DocumentUploadDialog';
 import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
 import { formatDate } from '@/lib/format';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { buyerService } from '@/services/buyerService';
+import { buyerKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 import type { BuyerDocument } from '@/types/buyer';
 
 const categoryLabels: Record<BuyerDocument['category'], string> = {
@@ -19,73 +26,28 @@ const categoryLabels: Record<BuyerDocument['category'], string> = {
   payment_receipt: 'Payment Receipt',
 };
 
-const mockDocuments: BuyerDocument[] = [
-  {
-    id: 'doc_001',
-    name: 'Bank Statement - Proof of Funds.pdf',
-    category: 'proof_of_funds',
-    uploadedAt: '2026-07-15T00:00:00.000Z',
-    sizeLabel: '640 KB',
-  },
-  {
-    id: 'doc_002',
-    name: 'GTBank Mortgage Pre-Approval Letter.pdf',
-    category: 'mortgage_preapproval',
-    uploadedAt: '2026-07-20T00:00:00.000Z',
-    sizeLabel: '410 KB',
-  },
-  {
-    id: 'doc_003',
-    name: 'National ID Card.pdf',
-    category: 'identity',
-    uploadedAt: '2026-06-01T00:00:00.000Z',
-    sizeLabel: '210 KB',
-  },
-  {
-    id: 'doc_004',
-    name: 'Deed of Assignment - Surulere Duplex.pdf',
-    category: 'transfer_agreement',
-    propertyTitle: 'Surulere Family Duplex',
-    uploadedAt: '2026-06-15T00:00:00.000Z',
-    sizeLabel: '1.1 MB',
-  },
-  {
-    id: 'doc_005',
-    name: 'Title Deed - Surulere Duplex.pdf',
-    category: 'title_deed',
-    propertyTitle: 'Surulere Family Duplex',
-    uploadedAt: '2026-06-20T00:00:00.000Z',
-    sizeLabel: '1.3 MB',
-  },
-  {
-    id: 'doc_006',
-    name: 'Final Payment Receipt.pdf',
-    category: 'payment_receipt',
-    propertyTitle: 'Surulere Family Duplex',
-    uploadedAt: '2026-06-14T00:00:00.000Z',
-    sizeLabel: '320 KB',
-  },
-];
-
 type CategoryFilter = 'all' | BuyerDocument['category'];
 
 export default function BuyerDocumentsPage() {
-  const [documents, setDocuments] = useState<BuyerDocument[]>(mockDocuments);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
-    setDocuments((prev) => [
-      {
-        id: `doc_${Date.now()}`,
-        name: data.name,
-        category: data.category as BuyerDocument['category'],
-        uploadedAt: new Date().toISOString(),
-        sizeLabel: data.sizeLabel,
-      },
-      ...prev,
-    ]);
+  const { data: documents = [] } = useQuery({
+    queryKey: buyerKeys.documents,
+    queryFn: () => unwrap(buyerService.listDocuments()),
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: (data: UploadedDocumentData) =>
+      buyerService.uploadDocument(data.file, data.name, data.category),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.documents }),
+  });
+
+  const handleUpload = (data: UploadedDocumentData) => {
+    uploadMutation.mutate(data);
+    setIsUploadOpen(false);
   };
 
   const filteredDocuments = documents.filter((d) => {

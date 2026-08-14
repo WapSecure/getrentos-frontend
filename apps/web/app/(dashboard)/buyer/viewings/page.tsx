@@ -2,88 +2,56 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
 import { Button } from '@/components/ui/Button';
-import type { ViewingRequest, BuyerPropertyListing } from '@/types/buyer';
-
-const mockListings: BuyerPropertyListing[] = [
-  {
-    id: 'listing_001',
-    title: 'Luxury 3-Bed Apartment with Ocean Views',
-    propertyType: 'Apartment',
-    askingPrice: 148_000_000,
-    address: '3 Bar Beach Way',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    features: [],
-    description: '',
-    ownerName: 'Adaeze Okafor',
-    ownerVerified: true,
-    listedDate: '2026-06-01T00:00:00.000Z',
-  },
-  {
-    id: 'listing_002',
-    title: 'Spacious 4-Bed Duplex in Lekki',
-    propertyType: 'Duplex',
-    askingPrice: 95_000_000,
-    address: '18 Chevron Drive',
-    city: 'Lekki',
-    state: 'Lagos',
-    features: [],
-    description: '',
-    ownerName: 'Adaeze Okafor',
-    ownerVerified: true,
-    listedDate: '2026-05-12T00:00:00.000Z',
-  },
-];
-
-const mockViewingRequests: ViewingRequest[] = [
-  {
-    id: 'view_001',
-    propertyId: 'listing_001',
-    propertyTitle: 'Luxury 3-Bed Apartment with Ocean Views',
-    requestedDate: '2026-08-09',
-    requestedTime: '14:00',
-    status: 'confirmed',
-    notes: 'Would like to see the balcony view.',
-  },
-  {
-    id: 'view_002',
-    propertyId: 'listing_002',
-    propertyTitle: 'Spacious 4-Bed Duplex in Lekki',
-    requestedDate: '2026-08-12',
-    requestedTime: '10:30',
-    status: 'pending',
-  },
-];
+import { buyerService } from '@/services/buyerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
 
 function BuyerViewingsPageContent() {
   const searchParams = useSearchParams();
   const defaultPropertyId = searchParams.get('property') || undefined;
+  const queryClient = useQueryClient();
 
-  const [requests, setRequests] = useState<ViewingRequest[]>(mockViewingRequests);
+  const { data: requests = [], isLoading } = useQuery({
+    queryKey: buyerKeys.viewings,
+    queryFn: () => unwrap(buyerService.listViewings()),
+  });
+
+  const { data: listings = [] } = useQuery({
+    queryKey: buyerKeys.listings,
+    queryFn: () => unwrap(buyerService.discover({})),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.viewings });
+
+  const createMutation = useMutation({
+    mutationFn: (data: { listingId: string; scheduledAt: string; notes?: string }) =>
+      unwrap(buyerService.requestViewing(data)),
+    onSuccess: invalidate,
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: string) => unwrap(buyerService.updateViewing(id, { status: 'CANCELLED' })),
+    onSuccess: invalidate,
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(!!defaultPropertyId);
 
   const handleSubmit = (propertyId: string, date: string, time: string, notes: string) => {
-    const property = mockListings.find((l) => l.id === propertyId);
-    const newRequest: ViewingRequest = {
-      id: `view_${Date.now()}`,
-      propertyId,
-      propertyTitle: property?.title || 'Unknown property',
-      requestedDate: date,
-      requestedTime: time,
-      status: 'pending',
+    createMutation.mutate({
+      listingId: propertyId,
+      scheduledAt: new Date(`${date}T${time}`).toISOString(),
       notes: notes || undefined,
-    };
-    setRequests((prev) => [newRequest, ...prev]);
+    });
+    setIsModalOpen(false);
   };
 
   const handleCancel = (requestId: string) => {
-    setRequests((prev) =>
-      prev.map((r) => (r.id === requestId ? { ...r, status: 'cancelled' } : r))
-    );
+    cancelMutation.mutate(requestId);
   };
 
   return (
@@ -92,7 +60,9 @@ function BuyerViewingsPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Viewing Requests</h1>
           <p className="text-muted-foreground mt-1">
-            {requests.length} request{requests.length === 1 ? '' : 's'}
+            {isLoading
+              ? 'Loading…'
+              : `${requests.length} request${requests.length === 1 ? '' : 's'}`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -101,7 +71,7 @@ function BuyerViewingsPageContent() {
         </Button>
       </div>
 
-      {requests.length === 0 ? (
+      {!isLoading && requests.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <CalendarClock className="w-8 h-8 text-primary" />
@@ -127,7 +97,7 @@ function BuyerViewingsPageContent() {
       <RequestViewingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        listings={mockListings}
+        listings={listings}
         defaultPropertyId={defaultPropertyId}
         onSubmit={handleSubmit}
       />

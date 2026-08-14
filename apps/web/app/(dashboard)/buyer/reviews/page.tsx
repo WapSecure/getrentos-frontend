@@ -1,31 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Star, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getInitials, formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
-
-interface GivenReview {
-  id: string;
-  ownerName: string;
-  propertyTitle: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-}
-
-const mockReviews: GivenReview[] = [
-  {
-    id: 'rev_001',
-    ownerName: 'Tobi Fashola',
-    propertyTitle: 'Surulere Family Duplex',
-    rating: 5,
-    comment:
-      'Smooth transaction from start to finish. Honest pricing and quick to respond to every question.',
-    createdAt: '2026-06-18T00:00:00.000Z',
-  },
-];
+import { buyerService, type BuyerReview } from '@/services/buyerService';
+import { buyerKeys } from '@/lib/queryKeys';
+import { unwrap } from '@/lib/apiHelpers';
 
 const StarRow = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }) => (
   <div className="flex items-center gap-0.5">
@@ -39,7 +21,10 @@ const StarRow = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }
 );
 
 export default function BuyerReviewsPage() {
-  const [reviews, setReviews] = useState<GivenReview[]>(mockReviews);
+  const { data: reviews = [] } = useQuery({
+    queryKey: buyerKeys.reviews,
+    queryFn: () => unwrap(buyerService.listReviews()),
+  });
 
   return (
     <>
@@ -72,21 +57,21 @@ export default function BuyerReviewsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {reviews.map((review: BuyerReview) => (
             <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
-                    {getInitials(review.ownerName)}
+                    {getInitials(review.author)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{review.ownerName}</p>
-                    <p className="text-xs text-muted-foreground">{review.propertyTitle}</p>
+                    <p className="text-sm font-medium text-foreground">{review.author}</p>
+                    <p className="text-xs text-muted-foreground">{review.category}</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
                   <StarRow rating={review.rating} />
-                  <p className="text-xs text-gray-400 mt-1">{formatDate(review.createdAt)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{formatDate(review.date)}</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>

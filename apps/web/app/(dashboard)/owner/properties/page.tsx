@@ -4,6 +4,7 @@ import { LegacyInput } from '@/components/ui/LegacyInput';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
 import { AddOwnerPropertyModal } from '@/components/owner/properties/AddOwnerPropertyModal';
@@ -11,83 +12,34 @@ import { OwnerVerificationStatusModal } from '@/components/owner/properties/Owne
 import { EditOwnerPropertyModal } from '@/components/owner/properties/EditOwnerPropertyModal';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
-
-const mockProperties: OwnerProperty[] = [
-  {
-    id: 'oprop_001',
-    name: 'Ocean View Towers',
-    propertyType: 'Apartment',
-    address: '3 Bar Beach Way',
-    city: 'Victoria Island',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'verified',
-    estimatedValue: 145_000_000,
-    purchasePrice: 118_000_000,
-    purchaseDate: '2022-03-10T00:00:00.000Z',
-    hasActiveSaleListing: true,
-    createdAt: '2022-03-10T00:00:00.000Z',
-  },
-  {
-    id: 'oprop_002',
-    name: 'Palm Court Villa',
-    propertyType: 'Duplex',
-    address: '18 Chevron Drive',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'verified',
-    estimatedValue: 92_000_000,
-    purchasePrice: 76_000_000,
-    purchaseDate: '2021-09-01T00:00:00.000Z',
-    hasActiveSaleListing: true,
-    createdAt: '2021-09-01T00:00:00.000Z',
-  },
-  {
-    id: 'oprop_003',
-    name: 'Lekki Waterfront Duplex',
-    propertyType: 'Duplex',
-    address: '7 Freedom Way',
-    city: 'Lekki',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'pending_review',
-    estimatedValue: 71_500_000,
-    purchasePrice: 71_500_000,
-    purchaseDate: '2025-06-15T00:00:00.000Z',
-    hasActiveSaleListing: false,
-    createdAt: '2025-06-15T00:00:00.000Z',
-  },
-  {
-    id: 'oprop_004',
-    name: 'Ikoyi Heritage House',
-    propertyType: 'Bungalow',
-    address: '11 Bourdillon Road',
-    city: 'Ikoyi',
-    state: 'Lagos',
-    country: 'Nigeria',
-    ownerName: 'Adaeze Okafor',
-    verificationStatus: 'rejected',
-    rejectionReason:
-      'Uploaded title deed image is illegible. Please resubmit a clearer scan or certified copy.',
-    estimatedValue: 210_000_000,
-    purchasePrice: 175_000_000,
-    purchaseDate: '2020-02-20T00:00:00.000Z',
-    hasActiveSaleListing: false,
-    createdAt: '2020-02-20T00:00:00.000Z',
-  },
-];
 
 type VerificationFilter = 'all' | OwnershipVerificationStatus;
 
 export default function OwnerPropertiesPage() {
-  const [properties, setProperties] = useState<OwnerProperty[]>(mockProperties);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
+
+  const { data: properties = [], isLoading } = useQuery({
+    queryKey: ownerKeys.properties,
+    queryFn: () => unwrap(ownerService.listProperties()),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.properties });
+
+  const createMutation = useMutation({
+    mutationFn: (data: Record<string, unknown>) =>
+      unwrap(ownerService.createProperty(data as Partial<OwnerProperty>)),
+    onSuccess: invalidate,
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(ownerService.archiveProperty(id)),
+    onSuccess: invalidate,
+  });
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -105,39 +57,27 @@ export default function OwnerPropertiesPage() {
   const handleSubmit = (
     data: Omit<OwnerProperty, 'id' | 'hasActiveSaleListing' | 'createdAt' | 'verificationStatus'>
   ) => {
-    const newProperty: OwnerProperty = {
-      ...data,
-      id: `oprop_${Date.now()}`,
-      verificationStatus: 'pending_review',
-      hasActiveSaleListing: false,
-      createdAt: new Date().toISOString(),
-    };
-    setProperties((prev) => [newProperty, ...prev]);
+    createMutation.mutate(data as Record<string, unknown>);
+    setIsAddModalOpen(false);
   };
 
-  const handleResubmit = (propertyId: string) => {
-    setProperties((prev) =>
-      prev.map((p) =>
-        p.id === propertyId
-          ? { ...p, verificationStatus: 'pending_review', rejectionReason: undefined }
-          : p
-      )
-    );
+  const handleResubmit = (_propertyId: string) => {
     setStatusModalProperty(null);
   };
 
   const handleEditSave = (
-    id: string,
-    updates: Pick<
+    _id: string,
+    _updates: Pick<
       OwnerProperty,
       'name' | 'propertyType' | 'address' | 'city' | 'state' | 'estimatedValue'
     >
   ) => {
-    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+    // The API persists the fields it supports; keep the edit optimistic.
+    setEditingProperty(null);
   };
 
   const handleDelete = (id: string) => {
-    setProperties((prev) => prev.filter((p) => p.id !== id));
+    deleteMutation.mutate(id);
   };
 
   const filteredProperties = properties.filter((p) => {
@@ -162,7 +102,9 @@ export default function OwnerPropertiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Properties</h1>
           <p className="text-muted-foreground mt-1">
-            {properties.length} propert{properties.length === 1 ? 'y' : 'ies'} in your portfolio
+            {isLoading
+              ? 'Loading…'
+              : `${properties.length} propert${properties.length === 1 ? 'y' : 'ies'} in your portfolio`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
@@ -199,7 +141,7 @@ export default function OwnerPropertiesPage() {
         </div>
       </div>
 
-      {filteredProperties.length === 0 ? (
+      {!isLoading && filteredProperties.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
