@@ -121,18 +121,22 @@ export const OwnerVerificationStatusModal = ({
                   <span className="text-muted-foreground">Owner on record</span>
                   <span className="text-foreground font-medium">{property.ownerName}</span>
                 </div>
-                <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-muted-foreground">Purchase price</span>
-                  <span className="text-foreground font-medium">
-                    {formatCurrency(property.purchasePrice)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-muted-foreground">Purchase date</span>
-                  <span className="text-foreground font-medium">
-                    {formatDate(property.purchaseDate)}
-                  </span>
-                </div>
+                {typeof property.purchasePrice === 'number' && (
+                  <div className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-muted-foreground">Purchase price</span>
+                    <span className="text-foreground font-medium">
+                      {formatCurrency(property.purchasePrice)}
+                    </span>
+                  </div>
+                )}
+                {property.purchaseDate && (
+                  <div className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="text-muted-foreground">Purchase date</span>
+                    <span className="text-foreground font-medium">
+                      {formatDate(property.purchaseDate)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {canResubmit && (

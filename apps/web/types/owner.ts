@@ -32,8 +32,8 @@ export interface OwnerProperty {
   verificationStatus: OwnershipVerificationStatus;
   rejectionReason?: string;
   estimatedValue: number;
-  purchasePrice: number;
-  purchaseDate: string;
+  purchasePrice?: number;
+  purchaseDate?: string;
   hasActiveSaleListing: boolean;
   createdAt: string;
 }

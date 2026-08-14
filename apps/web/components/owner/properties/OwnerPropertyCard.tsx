@@ -64,10 +64,9 @@ export const OwnerPropertyCard = ({
 }: OwnerPropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
   const VerificationIcon = verification.icon;
+  const purchasePrice = property.purchasePrice ?? 0;
   const appreciation =
-    property.purchasePrice > 0
-      ? ((property.estimatedValue - property.purchasePrice) / property.purchasePrice) * 100
-      : 0;
+    purchasePrice > 0 ? ((property.estimatedValue - purchasePrice) / purchasePrice) * 100 : 0;
 
   return (
     <motion.div
