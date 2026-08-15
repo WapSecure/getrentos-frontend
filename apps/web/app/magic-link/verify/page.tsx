@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
-import { getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
+import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { authService } from '@/services/authService';
 
 function MagicLinkVerifyContent() {
@@ -59,7 +59,7 @@ function MagicLinkVerifyContent() {
             <h1 className="text-lg font-semibold text-foreground">Link invalid or expired</h1>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
             <a
-              href="/login"
+              href={ROUTES.LOGIN}
               className="inline-block mt-4 text-sm font-medium text-primary hover:text-primary-hover"
             >
               Back to sign in

@@ -1,13 +1,28 @@
 'use client';
 
-import { Shield, CheckCircle, Clock, Phone, Mail, IdCard } from 'lucide-react';
+import {
+  Shield,
+  CheckCircle,
+  Clock,
+  Phone,
+  Mail,
+  Building2,
+  Landmark,
+  IdCard,
+  Award,
+  CreditCard,
+} from 'lucide-react';
 import type { VerificationItem } from '@/types/trust-score';
 
 const iconMap: Record<string, React.ElementType> = {
   Shield,
   Phone,
   Mail,
+  Building2,
+  Landmark,
   IdCard,
+  Award,
+  CreditCard,
 };
 
 interface VerificationListProps {

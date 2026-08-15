@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
-import { getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
+import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { apiFetch } from '@/lib/apiClient';
 
 interface MeResponse {
@@ -75,7 +75,7 @@ function OAuthCallbackContent() {
             <h1 className="text-lg font-semibold text-foreground">Sign-in failed</h1>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
             <a
-              href="/login"
+              href={ROUTES.LOGIN}
               className="inline-block mt-4 text-sm font-medium text-primary hover:text-primary-hover"
             >
               Back to sign in

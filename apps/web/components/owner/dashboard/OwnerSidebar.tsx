@@ -19,33 +19,36 @@ import {
   Wrench,
   Settings,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
-  { label: 'Properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
-  { label: 'Sale Listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
-  { label: 'Buyer Leads', href: ROUTES.OWNER_LEADS, icon: Users },
-  { label: 'Offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
-  { label: 'Transactions', href: ROUTES.OWNER_TRANSACTIONS, icon: ShieldCheck },
-  { label: 'Investment Analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },
-  { label: 'Home Management', href: ROUTES.OWNER_HOME_MANAGEMENT, icon: Wrench },
-  { label: 'Documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
-  { label: 'Messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
-  { label: 'Realtor Access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
-  { label: 'Reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
-  { label: 'Trust Profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
-  { label: 'Settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
+  { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
+  { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
+  { labelKey: 'sidebar.sale_listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
+  { labelKey: 'sidebar.buyer_leads', href: ROUTES.OWNER_LEADS, icon: Users },
+  { labelKey: 'sidebar.offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
+  { labelKey: 'sidebar.transactions', href: ROUTES.OWNER_TRANSACTIONS, icon: ShieldCheck },
+  { labelKey: 'sidebar.investment_analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },
+  { labelKey: 'sidebar.home_management', href: ROUTES.OWNER_HOME_MANAGEMENT, icon: Wrench },
+  { labelKey: 'sidebar.documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
+  { labelKey: 'sidebar.messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
+  { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
+  { labelKey: 'sidebar.reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
+  { labelKey: 'sidebar.trust_profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
+  { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
 ];
 
 export const OwnerSidebar = () => {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
@@ -68,7 +71,7 @@ export const OwnerSidebar = () => {
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </motion.div>
           );

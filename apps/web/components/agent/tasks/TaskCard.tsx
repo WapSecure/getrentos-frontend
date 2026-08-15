@@ -11,38 +11,17 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/format';
-import type { AgentTask, TaskType, TaskStatus, TaskPriority } from '@/types/agent';
+import { taskStatusBadges } from '@/lib/statusBadge';
+import type { AgentTask, TaskType, TaskPriority } from '@/types/agent';
 
 const typeConfig: Record<TaskType, { icon: React.ElementType; label: string }> = {
   inspection: { icon: ClipboardCheck, label: 'Inspection' },
   verification: { icon: UserCheck, label: 'Verification' },
   valuation: { icon: Home, label: 'Valuation' },
   document_pickup: { icon: FileText, label: 'Document Pickup' },
-};
-
-const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
-  assigned: {
-    label: 'Assigned',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  in_progress: {
-    label: 'In Progress',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  completed: {
-    label: 'Completed',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  overdue: {
-    label: 'Overdue',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-  cancelled: {
-    label: 'Cancelled',
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
-  },
 };
 
 const priorityConfig: Record<TaskPriority, { label: string; className: string }> = {
@@ -62,7 +41,7 @@ interface TaskCardProps {
 export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: TaskCardProps) => {
   const type = typeConfig[task.type];
   const TypeIcon = type.icon;
-  const status = statusConfig[task.status];
+  const status = taskStatusBadges[task.status];
   const priority = priorityConfig[task.priority];
   const isActionable =
     task.status === 'assigned' || task.status === 'in_progress' || task.status === 'overdue';
@@ -84,11 +63,9 @@ export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: Tas
             <p className="text-xs text-muted-foreground truncate">{task.propertyAddress}</p>
           </div>
         </div>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
-        >
+        <Badge variant={status.variant} icon={status.icon && <status.icon className="w-3 h-3" />}>
           {status.label}
-        </span>
+        </Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">

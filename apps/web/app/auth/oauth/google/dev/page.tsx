@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Chrome } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -47,7 +48,7 @@ export default function GoogleOAuthDevConsent() {
             {submitting ? 'Continuing…' : 'Continue as OAuth Dev User'}
           </button>
           <a
-            href="/login"
+            href={ROUTES.LOGIN}
             className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel and go back

@@ -1,9 +1,9 @@
 'use client';
 
 import { MessageCircle, Clock, Handshake, Star } from 'lucide-react';
-import { TrustScoreRing } from '@/components/realtor/trust/TrustScoreRing';
-import { VerificationList } from '@/components/realtor/trust/VerificationList';
-import { TrustBadges } from '@/components/realtor/trust/TrustBadges';
+import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
+import { VerificationList } from '@/components/shared/trust/VerificationList';
+import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import type { VerificationItem, Badge } from '@/types/trust-score';
 
 const mockVerifications: VerificationItem[] = [

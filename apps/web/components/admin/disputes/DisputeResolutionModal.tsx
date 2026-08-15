@@ -17,6 +17,9 @@ interface DisputeResolutionModalProps {
   onResolve: (id: string) => void;
   onEscalate: (id: string) => void;
   onSendMessage: (id: string, text: string) => void;
+  isResolving?: boolean;
+  isEscalating?: boolean;
+  isSendingMessage?: boolean;
 }
 
 export const DisputeResolutionModal = ({
@@ -26,6 +29,9 @@ export const DisputeResolutionModal = ({
   onResolve,
   onEscalate,
   onSendMessage,
+  isResolving = false,
+  isEscalating = false,
+  isSendingMessage = false,
 }: DisputeResolutionModalProps) => {
   const [messageText, setMessageText] = useState('');
 
@@ -96,6 +102,8 @@ export const DisputeResolutionModal = ({
                   variant="outline"
                   className="flex-1 gap-1.5"
                   onClick={() => onEscalate(dispute.id)}
+                  isLoading={isEscalating}
+                  disabled={isResolving || isEscalating}
                 >
                   <ArrowUpCircle className="w-3.5 h-3.5" />
                   Escalate
@@ -104,6 +112,8 @@ export const DisputeResolutionModal = ({
                   variant="primary"
                   className="flex-1 gap-1.5"
                   onClick={() => onResolve(dispute.id)}
+                  isLoading={isResolving}
+                  disabled={isResolving || isEscalating}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Mark Resolved
@@ -119,7 +129,11 @@ export const DisputeResolutionModal = ({
                 placeholder="Send a message to both parties..."
                 className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <Button variant="secondary" onClick={handleSend} disabled={!messageText.trim()}>
+              <Button
+                variant="secondary"
+                onClick={handleSend}
+                disabled={!messageText.trim() || isSendingMessage}
+              >
                 <Send className="w-4 h-4" />
               </Button>
             </div>

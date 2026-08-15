@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Home, MapPin } from 'lucide-react';
 import { formatPrice, type Property } from '@/types/renter';
+import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 
 interface SimilarPropertiesProps {
@@ -32,7 +33,7 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
         {similar.map((property) => (
           <Link
             key={property.id}
-            href={`/renter/properties/${property.id}`}
+            href={buildRoute.renterPropertyDetail(property.id)}
             className="block rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="h-24 bg-linear-to-br from-secondary to-muted flex items-center justify-center">

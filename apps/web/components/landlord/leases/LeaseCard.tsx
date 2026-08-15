@@ -2,28 +2,11 @@
 
 import { motion } from 'framer-motion';
 import { FileCheck, Download, RefreshCcw, Send } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { Lease, LeaseStatus } from '@/types/landlord';
-
-const statusConfig: Record<LeaseStatus, { label: string; className: string }> = {
-  draft: {
-    label: 'Draft',
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
-  },
-  sent: {
-    label: 'Sent',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  signed: {
-    label: 'Signed',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  expired: {
-    label: 'Expired',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-};
+import { leaseStatusBadges } from '@/lib/statusBadge';
+import type { Lease } from '@/types/landlord';
 
 const daysUntil = (dateString: string) => {
   return Math.ceil((new Date(dateString).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -37,7 +20,7 @@ interface LeaseCardProps {
 }
 
 export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: LeaseCardProps) => {
-  const status = statusConfig[lease.status];
+  const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
 
@@ -78,11 +61,7 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
             {lease.propertyName} • {lease.unitName}
           </p>
         </div>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
-        >
-          {status.label}
-        </span>
+        <Badge variant={status.variant}>{status.label}</Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">

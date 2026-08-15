@@ -1,9 +1,9 @@
 export { TrustScoreHeader } from './TrustScoreHeader';
 export { TrustScoreStats } from './TrustScoreStats';
-export { TrustScoreRing } from './TrustScoreRing';
+export { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
 export { VerificationList } from './VerificationList';
 export { TrustScoreHistory } from './TrustScoreHistory';
 export { ImprovementSuggestions } from './ImprovementSuggestions';
-export { TrustBadges } from './TrustBadges';
+export { TrustBadges } from '@/components/shared/trust/TrustBadges';
 export { VerificationTimeline } from './VerificationTimeline';
 export { TrustScoreBenefits } from './TrustScoreBenefits';

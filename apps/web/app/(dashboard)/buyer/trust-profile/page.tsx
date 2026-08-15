@@ -2,9 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
-import { TrustScoreRing } from '@/components/buyer/trust/TrustScoreRing';
-import { VerificationList } from '@/components/buyer/trust/VerificationList';
-import { TrustBadges } from '@/components/buyer/trust/TrustBadges';
+import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
+import { VerificationList } from '@/components/shared/trust/VerificationList';
+import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import { buyerService } from '@/services/buyerService';
 import { buyerKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';

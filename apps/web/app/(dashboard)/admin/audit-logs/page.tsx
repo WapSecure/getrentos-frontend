@@ -2,7 +2,7 @@
 
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ScrollText } from 'lucide-react';
 import { DataTable, type Column } from '@/components/ui/Table';
@@ -53,53 +53,56 @@ export default function AdminAuditLogsPage() {
     { value: 'info', label: 'Info' },
   ];
 
-  const columns: Column<AuditLogEntry>[] = [
-    {
-      key: 'actor',
-      header: 'Actor',
-      render: (log) => (
-        <>
-          <p className="font-medium text-foreground">{log.actorName}</p>
-          <p className="text-xs text-muted-foreground capitalize">{log.actorRole}</p>
-        </>
-      ),
-      className: 'whitespace-nowrap',
-    },
-    {
-      key: 'action',
-      header: 'Action',
-      render: (log) => log.action,
-      className: 'text-muted-foreground whitespace-nowrap',
-    },
-    {
-      key: 'target',
-      header: 'Target',
-      render: (log) => log.target,
-      className: 'text-muted-foreground whitespace-nowrap',
-    },
-    {
-      key: 'severity',
-      header: 'Severity',
-      render: (log) => (
-        <Badge variant={severityConfig[log.severity].variant}>
-          {severityConfig[log.severity].label}
-        </Badge>
-      ),
-      className: 'whitespace-nowrap',
-    },
-    {
-      key: 'ip',
-      header: 'IP Address',
-      render: (log) => log.ipAddress,
-      className: 'text-muted-foreground whitespace-nowrap font-mono text-xs',
-    },
-    {
-      key: 'timestamp',
-      header: 'Timestamp',
-      render: (log) => formatDate(log.timestamp),
-      className: 'text-muted-foreground whitespace-nowrap',
-    },
-  ];
+  const columns: Column<AuditLogEntry>[] = useMemo(
+    () => [
+      {
+        key: 'actor',
+        header: 'Actor',
+        render: (log) => (
+          <>
+            <p className="font-medium text-foreground">{log.actorName}</p>
+            <p className="text-xs text-muted-foreground capitalize">{log.actorRole}</p>
+          </>
+        ),
+        className: 'whitespace-nowrap',
+      },
+      {
+        key: 'action',
+        header: 'Action',
+        render: (log) => log.action,
+        className: 'text-muted-foreground whitespace-nowrap',
+      },
+      {
+        key: 'target',
+        header: 'Target',
+        render: (log) => log.target,
+        className: 'text-muted-foreground whitespace-nowrap',
+      },
+      {
+        key: 'severity',
+        header: 'Severity',
+        render: (log) => (
+          <Badge variant={severityConfig[log.severity].variant}>
+            {severityConfig[log.severity].label}
+          </Badge>
+        ),
+        className: 'whitespace-nowrap',
+      },
+      {
+        key: 'ip',
+        header: 'IP Address',
+        render: (log) => log.ipAddress,
+        className: 'text-muted-foreground whitespace-nowrap font-mono text-xs',
+      },
+      {
+        key: 'timestamp',
+        header: 'Timestamp',
+        render: (log) => formatDate(log.timestamp),
+        className: 'text-muted-foreground whitespace-nowrap',
+      },
+    ],
+    []
+  );
 
   return (
     <>

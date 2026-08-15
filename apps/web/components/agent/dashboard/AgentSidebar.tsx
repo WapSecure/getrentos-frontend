@@ -15,29 +15,32 @@ import {
   BadgeCheck,
   Settings,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: ROUTES.AGENT_DASHBOARD, icon: LayoutDashboard },
-  { label: 'Tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
-  { label: 'Inspections', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
-  { label: 'Verifications', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
-  { label: 'Sync Center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
-  { label: 'Documents', href: ROUTES.AGENT_DOCUMENTS, icon: FolderOpen },
-  { label: 'Messages', href: ROUTES.AGENT_MESSAGES, icon: MessageCircle },
-  { label: 'Reviews', href: ROUTES.AGENT_REVIEWS, icon: Star },
-  { label: 'Trust Profile', href: ROUTES.AGENT_TRUST_PROFILE, icon: BadgeCheck },
-  { label: 'Settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
+  { labelKey: 'sidebar.dashboard', href: ROUTES.AGENT_DASHBOARD, icon: LayoutDashboard },
+  { labelKey: 'sidebar.tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
+  { labelKey: 'sidebar.inspections', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
+  { labelKey: 'sidebar.verifications', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
+  { labelKey: 'sidebar.sync_center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
+  { labelKey: 'sidebar.documents', href: ROUTES.AGENT_DOCUMENTS, icon: FolderOpen },
+  { labelKey: 'sidebar.messages', href: ROUTES.AGENT_MESSAGES, icon: MessageCircle },
+  { labelKey: 'sidebar.reviews', href: ROUTES.AGENT_REVIEWS, icon: Star },
+  { labelKey: 'sidebar.trust_profile', href: ROUTES.AGENT_TRUST_PROFILE, icon: BadgeCheck },
+  { labelKey: 'sidebar.settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
 ];
 
 export const AgentSidebar = () => {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
@@ -60,7 +63,7 @@ export const AgentSidebar = () => {
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </motion.div>
           );

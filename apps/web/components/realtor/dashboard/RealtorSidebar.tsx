@@ -17,31 +17,34 @@ import {
   BadgeCheck,
   Settings,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: ROUTES.REALTOR_DASHBOARD, icon: LayoutDashboard },
-  { label: 'Clients', href: ROUTES.REALTOR_CLIENTS, icon: Users },
-  { label: 'Listings', href: ROUTES.REALTOR_LISTINGS, icon: Megaphone },
-  { label: 'Leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
-  { label: 'Viewings', href: ROUTES.REALTOR_VIEWINGS, icon: CalendarClock },
-  { label: 'Offers', href: ROUTES.REALTOR_OFFERS, icon: Handshake },
-  { label: 'Commissions', href: ROUTES.REALTOR_COMMISSIONS, icon: Wallet },
-  { label: 'Documents', href: ROUTES.REALTOR_DOCUMENTS, icon: FolderOpen },
-  { label: 'Messages', href: ROUTES.REALTOR_MESSAGES, icon: MessageCircle },
-  { label: 'Reviews', href: ROUTES.REALTOR_REVIEWS, icon: Star },
-  { label: 'Trust Profile', href: ROUTES.REALTOR_TRUST_PROFILE, icon: BadgeCheck },
-  { label: 'Settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
+  { labelKey: 'sidebar.dashboard', href: ROUTES.REALTOR_DASHBOARD, icon: LayoutDashboard },
+  { labelKey: 'sidebar.clients', href: ROUTES.REALTOR_CLIENTS, icon: Users },
+  { labelKey: 'sidebar.listings', href: ROUTES.REALTOR_LISTINGS, icon: Megaphone },
+  { labelKey: 'sidebar.leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
+  { labelKey: 'sidebar.viewings', href: ROUTES.REALTOR_VIEWINGS, icon: CalendarClock },
+  { labelKey: 'sidebar.offers', href: ROUTES.REALTOR_OFFERS, icon: Handshake },
+  { labelKey: 'sidebar.commissions', href: ROUTES.REALTOR_COMMISSIONS, icon: Wallet },
+  { labelKey: 'sidebar.documents', href: ROUTES.REALTOR_DOCUMENTS, icon: FolderOpen },
+  { labelKey: 'sidebar.messages', href: ROUTES.REALTOR_MESSAGES, icon: MessageCircle },
+  { labelKey: 'sidebar.reviews', href: ROUTES.REALTOR_REVIEWS, icon: Star },
+  { labelKey: 'sidebar.trust_profile', href: ROUTES.REALTOR_TRUST_PROFILE, icon: BadgeCheck },
+  { labelKey: 'sidebar.settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
 ];
 
 export const RealtorSidebar = () => {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
@@ -64,7 +67,7 @@ export const RealtorSidebar = () => {
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </motion.div>
           );

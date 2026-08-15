@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin,
@@ -22,6 +23,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { buildRoute } from '@/lib/constants/auth';
 import { Property } from '@/types/renter';
 import { AddNoteModal } from './AddNoteModal';
 import { SharePropertyModal } from './SharePropertyModal';
@@ -52,6 +54,7 @@ export const SavedPropertyCard = ({
   isSelected,
   onSelect,
 }: SavedPropertyCardProps) => {
+  const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -241,7 +244,7 @@ export const SavedPropertyCard = ({
                 <Button
                   size="sm"
                   variant="primary"
-                  onClick={() => (window.location.href = `/renter/properties/${property.id}`)}
+                  onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
                 >
                   View Details
                 </Button>
@@ -433,7 +436,7 @@ export const SavedPropertyCard = ({
             <Button
               size="sm"
               variant="primary"
-              onClick={() => (window.location.href = `/renter/properties/${property.id}`)}
+              onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
               className="flex-1"
             >
               View Details

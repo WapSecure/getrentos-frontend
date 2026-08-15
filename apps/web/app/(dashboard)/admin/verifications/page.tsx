@@ -36,21 +36,26 @@ export default function AdminVerificationsPage() {
   const invalidateRequests = () =>
     queryClient.invalidateQueries({ queryKey: adminKeys.verifications() });
 
+  const closeModalAndRefresh = () => {
+    invalidateRequests();
+    setActiveRequest(null);
+  };
+
   const approveMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.approveVerification(id)),
-    onSuccess: invalidateRequests,
+    onSuccess: closeModalAndRefresh,
   });
 
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       unwrap(adminService.rejectVerification(id, reason)),
-    onSuccess: invalidateRequests,
+    onSuccess: closeModalAndRefresh,
   });
 
   const requestClarificationMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       unwrap(adminService.requestVerificationClarification(id, reason)),
-    onSuccess: invalidateRequests,
+    onSuccess: closeModalAndRefresh,
   });
 
   const handleApprove = (id: string) => approveMutation.mutate(id);
@@ -160,6 +165,9 @@ export default function AdminVerificationsPage() {
         onApprove={handleApprove}
         onReject={handleReject}
         onRequestClarification={handleRequestClarification}
+        isApproving={approveMutation.isPending}
+        isRejecting={rejectMutation.isPending}
+        isRequestingClarification={requestClarificationMutation.isPending}
       />
     </>
   );

@@ -28,6 +28,39 @@ export type TranslationKey =
   | 'sidebar.calendar'
   | 'sidebar.settings'
   | 'sidebar.help'
+  | 'sidebar.properties'
+  | 'sidebar.listings'
+  | 'sidebar.offers'
+  | 'sidebar.reviews'
+  | 'sidebar.trust_profile'
+  | 'sidebar.verifications'
+  | 'sidebar.home_management'
+  | 'sidebar.realtor_access'
+  | 'sidebar.transactions'
+  | 'sidebar.units'
+  | 'sidebar.tenants'
+  | 'sidebar.leases'
+  | 'sidebar.vendors'
+  | 'sidebar.financials'
+  | 'sidebar.sale_listings'
+  | 'sidebar.buyer_leads'
+  | 'sidebar.investment_analytics'
+  | 'sidebar.users'
+  | 'sidebar.disputes'
+  | 'sidebar.fraud_risk'
+  | 'sidebar.escrow_oversight'
+  | 'sidebar.audit_logs'
+  | 'sidebar.reports'
+  | 'sidebar.access_roles'
+  | 'sidebar.clients'
+  | 'sidebar.leads'
+  | 'sidebar.viewings'
+  | 'sidebar.commissions'
+  | 'sidebar.tasks'
+  | 'sidebar.inspections'
+  | 'sidebar.sync_center'
+  | 'sidebar.saved_properties'
+  | 'sidebar.viewing_requests'
   | 'dashboard.greeting_morning'
   | 'dashboard.greeting_afternoon'
   | 'dashboard.greeting_evening'
@@ -77,6 +110,39 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.calendar': 'Calendar',
     'sidebar.settings': 'Settings',
     'sidebar.help': 'Help',
+    'sidebar.properties': 'Properties',
+    'sidebar.listings': 'Listings',
+    'sidebar.offers': 'Offers',
+    'sidebar.reviews': 'Reviews',
+    'sidebar.trust_profile': 'Trust Profile',
+    'sidebar.verifications': 'Verifications',
+    'sidebar.home_management': 'Home Management',
+    'sidebar.realtor_access': 'Realtor Access',
+    'sidebar.transactions': 'Transactions',
+    'sidebar.units': 'Units',
+    'sidebar.tenants': 'Tenants',
+    'sidebar.leases': 'Leases',
+    'sidebar.vendors': 'Vendors',
+    'sidebar.financials': 'Financials',
+    'sidebar.sale_listings': 'Sale Listings',
+    'sidebar.buyer_leads': 'Buyer Leads',
+    'sidebar.investment_analytics': 'Investment Analytics',
+    'sidebar.users': 'Users',
+    'sidebar.disputes': 'Disputes',
+    'sidebar.fraud_risk': 'Fraud & Risk',
+    'sidebar.escrow_oversight': 'Escrow Oversight',
+    'sidebar.audit_logs': 'Audit Logs',
+    'sidebar.reports': 'Reports',
+    'sidebar.access_roles': 'Access & Roles',
+    'sidebar.clients': 'Clients',
+    'sidebar.leads': 'Leads',
+    'sidebar.viewings': 'Viewings',
+    'sidebar.commissions': 'Commissions',
+    'sidebar.tasks': 'Tasks',
+    'sidebar.inspections': 'Inspections',
+    'sidebar.sync_center': 'Sync Center',
+    'sidebar.saved_properties': 'Saved Properties',
+    'sidebar.viewing_requests': 'Viewing Requests',
     'dashboard.greeting_morning': 'Good morning',
     'dashboard.greeting_afternoon': 'Good afternoon',
     'dashboard.greeting_evening': 'Good evening',
@@ -125,6 +191,39 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.calendar': 'Calendar',
     'sidebar.settings': 'Settings',
     'sidebar.help': 'Help',
+    'sidebar.properties': 'Property Dem',
+    'sidebar.listings': 'Listing Dem',
+    'sidebar.offers': 'Offer Dem',
+    'sidebar.reviews': 'Review Dem',
+    'sidebar.trust_profile': 'Trust Profile',
+    'sidebar.verifications': 'Verification Dem',
+    'sidebar.home_management': 'House Management',
+    'sidebar.realtor_access': 'Realtor Access',
+    'sidebar.transactions': 'Transaction Dem',
+    'sidebar.units': 'Unit Dem',
+    'sidebar.tenants': 'Tenant Dem',
+    'sidebar.leases': 'Agreement Dem',
+    'sidebar.vendors': 'Vendor Dem',
+    'sidebar.financials': 'Money Matter',
+    'sidebar.sale_listings': 'House Wey Dey Sale',
+    'sidebar.buyer_leads': 'Buyer Wey Fit Buy',
+    'sidebar.investment_analytics': 'Investment Analytics',
+    'sidebar.users': 'User Dem',
+    'sidebar.disputes': 'Wahala Dem',
+    'sidebar.fraud_risk': 'Fraud & Risk',
+    'sidebar.escrow_oversight': 'Escrow Oversight',
+    'sidebar.audit_logs': 'Audit Logs',
+    'sidebar.reports': 'Report Dem',
+    'sidebar.access_roles': 'Access & Roles',
+    'sidebar.clients': 'Client Dem',
+    'sidebar.leads': 'Lead Dem',
+    'sidebar.viewings': 'Viewing Dem',
+    'sidebar.commissions': 'Commission Dem',
+    'sidebar.tasks': 'Task Dem',
+    'sidebar.inspections': 'Inspection Dem',
+    'sidebar.sync_center': 'Sync Center',
+    'sidebar.saved_properties': 'House Wey I Save',
+    'sidebar.viewing_requests': 'Viewing Wey Dem Request',
     'dashboard.greeting_morning': 'Good morning o',
     'dashboard.greeting_afternoon': 'Good afternoon o',
     'dashboard.greeting_evening': 'Good evening o',

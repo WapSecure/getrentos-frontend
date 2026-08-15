@@ -17,12 +17,14 @@ import {
   Settings,
   KeyRound,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
 import type { AdminPermission } from '@/types/admin';
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
   permission: AdminPermission;
@@ -30,58 +32,68 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    labelKey: 'sidebar.dashboard',
     href: ROUTES.ADMIN_DASHBOARD,
     icon: LayoutDashboard,
     permission: 'dashboard.view',
   },
-  { label: 'Users', href: ROUTES.ADMIN_USERS, icon: Users, permission: 'users.view' },
+  { labelKey: 'sidebar.users', href: ROUTES.ADMIN_USERS, icon: Users, permission: 'users.view' },
   {
-    label: 'Verifications',
+    labelKey: 'sidebar.verifications',
     href: ROUTES.ADMIN_VERIFICATIONS,
     icon: ShieldCheck,
     permission: 'verifications.review',
   },
-  { label: 'Disputes', href: ROUTES.ADMIN_DISPUTES, icon: Gavel, permission: 'disputes.review' },
   {
-    label: 'Fraud & Risk',
+    labelKey: 'sidebar.disputes',
+    href: ROUTES.ADMIN_DISPUTES,
+    icon: Gavel,
+    permission: 'disputes.review',
+  },
+  {
+    labelKey: 'sidebar.fraud_risk',
     href: ROUTES.ADMIN_FRAUD,
     icon: AlertTriangle,
     permission: 'fraud.review',
   },
   {
-    label: 'Escrow Oversight',
+    labelKey: 'sidebar.escrow_oversight',
     href: ROUTES.ADMIN_ESCROW,
     icon: Landmark,
     permission: 'escrow.view',
   },
   {
-    label: 'Audit Logs',
+    labelKey: 'sidebar.audit_logs',
     href: ROUTES.ADMIN_AUDIT_LOGS,
     icon: ScrollText,
     permission: 'audit.view',
   },
   {
-    label: 'Documents',
+    labelKey: 'sidebar.documents',
     href: ROUTES.ADMIN_DOCUMENTS,
     icon: FolderOpen,
     permission: 'documents.manage',
   },
   {
-    label: 'Messages',
+    labelKey: 'sidebar.messages',
     href: ROUTES.ADMIN_MESSAGES,
     icon: MessageCircle,
     permission: 'messages.manage',
   },
-  { label: 'Reports', href: ROUTES.ADMIN_REPORTS, icon: BarChart3, permission: 'reports.view' },
   {
-    label: 'Settings',
+    labelKey: 'sidebar.reports',
+    href: ROUTES.ADMIN_REPORTS,
+    icon: BarChart3,
+    permission: 'reports.view',
+  },
+  {
+    labelKey: 'sidebar.settings',
     href: ROUTES.ADMIN_SETTINGS,
     icon: Settings,
     permission: 'platform.configure',
   },
   {
-    label: 'Access & Roles',
+    labelKey: 'sidebar.access_roles',
     href: ROUTES.ADMIN_ACCESS,
     icon: KeyRound,
     permission: 'staff.manage',
@@ -95,6 +107,7 @@ const hasAccess = (roles: string[] | undefined, item: NavItem) =>
 
 export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
@@ -119,7 +132,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               </motion.div>
             );

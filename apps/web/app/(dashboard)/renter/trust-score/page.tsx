@@ -3,11 +3,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { TrustScoreHeader } from '@/components/renter/trust-score/TrustScoreHeader';
 import { TrustScoreStats } from '@/components/renter/trust-score/TrustScoreStats';
-import { TrustScoreRing } from '@/components/renter/trust-score/TrustScoreRing';
+import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
 import { VerificationList } from '@/components/renter/trust-score/VerificationList';
 import { TrustScoreHistory } from '@/components/renter/trust-score/TrustScoreHistory';
 import { ImprovementSuggestions } from '@/components/renter/trust-score/ImprovementSuggestions';
-import { TrustBadges } from '@/components/renter/trust-score/TrustBadges';
+import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import { VerificationTimeline } from '@/components/renter/trust-score/VerificationTimeline';
 import { TrustScoreBenefits } from '@/components/renter/trust-score/TrustScoreBenefits';
 import { TrustScoreComparison } from '@/components/renter/trust-score/TrustScoreComparison';

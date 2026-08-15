@@ -12,7 +12,7 @@ import { cn } from '@/lib/cn';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@/lib/apiHelpers';
 import { adminKeys } from '@/lib/queryKeys';
-import type { DisputeCategory, DisputeStatus } from '@/types/admin';
+import type { DisputeCategory, DisputeMessage, DisputeStatus } from '@/types/admin';
 
 type StatusFilter = 'all' | DisputeStatus;
 type CategoryFilter = 'all' | DisputeCategory;
@@ -47,13 +47,37 @@ export default function AdminDisputesPage() {
 
   const escalateMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.escalateDispute(id)),
-    onSuccess: invalidateDisputes,
+    onSuccess: () => {
+      invalidateDisputes();
+      setActiveDisputeId(null);
+    },
   });
 
   const sendMessageMutation = useMutation({
     mutationFn: ({ id, text }: { id: string; text: string }) =>
       unwrap(adminService.sendDisputeMessage(id, text)),
-    onSuccess: (_, { id }) =>
+    onMutate: async ({ id, text }) => {
+      const queryKey = adminKeys.disputeMessages(id);
+      await queryClient.cancelQueries({ queryKey });
+      const previousMessages = queryClient.getQueryData<DisputeMessage[]>(queryKey);
+      const optimisticMessage: DisputeMessage = {
+        id: `optimistic-${crypto.randomUUID()}`,
+        disputeId: id,
+        senderId: 'admin',
+        senderName: 'You',
+        text,
+        timestamp: new Date().toISOString(),
+      };
+      queryClient.setQueryData<DisputeMessage[]>(queryKey, (old = []) => [
+        ...old,
+        optimisticMessage,
+      ]);
+      return { previousMessages, queryKey };
+    },
+    onError: (_error, _variables, context) => {
+      if (context) queryClient.setQueryData(context.queryKey, context.previousMessages);
+    },
+    onSettled: (_data, _error, { id }) =>
       queryClient.invalidateQueries({ queryKey: adminKeys.disputeMessages(id) }),
   });
 
@@ -168,6 +192,9 @@ export default function AdminDisputesPage() {
         onResolve={handleResolve}
         onEscalate={handleEscalate}
         onSendMessage={handleSendMessage}
+        isResolving={resolveMutation.isPending}
+        isEscalating={escalateMutation.isPending}
+        isSendingMessage={sendMessageMutation.isPending}
       />
     </>
   );

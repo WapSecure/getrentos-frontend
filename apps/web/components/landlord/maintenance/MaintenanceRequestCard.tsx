@@ -74,6 +74,8 @@ interface MaintenanceRequestCardProps {
   onAssignVendor: (request: LandlordMaintenanceRequest) => void;
   onMarkResolved: (id: string) => void;
   onEscalate: (id: string) => void;
+  isMarkingResolved?: boolean;
+  isEscalating?: boolean;
 }
 
 export const MaintenanceRequestCard = ({
@@ -82,11 +84,14 @@ export const MaintenanceRequestCard = ({
   onAssignVendor,
   onMarkResolved,
   onEscalate,
+  isMarkingResolved = false,
+  isEscalating = false,
 }: MaintenanceRequestCardProps) => {
   const CategoryIcon = categoryIcons[request.category];
   const priority = priorityConfig[request.priority];
   const status = statusConfig[request.status];
   const isResolved = request.status === 'resolved';
+  const isBusy = isMarkingResolved || isEscalating;
 
   return (
     <motion.div
@@ -138,6 +143,7 @@ export const MaintenanceRequestCard = ({
             fullWidth
             className="gap-1.5"
             onClick={() => onAssignVendor(request)}
+            disabled={isBusy}
           >
             <UserCog className="w-3.5 h-3.5" />
             {request.assignedVendorName ? 'Reassign' : 'Assign Vendor'}
@@ -148,6 +154,8 @@ export const MaintenanceRequestCard = ({
             className="px-2.5 text-orange-500 hover:text-orange-700"
             title="Escalate"
             onClick={() => onEscalate(request.id)}
+            isLoading={isEscalating}
+            disabled={isBusy}
           >
             <ArrowUpCircle className="w-4 h-4" />
           </Button>
@@ -157,6 +165,8 @@ export const MaintenanceRequestCard = ({
             className="px-2.5"
             title="Mark Resolved"
             onClick={() => onMarkResolved(request.id)}
+            isLoading={isMarkingResolved}
+            disabled={isBusy}
           >
             <CheckCircle2 className="w-4 h-4" />
           </Button>

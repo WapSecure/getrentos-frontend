@@ -1,53 +1,9 @@
 'use client';
 
-import { Lock, Clock, CheckCircle2, Ban } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { RentPayment, EscrowStatus, RentPaymentStatus } from '@/types/landlord';
-
-const escrowConfig: Record<
-  EscrowStatus,
-  { label: string; icon: React.ElementType; className: string }
-> = {
-  held: {
-    label: 'Held',
-    icon: Lock,
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  pending_review: {
-    label: 'Pending Review',
-    icon: Clock,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  released: {
-    label: 'Released',
-    icon: CheckCircle2,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  frozen: {
-    label: 'Frozen',
-    icon: Ban,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-};
-
-const statusConfig: Record<RentPaymentStatus, { label: string; className: string }> = {
-  paid: {
-    label: 'Paid',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  pending: {
-    label: 'Pending',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  overdue: {
-    label: 'Overdue',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-  processing: {
-    label: 'Processing',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-};
+import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
+import type { RentPayment } from '@/types/landlord';
 
 interface PaymentsTableProps {
   payments: RentPayment[];
@@ -80,9 +36,8 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
           </thead>
           <tbody className="divide-y divide-border">
             {payments.map((payment) => {
-              const escrow = escrowConfig[payment.escrowStatus];
-              const status = statusConfig[payment.status];
-              const EscrowIcon = escrow.icon;
+              const escrow = escrowStatusBadges[payment.escrowStatus];
+              const status = paymentStatusBadges[payment.status];
               return (
                 <tr key={payment.id} className="hover:bg-secondary transition-colors">
                   <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
@@ -98,19 +53,15 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                     {formatDate(payment.dueDate)}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${status.className}`}
-                    >
-                      {status.label}
-                    </span>
+                    <Badge variant={status.variant}>{status.label}</Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${escrow.className}`}
+                    <Badge
+                      variant={escrow.variant}
+                      icon={escrow.icon && <escrow.icon className="w-3 h-3" />}
                     >
-                      <EscrowIcon className="w-3 h-3" />
                       {escrow.label}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
                     <button

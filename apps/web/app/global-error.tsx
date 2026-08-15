@@ -1,5 +1,7 @@
 'use client';
 
+import { ROUTES } from '@/lib/constants/auth';
+
 export default function GlobalError({
   error,
   reset,
@@ -34,9 +36,9 @@ export default function GlobalError({
             >
               Try Again
             </button>
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error replaces the root layout, so next/link's router context can't be relied on here */}
+            {/* global-error replaces the root layout, so next/link's router context can't be relied on here */}
             <a
-              href="/"
+              href={ROUTES.HOME}
               className="px-6 py-2.5 rounded-full border-2 border-gray-300 dark:border-white/30 text-foreground font-medium text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
               Back to Home

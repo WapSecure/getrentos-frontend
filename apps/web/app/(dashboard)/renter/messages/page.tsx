@@ -13,7 +13,7 @@ import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageLabels } from '@/components/renter/messages/MessageLabels';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
 import { MessageCircle } from 'lucide-react';
-import { Conversation, FilterState } from '@/types/messages';
+import { Conversation, Message, FilterState } from '@/types/messages';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -51,7 +51,40 @@ export default function MessagesPage() {
       text: string;
       files?: File[];
     }) => unwrap(renterService.sendMessage(conversationId, text, files)),
-    onSuccess: invalidateConversations,
+    onMutate: async ({ conversationId, text }) => {
+      await queryClient.cancelQueries({ queryKey: renterKeys.conversations });
+      const previousConversations = queryClient.getQueryData<Conversation[]>(
+        renterKeys.conversations
+      );
+      const optimisticMessage: Message = {
+        id: `optimistic-${crypto.randomUUID()}`,
+        conversationId,
+        senderId: user?.id ?? 'me',
+        senderName: user?.fullName ?? 'You',
+        senderRole: 'renter',
+        text,
+        timestamp: new Date().toISOString(),
+        read: true,
+      };
+      queryClient.setQueryData<Conversation[]>(renterKeys.conversations, (old = []) =>
+        old.map((conversation) =>
+          conversation.id === conversationId
+            ? {
+                ...conversation,
+                messages: [...conversation.messages, optimisticMessage],
+                lastMessage: text,
+                lastMessageTime: optimisticMessage.timestamp,
+              }
+            : conversation
+        )
+      );
+      return { previousConversations };
+    },
+    onError: (_error, _variables, context) => {
+      if (context)
+        queryClient.setQueryData(renterKeys.conversations, context.previousConversations);
+    },
+    onSettled: invalidateConversations,
   });
 
   const markReadMutation = useMutation({

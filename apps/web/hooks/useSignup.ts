@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { authService } from '@/services/authService';
+import { saveAuthSession } from '@/lib/authStorage';
 import {
   ROLES_REQUIRING_VERIFICATION,
   ROUTES,
@@ -52,6 +53,10 @@ export const useSignup = () => {
 
   const sendOtp = async (identifier: string, method: 'email' | 'phone') => {
     setError(null);
+
+    // A fresh signup always starts as Renter — never inherit a role selection
+    // from a previous (persisted) attempt.
+    setData({ selectedRoles: ['renter'] });
 
     const response = await sendOtpMutation.mutateAsync({ identifier, method });
 
@@ -105,11 +110,14 @@ export const useSignup = () => {
     const response = await createAccountMutation.mutateAsync();
 
     if (response.success && response.data) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- excluded from the saved session payload
       const { accessToken, expiresIn: _expiresIn, ...user } = response.data;
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
-      localStorage.setItem(
-        STORAGE_KEYS.USER,
-        JSON.stringify({ ...user, fullName: user.legalName, role: data.selectedRoles[0] })
+      saveAuthSession(
+        {
+          accessToken,
+          user: { ...user, fullName: user.legalName, role: data.selectedRoles[0] },
+        },
+        true
       );
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 

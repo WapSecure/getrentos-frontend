@@ -112,6 +112,10 @@ export default function LandlordMaintenancePage() {
               onAssignVendor={setAssigningRequest}
               onMarkResolved={handleMarkResolved}
               onEscalate={handleEscalate}
+              isMarkingResolved={
+                markResolvedMutation.isPending && markResolvedMutation.variables === request.id
+              }
+              isEscalating={escalateMutation.isPending && escalateMutation.variables === request.id}
             />
           ))}
         </div>
@@ -122,6 +126,9 @@ export default function LandlordMaintenancePage() {
         vendors={vendors}
         onClose={() => setAssigningRequest(null)}
         onAssign={handleAssignVendor}
+        assigningVendorId={
+          assignVendorMutation.isPending ? assignVendorMutation.variables?.vendorId : null
+        }
       />
     </>
   );

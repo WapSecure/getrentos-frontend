@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { Toast, type ToastVariant } from '@/components/ui/Toast';
 import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 
 type Invitation = {
@@ -19,16 +20,16 @@ export function ClientRealtorAccess() {
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [propertiesFor, setPropertiesFor] = useState<string | null>(null);
   const { data: invitations = [], isLoading } = useQuery({
-    queryKey: ['client', 'realtor-invitations'],
+    queryKey: realtorKeys.clientInvitations,
     queryFn: () => unwrap(realtorService.listRealtorInvitations()) as Promise<Invitation[]>,
   });
   const { data: properties = [] } = useQuery({
     enabled: !!propertiesFor,
-    queryKey: ['client', 'realtor-properties', propertiesFor],
+    queryKey: realtorKeys.assignableProperties(propertiesFor ?? ''),
     queryFn: () =>
       unwrap(realtorService.getAssignableProperties(propertiesFor!)) as Promise<Property[]>,
   });
-  const refresh = () => client.invalidateQueries({ queryKey: ['client', 'realtor-invitations'] });
+  const refresh = () => client.invalidateQueries({ queryKey: realtorKeys.clientInvitations });
   const approve = useMutation({
     mutationFn: (id: string) => unwrap(realtorService.approveRealtorInvitation(id)),
     onSuccess: () => {

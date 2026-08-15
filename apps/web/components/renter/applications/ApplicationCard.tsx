@@ -6,18 +6,17 @@ import {
   Bed,
   Bath,
   Square,
-  Clock,
   Calendar,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
+  Clock,
   ChevronRight,
   Home,
   User,
   Star,
   Trash2,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { applicationStatusBadges } from '@/lib/statusBadge';
 import { Application } from '@/types/renter';
 
 interface ApplicationCardProps {
@@ -26,29 +25,6 @@ interface ApplicationCardProps {
   onViewDetails: () => void;
   onWithdraw?: (application: Application) => void;
 }
-
-const statusConfig = {
-  pending: {
-    label: 'Pending',
-    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-    icon: Clock,
-  },
-  under_review: {
-    label: 'Under Review',
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-    icon: AlertCircle,
-  },
-  approved: {
-    label: 'Approved',
-    color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-    icon: CheckCircle,
-  },
-  rejected: {
-    label: 'Rejected',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-    icon: XCircle,
-  },
-};
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -71,7 +47,7 @@ export const ApplicationCard = ({
   onViewDetails,
   onWithdraw,
 }: ApplicationCardProps) => {
-  const StatusIcon = statusConfig[application.status].icon;
+  const status = applicationStatusBadges[application.status];
   const canWithdraw = application.status !== 'approved' && application.status !== 'rejected';
 
   if (viewMode === 'list') {
@@ -101,12 +77,12 @@ export const ApplicationCard = ({
                 <span className="text-sm font-bold text-primary">
                   {formatPrice(application.price, application.period)}
                 </span>
-                <div
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig[application.status].color}`}
+                <Badge
+                  variant={status.variant}
+                  icon={status.icon && <status.icon className="w-3 h-3" />}
                 >
-                  <StatusIcon className="w-3 h-3" />
-                  {statusConfig[application.status].label}
-                </div>
+                  {status.label}
+                </Badge>
               </div>
             </div>
 
@@ -173,12 +149,13 @@ export const ApplicationCard = ({
     >
       <div className="h-32 bg-linear-to-br from-secondary to-muted flex items-center justify-center relative">
         <Home className="w-10 h-10 text-gray-400" />
-        <div
-          className={`absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[application.status].color}`}
+        <Badge
+          variant={status.variant}
+          icon={status.icon && <status.icon className="w-3 h-3" />}
+          className="absolute top-2 right-2"
         >
-          <StatusIcon className="w-3 h-3" />
-          {statusConfig[application.status].label}
-        </div>
+          {status.label}
+        </Badge>
       </div>
 
       <div className="p-4">

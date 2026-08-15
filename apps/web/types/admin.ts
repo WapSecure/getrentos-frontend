@@ -41,6 +41,8 @@ export type AdminPermission =
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
+export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
 export interface AdminStaffMember {
   id: string;
   legalName: string;
@@ -51,7 +53,7 @@ export interface AdminStaffMember {
   /** Present when this account was created pending approval. */
   staffApproval?: {
     id: string;
-    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    status: ApprovalStatus;
     createdAt: string;
     createdBy: { id: string; legalName: string; email: string };
   } | null;
@@ -59,7 +61,7 @@ export interface AdminStaffMember {
 
 export interface AdminStaffApproval {
   id: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: ApprovalStatus;
   createdAt: string;
   createdBy: {
     id: string;

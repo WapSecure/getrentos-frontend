@@ -1,6 +1,19 @@
 'use client';
 
-import { Award, Shield, Star, Zap, ShieldCheck, ClipboardCheck } from 'lucide-react';
+import {
+  Award,
+  Shield,
+  Star,
+  Zap,
+  ShieldCheck,
+  Handshake,
+  ClipboardCheck,
+  CheckCircle,
+  Crown,
+  Sparkles,
+  Lock,
+  Users,
+} from 'lucide-react';
 import type { Badge } from '@/types/trust-score';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -8,7 +21,13 @@ const iconMap: Record<string, React.ElementType> = {
   Star,
   Zap,
   ShieldCheck,
+  Handshake,
   ClipboardCheck,
+  CheckCircle,
+  Crown,
+  Sparkles,
+  Lock,
+  Users,
   Award,
 };
 
@@ -39,7 +58,7 @@ export const TrustBadges = ({ badges }: TrustBadgesProps) => {
               key={badge.id}
               className={`p-3 rounded-lg text-center transition-all ${
                 badge.earned
-                  ? 'bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200 dark:border-amber-800'
+                  ? 'bg-linear-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200 dark:border-amber-800'
                   : 'bg-gray-50 dark:bg-white/5 border border-border opacity-50'
               }`}
             >

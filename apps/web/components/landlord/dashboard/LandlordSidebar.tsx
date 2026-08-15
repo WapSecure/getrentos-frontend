@@ -21,36 +21,39 @@ import {
   Settings,
   UserRoundCheck,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: ROUTES.LANDLORD_DASHBOARD, icon: LayoutDashboard },
-  { label: 'Properties', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
-  { label: 'Units', href: ROUTES.LANDLORD_UNITS, icon: DoorOpen },
-  { label: 'Listings', href: ROUTES.LANDLORD_LISTINGS, icon: Megaphone },
-  { label: 'Applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
-  { label: 'Tenants', href: ROUTES.LANDLORD_TENANTS, icon: Users },
-  { label: 'Leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },
-  { label: 'Payments', href: ROUTES.LANDLORD_PAYMENTS, icon: CreditCard },
-  { label: 'Maintenance', href: ROUTES.LANDLORD_MAINTENANCE, icon: Wrench },
-  { label: 'Home Management', href: ROUTES.LANDLORD_HOME_MANAGEMENT, icon: Wrench },
-  { label: 'Vendors', href: ROUTES.LANDLORD_VENDORS, icon: HardHat },
-  { label: 'Financials', href: ROUTES.LANDLORD_FINANCIALS, icon: PieChart },
-  { label: 'Documents', href: ROUTES.LANDLORD_DOCUMENTS, icon: FolderOpen },
-  { label: 'Messages', href: ROUTES.LANDLORD_MESSAGES, icon: MessageCircle },
-  { label: 'Realtor Access', href: ROUTES.LANDLORD_REALTORS, icon: UserRoundCheck },
-  { label: 'Reviews', href: ROUTES.LANDLORD_REVIEWS, icon: Star },
-  { label: 'Settings', href: ROUTES.LANDLORD_SETTINGS, icon: Settings },
+  { labelKey: 'sidebar.dashboard', href: ROUTES.LANDLORD_DASHBOARD, icon: LayoutDashboard },
+  { labelKey: 'sidebar.properties', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
+  { labelKey: 'sidebar.units', href: ROUTES.LANDLORD_UNITS, icon: DoorOpen },
+  { labelKey: 'sidebar.listings', href: ROUTES.LANDLORD_LISTINGS, icon: Megaphone },
+  { labelKey: 'sidebar.applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
+  { labelKey: 'sidebar.tenants', href: ROUTES.LANDLORD_TENANTS, icon: Users },
+  { labelKey: 'sidebar.leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },
+  { labelKey: 'sidebar.payments', href: ROUTES.LANDLORD_PAYMENTS, icon: CreditCard },
+  { labelKey: 'sidebar.maintenance', href: ROUTES.LANDLORD_MAINTENANCE, icon: Wrench },
+  { labelKey: 'sidebar.home_management', href: ROUTES.LANDLORD_HOME_MANAGEMENT, icon: Wrench },
+  { labelKey: 'sidebar.vendors', href: ROUTES.LANDLORD_VENDORS, icon: HardHat },
+  { labelKey: 'sidebar.financials', href: ROUTES.LANDLORD_FINANCIALS, icon: PieChart },
+  { labelKey: 'sidebar.documents', href: ROUTES.LANDLORD_DOCUMENTS, icon: FolderOpen },
+  { labelKey: 'sidebar.messages', href: ROUTES.LANDLORD_MESSAGES, icon: MessageCircle },
+  { labelKey: 'sidebar.realtor_access', href: ROUTES.LANDLORD_REALTORS, icon: UserRoundCheck },
+  { labelKey: 'sidebar.reviews', href: ROUTES.LANDLORD_REVIEWS, icon: Star },
+  { labelKey: 'sidebar.settings', href: ROUTES.LANDLORD_SETTINGS, icon: Settings },
 ];
 
 export const LandlordSidebar = () => {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border overflow-y-auto z-30 hidden lg:block">
@@ -73,7 +76,7 @@ export const LandlordSidebar = () => {
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </motion.div>
           );

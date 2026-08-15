@@ -2,7 +2,7 @@
 
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Building2, ArrowUpDown } from 'lucide-react';
@@ -72,19 +72,23 @@ export default function BuyerDiscoverPage() {
     }
   };
 
-  const filteredListings = listings
-    .filter((l) => {
-      const matchesSearch =
-        l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        l.city.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = typeFilter === 'all' || l.propertyType === typeFilter;
-      return matchesSearch && matchesType;
-    })
-    .sort((a, b) => {
-      if (sortOrder === 'price_asc') return a.askingPrice - b.askingPrice;
-      if (sortOrder === 'price_desc') return b.askingPrice - a.askingPrice;
-      return 0;
-    });
+  const filteredListings = useMemo(
+    () =>
+      listings
+        .filter((l) => {
+          const matchesSearch =
+            l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.city.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesType = typeFilter === 'all' || l.propertyType === typeFilter;
+          return matchesSearch && matchesType;
+        })
+        .sort((a, b) => {
+          if (sortOrder === 'price_asc') return a.askingPrice - b.askingPrice;
+          if (sortOrder === 'price_desc') return b.askingPrice - a.askingPrice;
+          return 0;
+        }),
+    [listings, searchQuery, typeFilter, sortOrder]
+  );
 
   const typeFilters: { value: 'all' | ListingPropertyType; label: string }[] = [
     { value: 'all', label: 'All' },

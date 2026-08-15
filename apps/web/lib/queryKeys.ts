@@ -112,6 +112,9 @@ export const realtorKeys = {
   conversations: ['realtor', 'conversations'] as const,
   conversationMessages: (conversationId: string) =>
     ['realtor', 'conversations', conversationId, 'messages'] as const,
+  clientInvitations: ['realtor', 'client-invitations'] as const,
+  assignableProperties: (invitationId: string) =>
+    ['realtor', 'assignable-properties', invitationId] as const,
 };
 
 export const agentKeys = {
@@ -125,6 +128,9 @@ export const agentKeys = {
   conversations: ['agent', 'conversations'] as const,
   conversationMessages: (id: string) => ['agent', 'conversations', id, 'messages'] as const,
   clients: ['agent', 'clients'] as const,
+  clientAssignments: ['agent', 'client-assignments'] as const,
+  assignableProperties: (assignmentId: string) =>
+    ['agent', 'assignable-properties', assignmentId] as const,
 };
 
 export const homeManagementKeys = {

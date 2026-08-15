@@ -15,6 +15,9 @@ interface ReviewVerificationModalProps {
   onApprove: (id: string) => void;
   onReject: (id: string, reason: string) => void;
   onRequestClarification: (id: string, reason: string) => void;
+  isApproving?: boolean;
+  isRejecting?: boolean;
+  isRequestingClarification?: boolean;
 }
 
 export const ReviewVerificationModal = ({
@@ -23,27 +26,33 @@ export const ReviewVerificationModal = ({
   onApprove,
   onReject,
   onRequestClarification,
+  isApproving = false,
+  isRejecting = false,
+  isRequestingClarification = false,
 }: ReviewVerificationModalProps) => {
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
+  const isSubmitting = isApproving || isRejecting || isRequestingClarification;
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setMode('view');
     setReason('');
     onClose();
   };
 
+  // The mutations own success/failure feedback and close the modal
+  // themselves on success, so a failed request leaves it open with the
+  // entered reason intact rather than closing blindly.
   const handleApprove = () => {
     if (!request) return;
     onApprove(request.id);
-    handleClose();
   };
 
   const handleSubmitReason = () => {
     if (!request) return;
     if (mode === 'reject') onReject(request.id, reason);
     if (mode === 'clarify') onRequestClarification(request.id, reason);
-    handleClose();
   };
 
   return (
@@ -121,6 +130,7 @@ export const ReviewVerificationModal = ({
                   variant="ghost"
                   className="flex-1 gap-1.5"
                   onClick={() => setMode('clarify')}
+                  disabled={isSubmitting}
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
                   Need Info
@@ -129,25 +139,38 @@ export const ReviewVerificationModal = ({
                   variant="outline"
                   className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
                   onClick={() => setMode('reject')}
+                  disabled={isSubmitting}
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   Reject
                 </Button>
-                <Button variant="primary" className="flex-1 gap-1.5" onClick={handleApprove}>
+                <Button
+                  variant="primary"
+                  className="flex-1 gap-1.5"
+                  onClick={handleApprove}
+                  isLoading={isApproving}
+                  disabled={isSubmitting}
+                >
                   <Check className="w-3.5 h-3.5" />
                   Approve
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="ghost" className="flex-1" onClick={() => setMode('view')}>
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={() => setMode('view')}
+                  disabled={isSubmitting}
+                >
                   Back
                 </Button>
                 <Button
                   variant="primary"
                   className="flex-1"
                   onClick={handleSubmitReason}
-                  disabled={!reason.trim()}
+                  isLoading={mode === 'reject' ? isRejecting : isRequestingClarification}
+                  disabled={!reason.trim() || isSubmitting}
                 >
                   Submit
                 </Button>

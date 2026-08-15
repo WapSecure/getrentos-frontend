@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star } from 'lucide-react';
+import { Loader2, X, Star } from 'lucide-react';
 import type { LandlordMaintenanceRequest, Vendor } from '@/types/landlord';
 
 interface AssignVendorModalProps {
@@ -9,6 +9,8 @@ interface AssignVendorModalProps {
   vendors: Vendor[];
   onClose: () => void;
   onAssign: (requestId: string, vendor: Vendor) => void;
+  /** The vendor currently being assigned, if any, so the row shows in-flight feedback. */
+  assigningVendorId?: string | null;
 }
 
 export const AssignVendorModal = ({
@@ -16,6 +18,7 @@ export const AssignVendorModal = ({
   vendors,
   onClose,
   onAssign,
+  assigningVendorId = null,
 }: AssignVendorModalProps) => {
   return (
     <AnimatePresence>
@@ -43,22 +46,30 @@ export const AssignVendorModal = ({
                   No vendors in your directory yet. Add one from the Vendors page.
                 </p>
               ) : (
-                vendors.map((vendor) => (
-                  <button
-                    key={vendor.id}
-                    onClick={() => onAssign(request.id, vendor)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{vendor.name}</p>
-                      <p className="text-xs text-muted-foreground">{vendor.serviceType}</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                      {vendor.rating.toFixed(1)}
-                    </div>
-                  </button>
-                ))
+                vendors.map((vendor) => {
+                  const isAssigning = assigningVendorId === vendor.id;
+                  return (
+                    <button
+                      key={vendor.id}
+                      onClick={() => onAssign(request.id, vendor)}
+                      disabled={assigningVendorId !== null}
+                      className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{vendor.name}</p>
+                        <p className="text-xs text-muted-foreground">{vendor.serviceType}</p>
+                      </div>
+                      {isAssigning ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                      ) : (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                          {vendor.rating.toFixed(1)}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })
               )}
             </div>
           </motion.div>
