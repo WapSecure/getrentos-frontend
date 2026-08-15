@@ -24,7 +24,6 @@ export const Card = ({
     'overflow-hidden rounded-2xl border border-border/90 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300',
     className
   );
-
   if (isStatic) {
     return <div className={baseClassName}>{children}</div>;
   }

@@ -51,11 +51,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed',
       secondary:
-        'bg-secondary text-secondary-foreground border border-border hover:opacity-80 focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-secondary text-secondary-foreground border border-border/70 hover:bg-secondary-foreground/5 focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       outline:
-        'bg-card text-foreground border border-border hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-card text-foreground border border-border hover:border-foreground/25 hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed',
       ghost:
-        'bg-transparent text-muted-foreground hover:bg-secondary focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
       danger:
         'bg-destructive text-destructive-foreground hover:opacity-90 focus:ring-destructive disabled:opacity-50 disabled:cursor-not-allowed',
     };

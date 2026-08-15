@@ -24,7 +24,7 @@ export const SectionHeader = ({
       className={`text-center mb-12 ${className}`}
     >
       {badge && (
-        <div className="inline-block px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-xs font-medium text-primary mb-4">
+        <div className="inline-block px-3 py-1 rounded-full text-xs font-medium text-primary bg-accent border border-primary/15 mb-4">
           {badge}
         </div>
       )}

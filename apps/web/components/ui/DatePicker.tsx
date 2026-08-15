@@ -78,7 +78,9 @@ export const DatePicker = ({
           type="button"
           disabled={disabled}
           className={cn(
-            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm shadow-[0_1px_1px_rgba(0,0,0,0.02)] transition-[border-color,box-shadow] duration-150 focus:border-primary/70 focus:outline-none focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60',
+            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 text-left text-sm outline-none transition-[border-color,background-color,box-shadow] duration-150',
+            'hover:border-foreground/20',
+            'focus:border-primary focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60 disabled:hover:border-border',
             className
           )}
         >
@@ -114,7 +116,10 @@ export const DatePicker = ({
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span aria-live="polite" className="text-sm font-semibold tracking-[-0.02em] text-foreground">
+                  <span
+                    aria-live="polite"
+                    className="text-sm font-semibold tracking-[-0.02em] text-foreground"
+                  >
                     {format(viewMonth, 'MMMM yyyy')}
                   </span>
                   <button

@@ -60,7 +60,9 @@ export const TimePicker = ({
           type="button"
           disabled={disabled}
           className={cn(
-            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 text-left text-sm shadow-[0_1px_1px_rgba(0,0,0,0.02)] transition-[border-color,box-shadow] duration-150 focus:border-primary/70 focus:outline-none focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60',
+            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 text-left text-sm outline-none transition-[border-color,background-color,box-shadow] duration-150',
+            'hover:border-foreground/20',
+            'focus:border-primary focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60 disabled:hover:border-border',
             className
           )}
         >
@@ -88,8 +90,15 @@ export const TimePicker = ({
                 className="z-[70] w-52 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none"
               >
                 <div className="border-b border-border bg-secondary/55 px-3 py-2.5">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Time</p>
-                  <p aria-live="polite" className="mt-0.5 text-lg font-semibold tracking-[-0.03em] text-foreground">{selectedLabel ?? placeholder}</p>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                    Time
+                  </p>
+                  <p
+                    aria-live="polite"
+                    className="mt-0.5 text-lg font-semibold tracking-[-0.03em] text-foreground"
+                  >
+                    {selectedLabel ?? placeholder}
+                  </p>
                 </div>
                 <div className="max-h-56 overflow-y-auto p-1.5">
                   {options.map((option) => {
