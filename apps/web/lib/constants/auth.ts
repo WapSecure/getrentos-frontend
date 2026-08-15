@@ -151,6 +151,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   ROLE_SELECTION: '/role-selection',
   VERIFICATION: '/verification',
+  HOME_MANAGEMENT: '/home-management',
 
   // Dashboard base routes
   DASHBOARD: '/dashboard',
@@ -182,6 +183,7 @@ export const ROUTES = {
   RENTER_ROOMMATES: '/renter/roommates',
   RENTER_NOTIFICATIONS: '/renter/notifications',
   RENTER_HELP: '/renter/help',
+  RENTER_HOME: '/renter/home',
 
   // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',
@@ -200,6 +202,7 @@ export const ROUTES = {
   LANDLORD_SETTINGS: '/landlord/settings',
   LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',
+  LANDLORD_HOME_MANAGEMENT: '/landlord/home-management',
 
   // Property Owner specific routes
   OWNER_PROPERTIES: '/owner/properties',
@@ -215,6 +218,7 @@ export const ROUTES = {
   OWNER_SETTINGS: '/owner/settings',
   OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
+  OWNER_HOME_MANAGEMENT: '/owner/home-management',
 
   // Buyer specific routes
   BUYER_DISCOVER: '/buyer/discover',

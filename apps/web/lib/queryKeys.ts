@@ -127,6 +127,33 @@ export const agentKeys = {
   clients: ['agent', 'clients'] as const,
 };
 
+export const homeManagementKeys = {
+  dashboard: ['home-management', 'dashboard'] as const,
+  assets: (propertyId?: string) => ['home-management', 'assets', propertyId ?? 'all'] as const,
+  plans: ['home-management', 'plans'] as const,
+  units: (propertyId?: string) => ['home-management', 'units', propertyId ?? 'none'] as const,
+  workOrders: ['home-management', 'work-orders'] as const,
+  slaPolicies: (propertyId?: string) =>
+    ['home-management', 'sla-policies', propertyId ?? 'none'] as const,
+  escalations: (propertyId?: string) =>
+    ['home-management', 'escalations', propertyId ?? 'all'] as const,
+  workOrderQuotes: (workOrderId: string) =>
+    ['home-management', 'work-orders', workOrderId, 'quotes'] as const,
+  workOrderInvoices: (workOrderId: string) =>
+    ['home-management', 'work-orders', workOrderId, 'invoices'] as const,
+  inspections: ['home-management', 'inspections'] as const,
+  timeline: (params?: { propertyId?: string; limit?: number }) =>
+    [
+      'home-management',
+      'timeline',
+      params?.propertyId ?? 'all',
+      params?.limit ?? 'default',
+    ] as const,
+  documents: (role: 'owner' | 'landlord') => ['home-management', role, 'documents'] as const,
+  properties: (role: 'owner' | 'landlord') => ['home-management', role, 'properties'] as const,
+  vendors: ['home-management', 'landlord', 'vendors'] as const,
+};
+
 export const ownerKeys = {
   dashboard: ['owner', 'dashboard'] as const,
   properties: ['owner', 'properties'] as const,

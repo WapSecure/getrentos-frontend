@@ -91,13 +91,18 @@ export const Footer = () => {
               Quick Links
             </h3>
             <ul className="space-y-2">
-              {['About Us', 'Features', 'Pricing', 'Contact'].map((item) => (
-                <li key={item}>
+              {[
+                { label: 'About Us', href: '#' },
+                { label: 'Features', href: '#features' },
+                { label: 'Home Management', href: '/home-management' },
+                { label: 'Contact', href: '#' },
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    href="#"
+                    href={item.href}
                     className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}

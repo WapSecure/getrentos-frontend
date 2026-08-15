@@ -39,6 +39,7 @@ const navItems: NavItem[] = [
   { label: 'Leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },
   { label: 'Payments', href: ROUTES.LANDLORD_PAYMENTS, icon: CreditCard },
   { label: 'Maintenance', href: ROUTES.LANDLORD_MAINTENANCE, icon: Wrench },
+  { label: 'Home Management', href: ROUTES.LANDLORD_HOME_MANAGEMENT, icon: Wrench },
   { label: 'Vendors', href: ROUTES.LANDLORD_VENDORS, icon: HardHat },
   { label: 'Financials', href: ROUTES.LANDLORD_FINANCIALS, icon: PieChart },
   { label: 'Documents', href: ROUTES.LANDLORD_DOCUMENTS, icon: FolderOpen },

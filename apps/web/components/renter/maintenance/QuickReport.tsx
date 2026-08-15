@@ -2,21 +2,31 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Wrench, Droplets, Wifi, Shield, Plus, ChevronRight, CheckCircle } from 'lucide-react';
+import {
+  Zap,
+  Wrench,
+  Droplets,
+  Wifi,
+  Shield,
+  Plus,
+  ChevronRight,
+  CheckCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-
-interface ReportData {
-  title: string;
-  category: string;
-  priority: string;
-  description: string;
-}
+import type { CreateMaintenanceRequestInput, MaintenanceCategory } from '@/types/maintenance';
 
 interface QuickReportProps {
-  onQuickReport: (data: ReportData) => void;
+  onQuickReport: (data: CreateMaintenanceRequestInput) => Promise<boolean>;
 }
 
-const quickOptions = [
+const quickOptions: {
+  id: string;
+  icon: LucideIcon;
+  label: string;
+  category: MaintenanceCategory;
+  description: string;
+}[] = [
   {
     id: 'leaking_faucet',
     icon: Droplets,
@@ -49,17 +59,28 @@ const quickOptions = [
 
 export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
   const [selected, setSelected] = useState<string | null>(null);
+  const [pendingOptionId, setPendingOptionId] = useState<string | null>(null);
 
-  const handleQuickReport = (option: (typeof quickOptions)[0]) => {
-    const data: ReportData = {
+  const handleQuickReport = async (option: (typeof quickOptions)[0]) => {
+    if (pendingOptionId) return;
+
+    const data: CreateMaintenanceRequestInput = {
       title: option.label,
       category: option.category,
       priority: 'high',
       description: option.description,
     };
-    onQuickReport(data);
-    setSelected(option.id);
-    setTimeout(() => setSelected(null), 2000);
+
+    setPendingOptionId(option.id);
+    try {
+      const wasSubmitted = await onQuickReport(data);
+      if (wasSubmitted) {
+        setSelected(option.id);
+        window.setTimeout(() => setSelected(null), 2000);
+      }
+    } finally {
+      setPendingOptionId(null);
+    }
   };
 
   return (
@@ -80,16 +101,18 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
         {quickOptions.map((option) => {
           const Icon = option.icon;
           const isSelected = selected === option.id;
+          const isPending = pendingOptionId === option.id;
 
           return (
             <button
               key={option.id}
               onClick={() => handleQuickReport(option)}
-              disabled={isSelected}
+              disabled={isSelected || Boolean(pendingOptionId)}
+              aria-busy={isPending}
               className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${
                 isSelected
                   ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                  : 'hover:bg-secondary border-transparent'
+                  : 'hover:bg-secondary border-transparent disabled:cursor-not-allowed disabled:opacity-60'
               } border`}
             >
               <div
@@ -105,6 +128,8 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
               </div>
               {isSelected ? (
                 <CheckCircle className="w-4 h-4 text-green-500" />
+              ) : isPending ? (
+                <span className="text-xs font-medium text-muted-foreground">Sending…</span>
               ) : (
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               )}

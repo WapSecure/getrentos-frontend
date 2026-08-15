@@ -1,194 +1,138 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
-
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Zap, Droplets, Wifi, Key } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, FileText, House, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Badge } from '@/components/ui/Badge';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 
-interface Utility {
-  id: string;
-  name: string;
-  icon: React.ElementType;
-  usage: string;
-  status: 'normal' | 'high' | 'low';
-  dueDate?: string;
-  amount?: number;
-}
+const formatShortDate = (value?: string) => {
+  if (!value) return 'Not scheduled';
 
-const utilities: Utility[] = [
-  {
-    id: '1',
-    name: 'Electricity',
-    icon: Zap,
-    usage: '342 kWh',
-    status: 'normal',
-    dueDate: '2024-09-05',
-    amount: 25000,
-  },
-  {
-    id: '2',
-    name: 'Water',
-    icon: Droplets,
-    usage: '12 m³',
-    status: 'normal',
-    dueDate: '2024-08-28',
-    amount: 5000,
-  },
-  {
-    id: '3',
-    name: 'Internet',
-    icon: Wifi,
-    usage: 'Unlimited',
-    status: 'normal',
-    dueDate: '2024-09-01',
-    amount: 15000,
-  },
-];
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not scheduled';
 
-const generateAccessCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+  return new Intl.DateTimeFormat('en-NG', {
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+};
 
+/**
+ * A live dashboard entry for the renter's operational home record. It deliberately
+ * links to the existing lease, maintenance, document, and payment workflows instead
+ * of maintaining a second client-side "home management" data model.
+ */
 export const RenterHomeManagement = () => {
-  const router = useRouter();
-  const [showAddGuest, setShowAddGuest] = useState(false);
-  const [guestName, setGuestName] = useState('');
-  const [accessCode, setAccessCode] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const { data: lease } = useQuery({
+    queryKey: renterKeys.lease,
+    queryFn: () => unwrap(renterService.getLease()),
+  });
+  const { data: requests = [] } = useQuery({
+    queryKey: renterKeys.maintenanceRequests,
+    queryFn: () => unwrap(renterService.listMaintenanceRequests()),
+  });
+  const { data: documents = [] } = useQuery({
+    queryKey: renterKeys.documents,
+    queryFn: () => unwrap(renterService.listDocuments()),
+  });
 
-  const handleAddGuest = () => {
-    if (!guestName.trim()) {
-      setToast({ message: 'Enter a guest name', variant: 'error' });
-      return;
-    }
-    setToast({ message: `${guestName} added to guest access list`, variant: 'success' });
-    setGuestName('');
-    setShowAddGuest(false);
-  };
+  const openRequests = requests.filter(
+    (request) => request.status !== 'resolved' && request.status !== 'cancelled'
+  );
+  const expiringDocuments = documents.filter((document) => document.status === 'expiring');
 
-  const handleGenerateCode = () => {
-    setAccessCode(generateAccessCode());
-    setToast({ message: 'New temporary access code generated', variant: 'success' });
-  };
-
-  return (
-    <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.4 }}
-        className="bg-card rounded-xl border border-border overflow-hidden mt-6"
-      >
-        <div className="p-4 border-b border-border">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Home Management</h2>
-              <p className="text-sm text-muted-foreground">Track utilities and guest access</p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => router.push(ROUTES.RENTER_DOCUMENTS)}>
-              Manage
+  if (!lease) {
+    return (
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
+            <House className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-foreground">My Home</h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Your home record will appear here once you have an active lease.
+            </p>
+            <Button
+              href={ROUTES.RENTER_DISCOVER}
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              rounded="lg"
+            >
+              Find a home
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
+      </section>
+    );
+  }
 
-        <div className="p-4">
-          {/* Utilities Section */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-3">Utilities</h3>
-            <div className="space-y-3">
-              {utilities.map((utility) => (
-                <div
-                  key={utility.id}
-                  className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-accent">
-                      <utility.icon className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{utility.name}</p>
-                      <p className="text-xs text-gray-500">Usage: {utility.usage}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-foreground">
-                      {utility.amount
-                        ? new Intl.NumberFormat('en-NG', {
-                            style: 'currency',
-                            currency: 'NGN',
-                          }).format(utility.amount)
-                        : 'Included'}
-                    </p>
-                    {utility.dueDate && (
-                      <p className="text-xs text-gray-500">
-                        Due{' '}
-                        {new Date(utility.dueDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+  return (
+    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="border-b border-border bg-linear-to-br from-accent/80 via-card to-card p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                <House className="h-4 w-4" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold tracking-[-0.02em] text-foreground">
+                  My Home
+                </h2>
+                <p className="truncate text-sm text-muted-foreground">{lease.propertyName}</p>
+              </div>
             </div>
           </div>
-
-          {/* Guest Access Section */}
-          <div className="pt-3 border-t border-border">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-medium text-foreground">Guest Access</h3>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs"
-                onClick={() => setShowAddGuest(!showAddGuest)}
-              >
-                Add Guest
-              </Button>
-            </div>
-
-            {showAddGuest && (
-              <div className="flex gap-2 mb-3">
-                <LegacyInput
-                  type="text"
-                  placeholder="Guest name"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <Button size="sm" onClick={handleAddGuest}>
-                  Add
-                </Button>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-              <div className="flex items-center gap-3">
-                <Key className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Temporary Access Code</p>
-                  <p className="text-xs text-gray-500">
-                    {accessCode ? `Code: ${accessCode}` : 'Expires: Sep 15, 2024'}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleGenerateCode}
-                className="text-xs text-primary hover:text-primary-hover"
-              >
-                Generate
-              </button>
-            </div>
-          </div>
+          <Badge variant="success">Active lease</Badge>
         </div>
-      </motion.div>
-    </>
+      </div>
+
+      <div className="grid grid-cols-2 divide-x divide-border border-b border-border">
+        <div className="p-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Wrench className="h-4 w-4" />
+            <span className="text-xs font-medium">Open care</span>
+          </div>
+          <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">
+            {openRequests.length}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {openRequests.length === 1 ? 'request needs attention' : 'requests need attention'}
+          </p>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <FileText className="h-4 w-4" />
+            <span className="text-xs font-medium">Home records</span>
+          </div>
+          <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">
+            {documents.length}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {expiringDocuments.length > 0
+              ? `${expiringDocuments.length} need review`
+              : 'documents securely stored'}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <p className="text-sm text-muted-foreground">
+          Lease ends{' '}
+          <span className="font-medium text-foreground">{formatShortDate(lease.endDate)}</span>
+        </p>
+        <Button href={ROUTES.RENTER_HOME} variant="ghost" size="sm" rounded="lg">
+          Open My Home
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </section>
   );
 };

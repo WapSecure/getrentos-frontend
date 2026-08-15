@@ -8,10 +8,9 @@ import {
   Calendar,
   MapPin,
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
   Wrench,
-  Phone,
-  Mail,
   XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -39,8 +38,13 @@ const statusConfig = {
   cancelled: { label: 'Cancelled', color: 'bg-gray-100 text-gray-600', icon: XCircle },
 };
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+const formatDate = (value?: string | null, fallback = 'Not available') => {
+  if (!value) return fallback;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+
+  return date.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -48,6 +52,13 @@ const formatDate = (dateString: string) => {
     minute: '2-digit',
   });
 };
+
+const EmergencyTimelineItem = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-md bg-card/70 px-2.5 py-2 dark:bg-black/10">
+    <p className="text-[11px] font-medium text-red-700/80 dark:text-red-300/80">{label}</p>
+    <p className="mt-0.5 text-xs font-medium text-red-900 dark:text-red-100">{value}</p>
+  </div>
+);
 
 export const MaintenanceDetailsModal = ({
   isOpen,
@@ -87,6 +98,12 @@ export const MaintenanceDetailsModal = ({
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h4 className="text-lg font-semibold text-foreground">{request.title}</h4>
                 <div className="flex gap-2">
+                  {request.isEmergency && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-300">
+                      <AlertTriangle className="h-3 w-3" />
+                      Emergency
+                    </span>
+                  )}
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${priorityConfig[request.priority].color}`}
                   >
@@ -101,6 +118,44 @@ export const MaintenanceDetailsModal = ({
                   </span>
                 </div>
               </div>
+
+              {request.isEmergency && (
+                <section className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/25">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-300" />
+                    <div>
+                      <p className="text-sm font-semibold text-red-800 dark:text-red-200">
+                        Emergency request status
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-red-700 dark:text-red-300">
+                        {request.acknowledgedAt
+                          ? `Acknowledged ${formatDate(request.acknowledgedAt)}.`
+                          : 'Awaiting acknowledgement.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <EmergencyTimelineItem
+                      label="Response target"
+                      value={formatDate(request.responseDueAt, 'Not scheduled')}
+                    />
+                    <EmergencyTimelineItem
+                      label="Resolution target"
+                      value={formatDate(request.resolutionDueAt, 'Not scheduled')}
+                    />
+                    <EmergencyTimelineItem
+                      label="Escalation review"
+                      value={formatDate(request.escalationDueAt, 'Not scheduled')}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-red-700 dark:text-red-300">
+                    These are operational service targets for this request, not a guarantee of a
+                    response time. For any immediate threat to life or safety, contact local
+                    emergency services first.
+                  </p>
+                </section>
+              )}
 
               {/* Details Grid */}
               <div className="grid grid-cols-2 gap-3">
@@ -145,39 +200,18 @@ export const MaintenanceDetailsModal = ({
                 </div>
               )}
 
-              {/* Status Update Actions */}
-              {request.status !== 'resolved' && (
+              {/* Renters can only cancel a newly submitted request. */}
+              {request.status === 'submitted' && (
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Update Status
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {request.status !== 'assigned' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleStatusUpdate('assigned')}
-                      >
-                        Mark Assigned
-                      </Button>
-                    )}
-                    {request.status !== 'in_progress' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleStatusUpdate('in_progress')}
-                      >
-                        Start Work
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => handleStatusUpdate('resolved')}
-                    >
-                      Mark Resolved
-                    </Button>
-                  </div>
+                  <label className="mb-2 block text-sm font-medium text-foreground">Request</label>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleStatusUpdate('cancelled')}
+                  >
+                    Cancel request
+                  </Button>
                 </div>
               )}
 

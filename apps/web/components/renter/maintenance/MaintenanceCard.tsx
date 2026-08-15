@@ -1,13 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   Wrench,
   Clock,
   UserCheck,
   CheckCircle,
   AlertCircle,
-  Calendar,
   User,
   Star,
   ChevronRight,
@@ -95,6 +93,20 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+const formatDeadline = (value?: string | null) => {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat('en-NG', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
 export const MaintenanceCard = ({
   request,
   onViewDetails,
@@ -104,6 +116,10 @@ export const MaintenanceCard = ({
   const PriorityIcon = priorityConfig[request.priority].icon;
   const StatusIcon = statusConfig[request.status].icon;
   const categoryIcon = categoryIcons[request.category as keyof typeof categoryIcons] || '📌';
+  const acknowledgementTarget = request.acknowledgedAt
+    ? request.resolutionDueAt
+    : request.responseDueAt;
+  const formattedAcknowledgementTarget = formatDeadline(acknowledgementTarget);
 
   const handleRateVendor = () => {
     if (onRateVendor) {
@@ -129,6 +145,12 @@ export const MaintenanceCard = ({
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-foreground">{request.title}</h4>
+            {request.isEmergency && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-300">
+                <AlertTriangle className="h-3 w-3" />
+                Emergency
+              </span>
+            )}
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${priorityConfig[request.priority].color}`}
             >
@@ -168,6 +190,29 @@ export const MaintenanceCard = ({
               <div className="flex items-center gap-1">
                 <Star className="w-3 h-3 fill-primary text-primary" />
                 <span>{request.vendorRating}.0</span>
+              </div>
+            )}
+            {request.isEmergency && (
+              <div
+                className={`flex items-center gap-1 font-medium ${
+                  request.acknowledgedAt
+                    ? 'text-green-700 dark:text-green-300'
+                    : 'text-red-700 dark:text-red-300'
+                }`}
+              >
+                {request.acknowledgedAt ? (
+                  <CheckCircle className="h-3 w-3" />
+                ) : (
+                  <Clock className="h-3 w-3" />
+                )}
+                <span>
+                  {request.acknowledgedAt
+                    ? `Acknowledged ${formatDeadline(request.acknowledgedAt) ?? ''}`
+                    : 'Awaiting acknowledgement'}
+                  {formattedAcknowledgementTarget
+                    ? ` · ${request.acknowledgedAt ? 'Resolution' : 'Response'} target ${formattedAcknowledgementTarget}`
+                    : ''}
+                </span>
               </div>
             )}
           </div>

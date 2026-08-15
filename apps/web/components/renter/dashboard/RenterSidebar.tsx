@@ -11,6 +11,7 @@ import {
   CreditCard,
   MessageCircle,
   Home,
+  House,
   Wrench,
   Settings,
   HelpCircle,
@@ -28,7 +29,8 @@ import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
-  labelKey: TranslationKey;
+  labelKey?: TranslationKey;
+  label?: string;
   href: string;
   icon: React.ElementType;
 }
@@ -41,6 +43,7 @@ const navItems: NavItem[] = [
   { labelKey: 'sidebar.my_lease', href: ROUTES.RENTER_LEASE, icon: FileCheck },
   { labelKey: 'sidebar.payments', href: ROUTES.RENTER_PAYMENTS, icon: CreditCard },
   { labelKey: 'sidebar.flex_financing', href: ROUTES.RENTER_FINANCING, icon: Zap },
+  { labelKey: 'sidebar.my_home', href: ROUTES.RENTER_HOME, icon: House },
   { labelKey: 'sidebar.maintenance', href: ROUTES.RENTER_MAINTENANCE, icon: Wrench },
   { labelKey: 'sidebar.messages', href: ROUTES.RENTER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.documents', href: ROUTES.RENTER_DOCUMENTS, icon: Home },
@@ -79,7 +82,7 @@ export const RenterSidebar = () => {
                 }`}
               >
                 <item.icon className="w-4 h-4" />
-                {t(item.labelKey)}
+                {item.labelKey ? t(item.labelKey) : item.label}
               </Link>
             </motion.div>
           );

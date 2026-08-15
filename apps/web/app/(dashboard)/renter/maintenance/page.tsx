@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MaintenanceHeader } from '@/components/renter/maintenance/MaintenanceHeader';
 import { MaintenanceStats } from '@/components/renter/maintenance/MaintenanceStats';
 import { MaintenanceList } from '@/components/renter/maintenance/MaintenanceList';
@@ -11,27 +11,38 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import type { MaintenanceRequest } from '@/types/maintenance';
+import { Toast, type ToastVariant } from '@/components/ui/Toast';
+import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
-
-interface ReportData {
-  title: string;
-  category: string;
-  priority: string;
-  description: string;
-}
 
 export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [emergencyContacts, setEmergencyContacts] = useState<
-    { id: string; name: string; role: string; phone: string; email: string; availableHours: string }[]
+    {
+      id: string;
+      name: string;
+      role: string;
+      phone: string;
+      email: string;
+      availableHours: string;
+    }[]
   >([]);
+
+  const showToast = useCallback((message: string, variant: ToastVariant) => {
+    setToast({ message, variant });
+    window.setTimeout(() => setToast(null), 3500);
+  }, []);
 
   useEffect(() => {
     const loadMaintenanceRequests = async () => {
       const res = await renterService.listMaintenanceRequests();
-      if (res.success && res.data) setRequests(res.data);
+      if (res.success && res.data) {
+        setRequests(res.data);
+      } else {
+        showToast(res.message || 'Unable to load maintenance requests.', 'error');
+      }
     };
     loadMaintenanceRequests();
 
@@ -51,14 +62,24 @@ export default function MaintenancePage() {
       }
     };
     loadLandlordContact();
-  }, []);
+  }, [showToast]);
 
-  const handleReportIssue = async (data: ReportData) => {
+  const handleReportIssue = async (data: CreateMaintenanceRequestInput): Promise<boolean> => {
     const res = await renterService.createMaintenanceRequest(data);
     if (res.success && res.data) {
       const created = res.data;
       setRequests((prev) => [created, ...prev]);
+      showToast(
+        data.isEmergency
+          ? 'Emergency maintenance request submitted at urgent priority.'
+          : 'Maintenance request submitted successfully.',
+        'success'
+      );
+      return true;
     }
+
+    showToast(res.message || 'Unable to submit your maintenance request.', 'error');
+    return false;
   };
 
   const handleUpdateStatus = async (id: string, status: MaintenanceRequest['status']) => {
@@ -67,6 +88,9 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const updated = res.data;
       setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
+      showToast('Maintenance request cancelled.', 'info');
+    } else {
+      showToast(res.message || 'Unable to cancel this maintenance request.', 'error');
     }
   };
 
@@ -75,6 +99,9 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const updated = res.data;
       setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
+      showToast('Thanks for rating the vendor.', 'success');
+    } else {
+      showToast(res.message || 'Unable to submit your vendor rating.', 'error');
     }
   };
 
@@ -131,6 +158,10 @@ export default function MaintenancePage() {
 
   return (
     <>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <MaintenanceHeader onReport={() => setShowReportModal(true)} />
         <MaintenanceAlerts

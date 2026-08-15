@@ -16,6 +16,7 @@ export type TranslationKey =
   | 'sidebar.my_lease'
   | 'sidebar.payments'
   | 'sidebar.flex_financing'
+  | 'sidebar.my_home'
   | 'sidebar.maintenance'
   | 'sidebar.messages'
   | 'sidebar.documents'
@@ -64,6 +65,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.my_lease': 'My Lease',
     'sidebar.payments': 'Payments',
     'sidebar.flex_financing': 'Flex Financing',
+    'sidebar.my_home': 'My Home',
     'sidebar.maintenance': 'Maintenance',
     'sidebar.messages': 'Messages',
     'sidebar.documents': 'Documents',
@@ -111,6 +113,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.my_lease': 'My Agreement',
     'sidebar.payments': 'Payment Dem',
     'sidebar.flex_financing': 'Flex Loan',
+    'sidebar.my_home': 'My House',
     'sidebar.maintenance': 'Repair Matter',
     'sidebar.messages': 'Message Dem',
     'sidebar.documents': 'Paper Dem',

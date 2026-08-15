@@ -6,7 +6,7 @@ import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
 import type { Conversation, Reminder } from '@/types/messages';
 import type { RenewalOffer } from '@/types/lease';
-import type { MaintenanceRequest } from '@/types/maintenance';
+import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
 
 export interface SavedSearch {
@@ -525,12 +525,9 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/maintenance'));
   },
 
-  async createMaintenanceRequest(data: {
-    title: string;
-    category: string;
-    priority: string;
-    description: string;
-  }): Promise<ApiResponse<MaintenanceRequest>> {
+  async createMaintenanceRequest(
+    data: CreateMaintenanceRequestInput
+  ): Promise<ApiResponse<MaintenanceRequest>> {
     return safeCall(() =>
       authFetch('/renter/maintenance', { method: 'POST', body: JSON.stringify(data) })
     );

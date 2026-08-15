@@ -52,6 +52,12 @@ export const Navigation = () => {
               >
                 How it works
               </Link>
+              <Link
+                href={ROUTES.HOME_MANAGEMENT}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Home Management
+              </Link>
               {!isSignedIn ? (
                 <>
                   <Link
@@ -126,6 +132,13 @@ export const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 How it works
+              </Link>
+              <Link
+                href={ROUTES.HOME_MANAGEMENT}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home Management
               </Link>
               {!isSignedIn ? (
                 <>
