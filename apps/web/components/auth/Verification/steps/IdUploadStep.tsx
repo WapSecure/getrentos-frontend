@@ -9,6 +9,7 @@ interface IdUploadStepProps {
   selectedIdType: string | null;
   idImage: string | null;
   setIdImage: (image: string | null) => void;
+  onIdFileChange: (file: File | null) => void;
   setError: (error: string | null) => void;
   onNextStep: (step: VerificationStep) => void;
   onBack: () => void;
@@ -24,6 +25,7 @@ const idTypeNames: Record<string, string> = {
 export const IdUploadStep = ({
   selectedIdType,
   setIdImage,
+  onIdFileChange,
   setError,
   onNextStep,
   onBack,
@@ -35,6 +37,7 @@ export const IdUploadStep = ({
         setError('File size must be less than 5MB');
         return;
       }
+      onIdFileChange(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setIdImage(reader.result as string);

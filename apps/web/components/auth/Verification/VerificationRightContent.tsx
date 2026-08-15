@@ -16,6 +16,8 @@ interface VerificationRightContentProps {
   setSelectedIdType: (id: string | null) => void;
   idImage: string | null;
   setIdImage: (image: string | null) => void;
+  onIdFileChange: (file: File | null) => void;
+  onSelfieCapture: (file: File | null) => void;
   error: string | null;
   setError: (error: string | null) => void;
   onNextStep: (step: VerificationStep) => void;
@@ -30,6 +32,8 @@ export const VerificationRightContent = ({
   setSelectedIdType,
   idImage,
   setIdImage,
+  onIdFileChange,
+  onSelfieCapture,
   error,
   setError,
   onNextStep,
@@ -53,13 +57,16 @@ export const VerificationRightContent = ({
             selectedIdType={selectedIdType}
             idImage={idImage}
             setIdImage={setIdImage}
+            onIdFileChange={onIdFileChange}
             setError={setError}
             onNextStep={onNextStep}
             onBack={onBack}
           />
         );
       case 'liveness':
-        return <LivenessStep onNextStep={onNextStep} onBack={onBack} />;
+        return (
+          <LivenessStep onSelfieCapture={onSelfieCapture} onNextStep={onNextStep} onBack={onBack} />
+        );
       case 'processing':
         return <ProcessingStep />;
       case 'complete':

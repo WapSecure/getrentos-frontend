@@ -8,6 +8,7 @@ import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSignup } from '@/hooks/useSignup';
 import { ROUTES, getDashboardRoute } from '@/lib/constants/auth';
+import { kycService, ID_TYPE_TO_BACKEND } from '@/services/kycService';
 
 export type VerificationStep = 'id-select' | 'id-upload' | 'liveness' | 'processing' | 'complete';
 
@@ -17,6 +18,8 @@ export default function VerificationPage() {
   const [currentStep, setCurrentStep] = useState<VerificationStep>('id-select');
   const [selectedIdType, setSelectedIdType] = useState<string | null>(null);
   const [idImage, setIdImage] = useState<string | null>(null);
+  const [idFile, setIdFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +27,38 @@ export default function VerificationPage() {
       router.push(ROUTES.SIGNUP);
     }
   }, [signupData, router]);
+
+  // Real submission: when the wizard reaches the processing step, upload the
+  // identity documents to the backend for human review.
+  useEffect(() => {
+    if (currentStep !== 'processing') return;
+    if (!idFile || !selectedIdType) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setError('Missing identity document. Please try again.');
+      setCurrentStep('id-upload');
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      const response = await kycService.submitIdentity({
+        document: idFile,
+        selfie: selfieFile ?? undefined,
+        documentType: ID_TYPE_TO_BACKEND[selectedIdType],
+      });
+      if (cancelled) return;
+      if (response.success) {
+        setCurrentStep('complete');
+      } else {
+        setError(response.message || 'Verification failed. Please try again.');
+        setCurrentStep('id-upload');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentStep, idFile, selfieFile, selectedIdType]);
 
   const handleNextStep = (step: VerificationStep) => {
     setCurrentStep(step);
@@ -80,6 +115,8 @@ export default function VerificationPage() {
         setSelectedIdType={setSelectedIdType}
         idImage={idImage}
         setIdImage={setIdImage}
+        onIdFileChange={setIdFile}
+        onSelfieCapture={setSelfieFile}
         error={error}
         setError={setError}
         onNextStep={handleNextStep}

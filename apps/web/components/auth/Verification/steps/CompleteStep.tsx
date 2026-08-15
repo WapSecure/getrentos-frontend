@@ -27,12 +27,11 @@ export const CompleteStep = ({ onComplete }: CompleteStepProps) => {
         <CheckCircle className="w-8 h-8 text-green-600" />
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-        Verification Complete!
-      </h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents Submitted!</h3>
 
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Your identity has been verified successfully. Redirecting to your dashboard...
+        Your identity documents have been submitted for review. You&apos;ll be able to access
+        verified features once our team approves them. Redirecting to your dashboard...
       </p>
     </motion.div>
   );
