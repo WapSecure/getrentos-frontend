@@ -1,47 +1,60 @@
 'use client';
 
-import { Textarea } from '@/components/ui/Textarea';
-
+import { useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Star, Star as StarOutline, ThumbsUp } from 'lucide-react';
+import { Star, Star as StarOutline, MapPin } from 'lucide-react';
+import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastVariant } from '@/components/ui/Toast';
-import { useState } from 'react';
-
-interface PendingReview {
-  id: string;
-  property: string;
-  landlord: string;
-  moveOutDate: string;
-  type: 'property' | 'landlord';
-}
-
-const pendingReviews: PendingReview[] = [
-  {
-    id: '1',
-    property: 'Modern Downtown Loft',
-    landlord: 'Jane Smith',
-    moveOutDate: '2024-08-01',
-    type: 'property',
-  },
-  {
-    id: '2',
-    property: 'Cozy Studio Apartment',
-    landlord: 'John Doe',
-    moveOutDate: '2024-07-15',
-    type: 'landlord',
-  },
-];
+import { renterService, type PendingReview } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 export const RenterReviews = () => {
+  const queryClient = useQueryClient();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<PendingReview | null>(null);
-  const [pending, setPending] = useState(pendingReviews);
-  const [helpfulVotes, setHelpfulVotes] = useState<Record<number, boolean>>({});
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: pending = [] } = useQuery({
+    queryKey: renterKeys.reviewsPending,
+    queryFn: () => unwrap(renterService.getPendingReviews()),
+  });
+
+  const { data: submitted = [] } = useQuery({
+    queryKey: renterKeys.reviewsSubmitted,
+    queryFn: () => unwrap(renterService.getSubmittedReviews()),
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: (input: {
+      leaseId: string;
+      category: 'LANDLORD' | 'PROPERTY';
+      rating: number;
+      comment?: string;
+    }) => unwrap(renterService.submitReview(input)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.reviewsPending });
+      queryClient.invalidateQueries({ queryKey: renterKeys.reviewsSubmitted });
+      setShowReviewModal(false);
+      setRating(0);
+      setReviewText('');
+      setToast({ message: 'Review submitted — thanks for sharing!', variant: 'success' });
+    },
+    onError: (err: Error) => {
+      setToast({ message: err.message || 'Failed to submit review.', variant: 'error' });
+    },
+  });
+
+  // Real average from the reviews the renter has written.
+  const averageRating = useMemo(() => {
+    if (submitted.length === 0) return 0;
+    return submitted.reduce((sum, r) => sum + r.rating, 0) / submitted.length;
+  }, [submitted]);
 
   const handleStartReview = (review: PendingReview) => {
     setSelectedReview(review);
@@ -52,26 +65,16 @@ export const RenterReviews = () => {
 
   const handleSubmitReview = () => {
     if (!selectedReview) return;
-    const existing = localStorage.getItem('renter_submitted_reviews');
-    const submitted = existing ? JSON.parse(existing) : [];
-    submitted.push({
-      id: selectedReview.id,
-      target:
-        selectedReview.type === 'property' ? selectedReview.property : selectedReview.landlord,
+    submitMutation.mutate({
+      leaseId: selectedReview.leaseId,
+      category: selectedReview.category,
       rating,
-      text: reviewText,
-      date: new Date().toISOString(),
+      comment: reviewText || undefined,
     });
-    localStorage.setItem('renter_submitted_reviews', JSON.stringify(submitted));
-
-    setPending((prev) => prev.filter((r) => r.id !== selectedReview.id));
-    setShowReviewModal(false);
-    setToast({ message: 'Review submitted — thanks for sharing!', variant: 'success' });
   };
 
-  const toggleHelpful = (index: number) => {
-    setHelpfulVotes((prev) => ({ ...prev, [index]: !prev[index] }));
-  };
+  const targetName = (review: PendingReview) =>
+    review.type === 'property' ? review.property : review.landlord;
 
   return (
     <>
@@ -90,57 +93,24 @@ export const RenterReviews = () => {
         </div>
 
         <div className="p-4">
-          {/* Your Rating Summary */}
-          <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">4.8</div>
-              <div className="flex gap-0.5 mt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-3 h-3 fill-primary text-primary" />
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Your Rating</p>
-            </div>
-            <div className="flex-1">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs">
-                  <span>5 star</span>
-                  <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[60%] h-full bg-primary rounded-full" />
-                  </div>
-                  <span>60%</span>
+          {submitted.length > 0 && (
+            <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
+                <div className="flex gap-0.5 mt-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-3 h-3 ${star <= Math.round(averageRating) ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`}
+                    />
+                  ))}
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span>4 star</span>
-                  <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[25%] h-full bg-primary rounded-full" />
-                  </div>
-                  <span>25%</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span>3 star</span>
-                  <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[10%] h-full bg-primary rounded-full" />
-                  </div>
-                  <span>10%</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span>2 star</span>
-                  <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[3%] h-full bg-primary rounded-full" />
-                  </div>
-                  <span>3%</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span>1 star</span>
-                  <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="w-[2%] h-full bg-primary rounded-full" />
-                  </div>
-                  <span>2%</span>
-                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {submitted.length} review{submitted.length === 1 ? '' : 's'}
+                </p>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Pending Reviews */}
           {pending.length > 0 && (
@@ -172,41 +142,50 @@ export const RenterReviews = () => {
             </div>
           )}
 
-          {/* Recent Reviews */}
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-foreground mb-3">Your Recent Reviews</h3>
-            <div className="space-y-3">
-              {[1, 2].map((_, index) => (
-                <div key={index} className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Luxury Beachfront Villa</p>
-                      <div className="flex gap-0.5 mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="w-3 h-3 fill-primary text-primary" />
-                        ))}
+          {pending.length === 0 && submitted.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No reviews yet. You&apos;ll be able to review your landlord and property after a lease
+              ends.
+            </p>
+          )}
+
+          {submitted.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-foreground mb-3">Your Reviews</h3>
+              <div className="space-y-3">
+                {submitted.map((review) => (
+                  <div key={review.id} className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {review.category === 'PROPERTY'
+                            ? review.propertyTitle
+                            : review.reviewerName}
+                        </p>
+                        <div className="flex gap-0.5 mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-3 h-3 ${star <= review.rating ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`}
+                            />
+                          ))}
+                        </div>
                       </div>
+                      {review.propertyTitle && (
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <MapPin className="w-3 h-3" />
+                          {review.propertyTitle}
+                        </span>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-500">2 months ago</span>
+                    {review.comment && (
+                      <p className="text-xs text-muted-foreground">{review.comment}</p>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Great property, excellent location, very responsive landlord!
-                  </p>
-                  <button
-                    onClick={() => toggleHelpful(index)}
-                    className={`flex items-center gap-1 mt-2 text-xs transition-colors ${
-                      helpfulVotes[index] ? 'text-primary' : 'text-gray-500 hover:text-foreground'
-                    }`}
-                  >
-                    <ThumbsUp
-                      className={`w-3 h-3 ${helpfulVotes[index] ? 'fill-primary text-primary' : 'text-gray-400'}`}
-                    />
-                    <span>{helpfulVotes[index] ? 'Marked helpful' : 'Helpful'}</span>
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </motion.div>
 

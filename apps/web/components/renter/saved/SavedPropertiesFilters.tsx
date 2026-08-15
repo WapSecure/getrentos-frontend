@@ -9,15 +9,14 @@ interface SavedPropertiesFiltersProps {
   setViewMode: (mode: 'grid' | 'list') => void;
   sortBy: 'recent' | 'price-low' | 'price-high' | 'rating';
   setSortBy: (sort: 'recent' | 'price-low' | 'price-high' | 'rating') => void;
-  filterStatus: 'all' | 'applied' | 'viewed' | 'price-drop';
-  setFilterStatus: (status: 'all' | 'applied' | 'viewed' | 'price-drop') => void;
+  filterStatus: 'all' | 'applied' | 'viewed';
+  setFilterStatus: (status: 'all' | 'applied' | 'viewed') => void;
 }
 
-const statusOptions: { value: 'all' | 'applied' | 'viewed' | 'price-drop'; label: string }[] = [
+const statusOptions: { value: 'all' | 'applied' | 'viewed'; label: string }[] = [
   { value: 'all', label: 'All Properties' },
   { value: 'applied', label: 'Applied' },
   { value: 'viewed', label: 'Recently Viewed' },
-  { value: 'price-drop', label: 'Price Drop' },
 ];
 
 const sortOptions: { value: 'recent' | 'price-low' | 'price-high' | 'rating'; label: string }[] = [

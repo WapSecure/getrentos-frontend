@@ -49,6 +49,8 @@ export const RenterRoommates = () => {
     inviteMutation.mutate(inviteEmail);
   };
 
+  if (roommates.length === 0) return null;
+
   return (
     <>
       {toast && (

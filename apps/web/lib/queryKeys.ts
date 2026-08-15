@@ -98,6 +98,13 @@ export const renterKeys = {
   maintenanceRequests: ['renter', 'maintenanceRequests'] as const,
   notifications: ['renter', 'notifications'] as const,
   notificationPreferences: ['renter', 'notificationPreferences'] as const,
+  reviewsPending: ['renter', 'reviews', 'pending'] as const,
+  reviewsSubmitted: ['renter', 'reviews', 'submitted'] as const,
+  recentlyViewed: ['renter', 'recentlyViewed'] as const,
+  wishlists: ['renter', 'wishlists'] as const,
+  recommendations: ['renter', 'recommendations'] as const,
+  applicationAssistant: ['renter', 'applicationAssistant'] as const,
+  savedSearches: ['renter', 'savedSearches'] as const,
   profile: ['renter', 'profile'] as const,
 };
 

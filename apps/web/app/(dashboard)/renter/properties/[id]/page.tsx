@@ -28,7 +28,6 @@ import { PropertyLandlordCard } from '@/components/renter/property-detail/Proper
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
 import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
-import { trackRecentlyViewed } from '@/lib/mockProperties';
 import { formatPrice } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
@@ -56,7 +55,7 @@ export default function PropertyDetailPage() {
     queryKey: renterKeys.listing(params.id),
     queryFn: async () => {
       const data = await unwrap(renterService.getListing(params.id));
-      trackRecentlyViewed(data);
+      renterService.recordListingView(params.id).catch(() => {});
       return data;
     },
   });

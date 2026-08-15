@@ -24,6 +24,8 @@ export const RenterMoveInChecklist = () => {
     load();
   }, []);
 
+  if (items.length === 0) return null;
+
   const toggleItem = async (key: string) => {
     const res = await renterService.toggleMoveInChecklistItem(key);
     if (res.success && res.data) {

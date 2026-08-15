@@ -139,6 +139,56 @@ export interface Roommate {
   rating?: number;
 }
 
+export type ReviewCategory = 'LANDLORD' | 'PROPERTY';
+
+export interface PendingReview {
+  id: string;
+  leaseId: string;
+  category: ReviewCategory;
+  propertyId?: string;
+  property?: string;
+  landlord?: string;
+  moveOutDate: string;
+  type: 'landlord' | 'property';
+}
+
+export interface ReviewItem {
+  id: string;
+  rating: number;
+  category: string;
+  comment?: string;
+  reviewerName?: string;
+  propertyTitle?: string;
+  createdAt: string;
+}
+
+export type SavedListingItem = Property & {
+  savedListingId: string;
+  wishlistId: string | null;
+  savedAt: string;
+};
+
+export type RecentlyViewedItem = Property & { viewedAt: string };
+
+export interface Wishlist {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  count: number;
+  createdAt: string;
+}
+
+export interface ApplicationAssistantStep {
+  key: string;
+  title: string;
+  status: 'completed' | 'in_progress' | 'pending';
+}
+
+export interface ApplicationAssistant {
+  steps: ApplicationAssistantStep[];
+  suggestion: string | null;
+}
+
 export interface RoommateExpense {
   id: string;
   description: string;
@@ -206,16 +256,76 @@ export const renterService = {
   },
 
   // ---- Saved listings ----
-  async listSavedListings(): Promise<ApiResponse<Property[]>> {
+  async listSavedListings(): Promise<ApiResponse<SavedListingItem[]>> {
     return safeCall(() => authFetch('/renter/saved-listings'));
   },
 
-  async saveListing(listingId: string): Promise<ApiResponse<{ saved: boolean }>> {
-    return safeCall(() => authFetch(`/renter/saved-listings/${listingId}`, { method: 'POST' }));
+  async saveListing(
+    listingId: string,
+    wishlistId?: string | null
+  ): Promise<ApiResponse<{ saved: boolean }>> {
+    return safeCall(() =>
+      authFetch(`/renter/saved-listings/${listingId}`, {
+        method: 'POST',
+        body: JSON.stringify({ wishlistId: wishlistId ?? null }),
+      })
+    );
   },
 
   async unsaveListing(listingId: string): Promise<ApiResponse<{ saved: boolean }>> {
     return safeCall(() => authFetch(`/renter/saved-listings/${listingId}`, { method: 'DELETE' }));
+  },
+
+  async moveSavedListingToWishlist(
+    savedListingId: string,
+    wishlistId: string | null
+  ): Promise<ApiResponse<{ updated: boolean }>> {
+    return safeCall(() =>
+      authFetch(`/renter/saved-listings/${savedListingId}/wishlist`, {
+        method: 'PATCH',
+        body: JSON.stringify({ wishlistId: wishlistId ?? null }),
+      })
+    );
+  },
+
+  // ---- Wishlists ----
+  async listWishlists(): Promise<ApiResponse<Wishlist[]>> {
+    return safeCall(() => authFetch('/renter/wishlists'));
+  },
+
+  async createWishlist(name: string): Promise<ApiResponse<Wishlist>> {
+    return safeCall(() =>
+      authFetch('/renter/wishlists', { method: 'POST', body: JSON.stringify({ name }) })
+    );
+  },
+
+  async renameWishlist(id: string, name: string): Promise<ApiResponse<Wishlist>> {
+    return safeCall(() =>
+      authFetch(`/renter/wishlists/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) })
+    );
+  },
+
+  async deleteWishlist(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
+    return safeCall(() => authFetch(`/renter/wishlists/${id}`, { method: 'DELETE' }));
+  },
+
+  // ---- Recently viewed ----
+  async listRecentlyViewed(): Promise<ApiResponse<RecentlyViewedItem[]>> {
+    return safeCall(() => authFetch('/renter/recently-viewed'));
+  },
+
+  async recordListingView(listingId: string): Promise<ApiResponse<{ recorded: boolean }>> {
+    return safeCall(() => authFetch(`/renter/recently-viewed/${listingId}`, { method: 'POST' }));
+  },
+
+  // ---- Recommendations ----
+  async getRecommendations(): Promise<ApiResponse<Property[]>> {
+    return safeCall(() => authFetch('/renter/recommendations'));
+  },
+
+  // ---- Application assistant ----
+  async getApplicationAssistant(): Promise<ApiResponse<ApplicationAssistant>> {
+    return safeCall(() => authFetch('/renter/application-assistant'));
   },
 
   // ---- Applications ----
@@ -255,6 +365,29 @@ export const renterService = {
   // ---- Roommates ----
   async listRoommates(): Promise<ApiResponse<Roommate[]>> {
     return safeCall(() => authFetch('/renter/roommates'));
+  },
+
+  // ---- Reviews ----
+  async getPendingReviews(): Promise<ApiResponse<PendingReview[]>> {
+    return safeCall(() => authFetch('/renter/reviews/pending'));
+  },
+
+  async getSubmittedReviews(): Promise<ApiResponse<ReviewItem[]>> {
+    return safeCall(() => authFetch('/renter/reviews/submitted'));
+  },
+
+  async submitReview(data: {
+    leaseId: string;
+    category: 'LANDLORD' | 'PROPERTY';
+    rating: number;
+    comment?: string;
+  }): Promise<ApiResponse<ReviewItem>> {
+    return safeCall(() =>
+      authFetch('/renter/reviews', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
   },
 
   async inviteRoommate(email: string, message?: string): Promise<ApiResponse<Roommate>> {

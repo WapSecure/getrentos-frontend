@@ -7,7 +7,6 @@ import { DiscoverPropertyCard } from './DiscoverPropertyCard';
 import { VirtualTourViewerModal } from './features/VirtualTourViewerModal';
 import { Property } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
-import { trackRecentlyViewed } from '@/lib/mockProperties';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -57,7 +56,7 @@ export const DiscoverPropertyGrid = ({
   });
 
   const handleViewDetails = (property: Property) => {
-    trackRecentlyViewed(property);
+    renterService.recordListingView(property.id).catch(() => {});
     router.push(buildRoute.renterPropertyDetail(property.id));
   };
 

@@ -79,6 +79,8 @@ export const RenterRecentActivity = () => {
     };
   });
 
+  if (activities.length === 0) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

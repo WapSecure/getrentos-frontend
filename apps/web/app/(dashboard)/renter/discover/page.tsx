@@ -7,10 +7,8 @@ import { DiscoverSearchBar } from '@/components/renter/discover/DiscoverSearchBa
 import { DiscoverPropertyGrid } from '@/components/renter/discover/DiscoverPropertyGrid';
 import { DiscoverMapView } from '@/components/renter/discover/DiscoverMapView';
 import { DiscoverCompareDrawer } from '@/components/renter/discover/DiscoverCompareDrawer';
-import { DiscoverAIRecommendations } from '@/components/renter/discover/DiscoverAIRecommendations';
-import { DiscoverAIPricePredictor } from '@/components/renter/discover/DiscoverAIPricePredictor';
-import { DiscoverAINeighborhoodInsights } from '@/components/renter/discover/DiscoverAINeighborhoodInsights';
-import { DiscoverAIApplicationAssistant } from '@/components/renter/discover/DiscoverAIApplicationAssistant';
+import { DiscoverRecommendations } from '@/components/renter/discover/DiscoverRecommendations';
+import { DiscoverApplicationAssistant } from '@/components/renter/discover/DiscoverApplicationAssistant';
 import { RecentlyViewed } from '@/components/renter/discover/features/RecentlyViewed';
 import { DocumentChecklist } from '@/components/renter/discover/features/DocumentChecklist';
 import { SavedSearchAlert } from '@/components/renter/discover/features/SavedSearchAlert';
@@ -112,10 +110,7 @@ export default function DiscoverPage() {
             <div className="flex-1">
               <DiscoverSearchBar onSearch={handleSearch} />
             </div>
-            <SavedSearchAlert
-              currentFilters={filters}
-              onSave={(name, filters) => console.log('Saved:', name, filters)}
-            />
+            <SavedSearchAlert currentFilters={filters} onApplyFilters={handleApplyFilters} />
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
@@ -174,10 +169,8 @@ export default function DiscoverPage() {
 
         <div className="space-y-6">
           <RecentlyViewed />
-          <DiscoverAIRecommendations />
-          <DiscoverAIPricePredictor />
-          <DiscoverAINeighborhoodInsights />
-          <DiscoverAIApplicationAssistant />
+          <DiscoverRecommendations />
+          <DiscoverApplicationAssistant />
           <DocumentChecklist />
         </div>
       </div>

@@ -16,10 +16,10 @@ export const RenterRecommendedProperties = () => {
   const queryClient = useQueryClient();
 
   const { data: listings = [] } = useQuery({
-    queryKey: renterKeys.listings(),
-    queryFn: () => unwrap(renterService.listListings()),
+    queryKey: renterKeys.recommendations,
+    queryFn: () => unwrap(renterService.getRecommendations()),
   });
-  const recommendedProperties = listings.slice(0, 4);
+  const recommendedProperties = listings.slice(0, 3);
 
   const { data: savedListings = [] } = useQuery({
     queryKey: renterKeys.savedListings,
@@ -49,6 +49,8 @@ export const RenterRecommendedProperties = () => {
       saveMutation.mutate(propertyId);
     }
   };
+
+  if (recommendedProperties.length === 0) return null;
 
   return (
     <motion.div

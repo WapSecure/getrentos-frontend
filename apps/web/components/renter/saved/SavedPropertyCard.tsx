@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,36 +15,35 @@ import {
   Trash2,
   BookmarkPlus,
   Clock,
-  TrendingDown,
   ExternalLink,
   MoreHorizontal,
   CheckSquare,
-  Bell,
-  BellOff,
-  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { buildRoute } from '@/lib/constants/auth';
-import { Property } from '@/types/renter';
+import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 import { AddNoteModal } from './AddNoteModal';
 import { SharePropertyModal } from './SharePropertyModal';
-import { PriceHistoryChart } from './PriceHistoryChart';
 
 interface SavedPropertyCardProps {
-  property: Property;
+  property: SavedListingItem;
   viewMode: 'grid' | 'list';
   onRemove: (id: string) => void;
   onMoveToWishlist: (propertyId: string, wishlistId: string) => void;
-  wishlists: { id: string; name: string; propertyIds: string[] }[];
+  wishlists: Wishlist[];
   isSelected?: boolean;
   onSelect?: () => void;
 }
 
-interface ApplicationStatus {
-  propertyId: string;
-  status: 'not_applied' | 'pending' | 'under_review' | 'approved' | 'rejected';
-  appliedDate?: string;
-}
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const diffHours = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60));
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  return `${Math.floor(diffHours / 24)} day${Math.floor(diffHours / 24) === 1 ? '' : 's'} ago`;
+};
 
 export const SavedPropertyCard = ({
   property,
@@ -58,27 +58,17 @@ export const SavedPropertyCard = ({
   const [showMenu, setShowMenu] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showPriceHistory, setShowPriceHistory] = useState(false);
   const [note, setNote] = useState('');
-  const [hasPriceDrop, setHasPriceDrop] = useState(false);
-  const [priceAlertEnabled, setPriceAlertEnabled] = useState(true);
-  const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus | null>(null);
+
+  const { data: applications = [] } = useQuery({
+    queryKey: renterKeys.applications,
+    queryFn: () => unwrap(renterService.listMyApplications()),
+  });
 
   useEffect(() => {
     const savedNote = localStorage.getItem(`note_${property.id}`);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedNote) setNote(savedNote);
-
-    // Mock price drop detection
-    setHasPriceDrop(property.id === '5');
-
-    // Mock application status (in production, fetch from API)
-    const mockStatus: ApplicationStatus = {
-      propertyId: property.id,
-      status: property.id === '1' ? 'under_review' : 'not_applied',
-      appliedDate: property.id === '1' ? '2024-06-10' : undefined,
-    };
-    setApplicationStatus(mockStatus);
   }, [property.id]);
 
   const formatPrice = () => {
@@ -88,7 +78,9 @@ export const SavedPropertyCard = ({
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     });
-    return `${formatter.format(property.price)}${property.period === 'month' ? '/mo' : property.period === 'year' ? '/yr' : '/wk'}`;
+    return `${formatter.format(property.price)}${
+      property.period === 'month' ? '/mo' : property.period === 'year' ? '/yr' : '/wk'
+    }`;
   };
 
   const handleSaveNote = (newNote: string) => {
@@ -132,10 +124,8 @@ export const SavedPropertyCard = ({
     }
   };
 
-  const statusConfig =
-    applicationStatus && applicationStatus.status !== 'not_applied'
-      ? getStatusConfig(applicationStatus.status)
-      : null;
+  const application = applications.find((a) => a.propertyId === property.id);
+  const statusConfig = application ? getStatusConfig(application.status) : null;
 
   // List View
   if (viewMode === 'list') {
@@ -162,13 +152,6 @@ export const SavedPropertyCard = ({
                     <Square className="w-4 h-4 text-gray-500" />
                   )}
                 </button>
-              )}
-
-              {hasPriceDrop && (
-                <div className="absolute top-2 left-10 flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
-                  <TrendingDown className="w-3 h-3" />
-                  Price Drop
-                </div>
               )}
 
               {statusConfig && (
@@ -216,22 +199,8 @@ export const SavedPropertyCard = ({
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  <span>Saved 2 days ago</span>
+                  <span>Saved {formatTimeAgo(property.savedAt)}</span>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-2">
-                <button
-                  onClick={() => setPriceAlertEnabled(!priceAlertEnabled)}
-                  className={`flex items-center gap-1 text-xs ${priceAlertEnabled ? 'text-green-600' : 'text-gray-400'}`}
-                >
-                  {priceAlertEnabled ? (
-                    <Bell className="w-3 h-3" />
-                  ) : (
-                    <BellOff className="w-3 h-3" />
-                  )}
-                  {priceAlertEnabled ? 'Price alerts on' : 'Alerts off'}
-                </button>
               </div>
 
               {note && (
@@ -275,16 +244,6 @@ export const SavedPropertyCard = ({
                         >
                           <ExternalLink className="w-3 h-3" />
                           Share Property
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowPriceHistory(true);
-                            setShowMenu(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                        >
-                          <TrendingUp className="w-3 h-3" />
-                          Price History
                         </button>
                         <div className="border-t border-border my-1" />
                         <div className="px-2 py-1">
@@ -332,12 +291,6 @@ export const SavedPropertyCard = ({
           onClose={() => setShowShareModal(false)}
           property={property}
         />
-        <PriceHistoryChart
-          isOpen={showPriceHistory}
-          onClose={() => setShowPriceHistory(false)}
-          propertyId={property.id}
-          propertyTitle={property.title}
-        />
       </>
     );
   }
@@ -366,13 +319,6 @@ export const SavedPropertyCard = ({
             </button>
           )}
 
-          {hasPriceDrop && (
-            <div className="absolute top-2 left-10 flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full z-10">
-              <TrendingDown className="w-3 h-3" />
-              Price Drop
-            </div>
-          )}
-
           <button
             onClick={() => onRemove(property.id)}
             className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors z-10"
@@ -384,12 +330,6 @@ export const SavedPropertyCard = ({
           <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded-lg text-sm font-bold z-10">
             {formatPrice()}
           </div>
-
-          {priceAlertEnabled && (
-            <div className="absolute bottom-2 right-2 z-10">
-              <Bell className="w-3 h-3 text-white drop-shadow-sm" />
-            </div>
-          )}
 
           {statusConfig && (
             <div
@@ -476,16 +416,6 @@ export const SavedPropertyCard = ({
                       <ExternalLink className="w-3 h-3" />
                       Share Property
                     </button>
-                    <button
-                      onClick={() => {
-                        setShowPriceHistory(true);
-                        setShowMenu(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                    >
-                      <TrendingUp className="w-3 h-3" />
-                      Price History
-                    </button>
                     <div className="border-t border-border my-1" />
                     <div className="px-2 py-1">
                       <p className="text-xs text-gray-500 px-2 py-1">Move to wishlist</p>
@@ -530,12 +460,6 @@ export const SavedPropertyCard = ({
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         property={property}
-      />
-      <PriceHistoryChart
-        isOpen={showPriceHistory}
-        onClose={() => setShowPriceHistory(false)}
-        propertyId={property.id}
-        propertyTitle={property.title}
       />
     </>
   );

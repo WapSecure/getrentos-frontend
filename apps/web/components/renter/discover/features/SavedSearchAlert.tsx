@@ -1,68 +1,106 @@
 'use client';
 
 import { LegacyInput } from '@/components/ui/LegacyInput';
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, X, Save } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { renterService, type SavedSearch } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
-interface SavedSearch {
-  id: string;
-  name: string;
-  filters: unknown;
-  createdAt: string;
+export interface DiscoverFiltersState {
+  location: string;
+  minPrice: string;
+  maxPrice: string;
+  bedrooms: string;
+  bathrooms: string;
+  propertyType: string;
+  verifiedOnly: boolean;
+  search: string;
 }
 
 interface SavedSearchAlertProps {
-  currentFilters: unknown;
-  onSave: (name: string, filters: unknown) => void;
+  currentFilters: DiscoverFiltersState;
+  onApplyFilters?: (filters: DiscoverFiltersState) => void;
 }
 
-export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertProps) => {
+export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearchAlertProps) => {
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [showAlert, setShowAlert] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('saved_searches');
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSavedSearches(JSON.parse(saved));
-    }
-  }, []);
+  const { data: savedSearches = [] } = useQuery({
+    queryKey: renterKeys.savedSearches,
+    queryFn: () => unwrap(renterService.listSavedSearches()),
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (data: { name: string; filters: DiscoverFiltersState }) => {
+      const f = data.filters;
+      return unwrap(
+        renterService.createSavedSearch({
+          name: data.name,
+          location: f.location || undefined,
+          minPrice: f.minPrice ? Number(f.minPrice) : undefined,
+          maxPrice: f.maxPrice ? Number(f.maxPrice) : undefined,
+          bedrooms: f.bedrooms ? Number(f.bedrooms) : undefined,
+          bathrooms: f.bathrooms ? Number(f.bathrooms) : undefined,
+          propertyType: f.propertyType || undefined,
+          verifiedOnly: f.verifiedOnly || undefined,
+        })
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedSearches });
+      setSearchName('');
+      setIsOpen(false);
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.deleteSavedSearch(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedSearches });
+    },
+  });
 
   const handleSave = () => {
     if (!searchName.trim()) return;
-
-    const newSearch: SavedSearch = {
-      id: Date.now().toString(),
-      name: searchName,
-      filters: currentFilters,
-      createdAt: new Date().toISOString(),
-    };
-
-    const updated = [...savedSearches, newSearch];
-    setSavedSearches(updated);
-    localStorage.setItem('saved_searches', JSON.stringify(updated));
-    setSearchName('');
-    setIsOpen(false);
-    setShowAlert(true);
-    onSave(searchName, currentFilters);
-
-    setTimeout(() => setShowAlert(false), 3000);
+    saveMutation.mutate({ name: searchName.trim(), filters: currentFilters });
   };
 
   const handleDelete = (id: string) => {
-    const updated = savedSearches.filter((s) => s.id !== id);
-    setSavedSearches(updated);
-    localStorage.setItem('saved_searches', JSON.stringify(updated));
+    deleteMutation.mutate(id);
   };
 
-  const handleApplySearch = (filters: unknown) => {
-    // Apply saved filters to parent component
-    console.log('Applying saved filters:', filters);
+  const handleApplySearch = (search: SavedSearch) => {
+    if (onApplyFilters && search.filters) {
+      const f = search.filters as {
+        location?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        bedrooms?: number;
+        bathrooms?: number;
+        propertyType?: string;
+        verifiedOnly?: boolean;
+      };
+      onApplyFilters({
+        location: f.location ?? '',
+        minPrice: f.minPrice ? String(f.minPrice) : '',
+        maxPrice: f.maxPrice ? String(f.maxPrice) : '',
+        bedrooms: f.bedrooms ? String(f.bedrooms) : '',
+        bathrooms: f.bathrooms ? String(f.bathrooms) : '',
+        propertyType: f.propertyType ?? '',
+        verifiedOnly: f.verifiedOnly ?? false,
+        search: '',
+      });
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -108,7 +146,7 @@ export const SavedSearchAlert = ({ currentFilters, onSave }: SavedSearchAlertPro
                   {savedSearches.map((search) => (
                     <div key={search.id} className="flex items-center justify-between text-sm">
                       <button
-                        onClick={() => handleApplySearch(search.filters)}
+                        onClick={() => handleApplySearch(search)}
                         className="text-muted-foreground hover:text-primary text-left flex-1"
                       >
                         {search.name}

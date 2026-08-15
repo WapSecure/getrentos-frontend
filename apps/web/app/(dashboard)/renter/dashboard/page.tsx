@@ -7,7 +7,6 @@ import { RenterTrustScoreCard } from '@/components/renter/dashboard/RenterTrustS
 import { RenterRecommendedProperties } from '@/components/renter/dashboard/RenterRecommendedProperties';
 import { RenterUpcomingPayments } from '@/components/renter/dashboard/RenterUpcomingPayments';
 import { RenterRecentActivity } from '@/components/renter/dashboard/RenterRecentActivity';
-import { RenterHomeManagement } from '@/components/renter/dashboard/RenterHomeManagement';
 import { RenterMoveInChecklist } from '@/components/renter/dashboard/RenterMoveInChecklist';
 import { RenterLeaseRenewal } from '@/components/renter/dashboard/RenterLeaseRenewal';
 import { RenterRoommates } from '@/components/renter/dashboard/RenterRoommates';
@@ -38,21 +37,20 @@ export default function RenterDashboardPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <RenterHomeManagement />
-        <RenterMoveInChecklist />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
         <RenterLeaseRenewal />
-        <RenterRoommates />
+        <RenterMoveInChecklist />
       </div>
 
       <div className="mb-6">
         <RenterRecommendedProperties />
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
         <RenterUpcomingPayments />
+        <RenterRoommates />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
         <RenterRecentActivity />
         <RenterReviews />
       </div>

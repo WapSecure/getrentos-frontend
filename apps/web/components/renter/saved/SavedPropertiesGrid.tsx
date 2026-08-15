@@ -1,21 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Filter, ArrowUpDown } from 'lucide-react';
 import { SavedPropertyCard } from './SavedPropertyCard';
-import { Property } from '@/types/renter';
 import { Button } from '@/components/ui/Button';
 import { ROUTES } from '@/lib/constants/auth';
+import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+
+export type SavedFilterStatus = 'all' | 'applied' | 'viewed';
 
 interface SavedPropertiesGridProps {
-  properties: Property[];
+  properties: SavedListingItem[];
   viewMode: 'grid' | 'list';
   sortBy: 'recent' | 'price-low' | 'price-high' | 'rating';
-  filterStatus: 'all' | 'applied' | 'viewed' | 'price-drop';
+  filterStatus: SavedFilterStatus;
   onRemove: (id: string) => void;
   onMoveToWishlist: (propertyId: string, wishlistId: string) => void;
-  wishlists: { id: string; name: string; propertyIds: string[] }[];
+  wishlists: Wishlist[];
   selectedProperties?: string[];
   onSelectProperty?: (id: string) => void;
 }
@@ -31,34 +36,32 @@ export const SavedPropertiesGrid = ({
   selectedProperties = [],
   onSelectProperty,
 }: SavedPropertiesGridProps) => {
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [isFiltering, setIsFiltering] = useState(false);
+  const { data: applications = [] } = useQuery({
+    queryKey: renterKeys.applications,
+    queryFn: () => unwrap(renterService.listMyApplications()),
+  });
+  const { data: recentlyViewed = [] } = useQuery({
+    queryKey: renterKeys.recentlyViewed,
+    queryFn: () => unwrap(renterService.listRecentlyViewed()),
+  });
 
-  // Sort and filter properties
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsFiltering(true);
+  const appliedIds = useMemo(() => new Set(applications.map((a) => a.id)), [applications]);
+  const viewedIds = useMemo(() => new Set(recentlyViewed.map((r) => r.id)), [recentlyViewed]);
 
+  const filteredProperties = useMemo(() => {
     let filtered = [...properties];
 
     switch (filterStatus) {
       case 'applied':
-        // In production, filter by properties user has applied to
-        filtered = filtered.filter((p) => ['1'].includes(p.id));
+        filtered = filtered.filter((p) => appliedIds.has(p.id));
         break;
       case 'viewed':
-        // In production, filter by recently viewed properties
-        filtered = filtered;
-        break;
-      case 'price-drop':
-        // In production, filter by properties with price drops
-        filtered = filtered.filter((p) => p.id === '5');
+        filtered = filtered.filter((p) => viewedIds.has(p.id));
         break;
       default:
         break;
     }
 
-    // Apply sorting
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
@@ -71,23 +74,19 @@ export const SavedPropertiesGrid = ({
         break;
       case 'recent':
       default:
-        // In production, sort by saved date
+        filtered.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
         break;
     }
 
-    setFilteredProperties(filtered);
+    return filtered;
+  }, [properties, sortBy, filterStatus, appliedIds, viewedIds]);
 
-    // Simulate filter delay for smooth animation
-    setTimeout(() => setIsFiltering(false), 300);
-  }, [properties, sortBy, filterStatus]);
-
-  // Get filter status count
-  const getStatusCount = (status: string) => {
+  const getStatusCount = (status: SavedFilterStatus) => {
     switch (status) {
       case 'applied':
-        return properties.filter((p) => ['1'].includes(p.id)).length;
-      case 'price-drop':
-        return properties.filter((p) => p.id === '5').length;
+        return properties.filter((p) => appliedIds.has(p.id)).length;
+      case 'viewed':
+        return properties.filter((p) => viewedIds.has(p.id)).length;
       default:
         return properties.length;
     }
@@ -112,14 +111,6 @@ export const SavedPropertiesGrid = ({
     );
   }
 
-  if (isFiltering) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   if (filteredProperties.length === 0) {
     return (
       <motion.div
@@ -140,7 +131,6 @@ export const SavedPropertiesGrid = ({
 
   return (
     <div className="space-y-4">
-      {/* Filter Stats Bar */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-4">
           <span>
@@ -149,12 +139,8 @@ export const SavedPropertiesGrid = ({
           {filterStatus !== 'all' && (
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary" />
-              Filtered by:{' '}
-              {filterStatus === 'applied'
-                ? 'Applied'
-                : filterStatus === 'price-drop'
-                  ? 'Price Drop'
-                  : 'Viewed'}
+              Filtered by: {filterStatus === 'applied' ? 'Applied' : 'Recently Viewed'} (
+              {getStatusCount(filterStatus)})
             </span>
           )}
         </div>
@@ -173,10 +159,9 @@ export const SavedPropertiesGrid = ({
         </div>
       </div>
 
-      {/* Properties Grid/List */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={viewMode}
+          key={`${viewMode}-${sortBy}-${filterStatus}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -203,15 +188,6 @@ export const SavedPropertiesGrid = ({
           ))}
         </motion.div>
       </AnimatePresence>
-
-      {/* Load More Section (if pagination needed) */}
-      {filteredProperties.length >= 10 && (
-        <div className="text-center pt-4">
-          <Button variant="outline" className="gap-2">
-            Load More Properties
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

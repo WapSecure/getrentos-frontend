@@ -8,7 +8,7 @@ import { SavedPropertiesGrid } from '@/components/renter/saved/SavedPropertiesGr
 import { SavedSearchesList } from '@/components/renter/saved/SavedSearchesList';
 import { WishlistManager } from '@/components/renter/saved/WishlistManager';
 import { RecentlyViewed } from '@/components/renter/saved/RecentlyViewed';
-import { SavedAIRecommendations } from '@/components/renter/saved/SavedAIRecommendations';
+import { SavedRecommendations } from '@/components/renter/saved/SavedRecommendations';
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
 import { Toast } from '@/components/ui/Toast';
@@ -16,43 +16,27 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
-interface Wishlist {
-  id: string;
-  name: string;
-  propertyIds: string[];
-}
-
 export default function SavedPage() {
   const queryClient = useQueryClient();
   const { data: savedProperties = [] } = useQuery({
     queryKey: renterKeys.savedListings,
     queryFn: () => unwrap(renterService.listSavedListings()),
   });
-  const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
-    if (typeof window === 'undefined') return [];
-    const saved = localStorage.getItem('renter_wishlists');
-    if (saved) return JSON.parse(saved);
-    const defaultWishlists = [
-      { id: '1', name: 'Dream Homes', propertyIds: [] },
-      { id: '2', name: 'Budget Options', propertyIds: [] },
-      { id: '3', name: 'To Visit', propertyIds: [] },
-    ];
-    localStorage.setItem('renter_wishlists', JSON.stringify(defaultWishlists));
-    return defaultWishlists;
+  const { data: wishlists = [] } = useQuery({
+    queryKey: renterKeys.wishlists,
+    queryFn: () => unwrap(renterService.listWishlists()),
   });
   const [selectedWishlist, setSelectedWishlist] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'rating'>('recent');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed' | 'price-drop'>(
-    'all'
-  );
-
+  const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed'>('all');
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [shareToast, setShareToast] = useState<string | null>(null);
 
   const invalidateSaved = () => {
     queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+    queryClient.invalidateQueries({ queryKey: renterKeys.wishlists });
     queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
   };
 
@@ -64,17 +48,25 @@ export default function SavedPage() {
     },
   });
 
+  const moveMutation = useMutation({
+    mutationFn: ({
+      savedListingId,
+      wishlistId,
+    }: {
+      savedListingId: string;
+      wishlistId: string | null;
+    }) => unwrap(renterService.moveSavedListingToWishlist(savedListingId, wishlistId)),
+    onSuccess: () => {
+      invalidateSaved();
+      setSelectedProperties([]);
+    },
+  });
+
   const handleRemoveProperty = (propertyId: string) => unsaveMutation.mutate(propertyId);
 
   const handleMoveToWishlist = (propertyId: string, wishlistId: string) => {
-    const updatedWishlists = wishlists.map((w) => {
-      if (w.id === wishlistId && !w.propertyIds.includes(propertyId)) {
-        return { ...w, propertyIds: [...w.propertyIds, propertyId] };
-      }
-      return w;
-    });
-    setWishlists(updatedWishlists);
-    localStorage.setItem('renter_wishlists', JSON.stringify(updatedWishlists));
+    const saved = savedProperties.find((p) => p.id === propertyId);
+    if (saved) moveMutation.mutate({ savedListingId: saved.savedListingId, wishlistId });
   };
 
   const handleSelectAll = () => {
@@ -102,20 +94,17 @@ export default function SavedPage() {
 
   const handleShareSelected = () => {
     setShareToast(
-      `Share link copied for ${selectedProperties.length} propert${selectedProperties.length === 1 ? 'y' : 'ies'}`
+      `Share link copied for ${selectedProperties.length} propert${
+        selectedProperties.length === 1 ? 'y' : 'ies'
+      }`
     );
     window.setTimeout(() => setShareToast(null), 3000);
   };
 
   const handleBulkMoveToWishlist = (wishlistId: string) => {
-    const updatedWishlists = wishlists.map((w) =>
-      w.id === wishlistId
-        ? { ...w, propertyIds: Array.from(new Set([...w.propertyIds, ...selectedProperties])) }
-        : w
-    );
-    setWishlists(updatedWishlists);
-    localStorage.setItem('renter_wishlists', JSON.stringify(updatedWishlists));
-    setSelectedProperties([]);
+    savedProperties
+      .filter((p) => selectedProperties.includes(p.id))
+      .forEach((p) => moveMutation.mutate({ savedListingId: p.savedListingId, wishlistId }));
   };
 
   const handleSelectProperty = (propertyId: string) => {
@@ -125,6 +114,11 @@ export default function SavedPage() {
       setSelectedProperties([...selectedProperties, propertyId]);
     }
   };
+
+  const visibleProperties =
+    selectedWishlist === 'all'
+      ? savedProperties
+      : savedProperties.filter((p) => p.wishlistId === selectedWishlist);
 
   return (
     <>
@@ -138,13 +132,12 @@ export default function SavedPage() {
         <div className="space-y-6">
           <WishlistManager
             wishlists={wishlists}
-            setWishlists={setWishlists}
             selectedWishlist={selectedWishlist}
             setSelectedWishlist={setSelectedWishlist}
           />
           <RecentlyViewed />
           <SavedSearchesList />
-          <SavedAIRecommendations />
+          <SavedRecommendations />
         </div>
 
         <div className="lg:col-span-3 space-y-6">
@@ -158,7 +151,7 @@ export default function SavedPage() {
           />
 
           <SavedPropertiesGrid
-            properties={savedProperties}
+            properties={visibleProperties}
             viewMode={viewMode}
             sortBy={sortBy}
             filterStatus={filterStatus}

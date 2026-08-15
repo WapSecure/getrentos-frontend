@@ -38,6 +38,8 @@ export const RenterUpcomingPayments = () => {
       status: (p.status === 'overdue' ? 'overdue' : 'upcoming') as 'upcoming' | 'overdue',
     }));
 
+  if (upcomingPayments.length === 0) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

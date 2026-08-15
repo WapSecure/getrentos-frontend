@@ -59,8 +59,7 @@ export const SavedPropertiesHeader = ({
         >
           <Sparkles className="w-4 h-4 text-purple-600 shrink-0" />
           <p className="text-sm text-foreground">
-            <span className="font-semibold">AI Insight:</span> You have {savedCount} saved
-            properties.
+            <span className="font-semibold">Insight:</span> You have {savedCount} saved properties.
             {savedCount >= 3
               ? ' Based on your saved items, we found 5 similar properties you might like.'
               : ' Save at least 3 properties to get personalized recommendations.'}

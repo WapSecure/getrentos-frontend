@@ -100,15 +100,13 @@ export const ApplicationAnalytics = ({ applications }: ApplicationAnalyticsProps
           </div>
         </div>
 
-        {/* AI Insight */}
+        {/* Insight */}
         {successRate < 50 && total > 0 && (
           <div className="p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
               <div>
-                <p className="text-xs font-medium text-yellow-800 dark:text-yellow-300">
-                  AI Insight
-                </p>
+                <p className="text-xs font-medium text-yellow-800 dark:text-yellow-300">Insight</p>
                 <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-0.5">
                   Your success rate is below 50%. Consider improving your application documents.
                 </p>
