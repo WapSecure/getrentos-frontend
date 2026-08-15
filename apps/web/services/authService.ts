@@ -105,6 +105,27 @@ export const authService = {
     return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/auth/oauth/${provider}`;
   },
 
+  async sendMagicLink(
+    email: string,
+    redirectTo?: string
+  ): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      apiFetch('/auth/magic-link/send', {
+        method: 'POST',
+        body: JSON.stringify({ email, redirectTo }),
+      })
+    );
+  },
+
+  async verifyMagicLink(token: string): Promise<ApiResponse<AuthResult>> {
+    return safeCall(() =>
+      apiFetch('/auth/magic-link/verify', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      })
+    );
+  },
+
   async resetPassword(
     reference: string,
     newPassword: string

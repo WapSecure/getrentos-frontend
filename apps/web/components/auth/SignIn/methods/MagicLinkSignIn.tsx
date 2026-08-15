@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { Fingerprint, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ToastVariant } from '@/components/ui/Toast';
+import { authService } from '@/services/authService';
 
 const magicLinkSchema = z.object({
   identifier: z.string().email('Please enter a valid email address'),
@@ -38,10 +39,14 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setMagicLinkSent(true);
-      showToast(`Magic link sent to ${data.identifier}! Please check your email.`, 'success');
-    } catch (err) {
+      const response = await authService.sendMagicLink(data.identifier);
+      if (response.success) {
+        setMagicLinkSent(true);
+        showToast('Magic link sent! Please check your email.', 'success');
+      } else {
+        showToast(response.message || 'Failed to send magic link. Please try again.', 'error');
+      }
+    } catch {
       showToast('Failed to send magic link. Please try again.', 'error');
     } finally {
       setIsLoading(false);
@@ -92,7 +97,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
         isLoading={isLoading}
       >
         <Fingerprint className="w-4 h-4" />
-        Send Magic Link
+        {magicLinkSent ? 'Link Sent' : 'Send Magic Link'}
       </Button>
     </form>
   );
