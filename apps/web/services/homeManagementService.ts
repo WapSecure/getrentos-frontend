@@ -30,6 +30,8 @@ export type HomeManagementVendor = {
   id: string;
   name: string;
   serviceType?: string;
+  rating?: number;
+  jobsCompleted?: number;
 };
 
 export type HomeManagementUnit = {
