@@ -7,9 +7,11 @@ import { HomeManagementDashboard } from '@/components/home-management/HomeManage
 import { HomeManagementEscalationQueue } from '@/components/home-management/HomeManagementEscalationQueue';
 import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
 import { HomeManagementOperationsCommandCenter } from '@/components/home-management/HomeManagementOperationsCommandCenter';
+import { HomeManagementPortfolioAnalytics } from '@/components/home-management/HomeManagementPortfolioAnalytics';
 import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
 import { HomeManagementSlaPolicies } from '@/components/home-management/HomeManagementSlaPolicies';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
+import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
 import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
 import { PreventiveMaintenancePlans } from '@/components/home-management/PreventiveMaintenancePlans';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -72,6 +74,8 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
         id: vendor.id,
         name: vendor.name,
         serviceType: vendor.serviceType,
+        rating: vendor.rating,
+        jobsCompleted: vendor.jobsCompleted,
       })),
   });
 
@@ -98,6 +102,21 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
           workOrdersQuery.isLoading
         }
       />
+
+      <HomeManagementPortfolioAnalytics
+        properties={properties}
+        workOrders={workOrders}
+        assets={assets}
+        isLoading={propertiesQuery.isLoading || workOrdersQuery.isLoading || assetsQuery.isLoading}
+      />
+
+      {role === 'landlord' && (
+        <HomeManagementVendorPerformance
+          vendors={vendors}
+          workOrders={workOrders}
+          isLoading={vendorsQuery.isLoading}
+        />
+      )}
 
       {propertiesQuery.isError && (
         <div className="mt-8">
