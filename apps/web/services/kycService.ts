@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/apiClient';
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
 export interface KycItem {
@@ -10,6 +11,17 @@ export interface KycItem {
 export interface IdentityKyc extends KycItem {
   documentType: string;
   selfieUrl?: string;
+  /** 0-1 face-similarity when automatic face matching ran. */
+  matchScore?: number;
+  /** User id or 'AUTO_FACE_MATCH'. */
+  verifiedBy?: string;
+}
+
+export interface PreVerifyResult {
+  status: 'APPROVED' | 'REJECTED' | 'PENDING_REVIEW';
+  score: number;
+  message: string;
+  nextStep?: 'proceed' | 'retry' | 'manual_review';
 }
 
 export interface LicenseKyc extends KycItem {
@@ -43,7 +55,6 @@ export const IDENTITY_DOCUMENT_TYPES = [
 
 export type IdentityDocumentType = (typeof IDENTITY_DOCUMENT_TYPES)[number];
 
-/** Maps the signup wizard's id-select values to the backend enum values. */
 export const ID_TYPE_TO_BACKEND: Record<string, IdentityDocumentType> = {
   nin: 'NIN',
   voters: 'VOTERS_CARD',
@@ -52,7 +63,6 @@ export const ID_TYPE_TO_BACKEND: Record<string, IdentityDocumentType> = {
 };
 
 export const kycService = {
-  /** Current user's verification status and submitted KYC records. */
   async getStatus(): Promise<ApiResponse<KycStatus>> {
     return safeCall(() => authFetch<KycStatus>('/users/me/kyc'));
   },
@@ -71,6 +81,25 @@ export const kycService = {
       form.append('documentType', params.documentType);
       if (params.note) form.append('note', params.note);
       return authFetch<IdentityKyc>('/users/me/kyc/identity', {
+        method: 'POST',
+        body: form,
+      });
+    });
+  },
+
+  async preVerify(params: {
+    reference: string;
+    document: File;
+    selfie?: File;
+    documentType: IdentityDocumentType;
+  }): Promise<ApiResponse<PreVerifyResult>> {
+    return safeCall(async () => {
+      const form = new FormData();
+      form.append('reference', params.reference);
+      form.append('documentType', params.documentType);
+      form.append('document', params.document);
+      if (params.selfie) form.append('selfie', params.selfie);
+      return apiFetch<PreVerifyResult>('/auth/pre-verify', {
         method: 'POST',
         body: form,
       });

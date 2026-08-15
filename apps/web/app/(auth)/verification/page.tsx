@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { VerificationLeftContent, VerificationRightContent } from '@/components/auth/Verification';
@@ -14,13 +14,14 @@ export type VerificationStep = 'id-select' | 'id-upload' | 'liveness' | 'process
 
 export default function VerificationPage() {
   const router = useRouter();
-  const { signupData } = useSignup();
+  const { signupData, otpReference, createAccount } = useSignup();
   const [currentStep, setCurrentStep] = useState<VerificationStep>('id-select');
   const [selectedIdType, setSelectedIdType] = useState<string | null>(null);
   const [idImage, setIdImage] = useState<string | null>(null);
   const [idFile, setIdFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     if (!signupData.isVerified && signupData.selectedRoles.length === 0) {
@@ -28,37 +29,59 @@ export default function VerificationPage() {
     }
   }, [signupData, router]);
 
-  // Real submission: when the wizard reaches the processing step, upload the
-  // identity documents to the backend for human review.
   useEffect(() => {
     if (currentStep !== 'processing') return;
+    if (submittingRef.current) return; // guard against effect re-runs
     if (!idFile || !selectedIdType) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('Missing identity document. Please try again.');
       setCurrentStep('id-upload');
       return;
     }
-
+    if (!otpReference) {
+      setError('Your verification session expired. Please start over.');
+      setCurrentStep('id-upload');
+      return;
+    }
+    submittingRef.current = true;
     let cancelled = false;
     (async () => {
-      const response = await kycService.submitIdentity({
+      const response = await kycService.preVerify({
+        reference: otpReference,
         document: idFile,
         selfie: selfieFile ?? undefined,
         documentType: ID_TYPE_TO_BACKEND[selectedIdType],
       });
       if (cancelled) return;
-      if (response.success) {
-        setCurrentStep('complete');
-      } else {
+
+      if (!response.success || !response.data) {
         setError(response.message || 'Verification failed. Please try again.');
         setCurrentStep('id-upload');
+        return;
       }
+
+      const { status } = response.data;
+      if (status === 'REJECTED') {
+        // Face does not match the identity document — block and let the
+        // user retry with a correct document/selfie.
+        setError(response.data.message || 'The selfie does not match your identity document.');
+        setCurrentStep('id-upload');
+        return;
+      }
+
+      // APPROVED (auto-verified) or PENDING_REVIEW (ambiguous → manual) both
+      // proceed to account creation; the account carries the status.
+      await createAccount();
+      if (cancelled) return;
+      setCurrentStep('complete');
     })();
 
     return () => {
       cancelled = true;
+      submittingRef.current = false;
     };
-  }, [currentStep, idFile, selfieFile, selectedIdType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, idFile, selfieFile, selectedIdType, otpReference]);
 
   const handleNextStep = (step: VerificationStep) => {
     setCurrentStep(step);
@@ -78,7 +101,10 @@ export default function VerificationPage() {
     router.push(getDashboardRoute(signupData.selectedRoles[0]));
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    // Skipping still creates the account (PENDING_REVIEW on the backend) so
+    // the signup isn't lost — the user can verify later from their dashboard.
+    await createAccount();
     router.push(getDashboardRoute(signupData.selectedRoles[0]));
   };
 

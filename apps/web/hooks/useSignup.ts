@@ -114,16 +114,11 @@ export const useSignup = () => {
       );
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 
+      // Account is created now — route to the primary role dashboard. If the
+      // account was created pre-verified (auto face match), the dashboard is
+      // fully unlocked; otherwise the caller decided when to run verification.
       const primaryRole = data.selectedRoles[0];
-      const needsVerification = data.selectedRoles.some((roleId: string) =>
-        (ROLES_REQUIRING_VERIFICATION as readonly string[]).includes(roleId)
-      );
-
-      if (needsVerification) {
-        router.push(ROUTES.VERIFICATION);
-      } else {
-        router.push(getDashboardRoute(primaryRole));
-      }
+      router.push(getDashboardRoute(primaryRole));
     } else {
       setError(response.message || 'Failed to create account');
     }
@@ -144,9 +139,18 @@ export const useSignup = () => {
     setError(null);
   };
 
+  // Whether any selected role requires identity verification before it can
+  // be used (landlord/owner/realtor/agent). Callers use this to decide
+  // whether to run the verification wizard before creating the account.
+  const needsVerification = data.selectedRoles.some((roleId: string) =>
+    (ROLES_REQUIRING_VERIFICATION as readonly string[]).includes(roleId)
+  );
+
   return {
     signupData: data,
     step,
+    otpReference,
+    needsVerification,
     isLoading:
       sendOtpMutation.isPending ||
       verifyOtpMutation.isPending ||
