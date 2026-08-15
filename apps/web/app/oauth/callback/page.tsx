@@ -24,12 +24,13 @@ function OAuthCallbackContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // The backend delivers the access token in the URL and the refresh token
+    // in an httpOnly cookie (not visible here).
     const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
 
-    if (!accessToken || !refreshToken) {
+    if (!accessToken) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError('OAuth sign-in failed: missing tokens. Please try again.');
+      setError('OAuth sign-in failed: missing token. Please try again.');
       return;
     }
 
@@ -41,10 +42,11 @@ function OAuthCallbackContent() {
         });
         const primaryRoleId = BACKEND_ROLE_TO_ID[me.roles[0]] || 'renter';
 
+        // Session-only by default (refresh token is an httpOnly session cookie)
+        // — consistent with an unchecked "Remember me" checkbox.
         saveAuthSession(
           {
             accessToken,
-            refreshToken,
             user: {
               ...me,
               fullName: me.legalName,
@@ -52,7 +54,7 @@ function OAuthCallbackContent() {
               roles: me.roles,
             },
           },
-          true
+          false
         );
 
         router.replace(getDashboardRoute(primaryRoleId));

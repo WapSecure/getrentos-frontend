@@ -14,7 +14,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
-import { clearAuthSession } from '@/lib/authStorage';
+import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
 
 interface AgentProfileDropdownProps {
@@ -36,8 +36,8 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSignOut = () => {
-    clearAuthSession();
+  const handleSignOut = async () => {
+    await logoutSession();
     router.push(ROUTES.LOGIN);
   };
 

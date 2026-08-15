@@ -13,6 +13,7 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 import { hasStaffAccess } from '@/lib/adminAccess';
 import { usePathname } from 'next/navigation';
 
@@ -28,6 +29,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;

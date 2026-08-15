@@ -105,9 +105,8 @@ export const useSignup = () => {
     const response = await createAccountMutation.mutateAsync();
 
     if (response.success && response.data) {
-      const { accessToken, refreshToken, expiresIn: _expiresIn, ...user } = response.data;
+      const { accessToken, expiresIn: _expiresIn, ...user } = response.data;
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
       localStorage.setItem(
         STORAGE_KEYS.USER,
         JSON.stringify({ ...user, fullName: user.legalName, role: data.selectedRoles[0] })

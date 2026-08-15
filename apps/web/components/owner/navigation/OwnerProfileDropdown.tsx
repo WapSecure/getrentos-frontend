@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User, Settings, HelpCircle, LogOut, Building2 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
-import { clearAuthSession } from '@/lib/authStorage';
+import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
 
 interface OwnerProfileDropdownProps {
@@ -28,8 +28,8 @@ export const OwnerProfileDropdown = ({ user }: OwnerProfileDropdownProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSignOut = () => {
-    clearAuthSession();
+  const handleSignOut = async () => {
+    await logoutSession();
     router.push(ROUTES.LOGIN);
   };
 

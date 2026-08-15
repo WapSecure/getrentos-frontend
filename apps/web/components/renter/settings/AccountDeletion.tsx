@@ -9,7 +9,7 @@ import { AlertTriangle, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { renterService } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';
-import { clearAuthSession } from '@/lib/authStorage';
+import { logoutSession } from '@/lib/apiClient';
 
 export const AccountDeletion = () => {
   const router = useRouter();
@@ -23,7 +23,7 @@ export const AccountDeletion = () => {
     onSuccess: (res) => {
       if (res.success) {
         setStep('complete');
-        clearAuthSession();
+        void logoutSession();
         setTimeout(() => router.push(ROUTES.LOGIN), 2000);
       } else {
         setError(res.message || 'Failed to delete account');

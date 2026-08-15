@@ -12,7 +12,8 @@ import {
   STORAGE_KEYS,
   getDashboardRoute,
 } from '@/lib/constants/auth';
-import { clearAuthSession, getStoredUser } from '@/lib/authStorage';
+import { getStoredUser } from '@/lib/authStorage';
+import { logoutSession } from '@/lib/apiClient';
 
 interface RenterProfileDropdownProps {
   user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
@@ -33,8 +34,8 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSignOut = () => {
-    clearAuthSession();
+  const handleSignOut = async () => {
+    await logoutSession();
     router.push(ROUTES.LOGIN);
   };
 

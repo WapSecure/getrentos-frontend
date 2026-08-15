@@ -20,7 +20,8 @@ export interface AuthUser {
 
 export interface AuthResult extends AuthUser {
   accessToken: string;
-  refreshToken: string;
+  /** Delivered via httpOnly cookie; kept optional for backwards compatibility. */
+  refreshToken?: string;
   expiresIn: number;
 }
 
@@ -91,11 +92,15 @@ export const authService = {
     );
   },
 
-  async login(identifier: string, password: string): Promise<ApiResponse<AuthResult>> {
+  async login(
+    identifier: string,
+    password: string,
+    rememberMe = false
+  ): Promise<ApiResponse<AuthResult>> {
     return safeCall(() =>
       apiFetch('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({ identifier, password, rememberMe }),
       })
     );
   },

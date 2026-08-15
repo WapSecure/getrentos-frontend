@@ -13,6 +13,7 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
 export type RenterUser = {
   id?: string;
@@ -31,6 +32,7 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<RenterUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;

@@ -13,6 +13,7 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
 export type RealtorUser = { fullName: string; email: string; role?: string; roles?: string[] };
 
@@ -25,6 +26,7 @@ export default function RealtorLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<RealtorUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;

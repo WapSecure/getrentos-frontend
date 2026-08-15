@@ -2,7 +2,7 @@
 
 import { LegacyInput } from '@/components/ui/LegacyInput';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,12 @@ import { BACKEND_ROLE_TO_ID, ROUTES, getDashboardRoute } from '@/lib/constants/a
 import { ToastVariant } from '@/components/ui/Toast';
 import { authService } from '@/services/authService';
 import { useMutation } from '@tanstack/react-query';
-import { saveAuthSession } from '@/lib/authStorage';
+import {
+  getRememberedIdentifier,
+  saveAuthSession,
+  saveRememberedIdentifier,
+} from '@/lib/authStorage';
+import { consumeSessionExpiredFlag } from '@/lib/apiClient';
 
 const emailSchema = z.object({
   identifier: z.string().email('Please enter a valid email address'),
@@ -44,17 +49,35 @@ export const EmailSignIn = ({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const loginMutation = useMutation({
-    mutationFn: ({ identifier, password }: EmailFormData) => authService.login(identifier, password),
+    mutationFn: ({ identifier, password }: EmailFormData) =>
+      authService.login(identifier, password, rememberMe),
   });
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isValid, touchedFields },
   } = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     mode: 'onChange',
   });
+
+  // Prefill the identifier when the user previously signed in with "Remember me",
+  // and surface a notice when the previous session expired.
+  useEffect(() => {
+    // Mount-time sync with persisted storage — intentional synchronous setState.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const remembered = getRememberedIdentifier();
+    if (remembered) {
+      setValue('identifier', remembered, { shouldValidate: true });
+      setRememberMe(true);
+    }
+    if (consumeSessionExpiredFlag()) {
+      showToast('Your session has expired. Please sign in again.', 'info');
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [setValue, showToast]);
 
   const onSubmit = async (data: EmailFormData) => {
     if (isLocked) {
@@ -66,13 +89,14 @@ export const EmailSignIn = ({
     const response = await loginMutation.mutateAsync(data);
 
     if (response.success && response.data) {
-      const { accessToken, refreshToken, ...user } = response.data;
+      const { accessToken, ...user } = response.data;
       const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
 
       saveAuthSession(
-        { accessToken, refreshToken, user: { ...user, fullName: user.legalName, role: primaryRoleId } },
+        { accessToken, user: { ...user, fullName: user.legalName, role: primaryRoleId } },
         rememberMe
       );
+      if (rememberMe) saveRememberedIdentifier(data.identifier);
 
       router.push(getDashboardRoute(primaryRoleId));
       showToast('Successfully signed in! Redirecting...', 'success');
@@ -94,7 +118,13 @@ export const EmailSignIn = ({
           <Input
             type="email"
             {...register('identifier')}
-            className={errors.identifier ? 'border-red-500' : touchedFields.identifier ? 'border-green-500' : undefined}
+            className={
+              errors.identifier
+                ? 'border-red-500'
+                : touchedFields.identifier
+                  ? 'border-green-500'
+                  : undefined
+            }
             inputClassName="py-3"
             placeholder="you@example.com"
           />

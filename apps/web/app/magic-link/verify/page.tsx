@@ -25,16 +25,18 @@ function MagicLinkVerifyContent() {
     const verify = async () => {
       const response = await authService.verifyMagicLink(token);
       if (response.success && response.data) {
-        const { accessToken, refreshToken, ...user } = response.data;
+        const { accessToken, ...user } = response.data;
         const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
 
+        // Magic-link sign-in is session-only by default (the refresh token is
+        // an httpOnly session cookie) — consistent with an unchecked
+        // "Remember me" checkbox.
         saveAuthSession(
           {
             accessToken,
-            refreshToken,
             user: { ...user, fullName: user.legalName, role: primaryRoleId },
           },
-          true
+          false
         );
 
         router.replace(

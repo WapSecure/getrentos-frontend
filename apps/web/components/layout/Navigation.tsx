@@ -7,7 +7,7 @@ import { Logo } from '@/components/ui/Logo';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ROUTES, isAuthenticated } from '@/lib/constants/auth';
-import { clearAuthSession } from '@/lib/authStorage';
+import { logoutSession } from '@/lib/apiClient';
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -84,8 +84,8 @@ export const Navigation = () => {
                   </Link>
                   <ThemeToggle />
                   <button
-                    onClick={() => {
-                      clearAuthSession();
+                    onClick={async () => {
+                      await logoutSession();
                       setIsSignedIn(false);
                       window.location.href = ROUTES.HOME;
                     }}
@@ -167,8 +167,8 @@ export const Navigation = () => {
                     Dashboard
                   </Link>
                   <button
-                    onClick={() => {
-                      clearAuthSession();
+                    onClick={async () => {
+                      await logoutSession();
                       setIsSignedIn(false);
                       window.location.href = ROUTES.HOME;
                     }}

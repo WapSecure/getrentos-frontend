@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu';
 import { ROUTES } from '@/lib/constants/auth';
-import { clearAuthSession } from '@/lib/authStorage';
+import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
 
 interface AdminProfileDropdownProps {
@@ -22,8 +22,8 @@ interface AdminProfileDropdownProps {
 export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
   const router = useRouter();
 
-  const handleSignOut = () => {
-    clearAuthSession();
+  const handleSignOut = async () => {
+    await logoutSession();
     router.push(ROUTES.LOGIN);
   };
 
