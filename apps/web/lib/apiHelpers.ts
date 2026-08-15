@@ -1,4 +1,4 @@
-import { apiFetch, ApiError } from '@/lib/apiClient';
+import { apiFetch, ApiError, refreshSession } from '@/lib/apiClient';
 import { getAuthToken } from '@/lib/authStorage';
 
 export interface ApiResponse<T = unknown> {
@@ -24,15 +24,34 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
   }
 }
 
-export function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getAuthToken();
-  return apiFetch<T>(path, {
-    ...options,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+/** Fetches with the Bearer token attached, silently refreshing on 401 once. */
+export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const doFetch = (token: string | null) =>
+    apiFetch<T>(path, {
+      ...options,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+
+  try {
+    return await doFetch(getAuthToken());
+  } catch (err) {
+    // The access token expired — exchange the refresh token for a fresh pair
+    // and retry the request once. Single-flight refresh prevents the rotation
+    // race when many requests 401 at the same moment.
+    if (
+      err instanceof ApiError &&
+      err.status === 401 &&
+      path !== '/auth/refresh' &&
+      path !== '/auth/login'
+    ) {
+      const refreshed = await refreshSession();
+      if (refreshed) return doFetch(getAuthToken());
+    }
+    throw err;
+  }
 }
 
 export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {

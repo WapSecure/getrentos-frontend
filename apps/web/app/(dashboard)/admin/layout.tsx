@@ -12,6 +12,7 @@ import {
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
+import { ensureValidSession } from '@/lib/apiClient';
 import { hasStaffAccess } from '@/lib/adminAccess';
 import { usePathname } from 'next/navigation';
 
@@ -29,7 +30,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
+    let cancelled = false;
+    const checkAuth = async () => {
+      await ensureValidSession();
+      if (cancelled) return;
       const authenticated = isAuthenticated();
       if (!authenticated) {
         router.replace(ROUTES.LOGIN);
@@ -59,6 +63,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     };
 
     checkAuth();
+    return () => {
+      cancelled = true;
+    };
   }, [pathname, router]);
 
   if (isLoading) {

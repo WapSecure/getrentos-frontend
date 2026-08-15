@@ -13,8 +13,15 @@ import {
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
+import { ensureValidSession } from '@/lib/apiClient';
 
-export type AgentUser = { id?: string; fullName: string; email: string; role?: string; roles?: string[] };
+export type AgentUser = {
+  id?: string;
+  fullName: string;
+  email: string;
+  role?: string;
+  roles?: string[];
+};
 
 const AgentUserContext = createContext<AgentUser | null>(null);
 
@@ -27,7 +34,10 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
+    let cancelled = false;
+    const checkAuth = async () => {
+      await ensureValidSession();
+      if (cancelled) return;
       const authenticated = isAuthenticated();
       if (!authenticated) {
         router.replace(ROUTES.LOGIN);
@@ -36,7 +46,6 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
 
       const parsedUser = getStoredUser<AgentUser>();
       if (parsedUser) {
-
         const hasAgentRole = (parsedUser.roles || []).some(
           (r) => BACKEND_ROLE_TO_ID[r] === 'agent'
         );
@@ -52,6 +61,9 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
     };
 
     checkAuth();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   if (isLoading) {

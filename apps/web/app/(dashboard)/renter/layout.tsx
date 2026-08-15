@@ -12,6 +12,7 @@ import {
   BACKEND_ROLE_TO_ID,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
+import { ensureValidSession } from '@/lib/apiClient';
 
 export type RenterUser = {
   id?: string;
@@ -32,7 +33,10 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
+    let cancelled = false;
+    const checkAuth = async () => {
+      await ensureValidSession();
+      if (cancelled) return;
       const authenticated = isAuthenticated();
       if (!authenticated) {
         router.replace(ROUTES.LOGIN);
@@ -41,7 +45,6 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
 
       const parsedUser = getStoredUser<RenterUser>();
       if (parsedUser) {
-
         const hasRenterRole = (parsedUser.roles || []).some(
           (r) => BACKEND_ROLE_TO_ID[r] === 'renter'
         );
@@ -57,6 +60,9 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
     };
 
     checkAuth();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   if (isLoading) {
