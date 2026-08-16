@@ -5,6 +5,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { FinancialChart } from '@/components/landlord/financials/FinancialChart';
+import { ExpensesPanel } from '@/components/landlord/financials/ExpensesPanel';
 import { Button } from '@getrentos/ui';
 import {
   landlordService,
@@ -40,6 +41,11 @@ export default function LandlordFinancialsPage() {
   const { data: chartData = [] } = useQuery({
     queryKey: landlordKeys.financialChart,
     queryFn: () => unwrap(landlordService.getFinancialChart()),
+  });
+
+  const { data: properties = [] } = useQuery({
+    queryKey: landlordKeys.properties,
+    queryFn: () => unwrap(landlordService.listProperties()),
   });
 
   const exportMutation = useMutation({
@@ -104,6 +110,8 @@ export default function LandlordFinancialsPage() {
       />
 
       <FinancialChart data={chartData} />
+
+      <ExpensesPanel properties={properties} />
     </>
   );
 }

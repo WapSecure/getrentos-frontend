@@ -39,6 +39,57 @@ export interface FinancialChartPoint {
   expenses: number;
 }
 
+export type ExpenseCategory =
+  | 'UTILITIES'
+  | 'INSURANCE'
+  | 'TAX'
+  | 'REPAIRS'
+  | 'MANAGEMENT_FEE'
+  | 'OTHER';
+
+export interface Expense {
+  id: string;
+  propertyId: string;
+  propertyTitle: string;
+  category: ExpenseCategory;
+  amount: number;
+  currency: string;
+  incurredAt: string;
+  note: string | null;
+  createdAt: string;
+}
+
+export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
+
+export interface ManagementFeeConfig {
+  id: string;
+  propertyId: string;
+  type: ManagementFeeType;
+  value: number;
+}
+
+export type OwnerStatementStatus = 'DRAFT' | 'ISSUED';
+
+export interface OwnerStatementLineItem {
+  id: string;
+  label: string;
+  amount: number;
+}
+
+export interface OwnerStatement {
+  id: string;
+  periodStart: string;
+  periodEnd: string;
+  grossIncome: number;
+  totalExpenses: number;
+  managementFee: number;
+  netPayout: number;
+  status: OwnerStatementStatus;
+  generatedAt: string;
+  issuedAt: string | null;
+  lineItems?: OwnerStatementLineItem[];
+}
+
 export interface LandlordDocument {
   id: string;
   name: string;
@@ -305,6 +356,72 @@ export const landlordService = {
       link.remove();
       window.URL.revokeObjectURL(url);
     });
+  },
+
+  // ---- Expenses ----
+  async listExpenses(
+    params: { propertyId?: string; category?: string } = {}
+  ): Promise<ApiResponse<Expense[]>> {
+    return safeCall(() => authFetch(`/landlord/expenses${toQuery(params)}`));
+  },
+
+  async createExpense(data: {
+    propertyId: string;
+    category: ExpenseCategory;
+    amount: number;
+    incurredAt: string;
+    note?: string;
+  }): Promise<ApiResponse<Expense>> {
+    return safeCall(() =>
+      authFetch('/landlord/expenses', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async deleteExpense(id: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/landlord/expenses/${id}`, { method: 'DELETE' }));
+  },
+
+  // ---- Management fee configuration ----
+  async getManagementFeeConfig(
+    propertyId: string
+  ): Promise<ApiResponse<ManagementFeeConfig | null>> {
+    return safeCall(() => authFetch(`/landlord/management-fee-config${toQuery({ propertyId })}`));
+  },
+
+  async upsertManagementFeeConfig(data: {
+    propertyId: string;
+    type: ManagementFeeType;
+    value: number;
+  }): Promise<ApiResponse<ManagementFeeConfig>> {
+    return safeCall(() =>
+      authFetch('/landlord/management-fee-config', { method: 'PUT', body: JSON.stringify(data) })
+    );
+  },
+
+  // ---- Owner statements ----
+  async listOwnerStatements(): Promise<ApiResponse<OwnerStatement[]>> {
+    return safeCall(() => authFetch('/landlord/owner-statements'));
+  },
+
+  async getOwnerStatement(id: string): Promise<ApiResponse<OwnerStatement>> {
+    return safeCall(() => authFetch(`/landlord/owner-statements/${id}`));
+  },
+
+  async generateOwnerStatement(data: {
+    propertyId?: string;
+    periodStart: string;
+    periodEnd: string;
+  }): Promise<ApiResponse<OwnerStatement>> {
+    return safeCall(() =>
+      authFetch('/landlord/owner-statements/generate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async issueOwnerStatement(id: string): Promise<ApiResponse<OwnerStatement>> {
+    return safeCall(() => authFetch(`/landlord/owner-statements/${id}/issue`, { method: 'POST' }));
   },
 
   // ---- Vendors ----
