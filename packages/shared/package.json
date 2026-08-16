@@ -21,6 +21,10 @@
     "./utils": {
       "import": "./src/utils/index.ts",
       "types": "./src/utils/index.ts"
+    },
+    "./auth": {
+      "import": "./src/auth/index.ts",
+      "types": "./src/auth/index.ts"
     }
   },
   "scripts": {

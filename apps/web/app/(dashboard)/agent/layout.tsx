@@ -14,7 +14,7 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
-import { useSessionTimeout } from '@/hooks/useSessionTimeout';
+import { useSessionTimeout } from '@getrentos/ui';
 
 export type AgentUser = {
   id?: string;

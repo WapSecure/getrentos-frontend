@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
 };
 
 export default nextConfig;

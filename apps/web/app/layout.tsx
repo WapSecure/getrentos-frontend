@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { QueryProvider } from '@/components/providers/QueryProvider';
+import { ThemeProvider, QueryProvider } from '@getrentos/ui';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import './globals.css';
 
