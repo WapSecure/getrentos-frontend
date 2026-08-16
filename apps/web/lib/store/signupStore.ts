@@ -36,7 +36,9 @@ const initialState: SignupData = {
   fullName: '',
   password: '',
   method: 'email',
-  selectedRoles: [],
+  // Every new account defaults to Renter until the user explicitly picks a
+  // different role card during role selection.
+  selectedRoles: ['renter'],
   isVerified: false,
 };
 

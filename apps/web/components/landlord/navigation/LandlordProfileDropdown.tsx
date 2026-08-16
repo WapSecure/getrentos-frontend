@@ -8,6 +8,7 @@ import { ChevronDown, User, Settings, HelpCircle, LogOut, Building2 } from 'luci
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
+import { RoleSwitcher } from '@/components/shared/navigation/RoleSwitcher';
 
 interface LandlordProfileDropdownProps {
   user: { fullName: string; email: string } | null;
@@ -66,6 +67,8 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
               <p className="text-sm font-semibold text-foreground">{fullName}</p>
               <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
             </div>
+
+            <RoleSwitcher currentRoleId="landlord" />
 
             <div className="py-2">
               <Link

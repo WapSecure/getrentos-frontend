@@ -16,6 +16,7 @@ import {
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
+import { RoleSwitcher } from '@/components/shared/navigation/RoleSwitcher';
 
 interface AgentProfileDropdownProps {
   user: { fullName: string; email: string } | null;
@@ -74,6 +75,8 @@ export const AgentProfileDropdown = ({ user }: AgentProfileDropdownProps) => {
               <p className="text-sm font-semibold text-foreground">{fullName}</p>
               <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
             </div>
+
+            <RoleSwitcher currentRoleId="agent" />
 
             <div className="py-2">
               <Link

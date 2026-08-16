@@ -8,6 +8,7 @@ import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Heart } from '
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
+import { RoleSwitcher } from '@/components/shared/navigation/RoleSwitcher';
 
 interface BuyerProfileDropdownProps {
   user: { fullName: string; email: string } | null;
@@ -66,6 +67,8 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
               <p className="text-sm font-semibold text-foreground">{fullName}</p>
               <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
             </div>
+
+            <RoleSwitcher currentRoleId="buyer" />
 
             <div className="py-2">
               <Link

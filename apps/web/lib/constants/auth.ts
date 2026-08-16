@@ -148,6 +148,7 @@ export const ROUTES = {
   HOME: '/',
   SIGNUP: '/signup',
   LOGIN: '/login',
+  ADMIN_LOGIN: '/admin/login',
   FORGOT_PASSWORD: '/forgot-password',
   ROLE_SELECTION: '/role-selection',
   VERIFICATION: '/verification',

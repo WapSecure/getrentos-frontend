@@ -34,11 +34,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     const checkAuth = async () => {
+      // The dedicated admin sign-in page is exempt from the auth gate.
+      if (pathname === ROUTES.ADMIN_LOGIN) {
+        setIsLoading(false);
+        return;
+      }
       await ensureValidSession();
       if (cancelled) return;
       const authenticated = isAuthenticated();
       if (!authenticated) {
-        router.replace(ROUTES.LOGIN);
+        router.replace(ROUTES.ADMIN_LOGIN);
         return;
       }
 
@@ -69,6 +74,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [pathname, router]);
+
+  // The admin sign-in page renders without the auth gate or the admin chrome.
+  if (pathname === ROUTES.ADMIN_LOGIN) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return <PageLoadingState />;
