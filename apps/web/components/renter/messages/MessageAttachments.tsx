@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Image, Link as LinkIcon, Download, Eye, X } from 'lucide-react';
-import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
+import { FilePreviewDialog } from '@getrentos/ui';
 
 interface Attachment {
   name: string;

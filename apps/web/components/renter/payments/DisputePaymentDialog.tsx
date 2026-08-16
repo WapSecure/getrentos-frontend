@@ -1,10 +1,10 @@
 'use client';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 
 interface DisputePaymentDialogProps {
   open: boolean;

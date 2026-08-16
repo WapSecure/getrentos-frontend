@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AgentNavbar } from '@/components/agent/navigation/AgentNavbar';
 import { AgentSidebar } from '@/components/agent/dashboard/AgentSidebar';
 import { AgentOfflineQueueSync } from '@/components/agent/AgentOfflineQueueSync';
-import { PageLoadingState } from '@/components/ui/Skeleton';
+import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
   isAuthenticated,

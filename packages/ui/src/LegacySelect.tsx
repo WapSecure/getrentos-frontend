@@ -1,7 +1,7 @@
 'use client';
 
 import { Children, isValidElement, type ReactNode } from 'react';
-import { Select, type SelectOption } from '@/components/ui/Select';
+import { Select, type SelectOption } from './Select';
 
 interface LegacySelectProps {
   value?: string | number;
@@ -19,13 +19,24 @@ interface LegacySelectProps {
  * native-option children and an onChange callback, while rendering the custom
  * popover Select so legacy forms can be modernized without altering business logic.
  */
-export function LegacySelect({ value, onChange, children, className, disabled, 'aria-label': ariaLabel }: LegacySelectProps) {
+export function LegacySelect({
+  value,
+  onChange,
+  children,
+  className,
+  disabled,
+  'aria-label': ariaLabel,
+}: LegacySelectProps) {
   const options: SelectOption[] = [];
 
   const collectOptions = (nodes: ReactNode) => {
     Children.forEach(nodes, (child) => {
       if (!isValidElement(child)) return;
-      const props = child.props as { value?: string | number; disabled?: boolean; children?: ReactNode };
+      const props = child.props as {
+        value?: string | number;
+        disabled?: boolean;
+        children?: ReactNode;
+      };
       if (child.type === 'option') {
         options.push({
           value: String(props.value ?? ''),

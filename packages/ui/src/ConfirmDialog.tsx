@@ -1,8 +1,8 @@
 'use client';
 
 import { AlertTriangle } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
+import { Button } from './Button';
 
 interface ConfirmDialogProps {
   open: boolean;

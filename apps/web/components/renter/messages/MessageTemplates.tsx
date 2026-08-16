@@ -1,14 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { FileText, Plus, Edit2, Trash2, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 type TemplateCategory = 'application' | 'viewing' | 'followup' | 'general';
 

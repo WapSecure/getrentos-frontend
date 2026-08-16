@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface NotificationMetadata {
   propertyId?: string;

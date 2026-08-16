@@ -1,12 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCcw } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { Lease } from '@/types/landlord';
 

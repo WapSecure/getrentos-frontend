@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useRef, useState } from 'react';
 import { getInitials } from '@/lib/format';
-import { Button } from '@/components/ui/Button';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { Button } from '@getrentos/ui';
+import { SaveButton } from '@getrentos/ui';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;

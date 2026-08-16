@@ -1,11 +1,11 @@
 'use client';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit2, Trash2, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Note {
   id: string;

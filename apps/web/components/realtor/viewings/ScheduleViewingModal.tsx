@@ -1,15 +1,15 @@
 'use client';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { TimePicker } from '@/components/ui/TimePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { TimePicker } from '@getrentos/ui';
 import type { RealtorLead, ViewingAppointment } from '@/types/realtor';
 
 export type CreateViewingInput = Omit<ViewingAppointment, 'id' | 'status'> & { leadId: string };

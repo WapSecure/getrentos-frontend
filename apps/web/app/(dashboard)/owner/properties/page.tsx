@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -10,8 +10,8 @@ import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCa
 import { AddOwnerPropertyModal } from '@/components/owner/properties/AddOwnerPropertyModal';
 import { OwnerVerificationStatusModal } from '@/components/owner/properties/OwnerVerificationStatusModal';
 import { EditOwnerPropertyModal } from '@/components/owner/properties/EditOwnerPropertyModal';
-import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Button } from '@getrentos/ui';
+import { ConfirmDialog } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

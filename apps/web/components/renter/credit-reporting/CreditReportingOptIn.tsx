@@ -1,10 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { TrendingUp, ShieldCheck, Building2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { CreditBureau } from '@/types/credit-reporting';
 
 interface CreditReportingOptInProps {

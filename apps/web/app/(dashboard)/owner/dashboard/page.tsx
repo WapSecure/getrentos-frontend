@@ -8,7 +8,7 @@ import { OwnerStatsCards } from '@/components/owner/dashboard/OwnerStatsCards';
 import { OwnerPortfolioChart } from '@/components/owner/dashboard/OwnerPortfolioChart';
 import { OwnerActivityFeed } from '@/components/owner/dashboard/OwnerActivityFeed';
 import { OwnerQuickActions } from '@/components/owner/dashboard/OwnerQuickActions';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

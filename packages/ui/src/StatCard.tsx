@@ -2,8 +2,8 @@
 
 import { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { formatCurrency } from '@/lib/format';
-import { cn } from '@/lib/cn';
+import { formatCurrency } from '@getrentos/shared';
+import { cn } from '@getrentos/shared';
 
 export type StatCardAccent = 'blue' | 'primary' | 'orange' | 'red' | 'purple' | 'emerald' | 'green';
 

@@ -14,9 +14,9 @@ import {
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/Dialog';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +24,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/DropdownMenu';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Toast, type ToastVariant } from '@/components/ui/Toast';
+} from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
+import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

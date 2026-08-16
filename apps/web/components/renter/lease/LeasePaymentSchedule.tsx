@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Payment {
   month: string;

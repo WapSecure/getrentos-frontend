@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { FileCheck, Download, RefreshCcw, Send } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Badge } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { leaseStatusBadges } from '@/lib/statusBadge';
 import type { Lease } from '@/types/landlord';

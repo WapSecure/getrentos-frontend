@@ -14,7 +14,7 @@ import {
   Calendar,
   DollarSign,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Payment {
   id: string;

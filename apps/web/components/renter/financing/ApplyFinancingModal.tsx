@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { ShieldCheck, Zap } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { getFinancingPlanOptions } from '@/lib/financing';
 import type { FinancingPlanLength } from '@/types/financing';

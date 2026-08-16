@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 
 interface ApplicationRecommendationsProps {

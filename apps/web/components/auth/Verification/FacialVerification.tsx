@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
@@ -126,7 +126,12 @@ export const FacialVerification = ({ onComplete, onSkip }: FacialVerificationPro
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Click to upload or drag and drop
                 </span>
-                <LegacyInput type="file" accept="image/*" className="hidden" onChange={handleIdUpload} />
+                <LegacyInput
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleIdUpload}
+                />
               </label>
             </div>
           )}

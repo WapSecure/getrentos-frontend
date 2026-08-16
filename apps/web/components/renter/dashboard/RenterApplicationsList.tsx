@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

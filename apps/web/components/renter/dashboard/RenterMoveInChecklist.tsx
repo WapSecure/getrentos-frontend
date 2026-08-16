@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { motion } from 'framer-motion';
 import { CheckCircle, Circle, Camera, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Button } from '@getrentos/ui';
+import { Toast, ToastVariant } from '@getrentos/ui';
 import { useEffect, useRef, useState } from 'react';
 import { renterService, type MoveInChecklistItem } from '@/services/renterService';
 

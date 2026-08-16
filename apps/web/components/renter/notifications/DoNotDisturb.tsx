@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Moon, Clock, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { TimePicker } from '@/components/ui/TimePicker';
+import { Button } from '@getrentos/ui';
+import { TimePicker } from '@getrentos/ui';
 
 export const DoNotDisturb = () => {
   const [isEnabled, setIsEnabled] = useState(false);

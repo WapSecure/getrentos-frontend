@@ -1,15 +1,15 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, FolderPlus, Trash2, MoreHorizontal, Check, Bookmark } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { renterService, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Toast, ToastVariant } from '@getrentos/ui';
 
 interface WishlistManagerProps {
   wishlists: Wishlist[];

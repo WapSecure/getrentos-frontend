@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Circle, FileText, AlertCircle, Camera } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface ChecklistItem {
   id: string;

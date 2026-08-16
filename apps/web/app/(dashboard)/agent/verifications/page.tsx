@@ -6,7 +6,7 @@ import { Plus, UserCheck } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationCard } from '@/components/agent/verifications/VerificationCard';
 import { NewVerificationModal } from '@/components/agent/verifications/NewVerificationModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { VerificationVisit } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -44,7 +44,15 @@ function AgentVerificationsPageContent() {
       queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
       queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
     },
-    onError: (_error, visit) => agentOfflineQueue.enqueue('verification', { taskId: visit.taskId, subjectName: visit.subjectName, subjectType: visit.subjectType.toUpperCase(), idVerified: visit.idVerified, addressConfirmed: visit.addressConfirmed, notes: visit.notes || undefined }),
+    onError: (_error, visit) =>
+      agentOfflineQueue.enqueue('verification', {
+        taskId: visit.taskId,
+        subjectName: visit.subjectName,
+        subjectType: visit.subjectType.toUpperCase(),
+        idVerified: visit.idVerified,
+        addressConfirmed: visit.addressConfirmed,
+        notes: visit.notes || undefined,
+      }),
   });
 
   const handleSubmit = (data: Omit<VerificationVisit, 'id' | 'syncStatus'>) => {

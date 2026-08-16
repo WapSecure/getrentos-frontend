@@ -8,7 +8,7 @@ import {
   LayoutGrid,
   List,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { format } from 'date-fns';
 
 interface CalendarHeaderProps {

@@ -9,7 +9,7 @@ import {
   Archive,
   PlayCircle,
 } from 'lucide-react';
-import type { BadgeVariant } from '@/components/ui/Badge';
+import type { BadgeVariant } from '@getrentos/ui';
 import type { RentPaymentStatus, EscrowStatus, LeaseStatus } from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
 import type { OfferStatus } from '@/types/owner';

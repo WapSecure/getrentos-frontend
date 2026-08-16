@@ -14,7 +14,7 @@ import { HomeManagementTimeline } from '@/components/home-management/HomeManagem
 import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
 import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
 import { PreventiveMaintenancePlans } from '@/components/home-management/PreventiveMaintenancePlans';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { EmptyState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';

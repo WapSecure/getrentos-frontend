@@ -1,10 +1,10 @@
 'use client';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Volume2, VolumeX, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const NotificationSound = () => {
   const [isEnabled, setIsEnabled] = useState(true);

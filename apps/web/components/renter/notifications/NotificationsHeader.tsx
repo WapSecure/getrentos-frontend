@@ -1,7 +1,7 @@
 'use client';
 
 import { Bell, BellOff, CheckCheck, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface NotificationsHeaderProps {
   unreadCount: number;

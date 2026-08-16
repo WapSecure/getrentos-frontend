@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CalendarClock, Clock, CheckCircle2, XCircle, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingRequest, ViewingRequestStatus } from '@/types/buyer';
 

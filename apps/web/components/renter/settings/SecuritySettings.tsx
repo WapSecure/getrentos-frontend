@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Shield, Fingerprint, Smartphone, Key, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const SecuritySettings = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);

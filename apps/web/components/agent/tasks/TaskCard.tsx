@@ -11,8 +11,8 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Badge } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { taskStatusBadges } from '@/lib/statusBadge';
 import type { AgentTask, TaskType, TaskPriority } from '@/types/agent';

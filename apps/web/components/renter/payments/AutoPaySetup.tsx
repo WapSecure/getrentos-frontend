@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Repeat, Shield, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui/Select';
-import { Switch } from '@/components/ui/Switch';
+import { Button } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
+import { Switch } from '@getrentos/ui';
 
 export const AutoPaySetup = () => {
   const [enabled, setEnabled] = useState(false);
@@ -40,7 +40,11 @@ export const AutoPaySetup = () => {
             <Select
               value={frequency}
               onValueChange={setFrequency}
-              options={[{ value: 'monthly', label: 'Monthly' }, { value: 'quarterly', label: 'Quarterly' }, { value: 'yearly', label: 'Yearly' }]}
+              options={[
+                { value: 'monthly', label: 'Monthly' },
+                { value: 'quarterly', label: 'Quarterly' },
+                { value: 'yearly', label: 'Yearly' },
+              ]}
             />
           </div>
 
@@ -51,7 +55,10 @@ export const AutoPaySetup = () => {
             <Select
               value={String(dayOfMonth)}
               onValueChange={(value) => setDayOfMonth(Number(value))}
-              options={Array.from({ length: 28 }, (_, index) => ({ value: String(index + 1), label: String(index + 1) }))}
+              options={Array.from({ length: 28 }, (_, index) => ({
+                value: String(index + 1),
+                label: String(index + 1),
+              }))}
             />
           </div>
 

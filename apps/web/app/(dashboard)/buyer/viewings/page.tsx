@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

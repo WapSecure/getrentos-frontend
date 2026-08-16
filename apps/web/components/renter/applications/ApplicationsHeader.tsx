@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { FileText, TrendingUp, Clock, CheckCircle, Download, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
 

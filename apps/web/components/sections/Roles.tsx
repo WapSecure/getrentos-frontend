@@ -1,8 +1,8 @@
 'use client';
 
 import { Home, Building2, TrendingUp, Search, Users, UserCheck } from 'lucide-react';
-import { SectionHeader } from '../ui/SectionHeader';
-import { Card } from '../ui/Card';
+import { SectionHeader } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
 
 const roles = [
   {

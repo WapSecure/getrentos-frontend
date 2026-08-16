@@ -1,13 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Mail, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Button } from '@getrentos/ui';
+import { Toast, ToastVariant } from '@getrentos/ui';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';

@@ -1,10 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { SaveButton } from '@getrentos/ui';
 
 const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
 

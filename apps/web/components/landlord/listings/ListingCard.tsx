@@ -12,7 +12,7 @@ import {
   Eye,
   Zap,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing, ListingStatus } from '@/types/landlord';
 

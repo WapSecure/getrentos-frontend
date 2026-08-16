@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { SectionHeader } from '../ui/SectionHeader';
+import { SectionHeader } from '@getrentos/ui';
 import {
   UserPlus,
   ShieldCheck,
@@ -12,8 +12,8 @@ import {
   CheckCircle,
   Star,
 } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { ParticleBackground } from '../ui/ParticleBackground';
+import { Card } from '@getrentos/ui';
+import { ParticleBackground } from '@getrentos/ui';
 
 const steps = [
   {

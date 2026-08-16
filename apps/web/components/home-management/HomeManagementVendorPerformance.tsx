@@ -2,10 +2,10 @@
 
 import { useMemo } from 'react';
 import { BadgeDollarSign, Star, Users } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Badge } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type {
   HomeManagementVendor,

@@ -1,7 +1,7 @@
 'use client';
 
 import { Upload, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface DocumentsHeaderProps {
   documentCount: number;

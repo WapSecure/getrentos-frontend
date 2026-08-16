@@ -1,11 +1,11 @@
 'use client';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Check, XCircle, HelpCircle, FileText } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { VerificationRequest } from '@/types/admin';
 

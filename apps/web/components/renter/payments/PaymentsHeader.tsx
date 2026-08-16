@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CreditCard, Plus, Download, Shield, Lock, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface PaymentsHeaderProps {
   onExport: () => void;

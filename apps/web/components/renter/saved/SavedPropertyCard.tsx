@@ -19,7 +19,7 @@ import {
   MoreHorizontal,
   CheckSquare,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

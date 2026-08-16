@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 

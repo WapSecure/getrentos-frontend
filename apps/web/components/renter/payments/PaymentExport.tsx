@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, FileText, FileSpreadsheet, X, Check, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Payment {
   id: string;

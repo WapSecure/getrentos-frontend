@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Users } from 'lucide-react';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { RealtorClient, ClientRole } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
 import { unwrap } from '@/lib/apiHelpers';

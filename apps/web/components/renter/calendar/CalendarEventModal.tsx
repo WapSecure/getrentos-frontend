@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Bell, Repeat } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { TimePicker } from '@/components/ui/TimePicker';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { TimePicker } from '@getrentos/ui';
+import { Checkbox } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
+import { Textarea } from '@getrentos/ui';
 import type {
   CalendarEvent,
   CalendarEventFormData,
@@ -33,7 +33,14 @@ const eventTypes: { value: CalendarEventType; label: string }[] = [
   { value: 'personal', label: 'Personal' },
 ];
 
-const colors = ['var(--info)', 'var(--success)', 'var(--warning)', 'var(--purple)', 'var(--primary)', 'var(--destructive)'];
+const colors = [
+  'var(--info)',
+  'var(--success)',
+  'var(--warning)',
+  'var(--purple)',
+  'var(--primary)',
+  'var(--destructive)',
+];
 
 const getInitialFormData = (event?: CalendarEvent | null): CalendarEventFormData => ({
   title: event?.title || '',
@@ -133,7 +140,9 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
               <Field label="Event Type">
                 <Select
                   value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value as CalendarEventType })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, type: value as CalendarEventType })
+                  }
                   options={eventTypes}
                 />
               </Field>
@@ -180,7 +189,9 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   <Repeat className="w-4 h-4" />
                   <Select
                     value={formData.recurrence}
-                    onValueChange={(value) => setFormData({ ...formData, recurrence: value as CalendarRecurrence })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, recurrence: value as CalendarRecurrence })
+                    }
                     options={[
                       { value: 'none', label: 'None' },
                       { value: 'daily', label: 'Daily' },

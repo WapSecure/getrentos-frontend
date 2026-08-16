@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CreditCard, FileText, Wrench, MessageCircle, Star } from 'lucide-react';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { SaveButton } from '@getrentos/ui';
 import { landlordService, type LandlordNotificationPreference } from '@/services/landlordService';
 
 interface NotificationPreference extends LandlordNotificationPreference {

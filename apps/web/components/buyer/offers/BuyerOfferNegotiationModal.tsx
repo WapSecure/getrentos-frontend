@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Check, XCircle, RefreshCcw, Send } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferMessage } from '@/types/buyer';
 

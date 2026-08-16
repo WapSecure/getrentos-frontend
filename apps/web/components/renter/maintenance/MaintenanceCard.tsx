@@ -12,7 +12,7 @@ import {
   AlertTriangle,
   XCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceCardProps {

@@ -2,8 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, FileText, House, Wrench } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@getrentos/ui';
+import { Badge } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

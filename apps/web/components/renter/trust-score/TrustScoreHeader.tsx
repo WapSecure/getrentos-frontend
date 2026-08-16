@@ -1,7 +1,7 @@
 'use client';
 
 import { Shield, TrendingUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface TrustScoreHeaderProps {
   trustScore: number;

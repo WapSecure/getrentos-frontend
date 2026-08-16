@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Share2, Download, Check } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface DocumentRowActionsProps {
   onShare?: () => void;

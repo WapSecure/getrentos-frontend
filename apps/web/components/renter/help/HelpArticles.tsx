@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Eye, ThumbsUp, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Article {
   id: string;

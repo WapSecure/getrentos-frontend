@@ -1,10 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { RefreshCcw, Percent } from 'lucide-react';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { SaveButton } from '@getrentos/ui';
 
 export const PreferencesSettings = () => {
   const [minOfferPct, setMinOfferPct] = useState('85');

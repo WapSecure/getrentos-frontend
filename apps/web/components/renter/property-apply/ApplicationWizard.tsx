@@ -1,15 +1,15 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Check, Upload, FileText, User, Briefcase, ClipboardCheck } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 
 export interface ApplicationFormData {

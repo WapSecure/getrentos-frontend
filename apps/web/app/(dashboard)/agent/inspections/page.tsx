@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';
 import { InspectionDetailModal } from '@/components/agent/inspections/InspectionDetailModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { PropertyInspection } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -45,7 +45,14 @@ function AgentInspectionsPageContent() {
       queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
       queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
     },
-    onError: (_error, inspection) => agentOfflineQueue.enqueue('inspection', { taskId: inspection.taskId, scheduledAt: inspection.scheduledDate, rooms: inspection.rooms, clientName: inspection.clientName, overallCondition: inspection.overallCondition }),
+    onError: (_error, inspection) =>
+      agentOfflineQueue.enqueue('inspection', {
+        taskId: inspection.taskId,
+        scheduledAt: inspection.scheduledDate,
+        rooms: inspection.rooms,
+        clientName: inspection.clientName,
+        overallCondition: inspection.overallCondition,
+      }),
   });
 
   const handleSubmit = (data: Omit<PropertyInspection, 'id' | 'syncStatus'>) => {

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, Search } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
 import {
   ApplicationWizard,
   type ApplicationFormData,

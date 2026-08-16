@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
+import { Button } from '@getrentos/ui';
+import { FilePreviewDialog } from '@getrentos/ui';
 
 interface Document {
   name: string;

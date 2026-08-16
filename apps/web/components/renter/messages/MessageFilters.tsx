@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { Select } from '@/components/ui/Select';
+import { Select } from '@getrentos/ui';
 
 interface FilterState {
   type: string;
@@ -61,7 +61,12 @@ export const MessageFilters = ({
             <Select
               value={filters.type}
               onValueChange={(value) => handleFilterChange('type', value)}
-              options={[{ value: 'all', label: 'All Messages' }, { value: 'unread', label: 'Unread' }, { value: 'read', label: 'Read' }, { value: 'sent', label: 'Sent by Me' }]}
+              options={[
+                { value: 'all', label: 'All Messages' },
+                { value: 'unread', label: 'Unread' },
+                { value: 'read', label: 'Read' },
+                { value: 'sent', label: 'Sent by Me' },
+              ]}
             />
           </div>
           <div>
@@ -69,7 +74,12 @@ export const MessageFilters = ({
             <Select
               value={filters.sortBy}
               onValueChange={(value) => handleFilterChange('sortBy', value)}
-              options={[{ value: 'recent', label: 'Most Recent' }, { value: 'oldest', label: 'Oldest' }, { value: 'unread', label: 'Unread First' }, { value: 'property', label: 'By Property' }]}
+              options={[
+                { value: 'recent', label: 'Most Recent' },
+                { value: 'oldest', label: 'Oldest' },
+                { value: 'unread', label: 'Unread First' },
+                { value: 'property', label: 'By Property' },
+              ]}
             />
           </div>
         </div>

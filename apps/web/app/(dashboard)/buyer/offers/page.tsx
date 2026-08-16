@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -9,7 +9,7 @@ import { Plus, Search, Handshake } from 'lucide-react';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

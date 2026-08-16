@@ -2,12 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import {
-  DocumentUploadDialog,
-  type UploadedDocumentData,
-} from '@/components/ui/DocumentUploadDialog';
-import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
+import { Button } from '@getrentos/ui';
+import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
+import { DocumentRowActions } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { landlordService, type LandlordDocument } from '@/services/landlordService';
 

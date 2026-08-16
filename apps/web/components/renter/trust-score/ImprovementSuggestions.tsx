@@ -1,7 +1,7 @@
 'use client';
 
 import { Sparkles, User, Phone, FileText, Users, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 const suggestions = [
   {

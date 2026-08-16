@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Clock, CalendarClock, CheckCircle2, XCircle, Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingAppointment, ViewingStatus } from '@/types/realtor';
 

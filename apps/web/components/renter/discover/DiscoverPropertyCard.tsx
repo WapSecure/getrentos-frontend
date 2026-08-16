@@ -14,7 +14,7 @@ import {
   Home,
   Shield,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { Property } from '@/types/renter';
 import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';

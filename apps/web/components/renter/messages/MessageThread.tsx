@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { Phone, Video, MoreVertical, Home } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { Conversation } from '@/types/messages';

@@ -3,7 +3,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { Users, Building2, DollarSign, Shield, TrendingUp, Clock } from 'lucide-react';
-import { ParticleBackground } from '../ui/ParticleBackground';
+import { ParticleBackground } from '@getrentos/ui';
 
 const stats = [
   { icon: Users, value: 50000, label: 'Active Users', suffix: '+', prefix: '' },

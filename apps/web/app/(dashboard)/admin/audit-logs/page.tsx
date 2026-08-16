@@ -1,14 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ScrollText } from 'lucide-react';
-import { DataTable, type Column } from '@/components/ui/Table';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Pagination } from '@/components/ui/Pagination';
+import { DataTable, type Column } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/format';
 import { adminService } from '@/services/adminService';

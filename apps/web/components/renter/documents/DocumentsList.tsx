@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { LayoutGrid, List, FileText, Check, ArrowDownUp } from 'lucide-react';
 import { DocumentCard } from './DocumentCard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Document {
   id: string;

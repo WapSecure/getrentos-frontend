@@ -7,7 +7,7 @@ import { BuyerDashboardHeader } from '@/components/buyer/dashboard/BuyerDashboar
 import { BuyerStatsCards } from '@/components/buyer/dashboard/BuyerStatsCards';
 import { BuyerActivityFeed } from '@/components/buyer/dashboard/BuyerActivityFeed';
 import { BuyerQuickActions } from '@/components/buyer/dashboard/BuyerQuickActions';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

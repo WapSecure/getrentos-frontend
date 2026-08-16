@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Filter, ArrowUpDown } from 'lucide-react';
 import { SavedPropertyCard } from './SavedPropertyCard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

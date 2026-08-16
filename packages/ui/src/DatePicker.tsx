@@ -19,7 +19,7 @@ import {
   startOfMonth,
   subMonths,
 } from 'date-fns';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 

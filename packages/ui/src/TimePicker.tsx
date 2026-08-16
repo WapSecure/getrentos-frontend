@@ -5,7 +5,7 @@ import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { format, parse } from 'date-fns';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface TimePickerProps {
   value?: string;

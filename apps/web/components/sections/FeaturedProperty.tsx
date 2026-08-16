@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { MapPin, Bed, Bath, Square, Building2, TrendingUp } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 export const FeaturedProperty = () => {

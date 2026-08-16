@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Eye, User, Users, Globe, Lock, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const PrivacySettings = () => {
   const [privacy, setPrivacy] = useState({

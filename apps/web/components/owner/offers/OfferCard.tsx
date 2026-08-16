@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Wallet, CreditCard, Banknote } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@getrentos/ui';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import { offerStatusBadges } from '@/lib/statusBadge';
 import type { SaleOffer, FinancingType } from '@/types/owner';

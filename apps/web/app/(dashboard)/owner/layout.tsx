@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { OwnerNavbar } from '@/components/owner/navigation/OwnerNavbar';
 import { OwnerSidebar } from '@/components/owner/dashboard/OwnerSidebar';
-import { PageLoadingState } from '@/components/ui/Skeleton';
+import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
   isAuthenticated,

@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from '@/components/ui/DropdownMenu';
+} from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 import { RoleSwitcher } from '@/components/shared/navigation/RoleSwitcher';

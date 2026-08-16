@@ -1,12 +1,12 @@
 'use client';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
 
 interface LeaseTerminationRequestProps {
   leaseId: string;

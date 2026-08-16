@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { ArrowLeft, Upload } from 'lucide-react';
 import { VerificationStep } from '@/app/(auth)/verification/page';

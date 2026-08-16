@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Document {
   id: string;

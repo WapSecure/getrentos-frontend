@@ -1,7 +1,7 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface AdminDashboardHeaderProps {

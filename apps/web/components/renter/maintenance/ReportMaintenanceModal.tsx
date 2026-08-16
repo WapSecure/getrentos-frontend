@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, AlertTriangle, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { LegacyInput } from '@/components/ui/LegacyInput';
-import { LegacySelect } from '@/components/ui/LegacySelect';
-import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@getrentos/ui';
+import { LegacyInput } from '@getrentos/ui';
+import { LegacySelect } from '@getrentos/ui';
+import { Textarea } from '@getrentos/ui';
 import type {
   CreateMaintenanceRequestInput,
   MaintenanceCategory,

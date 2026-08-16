@@ -9,9 +9,9 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Card } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type {
   HomeAsset,

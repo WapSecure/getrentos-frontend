@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AnimatedParticles } from '@getrentos/ui';
+import { ThemeToggle } from '@getrentos/ui';
 import { ForgotPasswordLeftContent } from '@/components/auth/ForgotPassword/ForgotPasswordLeftContent';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPassword/ForgotPasswordForm';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Toast, ToastVariant } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function ForgotPasswordPage() {

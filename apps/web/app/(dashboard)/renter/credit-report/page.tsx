@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CreditReportingOptIn } from '@/components/renter/credit-reporting/CreditReportingOptIn';
 import { CreditReportingDashboard } from '@/components/renter/credit-reporting/CreditReportingDashboard';
-import { Toast } from '@/components/ui/Toast';
+import { Toast } from '@getrentos/ui';
 import type { CreditReportingProfile, ReportedPayment } from '@/types/credit-reporting';
 
 const PAST_ON_TIME_PAYMENTS: Omit<ReportedPayment, 'id' | 'reportedDate'>[] = [

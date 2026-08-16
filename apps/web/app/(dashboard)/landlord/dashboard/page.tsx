@@ -8,7 +8,7 @@ import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStat
 import { LandlordRevenueChart } from '@/components/landlord/dashboard/LandlordRevenueChart';
 import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordActivityFeed';
 import { LandlordQuickActions } from '@/components/landlord/dashboard/LandlordQuickActions';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

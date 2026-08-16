@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Smartphone, QrCode, Apple, Download } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const DownloadApp = () => {
   return (

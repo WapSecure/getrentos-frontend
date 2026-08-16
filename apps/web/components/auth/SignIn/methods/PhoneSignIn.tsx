@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,15 +8,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
 import {
   BACKEND_ROLE_TO_ID,
   ROUTES,
   VALIDATION_PATTERNS,
   getDashboardRoute,
 } from '@/lib/constants/auth';
-import { ToastVariant } from '@/components/ui/Toast';
+import { ToastVariant } from '@getrentos/ui';
 import { authService } from '@/services/authService';
 import { useMutation } from '@tanstack/react-query';
 import {

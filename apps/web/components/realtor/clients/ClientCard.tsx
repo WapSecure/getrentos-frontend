@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Building2, Home, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorClient } from '@/types/realtor';
 

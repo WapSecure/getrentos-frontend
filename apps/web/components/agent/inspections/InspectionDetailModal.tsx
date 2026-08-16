@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Camera, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { PropertyInspection, RoomCondition } from '@/types/agent';
 

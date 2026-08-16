@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Home, ArrowLeft, Compass } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { Button } from '@/components/ui/Button';
-import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
+import { Button } from '@getrentos/ui';
+import { AnimatedParticles } from '@getrentos/ui';
 import { ROUTES, isAuthenticated, getUserRole, getDashboardRoute } from '@/lib/constants/auth';
 
 export default function NotFound() {

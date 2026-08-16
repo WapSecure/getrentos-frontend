@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Plus, Trash2, Camera, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { Button } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
 import type {
   AgentTask,
   PropertyInspection,
@@ -101,7 +101,10 @@ export const NewInspectionModal = ({
                   value={taskId}
                   onValueChange={setTaskId}
                   placeholder="Select an inspection task"
-                  options={tasks.map((task) => ({ value: task.id, label: `${task.title} — ${task.propertyAddress}` }))}
+                  options={tasks.map((task) => ({
+                    value: task.id,
+                    label: `${task.title} — ${task.propertyAddress}`,
+                  }))}
                 />
               </div>
 
@@ -139,8 +142,13 @@ export const NewInspectionModal = ({
                         />
                         <Select
                           value={room.condition}
-                          onValueChange={(value) => updateRoom(index, 'condition', value as RoomCondition)}
-                          options={conditionOptions.map((condition) => ({ value: condition, label: condition.charAt(0).toUpperCase() + condition.slice(1) }))}
+                          onValueChange={(value) =>
+                            updateRoom(index, 'condition', value as RoomCondition)
+                          }
+                          options={conditionOptions.map((condition) => ({
+                            value: condition,
+                            label: condition.charAt(0).toUpperCase() + condition.slice(1),
+                          }))}
                           className="min-h-9 w-32"
                         />
                         {rooms.length > 1 && (

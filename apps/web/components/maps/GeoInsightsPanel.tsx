@@ -20,11 +20,11 @@ import {
   Wallet,
 } from 'lucide-react';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Badge } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

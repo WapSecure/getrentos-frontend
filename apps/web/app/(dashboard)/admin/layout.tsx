@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { AdminNavbar } from '@/components/admin/navigation/AdminNavbar';
 import { AdminSidebar } from '@/components/admin/dashboard/AdminSidebar';
-import { PageLoadingState } from '@/components/ui/Skeleton';
+import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
   isAuthenticated,

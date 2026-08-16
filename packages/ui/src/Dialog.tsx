@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface DialogProps {
   open: boolean;

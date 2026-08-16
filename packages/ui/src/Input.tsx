@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   leadingIcon?: ReactNode;

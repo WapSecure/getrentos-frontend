@@ -3,9 +3,9 @@ export { Navigation } from './layout/Navigation';
 export { Footer } from './layout/Footer';
 
 // UI Components
-export { Button } from './ui/Button';
-export { Card } from './ui/Card';
-export { SectionHeader } from './ui/SectionHeader';
+export { Button } from '@getrentos/ui';
+export { Card } from '@getrentos/ui';
+export { SectionHeader } from '@getrentos/ui';
 
 // Section Components
 export { Hero } from './sections/Hero';

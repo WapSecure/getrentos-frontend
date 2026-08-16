@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, FileText, Video, BookOpen } from 'lucide-react';
-import { Card } from '../ui/Card';
+import { Card } from '@getrentos/ui';
 
 const resources = [
   {

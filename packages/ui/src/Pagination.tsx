@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface PaginationProps {
   page: number;

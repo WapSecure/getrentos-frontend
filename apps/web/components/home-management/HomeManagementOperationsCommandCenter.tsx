@@ -13,10 +13,10 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import type {
   HomeAsset,
   HomeManagementProperty,

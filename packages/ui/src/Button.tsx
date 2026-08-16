@@ -3,7 +3,7 @@
 import { ReactNode, forwardRef } from 'react';
 import { motion, MotionProps } from 'framer-motion';
 import Link from 'next/link';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface ButtonProps {
   children: ReactNode;

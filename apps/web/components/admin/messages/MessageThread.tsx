@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';

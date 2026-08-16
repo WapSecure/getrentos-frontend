@@ -25,7 +25,7 @@ import {
   Shield,
   Star,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 import { ApplicationTimeline } from './ApplicationTimeline';
 import { ApplicationNotes } from './ApplicationNotes';

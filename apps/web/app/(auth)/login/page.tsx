@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AnimatedParticles } from '@getrentos/ui';
+import { ThemeToggle } from '@getrentos/ui';
 import { SignInLeftContent } from '@/components/auth/SignIn/SignInLeftContent';
 import { SignInRightContent } from '@/components/auth/SignIn/SignInRightContent';
 

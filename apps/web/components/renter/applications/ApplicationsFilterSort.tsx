@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacySelect } from '@/components/ui/LegacySelect';
+import { LegacySelect } from '@getrentos/ui';
 
 import { LayoutGrid, List, ChevronDown } from 'lucide-react';
 

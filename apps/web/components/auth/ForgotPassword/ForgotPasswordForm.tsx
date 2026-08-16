@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { RequestStep } from './steps/RequestStep';
 import { OtpStep } from './steps/OtpStep';
 import { ResetStep } from './steps/ResetStep';
@@ -82,7 +82,10 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
     }
 
     setIsLoading(true);
-    const response = await verifyOtpMutation.mutateAsync({ otpCode: otpValue, otpReference: reference });
+    const response = await verifyOtpMutation.mutateAsync({
+      otpCode: otpValue,
+      otpReference: reference,
+    });
     setIsLoading(false);
 
     if (response.success && response.data?.verified) {

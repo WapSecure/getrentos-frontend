@@ -1,14 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DocumentUploadDialog } from '@/components/ui/DocumentUploadDialog';
-import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
-import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
+import { Button } from '@getrentos/ui';
+import { DocumentUploadDialog } from '@getrentos/ui';
+import { DocumentRowActions } from '@getrentos/ui';
+import { FilePreviewDialog } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { RealtorDocument } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';

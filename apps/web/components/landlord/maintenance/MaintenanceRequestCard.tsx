@@ -11,7 +11,7 @@ import {
   ShieldAlert,
   Droplets,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
 import type {

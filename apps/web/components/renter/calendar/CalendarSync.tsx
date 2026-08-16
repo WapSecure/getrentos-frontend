@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Calendar, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const CalendarSync = () => {
   const [isExpanded, setIsExpanded] = useState(true);

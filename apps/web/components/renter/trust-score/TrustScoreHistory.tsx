@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { TrustScoreHistoryItem } from '@/types/trust-score';
 
 interface TrustScoreHistoryProps {

@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,8 +9,8 @@ import { Plus, Search, UserPlus } from 'lucide-react';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
 import type { LeadStage } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
-import { Button } from '@/components/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
+import { Button } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorLead, mapRealtorListing, realtorService } from '@/services/realtorService';

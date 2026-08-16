@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OTPModalProps {
@@ -129,7 +129,14 @@ export const OTPModal = ({
             )}
 
             <div className="mb-6">
-              <OtpInput value={otp} onChange={(value) => { setOtp(value); setError(null); }} disabled={isVerifying} />
+              <OtpInput
+                value={otp}
+                onChange={(value) => {
+                  setOtp(value);
+                  setError(null);
+                }}
+                disabled={isVerifying}
+              />
             </div>
 
             <div className="text-center mb-6">

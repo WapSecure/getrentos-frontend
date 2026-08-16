@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Share2, FileText, Star, StarOff } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { FilePreview } from '@/components/ui/FilePreview';
+import { Button } from '@getrentos/ui';
+import { FilePreview } from '@getrentos/ui';
 
 interface Document {
   id: string;

@@ -13,8 +13,8 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate, formatRelativeTime } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

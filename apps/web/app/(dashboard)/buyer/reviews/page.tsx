@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Star, PenLine } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerService, type BuyerReview } from '@/services/buyerService';

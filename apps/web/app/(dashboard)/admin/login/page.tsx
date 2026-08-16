@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AnimatedParticles } from '@getrentos/ui';
+import { ThemeToggle } from '@getrentos/ui';
 import { AdminSignInForm } from '@/components/auth/AdminSignIn/AdminSignInForm';
 import { ROUTES } from '@/lib/constants/auth';
 

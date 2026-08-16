@@ -1,13 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
+import { Textarea } from '@getrentos/ui';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
 
 interface MakeOfferModalProps {

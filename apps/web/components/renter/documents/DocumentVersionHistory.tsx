@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, Download, FileText, Check, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Version {
   id: string;

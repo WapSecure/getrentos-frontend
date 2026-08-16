@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Wrench, Plus, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface MaintenanceHeaderProps {
   onReport: () => void;

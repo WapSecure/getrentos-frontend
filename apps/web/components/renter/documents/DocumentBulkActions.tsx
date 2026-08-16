@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2, Share2, Download, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface DocumentBulkActionsProps {
   selectedCount: number;

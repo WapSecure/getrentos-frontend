@@ -1,8 +1,8 @@
 'use client';
 
 import { Ban, CheckCircle2, ShieldAlert } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
 import type { PlatformUser, UserAccountStatus } from '@/types/admin';
 

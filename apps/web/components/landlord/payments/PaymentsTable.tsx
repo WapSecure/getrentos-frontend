@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
 import type { RentPayment } from '@/types/landlord';

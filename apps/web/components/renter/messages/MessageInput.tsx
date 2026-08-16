@@ -1,12 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
 import { useState, useRef } from 'react';
 import { Send, Paperclip } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { MessageAttachments } from './MessageAttachments';
 
 interface Attachment {

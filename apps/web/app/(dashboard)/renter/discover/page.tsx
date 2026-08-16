@@ -12,7 +12,7 @@ import { DiscoverApplicationAssistant } from '@/components/renter/discover/Disco
 import { RecentlyViewed } from '@/components/renter/discover/features/RecentlyViewed';
 import { DocumentChecklist } from '@/components/renter/discover/features/DocumentChecklist';
 import { SavedSearchAlert } from '@/components/renter/discover/features/SavedSearchAlert';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Toast, ToastVariant } from '@getrentos/ui';
 import { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

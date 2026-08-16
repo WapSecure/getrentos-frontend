@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 

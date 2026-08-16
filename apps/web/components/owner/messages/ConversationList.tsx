@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { Search } from 'lucide-react';
 import { getInitials, formatRelativeTime } from '@/lib/format';

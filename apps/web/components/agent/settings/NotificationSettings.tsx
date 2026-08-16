@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ClipboardList, AlertTriangle, RefreshCw, MessageCircle, Star } from 'lucide-react';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { SaveButton } from '@getrentos/ui';
 
 interface NotificationPreference {
   id: string;

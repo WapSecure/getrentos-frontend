@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, Clock, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { FinancingInstallment, FinancingPlan, InstallmentStatus } from '@/types/financing';
 

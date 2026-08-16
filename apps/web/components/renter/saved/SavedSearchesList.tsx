@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, BellOff, Trash2, Clock, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { renterService, type SavedSearch } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';
 

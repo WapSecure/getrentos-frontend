@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendingUp, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 
 interface ComparableSale {

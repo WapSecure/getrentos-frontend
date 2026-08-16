@@ -12,7 +12,7 @@ import {
   XCircle,
   Clock,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { CalendarEvent } from '@/types/calendar';
 
 interface CalendarEventListProps {
@@ -88,7 +88,7 @@ export const CalendarEventList = ({
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span
-                        className={`text-xs px-2 py-0.5 rounded-full capitalize ${typeStyle.bg} ${typeStyle.text}`}
+                          className={`text-xs px-2 py-0.5 rounded-full capitalize ${typeStyle.bg} ${typeStyle.text}`}
                         >
                           {event.type}
                         </span>

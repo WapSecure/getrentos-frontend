@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { Check, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 export interface SelectOption {
   value: string;

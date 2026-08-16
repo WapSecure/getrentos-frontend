@@ -7,7 +7,7 @@ import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp, Loader2 } from '
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Toast, ToastVariant } from '@getrentos/ui';
 
 export const DocumentChecklist = () => {
   const queryClient = useQueryClient();

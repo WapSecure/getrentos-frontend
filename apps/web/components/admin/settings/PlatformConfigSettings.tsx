@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@/lib/apiHelpers';
 import { adminKeys } from '@/lib/queryKeys';

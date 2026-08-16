@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Video, Check, CalendarCheck, PhoneCall } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { VideoCallSimulator } from './VideoCallSimulator';
 import { tourRooms, videoViewingSlots } from '@/lib/tourRooms';
 import type { TourModalMode } from '@/types/virtual-tour';

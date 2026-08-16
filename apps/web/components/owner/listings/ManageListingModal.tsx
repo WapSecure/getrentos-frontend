@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Megaphone, Pause, Play, XCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
 

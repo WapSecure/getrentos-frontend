@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Input } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { Toast, ToastVariant } from '@getrentos/ui';
 import { BACKEND_ROLE_TO_ID, ROUTES } from '@/lib/constants/auth';
 import {
   saveAuthSession,

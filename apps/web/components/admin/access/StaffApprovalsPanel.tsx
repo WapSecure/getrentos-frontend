@@ -3,17 +3,17 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Inbox, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Textarea } from '@/components/ui/Textarea';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@getrentos/ui';
+import { Badge } from '@getrentos/ui';
+import { Textarea } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@/lib/apiHelpers';
 import { adminKeys } from '@/lib/queryKeys';
 import { ADMIN_ROLE_DETAILS } from '@/lib/adminAccess';
 import { formatRelativeTime, getInitials } from '@/lib/format';
 import type { AdminStaffApproval } from '@/types/admin';
-import type { ToastVariant } from '@/components/ui/Toast';
+import type { ToastVariant } from '@getrentos/ui';
 
 interface StaffApprovalsPanelProps {
   notify: (message: string, variant: ToastVariant) => void;

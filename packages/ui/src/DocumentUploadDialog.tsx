@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Upload as UploadIcon, FileText } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
-import { Field } from '@/components/ui/Field';
-import { Select } from '@/components/ui/Select';
-import { cn } from '@/lib/cn';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
+import { Button } from './Button';
+import { Field } from './Field';
+import { Select } from './Select';
+import { cn } from '@getrentos/shared';
 
 export interface UploadedDocumentData {
   name: string;

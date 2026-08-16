@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Landmark, CheckCircle2 } from 'lucide-react';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 
 export const PayoutSettings = () => {

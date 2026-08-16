@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes } from 'react';
-import { Input } from '@/components/ui/Input';
+import { Input } from './Input';
 
 /**
  * Safe bridge for existing input markup. Ordinary fields use the digital Input

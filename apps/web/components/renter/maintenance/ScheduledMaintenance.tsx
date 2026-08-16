@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Wrench, CheckCircle, AlertCircle, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface ScheduledMaintenance {
   id: string;

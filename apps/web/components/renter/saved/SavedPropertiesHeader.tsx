@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Heart, Bookmark, Bell, Download, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface SavedPropertiesHeaderProps {
   savedCount: number;

@@ -1,13 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { Select } from '@/components/ui/Select';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 
 interface CreateListingModalProps {
@@ -135,7 +135,10 @@ export const CreateListingModal = ({
                       value={unitId}
                       onValueChange={handleUnitChange}
                       placeholder="Select a vacant unit"
-                      options={vacantUnits.map((unit) => ({ value: unit.id, label: `${unit.propertyName} — ${unit.unitName}` }))}
+                      options={vacantUnits.map((unit) => ({
+                        value: unit.id,
+                        label: `${unit.propertyName} — ${unit.unitName}`,
+                      }))}
                     />
                   </div>
 

@@ -5,7 +5,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { FinancialChart } from '@/components/landlord/financials/FinancialChart';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import {
   landlordService,
   type FinancialStats as FinancialStatsData,

@@ -1,9 +1,9 @@
 'use client';
 
 import { Shield, Lock, FileCheck, Eye, Zap, BarChart3, Users2, Smartphone } from 'lucide-react';
-import { SectionHeader } from '../ui/SectionHeader';
-import { Card } from '../ui/Card';
-import { ParticleBackground } from '../ui/ParticleBackground';
+import { SectionHeader } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
+import { ParticleBackground } from '@getrentos/ui';
 
 const features = [
   {

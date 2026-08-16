@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '@/components/ui/DropdownMenu';
+} from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 

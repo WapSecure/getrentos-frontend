@@ -15,7 +15,7 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';

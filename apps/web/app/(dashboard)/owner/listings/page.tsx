@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { Plus, Search, Megaphone } from 'lucide-react';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
 import { CreateSaleListingModal } from '@/components/owner/listings/CreateSaleListingModal';
 import { ManageListingModal } from '@/components/owner/listings/ManageListingModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FinancingEligibilityCard } from '@/components/renter/financing/FinancingEligibilityCard';
 import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancingModal';
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
-import { Toast } from '@/components/ui/Toast';
+import { Toast } from '@getrentos/ui';
 import { getFinancingPlanOptions } from '@/lib/financing';
 import type {
   FinancingApplicationStatus,

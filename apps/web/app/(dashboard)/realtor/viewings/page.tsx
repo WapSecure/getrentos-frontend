@@ -7,7 +7,7 @@ import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingCard } from '@/components/realtor/viewings/ViewingCard';
 import { ScheduleViewingModal } from '@/components/realtor/viewings/ScheduleViewingModal';
 import type { CreateViewingInput } from '@/components/realtor/viewings/ScheduleViewingModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';

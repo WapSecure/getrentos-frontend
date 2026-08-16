@@ -11,7 +11,7 @@ import {
   Pause,
   XCircle,
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
+import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 

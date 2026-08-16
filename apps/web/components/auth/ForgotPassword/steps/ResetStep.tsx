@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@getrentos/ui';
 
 interface ResetStepProps {
   newPassword: string;

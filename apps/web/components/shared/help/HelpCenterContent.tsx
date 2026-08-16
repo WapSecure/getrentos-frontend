@@ -11,7 +11,7 @@ import {
   Clock,
   ArrowRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface FAQItem {
   question: string;

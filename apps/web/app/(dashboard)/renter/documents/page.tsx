@@ -12,7 +12,7 @@ import { DocumentExpiryAlerts } from '@/components/renter/documents/DocumentExpi
 import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkActions';
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
-import { Toast } from '@/components/ui/Toast';
+import { Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

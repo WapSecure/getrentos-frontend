@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface OwnerDashboardHeaderProps {

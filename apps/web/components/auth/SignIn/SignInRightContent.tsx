@@ -9,7 +9,7 @@ import { MagicLinkSignIn } from './methods/MagicLinkSignIn';
 import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Toast, ToastVariant } from '@getrentos/ui';
 
 interface SignInRightContentProps {
   method: SignInMethod;

@@ -1,7 +1,7 @@
 'use client';
 
 import { Users, UserPlus, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface RoommatesHeaderProps {
   roommateCount: number;

@@ -2,7 +2,7 @@
 
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface NotificationFiltersProps {
   filterType: string;

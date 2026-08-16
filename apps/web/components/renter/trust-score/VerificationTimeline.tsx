@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, CheckCircle, Circle, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { VerificationItem } from '@/types/trust-score';
 
 interface VerificationTimelineProps {

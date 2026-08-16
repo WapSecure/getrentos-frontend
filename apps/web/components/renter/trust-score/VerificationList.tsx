@@ -12,7 +12,7 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { VerificationItem } from '@/types/trust-score';
 
 const iconMap: Record<string, React.ElementType> = {

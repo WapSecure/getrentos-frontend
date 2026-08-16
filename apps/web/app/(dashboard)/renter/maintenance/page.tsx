@@ -11,7 +11,7 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import { Toast, type ToastVariant } from '@/components/ui/Toast';
+import { Toast, type ToastVariant } from '@getrentos/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
 

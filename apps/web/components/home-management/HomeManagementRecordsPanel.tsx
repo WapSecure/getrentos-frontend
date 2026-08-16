@@ -2,9 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, CircleAlert, FileText, FolderOpen, Wrench } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { Badge } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

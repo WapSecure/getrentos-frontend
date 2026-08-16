@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Palette, Moon, Sun, Monitor, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const ThemeSettings = () => {
   const [theme, setTheme] = useState('system');

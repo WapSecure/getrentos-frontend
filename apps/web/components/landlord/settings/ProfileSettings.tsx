@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getInitials } from '@/lib/format';
-import { Button } from '@/components/ui/Button';
-import { SaveButton } from '@/components/ui/SaveButton';
+import { Button } from '@getrentos/ui';
+import { SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 
 interface ProfileSettingsProps {

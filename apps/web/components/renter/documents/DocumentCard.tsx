@@ -19,7 +19,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { DocumentPreviewModal } from './DocumentPreviewModal';
 import { DocumentShareModal } from './DocumentShareModal';
 

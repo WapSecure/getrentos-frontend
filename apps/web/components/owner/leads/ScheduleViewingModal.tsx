@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { TimePicker } from '@/components/ui/TimePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { TimePicker } from '@getrentos/ui';
 import type { BuyerLead } from '@/types/owner';
 
 interface ScheduleViewingModalProps {

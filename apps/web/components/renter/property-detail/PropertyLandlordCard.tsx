@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Mail, Phone, Clock, Star, Shield, MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { Property } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
 

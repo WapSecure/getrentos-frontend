@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Shield, Building2, Award, Clock, HelpCircle, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { VerificationRequest, VerificationRequestType } from '@/types/admin';
 

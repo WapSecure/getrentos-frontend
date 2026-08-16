@@ -1,10 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { MessageCircle, CheckCircle2, Smartphone, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { WhatsAppConnectionStatus, WhatsAppNotificationPreference } from '@/types/whatsapp';
 
 const initialPreferences: WhatsAppNotificationPreference[] = [

@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface SwitchProps {
   checked: boolean;
@@ -11,7 +11,14 @@ interface SwitchProps {
   'aria-label'?: string;
 }
 
-export function Switch({ checked, onCheckedChange, disabled, id, className, ...props }: SwitchProps) {
+export function Switch({
+  checked,
+  onCheckedChange,
+  disabled,
+  id,
+  className,
+  ...props
+}: SwitchProps) {
   return (
     <button
       id={id}
@@ -27,7 +34,12 @@ export function Switch({ checked, onCheckedChange, disabled, id, className, ...p
       )}
       {...props}
     >
-      <span className={cn('block h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200', checked && 'translate-x-5')} />
+      <span
+        className={cn(
+          'block h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200',
+          checked && 'translate-x-5'
+        )}
+      />
     </button>
   );
 }

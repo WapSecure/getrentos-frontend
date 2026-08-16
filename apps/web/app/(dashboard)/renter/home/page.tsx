@@ -21,9 +21,9 @@ import {
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

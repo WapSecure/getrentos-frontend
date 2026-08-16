@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useRef } from 'react';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
@@ -35,9 +35,12 @@ export function OtpInput({
     const pastedDigits = digitsOnly(rawValue);
     if (!pastedDigits) return;
     const nextDigits = [...digits];
-    pastedDigits.slice(0, length - index).split('').forEach((digit, offset) => {
-      nextDigits[index + offset] = digit;
-    });
+    pastedDigits
+      .slice(0, length - index)
+      .split('')
+      .forEach((digit, offset) => {
+        nextDigits[index + offset] = digit;
+      });
     commit(nextDigits, Math.min(index + pastedDigits.length, length - 1));
   };
 

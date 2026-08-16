@@ -19,9 +19,9 @@ import {
   Zap,
   Lock,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Toast, ToastVariant } from '@/components/ui/Toast';
+import { Button } from '@getrentos/ui';
+import { EmptyState } from '@getrentos/ui';
+import { Toast, ToastVariant } from '@getrentos/ui';
 import { VirtualTourViewerModal } from '@/components/renter/discover/features/VirtualTourViewerModal';
 import { PropertyGallery } from '@/components/renter/property-detail/PropertyGallery';
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';

@@ -11,7 +11,7 @@ import {
   DollarSign,
   TrendingUp,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { RenewalOffer } from '@/types/lease';
 
 interface Lease {

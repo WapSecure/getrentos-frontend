@@ -1,7 +1,7 @@
 'use client';
 
 import { MessageCircle, Mail, Phone, Clock, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const HelpSupport = () => {
   return (

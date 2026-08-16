@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { TimePicker } from '@/components/ui/TimePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
+import { TimePicker } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';

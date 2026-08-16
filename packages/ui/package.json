@@ -11,15 +11,41 @@
       "types": "./src/index.ts"
     },
     "./styles": {
-      "import": "./src/styles/index.css"
+      "style": "./src/styles/index.css",
+      "import": "./src/styles/index.css",
+      "default": "./src/styles/index.css"
     }
   },
   "scripts": {
     "build": "echo 'No build step yet'",
-    "dev": "echo 'No dev step yet'"
+    "dev": "echo 'No dev step yet'",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "peerDependencies": {
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@getrentos/shared": "workspace:*",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-dropdown-menu": "^2.1.24",
+    "@radix-ui/react-popover": "^1.1.23",
+    "@radix-ui/react-tabs": "^1.1.21",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.468.0",
+    "next-themes": "^0.4.6"
   },
   "devDependencies": {
+    "@getrentos/eslint-config": "workspace:*",
     "@getrentos/typescript-config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "next": "16.0.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "typescript": "^5.4.5"
   }
 }

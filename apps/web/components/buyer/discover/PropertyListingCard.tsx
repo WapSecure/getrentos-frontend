@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { MapPin, BedDouble, Bath, Ruler, Heart, ShieldCheck, Building2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';
 

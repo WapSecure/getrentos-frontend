@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -9,7 +9,7 @@ import { Plus, Search, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import type { RealtorClient, RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';

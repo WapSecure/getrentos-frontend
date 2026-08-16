@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 export const Textarea = forwardRef<
   HTMLTextAreaElement,

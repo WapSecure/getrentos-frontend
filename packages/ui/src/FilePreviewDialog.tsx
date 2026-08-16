@@ -1,9 +1,9 @@
 'use client';
 
 import { Download } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
-import { FilePreview } from '@/components/ui/FilePreview';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from './Dialog';
+import { FilePreview } from './FilePreview';
+import { Button } from './Button';
 
 interface FilePreviewDialogProps {
   open: boolean;

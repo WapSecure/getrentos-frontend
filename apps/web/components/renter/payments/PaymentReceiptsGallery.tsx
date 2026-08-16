@@ -1,12 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Search, Calendar, Filter, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { FilePreviewDialog } from '@/components/ui/FilePreviewDialog';
+import { Button } from '@getrentos/ui';
+import { FilePreviewDialog } from '@getrentos/ui';
 
 interface Receipt {
   id: string;

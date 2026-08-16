@@ -1,15 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import {
-  DocumentUploadDialog,
-  type UploadedDocumentData,
-} from '@/components/ui/DocumentUploadDialog';
-import { DocumentRowActions } from '@/components/ui/DocumentRowActions';
+import { Button } from '@getrentos/ui';
+import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
+import { DocumentRowActions } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { buyerService } from '@/services/buyerService';

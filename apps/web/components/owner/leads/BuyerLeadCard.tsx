@@ -9,7 +9,7 @@ import {
   Handshake,
   UserPlus,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
 

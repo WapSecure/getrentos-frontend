@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Users, UserPlus } from 'lucide-react';
 import { RoommateCard } from './RoommateCard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 interface Roommate {
   id: string;

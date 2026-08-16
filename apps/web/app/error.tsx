@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { RefreshCcw, Home, AlertTriangle } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { Button } from '@/components/ui/Button';
-import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
+import { Button } from '@getrentos/ui';
+import { AnimatedParticles } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function Error({

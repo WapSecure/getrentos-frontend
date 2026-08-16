@@ -1,13 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat, Search } from 'lucide-react';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
 import { AddVendorModal } from '@/components/landlord/vendors/AddVendorModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

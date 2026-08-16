@@ -1,14 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Fingerprint, CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { ToastVariant } from '@/components/ui/Toast';
+import { Button } from '@getrentos/ui';
+import { ToastVariant } from '@getrentos/ui';
 import { authService } from '@/services/authService';
 
 const magicLinkSchema = z.object({

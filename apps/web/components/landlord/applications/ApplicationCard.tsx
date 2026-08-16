@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import type { RentalApplication } from '@/types/landlord';
 

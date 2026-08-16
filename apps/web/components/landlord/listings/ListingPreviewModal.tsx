@@ -1,7 +1,7 @@
 'use client';
 
 import { Megaphone, MapPin, PawPrint, Sofa, CalendarClock, Check, Zap } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
+import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing } from '@/types/landlord';
 

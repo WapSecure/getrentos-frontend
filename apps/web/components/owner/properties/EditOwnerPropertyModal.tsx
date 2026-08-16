@@ -1,10 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import type { OwnerProperty } from '@/types/owner';
 
 type OwnerPropertyUpdates = Pick<

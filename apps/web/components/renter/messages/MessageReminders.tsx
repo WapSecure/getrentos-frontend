@@ -1,12 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { TimePicker } from '@/components/ui/TimePicker';
+import { Button } from '@getrentos/ui';
+import { DatePicker } from '@getrentos/ui';
+import { TimePicker } from '@getrentos/ui';
 
 interface Reminder {
   id: string;

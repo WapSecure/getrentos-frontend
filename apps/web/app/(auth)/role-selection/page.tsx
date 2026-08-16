@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
 import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { ROLES, ROUTES } from '@/lib/constants/auth';
 

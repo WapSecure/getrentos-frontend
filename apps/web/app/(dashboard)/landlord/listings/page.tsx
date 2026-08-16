@@ -6,7 +6,7 @@ import { Plus, Megaphone } from 'lucide-react';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
 import { CreateListingModal } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

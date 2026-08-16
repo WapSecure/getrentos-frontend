@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorLead, LeadStage } from '@/types/realtor';
 

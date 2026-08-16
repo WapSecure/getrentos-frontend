@@ -11,7 +11,7 @@ import { RecentlyViewed } from '@/components/renter/saved/RecentlyViewed';
 import { SavedRecommendations } from '@/components/renter/saved/SavedRecommendations';
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
-import { Toast } from '@/components/ui/Toast';
+import { Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

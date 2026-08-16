@@ -1,7 +1,7 @@
 'use client';
 
 import { Zap, ShieldCheck, Clock, TrendingUp, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { getFinancingPlanOptions, MIN_TRUST_SCORE_FOR_FINANCING } from '@/lib/financing';
 

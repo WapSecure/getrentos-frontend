@@ -1,14 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { Button } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { Select } from '@getrentos/ui';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -178,18 +178,17 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
 
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Document Type">
-                    <Select
-                      value={type}
-                      onValueChange={setType}
-                      options={documentTypes}
-                    />
+                    <Select value={type} onValueChange={setType} options={documentTypes} />
                   </Field>
 
                   <Field label="Category">
                     <Select
                       value={category}
                       onValueChange={setCategory}
-                      options={categories.map((categoryOption) => ({ value: categoryOption, label: categoryOption }))}
+                      options={categories.map((categoryOption) => ({
+                        value: categoryOption,
+                        label: categoryOption,
+                      }))}
                     />
                   </Field>
                 </div>

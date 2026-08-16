@@ -7,8 +7,8 @@ import { EmailSignup } from '@/components/auth/SignupForm/EmailSignup';
 import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
-import { AnimatedParticles } from '@/components/ui/AnimatedParticles';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AnimatedParticles } from '@getrentos/ui';
+import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
 

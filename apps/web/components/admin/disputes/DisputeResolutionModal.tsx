@@ -1,11 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Send } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
 import { cn } from '@/lib/cn';
 import { formatCurrency } from '@/lib/format';
 import type { Dispute, DisputeMessage } from '@/types/admin';

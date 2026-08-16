@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
-import { TableSkeleton } from '@/components/ui/Skeleton';
+import { cn } from '@getrentos/shared';
+import { TableSkeleton } from './Skeleton';
 
 export interface Column<T> {
   key: string;

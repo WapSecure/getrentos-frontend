@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { MessageCircle, FileCheck, ShieldCheck, Home } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatDate, getInitials } from '@/lib/format';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';

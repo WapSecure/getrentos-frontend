@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { KeyRound, RefreshCw } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { AdminStaffMember } from '@/types/admin';

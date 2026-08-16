@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 

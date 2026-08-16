@@ -11,7 +11,7 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { OfflineSyncItem } from '@/types/agent';
 

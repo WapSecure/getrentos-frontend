@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Button } from '../ui/Button';
+import { Button } from '@getrentos/ui';
 import { ArrowRight } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 

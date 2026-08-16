@@ -1,13 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
 import { ROIComparisonChart } from '@/components/owner/analytics/ROIComparisonChart';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

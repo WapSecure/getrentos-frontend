@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Download, FileText, Maximize2, Minus, Plus, RotateCw } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 interface FilePreviewProps {
   url: string;

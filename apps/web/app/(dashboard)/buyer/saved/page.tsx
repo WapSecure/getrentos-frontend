@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Heart } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

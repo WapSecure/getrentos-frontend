@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 export type BadgeVariant = 'success' | 'warning' | 'danger' | 'neutral' | 'info';
 

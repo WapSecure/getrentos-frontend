@@ -1,15 +1,15 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
-import { Textarea } from '@/components/ui/Textarea';
+import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, Image as ImageIcon, Video } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
-import { Select } from '@/components/ui/Select';
+import { Select } from '@getrentos/ui';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
 
 interface CreateSaleListingModalProps {
@@ -168,7 +168,10 @@ export const CreateSaleListingModal = ({
                           value={form.propertyId}
                           onValueChange={(value) => update('propertyId', value)}
                           placeholder="Select a verified property"
-                          options={verifiedProperties.map((property) => ({ value: property.id, label: property.name }))}
+                          options={verifiedProperties.map((property) => ({
+                            value: property.id,
+                            label: property.name,
+                          }))}
                         />
                       </div>
 

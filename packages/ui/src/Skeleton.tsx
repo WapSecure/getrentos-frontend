@@ -1,7 +1,14 @@
-import { cn } from '@/lib/cn';
+import { cn } from '@getrentos/shared';
 
 export const Skeleton = ({ className }: { className?: string }) => {
-  return <div className={cn('animate-pulse rounded-lg bg-gradient-to-r from-muted via-secondary to-muted bg-[length:200%_100%]', className)} />;
+  return (
+    <div
+      className={cn(
+        'animate-pulse rounded-lg bg-gradient-to-r from-muted via-secondary to-muted bg-[length:200%_100%]',
+        className
+      )}
+    />
+  );
 };
 
 export const PageLoadingState = () => {

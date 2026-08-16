@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@/components/ui/LegacyInput';
+import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X, Wifi, WifiOff } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ThemeToggle } from '@getrentos/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';

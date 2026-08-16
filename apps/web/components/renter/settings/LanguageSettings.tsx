@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Globe, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@getrentos/ui';
 
 export const LanguageSettings = () => {
   const [language, setLanguage] = useState('en');
