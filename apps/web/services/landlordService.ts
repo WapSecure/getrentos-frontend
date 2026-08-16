@@ -39,6 +39,15 @@ export interface FinancialChartPoint {
   expenses: number;
 }
 
+export type ChargeCategory = 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY';
+
+export type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+
+export interface BulkChargeResult {
+  created: number;
+  skipped: { unitId: string; reason: string }[];
+}
+
 export type ExpenseCategory =
   | 'UTILITIES'
   | 'INSURANCE'
@@ -327,6 +336,18 @@ export const landlordService = {
 
   async getRentCollectionStats(): Promise<ApiResponse<RentCollectionStats>> {
     return safeCall(() => authFetch('/landlord/payments/stats'));
+  },
+
+  async bulkCharge(data: {
+    unitIds: string[];
+    category: ChargeCategory;
+    amount: number;
+    dueDate: string;
+    billingCycle: BillingCycle;
+  }): Promise<ApiResponse<BulkChargeResult>> {
+    return safeCall(() =>
+      authFetch('/landlord/payments/bulk-charge', { method: 'POST', body: JSON.stringify(data) })
+    );
   },
 
   // ---- Financials ----

@@ -7,9 +7,10 @@ import { LegacySelect } from '@getrentos/ui';
 import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Receipt, Search } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
+import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
 import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -32,6 +33,7 @@ function LandlordUnitsPageContent() {
     searchParams.get('property') || 'all'
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isBulkChargeOpen, setIsBulkChargeOpen] = useState(false);
 
   const { data: properties = [] } = useQuery({
     queryKey: landlordKeys.properties,
@@ -97,15 +99,26 @@ function LandlordUnitsPageContent() {
             {properties.length === 1 ? 'y' : 'ies'}
           </p>
         </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => setIsAddModalOpen(true)}
-          disabled={properties.length === 0}
-        >
-          <Plus className="w-4 h-4" />
-          Add Unit
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => setIsBulkChargeOpen(true)}
+            disabled={units.length === 0}
+          >
+            <Receipt className="w-4 h-4" />
+            Bulk charge
+          </Button>
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => setIsAddModalOpen(true)}
+            disabled={properties.length === 0}
+          >
+            <Plus className="w-4 h-4" />
+            Add Unit
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -145,6 +158,13 @@ function LandlordUnitsPageContent() {
         properties={properties}
         defaultPropertyId={propertyFilter !== 'all' ? propertyFilter : undefined}
         onSave={handleAddUnit}
+      />
+
+      <BulkChargeModal
+        isOpen={isBulkChargeOpen}
+        onClose={() => setIsBulkChargeOpen(false)}
+        units={units}
+        properties={properties}
       />
     </>
   );
