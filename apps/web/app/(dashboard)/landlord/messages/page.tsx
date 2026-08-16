@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
   ConversationList,
@@ -9,6 +9,7 @@ import {
 import { MessageThread, type ThreadMessage } from '@/components/landlord/messages/MessageThread';
 import { cn } from '@/lib/cn';
 import { landlordService } from '@/services/landlordService';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 
 export default function LandlordMessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -18,16 +19,22 @@ export default function LandlordMessagesPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchConversations = async () => {
-      const response = await landlordService.listConversations();
-      if (response.success && response.data) {
-        setConversations(response.data);
-      }
-    };
-
-    fetchConversations();
+  const loadConversations = useCallback(async () => {
+    const response = await landlordService.listConversations();
+    if (response.success && response.data) {
+      setConversations(response.data);
+    }
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadConversations();
+  }, [loadConversations]);
+
+  // Real-time: refresh the conversation list when either side sends a message.
+  useRealtimeEvent('conversation:update', () => {
+    loadConversations();
+  });
 
   useEffect(() => {
     if (!activeId) return;

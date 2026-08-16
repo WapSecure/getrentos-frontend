@@ -39,6 +39,15 @@ export interface FinancialChartPoint {
   expenses: number;
 }
 
+export type ChargeCategory = 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY';
+
+export type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+
+export interface BulkChargeResult {
+  created: number;
+  skipped: { unitId: string; reason: string }[];
+}
+
 export type ExpenseCategory =
   | 'UTILITIES'
   | 'INSURANCE'
@@ -329,6 +338,18 @@ export const landlordService = {
     return safeCall(() => authFetch('/landlord/payments/stats'));
   },
 
+  async bulkCharge(data: {
+    unitIds: string[];
+    category: ChargeCategory;
+    amount: number;
+    dueDate: string;
+    billingCycle: BillingCycle;
+  }): Promise<ApiResponse<BulkChargeResult>> {
+    return safeCall(() =>
+      authFetch('/landlord/payments/bulk-charge', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
   // ---- Financials ----
   async getFinancialStats(period: string): Promise<ApiResponse<FinancialStats>> {
     return safeCall(() => authFetch(`/landlord/financials/stats${toQuery({ period })}`));
@@ -526,6 +547,18 @@ export const landlordService = {
   async markConversationRead(conversationId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/landlord/messages/conversations/${conversationId}/read`, { method: 'PATCH' })
+    );
+  },
+
+  async startConversation(
+    participantId: string,
+    propertyId?: string
+  ): Promise<ApiResponse<Conversation>> {
+    return safeCall(() =>
+      authFetch('/landlord/messages/conversations', {
+        method: 'POST',
+        body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
+      })
     );
   },
 
