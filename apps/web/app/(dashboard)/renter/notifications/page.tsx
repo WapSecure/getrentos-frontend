@@ -14,6 +14,7 @@ import { NotificationSound } from '@/components/renter/notifications/Notificatio
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
@@ -27,6 +28,11 @@ export default function NotificationsPage() {
 
   const invalidateNotifications = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
+
+  // Real-time: refresh the list when the backend pushes a new notification.
+  useRealtimeEvent('notification:new', () => {
+    invalidateNotifications();
+  });
 
   const markAsReadMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useTheme } from 'next-themes';
 import { Palette, Moon, Sun, Monitor, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
 
 export const ThemeSettings = () => {
-  const [theme, setTheme] = useState('system');
+  const { theme, setTheme } = useTheme();
 
   const themes = [
     { id: 'light', label: 'Light', icon: Sun },
@@ -51,10 +50,6 @@ export const ThemeSettings = () => {
           💡 Changes will be applied immediately to your browsing experience.
         </p>
       </div>
-
-      <Button variant="primary" className="mt-4">
-        Save Theme
-      </Button>
     </div>
   );
 };

@@ -6,10 +6,11 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import type { OwnerProperty } from '@/types/owner';
+import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
 
 type OwnerPropertyUpdates = Pick<
   OwnerProperty,
-  'name' | 'propertyType' | 'address' | 'city' | 'state' | 'estimatedValue'
+  'name' | 'propertyType' | 'address' | 'city' | 'state' | 'country' | 'estimatedValue'
 >;
 
 interface EditOwnerPropertyModalProps {
@@ -53,6 +54,7 @@ const EditOwnerPropertyForm = ({
   const [address, setAddress] = useState(property.address);
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
+  const [country, setCountry] = useState(property.country ?? 'Nigeria');
   const [estimatedValue, setEstimatedValue] = useState(String(property.estimatedValue));
 
   const handleSave = () => {
@@ -62,6 +64,7 @@ const EditOwnerPropertyForm = ({
       address,
       city,
       state,
+      country,
       estimatedValue: Number(estimatedValue) || property.estimatedValue,
     });
     onClose();
@@ -108,26 +111,22 @@ const EditOwnerPropertyForm = ({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">City</label>
-            <LegacyInput
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">State</label>
-            <LegacyInput
-              type="text"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">City</label>
+          <LegacyInput
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
+
+        <CountryStateFields
+          country={country}
+          state={state}
+          onCountryChange={setCountry}
+          onStateChange={setState}
+        />
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">

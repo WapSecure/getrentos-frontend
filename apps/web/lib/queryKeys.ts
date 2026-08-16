@@ -73,6 +73,7 @@ export const renterKeys = {
   recommendations: ['renter', 'recommendations'] as const,
   applicationAssistant: ['renter', 'applicationAssistant'] as const,
   savedSearches: ['renter', 'savedSearches'] as const,
+  settingsPreferences: ['renter', 'settings', 'preferences'] as const,
   profile: ['renter', 'profile'] as const,
 };
 

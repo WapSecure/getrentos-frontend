@@ -13,6 +13,7 @@ import { LeaseSummaryCard } from '@/components/renter/lease/LeaseSummaryCard';
 import { RentIncreaseHistory } from '@/components/renter/lease/RentIncreaseHistory';
 import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaymentReminders';
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
+import { EmptyState } from '@getrentos/ui';
 import { FileText } from 'lucide-react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -63,15 +64,11 @@ export default function LeasePage() {
 
   if (!lease) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center">
-          <FileText className="w-8 h-8 text-muted-foreground" />
-        </div>
-        <h2 className="text-2xl font-bold text-foreground">No Active Lease</h2>
-        <p className="text-muted-foreground mt-2">
-          You don&apos;t have an active lease agreement at the moment.
-        </p>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No Active Lease"
+        description="You don't have an active lease agreement at the moment."
+      />
     );
   }
 

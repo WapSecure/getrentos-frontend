@@ -7,12 +7,13 @@ import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp, Loader2 } from '
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import { Toast, ToastVariant, FilePreviewDialog } from '@getrentos/ui';
 
 export const DocumentChecklist = () => {
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(true);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ url: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: documents = [], isLoading } = useQuery({
@@ -83,12 +84,15 @@ export const DocumentChecklist = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary"
+                    onClick={() => setPreviewDoc({ url: doc.url, name: doc.name })}
+                    className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary cursor-pointer"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-sm text-foreground truncate">{doc.name}</p>
+                        <p className="text-sm text-foreground truncate hover:text-primary">
+                          {doc.name}
+                        </p>
                         <p className="text-xs text-gray-500">
                           {doc.category} · {doc.size}
                         </p>
@@ -120,6 +124,12 @@ export const DocumentChecklist = () => {
           </div>
         )}
       </motion.div>
+
+      <FilePreviewDialog
+        open={previewDoc !== null}
+        onOpenChange={(open) => !open && setPreviewDoc(null)}
+        file={previewDoc}
+      />
     </>
   );
 };

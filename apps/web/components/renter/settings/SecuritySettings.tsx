@@ -1,15 +1,57 @@
 'use client';
 
-import { useState } from 'react';
-import { Shield, Fingerprint, Smartphone, Key, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Shield, Fingerprint } from 'lucide-react';
+import { Button, Toast, ToastVariant } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+
+interface SecurityState {
+  twoFactorEnabled: boolean;
+  biometricEnabled: boolean;
+}
 
 export const SecuritySettings = () => {
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const queryClient = useQueryClient();
+  const [security, setSecurity] = useState<SecurityState>({
+    twoFactorEnabled: false,
+    biometricEnabled: false,
+  });
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data } = useQuery({
+    queryKey: renterKeys.settingsPreferences,
+    queryFn: () => unwrap(renterService.getSettingsPreferences()),
+  });
+
+  useEffect(() => {
+    const saved = data?.security as Partial<SecurityState> | undefined;
+    if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSecurity((prev) => ({ ...prev, ...saved }));
+    }
+  }, [data]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => unwrap(renterService.updateSettingsPreferences({ security })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.settingsPreferences });
+      setToast({ message: 'Security settings saved', variant: 'success' });
+    },
+    onError: (err: Error) =>
+      setToast({ message: err.message || 'Failed to save security settings', variant: 'error' }),
+  });
+
+  const toggle = (key: keyof SecurityState) =>
+    setSecurity((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Security Settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage your account security and authentication methods
@@ -31,37 +73,18 @@ export const SecuritySettings = () => {
               </div>
             </div>
             <button
-              onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
+              onClick={() => toggle('twoFactorEnabled')}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                twoFactorEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+                security.twoFactorEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
+                  security.twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
           </div>
-          {twoFactorEnabled && (
-            <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-3">Choose your 2FA method:</p>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Key className="w-4 h-4" />
-                  Authenticator App
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Smartphone className="w-4 h-4" />
-                  SMS
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Fingerprint className="w-4 h-4" />
-                  Biometric
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Biometric Authentication */}
@@ -77,84 +100,29 @@ export const SecuritySettings = () => {
               </div>
             </div>
             <button
-              onClick={() => setBiometricEnabled(!biometricEnabled)}
+              onClick={() => toggle('biometricEnabled')}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                biometricEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+                security.biometricEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  biometricEnabled ? 'translate-x-6' : 'translate-x-1'
+                  security.biometricEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
           </div>
         </div>
 
-        {/* Session Management */}
-        <div className="p-4 rounded-lg border border-border">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
-              <Clock className="w-5 h-5 text-yellow-600" />
-            </div>
-            <div>
-              <h3 className="font-medium text-foreground">Active Sessions</h3>
-              <p className="text-sm text-muted-foreground">Manage your active sessions</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-              <div>
-                <p className="text-sm font-medium text-foreground">Chrome on MacOS</p>
-                <p className="text-xs text-gray-500">Current session • 2024-06-18 10:30</p>
-              </div>
-              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
-                Terminate
-              </Button>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-              <div>
-                <p className="text-sm font-medium text-foreground">Safari on iPhone</p>
-                <p className="text-xs text-gray-500">2024-06-17 14:20</p>
-              </div>
-              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
-                Terminate
-              </Button>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" className="mt-3 text-red-500 hover:text-red-700">
-            Terminate All Sessions
-          </Button>
-        </div>
-
-        {/* Login History */}
-        <div className="p-4 rounded-lg border border-border">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-              <AlertCircle className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-medium text-foreground">Recent Login Activity</h3>
-              <p className="text-sm text-muted-foreground">Monitor account access</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-              <div>
-                <p className="text-sm font-medium text-foreground">Successful login</p>
-                <p className="text-xs text-gray-500">2024-06-18 10:30 • Chrome on MacOS</p>
-              </div>
-              <span className="text-xs text-green-600">✅</span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5">
-              <div>
-                <p className="text-sm font-medium text-foreground">Successful login</p>
-                <p className="text-xs text-gray-500">2024-06-17 14:20 • Safari on iPhone</p>
-              </div>
-              <span className="text-xs text-green-600">✅</span>
-            </div>
-          </div>
-        </div>
+        <Button
+          variant="primary"
+          className="w-full"
+          onClick={() => saveMutation.mutate()}
+          isLoading={saveMutation.isPending}
+          disabled={saveMutation.isPending}
+        >
+          Save Security Settings
+        </Button>
       </div>
     </div>
   );

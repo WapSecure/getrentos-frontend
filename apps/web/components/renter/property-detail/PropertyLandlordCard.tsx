@@ -1,10 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Mail, Phone, Clock, Star, Shield, MessageCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import type { Property } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface PropertyLandlordCardProps {
   property: Property;
@@ -12,7 +16,25 @@ interface PropertyLandlordCardProps {
 
 export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const name = property.landlordName || 'GetRentos Landlord';
+
+  const startConversationMutation = useMutation({
+    mutationFn: (landlordId: string) =>
+      unwrap(renterService.startConversation(landlordId, property.id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.conversations });
+      router.push(ROUTES.RENTER_MESSAGES);
+    },
+  });
+
+  const handleMessage = () => {
+    if (property.landlordId) {
+      startConversationMutation.mutate(property.landlordId);
+    } else {
+      router.push(ROUTES.RENTER_MESSAGES);
+    }
+  };
 
   return (
     <div className="bg-card border border-border rounded-xl p-4">
@@ -59,7 +81,9 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         size="sm"
         fullWidth
         className="gap-2 mt-4"
-        onClick={() => router.push(ROUTES.RENTER_MESSAGES)}
+        onClick={handleMessage}
+        isLoading={startConversationMutation.isPending}
+        disabled={startConversationMutation.isPending}
       >
         <MessageCircle className="w-4 h-4" />
         Message Landlord

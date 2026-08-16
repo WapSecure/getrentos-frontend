@@ -9,6 +9,7 @@ import { Button } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
+import { FilePreviewDialog } from '@getrentos/ui';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -49,6 +50,20 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
+  const [preview, setPreview] = useState<{ url: string; name: string; mimeType: string } | null>(
+    null
+  );
+
+  const handlePreview = () => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setPreview({ url, name: file.name, mimeType: file.type });
+  };
+
+  const closePreview = () => {
+    if (preview) URL.revokeObjectURL(preview.url);
+    setPreview(null);
+  };
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -143,12 +158,20 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     <p className="text-xs text-gray-500">
                       {(file.size / (1024 * 1024)).toFixed(2)} MB
                     </p>
-                    <button
-                      onClick={() => setFile(null)}
-                      className="text-xs text-red-500 hover:text-red-600"
-                    >
-                      Remove
-                    </button>
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={handlePreview}
+                        className="text-xs text-primary hover:text-primary-hover"
+                      >
+                        Preview
+                      </button>
+                      <button
+                        onClick={() => setFile(null)}
+                        className="text-xs text-red-500 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>
@@ -232,6 +255,12 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
           </motion.div>
         </div>
       )}
+
+      <FilePreviewDialog
+        open={preview !== null}
+        onOpenChange={(open) => !open && closePreview()}
+        file={preview}
+      />
     </AnimatePresence>
   );
 };

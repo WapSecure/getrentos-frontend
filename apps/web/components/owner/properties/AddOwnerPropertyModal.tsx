@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
+import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
 import type { OwnerProperty } from '@/types/owner';
 
 interface AddOwnerPropertyModalProps {
@@ -206,30 +207,24 @@ export const AddOwnerPropertyModal = ({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <LegacyInput
-                        type="text"
-                        value={form.city}
-                        onChange={(e) => update('city', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        State <span className="text-red-500">*</span>
-                      </label>
-                      <LegacyInput
-                        type="text"
-                        value={form.state}
-                        onChange={(e) => update('state', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <LegacyInput
+                      type="text"
+                      value={form.city}
+                      onChange={(e) => update('city', e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
                   </div>
+
+                  <CountryStateFields
+                    country={form.country}
+                    state={form.state}
+                    onCountryChange={(c) => update('country', c)}
+                    onStateChange={(s) => update('state', s)}
+                  />
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>

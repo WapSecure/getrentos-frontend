@@ -17,6 +17,7 @@ import { Conversation, Message, FilterState } from '@/types/messages';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 
 export default function MessagesPage() {
   const user = useRenterUser();
@@ -40,6 +41,12 @@ export default function MessagesPage() {
     queryClient.invalidateQueries({ queryKey: renterKeys.conversations });
   const invalidateReminders = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.reminders });
+
+  // Real-time: refresh the conversation list whenever either participant
+  // sends a message or starts a conversation (pushed over the WebSocket).
+  useRealtimeEvent('conversation:update', () => {
+    invalidateConversations();
+  });
 
   const sendMessageMutation = useMutation({
     mutationFn: ({

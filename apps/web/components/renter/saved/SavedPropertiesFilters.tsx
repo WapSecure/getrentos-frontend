@@ -2,7 +2,7 @@
 
 import { LegacySelect } from '@getrentos/ui';
 
-import { LayoutGrid, List, ChevronDown } from 'lucide-react';
+import { LayoutGrid, List } from 'lucide-react';
 
 interface SavedPropertiesFiltersProps {
   viewMode: 'grid' | 'list';
@@ -53,22 +53,19 @@ export const SavedPropertiesFilters = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative">
-          <LegacySelect
-            value={sortBy}
-            onChange={(e) =>
-              setSortBy(e.target.value as 'recent' | 'price-low' | 'price-high' | 'rating')
-            }
-            className="appearance-none px-4 py-1.5 pr-8 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </LegacySelect>
-          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-        </div>
+        <LegacySelect
+          value={sortBy}
+          onChange={(e) =>
+            setSortBy(e.target.value as 'recent' | 'price-low' | 'price-high' | 'rating')
+          }
+          className="px-4 py-1.5 text-sm cursor-pointer"
+        >
+          {sortOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </LegacySelect>
 
         {/* View Toggle */}
         <div className="flex gap-1 p-1 bg-secondary rounded-lg">

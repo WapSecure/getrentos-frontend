@@ -1,21 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { Globe, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export const LanguageSettings = () => {
-  const [language, setLanguage] = useState('en');
+  const { language, setLanguage } = useLanguage();
 
   const languages = [
     { id: 'en', label: 'English', native: 'English' },
-    { id: 'es', label: 'Spanish', native: 'Español' },
-    { id: 'fr', label: 'French', native: 'Français' },
-    { id: 'de', label: 'German', native: 'Deutsch' },
-    { id: 'pt', label: 'Portuguese', native: 'Português' },
-    { id: 'zh', label: 'Chinese', native: '中文' },
-    { id: 'ja', label: 'Japanese', native: '日本語' },
-    { id: 'ar', label: 'Arabic', native: 'العربية' },
+    { id: 'pcm', label: 'Nigerian Pidgin', native: 'Pidgin' },
   ];
 
   return (
@@ -31,7 +24,7 @@ export const LanguageSettings = () => {
           return (
             <button
               key={lang.id}
-              onClick={() => setLanguage(lang.id)}
+              onClick={() => setLanguage(lang.id as 'en' | 'pcm')}
               className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${
                 isSelected ? 'border-primary bg-accent' : 'border-border hover:border-gray-300'
               }`}
@@ -52,10 +45,6 @@ export const LanguageSettings = () => {
           );
         })}
       </div>
-
-      <Button variant="primary" className="mt-4">
-        Save Language
-      </Button>
     </div>
   );
 };

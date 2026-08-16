@@ -508,6 +508,18 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/messages'));
   },
 
+  async startConversation(
+    participantId: string,
+    propertyId?: string
+  ): Promise<ApiResponse<Conversation>> {
+    return safeCall(() =>
+      authFetch('/renter/messages', {
+        method: 'POST',
+        body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
+      })
+    );
+  },
+
   async sendMessage(
     conversationId: string,
     text: string,
@@ -750,6 +762,21 @@ export const renterService = {
       authFetch('/renter/settings/password', {
         method: 'PUT',
         body: JSON.stringify({ currentPassword, newPassword }),
+      })
+    );
+  },
+
+  async getSettingsPreferences(): Promise<ApiResponse<Record<string, unknown>>> {
+    return safeCall(() => authFetch('/renter/settings/preferences'));
+  },
+
+  async updateSettingsPreferences(
+    preferences: Record<string, unknown>
+  ): Promise<ApiResponse<Record<string, unknown>>> {
+    return safeCall(() =>
+      authFetch('/renter/settings/preferences', {
+        method: 'PUT',
+        body: JSON.stringify(preferences),
       })
     );
   },

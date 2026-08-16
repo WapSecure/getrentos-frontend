@@ -1,17 +1,55 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, User, Users, Globe, Lock, Phone } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Toast, ToastVariant } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+
+interface PrivacyState {
+  profileVisibility: 'public' | 'private' | 'contacts';
+  showEmail: boolean;
+  showPhone: boolean;
+  showActivity: boolean;
+  allowMessages: boolean;
+  shareData: boolean;
+}
 
 export const PrivacySettings = () => {
-  const [privacy, setPrivacy] = useState({
+  const queryClient = useQueryClient();
+  const [privacy, setPrivacy] = useState<PrivacyState>({
     profileVisibility: 'public',
     showEmail: false,
     showPhone: false,
     showActivity: true,
     allowMessages: true,
     shareData: false,
+  });
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data } = useQuery({
+    queryKey: renterKeys.settingsPreferences,
+    queryFn: () => unwrap(renterService.getSettingsPreferences()),
+  });
+
+  useEffect(() => {
+    const saved = data?.privacy as Partial<PrivacyState> | undefined;
+    if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPrivacy((prev) => ({ ...prev, ...saved }));
+    }
+  }, [data]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => unwrap(renterService.updateSettingsPreferences({ privacy })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.settingsPreferences });
+      setToast({ message: 'Privacy settings saved', variant: 'success' });
+    },
+    onError: (err: Error) =>
+      setToast({ message: err.message || 'Failed to save privacy settings', variant: 'error' }),
   });
 
   const visibilityOptions = [
@@ -22,6 +60,9 @@ export const PrivacySettings = () => {
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Privacy Settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Control who can see your information and activity
@@ -39,7 +80,12 @@ export const PrivacySettings = () => {
               return (
                 <button
                   key={option.id}
-                  onClick={() => setPrivacy({ ...privacy, profileVisibility: option.id })}
+                  onClick={() =>
+                    setPrivacy({
+                      ...privacy,
+                      profileVisibility: option.id as PrivacyState['profileVisibility'],
+                    })
+                  }
                   className={`p-3 rounded-lg border-2 transition-all ${
                     isSelected ? 'border-primary bg-accent' : 'border-border hover:border-gray-300'
                   }`}
@@ -119,7 +165,13 @@ export const PrivacySettings = () => {
           </div>
         </div>
 
-        <Button variant="primary" className="w-full">
+        <Button
+          variant="primary"
+          className="w-full"
+          onClick={() => saveMutation.mutate()}
+          isLoading={saveMutation.isPending}
+          disabled={saveMutation.isPending}
+        >
           Save Privacy Settings
         </Button>
       </div>

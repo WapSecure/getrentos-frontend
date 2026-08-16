@@ -43,6 +43,7 @@ export interface Property {
   landlordVerified?: boolean;
   description?: string;
   amenities?: string[];
+  landlordId?: string;
   landlordName?: string;
   landlordEmail?: string;
   landlordPhone?: string;
