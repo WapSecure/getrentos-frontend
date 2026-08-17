@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import { FileCheck, Download, RefreshCcw, Send } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
+import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { leaseStatusBadges } from '@/lib/statusBadge';
+import { landlordService } from '@/services/landlordService';
 import type { Lease } from '@/types/landlord';
 
 const daysUntil = (dateString: string) => {
@@ -23,28 +25,17 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
   const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
+  const [downloading, setDownloading] = useState(false);
 
-  const handleDownload = () => {
-    const lines = [
-      `Lease Agreement`,
-      `Property: ${lease.propertyName} — ${lease.unitName}`,
-      `Tenant: ${lease.tenantName}`,
-      `Lease Start: ${formatDate(lease.leaseStart)}`,
-      `Lease End: ${formatDate(lease.leaseEnd)}`,
-      `Rent Amount: ${formatCurrency(lease.rentAmount)}`,
-      lease.securityDeposit !== undefined
-        ? `Security Deposit: ${formatCurrency(lease.securityDeposit)}`
-        : undefined,
-      `Status: ${status.label}`,
-    ].filter(Boolean);
-
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `lease-${lease.propertyName}-${lease.unitName}.txt`.replace(/\s+/g, '-');
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      await landlordService.downloadLeasePdf(lease.id);
+    } catch {
+      // swallow — the service surfaces the error via safeCall already
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -110,10 +101,11 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
               size="sm"
               fullWidth
               className="gap-1.5"
+              disabled={downloading}
               onClick={handleDownload}
             >
               <Download className="w-3.5 h-3.5" />
-              Download
+              {downloading ? 'Downloading…' : 'Download'}
             </Button>
             <Button
               variant="outline"

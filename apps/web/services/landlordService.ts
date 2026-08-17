@@ -163,6 +163,35 @@ export const landlordService = {
     return safeCall(() => authFetch('/landlord/dashboard/stats'));
   },
 
+  async getDashboardActivity(): Promise<
+    ApiResponse<
+      { id: string; type: string; title: string; description: string; timestamp: string }[]
+    >
+  > {
+    return safeCall(() => authFetch('/landlord/dashboard/activity'));
+  },
+
+  async getRevenueTrend(): Promise<ApiResponse<{ label: string; value: number }[]>> {
+    return safeCall(() => authFetch('/landlord/dashboard/revenue-trend'));
+  },
+
+  // ---- Notifications feed ----
+  async getNotifications(): Promise<
+    ApiResponse<
+      { id: string; type: string; title: string; body: string; read: boolean; createdAt: string }[]
+    >
+  > {
+    return safeCall(() => authFetch('/landlord/notifications'));
+  },
+
+  async markNotificationRead(id: string): Promise<ApiResponse<{ success: boolean }>> {
+    return safeCall(() => authFetch(`/landlord/notifications/${id}/read`, { method: 'PATCH' }));
+  },
+
+  async markAllNotificationsRead(): Promise<ApiResponse<{ success: boolean }>> {
+    return safeCall(() => authFetch('/landlord/notifications/read-all', { method: 'POST' }));
+  },
+
   // ---- Properties ----
   async listProperties(
     params: {
@@ -372,6 +401,26 @@ export const landlordService = {
       const link = document.createElement('a');
       link.href = url;
       link.download = 'getrentos-financials.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
+  },
+
+  async downloadLeasePdf(id: string): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/landlord/leases/${id}/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `lease-${id}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();

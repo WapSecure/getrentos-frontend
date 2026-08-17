@@ -5,28 +5,25 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { LandlordProfileDropdown } from './LandlordProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface LandlordNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
-interface NavNotification {
-  id: number;
-  title: string;
-  message: string;
-  read: boolean;
-  time: string;
-}
-
 export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -36,30 +33,20 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
   };
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NavNotification[]>([
-    {
-      id: 1,
-      title: 'Rent payment received',
-      message: 'Adaeze Okafor paid ₦450,000 for Unit 3B',
-      read: false,
-      time: '2026-08-07T09:20:00.000Z',
-    },
-    {
-      id: 2,
-      title: 'New rental application',
-      message: 'A new application was submitted for Modern Downtown Loft',
-      read: false,
-      time: '2026-08-07T06:40:00.000Z',
-    },
-    {
-      id: 3,
-      title: 'Maintenance request assigned',
-      message: 'Plumbing issue at Sunrise Apartments assigned to vendor',
-      read: true,
-      time: '2026-08-06T09:40:00.000Z',
-    },
-  ]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { data: notifications = [] } = useQuery({
+    queryKey: landlordKeys.notifications,
+    queryFn: () => unwrap(landlordService.getNotifications()),
+  });
+
+  const markRead = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.markNotificationRead(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.notifications }),
+  });
+  const markAllRead = useMutation({
+    mutationFn: () => unwrap(landlordService.markAllNotificationsRead()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.notifications }),
+  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -69,12 +56,12 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAsRead = (id: string) => {
+    markRead.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllRead.mutate();
   };
 
   return (
@@ -169,12 +156,10 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
                                   {notification.title}
                                 </h4>
                                 <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.time)}
+                                  {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.message}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{notification.body}</p>
                             </div>
                           ))
                         )}

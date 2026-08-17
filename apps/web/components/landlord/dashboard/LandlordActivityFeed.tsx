@@ -1,48 +1,13 @@
 'use client';
 
-import { CreditCard, Wrench, CalendarClock } from 'lucide-react';
+import { CreditCard, Wrench, CalendarClock, UserPlus, Receipt } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { formatRelativeTime } from '@/lib/format';
+import { landlordService } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 
-type ActivityType = 'payment' | 'maintenance' | 'lease';
-
-interface ActivityItem {
-  id: string;
-  type: ActivityType;
-  title: string;
-  description: string;
-  time: string;
-}
-
-const activityItems: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'payment',
-    title: 'Rent payment received',
-    description: 'Adaeze Okafor paid ₦450,000 for Sunrise Apartments, Unit 3B',
-    time: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-  },
-  {
-    id: '2',
-    type: 'maintenance',
-    title: 'Maintenance request updated',
-    description: 'Plumbing repair at Modern Downtown Loft marked in progress',
-    time: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-  },
-  {
-    id: '3',
-    type: 'lease',
-    title: 'Lease expiring soon',
-    description: 'Chuka Nwosu’s lease at Palm Court Residences ends in 14 days',
-    time: new Date(Date.now() - 1000 * 60 * 60 * 9).toISOString(),
-  },
-  {
-    id: '4',
-    type: 'payment',
-    title: 'Rent payment received',
-    description: 'Ifeoma Bello paid ₦380,000 for Palm Court Residences, Unit 1A',
-    time: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-  },
-];
+type ActivityType = 'payment' | 'maintenance' | 'lease' | 'application' | 'expense';
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   payment: {
@@ -60,9 +25,41 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
     bg: 'bg-orange-50 dark:bg-orange-950/20',
     color: 'text-orange-600 dark:text-orange-400',
   },
+  application: {
+    icon: UserPlus,
+    bg: 'bg-blue-50 dark:bg-blue-950/20',
+    color: 'text-blue-600 dark:text-blue-400',
+  },
+  expense: {
+    icon: Receipt,
+    bg: 'bg-rose-50 dark:bg-rose-950/20',
+    color: 'text-rose-600 dark:text-rose-400',
+  },
+};
+
+const typeFor = (type: string): ActivityType => {
+  switch (type) {
+    case 'payment':
+      return 'payment';
+    case 'maintenance':
+      return 'maintenance';
+    case 'lease':
+      return 'lease';
+    case 'application':
+      return 'application';
+    case 'expense':
+      return 'expense';
+    default:
+      return 'payment';
+  }
 };
 
 export const LandlordActivityFeed = () => {
+  const { data: activity = [] } = useQuery({
+    queryKey: landlordKeys.dashboardActivity,
+    queryFn: () => unwrap(landlordService.getDashboardActivity()),
+  });
+
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -73,25 +70,34 @@ export const LandlordActivityFeed = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {activityItems.map((item) => {
-          const config = typeConfig[item.type];
-          const Icon = config.icon;
-          return (
-            <div
-              key={item.id}
-              className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-            >
-              <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                <Icon className={`w-4 h-4 ${config.color}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
-              </div>
+        {activity.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-muted-foreground" />
             </div>
-          );
-        })}
+            <p className="text-sm text-muted-foreground">No activity yet</p>
+          </div>
+        ) : (
+          activity.map((item) => {
+            const config = typeConfig[typeFor(item.type)];
+            const Icon = config.icon;
+            return (
+              <div
+                key={item.id}
+                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+              >
+                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
+                  <Icon className={`w-4 h-4 ${config.color}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.timestamp)}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

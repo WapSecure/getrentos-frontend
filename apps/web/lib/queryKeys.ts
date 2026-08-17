@@ -2,6 +2,9 @@ import type { RenterListingsFilters } from '@/services/renterService';
 
 export const landlordKeys = {
   dashboardStats: ['landlord', 'dashboardStats'] as const,
+  dashboardActivity: ['landlord', 'dashboardActivity'] as const,
+  revenueTrend: ['landlord', 'revenueTrend'] as const,
+  notifications: ['landlord', 'notifications'] as const,
   properties: ['landlord', 'properties'] as const,
   units: (propertyId?: string) => ['landlord', 'units', propertyId ?? 'all'] as const,
   vacantUnits: ['landlord', 'units', 'vacant'] as const,
