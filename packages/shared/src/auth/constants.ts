@@ -185,6 +185,7 @@ export const ROUTES = {
   RENTER_NOTIFICATIONS: '/renter/notifications',
   RENTER_HELP: '/renter/help',
   RENTER_HOME: '/renter/home',
+  RENTER_LEGAL_RESOURCES: '/renter/legal-resources',
 
   // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',

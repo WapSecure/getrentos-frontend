@@ -23,6 +23,7 @@ import {
   Zap,
   TrendingUp,
   Smartphone,
+  Scale,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -47,6 +48,11 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.maintenance', href: ROUTES.RENTER_MAINTENANCE, icon: Wrench },
   { labelKey: 'sidebar.messages', href: ROUTES.RENTER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.documents', href: ROUTES.RENTER_DOCUMENTS, icon: Home },
+  {
+    labelKey: 'sidebar.legal_resources',
+    href: ROUTES.RENTER_LEGAL_RESOURCES,
+    icon: Scale,
+  },
   { labelKey: 'sidebar.roommates', href: ROUTES.RENTER_ROOMMATES, icon: Users },
   { labelKey: 'sidebar.trust_score', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
   { labelKey: 'sidebar.credit_report', href: ROUTES.RENTER_CREDIT_REPORT, icon: TrendingUp },
