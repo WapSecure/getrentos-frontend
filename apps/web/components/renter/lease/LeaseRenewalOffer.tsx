@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
   Mail,
   CheckCircle,
@@ -12,6 +13,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { ROUTES } from '@/lib/constants/auth';
 import type { RenewalOffer } from '@/types/lease';
 
 interface Lease {
@@ -28,6 +30,7 @@ interface LeaseRenewalOfferProps {
 }
 
 export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenewalOfferProps) => {
+  const router = useRouter();
   const [response, setResponse] = useState<'accepted' | 'declined' | null>(
     renewalOffer.status === 'accepted'
       ? 'accepted'
@@ -36,6 +39,10 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
         : null
   );
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleContactLandlord = () => {
+    router.push(ROUTES.RENTER_MESSAGES);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -79,7 +86,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             You&apos;ve accepted the renewal offer for {lease.propertyName}. Your new lease will
             begin on {formatDate(renewalOffer.newEndDate)}.
           </p>
-          <Button variant="outline" className="mt-3 w-full gap-2">
+          <Button variant="outline" className="mt-3 w-full gap-2" onClick={handleContactLandlord}>
             <Mail className="w-4 h-4" />
             Contact Landlord
           </Button>

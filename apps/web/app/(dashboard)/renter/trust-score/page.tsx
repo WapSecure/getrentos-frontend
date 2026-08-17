@@ -25,6 +25,7 @@ export default function TrustScorePage() {
     queryFn: () => unwrap(renterService.getTrustScore()),
   });
   const trustScore = data?.trustScore ?? 0;
+  const averageScore = data?.averageScore ?? 0;
   const verifications = data?.verifications ?? [];
   const history = data?.history ?? [];
   const badges = data?.badges ?? [];
@@ -47,16 +48,16 @@ export default function TrustScorePage() {
           <VerificationList verifications={verifications} />
           <TrustScoreHistory history={history} />
           <VerificationTimeline verifications={verifications} />
-          <ScoreFactors />
+          <ScoreFactors verifications={verifications} />
         </div>
         <div className="space-y-6">
           <TrustBadges badges={badges} />
-          <ScoreForecast currentScore={trustScore} />
-          <ImprovementSuggestions />
+          <ScoreForecast currentScore={trustScore} verifications={verifications} />
+          <ImprovementSuggestions verifications={verifications} />
           <TrustScoreTips />
-          <TrustScoreComparison currentScore={trustScore} />
+          <TrustScoreComparison currentScore={trustScore} averageScore={averageScore} />
           <TrustScoreBenefits />
-          <ScoreNotifications />
+          <ScoreNotifications history={history} />
         </div>
       </div>
     </>

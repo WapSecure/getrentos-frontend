@@ -4,10 +4,10 @@ import { Users, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface TrustScoreComparisonProps {
   currentScore: number;
+  averageScore: number;
 }
 
-export const TrustScoreComparison = ({ currentScore }: TrustScoreComparisonProps) => {
-  const averageScore = 65;
+export const TrustScoreComparison = ({ currentScore, averageScore }: TrustScoreComparisonProps) => {
   const difference = currentScore - averageScore;
 
   return (

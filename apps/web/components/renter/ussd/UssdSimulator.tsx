@@ -1,9 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { PhoneCall, X, RotateCcw } from 'lucide-react';
-import { ussdScreens, USSD_CODE } from '@/lib/ussdMenu';
-import type { UssdSessionState } from '@/types/ussd';
+import { USSD_CODE } from '@/lib/ussdMenu';
+import type { UssdScreen, UssdSessionState } from '@/types/ussd';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 const KEYPAD_ROWS = [
   ['1', '2', '3'],
@@ -17,7 +21,16 @@ export const UssdSimulator = () => {
   const [path, setPath] = useState('root');
   const [history, setHistory] = useState<string[]>([]);
 
-  const currentScreen = ussdScreens[path];
+  // The menu is served by the backend and populated with the renter's real
+  // balance, property, trust score and maintenance data.
+  const { data: menu, isLoading } = useQuery({
+    queryKey: renterKeys.ussdMenu,
+    queryFn: () => unwrap(renterService.getUssdMenu()),
+  });
+
+  const screens = menu?.screens ?? {};
+  const currentScreen: UssdScreen | undefined = screens[path];
+  const ussdCode = menu?.code ?? USSD_CODE;
 
   const handleDial = () => {
     setSession('active');
@@ -60,10 +73,11 @@ export const UssdSimulator = () => {
   };
 
   const displayText = (() => {
-    if (session === 'idle') return `Dial ${USSD_CODE} to begin`;
+    if (isLoading) return 'Loading your USSD menu…';
+    if (session === 'idle') return `Dial ${ussdCode} to begin`;
     if (session === 'ended') return 'Session ended.\n\nDial again to restart.';
     const hint = history.length > 0 ? '\n\n0 Back' : '\n\n0 End Session';
-    return `${currentScreen.text}${hint}`;
+    return `${currentScreen?.text ?? 'Session unavailable'}${hint}`;
   })();
 
   return (
@@ -95,7 +109,7 @@ export const UssdSimulator = () => {
               className="flex-1 h-9 rounded-lg bg-green-600 hover:bg-green-500 text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
             >
               <PhoneCall className="w-3.5 h-3.5" />
-              Dial {USSD_CODE}
+              Dial {ussdCode}
             </button>
           )}
           {session === 'active' && (

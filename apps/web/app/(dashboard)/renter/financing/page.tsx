@@ -1,106 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FinancingEligibilityCard } from '@/components/renter/financing/FinancingEligibilityCard';
 import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancingModal';
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
 import { Toast } from '@getrentos/ui';
-import { getFinancingPlanOptions } from '@/lib/financing';
-import type {
-  FinancingApplicationStatus,
-  FinancingInstallment,
-  FinancingPlan,
-  FinancingPlanLength,
-} from '@/types/financing';
-
-const RENT_AMOUNT = 2_400_000;
-const TRUST_SCORE = 78;
-const PROPERTY_NAME = 'Modern Downtown Loft';
-const LANDLORD_NAME = 'Chuka Nwosu';
-
-const buildInstallments = (
-  months: FinancingPlanLength,
-  monthlyInstallment: number
-): FinancingInstallment[] => {
-  const today = new Date();
-  return Array.from({ length: months }).map((_, index) => {
-    const dueDate = new Date(today);
-    dueDate.setMonth(dueDate.getMonth() + index + 1);
-    return {
-      id: `inst_${index + 1}`,
-      installmentNumber: index + 1,
-      dueDate: dueDate.toISOString(),
-      amount: monthlyInstallment,
-      status: index === 0 ? 'due' : 'upcoming',
-    };
-  });
-};
+import { useState } from 'react';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import type { FinancingPlanLength } from '@/types/financing';
 
 export default function RenterFinancingPage() {
-  const [applicationStatus, setApplicationStatus] =
-    useState<FinancingApplicationStatus>('not_applied');
-  const [plan, setPlan] = useState<FinancingPlan | null>(null);
+  const queryClient = useQueryClient();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const handleApply = (months: FinancingPlanLength) => {
-    setIsApplyModalOpen(false);
-    setApplicationStatus('pending_review');
+  const { data: overview, isLoading } = useQuery({
+    queryKey: renterKeys.financing,
+    queryFn: () => unwrap(renterService.getFinancing()),
+  });
 
-    window.setTimeout(() => {
-      const option = getFinancingPlanOptions(RENT_AMOUNT).find((o) => o.months === months)!;
-      const newPlan: FinancingPlan = {
-        id: `flex_${Date.now()}`,
-        propertyName: PROPERTY_NAME,
-        landlordName: LANDLORD_NAME,
-        rentAmount: RENT_AMOUNT,
-        planLengthMonths: months,
-        feePercent: option.feePercent,
-        feeAmount: option.totalRepayable - RENT_AMOUNT,
-        totalRepayable: option.totalRepayable,
-        monthlyInstallment: option.monthlyInstallment,
-        status: 'active',
-        appliedAt: new Date().toISOString(),
-        landlordPaidAt: new Date().toISOString(),
-        installments: buildInstallments(months, option.monthlyInstallment),
-      };
-      setPlan(newPlan);
-      setApplicationStatus('approved');
+  const applyMutation = useMutation({
+    mutationFn: (months: FinancingPlanLength) => unwrap(renterService.applyFinancing(months)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.financing });
+      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+      setIsApplyModalOpen(false);
       setToast(
-        `Approved! ${LANDLORD_NAME} has been paid ${new Intl.NumberFormat('en-NG', {
-          style: 'currency',
-          currency: 'NGN',
-          minimumFractionDigits: 0,
-        }).format(RENT_AMOUNT)} in full.`
+        `Approved! Your landlord has been paid in full — repay in interest-free installments.`
       );
-    }, 2200);
+    },
+  });
+
+  const payInstallmentMutation = useMutation({
+    mutationFn: (installmentId: string) =>
+      unwrap(renterService.payFinancingInstallment(installmentId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.financing });
+      setToast('Installment paid.');
+    },
+  });
+
+  const handleApply = (months: FinancingPlanLength) => {
+    applyMutation.mutate(months);
   };
 
   const handlePayInstallment = (installmentId: string) => {
-    setPlan((prev) => {
-      if (!prev) return prev;
-      const index = prev.installments.findIndex((i) => i.id === installmentId);
-      if (index === -1) return prev;
-
-      const updatedInstallments = prev.installments.map((installment, i) => {
-        if (i === index) {
-          return { ...installment, status: 'paid' as const, paidDate: new Date().toISOString() };
-        }
-        if (i === index + 1) {
-          return { ...installment, status: 'due' as const };
-        }
-        return installment;
-      });
-
-      const allPaid = updatedInstallments.every((i) => i.status === 'paid');
-      return {
-        ...prev,
-        installments: updatedInstallments,
-        status: allPaid ? 'completed' : prev.status,
-      };
-    });
-    setToast('Installment paid — your Trust Score has been updated.');
+    payInstallmentMutation.mutate(installmentId);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
+        Loading your GetRentos Flex status…
+      </div>
+    );
+  }
+
+  const rentAmount = overview?.rentAmount ?? 0;
+  const trustScore = overview?.trustScore ?? 0;
+  const plan = overview?.plan ?? null;
 
   return (
     <>
@@ -110,9 +70,9 @@ export default function RenterFinancingPage() {
         <ActiveFinancingPlanCard plan={plan} onPayInstallment={handlePayInstallment} />
       ) : (
         <FinancingEligibilityCard
-          rentAmount={RENT_AMOUNT}
-          trustScore={TRUST_SCORE}
-          isPending={applicationStatus === 'pending_review'}
+          rentAmount={rentAmount}
+          trustScore={trustScore}
+          isPending={applyMutation.isPending}
           onApply={() => setIsApplyModalOpen(true)}
         />
       )}
@@ -120,7 +80,7 @@ export default function RenterFinancingPage() {
       <ApplyFinancingModal
         open={isApplyModalOpen}
         onOpenChange={setIsApplyModalOpen}
-        rentAmount={RENT_AMOUNT}
+        rentAmount={rentAmount}
         onSubmit={handleApply}
       />
     </>

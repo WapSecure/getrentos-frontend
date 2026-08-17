@@ -123,7 +123,7 @@ export const DiscoverPropertyCard = ({
         </div>
 
         <div className="mt-2">
-          <PropertyScore score={property.score || 85} size="sm" />
+          <PropertyScore score={property.score} size="sm" />
         </div>
 
         <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
@@ -146,10 +146,8 @@ export const DiscoverPropertyCard = ({
         </div>
 
         <LandlordMetrics
-          responseRate={property.landlordResponseRate || 92}
-          responseTime="2-4 hours"
-          rating={property.landlordRating || 4.8}
-          totalReviews={property.landlordReviews || 127}
+          rating={property.landlordRating}
+          totalReviews={property.landlordReviews}
           verifiedBadge={property.landlordVerified || false}
         />
 

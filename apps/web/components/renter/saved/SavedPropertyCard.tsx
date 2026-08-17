@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -55,21 +55,24 @@ export const SavedPropertyCard = ({
   onSelect,
 }: SavedPropertyCardProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [showMenu, setShowMenu] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState(property.note ?? '');
 
   const { data: applications = [] } = useQuery({
     queryKey: renterKeys.applications,
     queryFn: () => unwrap(renterService.listMyApplications()),
   });
 
-  useEffect(() => {
-    const savedNote = localStorage.getItem(`note_${property.id}`);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (savedNote) setNote(savedNote);
-  }, [property.id]);
+  const noteMutation = useMutation({
+    mutationFn: (newNote: string) =>
+      unwrap(renterService.setSavedListingNote(property.savedListingId, newNote || null)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
+    },
+  });
 
   const formatPrice = () => {
     const formatter = new Intl.NumberFormat('en-NG', {
@@ -85,7 +88,7 @@ export const SavedPropertyCard = ({
 
   const handleSaveNote = (newNote: string) => {
     setNote(newNote);
-    localStorage.setItem(`note_${property.id}`, newNote);
+    noteMutation.mutate(newNote);
   };
 
   const handleMoveToWishlist = (wishlistId: string) => {

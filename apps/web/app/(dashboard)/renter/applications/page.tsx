@@ -26,55 +26,61 @@ export default function ApplicationsPage() {
     queryKey: renterKeys.applications,
     queryFn: () => unwrap(renterService.listMyApplications()),
   });
+  // Private notes are persisted server-side (ApplicationNote records).
+  const { data: allNotes = [] } = useQuery({
+    queryKey: renterKeys.allApplicationNotes,
+    queryFn: () => unwrap(renterService.listAllApplicationNotes()),
+  });
   const [filterStatus, setFilterStatus] = useState<
     'all' | 'pending' | 'under_review' | 'approved' | 'rejected'
   >('all');
   const [sortBy, setSortBy] = useState<'recent' | 'property' | 'status'>('recent');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [showExportModal, setShowExportModal] = useState(false);
-  const [notes, setNotes] = useState<Record<string, Note[]>>(() => {
-    if (typeof window === 'undefined') return {};
-    const saved = localStorage.getItem('application_notes');
-    return saved ? JSON.parse(saved) : {};
+
+  const notes: Record<string, Note[]> = allNotes.reduce<Record<string, Note[]>>((acc, note) => {
+    (acc[note.applicationId] ||= []).push(note);
+    return acc;
+  }, {});
+
+  const invalidateNotes = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.allApplicationNotes });
+
+  const addNoteMutation = useMutation({
+    mutationFn: ({ applicationId, content }: { applicationId: string; content: string }) =>
+      unwrap(renterService.createApplicationNote(applicationId, content)),
+    onSuccess: invalidateNotes,
   });
 
-  const saveNotes = (updatedNotes: Record<string, Note[]>) => {
-    localStorage.setItem('application_notes', JSON.stringify(updatedNotes));
-  };
+  const deleteNoteMutation = useMutation({
+    mutationFn: ({ applicationId, noteId }: { applicationId: string; noteId: string }) =>
+      unwrap(renterService.deleteApplicationNote(applicationId, noteId)),
+    onSuccess: invalidateNotes,
+  });
+
+  const editNoteMutation = useMutation({
+    mutationFn: ({
+      applicationId,
+      noteId,
+      content,
+    }: {
+      applicationId: string;
+      noteId: string;
+      content: string;
+    }) => unwrap(renterService.updateApplicationNote(applicationId, noteId, content)),
+    onSuccess: invalidateNotes,
+  });
 
   const handleAddNote = (applicationId: string, content: string) => {
-    const newNote: Note = {
-      id: Date.now().toString(),
-      content,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    const updated = {
-      ...notes,
-      [applicationId]: [...(notes[applicationId] || []), newNote],
-    };
-    setNotes(updated);
-    saveNotes(updated);
+    addNoteMutation.mutate({ applicationId, content });
   };
 
   const handleDeleteNote = (applicationId: string, noteId: string) => {
-    const updated = {
-      ...notes,
-      [applicationId]: (notes[applicationId] || []).filter((n) => n.id !== noteId),
-    };
-    setNotes(updated);
-    saveNotes(updated);
+    deleteNoteMutation.mutate({ applicationId, noteId });
   };
 
   const handleEditNote = (applicationId: string, noteId: string, content: string) => {
-    const updated = {
-      ...notes,
-      [applicationId]: (notes[applicationId] || []).map((n) =>
-        n.id === noteId ? { ...n, content, updatedAt: new Date().toISOString() } : n
-      ),
-    };
-    setNotes(updated);
-    saveNotes(updated);
+    editNoteMutation.mutate({ applicationId, noteId, content });
   };
 
   const withdrawMutation = useMutation({

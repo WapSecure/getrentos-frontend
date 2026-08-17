@@ -1,61 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditReportingOptIn } from '@/components/renter/credit-reporting/CreditReportingOptIn';
 import { CreditReportingDashboard } from '@/components/renter/credit-reporting/CreditReportingDashboard';
 import { Toast } from '@getrentos/ui';
-import type { CreditReportingProfile, ReportedPayment } from '@/types/credit-reporting';
-
-const PAST_ON_TIME_PAYMENTS: Omit<ReportedPayment, 'id' | 'reportedDate'>[] = [
-  { month: 'May 2024', amount: 200_000, status: 'on_time' },
-  { month: 'June 2024', amount: 200_000, status: 'on_time' },
-  { month: 'July 2024', amount: 200_000, status: 'on_time' },
-];
-
-const buildNextReportDate = (): string => {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 1);
-  date.setDate(1);
-  return date.toISOString();
-};
+import { useState } from 'react';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import type { CreditBureau } from '@/types/credit-reporting';
 
 export default function RenterCreditReportPage() {
-  const [profile, setProfile] = useState<CreditReportingProfile | null>(null);
-  const [isEnrolling, setIsEnrolling] = useState(false);
+  const queryClient = useQueryClient();
   const [toast, setToast] = useState<string | null>(null);
 
-  const handleEnroll = () => {
-    setIsEnrolling(true);
+  const { data: profile, isLoading } = useQuery({
+    queryKey: renterKeys.creditReporting,
+    queryFn: () => unwrap(renterService.getCreditReporting()),
+  });
 
-    window.setTimeout(() => {
-      const now = new Date().toISOString();
-      const reportedPayments: ReportedPayment[] = PAST_ON_TIME_PAYMENTS.map((payment, index) => ({
-        ...payment,
-        id: `rp_${index + 1}`,
-        reportedDate: now,
-      }));
+  const enrollMutation = useMutation({
+    mutationFn: (bureau?: CreditBureau) => unwrap(renterService.enrollCreditReporting(bureau)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.creditReporting });
+      const count = updated?.reportedPayments?.length ?? 0;
+      setToast(
+        `You are enrolled — ${count} month${count === 1 ? '' : 's'} of on-time rent history will be reported.`
+      );
+    },
+  });
 
-      setProfile({
-        status: 'enrolled',
-        enrolledAt: now,
-        consecutiveOnTimeMonths: reportedPayments.length,
-        totalPaymentsReported: reportedPayments.length,
-        nextReportDate: buildNextReportDate(),
-        reportedPayments,
-      });
-      setIsEnrolling(false);
-      setToast('You are enrolled — 3 months of on-time rent history have been reported.');
-    }, 1800);
-  };
+  const handleEnroll = () => enrollMutation.mutate(undefined);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
+        Loading your credit-reporting status…
+      </div>
+    );
+  }
 
   return (
     <>
       {toast && <Toast message={toast} variant="success" onClose={() => setToast(null)} />}
 
-      {profile ? (
+      {profile?.status === 'enrolled' ? (
         <CreditReportingDashboard profile={profile} />
       ) : (
-        <CreditReportingOptIn onEnroll={handleEnroll} isEnrolling={isEnrolling} />
+        <CreditReportingOptIn onEnroll={handleEnroll} isEnrolling={enrollMutation.isPending} />
       )}
     </>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, AlertCircle, Activity } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 export const HelpStatus = () => {
   return (
@@ -9,12 +9,9 @@ export const HelpStatus = () => {
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-green-600" />
           <span className="text-sm font-medium text-green-700 dark:text-green-300">
-            All systems operational
+            GetRentos services are operational
           </span>
         </div>
-        <span className="text-xs text-green-600 dark:text-green-400 ml-auto">
-          Last checked: 2 minutes ago
-        </span>
       </div>
     </div>
   );

@@ -82,6 +82,13 @@ export default function PaymentsPage() {
     payNowMutation.mutate({ paymentId, method: payment.method });
   };
 
+  const handlePayAll = () => {
+    const due = payments.filter((p) => p.status !== 'paid');
+    due.forEach((payment) => {
+      payNowMutation.mutate({ paymentId: payment.id, method: payment.method });
+    });
+  };
+
   const handleDownloadReceipt = (receiptId: string) => {
     const receipt = receipts.find((r) => r.id === receiptId || r.paymentId === receiptId);
     pushNotification({
@@ -189,7 +196,7 @@ export default function PaymentsPage() {
             onMarkAsRead={handleMarkNotificationAsRead}
             onClearAll={handleClearAllNotifications}
           />
-          <PaymentSchedule payments={payments} />
+          <PaymentSchedule payments={payments} onPayAll={handlePayAll} />
           <PaymentMethods
             methods={paymentMethods}
             onSetDefault={handleSetDefaultPaymentMethod}

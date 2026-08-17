@@ -3,11 +3,12 @@
 import { motion } from 'framer-motion';
 
 interface PropertyScoreProps {
-  score: number;
+  score?: number;
   size?: 'sm' | 'md' | 'lg';
 }
 
 export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
+  if (score === undefined) return null;
   const getScoreColor = () => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-blue-600';

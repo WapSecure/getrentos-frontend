@@ -1,17 +1,34 @@
 'use client';
 
-import { CheckCircle, XCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
-const factors = [
-  { label: 'Identity Verified', impact: '+15', status: 'positive' },
-  { label: 'Phone Verified', impact: '+10', status: 'positive' },
-  { label: 'Email Verified', impact: '+8', status: 'positive' },
-  { label: 'Property Verified', impact: '+20', status: 'pending' },
-  { label: 'Background Check', impact: '+15', status: 'pending' },
-  { label: 'References Added', impact: '+5', status: 'pending' },
-];
+interface Verification {
+  id: string;
+  label: string;
+  verified: boolean;
+  description: string;
+}
 
-export const ScoreFactors = () => {
+const FACTOR_WEIGHTS: Record<string, number> = {
+  identity: 15,
+  phone: 10,
+  email: 8,
+  background_check: 15,
+  references: 5,
+};
+
+interface ScoreFactorsProps {
+  verifications: Verification[];
+}
+
+export const ScoreFactors = ({ verifications }: ScoreFactorsProps) => {
+  const factors = verifications.map((v) => ({
+    label: v.label,
+    impact: FACTOR_WEIGHTS[v.id] != null ? `+${FACTOR_WEIGHTS[v.id]}` : '+0',
+    status: v.verified ? 'positive' : 'pending',
+    description: v.description,
+  }));
+
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -26,7 +43,10 @@ export const ScoreFactors = () => {
               {factor.status === 'positive' && <CheckCircle className="w-4 h-4 text-green-500" />}
               {factor.status === 'pending' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
               {factor.status === 'negative' && <XCircle className="w-4 h-4 text-red-500" />}
-              <span className="text-sm text-foreground">{factor.label}</span>
+              <div>
+                <span className="text-sm text-foreground">{factor.label}</span>
+                <p className="text-xs text-muted-foreground">{factor.description}</p>
+              </div>
             </div>
             <span
               className={`text-sm font-semibold ${

@@ -6,12 +6,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
 import { ROUTES } from '@/lib/constants/auth';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 
 interface RenterNavbarProps {
   user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
@@ -19,32 +25,33 @@ interface RenterNavbarProps {
 
 export const RenterNavbar = ({ user }: RenterNavbarProps) => {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'Application reviewed',
-      message: 'Your application for Modern Loft has been reviewed',
-      read: false,
-      time: '5 min ago',
-    },
-    {
-      id: 2,
-      title: 'Payment due',
-      message: 'Rent payment due in 3 days',
-      read: false,
-      time: '1 hour ago',
-    },
-    {
-      id: 3,
-      title: 'Maintenance update',
-      message: 'Your maintenance request has been assigned',
-      read: true,
-      time: '2 days ago',
-    },
-  ]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const { data: notifications = [] } = useQuery({
+    queryKey: renterKeys.notifications,
+    queryFn: () => unwrap(renterService.listNotifications()),
+  });
+
+  const invalidateNotifications = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
+
+  // Real-time: refresh the bell when the backend pushes a new notification.
+  useRealtimeEvent('notification:new', () => {
+    invalidateNotifications();
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),
+    onSuccess: invalidateNotifications,
+  });
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
+    onSuccess: invalidateNotifications,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,12 +63,12 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAsRead = (id: string) => {
+    markAsReadMutation.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    markAllAsReadMutation.mutate();
   };
 
   return (
@@ -158,7 +165,11 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
-                                <span className="text-xs text-gray-500">{notification.time}</span>
+                                <span className="text-xs text-gray-500">
+                                  {formatDistanceToNow(new Date(notification.createdAt), {
+                                    addSuffix: true,
+                                  })}
+                                </span>
                               </div>
                               <p className="text-xs text-muted-foreground">
                                 {notification.message}
@@ -168,9 +179,13 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                         )}
                       </div>
                       <div className="p-2 border-t border-border">
-                        <button className="w-full text-center text-sm text-primary hover:text-primary-hover py-1">
+                        <Link
+                          href={ROUTES.RENTER_NOTIFICATIONS}
+                          onClick={() => setShowNotifications(false)}
+                          className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
+                        >
                           View all notifications
-                        </button>
+                        </Link>
                       </div>
                     </motion.div>
                   )}

@@ -19,6 +19,16 @@ export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [alerts, setAlerts] = useState<
+    {
+      id: string;
+      type: 'status_update' | 'vendor_assigned';
+      title: string;
+      message: string;
+      date: string;
+      read: boolean;
+    }[]
+  >([]);
   const [emergencyContacts, setEmergencyContacts] = useState<
     {
       id: string;
@@ -45,6 +55,24 @@ export default function MaintenancePage() {
       }
     };
     loadMaintenanceRequests();
+
+    const loadAlerts = async () => {
+      const res = await renterService.listNotifications();
+      if (res.success && res.data) {
+        const maintenanceAlerts = res.data
+          .filter((n) => n.type === 'maintenance')
+          .map((n) => ({
+            id: n.id,
+            type: 'status_update' as const,
+            title: n.title,
+            message: n.message,
+            date: n.createdAt,
+            read: n.read,
+          }));
+        setAlerts(maintenanceAlerts);
+      }
+    };
+    loadAlerts();
 
     const loadLandlordContact = async () => {
       const res = await renterService.getLease();
@@ -113,48 +141,27 @@ export default function MaintenancePage() {
     window.location.href = `mailto:${email}`;
   };
 
-  const scheduledMaintenance = [
-    {
-      id: 'sched_001',
-      title: 'AC Maintenance',
-      description: 'Routine AC servicing and filter replacement',
-      scheduledDate: '2024-07-15',
-      estimatedDuration: '2 hours',
-      assignedVendor: 'CoolTech AC Services',
-      status: 'scheduled' as const,
+  // Scheduled maintenance is derived from real requests that are still active
+  // (submitted / assigned / in progress) — no fabricated entries.
+  const scheduledMaintenance = requests
+    .filter((r) => r.status !== 'resolved' && r.status !== 'cancelled')
+    .map((r) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      scheduledDate: r.updatedAt,
+      estimatedDuration: r.slaResponseTime
+        ? `${Math.max(1, Math.round(r.slaResponseTime / 60))} hour(s)`
+        : 'As scheduled',
+      assignedVendor: r.assignedVendorName || 'To be assigned',
+      status:
+        r.status === 'in_progress'
+          ? ('in_progress' as const)
+          : r.status === 'assigned'
+            ? ('scheduled' as const)
+            : ('scheduled' as const),
       type: 'routine' as const,
-    },
-    {
-      id: 'sched_002',
-      title: 'Pest Control',
-      description: 'Quarterly pest control treatment',
-      scheduledDate: '2024-07-20',
-      estimatedDuration: '1.5 hours',
-      assignedVendor: 'PestControl Pro',
-      status: 'scheduled' as const,
-      type: 'routine' as const,
-    },
-  ];
-
-  const initialAlerts = [
-    {
-      id: 'alert_001',
-      type: 'status_update' as const,
-      title: 'Status Update',
-      message: 'Your maintenance request has been assigned to a vendor',
-      date: '2024-06-08T14:20:00',
-      read: false,
-    },
-    {
-      id: 'alert_002',
-      type: 'vendor_assigned' as const,
-      title: 'Vendor Assigned',
-      message: 'Quick Plumbing Services has been assigned to your request',
-      date: '2024-06-08T14:25:00',
-      read: false,
-    },
-  ];
-  const [alerts, setAlerts] = useState(initialAlerts);
+    }));
 
   return (
     <>
@@ -166,10 +173,14 @@ export default function MaintenancePage() {
         <MaintenanceHeader onReport={() => setShowReportModal(true)} />
         <MaintenanceAlerts
           alerts={alerts}
-          onMarkAsRead={(id) =>
-            setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)))
-          }
-          onClearAll={() => setAlerts((prev) => prev.map((a) => ({ ...a, read: true })))}
+          onMarkAsRead={(id) => {
+            setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)));
+            renterService.markNotificationAsRead(id);
+          }}
+          onClearAll={() => {
+            setAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+            renterService.markAllNotificationsAsRead();
+          }}
         />
       </div>
 
@@ -187,7 +198,10 @@ export default function MaintenancePage() {
           <QuickReport onQuickReport={handleReportIssue} />
           <MaintenanceAnalytics requests={requests} />
           <MaintenanceChecklist />
-          <ScheduledMaintenance schedules={scheduledMaintenance} />
+          <ScheduledMaintenance
+            schedules={scheduledMaintenance}
+            onSchedule={() => setShowReportModal(true)}
+          />
           <EmergencyContact
             contacts={emergencyContacts}
             onCall={handleCall}

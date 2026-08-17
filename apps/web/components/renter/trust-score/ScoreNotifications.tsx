@@ -1,29 +1,20 @@
 'use client';
 
-import { Bell, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Bell, CheckCircle, Clock, AlertCircle, Inbox } from 'lucide-react';
+import { format } from 'date-fns';
 
-const notifications = [
-  {
-    id: '1',
-    type: 'success',
-    message: 'Identity verification completed! +15 points',
-    time: '2 hours ago',
-  },
-  {
-    id: '2',
-    type: 'info',
-    message: 'Complete your phone verification for +10 points',
-    time: '1 day ago',
-  },
-  {
-    id: '3',
-    type: 'warning',
-    message: 'Your property verification is pending review',
-    time: '3 days ago',
-  },
-];
+interface ScoreHistoryItem {
+  date: string;
+  score: number;
+  change: number;
+  reason: string;
+}
 
-export const ScoreNotifications = () => {
+interface ScoreNotificationsProps {
+  history: ScoreHistoryItem[];
+}
+
+export const ScoreNotifications = ({ history }: ScoreNotificationsProps) => {
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -35,25 +26,41 @@ export const ScoreNotifications = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {notifications.map((notification) => (
-          <div key={notification.id} className="p-3 hover:bg-secondary transition-colors">
-            <div className="flex items-start gap-3">
-              {notification.type === 'success' && (
-                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-              )}
-              {notification.type === 'info' && (
-                <Clock className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-              )}
-              {notification.type === 'warning' && (
-                <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
-              )}
-              <div>
-                <p className="text-sm text-foreground">{notification.message}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{notification.time}</p>
+        {history.length === 0 ? (
+          <div className="p-4 text-center text-muted-foreground">
+            <Inbox className="w-6 h-6 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No score activity yet</p>
+          </div>
+        ) : (
+          history.slice(0, 5).map((item, index) => (
+            <div key={index} className="p-3 hover:bg-secondary transition-colors">
+              <div className="flex items-start gap-3">
+                {item.change > 0 && (
+                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                )}
+                {item.change === 0 && <Clock className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />}
+                {item.change < 0 && (
+                  <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+                )}
+                <div>
+                  <p className="text-sm text-foreground">
+                    {item.reason}
+                    {item.change !== 0 && (
+                      <span className={item.change > 0 ? ' text-green-600' : ' text-red-600'}>
+                        {' '}
+                        ({item.change > 0 ? '+' : ''}
+                        {item.change})
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {format(new Date(item.date), 'MMM d, yyyy')} · Score {item.score}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

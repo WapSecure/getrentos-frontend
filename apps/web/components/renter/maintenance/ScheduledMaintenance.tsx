@@ -17,6 +17,7 @@ interface ScheduledMaintenance {
 
 interface ScheduledMaintenanceProps {
   schedules: ScheduledMaintenance[];
+  onSchedule?: () => void;
 }
 
 const statusConfig = {
@@ -35,7 +36,7 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export const ScheduledMaintenance = ({ schedules }: ScheduledMaintenanceProps) => {
+export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMaintenanceProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,7 +51,7 @@ export const ScheduledMaintenance = ({ schedules }: ScheduledMaintenanceProps) =
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">Upcoming and ongoing maintenance</p>
         </div>
-        <Button size="sm" variant="ghost" className="gap-1">
+        <Button size="sm" variant="ghost" className="gap-1" onClick={onSchedule}>
           <Plus className="w-3 h-3" />
           Schedule
         </Button>

@@ -15,9 +15,10 @@ interface Payment {
 
 interface PaymentScheduleProps {
   payments: Payment[];
+  onPayAll?: () => void;
 }
 
-export const PaymentSchedule = ({ payments }: PaymentScheduleProps) => {
+export const PaymentSchedule = ({ payments, onPayAll }: PaymentScheduleProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
@@ -126,7 +127,7 @@ export const PaymentSchedule = ({ payments }: PaymentScheduleProps) => {
       </div>
 
       <div className="p-3 border-t border-border">
-        <Button variant="primary" size="sm" fullWidth>
+        <Button variant="primary" size="sm" fullWidth onClick={onPayAll}>
           Pay All Now
         </Button>
       </div>

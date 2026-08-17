@@ -1,14 +1,34 @@
 'use client';
 
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
+
+interface Verification {
+  id: string;
+  label: string;
+  verified: boolean;
+  description: string;
+}
+
+// Deterministic factor weights (same weights as ScoreFactors).
+const FACTOR_WEIGHTS: Record<string, number> = {
+  identity: 15,
+  phone: 10,
+  email: 8,
+  background_check: 15,
+  references: 5,
+};
 
 interface ScoreForecastProps {
   currentScore: number;
+  verifications: Verification[];
 }
 
-export const ScoreForecast = ({ currentScore }: ScoreForecastProps) => {
-  const forecastScore = Math.min(100, currentScore + 15);
-  const potentialIncrease = forecastScore - currentScore;
+export const ScoreForecast = ({ currentScore, verifications }: ScoreForecastProps) => {
+  const potentialIncrease = verifications.reduce((total, v) => {
+    if (v.verified) return total;
+    return total + (FACTOR_WEIGHTS[v.id] ?? 0);
+  }, 0);
+  const forecastScore = Math.min(100, currentScore + potentialIncrease);
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -32,17 +52,25 @@ export const ScoreForecast = ({ currentScore }: ScoreForecastProps) => {
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-green-600" />
-            <span className="text-sm font-medium text-green-800 dark:text-green-300">
-              Potential increase of +{potentialIncrease} points
-            </span>
+        {potentialIncrease > 0 ? (
+          <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800 dark:text-green-300">
+                Potential increase of +{potentialIncrease} points
+              </span>
+            </div>
+            <p className="text-xs text-green-700 dark:text-green-400 mt-1">
+              Complete pending verifications to reach this score
+            </p>
           </div>
-          <p className="text-xs text-green-700 dark:text-green-400 mt-1">
-            Complete pending verifications to reach this score
-          </p>
-        </div>
+        ) : (
+          <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+            <p className="text-sm font-medium text-green-800 dark:text-green-300">
+              All verifications complete — your score is at its potential.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

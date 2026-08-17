@@ -60,7 +60,8 @@ export const ActiveFinancingPlanCard = ({
             </div>
             <div className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Landlord paid in full on {formatDate(plan.landlordPaidAt)}
+              Landlord paid in full
+              {plan.landlordPaidAt ? ` on ${formatDate(plan.landlordPaidAt)}` : ''}
             </div>
           </div>
         </div>

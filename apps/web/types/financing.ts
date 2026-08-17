@@ -34,6 +34,15 @@ export interface FinancingPlan {
   monthlyInstallment: number;
   status: FinancingPlanStatus;
   appliedAt: string;
-  landlordPaidAt: string;
+  landlordPaidAt?: string;
   installments: FinancingInstallment[];
+}
+
+export interface FinancingOverview {
+  rentAmount: number;
+  trustScore: number;
+  propertyName: string;
+  landlordName: string;
+  applicationStatus: FinancingApplicationStatus;
+  plan?: FinancingPlan;
 }

@@ -8,6 +8,9 @@ import type { Conversation, Reminder } from '@/types/messages';
 import type { RenewalOffer } from '@/types/lease';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
+import type { CreditBureau, CreditReportingProfile } from '@/types/credit-reporting';
+import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
+import type { UssdMenu } from '@/types/ussd';
 
 export interface SavedSearch {
   id: string;
@@ -125,6 +128,8 @@ export interface RenterProfile {
   email: string;
   phone?: string;
   avatarUrl?: string;
+  location?: string;
+  bio?: string;
 }
 
 export interface Roommate {
@@ -165,8 +170,17 @@ export interface ReviewItem {
 export type SavedListingItem = Property & {
   savedListingId: string;
   wishlistId: string | null;
+  note: string | null;
   savedAt: string;
 };
+
+export interface ApplicationNote {
+  id: string;
+  applicationId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export type RecentlyViewedItem = Property & { viewedAt: string };
 
@@ -201,6 +215,7 @@ export interface RoommateExpense {
 
 export interface TrustScoreOverview {
   trustScore: number;
+  averageScore: number;
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: Badge[];
@@ -288,6 +303,18 @@ export const renterService = {
     );
   },
 
+  async setSavedListingNote(
+    savedListingId: string,
+    note: string | null
+  ): Promise<ApiResponse<{ updated: boolean; note: string | null }>> {
+    return safeCall(() =>
+      authFetch(`/renter/saved-listings/${savedListingId}/note`, {
+        method: 'PATCH',
+        body: JSON.stringify({ note: note ?? null }),
+      })
+    );
+  },
+
   // ---- Wishlists ----
   async listWishlists(): Promise<ApiResponse<Wishlist[]>> {
     return safeCall(() => authFetch('/renter/wishlists'));
@@ -332,9 +359,50 @@ export const renterService = {
   async listMyApplications(): Promise<ApiResponse<Application[]>> {
     return safeCall(() => authFetch('/renter/applications'));
   },
-
   async withdrawApplication(id: string): Promise<ApiResponse<Application>> {
     return safeCall(() => authFetch(`/renter/applications/${id}/withdraw`, { method: 'PATCH' }));
+  },
+
+  async listApplicationNotes(applicationId: string): Promise<ApiResponse<ApplicationNote[]>> {
+    return safeCall(() => authFetch(`/renter/applications/${applicationId}/notes`));
+  },
+
+  async listAllApplicationNotes(): Promise<ApiResponse<ApplicationNote[]>> {
+    return safeCall(() => authFetch('/renter/applications/notes'));
+  },
+
+  async createApplicationNote(
+    applicationId: string,
+    content: string
+  ): Promise<ApiResponse<ApplicationNote>> {
+    return safeCall(() =>
+      authFetch(`/renter/applications/${applicationId}/notes`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      })
+    );
+  },
+
+  async updateApplicationNote(
+    applicationId: string,
+    noteId: string,
+    content: string
+  ): Promise<ApiResponse<ApplicationNote>> {
+    return safeCall(() =>
+      authFetch(`/renter/applications/${applicationId}/notes/${noteId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ content }),
+      })
+    );
+  },
+
+  async deleteApplicationNote(
+    applicationId: string,
+    noteId: string
+  ): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      authFetch(`/renter/applications/${applicationId}/notes/${noteId}`, { method: 'DELETE' })
+    );
   },
 
   async submitApplication(
@@ -459,6 +527,45 @@ export const renterService = {
   // ---- Trust score ----
   async getTrustScore(): Promise<ApiResponse<TrustScoreOverview>> {
     return safeCall(() => authFetch('/renter/trust-score'));
+  },
+
+  // ---- Credit reporting ----
+  async getCreditReporting(): Promise<ApiResponse<CreditReportingProfile>> {
+    return safeCall(() => authFetch('/renter/credit-reporting'));
+  },
+
+  async enrollCreditReporting(bureau?: CreditBureau): Promise<ApiResponse<CreditReportingProfile>> {
+    return safeCall(() =>
+      authFetch('/renter/credit-reporting/enroll', {
+        method: 'POST',
+        body: JSON.stringify({ bureau: bureau ?? undefined }),
+      })
+    );
+  },
+
+  // ---- Flex financing ----
+  async getFinancing(): Promise<ApiResponse<FinancingOverview>> {
+    return safeCall(() => authFetch('/renter/financing'));
+  },
+
+  async applyFinancing(months: FinancingPlanLength): Promise<ApiResponse<FinancingOverview>> {
+    return safeCall(() =>
+      authFetch('/renter/financing/apply', {
+        method: 'POST',
+        body: JSON.stringify({ months }),
+      })
+    );
+  },
+
+  async payFinancingInstallment(installmentId: string): Promise<ApiResponse<FinancingPlan>> {
+    return safeCall(() =>
+      authFetch(`/renter/financing/installments/${installmentId}/pay`, { method: 'POST' })
+    );
+  },
+
+  // ---- USSD ----
+  async getUssdMenu(): Promise<ApiResponse<UssdMenu>> {
+    return safeCall(() => authFetch('/renter/ussd/menu'));
   },
 
   // ---- Documents ----
@@ -742,6 +849,8 @@ export const renterService = {
     fullName?: string;
     email?: string;
     phone?: string;
+    location?: string;
+    bio?: string;
   }): Promise<ApiResponse<RenterProfile>> {
     return safeCall(() =>
       authFetch('/renter/profile', { method: 'PUT', body: JSON.stringify(data) })
