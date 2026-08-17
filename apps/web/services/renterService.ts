@@ -1,5 +1,7 @@
+import { ApiError } from '@/lib/apiClient';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
+import { getAuthToken } from '@/lib/authStorage';
 import type { Property, Application, GeoInsights } from '@/types/renter';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
@@ -8,6 +10,8 @@ import type { Conversation, Reminder } from '@/types/messages';
 import type { RenewalOffer } from '@/types/lease';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export interface SavedSearch {
   id: string;
@@ -53,6 +57,20 @@ export interface Lease {
     status: 'paid' | 'pending' | 'overdue';
     date: string;
   }[];
+}
+
+export interface PendingLease {
+  id: string;
+  propertyName: string;
+  address: string;
+  unitName: string;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  securityDeposit?: number;
+  landlord: { name: string; email: string; phone: string };
+  tenantSigned: boolean;
+  landlordSigned: boolean;
 }
 
 export interface RentIncrease {
@@ -356,6 +374,18 @@ export const renterService = {
           moveInDate: data.moveInDate || undefined,
           leaseTerm: data.leaseTerm,
           notes: data.notes,
+          nextOfKinName: data.nextOfKinName || undefined,
+          nextOfKinPhone: data.nextOfKinPhone || undefined,
+          nextOfKinRelationship: data.nextOfKinRelationship || undefined,
+          references: data.referenceName
+            ? [
+                {
+                  name: data.referenceName,
+                  phone: data.referencePhone,
+                  relationship: data.referenceRelationship || 'Reference',
+                },
+              ]
+            : undefined,
           documents: data.documents,
         }),
       })
@@ -601,6 +631,39 @@ export const renterService = {
         body: JSON.stringify({ noticeDate, reason }),
       })
     );
+  },
+
+  async getPendingLease(): Promise<ApiResponse<PendingLease | null>> {
+    return safeCall(() => authFetch('/renter/lease/pending'));
+  },
+
+  async signLease(id: string, signatureData: string): Promise<ApiResponse<PendingLease>> {
+    return safeCall(() =>
+      authFetch(`/renter/lease/${id}/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ signatureData }),
+      })
+    );
+  },
+
+  async downloadLeasePdf(): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/renter/lease/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'lease.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
   },
 
   // ---- Payments ----

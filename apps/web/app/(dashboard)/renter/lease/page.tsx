@@ -13,17 +13,26 @@ import { LeaseSummaryCard } from '@/components/renter/lease/LeaseSummaryCard';
 import { RentIncreaseHistory } from '@/components/renter/lease/RentIncreaseHistory';
 import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaymentReminders';
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
+import { PendingLeaseCard } from '@/components/renter/lease/PendingLeaseCard';
 import { FileText } from 'lucide-react';
+import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export default function LeasePage() {
   const queryClient = useQueryClient();
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: lease = null } = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
+  });
+  const { data: pendingLease = null } = useQuery({
+    queryKey: renterKeys.pendingLease,
+    queryFn: () => unwrap(renterService.getPendingLease()),
+    enabled: !lease,
   });
   const { data: renewalOffer = null } = useQuery({
     queryKey: renterKeys.renewalOffer,
@@ -53,6 +62,24 @@ export default function LeasePage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.lease }),
   });
 
+  const signLeaseMutation = useMutation({
+    mutationFn: ({ id, signatureData }: { id: string; signatureData: string }) =>
+      unwrap(renterService.signLease(id, signatureData)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.pendingLease });
+      queryClient.invalidateQueries({ queryKey: renterKeys.lease });
+      setToast({
+        message: updated.landlordSigned
+          ? 'Lease fully executed — welcome home!'
+          : 'Your signature was recorded. Waiting on the landlord to countersign.',
+        variant: 'success',
+      });
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to sign this lease.', variant: 'error' });
+    },
+  });
+
   const handleRespondToOffer = async (offerId: string, action: 'accept' | 'decline') => {
     await respondToOfferMutation.mutateAsync({ offerId, action });
   };
@@ -61,17 +88,33 @@ export default function LeasePage() {
     await requestTerminationMutation.mutateAsync({ noticeDate, reason });
   };
 
+  const handleSignLease = (id: string, signatureData: string) =>
+    signLeaseMutation.mutate({ id, signatureData });
+
   if (!lease) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center">
-          <FileText className="w-8 h-8 text-muted-foreground" />
-        </div>
-        <h2 className="text-2xl font-bold text-foreground">No Active Lease</h2>
-        <p className="text-muted-foreground mt-2">
-          You don&apos;t have an active lease agreement at the moment.
-        </p>
-      </div>
+      <>
+        {pendingLease ? (
+          <PendingLeaseCard
+            lease={pendingLease}
+            onSign={handleSignLease}
+            isPending={signLeaseMutation.isPending}
+          />
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center">
+              <FileText className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">No Active Lease</h2>
+            <p className="text-muted-foreground mt-2">
+              You don&apos;t have an active lease agreement at the moment.
+            </p>
+          </div>
+        )}
+        {toast && (
+          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+        )}
+      </>
     );
   }
 

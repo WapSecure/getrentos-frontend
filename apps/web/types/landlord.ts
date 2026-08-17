@@ -82,6 +82,8 @@ export interface Lease {
   rentAmount: number;
   securityDeposit?: number;
   status: LeaseStatus;
+  tenantSigned: boolean;
+  landlordSigned: boolean;
   createdAt: string;
 }
 
@@ -101,6 +103,10 @@ export interface RentalApplication {
   applicationDate: string;
   status: ApplicationStatus;
   documents: { name: string; uploaded: boolean }[];
+  nextOfKinName?: string;
+  nextOfKinPhone?: string;
+  nextOfKinRelationship?: string;
+  references: { name: string; phone: string; relationship: string }[];
 }
 
 export interface RentPayment {

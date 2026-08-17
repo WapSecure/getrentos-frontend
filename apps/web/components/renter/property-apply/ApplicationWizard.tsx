@@ -24,6 +24,12 @@ export interface ApplicationFormData {
   leaseTerm: string;
   notes: string;
   documents: ApplicationDocument[];
+  nextOfKinName: string;
+  nextOfKinPhone: string;
+  nextOfKinRelationship: string;
+  referenceName: string;
+  referencePhone: string;
+  referenceRelationship: string;
 }
 
 interface ApplicationWizardProps {
@@ -206,6 +212,66 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                   <option value="12 months">12 months</option>
                   <option value="24 months">24 months</option>
                 </LegacySelect>
+              </Field>
+            </div>
+
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">
+              Next of kin (optional)
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Full name">
+                <LegacyInput
+                  value={data.nextOfKinName}
+                  onChange={(e) => update('nextOfKinName', e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Ngozi Okoro"
+                />
+              </Field>
+              <Field label="Phone number">
+                <LegacyInput
+                  value={data.nextOfKinPhone}
+                  onChange={(e) => update('nextOfKinPhone', e.target.value)}
+                  className={inputClass}
+                  placeholder="+234 800 000 0000"
+                />
+              </Field>
+              <Field label="Relationship">
+                <LegacyInput
+                  value={data.nextOfKinRelationship}
+                  onChange={(e) => update('nextOfKinRelationship', e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Sibling"
+                />
+              </Field>
+            </div>
+
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">
+              Reference (optional)
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Full name">
+                <LegacyInput
+                  value={data.referenceName}
+                  onChange={(e) => update('referenceName', e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Previous landlord"
+                />
+              </Field>
+              <Field label="Phone number">
+                <LegacyInput
+                  value={data.referencePhone}
+                  onChange={(e) => update('referencePhone', e.target.value)}
+                  className={inputClass}
+                  placeholder="+234 800 000 0000"
+                />
+              </Field>
+              <Field label="Relationship">
+                <LegacyInput
+                  value={data.referenceRelationship}
+                  onChange={(e) => update('referenceRelationship', e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Former landlord"
+                />
               </Field>
             </div>
           </div>

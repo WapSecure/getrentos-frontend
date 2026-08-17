@@ -15,7 +15,10 @@ interface CreateLeaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   vacantUnits: Unit[];
-  onSave: (lease: Omit<Lease, 'id' | 'status' | 'createdAt'>, sendImmediately: boolean) => void;
+  onSave: (
+    lease: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>,
+    sendImmediately: boolean
+  ) => void;
 }
 
 export const CreateLeaseModal = ({
@@ -59,7 +62,10 @@ export const CreateLeaseModal = ({
   const isValid =
     selectedUnit && tenantName.trim() && leaseStart && leaseEnd && Number(rentAmount) > 0;
 
-  const buildLease = (): Omit<Lease, 'id' | 'status' | 'createdAt'> | null => {
+  const buildLease = (): Omit<
+    Lease,
+    'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'
+  > | null => {
     if (!selectedUnit || !isValid) return null;
     return {
       tenantId: `tenant_${Date.now()}`,

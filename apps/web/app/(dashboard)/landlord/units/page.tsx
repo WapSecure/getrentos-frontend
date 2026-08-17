@@ -7,10 +7,11 @@ import { LegacySelect } from '@getrentos/ui';
 import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Receipt, Search } from 'lucide-react';
+import { Plus, Receipt, Search, Tag } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
+import { BulkPricingModal } from '@/components/landlord/units/BulkPricingModal';
 import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -34,6 +35,7 @@ function LandlordUnitsPageContent() {
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkChargeOpen, setIsBulkChargeOpen] = useState(false);
+  const [isBulkPricingOpen, setIsBulkPricingOpen] = useState(false);
 
   const { data: properties = [] } = useQuery({
     queryKey: landlordKeys.properties,
@@ -103,6 +105,15 @@ function LandlordUnitsPageContent() {
           <Button
             variant="outline"
             className="gap-2"
+            onClick={() => setIsBulkPricingOpen(true)}
+            disabled={units.length === 0}
+          >
+            <Tag className="w-4 h-4" />
+            Bulk pricing
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
             onClick={() => setIsBulkChargeOpen(true)}
             disabled={units.length === 0}
           >
@@ -163,6 +174,13 @@ function LandlordUnitsPageContent() {
       <BulkChargeModal
         isOpen={isBulkChargeOpen}
         onClose={() => setIsBulkChargeOpen(false)}
+        units={units}
+        properties={properties}
+      />
+
+      <BulkPricingModal
+        isOpen={isBulkPricingOpen}
+        onClose={() => setIsBulkPricingOpen(false)}
         units={units}
         properties={properties}
       />

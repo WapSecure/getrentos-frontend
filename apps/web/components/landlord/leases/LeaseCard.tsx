@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileCheck, Download, RefreshCcw, Send } from 'lucide-react';
+import { FileCheck, Download, PenLine, RefreshCcw, Send } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { leaseStatusBadges } from '@/lib/statusBadge';
+import { landlordService } from '@/services/landlordService';
 import type { Lease } from '@/types/landlord';
 
 const daysUntil = (dateString: string) => {
@@ -17,34 +18,22 @@ interface LeaseCardProps {
   delay?: number;
   onSendLease: (id: string) => void;
   onRequestRenewal: (lease: Lease) => void;
+  onSignLease: (lease: Lease) => void;
 }
 
-export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: LeaseCardProps) => {
+export const LeaseCard = ({
+  lease,
+  delay = 0,
+  onSendLease,
+  onRequestRenewal,
+  onSignLease,
+}: LeaseCardProps) => {
   const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
 
   const handleDownload = () => {
-    const lines = [
-      `Lease Agreement`,
-      `Property: ${lease.propertyName} — ${lease.unitName}`,
-      `Tenant: ${lease.tenantName}`,
-      `Lease Start: ${formatDate(lease.leaseStart)}`,
-      `Lease End: ${formatDate(lease.leaseEnd)}`,
-      `Rent Amount: ${formatCurrency(lease.rentAmount)}`,
-      lease.securityDeposit !== undefined
-        ? `Security Deposit: ${formatCurrency(lease.securityDeposit)}`
-        : undefined,
-      `Status: ${status.label}`,
-    ].filter(Boolean);
-
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `lease-${lease.propertyName}-${lease.unitName}.txt`.replace(/\s+/g, '-');
-    link.click();
-    URL.revokeObjectURL(url);
+    void landlordService.downloadLeasePdf(lease.id);
   };
 
   return (
@@ -99,8 +88,16 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
           </Button>
         )}
         {lease.status === 'sent' && (
-          <Button variant="outline" size="sm" fullWidth disabled className="gap-1.5">
-            Awaiting Signature
+          <Button
+            variant={lease.landlordSigned ? 'outline' : 'primary'}
+            size="sm"
+            fullWidth
+            disabled={lease.landlordSigned}
+            className="gap-1.5"
+            onClick={() => onSignLease(lease)}
+          >
+            <PenLine className="w-3.5 h-3.5" />
+            {lease.landlordSigned ? 'Waiting on tenant' : 'Sign Lease'}
           </Button>
         )}
         {lease.status === 'signed' && (

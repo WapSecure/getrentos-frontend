@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Check,
   MessageSquareText,
+  Users,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
@@ -101,6 +102,46 @@ export const ApplicationDetailsModal = ({
                   </div>
                 </div>
               </div>
+
+              {(application.references.length > 0 || application.nextOfKinName) && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    References &amp; Next of Kin
+                  </h4>
+                  <div className="space-y-1.5">
+                    {application.nextOfKinName && (
+                      <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm">
+                        <p className="text-foreground font-medium">
+                          {application.nextOfKinName}{' '}
+                          <span className="text-xs text-muted-foreground font-normal">
+                            ({application.nextOfKinRelationship || 'Next of kin'})
+                          </span>
+                        </p>
+                        {application.nextOfKinPhone && (
+                          <p className="text-xs text-muted-foreground">
+                            {application.nextOfKinPhone}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {application.references.map((reference) => (
+                      <div
+                        key={reference.phone}
+                        className="p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm"
+                      >
+                        <p className="text-foreground font-medium">
+                          {reference.name}{' '}
+                          <span className="text-xs text-muted-foreground font-normal">
+                            ({reference.relationship})
+                          </span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">{reference.phone}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">

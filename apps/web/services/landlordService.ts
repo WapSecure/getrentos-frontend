@@ -236,6 +236,18 @@ export const landlordService = {
     );
   },
 
+  async bulkUpdateUnitPricing(
+    unitIds: string[],
+    monthlyRent: number
+  ): Promise<ApiResponse<{ updated: number }>> {
+    return safeCall(() =>
+      authFetch('/landlord/units/bulk-price', {
+        method: 'PATCH',
+        body: JSON.stringify({ unitIds, monthlyRent }),
+      })
+    );
+  },
+
   // ---- Listings ----
   async listListings(status?: string): Promise<ApiResponse<Listing[]>> {
     return safeCall(() => authFetch(`/landlord/listings${toQuery({ status })}`));
@@ -322,6 +334,35 @@ export const landlordService = {
         body: JSON.stringify({ rentAmount, leaseEnd }),
       })
     );
+  },
+
+  async signLease(id: string, signatureData: string): Promise<ApiResponse<Lease>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${id}/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ signatureData }),
+      })
+    );
+  },
+
+  async downloadLeasePdf(id: string): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/landlord/leases/${id}/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `lease-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
   },
 
   // ---- Tenants ----

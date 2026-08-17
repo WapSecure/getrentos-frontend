@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { FileText, Download, Mail, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
 import type { RenewalOffer } from '@/types/lease';
 
 interface Lease {
@@ -75,7 +76,12 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2" size="sm">
+          <Button
+            variant="outline"
+            className="gap-2"
+            size="sm"
+            onClick={() => void renterService.downloadLeasePdf()}
+          >
             <Download className="w-4 h-4" />
             Download Lease
           </Button>

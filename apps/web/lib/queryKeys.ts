@@ -57,6 +57,7 @@ export const renterKeys = {
   conversations: ['renter', 'conversations'] as const,
   reminders: ['renter', 'reminders'] as const,
   lease: ['renter', 'lease'] as const,
+  pendingLease: ['renter', 'lease', 'pending'] as const,
   rentIncreases: ['renter', 'rentIncreases'] as const,
   upcomingPaymentReminders: ['renter', 'upcomingPaymentReminders'] as const,
   renewalOffer: ['renter', 'renewalOffer'] as const,
