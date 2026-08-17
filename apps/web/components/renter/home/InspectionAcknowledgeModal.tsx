@@ -1,38 +1,42 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Camera, RefreshCw, UserCheck } from 'lucide-react';
+import { X, Camera, UserCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { formatDate } from '@/lib/format';
-import type { PropertyInspection, RoomCondition, InspectionType } from '@/types/agent';
+import type { RenterInspection, RenterRoomCondition } from '@/types/renter';
 
-const conditionConfig: Record<RoomCondition, string> = {
+const conditionConfig: Record<RenterRoomCondition, string> = {
   excellent: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
   good: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
   fair: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
   poor: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
 };
 
-const typeConfig: Record<InspectionType, string> = {
-  move_in: 'Move-in',
-  move_out: 'Move-out',
-  periodic: 'Periodic',
-  other: 'Other',
+const typeLabels: Record<RenterInspection['type'], string> = {
+  move_in: 'Move-in inspection',
+  move_out: 'Move-out inspection',
+  periodic: 'Periodic inspection',
+  other: 'Inspection',
 };
 
-interface InspectionDetailModalProps {
-  inspection: PropertyInspection | null;
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(
+    new Date(value)
+  );
+
+interface InspectionAcknowledgeModalProps {
+  inspection: RenterInspection | null;
   onClose: () => void;
-  onSync: (inspectionId: string) => void;
+  onAcknowledge: (id: string) => void;
+  isAcknowledging?: boolean;
 }
 
-export const InspectionDetailModal = ({
+export const InspectionAcknowledgeModal = ({
   inspection,
   onClose,
-  onSync,
-}: InspectionDetailModalProps) => {
-  if (!inspection) return null;
-
+  onAcknowledge,
+  isAcknowledging,
+}: InspectionAcknowledgeModalProps) => {
   return (
     <AnimatePresence>
       {inspection && (
@@ -45,17 +49,10 @@ export const InspectionDetailModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-foreground">{inspection.propertyAddress}</h3>
+                <h3 className="font-semibold text-foreground">{typeLabels[inspection.type]}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {typeConfig[inspection.type]} · {inspection.clientName} ·{' '}
-                  {formatDate(inspection.scheduledDate)}
+                  {inspection.propertyAddress} · {formatDate(inspection.scheduledDate)}
                 </p>
-                {inspection.acknowledgedAt && (
-                  <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-                    <UserCheck className="w-3 h-3" />
-                    Tenant signed off {formatDate(inspection.acknowledgedAt)}
-                  </span>
-                )}
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
@@ -74,7 +71,7 @@ export const InspectionDetailModal = ({
                     </span>
                   </div>
                   {room.notes && <p className="text-xs text-muted-foreground mt-1">{room.notes}</p>}
-                  {room.photoCount > 0 && (
+                  {!!room.photoCount && (
                     <p className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
                       <Camera className="w-3 h-3" />
                       {room.photoCount} photo{room.photoCount === 1 ? '' : 's'}
@@ -84,19 +81,29 @@ export const InspectionDetailModal = ({
               ))}
             </div>
 
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" className="flex-1" onClick={onClose}>
-                Close
-              </Button>
-              {inspection.syncStatus !== 'synced' && (
-                <Button
-                  variant="primary"
-                  className="flex-1 gap-1.5"
-                  onClick={() => onSync(inspection.id)}
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Sync Now
-                </Button>
+            <div className="p-4 border-t border-border shrink-0">
+              {inspection.acknowledgedAt ? (
+                <p className="flex items-center justify-center gap-1.5 text-sm text-success">
+                  <UserCheck className="w-4 h-4" />
+                  Acknowledged {formatDate(inspection.acknowledgedAt)}
+                </p>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    className="gap-1.5"
+                    onClick={() => onAcknowledge(inspection.id)}
+                    disabled={isAcknowledging}
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    {isAcknowledging ? 'Saving…' : 'Confirm I reviewed this record'}
+                  </Button>
+                  <p className="mt-2 text-xs text-muted-foreground text-center">
+                    Acknowledging confirms you reviewed the recorded room conditions. It does not
+                    waive your right to dispute any item.
+                  </p>
+                </>
               )}
             </div>
           </motion.div>

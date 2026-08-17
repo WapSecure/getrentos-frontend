@@ -29,8 +29,10 @@ interface AgentInspectionApi {
   clientName: string | null;
   scheduledAt: string;
   status: 'DRAFT' | 'SUBMITTED';
+  type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
   rooms: PropertyInspection['rooms'];
   overallCondition: PropertyInspection['overallCondition'] | null;
+  acknowledgedAt: string | null;
   task: { id: string; status: string };
   property: { title: string; address: string; city: string; state: string };
 }
@@ -78,9 +80,11 @@ function mapAgentInspection(inspection: AgentInspectionApi): PropertyInspection 
     clientName: inspection.clientName || 'Property client',
     scheduledDate: inspection.scheduledAt,
     status: inspection.status === 'SUBMITTED' ? 'completed' : 'in_progress',
+    type: lower(inspection.type),
     rooms: inspection.rooms,
     overallCondition: inspection.overallCondition || undefined,
     syncStatus: 'synced',
+    acknowledgedAt: inspection.acknowledgedAt || undefined,
   };
 }
 
@@ -163,6 +167,7 @@ export const agentService = {
   submitInspection: (data: {
     taskId: string;
     scheduledAt: string;
+    type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
     rooms: PropertyInspection['rooms'];
     clientName?: string;
     overallCondition?: string;

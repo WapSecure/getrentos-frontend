@@ -29,6 +29,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import type { MaintenanceRequest, MaintenanceRequestStatus } from '@/types/maintenance';
+import { InspectionsSection } from '@/components/renter/home/InspectionsSection';
 
 const formatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -438,6 +439,10 @@ export default function RenterHomePage() {
             </div>
           </div>
         </Card>
+      </section>
+
+      <section>
+        <InspectionsSection />
       </section>
 
       <section>

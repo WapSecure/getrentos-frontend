@@ -75,6 +75,7 @@ export const renterKeys = {
   applicationAssistant: ['renter', 'applicationAssistant'] as const,
   savedSearches: ['renter', 'savedSearches'] as const,
   profile: ['renter', 'profile'] as const,
+  inspections: ['renter', 'inspections'] as const,
 };
 
 export const realtorKeys = {

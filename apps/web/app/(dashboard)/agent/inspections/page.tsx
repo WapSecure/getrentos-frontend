@@ -30,11 +30,12 @@ function AgentInspectionsPageContent() {
     queryFn: () => unwrap(agentService.listTasks()),
   });
   const submitInspection = useMutation({
-    mutationFn: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus'>) =>
+    mutationFn: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) =>
       unwrap(
         agentService.submitInspection({
           taskId: inspection.taskId,
           scheduledAt: inspection.scheduledDate,
+          type: inspection.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
           rooms: inspection.rooms,
           clientName: inspection.clientName,
           overallCondition: inspection.overallCondition,
@@ -49,13 +50,14 @@ function AgentInspectionsPageContent() {
       agentOfflineQueue.enqueue('inspection', {
         taskId: inspection.taskId,
         scheduledAt: inspection.scheduledDate,
+        type: inspection.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
         rooms: inspection.rooms,
         clientName: inspection.clientName,
         overallCondition: inspection.overallCondition,
       }),
   });
 
-  const handleSubmit = (data: Omit<PropertyInspection, 'id' | 'syncStatus'>) => {
+  const handleSubmit = (data: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) => {
     submitInspection.mutate(data);
   };
 

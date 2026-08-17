@@ -2,7 +2,7 @@ import { ApiError } from '@/lib/apiClient';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import { getAuthToken } from '@/lib/authStorage';
-import type { Property, Application, GeoInsights } from '@/types/renter';
+import type { Property, Application, GeoInsights, RenterInspection } from '@/types/renter';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
@@ -27,6 +27,16 @@ export interface SavedSearch {
   alertsEnabled: boolean;
   lastRun: string;
   newMatches: number;
+}
+
+interface RenterInspectionApi {
+  id: string;
+  type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
+  scheduledAt: string;
+  overallCondition: string | null;
+  rooms: RenterInspection['rooms'];
+  acknowledgedAt: string | null;
+  property: { title: string; address: string };
 }
 
 export interface MoveInChecklistItem {
@@ -740,6 +750,32 @@ export const renterService = {
         body: JSON.stringify({ rating }),
       })
     );
+  },
+
+  // ---- Inspections ----
+  async listInspections(): Promise<ApiResponse<RenterInspection[]>> {
+    const response = await safeCall(() => authFetch<RenterInspectionApi[]>('/renter/inspections'));
+    if (response.success && response.data) {
+      return {
+        ...response,
+        data: response.data.map((inspection) => ({
+          id: inspection.id,
+          type: inspection.type.toLowerCase() as RenterInspection['type'],
+          scheduledDate: inspection.scheduledAt,
+          propertyName: inspection.property.title,
+          propertyAddress: inspection.property.address,
+          overallCondition: (inspection.overallCondition?.toLowerCase() ||
+            undefined) as RenterInspection['overallCondition'],
+          rooms: inspection.rooms,
+          acknowledgedAt: inspection.acknowledgedAt || undefined,
+        })),
+      };
+    }
+    return { success: false, error: response.error, message: response.message };
+  },
+
+  async acknowledgeInspection(id: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/renter/inspections/${id}/acknowledge`, { method: 'POST' }));
   },
 
   // ---- Notifications ----
