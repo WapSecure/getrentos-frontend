@@ -30,10 +30,10 @@ export const RoommateAgreementModal = ({
   const handleSubmit = () => {
     if (!agreed) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onClose();
-    }, 1500);
+    // Agreement acknowledged — the household terms are shared with roommates
+    // in-app. No fabricated server round-trip.
+    setIsSubmitting(false);
+    onClose();
   };
 
   return (
