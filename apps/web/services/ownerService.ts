@@ -74,6 +74,12 @@ export type OwnerMetricApi = InvestmentMetrics;
 export type OwnerLeadApi = BuyerLead;
 export type OwnerDocumentApi = OwnershipTransferDocument;
 
+export interface RealtorOption {
+  id: string;
+  name: string;
+  speciality?: string;
+}
+
 export const ownerService = {
   // Dashboard
   getDashboard: () => safeCall(() => authFetch<OwnerDashboard>('/owner/dashboard')),
@@ -134,6 +140,7 @@ export const ownerService = {
 
   // Leads
   listLeads: () => safeCall(() => authFetch<OwnerLeadApi[]>('/owner/leads')),
+  getRealtors: () => safeCall(() => authFetch<RealtorOption[]>('/owner/leads/realtors')),
 
   // Documents
   listDocuments: () => safeCall(() => authFetch<OwnerDocumentApi[]>('/owner/documents')),

@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, UserPlus, Check } from 'lucide-react';
+import { X, UserPlus, Check, Loader2, Users } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { getInitials } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerService } from '@/services/ownerService';
+import { ownerKeys } from '@/lib/queryKeys';
 import type { BuyerLead } from '@/types/owner';
 
 interface AssignRealtorModalProps {
@@ -13,15 +17,13 @@ interface AssignRealtorModalProps {
   onAssign: (leadId: string, realtorName: string) => void;
 }
 
-const mockRealtors = [
-  { id: 'realtor_001', name: 'Chidinma Nwosu', speciality: 'Luxury Residential' },
-  { id: 'realtor_002', name: 'Tunde Bakare', speciality: 'Commercial & Land' },
-  { id: 'realtor_003', name: 'Fatima Ibrahim', speciality: 'Waterfront Properties' },
-];
-
 export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorModalProps) => {
   const [selectedId, setSelectedId] = useState('');
   const [assigned, setAssigned] = useState(false);
+  const { data: realtors = [], isLoading } = useQuery({
+    queryKey: ownerKeys.realtors,
+    queryFn: () => unwrap(ownerService.getRealtors()),
+  });
 
   if (!lead) return null;
 
@@ -31,7 +33,7 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
     onClose();
   };
 
-  const selectedRealtor = mockRealtors.find((r) => r.id === selectedId);
+  const selectedRealtor = realtors.find((r) => r.id === selectedId);
 
   const handleAssign = () => {
     if (!selectedRealtor) return;
@@ -71,8 +73,23 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
                     {selectedRealtor?.name} has been assigned to this lead.
                   </p>
                 </div>
+              ) : isLoading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading realtors…
+                </div>
+              ) : realtors.length === 0 ? (
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-secondary flex items-center justify-center">
+                    <Users className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-foreground">No verified realtors yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Realtors appear here once their identity is verified.
+                  </p>
+                </div>
               ) : (
-                mockRealtors.map((realtor) => (
+                realtors.map((realtor) => (
                   <button
                     key={realtor.id}
                     onClick={() => setSelectedId(realtor.id)}

@@ -160,6 +160,7 @@ export const ownerKeys = {
   transactions: ['owner', 'transactions'] as const,
   analytics: ['owner', 'analytics'] as const,
   leads: ['owner', 'leads'] as const,
+  realtors: ['owner', 'leads', 'realtors'] as const,
   documents: ['owner', 'documents'] as const,
   reviews: ['owner', 'reviews'] as const,
   profile: ['owner', 'profile'] as const,
