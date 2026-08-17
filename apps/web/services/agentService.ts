@@ -2,6 +2,7 @@ import { authFetch, safeCall } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { AgentTask, PropertyInspection, TaskStatus, VerificationVisit } from '@/types/agent';
 import type { AgentDocument } from '@/types/agent';
+import type { TrustProfile } from '@/types/trust-score';
 
 export interface AgentDashboard {
   assignedProperties: number;
@@ -142,6 +143,7 @@ export const agentService = {
         reviewCount: number;
       }>('/agent/profile')
     ),
+  getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/agent/trust-profile')),
   listTasks: async (): Promise<ApiResponse<AgentTask[]>> => {
     const response = await safeCall(() => authFetch<AgentTaskApi[]>('/agent/tasks'));
     if (response.success && response.data) {

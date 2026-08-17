@@ -8,6 +8,7 @@ import type {
   BuyerLead,
   OwnershipTransferDocument,
 } from '@/types/owner';
+import type { TrustProfile } from '@/types/trust-score';
 
 export interface OwnerDashboard {
   totalProperties: number;
@@ -160,6 +161,7 @@ export const ownerService = {
 
   // Profile / settings
   getProfile: () => safeCall(() => authFetch<OwnerProfile>('/owner/profile')),
+  getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/owner/trust-profile')),
   updateProfile: (data: Partial<OwnerProfile>) =>
     safeCall(() => authFetch('/owner/profile', { method: 'PUT', body: JSON.stringify(data) })),
 

@@ -7,6 +7,7 @@ import type {
   ViewingAppointment,
   RealtorOffer,
 } from '@/types/realtor';
+import type { TrustProfile } from '@/types/trust-score';
 
 export interface RealtorDashboardStats {
   totalListings: number;
@@ -233,6 +234,7 @@ export const realtorService = {
   },
   getDocumentDownload: (id: string) =>
     safeCall(() => authFetch<{ name: string; url: string }>(`/realtor/documents/${id}/download`)),
+  getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/realtor/trust-profile')),
   listConversations: () => safeCall(() => authFetch('/realtor/messages')),
   getConversationMessages: (id: string) => safeCall(() => authFetch(`/realtor/messages/${id}`)),
   sendMessage: (id: string, text: string, files: File[] = []) => {

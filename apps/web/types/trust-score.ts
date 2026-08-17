@@ -21,3 +21,18 @@ export interface Badge {
   earned: boolean;
   description: string;
 }
+
+export interface TrustProfileStat {
+  label: string;
+  value: string;
+}
+
+/** Role-appropriate trust profile returned by /<role>/trust-profile. */
+export interface TrustProfile {
+  trustScore: number;
+  averageScore: number;
+  verifications: VerificationItem[];
+  history: TrustScoreHistoryItem[];
+  badges: Badge[];
+  stats: TrustProfileStat[];
+}

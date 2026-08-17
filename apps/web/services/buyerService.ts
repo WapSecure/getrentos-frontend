@@ -6,6 +6,7 @@ import type {
   BuyerEscrowTransaction,
   BuyerDocument,
 } from '@/types/buyer';
+import type { TrustProfile } from '@/types/trust-score';
 
 export interface BuyerDashboard {
   savedListings: number;
@@ -164,6 +165,7 @@ export const buyerService = {
 
   // Profile / settings
   getProfile: () => safeCall(() => authFetch<BuyerProfile>('/buyer/profile')),
+  getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/buyer/trust-profile')),
   updateProfile: (data: Partial<BuyerProfile>) =>
     safeCall(() => authFetch('/buyer/profile', { method: 'PUT', body: JSON.stringify(data) })),
 
