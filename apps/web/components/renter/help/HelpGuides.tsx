@@ -12,7 +12,7 @@ interface Guide {
   duration: string;
 }
 
-const mockGuides: Guide[] = [
+const helpGuides: Guide[] = [
   {
     id: '1',
     title: 'Getting started as a renter',
@@ -92,7 +92,7 @@ interface HelpGuidesProps {
 export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const filteredGuides = mockGuides.filter(
+  const filteredGuides = helpGuides.filter(
     (guide) => selectedCategory === 'all' || guide.category === selectedCategory
   );
 

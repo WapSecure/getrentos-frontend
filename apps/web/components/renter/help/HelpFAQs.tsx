@@ -10,7 +10,7 @@ interface FAQ {
   category: string;
 }
 
-const mockFAQs: FAQ[] = [
+const helpFAQs: FAQ[] = [
   {
     id: '1',
     question: 'How do I reset my password?',
@@ -76,7 +76,7 @@ interface HelpFAQsProps {
 export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const filteredFAQs = mockFAQs.filter(
+  const filteredFAQs = helpFAQs.filter(
     (faq) => selectedCategory === 'all' || faq.category === selectedCategory
   );
 

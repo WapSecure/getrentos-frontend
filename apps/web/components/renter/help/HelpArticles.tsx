@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { FileText, Eye, ThumbsUp, ChevronRight } from 'lucide-react';
-import { Button } from '@getrentos/ui';
 
 interface Article {
   id: string;
@@ -14,7 +12,7 @@ interface Article {
   updatedAt: string;
 }
 
-const mockArticles: Article[] = [
+const helpArticles: Article[] = [
   {
     id: '1',
     title: 'How to apply for a rental property',
@@ -50,7 +48,7 @@ interface HelpArticlesProps {
 }
 
 export const HelpArticles = ({ searchQuery, selectedCategory }: HelpArticlesProps) => {
-  const filteredArticles = mockArticles.filter((article) => {
+  const filteredArticles = helpArticles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.description.toLowerCase().includes(searchQuery.toLowerCase());
