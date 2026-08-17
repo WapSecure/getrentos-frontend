@@ -19,19 +19,19 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  propertyId: string;
-  propertyName: string;
+  propertyId?: string;
+  propertyName?: string;
   propertyImage?: string;
   participantId: string;
   participantName: string;
   participantRole: 'renter' | 'landlord' | 'agent';
   participantAvatar?: string;
-  lastMessage: string;
+  lastMessage?: string;
   lastMessageTime: string;
   unreadCount: number;
   isPinned: boolean;
   isArchived: boolean;
-  messages: Message[];
+  messages?: Message[];
 }
 
 export interface Reminder {

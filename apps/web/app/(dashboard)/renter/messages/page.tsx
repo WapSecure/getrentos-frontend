@@ -78,7 +78,7 @@ export default function MessagesPage() {
           conversation.id === conversationId
             ? {
                 ...conversation,
-                messages: [...conversation.messages, optimisticMessage],
+                messages: [...(conversation.messages ?? []), optimisticMessage],
                 lastMessage: text,
                 lastMessageTime: optimisticMessage.timestamp,
               }
@@ -156,17 +156,17 @@ export default function MessagesPage() {
 
   const getConversationLabelIds = (conv: Conversation): string[] => {
     const ids: string[] = [];
-    if (conv.propertyName.includes('Loft')) ids.push('1');
-    if (conv.messages.some((m) => m.text.toLowerCase().includes('lease'))) ids.push('2');
-    if (conv.messages.some((m) => /maintenance|repair/i.test(m.text))) ids.push('3');
+    if (conv.propertyName?.includes('Loft')) ids.push('1');
+    if ((conv.messages ?? []).some((m) => m.text.toLowerCase().includes('lease'))) ids.push('2');
+    if ((conv.messages ?? []).some((m) => /maintenance|repair/i.test(m.text))) ids.push('3');
     return ids;
   };
 
   const filteredConversations = conversations.filter((conv) => {
     const matchesSearch =
       conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conv.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase());
+      (conv.propertyName ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (conv.lastMessage ?? '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesType =
       filterType === 'all' ||
