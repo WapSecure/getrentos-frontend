@@ -84,6 +84,7 @@ export const renterKeys = {
   savedSearches: ['renter', 'savedSearches'] as const,
   settingsPreferences: ['renter', 'settings', 'preferences'] as const,
   profile: ['renter', 'profile'] as const,
+  twoFactor: ['renter', 'settings', 'twoFactor'] as const,
 };
 
 export const realtorKeys = {

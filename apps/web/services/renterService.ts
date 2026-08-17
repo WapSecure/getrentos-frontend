@@ -990,6 +990,34 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/settings/data-export'));
   },
 
+  async getTwoFactorStatus(): Promise<ApiResponse<{ enrolled: boolean; enabled: boolean }>> {
+    return safeCall(() => authFetch('/renter/settings/2fa'));
+  },
+
+  async enrollTwoFactor(): Promise<
+    ApiResponse<{ secret: string; otpauthUrl: string; qrDataUrl: string }>
+  > {
+    return safeCall(() => authFetch('/renter/settings/2fa/enroll', { method: 'POST' }));
+  },
+
+  async enableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
+    return safeCall(() =>
+      authFetch('/renter/settings/2fa/enable', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      })
+    );
+  },
+
+  async disableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
+    return safeCall(() =>
+      authFetch('/renter/settings/2fa/disable', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      })
+    );
+  },
+
   async deleteAccount(password: string): Promise<ApiResponse<{ message: string }>> {
     return safeCall(() =>
       authFetch('/renter/settings/account', {
