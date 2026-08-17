@@ -13,8 +13,51 @@ export interface BuyerDashboard {
   activeOffers: number;
   upcomingViewings: number;
   activeTransactions: number;
+  documentsUploaded: number;
+  completedPurchases: number;
   recommendations?: { id: string; title: string; price: number; city: string }[];
   recentActivity: { id: string; type: string; message: string; timestamp: string }[];
+}
+
+export interface BuyerPaymentMethod {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
+}
+
+export interface BuyerNotificationPreference {
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
+export interface BuyerSearchPreferences {
+  minBudget: number;
+  maxBudget: number;
+  preferredTypes: string[];
+  preferredLocations: string;
+  notifyOnMatch: boolean;
+}
+
+export interface BuyerNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface BuyerOfferThreadMessage {
+  id: string;
+  offerId: string;
+  senderId: string;
+  senderName: string;
+  type: string;
+  amount?: number;
+  text?: string;
+  timestamp: string;
 }
 
 export interface BuyerProfile {
@@ -130,6 +173,17 @@ export const buyerService = {
   }) => safeCall(() => authFetch('/buyer/offers', { method: 'POST', body: JSON.stringify(data) })),
   withdrawOffer: (id: string) =>
     safeCall(() => authFetch(`/buyer/offers/${id}/withdraw`, { method: 'POST' })),
+  counterOffer: (id: string, amount: number, message?: string) =>
+    safeCall(() =>
+      authFetch(`/buyer/offers/${id}/counter`, {
+        method: 'POST',
+        body: JSON.stringify({ amount, message }),
+      })
+    ),
+  acceptOffer: (id: string) =>
+    safeCall(() => authFetch(`/buyer/offers/${id}/accept`, { method: 'POST' })),
+  getOfferThread: (id: string) =>
+    safeCall(() => authFetch<BuyerOfferThreadMessage[]>(`/buyer/offers/${id}/thread`)),
 
   // Transactions / escrow
   listTransactions: () => safeCall(() => authFetch<BuyerTransactionApi[]>('/buyer/transactions')),
@@ -168,6 +222,46 @@ export const buyerService = {
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/buyer/trust-profile')),
   updateProfile: (data: Partial<BuyerProfile>) =>
     safeCall(() => authFetch('/buyer/profile', { method: 'PUT', body: JSON.stringify(data) })),
+
+  // Payment method
+  getPaymentMethod: () =>
+    safeCall(() => authFetch<BuyerPaymentMethod>('/buyer/settings/payment-method')),
+  updatePaymentMethod: (data: { bankName: string; accountNumber: string; accountName: string }) =>
+    safeCall(() =>
+      authFetch<BuyerPaymentMethod>('/buyer/settings/payment-method', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+    ),
+
+  // Notification preferences
+  getNotificationPreferences: () =>
+    safeCall(() => authFetch<BuyerNotificationPreference[]>('/buyer/settings/notifications')),
+  updateNotificationPreferences: (preferences: BuyerNotificationPreference[]) =>
+    safeCall(() =>
+      authFetch<BuyerNotificationPreference[]>('/buyer/settings/notifications', {
+        method: 'PUT',
+        body: JSON.stringify({ preferences }),
+      })
+    ),
+
+  // Search preferences
+  getSearchPreferences: () =>
+    safeCall(() => authFetch<BuyerSearchPreferences>('/buyer/settings/search-preferences')),
+  updateSearchPreferences: (data: Partial<BuyerSearchPreferences>) =>
+    safeCall(() =>
+      authFetch<BuyerSearchPreferences>('/buyer/settings/search-preferences', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+    ),
+
+  // Notifications feed
+  getNotifications: () => safeCall(() => authFetch<BuyerNotification[]>('/buyer/notifications')),
+  markNotificationRead: (id: string) =>
+    safeCall(() => authFetch(`/buyer/notifications/${id}/read`, { method: 'PATCH' })),
+  markAllNotificationsRead: () =>
+    safeCall(() => authFetch('/buyer/notifications/read-all', { method: 'POST' })),
 
   // Messages
   listConversations: () =>

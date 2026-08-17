@@ -2,24 +2,71 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
+import { buyerService } from '@/services/buyerService';
 
 const propertyTypeOptions = ['Apartment', 'Duplex', 'Bungalow', 'Terrace', 'Land', 'Commercial'];
 
 export const SearchPreferencesSettings = () => {
-  const [minBudget, setMinBudget] = useState('50000000');
-  const [maxBudget, setMaxBudget] = useState('150000000');
-  const [preferredTypes, setPreferredTypes] = useState<string[]>(['Apartment', 'Duplex']);
-  const [preferredLocations, setPreferredLocations] = useState('Lekki, Victoria Island, Ikoyi');
+  const queryClient = useQueryClient();
+  const [minBudget, setMinBudget] = useState('');
+  const [maxBudget, setMaxBudget] = useState('');
+  const [preferredTypes, setPreferredTypes] = useState<string[]>([]);
+  const [preferredLocations, setPreferredLocations] = useState('');
   const [notifyOnMatch, setNotifyOnMatch] = useState(true);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: prefs } = useQuery({
+    queryKey: buyerKeys.searchPreferences,
+    queryFn: () => unwrap(buyerService.getSearchPreferences()),
+  });
+
+  useEffect(() => {
+    if (!prefs) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMinBudget(prefs.minBudget ? String(prefs.minBudget) : '');
+
+    setMaxBudget(prefs.maxBudget ? String(prefs.maxBudget) : '');
+
+    setPreferredTypes(prefs.preferredTypes ?? []);
+
+    setPreferredLocations(prefs.preferredLocations ?? '');
+
+    setNotifyOnMatch(prefs.notifyOnMatch ?? true);
+  }, [prefs]);
 
   const toggleType = (type: string) => {
     setPreferredTypes((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
   };
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        buyerService.updateSearchPreferences({
+          minBudget: Number(minBudget) || 0,
+          maxBudget: Number(maxBudget) || 0,
+          preferredTypes,
+          preferredLocations,
+          notifyOnMatch,
+        })
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: buyerKeys.searchPreferences });
+      setToast({ message: 'Search preferences saved.', variant: 'success' });
+    },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Failed to save search preferences.',
+        variant: 'error',
+      }),
+  });
 
   return (
     <div>
@@ -37,6 +84,7 @@ export const SearchPreferencesSettings = () => {
               min={0}
               value={minBudget}
               onChange={(e) => setMinBudget(e.target.value)}
+              placeholder="e.g. 50000000"
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -47,6 +95,7 @@ export const SearchPreferencesSettings = () => {
               min={0}
               value={maxBudget}
               onChange={(e) => setMaxBudget(e.target.value)}
+              placeholder="e.g. 150000000"
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -101,7 +150,19 @@ export const SearchPreferencesSettings = () => {
         </label>
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+      <Button
+        variant="primary"
+        className="mt-6 gap-1.5"
+        isLoading={save.isPending}
+        disabled={save.isPending}
+        onClick={() => save.mutate()}
+      >
+        Save Preferences
+      </Button>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };

@@ -5,28 +5,25 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { BuyerProfileDropdown } from './BuyerProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
+import { buyerService } from '@/services/buyerService';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface BuyerNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
-interface NavNotification {
-  id: number;
-  title: string;
-  message: string;
-  read: boolean;
-  time: string;
-}
-
 export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -36,30 +33,20 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
   };
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NavNotification[]>([
-    {
-      id: 1,
-      title: 'Offer countered',
-      message: 'The owner of Palm Court Villa sent a counter offer of ₦96,500,000',
-      read: false,
-      time: '2026-08-07T10:15:00.000Z',
-    },
-    {
-      id: 2,
-      title: 'Viewing confirmed',
-      message: 'Your viewing for Ocean View Towers is confirmed for Aug 9, 2pm',
-      read: false,
-      time: '2026-08-07T07:30:00.000Z',
-    },
-    {
-      id: 3,
-      title: 'Escrow milestone reached',
-      message: 'Ownership verification completed for Surulere Family Duplex',
-      read: true,
-      time: '2026-08-06T12:00:00.000Z',
-    },
-  ]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { data: notifications = [] } = useQuery({
+    queryKey: buyerKeys.notifications,
+    queryFn: () => unwrap(buyerService.getNotifications()),
+  });
+
+  const markRead = useMutation({
+    mutationFn: (id: string) => unwrap(buyerService.markNotificationRead(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.notifications }),
+  });
+  const markAllRead = useMutation({
+    mutationFn: () => unwrap(buyerService.markAllNotificationsRead()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.notifications }),
+  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -69,12 +56,12 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAsRead = (id: string) => {
+    markRead.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllRead.mutate();
   };
 
   return (
@@ -169,12 +156,10 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                                   {notification.title}
                                 </h4>
                                 <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.time)}
+                                  {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.message}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{notification.body}</p>
                             </div>
                           ))
                         )}

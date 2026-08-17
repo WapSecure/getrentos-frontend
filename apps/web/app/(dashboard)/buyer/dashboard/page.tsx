@@ -24,7 +24,13 @@ export default function BuyerDashboardPage() {
   const hasActivity =
     !isLoading &&
     dashboard != null &&
-    (dashboard.savedListings > 0 || dashboard.activeOffers > 0 || dashboard.activeTransactions > 0);
+    (dashboard.savedListings > 0 ||
+      dashboard.activeOffers > 0 ||
+      dashboard.activeTransactions > 0 ||
+      dashboard.upcomingViewings > 0 ||
+      dashboard.documentsUploaded > 0 ||
+      dashboard.completedPurchases > 0 ||
+      dashboard.recentActivity.length > 0);
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -57,13 +63,13 @@ export default function BuyerDashboardPage() {
             upcomingViewings={dashboard?.upcomingViewings ?? 0}
             activeOffers={dashboard?.activeOffers ?? 0}
             activeTransactions={dashboard?.activeTransactions ?? 0}
-            documentsUploaded={0}
-            completedPurchases={0}
+            documentsUploaded={dashboard?.documentsUploaded ?? 0}
+            completedPurchases={dashboard?.completedPurchases ?? 0}
           />
 
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <BuyerActivityFeed />
+              <BuyerActivityFeed activity={dashboard?.recentActivity ?? []} />
             </div>
             <div>
               <BuyerQuickActions />

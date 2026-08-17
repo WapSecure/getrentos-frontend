@@ -1,31 +1,53 @@
 'use client';
 
-import { useState } from 'react';
-import { Handshake, ShieldCheck, MessageCircle, CalendarClock, Heart } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Handshake, ShieldCheck, MessageCircle, CalendarClock, Heart, Bell } from 'lucide-react';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
+import { buyerService, type BuyerNotificationPreference } from '@/services/buyerService';
 
-interface NotificationPreference {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-  email: boolean;
-  push: boolean;
-}
-
-const initialPreferences: NotificationPreference[] = [
-  { id: 'offers', label: 'Offer Updates & Counters', icon: Handshake, email: true, push: true },
-  { id: 'escrow', label: 'Escrow Milestone Updates', icon: ShieldCheck, email: true, push: true },
-  { id: 'viewings', label: 'Viewing Confirmations', icon: CalendarClock, email: true, push: true },
-  { id: 'messages', label: 'New Messages', icon: MessageCircle, email: true, push: false },
-  { id: 'saved', label: 'Price Drops on Saved Properties', icon: Heart, email: true, push: false },
-];
+const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
+  offers: { label: 'Offer Updates & Counters', icon: Handshake },
+  escrow: { label: 'Escrow Milestone Updates', icon: ShieldCheck },
+  viewings: { label: 'Viewing Confirmations', icon: CalendarClock },
+  messages: { label: 'New Messages', icon: MessageCircle },
+  saved: { label: 'Price Drops on Saved Properties', icon: Heart },
+};
 
 export const NotificationSettings = () => {
-  const [preferences, setPreferences] = useState(initialPreferences);
+  const queryClient = useQueryClient();
+  const [preferences, setPreferences] = useState<BuyerNotificationPreference[]>([]);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: serverPrefs = [] } = useQuery({
+    queryKey: buyerKeys.notificationPrefs,
+    queryFn: () => unwrap(buyerService.getNotificationPreferences()),
+  });
+
+  useEffect(() => {
+    if (serverPrefs.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPreferences(serverPrefs);
+  }, [serverPrefs]);
 
   const toggle = (id: string, channel: 'email' | 'push') => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
   };
+
+  const save = useMutation({
+    mutationFn: () => unwrap(buyerService.updateNotificationPreferences(preferences)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: buyerKeys.notificationPrefs });
+      setToast({ message: 'Notification preferences saved.', variant: 'success' });
+    },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Failed to save notification preferences.',
+        variant: 'error',
+      }),
+  });
 
   return (
     <div>
@@ -39,28 +61,44 @@ export const NotificationSettings = () => {
           <span className="w-11 text-center">Email</span>
           <span className="w-11 text-center">Push</span>
         </div>
-        {preferences.map((pref) => (
-          <div
-            key={pref.id}
-            className="flex items-center justify-between p-3 rounded-lg border border-border"
-          >
-            <div className="flex items-center gap-3">
-              <pref.icon className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-foreground">{pref.label}</span>
-            </div>
-            <div className="flex items-center gap-8">
-              <div className="w-10 flex justify-center">
-                <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+        {preferences.map((pref) => {
+          const meta = CATEGORY_META[pref.id] ?? { label: pref.id, icon: Bell };
+          const Icon = meta.icon;
+          return (
+            <div
+              key={pref.id}
+              className="flex items-center justify-between p-3 rounded-lg border border-border"
+            >
+              <div className="flex items-center gap-3">
+                <Icon className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-foreground">{meta.label}</span>
               </div>
-              <div className="w-10 flex justify-center">
-                <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+              <div className="flex items-center gap-8">
+                <div className="w-10 flex justify-center">
+                  <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                </div>
+                <div className="w-10 flex justify-center">
+                  <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+      <Button
+        variant="primary"
+        className="mt-6 gap-1.5"
+        isLoading={save.isPending}
+        disabled={preferences.length === 0 || save.isPending}
+        onClick={() => save.mutate()}
+      >
+        Save Preferences
+      </Button>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };

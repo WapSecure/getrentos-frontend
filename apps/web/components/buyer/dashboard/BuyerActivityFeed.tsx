@@ -2,47 +2,9 @@
 
 import { Handshake, CalendarClock, ShieldCheck, Heart } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/format';
+import type { BuyerDashboard } from '@/services/buyerService';
 
 type ActivityType = 'offer' | 'viewing' | 'escrow' | 'saved';
-
-interface ActivityItem {
-  id: string;
-  type: ActivityType;
-  title: string;
-  description: string;
-  time: string;
-}
-
-const activityItems: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'offer',
-    title: 'Offer countered',
-    description: 'The owner of Palm Court Villa sent a counter offer of ₦96,500,000',
-    time: '2026-08-07T10:15:00.000Z',
-  },
-  {
-    id: '2',
-    type: 'viewing',
-    title: 'Viewing confirmed',
-    description: 'Your viewing for Ocean View Towers is confirmed for Aug 9, 2pm',
-    time: '2026-08-07T07:30:00.000Z',
-  },
-  {
-    id: '3',
-    type: 'escrow',
-    title: 'Escrow milestone reached',
-    description: 'Ownership verification completed for Surulere Family Duplex',
-    time: '2026-08-06T12:00:00.000Z',
-  },
-  {
-    id: '4',
-    type: 'saved',
-    title: 'Price drop on saved property',
-    description: 'Lekki Waterfront Duplex reduced its asking price by ₦2,000,000',
-    time: '2026-08-05T16:20:00.000Z',
-  },
-];
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
@@ -63,7 +25,37 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
   },
 };
 
-export const BuyerActivityFeed = () => {
+const titleFor = (type: string): string => {
+  switch (type) {
+    case 'offer':
+      return 'Offer update';
+    case 'viewing':
+      return 'Viewing update';
+    case 'saved':
+      return 'Saved property';
+    default:
+      return 'Activity';
+  }
+};
+
+const typeFor = (type: string): ActivityType => {
+  switch (type) {
+    case 'offer':
+      return 'offer';
+    case 'viewing':
+      return 'viewing';
+    case 'saved':
+      return 'saved';
+    default:
+      return 'escrow';
+  }
+};
+
+interface BuyerActivityFeedProps {
+  activity: BuyerDashboard['recentActivity'];
+}
+
+export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -74,25 +66,34 @@ export const BuyerActivityFeed = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {activityItems.map((item) => {
-          const config = typeConfig[item.type];
-          const Icon = config.icon;
-          return (
-            <div
-              key={item.id}
-              className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-            >
-              <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                <Icon className={`w-4 h-4 ${config.color}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
-              </div>
+        {activity.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
+              <Heart className="w-5 h-5 text-muted-foreground" />
             </div>
-          );
-        })}
+            <p className="text-sm text-muted-foreground">No activity yet</p>
+          </div>
+        ) : (
+          activity.map((item) => {
+            const config = typeConfig[typeFor(item.type)];
+            const Icon = config.icon;
+            return (
+              <div
+                key={item.id}
+                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+              >
+                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
+                  <Icon className={`w-4 h-4 ${config.color}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.message}</p>
+                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.timestamp)}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

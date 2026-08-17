@@ -16,30 +16,6 @@ import { buyerKeys } from '@/lib/queryKeys';
 import { cn } from '@/lib/cn';
 import type { BuyerOffer, BuyerOfferStatus, BuyerOfferMessage } from '@/types/buyer';
 
-const initialMessages: Record<string, BuyerOfferMessage[]> = {
-  offer_001: [
-    {
-      id: 'm1',
-      offerId: 'offer_001',
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'offer',
-      amount: 85_000_000,
-      text: 'Submitted an offer of',
-      timestamp: '2026-08-07T09:30:00.000Z',
-    },
-    {
-      id: 'm2',
-      offerId: 'offer_001',
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'message',
-      text: 'Pre-approved for mortgage financing, ready to move quickly.',
-      timestamp: '2026-08-07T09:31:00.000Z',
-    },
-  ],
-};
-
 type StatusFilter = 'all' | BuyerOfferStatus;
 
 function BuyerOffersPageContent() {
@@ -57,7 +33,10 @@ function BuyerOffersPageContent() {
     queryFn: () => unwrap(buyerService.discover({})),
   });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.offers });
+  const invalidate = (offerId?: string) => {
+    queryClient.invalidateQueries({ queryKey: buyerKeys.offers });
+    if (offerId) queryClient.invalidateQueries({ queryKey: buyerKeys.offerThread(offerId) });
+  };
 
   const createMutation = useMutation({
     mutationFn: (data: {
@@ -66,22 +45,37 @@ function BuyerOffersPageContent() {
       financingType?: string;
       message?: string;
     }) => unwrap(buyerService.createOffer(data)),
-    onSuccess: invalidate,
+    onSuccess: () => invalidate(),
   });
   const withdrawMutation = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.withdrawOffer(id)),
-    onSuccess: invalidate,
+    onSuccess: (_result, id) => invalidate(id),
+  });
+  const counterMutation = useMutation({
+    mutationFn: ({ offerId, amount, note }: { offerId: string; amount: number; note?: string }) =>
+      unwrap(buyerService.counterOffer(offerId, amount, note)),
+    onSuccess: (_result, { offerId }) => invalidate(offerId),
+  });
+  const acceptMutation = useMutation({
+    mutationFn: (offerId: string) => unwrap(buyerService.acceptOffer(offerId)),
+    onSuccess: (_result, offerId) => invalidate(offerId),
   });
 
-  const [messagesByOffer, setMessagesByOffer] =
-    useState<Record<string, BuyerOfferMessage[]>>(initialMessages);
+  const [pendingMessages, setPendingMessages] = useState<Record<string, BuyerOfferMessage[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(!!defaultPropertyId);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
+  // Negotiation thread for the currently-open offer.
+  const { data: thread = [] } = useQuery({
+    queryKey: buyerKeys.offerThread(activeOfferId ?? ''),
+    queryFn: () => unwrap(buyerService.getOfferThread(activeOfferId as string)),
+    enabled: !!activeOfferId,
+  });
+
   const appendMessage = (offerId: string, message: BuyerOfferMessage) => {
-    setMessagesByOffer((prev) => ({
+    setPendingMessages((prev) => ({
       ...prev,
       [offerId]: [...(prev[offerId] || []), message],
     }));
@@ -95,20 +89,10 @@ function BuyerOffersPageContent() {
       message: offerData.message,
     });
     setIsMakeOfferOpen(false);
-    const optimisticId = `offer_${Date.now()}`;
-    appendMessage(optimisticId, {
-      id: `m_${Date.now()}`,
-      offerId: optimisticId,
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'offer',
-      amount: offerData.offerAmount,
-      text: 'Submitted an offer of',
-      timestamp: new Date().toISOString(),
-    });
   };
 
   const handleAcceptCounter = (offerId: string) => {
+    acceptMutation.mutate(offerId);
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -134,6 +118,7 @@ function BuyerOffersPageContent() {
   };
 
   const handleCounter = (offerId: string, amount: number, note: string) => {
+    counterMutation.mutate({ offerId, amount, note });
     appendMessage(offerId, {
       id: `sys_${Date.now()}`,
       offerId,
@@ -170,6 +155,22 @@ function BuyerOffersPageContent() {
   };
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
+
+  const messages: BuyerOfferMessage[] = activeOfferId
+    ? [
+        ...thread.map((m) => ({
+          id: m.id,
+          offerId: m.offerId,
+          senderId: (m.senderId === 'buyer' ? 'buyer' : 'owner') as 'buyer' | 'owner',
+          senderName: m.senderName,
+          type: m.type as BuyerOfferMessage['type'],
+          amount: m.amount,
+          text: m.text ?? '',
+          timestamp: m.timestamp,
+        })),
+        ...(pendingMessages[activeOfferId] || []),
+      ]
+    : [];
 
   const filteredOffers = offers.filter((o) => {
     const matchesSearch = o.propertyTitle.toLowerCase().includes(searchQuery.toLowerCase());
@@ -266,7 +267,7 @@ function BuyerOffersPageContent() {
 
       <BuyerOfferNegotiationModal
         offer={activeOffer}
-        messages={activeOfferId ? messagesByOffer[activeOfferId] || [] : []}
+        messages={messages}
         onClose={() => setActiveOfferId(null)}
         onAcceptCounter={handleAcceptCounter}
         onWithdraw={handleWithdraw}

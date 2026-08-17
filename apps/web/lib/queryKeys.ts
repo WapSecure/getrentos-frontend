@@ -198,5 +198,10 @@ export const buyerKeys = {
   conversations: ['buyer', 'conversations'] as const,
   messages: (conversationId: string) =>
     ['buyer', 'conversations', conversationId, 'messages'] as const,
+  paymentMethod: ['buyer', 'settings', 'payment-method'] as const,
+  notificationPrefs: ['buyer', 'settings', 'notifications'] as const,
+  searchPreferences: ['buyer', 'settings', 'search-preferences'] as const,
+  notifications: ['buyer', 'notifications'] as const,
+  offerThread: (offerId: string) => ['buyer', 'offers', offerId, 'thread'] as const,
   trustProfile: ['buyer', 'trust-profile'] as const,
 };
