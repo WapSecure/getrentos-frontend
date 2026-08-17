@@ -25,7 +25,7 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.AGENT_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
   { labelKey: 'sidebar.inspections', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },

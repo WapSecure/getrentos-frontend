@@ -10,8 +10,10 @@ import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
+import { navItems } from '../dashboard/RealtorSidebar';
 import { formatRelativeTime } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface RealtorNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -27,6 +29,7 @@ interface NavNotification {
 
 export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -197,7 +200,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-secondary"
+                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -226,23 +229,20 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background border-b border-border md:hidden"
+            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 space-y-2">
-              <Link
-                href={ROUTES.REALTOR_DASHBOARD}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href={ROUTES.REALTOR_LISTINGS}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Listings
-              </Link>
+            <div className="flex flex-col p-4 space-y-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {t(item.labelKey)}
+                </Link>
+              ))}
             </div>
           </motion.div>
         )}

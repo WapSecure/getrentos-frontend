@@ -35,7 +35,7 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.RENTER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.discover', href: ROUTES.RENTER_DISCOVER, icon: Search },
   { labelKey: 'sidebar.saved', href: ROUTES.RENTER_SAVED, icon: Heart },
