@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, FileText, FileSpreadsheet, X, Check } from 'lucide-react';
 import { Application } from '@/types/renter';
+import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
 interface ApplicationExportProps {
   isOpen: boolean;
@@ -15,9 +16,8 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
   const [exporting, setExporting] = useState<'pdf' | 'csv' | null>(null);
   const [completed, setCompleted] = useState(false);
 
-  const exportToCSV = async () => {
+  const exportToCSV = () => {
     setExporting('csv');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     const headers = [
       'Property',
@@ -40,32 +40,41 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
       a.size,
     ]);
 
-    const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `applications-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(`applications-${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
 
     setCompleted(true);
     setTimeout(() => {
       setCompleted(false);
       onClose();
       setExporting(null);
-    }, 1500);
+    }, 1000);
   };
 
-  const exportToPDF = async () => {
+  const exportToPDF = () => {
     setExporting('pdf');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const rows = applications
+      .map(
+        (a) =>
+          `<tr><td>${escapeHtml(a.title)}</td><td>${escapeHtml(a.address)}</td><td>${escapeHtml(
+            a.status
+          )}</td><td>${escapeHtml(a.applicationDate)}</td><td>${a.price.toLocaleString()}</td><td>${
+            a.bedrooms
+          }</td><td>${a.bathrooms}</td><td>${a.size}</td></tr>`
+      )
+      .join('');
+
+    printHtml(
+      'Applications Export',
+      `<h1>Applications Export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${applications.length} application${applications.length === 1 ? '' : 's'}</p><table><thead><tr><th>Property</th><th>Address</th><th>Status</th><th>Applied</th><th>Price</th><th>Beds</th><th>Baths</th><th>Size</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No applications</td></tr>'}</tbody></table>`
+    );
+
     setCompleted(true);
     setTimeout(() => {
       setCompleted(false);
       onClose();
       setExporting(null);
-    }, 1500);
+    }, 1000);
   };
 
   return (

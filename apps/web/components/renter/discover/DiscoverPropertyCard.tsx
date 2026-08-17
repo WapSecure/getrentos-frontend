@@ -164,9 +164,9 @@ export const DiscoverPropertyCard = ({
         </div>
 
         <div className="flex flex-wrap gap-3 mt-2 text-xs border-t border-gray-100 dark:border-gray-800 pt-2">
-          <CommuteCalculator propertyLocation={property.location} />
+          <CommuteCalculator listingId={property.id} propertyLocation={property.location} />
           <RentVsBuyCalculator propertyPrice={property.price} monthlyRent={property.price / 12} />
-          <NeighborhoodCompare />
+          <NeighborhoodCompare listingId={property.id} propertyLocation={property.location} />
         </div>
 
         {isHovered && (

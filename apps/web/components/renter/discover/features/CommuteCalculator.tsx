@@ -4,32 +4,42 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Car, Bus, Train, Clock, Navigation, X } from 'lucide-react';
+import { MapPin, Car, Bus, Train, Clock, Navigation, X, AlertCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
 
 interface CommuteCalculatorProps {
+  listingId: string;
   propertyLocation: string;
   propertyCoordinates?: { lat: number; lng: number };
 }
 
-export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) => {
+export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalculatorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [destination, setDestination] = useState('');
   const [mode, setMode] = useState<'driving' | 'transit' | 'walking'>('driving');
   const [commuteTime, setCommuteTime] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCalculate = async () => {
     if (!destination) return;
 
     setIsCalculating(true);
-    // Simulate API call to maps service
-    setTimeout(() => {
-      // Mock commute time based on mode
-      const times = { driving: 25, transit: 45, walking: 120 };
-      setCommuteTime(times[mode]);
-      setIsCalculating(false);
-    }, 1000);
+    setError(null);
+    setCommuteTime(null);
+
+    // Uses the real Google Distance Matrix data served by the backend.
+    const response = await renterService.getGeoInsights(listingId, destination);
+    const insights = response.data;
+
+    const travel = insights?.travelTimes?.modes?.[mode];
+    if (travel && travel.durationSeconds > 0) {
+      setCommuteTime(Math.round(travel.durationSeconds / 60));
+    } else {
+      setError('Travel time is not available for this destination yet.');
+    }
+    setIsCalculating(false);
   };
 
   return (
@@ -151,6 +161,13 @@ export const CommuteCalculator = ({ propertyLocation }: CommuteCalculatorProps) 
                     {mode === 'driving' ? 'car' : mode === 'transit' ? 'public transit' : 'walking'}
                   </p>
                 </motion.div>
+              )}
+
+              {error && (
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                  <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                  <p className="text-xs text-yellow-700 dark:text-yellow-400">{error}</p>
+                </div>
               )}
             </div>
           </motion.div>

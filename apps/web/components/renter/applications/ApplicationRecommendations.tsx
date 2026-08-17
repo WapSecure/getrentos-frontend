@@ -22,7 +22,8 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
         {
           id: '1',
           title: 'Complete Your Profile',
-          description: 'A complete profile increases approval chances by 40%',
+          description:
+            'A complete, verified profile gives landlords more confidence when reviewing your application.',
           action: 'Update Profile',
         },
         {

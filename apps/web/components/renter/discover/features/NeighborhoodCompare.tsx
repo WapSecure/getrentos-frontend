@@ -1,86 +1,55 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { GitCompare, MapPin, X } from 'lucide-react';
+import { GitCompare, MapPin, X, Loader2 } from 'lucide-react';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import type { NearbyPlace } from '@/types/renter';
 
-interface Neighborhood {
-  name: string;
-  avgRent: number;
-  safetyScore: number;
-  transitScore: number;
-  schoolScore: number;
-  amenities: string[];
+interface NeighborhoodCompareProps {
+  listingId: string;
+  propertyLocation: string;
 }
 
-const neighborhoods: Neighborhood[] = [
-  {
-    name: 'Ikeja',
-    avgRent: 250000,
-    safetyScore: 85,
-    transitScore: 90,
-    schoolScore: 88,
-    amenities: ['Malls', 'Restaurants', 'Parks', 'Schools'],
-  },
-  {
-    name: 'Lekki Phase 1',
-    avgRent: 450000,
-    safetyScore: 90,
-    transitScore: 75,
-    schoolScore: 92,
-    amenities: ['Beach', 'Malls', 'Restaurants', 'Schools'],
-  },
-  {
-    name: 'Victoria Island',
-    avgRent: 600000,
-    safetyScore: 92,
-    transitScore: 80,
-    schoolScore: 90,
-    amenities: ['Business District', 'Malls', 'Restaurants', 'Nightlife'],
-  },
-  {
-    name: 'Surulere',
-    avgRent: 180000,
-    safetyScore: 75,
-    transitScore: 85,
-    schoolScore: 75,
-    amenities: ['Markets', 'Restaurants', 'Stadium'],
-  },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  schools: 'Schools',
+  transit: 'Transit & Commute',
+  amenities: 'Amenities',
+  food: 'Food & Dining',
+  healthcare: 'Healthcare',
+  shopping: 'Shopping',
+  parks: 'Parks & Recreation',
+  nightlife: 'Nightlife',
+};
 
-export const NeighborhoodCompare = () => {
-  const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
+const formatDistance = (meters: number): string => {
+  if (meters < 1000) return `${Math.round(meters)}m`;
+  return `${(meters / 1000).toFixed(1)}km`;
+};
+
+export const NeighborhoodCompare = ({ listingId, propertyLocation }: NeighborhoodCompareProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: insights, isLoading } = useQuery({
+    queryKey: renterKeys.geoInsights(listingId),
+    queryFn: () => unwrap(renterService.getGeoInsights(listingId)),
+    enabled: isOpen,
+  });
 
-  const handleSelect = (name: string) => {
-    if (selectedNeighborhoods.includes(name)) {
-      setSelectedNeighborhoods(selectedNeighborhoods.filter((n) => n !== name));
-    } else if (selectedNeighborhoods.length < 3) {
-      setSelectedNeighborhoods([...selectedNeighborhoods, name]);
-    }
-  };
+  const categories = Object.entries(insights?.neighborhood ?? {}).filter(
+    ([, places]) => places.length > 0
+  );
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const placesByCategory = (category: string): NearbyPlace[] =>
+    (insights?.neighborhood ?? {})[category] ?? [];
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-blue-600';
-    return 'text-red-600';
-  };
-
-  const getScoreBar = (score: number) => {
-    return (
-      <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div className="h-full bg-primary rounded-full" style={{ width: `${score}%` }} />
-      </div>
-    );
+  const formatTravelTime = (seconds?: number): string => {
+    if (!seconds) return '—';
+    const mins = Math.round(seconds / 60);
+    if (mins < 60) return `${mins} min`;
+    return `${Math.floor(mins / 60)}h ${mins % 60}m`;
   };
 
   return (
@@ -90,7 +59,7 @@ export const NeighborhoodCompare = () => {
         className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
       >
         <GitCompare className="w-3 h-3" />
-        Compare neighborhoods
+        Area insights
       </button>
 
       {isOpen && (
@@ -98,12 +67,14 @@ export const NeighborhoodCompare = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="sticky top-0 bg-card p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-foreground">Compare Neighborhoods</h3>
-                <p className="text-xs text-gray-500">Select up to 3 neighborhoods to compare</p>
+                <h3 className="font-semibold text-foreground">Area Insights</h3>
+                <p className="text-xs text-gray-500">
+                  Real nearby places and commute times for {propertyLocation}
+                </p>
               </div>
               <button onClick={() => setIsOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
@@ -111,164 +82,105 @@ export const NeighborhoodCompare = () => {
             </div>
 
             <div className="p-6">
-              {/* Selection Buttons */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {neighborhoods.map((neighborhood) => (
-                  <button
-                    key={neighborhood.name}
-                    onClick={() => handleSelect(neighborhood.name)}
-                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                      selectedNeighborhoods.includes(neighborhood.name)
-                        ? 'bg-primary text-white'
-                        : 'bg-secondary text-foreground hover:bg-gray-200'
-                    } ${!selectedNeighborhoods.includes(neighborhood.name) && selectedNeighborhoods.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={
-                      !selectedNeighborhoods.includes(neighborhood.name) &&
-                      selectedNeighborhoods.length >= 3
-                    }
-                  >
-                    {neighborhood.name}
-                  </button>
-                ))}
-              </div>
-
-              {selectedNeighborhoods.length === 0 ? (
-                <div className="text-center py-12">
-                  <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">Select neighborhoods to compare</p>
+              {isLoading && (
+                <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Loading area data…</span>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                          Feature
-                        </th>
-                        {selectedNeighborhoods.map((name) => (
-                          <th key={name} className="text-left py-3 px-4 min-w-[150px]">
-                            <div className="flex justify-between items-center">
-                              <span className="font-semibold text-foreground">{name}</span>
-                              <button
-                                onClick={() =>
-                                  setSelectedNeighborhoods(
-                                    selectedNeighborhoods.filter((n) => n !== name)
-                                  )
-                                }
-                                className="text-gray-400 hover:text-red-500"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
+              )}
+
+              {!isLoading && insights && (
+                <>
+                  {/* Commute times */}
+                  {insights.travelTimes && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-foreground mb-3">
+                        Commute to {insights.travelTimes.destination}
+                      </h4>
+                      <div className="grid grid-cols-3 gap-3">
+                        {(['driving', 'transit', 'walking'] as const).map((mode) => {
+                          const result = insights.travelTimes?.modes?.[mode];
+                          if (!result) return null;
+                          return (
+                            <div key={mode} className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+                              <p className="text-xs capitalize text-gray-500">{mode}</p>
+                              <p className="text-lg font-bold text-foreground">
+                                {formatTravelTime(result.durationSeconds)}
+                              </p>
+                              <p className="text-xs text-gray-500">{result.distanceText}</p>
                             </div>
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {selectedNeighborhoods.map((name) => {
-                        const neighborhood = neighborhoods.find((n) => n.name === name);
-                        if (!neighborhood) return null;
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Walkability */}
+                  {insights.walkability && (
+                    <div className="mb-6 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-foreground">Walkability</p>
+                        <span className="text-sm font-semibold text-primary">
+                          {insights.walkability.score}/100 · {insights.walkability.label}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {insights.walkability.summary}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Nearby places by category */}
+                  {categories.length > 0 ? (
+                    <div className="space-y-6">
+                      {categories.map(([category]) => {
+                        const places = placesByCategory(category);
+                        if (places.length === 0) return null;
                         return (
-                          <tr key={name}>
-                            <td className="py-3 px-4 text-sm text-muted-foreground">
-                              Average Rent
-                            </td>
-                            <td className="py-3 px-4 font-medium text-primary">
-                              {formatCurrency(neighborhood.avgRent)}/mo
-                            </td>
-                          </tr>
+                          <div key={category}>
+                            <h4 className="text-sm font-medium text-foreground mb-2">
+                              {CATEGORY_LABELS[category] ?? category}
+                            </h4>
+                            <div className="space-y-2">
+                              {places.slice(0, 5).map((place, index) => (
+                                <div
+                                  key={`${place.name}-${index}`}
+                                  className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                    <div>
+                                      <p className="text-sm text-foreground">{place.name}</p>
+                                      <p className="text-xs text-gray-500">{place.address}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right text-xs">
+                                    <p className="font-medium text-foreground">
+                                      {formatDistance(place.distanceMeters)}
+                                    </p>
+                                    {place.rating != null && (
+                                      <p className="text-gray-500">
+                                        ★ {place.rating}
+                                        {place.userRatingsTotal
+                                          ? ` (${place.userRatingsTotal})`
+                                          : ''}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         );
                       })}
-
-                      <tr>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">Safety Score</td>
-                        {selectedNeighborhoods.map((name) => {
-                          const neighborhood = neighborhoods.find((n) => n.name === name);
-                          return (
-                            <td key={name} className="py-3 px-4">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={`text-sm font-semibold ${getScoreColor(neighborhood?.safetyScore || 0)}`}
-                                  >
-                                    {neighborhood?.safetyScore}
-                                  </span>
-                                  <span className="text-xs text-gray-500">/100</span>
-                                </div>
-                                {getScoreBar(neighborhood?.safetyScore || 0)}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-
-                      <tr>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">Transit Score</td>
-                        {selectedNeighborhoods.map((name) => {
-                          const neighborhood = neighborhoods.find((n) => n.name === name);
-                          return (
-                            <td key={name} className="py-3 px-4">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={`text-sm font-semibold ${getScoreColor(neighborhood?.transitScore || 0)}`}
-                                  >
-                                    {neighborhood?.transitScore}
-                                  </span>
-                                  <span className="text-xs text-gray-500">/100</span>
-                                </div>
-                                {getScoreBar(neighborhood?.transitScore || 0)}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-
-                      <tr>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">School Score</td>
-                        {selectedNeighborhoods.map((name) => {
-                          const neighborhood = neighborhoods.find((n) => n.name === name);
-                          return (
-                            <td key={name} className="py-3 px-4">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={`text-sm font-semibold ${getScoreColor(neighborhood?.schoolScore || 0)}`}
-                                  >
-                                    {neighborhood?.schoolScore}
-                                  </span>
-                                  <span className="text-xs text-gray-500">/100</span>
-                                </div>
-                                {getScoreBar(neighborhood?.schoolScore || 0)}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-
-                      <tr>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">Amenities</td>
-                        {selectedNeighborhoods.map((name) => {
-                          const neighborhood = neighborhoods.find((n) => n.name === name);
-                          return (
-                            <td key={name} className="py-3 px-4">
-                              <div className="flex flex-wrap gap-1">
-                                {neighborhood?.amenities.map((amenity) => (
-                                  <span
-                                    key={amenity}
-                                    className="text-xs px-2 py-0.5 bg-secondary rounded-full"
-                                  >
-                                    {amenity}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500">No area data available for this property yet.</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </motion.div>

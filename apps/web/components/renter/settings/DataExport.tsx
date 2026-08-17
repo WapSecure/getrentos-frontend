@@ -6,21 +6,56 @@ import { Download, FileText, FileSpreadsheet, AlertCircle, Check } from 'lucide-
 import { Button } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
+import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
+
+type ExportType = 'pdf' | 'csv';
+
+const buildSectionsHtml = (data: Record<string, unknown>): string =>
+  Object.entries(data)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        const rows = value
+          .map(
+            (item, index) =>
+              `<tr><td>${index + 1}</td><td><pre>${escapeHtml(
+                JSON.stringify(item, null, 2)
+              )}</pre></td></tr>`
+          )
+          .join('');
+        return `<h2>${escapeHtml(key)}</h2>${value.length ? `<table><thead><tr><th>#</th><th>Record</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>None</p>'}`;
+      }
+      return `<h2>${escapeHtml(key)}</h2><p><pre>${escapeHtml(
+        JSON.stringify(value, null, 2)
+      )}</pre></p>`;
+    })
+    .join('');
 
 export const DataExport = () => {
-  const [exportType, setExportType] = useState('pdf');
+  const [exportType, setExportType] = useState<ExportType>('pdf');
   const [completed, setCompleted] = useState(false);
 
   const exportMutation = useMutation({
     mutationFn: () => unwrap(renterService.exportData()),
     onSuccess: (data) => {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `getrentos-data-export-${new Date().toISOString().slice(0, 10)}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+      const date = new Date().toISOString().slice(0, 10);
+      if (exportType === 'csv') {
+        const rows: unknown[][] = [];
+        for (const [section, value] of Object.entries(data ?? {})) {
+          if (Array.isArray(value)) {
+            value.forEach((item) => rows.push([section, JSON.stringify(item)]));
+          } else if (value && typeof value === 'object') {
+            rows.push([section, JSON.stringify(value)]);
+          } else {
+            rows.push([section, String(value)]);
+          }
+        }
+        downloadCsv(`getrentos-data-export-${date}.csv`, ['Section', 'Data'], rows);
+      } else {
+        printHtml(
+          'GetRentos Data Export',
+          `<h1>GetRentos Data Export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()}</p>${buildSectionsHtml(data ?? {})}`
+        );
+      }
       setCompleted(true);
       setTimeout(() => setCompleted(false), 3000);
     },

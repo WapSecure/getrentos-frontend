@@ -4,8 +4,9 @@ import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, X, Check, Calendar } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, X, Check } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
 interface Payment {
   id: string;
@@ -58,9 +59,8 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
     return payments.filter((p) => new Date(p.date) >= cutoffDate);
   };
 
-  const exportToCSV = async () => {
+  const exportToCSV = () => {
     setExporting('csv');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     const filteredPayments = getFilteredPayments();
     const headers = ['Property', 'Amount', 'Date', 'Status', 'Method'];
@@ -72,32 +72,44 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
       p.method,
     ]);
 
-    const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `payments-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(`payments-${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
 
     setCompleted(true);
     setTimeout(() => {
       setCompleted(false);
       onClose();
       setExporting(null);
-    }, 1500);
+    }, 1000);
   };
 
-  const exportToPDF = async () => {
+  const exportToPDF = () => {
     setExporting('pdf');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const filteredPayments = getFilteredPayments();
+    const rows = filteredPayments
+      .map(
+        (p) =>
+          `<tr><td>${escapeHtml(p.propertyName)}</td><td>${escapeHtml(
+            formatCurrency(p.amount)
+          )}</td><td>${escapeHtml(new Date(p.date).toLocaleDateString())}</td><td>${escapeHtml(
+            p.status
+          )}</td><td>${escapeHtml(p.method)}</td></tr>`
+      )
+      .join('');
+
+    printHtml(
+      'Payments Export',
+      `<h1>Payments Export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${filteredPayments.length} payment${filteredPayments.length === 1 ? '' : 's'} · Total ${escapeHtml(
+        formatCurrency(filteredPayments.reduce((sum, p) => sum + p.amount, 0))
+      )}</p><table><thead><tr><th>Property</th><th>Amount</th><th>Date</th><th>Status</th><th>Method</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No payments</td></tr>'}</tbody></table>`
+    );
+
     setCompleted(true);
     setTimeout(() => {
       setCompleted(false);
       onClose();
       setExporting(null);
-    }, 1500);
+    }, 1000);
   };
 
   return (
