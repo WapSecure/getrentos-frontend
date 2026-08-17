@@ -174,18 +174,17 @@ export const AddClientModal = ({
               )}
             </div>
 
-            <div className="p-4 border-t border-border flex gap-3">
+            <div className="p-4 border-t border-border flex justify-end gap-3">
               <Button
                 variant="ghost"
                 onClick={handleClose}
-                className="flex-1"
                 disabled={isSubmitting || check.isPending}
               >
                 Cancel
               </Button>
               <Button
                 variant="primary"
-                className="flex-1 gap-1.5"
+                className="gap-1.5"
                 onClick={handlePrimary}
                 isLoading={isSubmitting || check.isPending}
                 disabled={!email.trim()}

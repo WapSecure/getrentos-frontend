@@ -323,4 +323,115 @@ export const realtorService = {
         body: JSON.stringify({ propertyId }),
       })
     ),
+
+  // Settings
+  getSettingsProfile: () =>
+    safeCall(() =>
+      authFetch<{
+        fullName: string;
+        email: string;
+        phone?: string;
+        companyName?: string;
+        avatarUrl?: string;
+      }>('/realtor/settings/profile')
+    ),
+  updateSettingsProfile: (data: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    companyName?: string;
+  }) =>
+    safeCall(() =>
+      authFetch('/realtor/settings/profile', { method: 'PUT', body: JSON.stringify(data) })
+    ),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return safeCall(() =>
+      authFetch<{ avatarUrl?: string }>('/realtor/settings/profile/avatar', {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+  getPayoutAccount: () =>
+    safeCall(() =>
+      authFetch<{
+        bankName: string;
+        accountNumber: string;
+        accountName: string;
+        verified: boolean;
+      }>('/realtor/settings/payout')
+    ),
+  updatePayoutAccount: (data: { bankName: string; accountNumber: string; accountName: string }) =>
+    safeCall(() =>
+      authFetch<{
+        bankName: string;
+        accountNumber: string;
+        accountName: string;
+        verified: boolean;
+      }>('/realtor/settings/payout', { method: 'PUT', body: JSON.stringify(data) })
+    ),
+  getNotificationPreferences: () =>
+    safeCall(() =>
+      authFetch<{ id: string; email: boolean; push: boolean }[]>('/realtor/settings/notifications')
+    ),
+  updateNotificationPreferences: (
+    preferences: {
+      id: string;
+      email: boolean;
+      push: boolean;
+    }[]
+  ) =>
+    safeCall(() =>
+      authFetch('/realtor/settings/notifications', {
+        method: 'PUT',
+        body: JSON.stringify({ preferences }),
+      })
+    ),
+  getBusinessPreferences: () =>
+    safeCall(() =>
+      authFetch<{
+        serviceAreas: string[];
+        propertyTypes: string[];
+        commissionRate: number;
+      }>('/realtor/settings/preferences')
+    ),
+  updateBusinessPreferences: (data: {
+    serviceAreas: string[];
+    propertyTypes: string[];
+    commissionRate: number;
+  }) =>
+    safeCall(() =>
+      authFetch('/realtor/settings/preferences', { method: 'PUT', body: JSON.stringify(data) })
+    ),
+
+  // Notifications feed
+  getNotifications: () =>
+    safeCall(() =>
+      authFetch<
+        {
+          id: string;
+          type: string;
+          title: string;
+          body: string;
+          read: boolean;
+          createdAt: string;
+        }[]
+      >('/realtor/notifications')
+    ),
+  markNotificationRead: (id: string) =>
+    safeCall(() => authFetch(`/realtor/notifications/${id}/read`, { method: 'PATCH' })),
+  markAllNotificationsRead: () =>
+    safeCall(() => authFetch('/realtor/notifications/read-all', { method: 'POST' })),
+
+  // Dashboard extras
+  getDashboardActivity: () =>
+    safeCall(() =>
+      authFetch<{ id: string; type: string; title: string; description: string; date: string }[]>(
+        '/realtor/dashboard/activity'
+      )
+    ),
+  getCommissionTrend: () =>
+    safeCall(() => authFetch<{ label: string; value: number }[]>('/realtor/commissions/trend')),
 };

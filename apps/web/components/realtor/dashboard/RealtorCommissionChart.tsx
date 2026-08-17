@@ -10,22 +10,17 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
+import { useQuery } from '@tanstack/react-query';
 import { TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { realtorService } from '@/services/realtorService';
 
 interface CommissionPoint {
   month: string;
   amount: number;
 }
-
-const commissionData: CommissionPoint[] = [
-  { month: 'Mar', amount: 850_000 },
-  { month: 'Apr', amount: 1_200_000 },
-  { month: 'May', amount: 980_000 },
-  { month: 'Jun', amount: 1_450_000 },
-  { month: 'Jul', amount: 1_650_000 },
-  { month: 'Aug', amount: 2_100_000 },
-];
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (!active || !payload?.length) return null;
@@ -40,9 +35,19 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export const RealtorCommissionChart = () => {
-  const currentValue = commissionData[commissionData.length - 1].amount;
-  const previousValue = commissionData[commissionData.length - 2].amount;
-  const change = ((currentValue - previousValue) / previousValue) * 100;
+  const { data: trend = [] } = useQuery({
+    queryKey: realtorKeys.commissionTrend,
+    queryFn: () => unwrap(realtorService.getCommissionTrend()),
+  });
+
+  const commissionData: CommissionPoint[] = trend.map((t) => ({
+    month: t.label,
+    amount: t.value,
+  }));
+
+  const currentValue = commissionData[commissionData.length - 1]?.amount ?? 0;
+  const previousValue = commissionData[commissionData.length - 2]?.amount ?? 0;
+  const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : null;
 
   return (
     <div className="bg-card rounded-2xl border border-border p-5">
@@ -53,17 +58,19 @@ export const RealtorCommissionChart = () => {
             Monthly commission earned, last 6 months
           </p>
         </div>
-        <div
-          className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-            change >= 0
-              ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-              : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
-          }`}
-        >
-          <TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />
-          {change >= 0 ? '+' : ''}
-          {change.toFixed(1)}%
-        </div>
+        {change !== null && (
+          <div
+            className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
+              change >= 0
+                ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
+                : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
+            }`}
+          >
+            <TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />
+            {change >= 0 ? '+' : ''}
+            {change.toFixed(1)}%
+          </div>
+        )}
       </div>
 
       <div className="h-56">

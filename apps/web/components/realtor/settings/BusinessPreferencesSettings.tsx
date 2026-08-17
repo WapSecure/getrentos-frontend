@@ -2,22 +2,76 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useState } from 'react';
-import { Bell } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { realtorService } from '@/services/realtorService';
 
 const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
+const propertyTypeOptions = [
+  { value: 'APARTMENT', label: 'Apartments' },
+  { value: 'DUPLEX', label: 'Duplexes' },
+  { value: 'CONDO', label: 'Condos' },
+  { value: 'COMMERCIAL', label: 'Commercial' },
+  { value: 'LAND', label: 'Land' },
+];
 
 export const BusinessPreferencesSettings = () => {
+  const queryClient = useQueryClient();
   const [defaultCommissionRate, setDefaultCommissionRate] = useState('5');
-  const [serviceAreas, setServiceAreas] = useState<string[]>(['Lekki', 'Victoria Island']);
-  const [autoNotifyClients, setAutoNotifyClients] = useState(true);
+  const [serviceAreas, setServiceAreas] = useState<string[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: prefs } = useQuery({
+    queryKey: realtorKeys.settingsPreferences,
+    queryFn: () => unwrap(realtorService.getBusinessPreferences()),
+  });
+
+  useEffect(() => {
+    if (!prefs) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDefaultCommissionRate(String(prefs.commissionRate ?? 5));
+
+    setServiceAreas(prefs.serviceAreas ?? []);
+
+    setPropertyTypes(prefs.propertyTypes ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefs?.commissionRate, prefs?.serviceAreas, prefs?.propertyTypes]);
 
   const toggleArea = (area: string) => {
     setServiceAreas((prev) =>
       prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
     );
   };
+
+  const toggleType = (type: string) => {
+    setPropertyTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        realtorService.updateBusinessPreferences({
+          commissionRate: Number(defaultCommissionRate) || 5,
+          serviceAreas,
+          propertyTypes,
+        })
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.settingsPreferences });
+      setToast({ message: 'Business preferences saved.', variant: 'success' });
+    },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to save your business preferences.',
+        variant: 'error',
+      }),
+  });
 
   return (
     <div>
@@ -33,7 +87,7 @@ export const BusinessPreferencesSettings = () => {
           </label>
           <LegacyInput
             type="number"
-            min={0}
+            min={1}
             max={100}
             value={defaultCommissionRate}
             onChange={(e) => setDefaultCommissionRate(e.target.value)}
@@ -61,34 +115,40 @@ export const BusinessPreferencesSettings = () => {
           </div>
         </div>
 
-        <label className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer">
-          <div className="flex items-start gap-3">
-            <Bell className="w-4 h-4 text-gray-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-foreground">Auto-notify clients of new leads</p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Send your client a heads-up whenever a new lead comes in on their listing
-              </p>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Property Types</label>
+          <div className="flex flex-wrap gap-2">
+            {propertyTypeOptions.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => toggleType(type.value)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                  propertyTypes.includes(type.value)
+                    ? 'border-primary bg-accent text-primary'
+                    : 'border-border text-muted-foreground'
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
           </div>
-          <Toggle checked={autoNotifyClients} onChange={() => setAutoNotifyClients((v) => !v)} />
-        </label>
+        </div>
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+      <Button
+        variant="primary"
+        className="mt-6 gap-1.5"
+        isLoading={save.isPending}
+        disabled={save.isPending}
+        onClick={() => save.mutate()}
+      >
+        Save Preferences
+      </Button>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };
-
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);

@@ -1,7 +1,11 @@
 'use client';
 
-import { UserPlus, CalendarClock, Handshake, Wallet } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { UserPlus, CalendarClock, Handshake, Wallet, Inbox } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorKeys } from '@/lib/queryKeys';
+import { realtorService } from '@/services/realtorService';
 
 type ActivityType = 'lead' | 'viewing' | 'offer' | 'commission';
 
@@ -12,37 +16,6 @@ interface ActivityItem {
   description: string;
   time: string;
 }
-
-const activityItems: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'lead',
-    title: 'New lead assigned',
-    description: 'A buyer inquired about Ocean View Towers',
-    time: '2026-08-08T09:20:00.000Z',
-  },
-  {
-    id: '2',
-    type: 'viewing',
-    title: 'Viewing confirmed',
-    description: 'Tour for Palm Court Villa confirmed for Aug 10, 11am',
-    time: '2026-08-07T15:40:00.000Z',
-  },
-  {
-    id: '3',
-    type: 'offer',
-    title: 'Offer submitted on behalf of client',
-    description: 'Countered a buyer offer for Ikeja GRA Townhouse',
-    time: '2026-08-06T13:00:00.000Z',
-  },
-  {
-    id: '4',
-    type: 'commission',
-    title: 'Commission paid',
-    description: 'Your commission for Surulere Family Duplex has been paid',
-    time: '2026-08-06T10:00:00.000Z',
-  },
-];
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   lead: {
@@ -64,6 +37,28 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
 };
 
 export const RealtorActivityFeed = () => {
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: realtorKeys.activity,
+    queryFn: () =>
+      unwrap(realtorService.getDashboardActivity()).then((list) =>
+        list.map(
+          (item): ActivityItem => ({
+            id: item.id,
+            type: (item.type === 'offer'
+              ? 'offer'
+              : item.type === 'viewing'
+                ? 'viewing'
+                : item.type === 'commission'
+                  ? 'commission'
+                  : 'lead') as ActivityType,
+            title: item.title,
+            description: item.description,
+            time: item.date,
+          })
+        )
+      ),
+  });
+
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -74,25 +69,34 @@ export const RealtorActivityFeed = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {activityItems.map((item) => {
-          const config = typeConfig[item.type];
-          const Icon = config.icon;
-          return (
-            <div
-              key={item.id}
-              className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-            >
-              <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                <Icon className={`w-4 h-4 ${config.color}`} />
+        {isLoading ? (
+          <p className="p-6 text-center text-sm text-muted-foreground">Loading activity…</p>
+        ) : items.length === 0 ? (
+          <div className="p-8 text-center">
+            <Inbox className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">No activity yet</p>
+          </div>
+        ) : (
+          items.map((item) => {
+            const config = typeConfig[item.type];
+            const Icon = config.icon;
+            return (
+              <div
+                key={item.id}
+                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+              >
+                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
+                  <Icon className={`w-4 h-4 ${config.color}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

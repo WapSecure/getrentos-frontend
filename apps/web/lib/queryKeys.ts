@@ -104,6 +104,13 @@ export const realtorKeys = {
   trustProfile: ['realtor', 'trust-profile'] as const,
   reviews: ['realtor', 'reviews'] as const,
   commissions: ['realtor', 'commissions'] as const,
+  commissionTrend: ['realtor', 'commissions', 'trend'] as const,
+  settingsProfile: ['realtor', 'settings', 'profile'] as const,
+  settingsPayout: ['realtor', 'settings', 'payout'] as const,
+  settingsNotifications: ['realtor', 'settings', 'notifications'] as const,
+  settingsPreferences: ['realtor', 'settings', 'preferences'] as const,
+  notifications: ['realtor', 'notifications'] as const,
+  activity: ['realtor', 'activity'] as const,
 };
 
 export const agentKeys = {
