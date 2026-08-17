@@ -87,6 +87,15 @@ export interface Lease {
   createdAt: string;
 }
 
+export interface RentIncreaseCheck {
+  increasePercent: number;
+  exceedsGuidance: boolean;
+  maxAnnualIncreasePercent: number | null;
+  minNoticeDays: number;
+  advisory: string;
+  source: string;
+}
+
 export type EvictionStatus = 'draft' | 'issued' | 'filed' | 'resolved' | 'withdrawn';
 
 export interface EvictionCase {

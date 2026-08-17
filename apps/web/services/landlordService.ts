@@ -14,6 +14,7 @@ import type {
   Vendor,
   LandlordMaintenanceRequest,
   EvictionCase,
+  RentIncreaseCheck,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -333,6 +334,18 @@ export const landlordService = {
       authFetch(`/landlord/leases/${id}/renew`, {
         method: 'PATCH',
         body: JSON.stringify({ rentAmount, leaseEnd }),
+      })
+    );
+  },
+
+  async previewRenewalCheck(
+    id: string,
+    rentAmount: number
+  ): Promise<ApiResponse<RentIncreaseCheck>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${id}/renewal-check`, {
+        method: 'POST',
+        body: JSON.stringify({ rentAmount }),
       })
     );
   },
