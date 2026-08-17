@@ -28,6 +28,7 @@ export const landlordKeys = {
       params?.status ?? 'all',
       params?.priority ?? 'all',
     ] as const,
+  evictions: ['landlord', 'evictions'] as const,
 };
 
 export const renterKeys = {

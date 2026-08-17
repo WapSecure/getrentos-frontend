@@ -44,6 +44,7 @@ export type TranslationKey =
   | 'sidebar.financials'
   | 'sidebar.owner_statements'
   | 'sidebar.arrears'
+  | 'sidebar.evictions'
   | 'sidebar.sale_listings'
   | 'sidebar.buyer_leads'
   | 'sidebar.investment_analytics'
@@ -128,6 +129,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.financials': 'Financials',
     'sidebar.owner_statements': 'Owner Statements',
     'sidebar.arrears': 'Arrears',
+    'sidebar.evictions': 'Evictions',
     'sidebar.sale_listings': 'Sale Listings',
     'sidebar.buyer_leads': 'Buyer Leads',
     'sidebar.investment_analytics': 'Investment Analytics',
@@ -211,6 +213,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.financials': 'Money Matter',
     'sidebar.owner_statements': 'Owner Statement Dem',
     'sidebar.arrears': 'Rent Wey Dem Owe',
+    'sidebar.evictions': 'Comot-For-House Case',
     'sidebar.sale_listings': 'House Wey Dey Sale',
     'sidebar.buyer_leads': 'Buyer Wey Fit Buy',
     'sidebar.investment_analytics': 'Investment Analytics',

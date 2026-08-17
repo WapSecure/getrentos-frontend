@@ -13,6 +13,7 @@ import type {
   RentPayment,
   Vendor,
   LandlordMaintenanceRequest,
+  EvictionCase,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -358,6 +359,67 @@ export const landlordService = {
       const link = document.createElement('a');
       link.href = url;
       link.download = `lease-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
+  },
+
+  // ---- Evictions ----
+  async listEvictions(): Promise<ApiResponse<EvictionCase[]>> {
+    return safeCall(() => authFetch('/landlord/evictions'));
+  },
+
+  async initiateEviction(leaseId: string, reason: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() =>
+      authFetch('/landlord/evictions', {
+        method: 'POST',
+        body: JSON.stringify({ leaseId, reason }),
+      })
+    );
+  },
+
+  async issueEvictionNotice(id: string, cureDays: number): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/evictions/${id}/issue-notice`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cureDays }),
+      })
+    );
+  },
+
+  async markEvictionFiled(id: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() => authFetch(`/landlord/evictions/${id}/file`, { method: 'PATCH' }));
+  },
+
+  async resolveEviction(id: string, resolutionNotes?: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/evictions/${id}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async withdrawEviction(id: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() => authFetch(`/landlord/evictions/${id}/withdraw`, { method: 'PATCH' }));
+  },
+
+  async downloadEvictionNoticePdf(id: string): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/landlord/evictions/${id}/notice.pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok)
+        throw new ApiError(response.status, 'Failed to download eviction notice PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `eviction-notice-${id}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
