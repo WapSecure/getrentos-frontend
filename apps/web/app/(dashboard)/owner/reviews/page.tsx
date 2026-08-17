@@ -18,21 +18,29 @@ const StarRow = ({ rating }: { rating: number }) => (
   </div>
 );
 
+const categoryIcon: Record<string, React.ElementType> = {
+  communication: MessageCircle,
+  transparency: ShieldCheck,
+  responsiveness: Clock,
+};
+
 export default function OwnerReviewsPage() {
   const { data: reviews = [] } = useQuery({
     queryKey: ownerKeys.reviews,
     queryFn: () => unwrap(ownerService.listReviews()),
   });
 
-  const overallRating = reviews.length
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0;
+  const { data: summary } = useQuery({
+    queryKey: ownerKeys.reviewSummary,
+    queryFn: () => unwrap(ownerService.getRatingSummary()),
+  });
 
-  const categories = [
-    { label: 'Communication', icon: MessageCircle, value: overallRating },
-    { label: 'Transparency', icon: ShieldCheck, value: overallRating },
-    { label: 'Responsiveness', icon: Clock, value: overallRating },
-  ];
+  const overallRating = summary?.averageRating ?? 0;
+  const categories = (summary?.categories ?? []).map((c) => ({
+    label: c.category.charAt(0).toUpperCase() + c.category.slice(1),
+    icon: categoryIcon[c.category.toLowerCase()] ?? MessageCircle,
+    value: c.average,
+  }));
 
   return (
     <>
@@ -46,26 +54,38 @@ export default function OwnerReviewsPage() {
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
-            Based on {reviews.length} review{reviews.length === 1 ? '' : 's'}
+            Based on {summary?.reviewCount ?? reviews.length} review
+            {summary?.reviewCount === 1 ? '' : 's'}
           </p>
         </div>
 
         <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
-          {categories.map((category) => (
-            <div key={category.label} className="flex items-center gap-3">
-              <category.icon className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="text-sm text-muted-foreground w-36 shrink-0">{category.label}</span>
-              <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${(category.value / 5) * 100}%` }}
-                />
-              </div>
-              <span className="text-sm font-medium text-foreground w-8 text-right">
-                {category.value.toFixed(1)}
-              </span>
-            </div>
-          ))}
+          {categories.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No category ratings yet
+            </p>
+          ) : (
+            categories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <div key={category.label} className="flex items-center gap-3">
+                  <Icon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-sm text-muted-foreground w-36 shrink-0">
+                    {category.label}
+                  </span>
+                  <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${(category.value / 5) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-foreground w-8 text-right">
+                    {category.value.toFixed(1)}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

@@ -2,47 +2,9 @@
 
 import { Users, Handshake, ShieldCheck, FileCheck } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/format';
+import type { OwnerDashboard } from '@/services/ownerService';
 
 type ActivityType = 'inquiry' | 'offer' | 'escrow' | 'document';
-
-interface ActivityItem {
-  id: string;
-  type: ActivityType;
-  title: string;
-  description: string;
-  time: string;
-}
-
-const activityItems: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'inquiry',
-    title: 'New buyer inquiry',
-    description: 'A verified buyer requested details on Ocean View Towers',
-    time: '2026-08-07T13:10:00.000Z',
-  },
-  {
-    id: '2',
-    type: 'offer',
-    title: 'New offer received',
-    description: 'Emeka Chukwu offered ₦85,000,000 for Palm Court Villa',
-    time: '2026-08-07T09:30:00.000Z',
-  },
-  {
-    id: '3',
-    type: 'escrow',
-    title: 'Escrow milestone reached',
-    description: 'Ownership documents verified for Lekki Waterfront Duplex',
-    time: '2026-08-06T11:00:00.000Z',
-  },
-  {
-    id: '4',
-    type: 'document',
-    title: 'Verification document approved',
-    description: 'Title deed for Ocean View Towers passed compliance review',
-    time: '2026-08-05T16:20:00.000Z',
-  },
-];
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   inquiry: {
@@ -63,7 +25,41 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
   },
 };
 
-export const OwnerActivityFeed = () => {
+const titleFor = (type: string): string => {
+  switch (type) {
+    case 'offer':
+      return 'New offer received';
+    case 'viewing':
+      return 'New viewing request';
+    case 'transaction':
+      return 'Escrow update';
+    case 'document':
+      return 'Document update';
+    default:
+      return 'Activity';
+  }
+};
+
+const typeFor = (type: string): ActivityType => {
+  switch (type) {
+    case 'offer':
+      return 'offer';
+    case 'viewing':
+      return 'inquiry';
+    case 'transaction':
+      return 'escrow';
+    case 'document':
+      return 'document';
+    default:
+      return 'inquiry';
+  }
+};
+
+interface OwnerActivityFeedProps {
+  activity: OwnerDashboard['recentActivity'];
+}
+
+export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -74,25 +70,35 @@ export const OwnerActivityFeed = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {activityItems.map((item) => {
-          const config = typeConfig[item.type];
-          const Icon = config.icon;
-          return (
-            <div
-              key={item.id}
-              className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-            >
-              <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                <Icon className={`w-4 h-4 ${config.color}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
-              </div>
+        {activity.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-muted-foreground" />
             </div>
-          );
-        })}
+            <p className="text-sm text-muted-foreground">No activity yet</p>
+          </div>
+        ) : (
+          activity.map((item) => {
+            const type = typeFor(item.type);
+            const config = typeConfig[type];
+            const Icon = config.icon;
+            return (
+              <div
+                key={item.id}
+                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+              >
+                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
+                  <Icon className={`w-4 h-4 ${config.color}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.message}</p>
+                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.timestamp)}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

@@ -2,14 +2,55 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCcw, Percent } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
+import { ownerService } from '@/services/ownerService';
 
 export const PreferencesSettings = () => {
+  const queryClient = useQueryClient();
   const [minOfferPct, setMinOfferPct] = useState('85');
   const [autoDeclineLowOffers, setAutoDeclineLowOffers] = useState(false);
   const [allowRentalConversion, setAllowRentalConversion] = useState(true);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: prefs } = useQuery({
+    queryKey: ownerKeys.preferences,
+    queryFn: () => unwrap(ownerService.getPreferences()),
+  });
+
+  useEffect(() => {
+    if (!prefs) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMinOfferPct(String(prefs.minOfferPercent ?? 85));
+
+    setAutoDeclineLowOffers(prefs.autoDeclineLowOffers ?? false);
+
+    setAllowRentalConversion(prefs.allowRentalConversion ?? true);
+  }, [prefs]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        ownerService.updatePreferences({
+          minOfferPercent: Number(minOfferPct) || 0,
+          autoDeclineLowOffers,
+          allowRentalConversion,
+        })
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ownerKeys.preferences });
+      setToast({ message: 'Preferences saved.', variant: 'success' });
+    },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Failed to save preferences.',
+        variant: 'error',
+      }),
+  });
 
   return (
     <div>
@@ -67,7 +108,19 @@ export const PreferencesSettings = () => {
         </label>
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+      <Button
+        variant="primary"
+        className="mt-6 gap-1.5"
+        isLoading={save.isPending}
+        disabled={!minOfferPct || save.isPending}
+        onClick={() => save.mutate()}
+      >
+        Save Preferences
+      </Button>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };

@@ -16,6 +16,7 @@ export interface OwnerDashboard {
   activeListings: number;
   pendingOffers: number;
   activeTransactions: number;
+  completedSales: number;
   portfolioValue: number;
   recentActivity: { id: string; type: string; message: string; timestamp: string }[];
 }
@@ -37,6 +38,12 @@ export interface OwnerReview {
   date: string;
   comment?: string;
   category?: string;
+}
+
+export interface OwnerRatingSummary {
+  averageRating: number;
+  reviewCount: number;
+  categories: { category: string; average: number; count: number }[];
 }
 
 export interface OwnerConversation {
@@ -63,6 +70,58 @@ export interface OwnerMessage {
   text: string;
   timestamp: string;
   read: boolean;
+}
+
+export interface OwnerPayoutAccount {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
+}
+
+export interface OwnerNotificationPreference {
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
+export interface OwnerPreferences {
+  minOfferPercent: number;
+  autoDeclineLowOffers: boolean;
+  allowRentalConversion: boolean;
+}
+
+export interface OwnerNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface OwnerOfferThreadMessage {
+  id: string;
+  offerId: string;
+  senderId: string;
+  senderName: string;
+  type: string;
+  amount?: number;
+  text?: string;
+  timestamp: string;
+}
+
+export interface OwnerMarketInsights {
+  comparables: {
+    propertyType: string;
+    city: string;
+    soldPrice: number;
+    size: number;
+    soldMonthsAgo: number;
+  }[];
+  lowEstimate: number;
+  highEstimate: number;
+  suggested: number;
 }
 
 export type OwnerPropertyApi = OwnerProperty;
@@ -163,13 +222,69 @@ export const ownerService = {
 
   // Reviews
   listReviews: () => safeCall(() => authFetch<OwnerReview[]>('/owner/reviews')),
-  getRatingSummary: () => safeCall(() => authFetch('/owner/reviews/summary')),
+  getRatingSummary: () => safeCall(() => authFetch<OwnerRatingSummary>('/owner/reviews/summary')),
 
   // Profile / settings
   getProfile: () => safeCall(() => authFetch<OwnerProfile>('/owner/profile')),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/owner/trust-profile')),
   updateProfile: (data: Partial<OwnerProfile>) =>
     safeCall(() => authFetch('/owner/profile', { method: 'PUT', body: JSON.stringify(data) })),
+
+  // Payout account
+  getPayoutSettings: () => safeCall(() => authFetch<OwnerPayoutAccount>('/owner/settings/payout')),
+  updatePayoutSettings: (data: { bankName: string; accountNumber: string; accountName: string }) =>
+    safeCall(() =>
+      authFetch<OwnerPayoutAccount>('/owner/settings/payout', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+    ),
+
+  // Notification preferences
+  getNotificationPreferences: () =>
+    safeCall(() => authFetch<OwnerNotificationPreference[]>('/owner/settings/notifications')),
+  updateNotificationPreferences: (preferences: OwnerNotificationPreference[]) =>
+    safeCall(() =>
+      authFetch<OwnerNotificationPreference[]>('/owner/settings/notifications', {
+        method: 'PUT',
+        body: JSON.stringify({ preferences }),
+      })
+    ),
+
+  // Preferences
+  getPreferences: () => safeCall(() => authFetch<OwnerPreferences>('/owner/settings/preferences')),
+  updatePreferences: (data: Partial<OwnerPreferences>) =>
+    safeCall(() =>
+      authFetch<OwnerPreferences>('/owner/settings/preferences', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+    ),
+
+  // Notifications feed
+  getNotifications: () => safeCall(() => authFetch<OwnerNotification[]>('/owner/notifications')),
+  markNotificationRead: (id: string) =>
+    safeCall(() => authFetch(`/owner/notifications/${id}/read`, { method: 'PATCH' })),
+  markAllNotificationsRead: () =>
+    safeCall(() => authFetch('/owner/notifications/read-all', { method: 'POST' })),
+
+  // Portfolio trend
+  getPortfolioTrend: () =>
+    safeCall(() =>
+      authFetch<{ label: string; value: number }[]>('/owner/analytics/portfolio-trend')
+    ),
+
+  // Market insights (comparable sales)
+  getMarketInsights: (city?: string) =>
+    safeCall(() =>
+      authFetch<OwnerMarketInsights>(
+        `/owner/analytics/market-insights${city ? `?city=${encodeURIComponent(city)}` : ''}`
+      )
+    ),
+
+  // Offer negotiation thread
+  getOfferThread: (offerId: string) =>
+    safeCall(() => authFetch<OwnerOfferThreadMessage[]>(`/owner/offers/${offerId}/thread`)),
 
   // Messages
   listConversations: () =>

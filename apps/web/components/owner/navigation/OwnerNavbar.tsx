@@ -5,28 +5,25 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { OwnerProfileDropdown } from './OwnerProfileDropdown';
 import { formatRelativeTime } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
+import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface OwnerNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
-interface NavNotification {
-  id: number;
-  title: string;
-  message: string;
-  read: boolean;
-  time: string;
-}
-
 export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -36,30 +33,20 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
   };
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NavNotification[]>([
-    {
-      id: 1,
-      title: 'New buyer inquiry',
-      message: 'A buyer is interested in Ocean View Towers',
-      read: false,
-      time: '2026-08-07T13:10:00.000Z',
-    },
-    {
-      id: 2,
-      title: 'New offer received',
-      message: 'Emeka Chukwu offered ₦85,000,000 for Palm Court Villa',
-      read: false,
-      time: '2026-08-07T09:30:00.000Z',
-    },
-    {
-      id: 3,
-      title: 'Escrow milestone reached',
-      message: 'Ownership documents verified for Lekki Waterfront Duplex',
-      read: true,
-      time: '2026-08-06T11:00:00.000Z',
-    },
-  ]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { data: notifications = [] } = useQuery({
+    queryKey: ownerKeys.notifications,
+    queryFn: () => unwrap(ownerService.getNotifications()),
+  });
+
+  const markRead = useMutation({
+    mutationFn: (id: string) => unwrap(ownerService.markNotificationRead(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ownerKeys.notifications }),
+  });
+  const markAllRead = useMutation({
+    mutationFn: () => unwrap(ownerService.markAllNotificationsRead()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ownerKeys.notifications }),
+  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -69,12 +56,12 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAsRead = (id: string) => {
+    markRead.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllRead.mutate();
   };
 
   return (
@@ -169,12 +156,10 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
                                   {notification.title}
                                 </h4>
                                 <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.time)}
+                                  {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.message}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{notification.body}</p>
                             </div>
                           ))
                         )}

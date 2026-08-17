@@ -12,58 +12,11 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import type { OfferStatus, OfferMessage } from '@/types/owner';
 
-const initialMessages: Record<string, OfferMessage[]> = {
-  offer_001: [
-    {
-      id: 'm1',
-      offerId: 'offer_001',
-      senderId: 'buyer',
-      senderName: 'Emeka Chukwu',
-      type: 'offer',
-      amount: 85_000_000,
-      text: 'Submitted an offer of',
-      timestamp: '2026-08-07T09:30:00.000Z',
-    },
-    {
-      id: 'm2',
-      offerId: 'offer_001',
-      senderId: 'buyer',
-      senderName: 'Emeka Chukwu',
-      type: 'message',
-      text: 'Pre-approved for mortgage financing, ready to move quickly.',
-      timestamp: '2026-08-07T09:31:00.000Z',
-    },
-  ],
-  offer_002: [
-    {
-      id: 'm1',
-      offerId: 'offer_002',
-      senderId: 'buyer',
-      senderName: 'Chioma Adaobi',
-      type: 'offer',
-      amount: 138_000_000,
-      text: 'Submitted an offer of',
-      timestamp: '2026-08-04T11:00:00.000Z',
-    },
-    {
-      id: 'm2',
-      offerId: 'offer_002',
-      senderId: 'owner',
-      senderName: 'You',
-      type: 'counter',
-      amount: 140_000_000,
-      text: 'Countered with',
-      timestamp: '2026-08-05T10:00:00.000Z',
-    },
-  ],
-};
-
 type StatusFilter = 'all' | OfferStatus;
 
 export default function OwnerOffersPage() {
   const queryClient = useQueryClient();
-  const [messagesByOffer, setMessagesByOffer] =
-    useState<Record<string, OfferMessage[]>>(initialMessages);
+  const [pendingMessages, setPendingMessages] = useState<Record<string, OfferMessage[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
@@ -73,24 +26,34 @@ export default function OwnerOffersPage() {
     queryFn: () => unwrap(ownerService.listOffers()),
   });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.offers });
+  // Negotiation thread for the currently-open offer, fetched from the backend.
+  const { data: thread = [] } = useQuery({
+    queryKey: ownerKeys.offerThread(activeOfferId ?? ''),
+    queryFn: () => unwrap(ownerService.getOfferThread(activeOfferId as string)),
+    enabled: !!activeOfferId,
+  });
+
+  const invalidate = (offerId?: string) => {
+    queryClient.invalidateQueries({ queryKey: ownerKeys.offers });
+    if (offerId) queryClient.invalidateQueries({ queryKey: ownerKeys.offerThread(offerId) });
+  };
 
   const acceptMutation = useMutation({
     mutationFn: (offerId: string) => unwrap(ownerService.acceptOffer(offerId)),
-    onSuccess: invalidate,
+    onSuccess: (_result, offerId) => invalidate(offerId),
   });
   const rejectMutation = useMutation({
     mutationFn: (offerId: string) => unwrap(ownerService.rejectOffer(offerId)),
-    onSuccess: invalidate,
+    onSuccess: (_result, offerId) => invalidate(offerId),
   });
   const counterMutation = useMutation({
     mutationFn: ({ offerId, amount, note }: { offerId: string; amount: number; note?: string }) =>
       unwrap(ownerService.counterOffer(offerId, amount, note)),
-    onSuccess: invalidate,
+    onSuccess: (_result, { offerId }) => invalidate(offerId),
   });
 
   const appendMessage = (offerId: string, message: OfferMessage) => {
-    setMessagesByOffer((prev) => ({
+    setPendingMessages((prev) => ({
       ...prev,
       [offerId]: [...(prev[offerId] || []), message],
     }));
@@ -160,6 +123,22 @@ export default function OwnerOffersPage() {
   };
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
+
+  const messages: OfferMessage[] = activeOfferId
+    ? [
+        ...thread.map((m) => ({
+          id: m.id,
+          offerId: m.offerId,
+          senderId: (m.senderId === 'owner' ? 'owner' : 'buyer') as 'owner' | 'buyer',
+          senderName: m.senderName,
+          type: m.type as OfferMessage['type'],
+          amount: m.amount,
+          text: m.text ?? '',
+          timestamp: m.timestamp,
+        })),
+        ...(pendingMessages[activeOfferId] || []),
+      ]
+    : [];
 
   const filteredOffers = offers.filter((o) => {
     const matchesSearch =
@@ -245,7 +224,7 @@ export default function OwnerOffersPage() {
 
       <OfferNegotiationModal
         offer={activeOffer}
-        messages={activeOfferId ? messagesByOffer[activeOfferId] || [] : []}
+        messages={messages}
         onClose={() => setActiveOfferId(null)}
         onAccept={handleAccept}
         onReject={handleReject}

@@ -59,13 +59,13 @@ export default function OwnerDashboardPage() {
             }
             pendingOffers={dashboard?.pendingOffers ?? 0}
             totalPortfolioValue={dashboard?.portfolioValue ?? 0}
-            completedSales={0}
+            completedSales={dashboard?.completedSales ?? 0}
           />
 
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <OwnerPortfolioChart />
-              <OwnerActivityFeed />
+              <OwnerActivityFeed activity={dashboard?.recentActivity ?? []} />
             </div>
             <div>
               <OwnerQuickActions />

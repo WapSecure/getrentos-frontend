@@ -170,11 +170,19 @@ export const ownerKeys = {
   realtors: ['owner', 'leads', 'realtors'] as const,
   documents: ['owner', 'documents'] as const,
   reviews: ['owner', 'reviews'] as const,
+  reviewSummary: ['owner', 'reviews', 'summary'] as const,
   profile: ['owner', 'profile'] as const,
   conversations: ['owner', 'conversations'] as const,
   messages: (conversationId: string) =>
     ['owner', 'conversations', conversationId, 'messages'] as const,
   trustProfile: ['owner', 'trust-profile'] as const,
+  payoutSettings: ['owner', 'settings', 'payout'] as const,
+  notificationPrefs: ['owner', 'settings', 'notifications'] as const,
+  preferences: ['owner', 'settings', 'preferences'] as const,
+  notifications: ['owner', 'notifications'] as const,
+  portfolioTrend: ['owner', 'analytics', 'portfolio-trend'] as const,
+  marketInsights: (city?: string) => ['owner', 'analytics', 'market-insights', city ?? ''] as const,
+  offerThread: (offerId: string) => ['owner', 'offers', offerId, 'thread'] as const,
 };
 
 export const buyerKeys = {
