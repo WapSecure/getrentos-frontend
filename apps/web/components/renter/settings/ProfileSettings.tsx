@@ -6,8 +6,9 @@ import { Textarea } from '@getrentos/ui';
 
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, User, Mail, Phone, MapPin } from 'lucide-react';
+import { Camera, User, Mail, Phone, MapPin, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { SaveButton } from '@getrentos/ui';
+import { OTPModal } from '@/components/auth/OTPModal';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -30,20 +31,33 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     bio: profile?.bio ?? '',
   };
 
-  return <ProfileSettingsForm key={profile ? 'loaded' : 'initial'} initial={initial} user={user} />;
+  return (
+    <ProfileSettingsForm
+      key={profile ? 'loaded' : 'initial'}
+      initial={initial}
+      user={user}
+      phoneVerified={!!profile?.phoneVerified}
+    />
+  );
 };
 
 const ProfileSettingsForm = ({
   initial,
   user,
+  phoneVerified,
 }: {
   initial: { fullName: string; email: string; phone: string; location: string; bio: string };
   user: { fullName: string; email: string; role?: string } | null;
+  phoneVerified: boolean;
 }) => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState(initial);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+  const [isOtpOpen, setIsOtpOpen] = useState(false);
+  const [otpReference, setOtpReference] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   const updateMutation = useMutation({
     mutationFn: () =>
@@ -77,12 +91,59 @@ const ProfileSettingsForm = ({
     updateMutation.mutate();
   };
 
+  const handleVerifyPhone = async () => {
+    if (!formData.phone) {
+      setOtpError('Add your phone number first');
+      return;
+    }
+    setOtpError('');
+    setIsSendingOtp(true);
+    const response = await renterService.sendPhoneVerification();
+    setIsSendingOtp(false);
+    if (response.success && response.data) {
+      setOtpReference(response.data.reference);
+      setIsOtpOpen(true);
+    } else {
+      setOtpError(response.message || 'Failed to send the verification code');
+    }
+  };
+
+  const handleOtpVerify = async (otp: string) => {
+    if (!otpReference) return;
+    const response = await renterService.confirmPhoneVerification(otpReference, otp);
+    if (response.success && response.data) {
+      setIsOtpOpen(false);
+      setOtpReference('');
+      queryClient.invalidateQueries({ queryKey: renterKeys.profile });
+    } else {
+      throw new Error(response.message || 'The code is invalid or has expired');
+    }
+  };
+
+  const handleOtpResend = async () => {
+    const response = await renterService.sendPhoneVerification();
+    if (response.success && response.data) {
+      setOtpReference(response.data.reference);
+    } else {
+      throw new Error(response.message || 'Failed to resend the code');
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Profile Settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Update your personal information and profile photo
       </p>
+
+      <OTPModal
+        isOpen={isOtpOpen}
+        onClose={() => setIsOtpOpen(false)}
+        identifier={formData.phone}
+        method="phone"
+        onVerify={handleOtpVerify}
+        onResend={handleOtpResend}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-6">
@@ -144,16 +205,37 @@ const ProfileSettingsForm = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Phone Number
+            {phoneVerified && (
+              <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Verified
+              </span>
+            )}
+          </label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <LegacyInput
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            {!phoneVerified && (
+              <button
+                type="button"
+                onClick={handleVerifyPhone}
+                disabled={isSendingOtp}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-sm font-medium text-primary hover:bg-secondary disabled:opacity-50 transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                {isSendingOtp ? 'Sending…' : 'Verify'}
+              </button>
+            )}
           </div>
+          {otpError && <p className="mt-1 text-xs text-red-500">{otpError}</p>}
         </div>
 
         <div>

@@ -158,6 +158,7 @@ export interface RenterProfile {
   fullName: string;
   email: string;
   phone?: string;
+  phoneVerified?: boolean;
   avatarUrl?: string;
   location?: string;
   bio?: string;
@@ -957,6 +958,22 @@ export const renterService = {
     const formData = new FormData();
     formData.append('file', file);
     return safeCall(() => authFetch('/renter/profile/avatar', { method: 'POST', body: formData }));
+  },
+
+  async sendPhoneVerification(): Promise<ApiResponse<{ reference: string }>> {
+    return safeCall(() => authFetch('/renter/settings/phone/verify/send', { method: 'POST' }));
+  },
+
+  async confirmPhoneVerification(
+    reference: string,
+    otp: string
+  ): Promise<ApiResponse<{ phoneVerified: boolean }>> {
+    return safeCall(() =>
+      authFetch('/renter/settings/phone/verify', {
+        method: 'POST',
+        body: JSON.stringify({ reference, otp }),
+      })
+    );
   },
 
   async updatePassword(
