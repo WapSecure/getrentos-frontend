@@ -87,6 +87,15 @@ export interface Lease {
   createdAt: string;
 }
 
+export interface TenancyStanding {
+  shared: boolean;
+  trustScore?: number;
+  signedLeaseCount?: number;
+  identityVerified?: boolean;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+}
+
 export interface RentIncreaseCheck {
   increasePercent: number;
   exceedsGuidance: boolean;

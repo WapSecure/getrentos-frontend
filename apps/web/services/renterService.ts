@@ -866,6 +866,18 @@ export const renterService = {
     );
   },
 
+  async getPreferences(): Promise<ApiResponse<Record<string, unknown>>> {
+    return safeCall(() => authFetch('/renter/settings/preferences'));
+  },
+
+  async updatePreferences(
+    updates: Record<string, unknown>
+  ): Promise<ApiResponse<Record<string, unknown>>> {
+    return safeCall(() =>
+      authFetch('/renter/settings/preferences', { method: 'PUT', body: JSON.stringify(updates) })
+    );
+  },
+
   // ---- Saved searches ----
   async listSavedSearches(): Promise<ApiResponse<SavedSearch[]>> {
     return safeCall(() => authFetch('/renter/saved-searches'));

@@ -29,6 +29,8 @@ export const landlordKeys = {
       params?.priority ?? 'all',
     ] as const,
   evictions: ['landlord', 'evictions'] as const,
+  tenancyStanding: (applicationId: string) =>
+    ['landlord', 'tenancyStanding', applicationId] as const,
 };
 
 export const renterKeys = {
@@ -77,6 +79,7 @@ export const renterKeys = {
   savedSearches: ['renter', 'savedSearches'] as const,
   profile: ['renter', 'profile'] as const,
   inspections: ['renter', 'inspections'] as const,
+  preferences: ['renter', 'preferences'] as const,
 };
 
 export const realtorKeys = {

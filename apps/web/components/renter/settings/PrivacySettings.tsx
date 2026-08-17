@@ -1,10 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, User, Users, Globe, Lock, Phone } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Eye, User, Users, Globe, Lock, Phone, History } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import { renterService } from '@/services/renterService';
 
 export const PrivacySettings = () => {
+  const queryClient = useQueryClient();
+  const { data: preferences } = useQuery({
+    queryKey: renterKeys.preferences,
+    queryFn: () => unwrap(renterService.getPreferences()),
+  });
+  const shareTenancyStanding = preferences?.shareTenancyStanding === true;
+
+  const updateSharing = useMutation({
+    mutationFn: (value: boolean) =>
+      unwrap(renterService.updatePreferences({ shareTenancyStanding: value })),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.preferences }),
+  });
+
   const [privacy, setPrivacy] = useState({
     profileVisibility: 'public',
     showEmail: false,
@@ -113,6 +130,37 @@ export const PrivacySettings = () => {
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                   privacy.showActivity ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-foreground">Tenancy standing</label>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex items-center gap-3">
+              <History className="w-4 h-4 text-gray-500" />
+              <div>
+                <span className="text-sm text-foreground">
+                  Share my tenancy standing with landlords I apply to
+                </span>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  When on, a landlord reviewing your rental application can see your platform trust
+                  score, signed-lease count, and verification status.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => updateSharing.mutate(!shareTenancyStanding)}
+              disabled={updateSharing.isPending}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                shareTenancyStanding ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  shareTenancyStanding ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   X,
   Mail,
@@ -13,9 +14,13 @@ import {
   Check,
   MessageSquareText,
   Users,
+  History,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
 import type { RentalApplication } from '@/types/landlord';
 
 interface ApplicationDetailsModalProps {
@@ -34,6 +39,12 @@ export const ApplicationDetailsModal = ({
   onRequestInfo,
 }: ApplicationDetailsModalProps) => {
   const isDecided = application?.status === 'approved' || application?.status === 'rejected';
+
+  const { data: tenancyStanding } = useQuery({
+    queryKey: landlordKeys.tenancyStanding(application?.id ?? ''),
+    queryFn: () => unwrap(landlordService.getTenancyStanding(application!.id)),
+    enabled: !!application,
+  });
 
   return (
     <AnimatePresence>
@@ -69,6 +80,48 @@ export const ApplicationDetailsModal = ({
                   <span className="text-sm font-medium text-foreground">Platform Trust Score</span>
                 </div>
                 <span className="text-lg font-bold text-primary">{application.trustScore}</span>
+              </div>
+
+              <div className="p-3 rounded-lg border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <History className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Tenancy Standing</span>
+                </div>
+                {tenancyStanding?.shared ? (
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Platform trust score</p>
+                      <p className="font-medium text-foreground">{tenancyStanding.trustScore}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Signed leases</p>
+                      <p className="font-medium text-foreground">
+                        {tenancyStanding.signedLeaseCount}
+                      </p>
+                    </div>
+                    <div className="col-span-2 flex flex-wrap gap-1.5 mt-1">
+                      {tenancyStanding.identityVerified && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                          Identity verified
+                        </span>
+                      )}
+                      {tenancyStanding.emailVerified && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                          Email verified
+                        </span>
+                      )}
+                      {tenancyStanding.phoneVerified && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                          Phone verified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    This applicant hasn&apos;t opted in to share their prior tenancy history.
+                  </p>
+                )}
               </div>
 
               <div>

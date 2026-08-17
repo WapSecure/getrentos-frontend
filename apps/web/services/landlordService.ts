@@ -15,6 +15,7 @@ import type {
   LandlordMaintenanceRequest,
   EvictionCase,
   RentIncreaseCheck,
+  TenancyStanding,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -299,6 +300,10 @@ export const landlordService = {
         body: JSON.stringify({ status }),
       })
     );
+  },
+
+  async getTenancyStanding(id: string): Promise<ApiResponse<TenancyStanding>> {
+    return safeCall(() => authFetch(`/landlord/applications/${id}/tenancy-standing`));
   },
 
   // ---- Leases ----
