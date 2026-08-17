@@ -48,6 +48,8 @@ export default function LandlordDocumentsPage() {
     const response = await landlordService.uploadDocument(data.name, data.category, data.file);
     if (response.success && response.data) {
       setDocuments((prev) => [response.data!, ...prev]);
+    } else {
+      throw new Error(response.message || 'Unable to upload document.');
     }
   };
 

@@ -8,8 +8,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Users } from 'lucide-react';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
-import { Button } from '@getrentos/ui';
-import type { RealtorClient, ClientRole } from '@/types/realtor';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import type { ClientRole } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -22,6 +22,7 @@ export default function RealtorClientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
   const { data: clients = [], isLoading } = useQuery({
     queryKey: realtorKeys.clients,
@@ -32,13 +33,18 @@ export default function RealtorClientsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.clients });
       setIsAddModalOpen(false);
+      setToast({ message: 'Client invitation sent.', variant: 'success' });
+    },
+    onError: (error) => {
+      setToast({
+        message: error.message || 'Unable to add this client. Please try again.',
+        variant: 'error',
+      });
     },
   });
 
-  const handleAddClient = (
-    data: Omit<RealtorClient, 'id' | 'status' | 'propertiesRepresented' | 'joinedDate'>
-  ) => {
-    inviteClient.mutate(data.email);
+  const handleAddClient = (email: string) => {
+    inviteClient.mutate(email);
   };
 
   const filteredClients = clients.filter((c) => {
@@ -136,7 +142,13 @@ export default function RealtorClientsPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddClient}
+        isSubmitting={inviteClient.isPending}
+        error={inviteClient.isError ? inviteClient.error.message : null}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

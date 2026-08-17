@@ -9,8 +9,8 @@ import { Plus, Search, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
-import { Button } from '@getrentos/ui';
-import type { RealtorClient, RealtorListing, RealtorListingStatus } from '@/types/realtor';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import {
@@ -28,6 +28,7 @@ type StatusFilter = 'all' | RealtorListingStatus;
 
 export default function RealtorListingsPage() {
   const searchParams = useSearchParams();
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -66,6 +67,11 @@ export default function RealtorListingsPage() {
       queryClient.invalidateQueries({ queryKey: realtorKeys.listings });
       setIsCreateModalOpen(false);
     },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to create this listing. Please try again.',
+        variant: 'error',
+      }),
   });
 
   useEffect(() => {
@@ -186,6 +192,10 @@ export default function RealtorListingsPage() {
         listing={previewListing}
         onClose={() => setPreviewListing(null)}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

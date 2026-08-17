@@ -8,6 +8,7 @@ import { Search, Handshake } from 'lucide-react';
 import { RealtorOfferCard } from '@/components/realtor/offers/RealtorOfferCard';
 import { RealtorOfferNegotiationModal } from '@/components/realtor/offers/RealtorOfferNegotiationModal';
 import type { RealtorOfferStatus, OfferThreadMessage } from '@/types/realtor';
+import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorOffer, realtorService } from '@/services/realtorService';
@@ -19,6 +20,7 @@ export default function RealtorOffersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
   const { data: offers = [], isLoading } = useQuery({
     queryKey: realtorKeys.offers,
@@ -28,6 +30,11 @@ export default function RealtorOffersPage() {
     mutationFn: ({ id, amount, message }: { id: string; amount: number; message?: string }) =>
       unwrap(realtorService.counterOffer(id, { amount, message })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.offers }),
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to submit the counter offer. Please try again.',
+        variant: 'error',
+      }),
   });
 
   const appendMessage = (offerId: string, message: OfferThreadMessage) => {
@@ -152,6 +159,10 @@ export default function RealtorOffersPage() {
         onClose={() => setActiveOfferId(null)}
         onCounter={handleCounter}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

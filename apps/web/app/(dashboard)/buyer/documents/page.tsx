@@ -42,9 +42,8 @@ export default function BuyerDocumentsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.documents }),
   });
 
-  const handleUpload = (data: UploadedDocumentData) => {
-    uploadMutation.mutate(data);
-    setIsUploadOpen(false);
+  const handleUpload = async (data: UploadedDocumentData) => {
+    await uploadMutation.mutateAsync(data);
   };
 
   const filteredDocuments = documents.filter((d) => {

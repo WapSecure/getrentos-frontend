@@ -12,10 +12,12 @@ import { cn } from '@/lib/cn';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
+import { Toast, type ToastVariant } from '@getrentos/ui';
 
 export default function RealtorMessagesPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
   const { data: conversations = [] } = useQuery({
     queryKey: realtorKeys.conversations,
@@ -68,6 +70,11 @@ export default function RealtorMessagesPage() {
       queryClient.invalidateQueries({ queryKey: realtorKeys.conversationMessages(activeId || '') });
       queryClient.invalidateQueries({ queryKey: realtorKeys.conversations });
     },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to send this message. Please try again.',
+        variant: 'error',
+      }),
   });
   const filteredConversations = conversations.filter((conversation) =>
     conversation.participantName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -116,6 +123,10 @@ export default function RealtorMessagesPage() {
           )}
         </div>
       </div>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }

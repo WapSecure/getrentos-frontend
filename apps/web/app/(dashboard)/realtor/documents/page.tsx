@@ -66,8 +66,9 @@ export default function RealtorDocumentsPage() {
   const previewDocument = async (id: string) =>
     setPreview(await unwrap(realtorService.getDocumentDownload(id)));
 
-  const handleUpload = (data: { name: string; category: string; file: File }) =>
-    upload.mutate(data);
+  const handleUpload = async (data: { name: string; category: string; file: File }) => {
+    await upload.mutateAsync(data);
+  };
 
   const filteredDocuments = documents.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());

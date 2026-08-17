@@ -7,7 +7,7 @@ import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingCard } from '@/components/realtor/viewings/ViewingCard';
 import { ScheduleViewingModal } from '@/components/realtor/viewings/ScheduleViewingModal';
 import type { CreateViewingInput } from '@/components/realtor/viewings/ScheduleViewingModal';
-import { Button } from '@getrentos/ui';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
 import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -18,6 +18,7 @@ function RealtorViewingsPageContent() {
   const defaultLeadId = searchParams.get('lead') || undefined;
 
   const [isModalOpen, setIsModalOpen] = useState(!!defaultLeadId);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
   const { data: viewings = [], isLoading } = useQuery({
     queryKey: realtorKeys.viewings,
@@ -41,11 +42,21 @@ function RealtorViewingsPageContent() {
       queryClient.invalidateQueries({ queryKey: realtorKeys.viewings });
       setIsModalOpen(false);
     },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to schedule this viewing. Please try again.',
+        variant: 'error',
+      }),
   });
   const updateViewing = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' }) =>
       unwrap(realtorService.updateViewingStatus(id, status)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.viewings }),
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to update this viewing. Please try again.',
+        variant: 'error',
+      }),
   });
 
   const handleSubmit = (appointment: CreateViewingInput) => {
@@ -103,6 +114,10 @@ function RealtorViewingsPageContent() {
         defaultLeadId={defaultLeadId}
         onSubmit={handleSubmit}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

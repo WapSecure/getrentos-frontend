@@ -5,12 +5,20 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, UserPlus } from 'lucide-react';
+import { Plus, Search, UserPlus, User, Mail, Phone } from 'lucide-react';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
 import type { LeadStage } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
-import { Button } from '@getrentos/ui';
-import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  Input,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorLead, mapRealtorListing, realtorService } from '@/services/realtorService';
@@ -23,6 +31,12 @@ export default function RealtorLeadsPage() {
   const [filter, setFilter] = useState<StageFilter>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newLead, setNewLead] = useState({ fullName: '', email: '', phone: '', listingId: '' });
+  const [formErrors, setFormErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    phone?: string;
+  }>({});
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const { data: leads = [], isLoading } = useQuery({
     queryKey: realtorKeys.leads,
     queryFn: async () => (await unwrap(realtorService.listLeads())).map(mapRealtorLead),
@@ -43,9 +57,27 @@ export default function RealtorLeadsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.leads });
       setNewLead({ fullName: '', email: '', phone: '', listingId: '' });
+      setFormErrors({});
       setIsCreateOpen(false);
+      setToast({ message: 'Lead created.', variant: 'success' });
+    },
+    onError: (error) => {
+      setToast({
+        message: error.message || 'Unable to create this lead. Please try again.',
+        variant: 'error',
+      });
     },
   });
+
+  const handleCreateLead = () => {
+    const errors: typeof formErrors = {};
+    if (!newLead.fullName.trim()) errors.fullName = 'Enter the lead’s full name.';
+    if (newLead.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newLead.email.trim())) {
+      errors.email = 'Enter a valid email address, e.g. lead@example.com.';
+    }
+    setFormErrors(errors);
+    if (Object.keys(errors).length === 0) createLead.mutate();
+  };
 
   const filteredLeads = leads.filter((l) => {
     const matchesSearch =
@@ -68,14 +100,16 @@ export default function RealtorLeadsPage() {
   return (
     <>
       <div className="mb-6 flex items-start justify-between gap-4">
-        <h1 className="text-2xl font-bold text-foreground">Leads</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Leads</h1>
+          <p className="text-muted-foreground mt-1">
+            {leads.length} lead{leads.length === 1 ? '' : 's'} across your listings
+          </p>
+        </div>
         <Button className="gap-2" onClick={() => setIsCreateOpen(true)}>
           <Plus className="h-4 w-4" />
           Add lead
         </Button>
-        <p className="text-muted-foreground mt-1">
-          {leads.length} lead{leads.length === 1 ? '' : 's'} across your listings
-        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -142,50 +176,85 @@ export default function RealtorLeadsPage() {
       )}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent>
-          <div className="p-5 space-y-3">
+          <div className="p-5 space-y-4">
             <DialogTitle>Add lead</DialogTitle>
-            {(['fullName', 'email', 'phone'] as const).map((field) => (
-              <input
-                key={field}
-                value={newLead[field]}
+            <Field label="Full name" htmlFor="lead-full-name" required error={formErrors.fullName}>
+              <Input
+                id="lead-full-name"
+                type="text"
+                autoComplete="name"
+                placeholder="e.g. Adaeze Okafor"
+                leadingIcon={<User className="h-4 w-4" />}
+                value={newLead.fullName}
                 onChange={(event) =>
-                  setNewLead((value) => ({ ...value, [field]: event.target.value }))
+                  setNewLead((value) => ({ ...value, fullName: event.target.value }))
                 }
-                placeholder={
-                  field === 'fullName'
-                    ? 'Full name'
-                    : field === 'email'
-                      ? 'Email address'
-                      : 'Phone number'
-                }
-                className="w-full rounded-lg border border-border bg-card px-3 py-2"
+                disabled={createLead.isPending}
               />
-            ))}
-            <select
-              value={newLead.listingId}
-              onChange={(event) =>
-                setNewLead((value) => ({ ...value, listingId: event.target.value }))
-              }
-              className="w-full rounded-lg border border-border bg-card px-3 py-2"
-            >
-              <option value="">No listing yet</option>
-              {listings.map((listing) => (
-                <option key={listing.id} value={listing.id}>
-                  {listing.title}
-                </option>
-              ))}
-            </select>
+            </Field>
+            <Field label="Email" htmlFor="lead-email" error={formErrors.email}>
+              <Input
+                id="lead-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="lead@example.com"
+                leadingIcon={<Mail className="h-4 w-4" />}
+                value={newLead.email}
+                onChange={(event) =>
+                  setNewLead((value) => ({ ...value, email: event.target.value }))
+                }
+                disabled={createLead.isPending}
+              />
+            </Field>
+            <Field label="Phone" htmlFor="lead-phone" error={formErrors.phone}>
+              <Input
+                id="lead-phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="0801 234 5678"
+                leadingIcon={<Phone className="h-4 w-4" />}
+                value={newLead.phone}
+                onChange={(event) =>
+                  setNewLead((value) => ({ ...value, phone: event.target.value }))
+                }
+                disabled={createLead.isPending}
+              />
+            </Field>
+            <Field label="Listing" htmlFor="lead-listing">
+              <select
+                id="lead-listing"
+                value={newLead.listingId}
+                onChange={(event) =>
+                  setNewLead((value) => ({ ...value, listingId: event.target.value }))
+                }
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-4 focus:ring-primary/12"
+                disabled={createLead.isPending}
+              >
+                <option value="">No listing yet</option>
+                {listings.map((listing) => (
+                  <option key={listing.id} value={listing.id}>
+                    {listing.title}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <Button
               fullWidth
               isLoading={createLead.isPending}
-              disabled={!newLead.fullName}
-              onClick={() => createLead.mutate()}
+              disabled={!newLead.fullName.trim()}
+              onClick={handleCreateLead}
             >
               Create lead
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

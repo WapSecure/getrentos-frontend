@@ -65,7 +65,6 @@ export interface OwnerMessage {
   read: boolean;
 }
 
-/** API response shapes from the backend (camelCase already mapped by the API). */
 export type OwnerPropertyApi = OwnerProperty;
 export type OwnerSaleListingApi = SaleListing;
 export type OwnerOfferApi = SaleOffer;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Upload as UploadIcon, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
 import { Button } from './Button';
@@ -22,6 +22,11 @@ interface DocumentUploadDialogProps {
   onUpload: (data: UploadedDocumentData) => void | Promise<void>;
 }
 
+const ACCEPT = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.txt';
+
+const isImageFile = (file: File) => file.type.startsWith('image/');
+const isPdfFile = (file: File) => file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+
 export const DocumentUploadDialog = ({
   open,
   onOpenChange,
@@ -32,12 +37,27 @@ export const DocumentUploadDialog = ({
   const [category, setCategory] = useState(categories[0]?.value ?? '');
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Object URL for a live preview of the selected file (images / PDFs).
+  useEffect(() => {
+    if (!file || (!isImageFile(file) && !isPdfFile(file))) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   const reset = () => {
     setFile(null);
     setCategory(categories[0]?.value ?? '');
     setIsUploading(false);
     setDragActive(false);
+    setError(null);
+    setPreviewUrl(null);
   };
 
   const handleClose = (next: boolean) => {
@@ -61,6 +81,7 @@ export const DocumentUploadDialog = ({
   const handleSubmit = async () => {
     if (!file) return;
     setIsUploading(true);
+    setError(null);
     try {
       await onUpload({
         name: file.name,
@@ -70,6 +91,8 @@ export const DocumentUploadDialog = ({
       });
       reset();
       onOpenChange(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -98,10 +121,23 @@ export const DocumentUploadDialog = ({
           >
             {file ? (
               <div className="space-y-2">
-                <FileText className="w-8 h-8 text-primary mx-auto" />
+                {previewUrl && isImageFile(file) ? (
+                  <img
+                    src={previewUrl}
+                    alt={file.name}
+                    className="mx-auto max-h-40 max-w-full rounded-lg border border-border object-contain"
+                  />
+                ) : previewUrl && isPdfFile(file) ? (
+                  <div className="mx-auto flex h-36 w-28 items-center justify-center rounded-lg border border-border bg-secondary/60">
+                    <FileText className="h-10 w-10 text-primary" />
+                    <span className="sr-only">PDF preview</span>
+                  </div>
+                ) : (
+                  <FileText className="w-8 h-8 text-primary mx-auto" />
+                )}
                 <p className="text-sm font-medium text-foreground">{file.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB · {file.type || 'unknown type'}
                 </p>
                 <button
                   onClick={() => setFile(null)}
@@ -119,6 +155,7 @@ export const DocumentUploadDialog = ({
                   <span className="text-sm text-primary hover:opacity-80">Browse files</span>
                   <input
                     type="file"
+                    accept={ACCEPT}
                     onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])}
                     className="hidden"
                   />
@@ -129,6 +166,12 @@ export const DocumentUploadDialog = ({
               </>
             )}
           </div>
+
+          {error && (
+            <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              {error}
+            </p>
+          )}
 
           <Field label="Category">
             <Select value={category} onValueChange={setCategory} options={categories} />
