@@ -3,8 +3,11 @@
 import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Star, Send } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
 
 export const HelpFeedback = () => {
   const [rating, setRating] = useState(0);
@@ -12,15 +15,19 @@ export const HelpFeedback = () => {
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
+  const submitMutation = useMutation({
+    mutationFn: (data: { rating?: number; message: string }) =>
+      unwrap(renterService.submitFeedback(data)),
+    onSuccess: () => {
+      setSubmitted(true);
+      setRating(0);
+      setFeedback('');
+    },
+  });
+
   const handleSubmit = () => {
     if (rating > 0) {
-      setSubmitted(true);
-      // In production, send feedback
-      setTimeout(() => {
-        setSubmitted(false);
-        setRating(0);
-        setFeedback('');
-      }, 3000);
+      submitMutation.mutate({ rating, message: feedback.trim() || 'No additional feedback' });
     }
   };
 

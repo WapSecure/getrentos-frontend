@@ -36,6 +36,37 @@ export interface MoveInChecklistItem {
   required: boolean;
 }
 
+export interface MoveOutChecklistItem {
+  key: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  required: boolean;
+}
+
+export interface MessageTemplate {
+  id: string;
+  title: string;
+  content: string;
+  category?: string;
+  useCount: number;
+  createdAt: string;
+}
+
+export interface QuickReply {
+  id: string;
+  shortcut: string;
+  response: string;
+  createdAt: string;
+}
+
+export interface Feedback {
+  id: string;
+  rating?: number;
+  message: string;
+  createdAt: string;
+}
+
 export interface Lease {
   id: string;
   propertyId: string;
@@ -681,6 +712,71 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/messages/reminders/${id}`, { method: 'DELETE' }));
   },
 
+  // ---- Message templates ----
+  async listMessageTemplates(): Promise<ApiResponse<MessageTemplate[]>> {
+    return safeCall(() => authFetch('/renter/messages/templates'));
+  },
+
+  async createMessageTemplate(data: {
+    title: string;
+    content: string;
+    category?: string;
+  }): Promise<ApiResponse<MessageTemplate>> {
+    return safeCall(() =>
+      authFetch('/renter/messages/templates', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async updateMessageTemplate(
+    id: string,
+    data: { title?: string; content?: string; category?: string; useCount?: number }
+  ): Promise<ApiResponse<MessageTemplate>> {
+    return safeCall(() =>
+      authFetch(`/renter/messages/templates/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
+    );
+  },
+
+  async deleteMessageTemplate(id: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() => authFetch(`/renter/messages/templates/${id}`, { method: 'DELETE' }));
+  },
+
+  // ---- Quick replies ----
+  async listQuickReplies(): Promise<ApiResponse<QuickReply[]>> {
+    return safeCall(() => authFetch('/renter/messages/quick-replies'));
+  },
+
+  async createQuickReply(data: {
+    shortcut: string;
+    response: string;
+  }): Promise<ApiResponse<QuickReply>> {
+    return safeCall(() =>
+      authFetch('/renter/messages/quick-replies', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async updateQuickReply(
+    id: string,
+    data: { shortcut?: string; response?: string }
+  ): Promise<ApiResponse<QuickReply>> {
+    return safeCall(() =>
+      authFetch(`/renter/messages/quick-replies/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async deleteQuickReply(id: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() => authFetch(`/renter/messages/quick-replies/${id}`, { method: 'DELETE' }));
+  },
+
+  // ---- Help feedback ----
+  async submitFeedback(data: { rating?: number; message: string }): Promise<ApiResponse<Feedback>> {
+    return safeCall(() =>
+      authFetch('/renter/feedback', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
   // ---- Lease ----
   async getLease(): Promise<ApiResponse<Lease>> {
     return safeCall(() => authFetch('/renter/lease'));
@@ -939,6 +1035,17 @@ export const renterService = {
   async toggleMoveInChecklistItem(key: string): Promise<ApiResponse<MoveInChecklistItem>> {
     return safeCall(() =>
       authFetch(`/renter/dashboard/move-in-checklist/${key}/toggle`, { method: 'PATCH' })
+    );
+  },
+
+  // ---- Move-out checklist ----
+  async getMoveOutChecklist(): Promise<ApiResponse<MoveOutChecklistItem[]>> {
+    return safeCall(() => authFetch('/renter/dashboard/move-out-checklist'));
+  },
+
+  async toggleMoveOutChecklistItem(key: string): Promise<ApiResponse<MoveOutChecklistItem>> {
+    return safeCall(() =>
+      authFetch(`/renter/dashboard/move-out-checklist/${key}/toggle`, { method: 'PATCH' })
     );
   },
 };

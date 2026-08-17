@@ -8,6 +8,7 @@ import { Button } from '@getrentos/ui';
 import { Toast, ToastVariant } from '@getrentos/ui';
 import { useEffect, useRef, useState } from 'react';
 import { renterService, type MoveInChecklistItem } from '@/services/renterService';
+import { printHtml, escapeHtml } from '@/lib/export';
 
 export const RenterMoveInChecklist = () => {
   const [items, setItems] = useState<MoveInChecklistItem[]>([]);
@@ -46,7 +47,26 @@ export const RenterMoveInChecklist = () => {
   };
 
   const handleGenerateReport = () => {
-    setToast({ message: 'Move-in report generated and sent to your landlord', variant: 'success' });
+    const date = new Date().toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const rows = items
+      .map(
+        (item) =>
+          `<tr><td>${escapeHtml(item.title)}</td><td>${escapeHtml(item.description)}</td><td>${
+            item.completed ? 'Done' : 'Pending'
+          }</td></tr>`
+      )
+      .join('');
+    printHtml(
+      'Move-In Report',
+      `<h1>Move-In Report</h1>
+       <p class="meta">Generated ${date} · ${completedCount}/${items.length} items completed</p>
+       <h2>Checklist Status</h2>
+       <table><thead><tr><th>Item</th><th>Description</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`
+    );
   };
 
   return (

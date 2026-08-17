@@ -7,103 +7,91 @@ import { Textarea } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Plus, Edit2, Trash2, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-
-type TemplateCategory = 'application' | 'viewing' | 'followup' | 'general';
-
-interface Template {
-  id: string;
-  name: string;
-  content: string;
-  category: TemplateCategory;
-  useCount: number;
-}
+import { renterService, type MessageTemplate } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 
 interface MessageTemplatesProps {
   onSelectTemplate: (content: string) => void;
 }
 
 interface NewTemplateData {
-  name: string;
+  title: string;
   content: string;
-  category: TemplateCategory;
+  category: string;
 }
 
-const defaultTemplates: Template[] = [
-  {
-    id: '1',
-    name: 'Application Follow-up',
-    content:
-      'Hi, I submitted an application for this property and wanted to follow up on the status. Please let me know if you need any additional information.',
-    category: 'application',
-    useCount: 12,
-  },
-  {
-    id: '2',
-    name: 'Schedule Viewing',
-    content:
-      "Hi, I'm very interested in this property. Could we schedule a viewing at your earliest convenience? I'm available on [day/time]. Please let me know what works for you.",
-    category: 'viewing',
-    useCount: 8,
-  },
-  {
-    id: '3',
-    name: 'Availability Inquiry',
-    content:
-      "Hi, is this property still available? I've been looking for something like this and would love to schedule a viewing if it's still on the market.",
-    category: 'general',
-    useCount: 15,
-  },
-  {
-    id: '4',
-    name: 'Thank You for Viewing',
-    content:
-      'Thank you for the viewing today! I really liked the property and would like to proceed with the application. Could you please send me the application link?',
-    category: 'viewing',
-    useCount: 5,
-  },
-];
-
-const categoryLabels: Record<TemplateCategory, string> = {
+const categoryLabels: Record<string, string> = {
   application: 'Application',
   viewing: 'Viewing',
   followup: 'Follow-up',
   general: 'General',
 };
 
-const categoryColors: Record<TemplateCategory, string> = {
+const categoryColors: Record<string, string> = {
   application: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
   viewing: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
   followup: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
   general: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
 };
 
-const categoryOptions: TemplateCategory[] = ['application', 'viewing', 'followup', 'general'];
+const categoryOptions: string[] = ['application', 'viewing', 'followup', 'general'];
 
 export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) => {
-  const [templates, setTemplates] = useState<Template[]>(defaultTemplates);
+  const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newTemplate, setNewTemplate] = useState<NewTemplateData>({
-    name: '',
+    title: '',
     content: '',
     category: 'general',
   });
-  const [editTemplate, setEditTemplate] = useState<Template | null>(null);
+  const [editTemplate, setEditTemplate] = useState<MessageTemplate | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const { data: templates = [] } = useQuery({
+    queryKey: renterKeys.messageTemplates,
+    queryFn: () => unwrap(renterService.listMessageTemplates()),
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: renterKeys.messageTemplates });
+
+  const addMutation = useMutation({
+    mutationFn: (data: NewTemplateData) => unwrap(renterService.createMessageTemplate(data)),
+    onSuccess: () => {
+      invalidate();
+      setNewTemplate({ title: '', content: '', category: 'general' });
+      setIsAdding(false);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { title: string; content: string; category: string; useCount?: number };
+    }) => unwrap(renterService.updateMessageTemplate(id, data)),
+    onSuccess: () => {
+      invalidate();
+      setEditingId(null);
+      setEditTemplate(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.deleteMessageTemplate(id)),
+    onSuccess: invalidate,
+  });
+
   const handleAddTemplate = () => {
-    if (!newTemplate.name || !newTemplate.content) return;
-    const template: Template = {
-      id: Date.now().toString(),
-      ...newTemplate,
-      useCount: 0,
-    };
-    setTemplates([template, ...templates]);
-    setNewTemplate({ name: '', content: '', category: 'general' });
-    setIsAdding(false);
+    if (!newTemplate.title || !newTemplate.content) return;
+    addMutation.mutate(newTemplate);
   };
 
   const handleEditTemplate = (id: string) => {
@@ -116,13 +104,18 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
 
   const handleSaveEdit = () => {
     if (!editTemplate) return;
-    setTemplates(templates.map((t) => (t.id === editTemplate.id ? editTemplate : t)));
-    setEditingId(null);
-    setEditTemplate(null);
+    updateMutation.mutate({
+      id: editTemplate.id,
+      data: {
+        title: editTemplate.title,
+        content: editTemplate.content,
+        category: editTemplate.category ?? 'general',
+      },
+    });
   };
 
   const handleDeleteTemplate = (id: string) => {
-    setTemplates(templates.filter((t) => t.id !== id));
+    deleteMutation.mutate(id);
   };
 
   const handleCopyTemplate = (content: string, id: string) => {
@@ -131,16 +124,20 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleUseTemplate = (content: string) => {
-    onSelectTemplate(content);
-    setTemplates(
-      templates.map((t) => (t.content === content ? { ...t, useCount: t.useCount + 1 } : t))
-    );
+  const handleUseTemplate = (template: MessageTemplate) => {
+    onSelectTemplate(template.content);
+    updateMutation.mutate({
+      id: template.id,
+      data: {
+        title: template.title,
+        content: template.content,
+        category: template.category ?? 'general',
+        useCount: template.useCount + 1,
+      },
+    });
   };
 
-  const handleCategoryChange = (value: string): TemplateCategory => {
-    return value as TemplateCategory;
-  };
+  const handleCategoryChange = (value: string): string => value;
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -177,8 +174,8 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
               <LegacyInput
                 type="text"
-                value={newTemplate.name}
-                onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                value={newTemplate.title}
+                onChange={(e) => setNewTemplate({ ...newTemplate, title: e.target.value })}
                 placeholder="Template name"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -206,7 +203,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                 <Button
                   size="sm"
                   onClick={handleAddTemplate}
-                  disabled={!newTemplate.name || !newTemplate.content}
+                  disabled={!newTemplate.title || !newTemplate.content}
                 >
                   Add Template
                 </Button>
@@ -226,8 +223,8 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                 <div className="space-y-3">
                   <LegacyInput
                     type="text"
-                    value={editTemplate.name}
-                    onChange={(e) => setEditTemplate({ ...editTemplate, name: e.target.value })}
+                    value={editTemplate.title}
+                    onChange={(e) => setEditTemplate({ ...editTemplate, title: e.target.value })}
                     className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <Textarea
@@ -237,7 +234,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                     className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <LegacySelect
-                    value={editTemplate.category}
+                    value={editTemplate.category ?? 'general'}
                     onChange={(e) =>
                       setEditTemplate({
                         ...editTemplate,
@@ -266,11 +263,11 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-foreground">{template.name}</h4>
+                        <h4 className="font-medium text-foreground">{template.title}</h4>
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[template.category]}`}
+                          className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[template.category ?? 'general']}`}
                         >
-                          {categoryLabels[template.category]}
+                          {categoryLabels[template.category ?? 'general']}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -282,7 +279,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                     </div>
                     <div className="flex gap-1 ml-2">
                       <button
-                        onClick={() => handleUseTemplate(template.content)}
+                        onClick={() => handleUseTemplate(template)}
                         className="p-1 rounded hover:bg-secondary"
                         title="Use template"
                       >
