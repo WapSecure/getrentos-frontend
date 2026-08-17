@@ -1,5 +1,8 @@
 export const adminKeys = {
   dashboardStats: ['admin', 'dashboardStats'] as const,
+  dashboardActivity: ['admin', 'dashboardActivity'] as const,
+  userGrowth: ['admin', 'userGrowth'] as const,
+  notifications: ['admin', 'notifications'] as const,
   users: (params?: { search?: string; status?: string; role?: string }) =>
     [
       'admin',

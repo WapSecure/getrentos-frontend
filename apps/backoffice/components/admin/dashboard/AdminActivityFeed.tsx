@@ -1,48 +1,13 @@
 'use client';
 
-import { ShieldCheck, Gavel, AlertTriangle, UserPlus } from 'lucide-react';
+import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { formatRelativeTime } from '@getrentos/shared';
+import { adminService } from '@/services/adminService';
+import { unwrap } from '@getrentos/shared';
+import { adminKeys } from '@/lib/queryKeys';
 
 type ActivityType = 'verification' | 'dispute' | 'fraud' | 'signup';
-
-interface ActivityItem {
-  id: string;
-  type: ActivityType;
-  title: string;
-  description: string;
-  time: string;
-}
-
-const activityItems: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'verification',
-    title: 'New verification request',
-    description: 'Segun Alabi submitted property documents for review',
-    time: '2026-08-08T09:20:00.000Z',
-  },
-  {
-    id: '2',
-    type: 'dispute',
-    title: 'Dispute escalated',
-    description: 'Escrow dispute on Banana Island Penthouse needs attention',
-    time: '2026-08-07T15:40:00.000Z',
-  },
-  {
-    id: '3',
-    type: 'fraud',
-    title: 'Fraud alert flagged',
-    description: 'Unusual login pattern detected on a buyer account',
-    time: '2026-08-06T11:00:00.000Z',
-  },
-  {
-    id: '4',
-    type: 'signup',
-    title: 'New realtor onboarded',
-    description: 'Chidinma Nwosu completed license verification',
-    time: '2026-08-05T16:20:00.000Z',
-  },
-];
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   verification: { icon: ShieldCheck, bg: 'bg-accent', color: 'text-primary' },
@@ -63,7 +28,27 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
   },
 };
 
+const typeFor = (type: string): ActivityType => {
+  switch (type) {
+    case 'verification':
+      return 'verification';
+    case 'dispute':
+      return 'dispute';
+    case 'fraud':
+      return 'fraud';
+    case 'user':
+      return 'signup';
+    default:
+      return 'verification';
+  }
+};
+
 export const AdminActivityFeed = () => {
+  const { data: activity = [] } = useQuery({
+    queryKey: adminKeys.dashboardActivity,
+    queryFn: () => unwrap(adminService.getDashboardActivity()),
+  });
+
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -74,25 +59,34 @@ export const AdminActivityFeed = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {activityItems.map((item) => {
-          const config = typeConfig[item.type];
-          const Icon = config.icon;
-          return (
-            <div
-              key={item.id}
-              className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-            >
-              <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                <Icon className={`w-4 h-4 ${config.color}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.time)}</p>
-              </div>
+        {activity.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
+              <Bell className="w-5 h-5 text-muted-foreground" />
             </div>
-          );
-        })}
+            <p className="text-sm text-muted-foreground">No activity yet</p>
+          </div>
+        ) : (
+          activity.map((item) => {
+            const config = typeConfig[typeFor(item.type)];
+            const Icon = config.icon;
+            return (
+              <div
+                key={item.id}
+                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+              >
+                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
+                  <Icon className={`w-4 h-4 ${config.color}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.timestamp)}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

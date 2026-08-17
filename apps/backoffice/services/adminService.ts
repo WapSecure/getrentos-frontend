@@ -35,6 +35,23 @@ export interface DashboardStats {
   platformGmv: number;
 }
 
+export interface AdminActivityItem {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+}
+
+export interface AdminNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface PaginatedAuditLogs {
   items: AuditLogEntry[];
   total: number;
@@ -189,6 +206,26 @@ export const adminService = {
 
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     return safeCall(() => authFetch('/admin/dashboard/stats'));
+  },
+
+  async getDashboardActivity(): Promise<ApiResponse<AdminActivityItem[]>> {
+    return safeCall(() => authFetch('/admin/dashboard/activity'));
+  },
+
+  async getUserGrowth(): Promise<ApiResponse<{ label: string; value: number }[]>> {
+    return safeCall(() => authFetch('/admin/dashboard/user-growth'));
+  },
+
+  async getNotifications(): Promise<ApiResponse<AdminNotification[]>> {
+    return safeCall(() => authFetch('/admin/notifications'));
+  },
+
+  async markNotificationRead(id: string): Promise<ApiResponse<{ success: boolean }>> {
+    return safeCall(() => authFetch(`/admin/notifications/${id}/read`, { method: 'PATCH' }));
+  },
+
+  async markAllNotificationsRead(): Promise<ApiResponse<{ success: boolean }>> {
+    return safeCall(() => authFetch('/admin/notifications/read-all', { method: 'POST' }));
   },
 
   // ---- Users ----

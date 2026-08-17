@@ -4,51 +4,37 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo, ThemeToggle } from '@getrentos/ui';
 import { AdminProfileDropdown } from './AdminProfileDropdown';
-import { formatRelativeTime, ROUTES } from '@getrentos/shared';
+import { formatRelativeTime, ROUTES, unwrap } from '@getrentos/shared';
+import { adminService } from '@/services/adminService';
+import { adminKeys } from '@/lib/queryKeys';
 
 interface AdminNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
-interface NavNotification {
-  id: number;
-  title: string;
-  message: string;
-  read: boolean;
-  time: string;
-}
-
 export const AdminNavbar = ({ user }: AdminNavbarProps) => {
+  const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NavNotification[]>([
-    {
-      id: 1,
-      title: 'New verification request',
-      message: 'Segun Alabi submitted property documents for review',
-      read: false,
-      time: '2026-08-08T09:20:00.000Z',
-    },
-    {
-      id: 2,
-      title: 'Dispute escalated',
-      message: 'Escrow dispute on Banana Island Penthouse needs attention',
-      read: false,
-      time: '2026-08-07T15:40:00.000Z',
-    },
-    {
-      id: 3,
-      title: 'Fraud alert flagged',
-      message: 'Unusual login pattern detected on a buyer account',
-      read: true,
-      time: '2026-08-06T11:00:00.000Z',
-    },
-  ]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { data: notifications = [] } = useQuery({
+    queryKey: adminKeys.notifications,
+    queryFn: () => unwrap(adminService.getNotifications()),
+  });
+
+  const markRead = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.markNotificationRead(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.notifications }),
+  });
+  const markAllRead = useMutation({
+    mutationFn: () => unwrap(adminService.markAllNotificationsRead()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.notifications }),
+  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -58,12 +44,12 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAsRead = (id: string) => {
+    markRead.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllRead.mutate();
   };
 
   return (
@@ -155,12 +141,10 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
                                   {notification.title}
                                 </h4>
                                 <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.time)}
+                                  {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.message}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{notification.body}</p>
                             </div>
                           ))
                         )}
