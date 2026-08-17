@@ -19,7 +19,7 @@ interface ForgotPasswordFormProps {
 export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormProps) => {
   const router = useRouter();
   const [step, setStep] = useState<'request' | 'otp' | 'reset'>('request');
-  const [method, setMethod] = useState<'email' | 'phone'>('email');
+  const [method, setMethod] = useState<'email' | 'phone' | 'whatsapp'>('email');
   const [identifier, setIdentifier] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [reference, setReference] = useState<string | null>(null);
@@ -41,9 +41,14 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
       authService.resetPassword(otpReference, password),
   });
 
+  const methodLabel = method === 'whatsapp' ? 'WhatsApp' : method;
+
   const handleSendCode = async () => {
     if (!identifier) {
-      showToast(`Please enter your ${method} address`, 'error');
+      showToast(
+        method === 'email' ? 'Please enter your email address' : 'Please enter your phone number',
+        'error'
+      );
       return;
     }
     setIsLoading(true);
@@ -53,7 +58,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
     if (response.success && response.data) {
       setReference(response.data.reference);
       setStep('otp');
-      showToast(`Verification code sent to your ${method}`, 'success');
+      showToast(`Verification code sent to your ${methodLabel}`, 'success');
     } else {
       showToast(response.message || 'Failed to send verification code', 'error');
     }
@@ -63,7 +68,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
     if (!reference) return;
     const response = await resendCodeMutation.mutateAsync(reference);
     if (response.success) {
-      showToast(`Verification code resent to your ${method}`, 'success');
+      showToast(`Verification code resent to your ${methodLabel}`, 'success');
     } else {
       showToast(response.message || 'Failed to resend code', 'error');
     }

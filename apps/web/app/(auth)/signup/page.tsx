@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, Shield, CheckCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MessageCircle,
+  Shield,
+  CheckCircle,
+  ArrowLeft,
+  RefreshCw,
+} from 'lucide-react';
 import { EmailSignup } from '@/components/auth/SignupForm/EmailSignup';
 import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
@@ -158,6 +166,17 @@ export default function SignupPage() {
                   >
                     <Phone className="w-4 h-4" />
                     Phone
+                  </button>
+                  <button
+                    onClick={() => setMethod(SIGNUP_METHODS.WHATSAPP)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                      method === SIGNUP_METHODS.WHATSAPP
+                        ? 'bg-card text-primary shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp
                   </button>
                 </div>
 

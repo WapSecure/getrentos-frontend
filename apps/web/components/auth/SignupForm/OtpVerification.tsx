@@ -9,7 +9,7 @@ import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpVerificationProps {
   identifier: string;
-  method: 'email' | 'phone';
+  method: 'email' | 'phone' | 'whatsapp';
   onSubmit: (otp: string) => Promise<void>;
   onResend: () => Promise<void>;
   isLoading: boolean;
@@ -72,10 +72,15 @@ export const OtpVerification = ({
         <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
           <CheckCircle className="w-6 h-6 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-1">Verify your {method}</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-1">
+          Verify your {method === 'whatsapp' ? 'WhatsApp' : method}
+        </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          We sent a verification code to{' '}
-          <span className="font-medium text-foreground">{identifier}</span>
+          We sent a verification code to your{' '}
+          <span className="font-medium text-foreground">
+            {method === 'whatsapp' ? 'WhatsApp' : method}
+          </span>{' '}
+          at <span className="font-medium text-foreground">{identifier}</span>
         </p>
       </div>
 

@@ -25,7 +25,7 @@ type OtpPurpose = 'signup' | 'password_reset';
 export const authService = {
   async sendOtp(
     identifier: string,
-    method: 'email' | 'phone',
+    method: 'email' | 'phone' | 'whatsapp',
     purpose: OtpPurpose = 'signup'
   ): Promise<ApiResponse<{ reference: string }>> {
     return safeCall(() =>
@@ -74,12 +74,17 @@ export const authService = {
   async login(
     identifier: string,
     password: string,
-    rememberMe = false
+    rememberMe = false,
+    /** Declares the calling app to the backend (e.g. 'backoffice') so it can
+     *  reject non-staff accounts before issuing a token, instead of relying
+     *  solely on the caller's own post-login role check. */
+    clientApp?: string
   ): Promise<ApiResponse<AuthResult>> {
     return safeCall(() =>
       apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ identifier, password, rememberMe }),
+        headers: clientApp ? { 'x-client-app': clientApp } : undefined,
       })
     );
   },

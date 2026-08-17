@@ -18,6 +18,7 @@ export const VALIDATION_PATTERNS = {
 export const SIGNUP_METHODS = {
   EMAIL: 'email',
   PHONE: 'phone',
+  WHATSAPP: 'whatsapp',
 } as const;
 
 export type SignupMethod = (typeof SIGNUP_METHODS)[keyof typeof SIGNUP_METHODS];

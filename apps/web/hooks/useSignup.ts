@@ -29,8 +29,13 @@ export const useSignup = () => {
   const [error, setError] = useState<string | null>(null);
 
   const sendOtpMutation = useMutation({
-    mutationFn: ({ identifier, method }: { identifier: string; method: 'email' | 'phone' }) =>
-      authService.sendOtp(identifier, method, 'signup'),
+    mutationFn: ({
+      identifier,
+      method,
+    }: {
+      identifier: string;
+      method: 'email' | 'phone' | 'whatsapp';
+    }) => authService.sendOtp(identifier, method, 'signup'),
   });
   const verifyOtpMutation = useMutation({
     mutationFn: (otp: string) => authService.verifyOtp(otp, otpReference || ''),
@@ -51,7 +56,7 @@ export const useSignup = () => {
       }),
   });
 
-  const sendOtp = async (identifier: string, method: 'email' | 'phone') => {
+  const sendOtp = async (identifier: string, method: 'email' | 'phone' | 'whatsapp') => {
     setError(null);
 
     // A fresh signup always starts as Renter — never inherit a role selection

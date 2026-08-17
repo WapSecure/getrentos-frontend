@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpStepProps {
-  method: 'email' | 'phone';
+  method: 'email' | 'phone' | 'whatsapp';
   identifier: string;
   otp: string[];
   setOtp: (value: string[]) => void;
@@ -61,9 +61,13 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         >
           <CheckCircle className="w-8 h-8 text-primary" />
         </motion.div>
-        <h3 className="text-xl font-semibold text-foreground mb-2">Verify Your {method}</h3>
+        <h3 className="text-xl font-semibold text-foreground mb-2">
+          Verify Your {method === 'whatsapp' ? 'WhatsApp' : method}
+        </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          We sent a verification code to <span className="font-medium">{identifier}</span>
+          We sent a verification code to your{' '}
+          <span className="font-medium">{method === 'whatsapp' ? 'WhatsApp' : method}</span> at{' '}
+          <span className="font-medium">{identifier}</span>
         </p>
       </div>
 

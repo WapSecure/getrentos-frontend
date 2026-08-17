@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, Phone, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
 import { Input } from '@getrentos/ui';
 
 interface RequestStepProps {
-  method: 'email' | 'phone';
-  setMethod: (method: 'email' | 'phone') => void;
+  method: 'email' | 'phone' | 'whatsapp';
+  setMethod: (method: 'email' | 'phone' | 'whatsapp') => void;
   identifier: string;
   setIdentifier: (value: string) => void;
 }
@@ -86,6 +86,22 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           <Phone className="w-4 h-4 inline mr-2" />
           Phone
         </button>
+        <button
+          onClick={() => {
+            setMethod('whatsapp');
+            setIdentifier('');
+            setError('');
+            setTouched(false);
+          }}
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+            method === 'whatsapp'
+              ? 'bg-card text-primary shadow-sm'
+              : 'text-gray-600 dark:text-gray-400'
+          }`}
+        >
+          <MessageCircle className="w-4 h-4 inline mr-2" />
+          WhatsApp
+        </button>
       </div>
 
       <div>
@@ -100,7 +116,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
             onBlur={handleBlur}
             className={touched && error ? 'border-red-500' : undefined}
             inputClassName="py-3"
-            placeholder={method === 'email' ? 'you@example.com' : '+1 234 567 8900'}
+            placeholder={method === 'email' ? 'you@example.com' : '+234 801 234 5678'}
           />
           {touched && !error && identifier && (
             <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
