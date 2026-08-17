@@ -7,8 +7,7 @@ import { LegacySelect } from '@getrentos/ui';
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
+import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
 import type { Lease, Unit } from '@/types/landlord';
 
 interface CreateLeaseModalProps {
@@ -160,10 +159,10 @@ export const CreateLeaseModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Rent Amount (₦) <span className="text-red-500">*</span>
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <CurrencyInput
+                        prefix="₦"
                         value={rentAmount}
-                        onChange={(e) => setRentAmount(e.target.value)}
+                        onValueChange={(v) => setRentAmount(v === 0 ? '' : String(v))}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
@@ -171,10 +170,10 @@ export const CreateLeaseModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Deposit (₦)
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <CurrencyInput
+                        prefix="₦"
                         value={securityDeposit}
-                        onChange={(e) => setSecurityDeposit(e.target.value)}
+                        onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
                         placeholder="Optional"
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />

@@ -120,147 +120,155 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <>
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full mx-4 overflow-hidden"
+            key="upload-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Upload Document</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Upload a new document to your vault
-                </p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-card rounded-xl max-w-lg w-full mx-4 overflow-hidden"
+            >
+              <div className="p-4 border-b border-border flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold text-foreground">Upload Document</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Upload a new document to your vault
+                  </p>
+                </div>
+                <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            <div className="p-4 space-y-4">
-              <div
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  dragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary'
-                }`}
-              >
-                {file ? (
+              <div className="p-4 space-y-4">
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                    dragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary'
+                  }`}
+                >
+                  {file ? (
+                    <div className="space-y-2">
+                      <FileText className="w-8 h-8 text-primary mx-auto" />
+                      <p className="text-sm font-medium text-foreground">{file.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {(file.size / (1024 * 1024)).toFixed(2)} MB
+                      </p>
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          onClick={handlePreview}
+                          className="text-xs text-primary hover:text-primary-hover"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => setFile(null)}
+                          className="text-xs text-red-500 hover:text-red-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Drag and drop your file here</p>
+                      <p className="text-xs text-gray-500 mt-1">or</p>
+                      <label className="cursor-pointer">
+                        <span className="text-sm text-primary hover:text-primary-hover">
+                          Browse files
+                        </span>
+                        <LegacyInput type="file" onChange={handleFileSelect} className="hidden" />
+                      </label>
+                      <p className="text-xs text-gray-400 mt-2">PDF, DOC, JPG, PNG up to 10MB</p>
+                    </>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <Field label="Document Name">
+                    <Input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter document name"
+                    />
+                  </Field>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Document Type">
+                      <Select value={type} onValueChange={setType} options={documentTypes} />
+                    </Field>
+
+                    <Field label="Category">
+                      <Select
+                        value={category}
+                        onValueChange={setCategory}
+                        options={categories.map((categoryOption) => ({
+                          value: categoryOption,
+                          label: categoryOption,
+                        }))}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="Tags (comma separated)">
+                    <Input
+                      type="text"
+                      value={tags}
+                      onChange={(e) => setTags(e.target.value)}
+                      placeholder="e.g., important, signed, lease"
+                    />
+                  </Field>
+                </div>
+
+                {isUploading && (
                   <div className="space-y-2">
-                    <FileText className="w-8 h-8 text-primary mx-auto" />
-                    <p className="text-sm font-medium text-foreground">{file.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {(file.size / (1024 * 1024)).toFixed(2)} MB
-                    </p>
-                    <div className="flex items-center justify-center gap-3">
-                      <button
-                        onClick={handlePreview}
-                        className="text-xs text-primary hover:text-primary-hover"
-                      >
-                        Preview
-                      </button>
-                      <button
-                        onClick={() => setFile(null)}
-                        className="text-xs text-red-500 hover:text-red-600"
-                      >
-                        Remove
-                      </button>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Uploading...</span>
+                      <span className="text-gray-600">{progress}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-200"
+                        style={{ width: `${progress}%` }}
+                      />
                     </div>
                   </div>
-                ) : (
-                  <>
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Drag and drop your file here</p>
-                    <p className="text-xs text-gray-500 mt-1">or</p>
-                    <label className="cursor-pointer">
-                      <span className="text-sm text-primary hover:text-primary-hover">
-                        Browse files
-                      </span>
-                      <LegacyInput type="file" onChange={handleFileSelect} className="hidden" />
-                    </label>
-                    <p className="text-xs text-gray-400 mt-2">PDF, DOC, JPG, PNG up to 10MB</p>
-                  </>
                 )}
+
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={handleSubmit}
+                  disabled={!file || isUploading}
+                  isLoading={isUploading}
+                >
+                  <Upload className="w-4 h-4" />
+                  {isUploading ? 'Uploading...' : 'Upload Document'}
+                </Button>
               </div>
-
-              <div className="space-y-3">
-                <Field label="Document Name">
-                  <Input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter document name"
-                  />
-                </Field>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Document Type">
-                    <Select value={type} onValueChange={setType} options={documentTypes} />
-                  </Field>
-
-                  <Field label="Category">
-                    <Select
-                      value={category}
-                      onValueChange={setCategory}
-                      options={categories.map((categoryOption) => ({
-                        value: categoryOption,
-                        label: categoryOption,
-                      }))}
-                    />
-                  </Field>
-                </div>
-
-                <Field label="Tags (comma separated)">
-                  <Input
-                    type="text"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    placeholder="e.g., important, signed, lease"
-                  />
-                </Field>
-              </div>
-
-              {isUploading && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Uploading...</span>
-                    <span className="text-gray-600">{progress}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-200"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={handleSubmit}
-                disabled={!file || isUploading}
-                isLoading={isUploading}
-              >
-                <Upload className="w-4 h-4" />
-                {isUploading ? 'Uploading...' : 'Upload Document'}
-              </Button>
-            </div>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       <FilePreviewDialog
         open={preview !== null}
         onOpenChange={(open) => !open && closePreview()}
         file={preview}
       />
-    </AnimatePresence>
+    </>
   );
 };

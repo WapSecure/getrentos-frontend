@@ -1,12 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCcw } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
+import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { Lease } from '@/types/landlord';
 
@@ -68,10 +65,10 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
                 <label className="block text-sm font-medium text-foreground mb-1">
                   New Monthly Rent (₦)
                 </label>
-                <LegacyInput
-                  type="number"
+                <CurrencyInput
+                  prefix="₦"
                   value={newRent}
-                  onChange={(e) => setNewRent(e.target.value)}
+                  onValueChange={(v) => setNewRent(v === 0 ? '' : String(v))}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="text-xs text-gray-400 mt-1">

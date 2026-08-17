@@ -7,7 +7,7 @@ import { Textarea } from '@getrentos/ui';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, Image as ImageIcon, Video } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
 import { Select } from '@getrentos/ui';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
@@ -192,11 +192,11 @@ export const CreateSaleListingModal = ({
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Asking Price (₦) <span className="text-red-500">*</span>
                         </label>
-                        <LegacyInput
-                          type="number"
+                        <CurrencyInput
+                          prefix="₦"
                           min={0}
                           value={form.askingPrice}
-                          onChange={(e) => update('askingPrice', e.target.value)}
+                          onValueChange={(v) => update('askingPrice', v === 0 ? '' : String(v))}
                           className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>

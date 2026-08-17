@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 import type { OwnerProperty } from '@/types/owner';
 import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
 
@@ -132,11 +132,11 @@ const EditOwnerPropertyForm = ({
           <label className="block text-sm font-medium text-foreground mb-1">
             Estimated Value (₦)
           </label>
-          <LegacyInput
-            type="number"
+          <CurrencyInput
+            prefix="₦"
             min={0}
             value={estimatedValue}
-            onChange={(e) => setEstimatedValue(e.target.value)}
+            onValueChange={(v) => setEstimatedValue(v === 0 ? '' : String(v))}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

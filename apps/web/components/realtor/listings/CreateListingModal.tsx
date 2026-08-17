@@ -5,8 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
+import { Button, CurrencyInput, Select } from '@getrentos/ui';
 import type { RealtorClient, ListingCategory } from '@/types/realtor';
 
 export interface RealtorClientProperty {
@@ -164,11 +163,11 @@ export const CreateListingModal = ({
                       {category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'}{' '}
                       <span className="text-red-500">*</span>
                     </label>
-                    <LegacyInput
-                      type="number"
+                    <CurrencyInput
+                      prefix="₦"
                       min={0}
                       value={price}
-                      onChange={(e) => setPrice(e.target.value)}
+                      onValueChange={(v) => setPrice(v === 0 ? '' : String(v))}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>

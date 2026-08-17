@@ -6,7 +6,7 @@ import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { DollarSign, Plus, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 
 interface Expense {
   id: string;
@@ -141,13 +141,17 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <div className="flex gap-2">
-                <LegacyInput
-                  type="number"
-                  value={newExpense.amount}
-                  onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                  placeholder="Amount"
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div className="flex-1">
+                  <CurrencyInput
+                    prefix="₦"
+                    value={newExpense.amount}
+                    onValueChange={(v) =>
+                      setNewExpense({ ...newExpense, amount: v === 0 ? '' : String(v) })
+                    }
+                    placeholder="Amount"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
                 <LegacySelect
                   value={newExpense.category}
                   onChange={(e) =>

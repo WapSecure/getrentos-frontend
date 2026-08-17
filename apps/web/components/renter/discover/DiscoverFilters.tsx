@@ -6,7 +6,7 @@ import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 
 interface Filters {
   location: string;
@@ -101,20 +101,24 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
                 Price Range (₦)
               </label>
               <div className="flex gap-2">
-                <LegacyInput
-                  type="number"
-                  value={filters.minPrice}
-                  onChange={(e) => handleChange('minPrice', e.target.value)}
-                  placeholder="Min"
-                  className="w-1/2 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <LegacyInput
-                  type="number"
-                  value={filters.maxPrice}
-                  onChange={(e) => handleChange('maxPrice', e.target.value)}
-                  placeholder="Max"
-                  className="w-1/2 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div className="w-1/2">
+                  <CurrencyInput
+                    prefix="₦"
+                    value={filters.minPrice}
+                    onValueChange={(v) => handleChange('minPrice', v === 0 ? '' : String(v))}
+                    placeholder="Min"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="w-1/2">
+                  <CurrencyInput
+                    prefix="₦"
+                    value={filters.maxPrice}
+                    onValueChange={(v) => handleChange('maxPrice', v === 0 ? '' : String(v))}
+                    placeholder="Max"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
               </div>
             </div>
 

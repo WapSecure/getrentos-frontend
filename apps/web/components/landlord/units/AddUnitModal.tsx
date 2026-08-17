@@ -7,7 +7,7 @@ import { LegacySelect } from '@getrentos/ui';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 import type { Property, Unit } from '@/types/landlord';
 
 interface AddUnitModalProps {
@@ -142,11 +142,11 @@ export const AddUnitModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Monthly Rent (₦) <span className="text-red-500">*</span>
                 </label>
-                <LegacyInput
-                  type="number"
+                <CurrencyInput
+                  prefix="₦"
                   min={0}
                   value={monthlyRent}
-                  onChange={(e) => setMonthlyRent(e.target.value)}
+                  onValueChange={(v) => setMonthlyRent(v === 0 ? '' : String(v))}
                   placeholder="450000"
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />

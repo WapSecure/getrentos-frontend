@@ -5,6 +5,7 @@ export * from './Button';
 export * from './Card';
 export * from './Checkbox';
 export * from './ConfirmDialog';
+export * from './CurrencyInput';
 export * from './DatePicker';
 export * from './Dialog';
 export * from './DocumentRowActions';

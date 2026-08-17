@@ -5,7 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Check, XCircle, RefreshCcw, Send } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferMessage } from '@/types/buyer';
 
@@ -130,11 +130,11 @@ export const BuyerOfferNegotiationModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     New Offer Amount (₦)
                   </label>
-                  <LegacyInput
-                    type="number"
+                  <CurrencyInput
+                    prefix="₦"
                     min={0}
                     value={counterAmount}
-                    onChange={(e) => setCounterAmount(e.target.value)}
+                    onValueChange={(v) => setCounterAmount(v === 0 ? '' : String(v))}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>

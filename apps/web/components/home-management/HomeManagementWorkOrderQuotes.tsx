@@ -20,7 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrento
 import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { CurrencyInput } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
@@ -560,18 +560,15 @@ export function HomeManagementWorkOrderQuotes({
                   form.amount && !validAmount ? 'Enter a whole amount of at least one.' : undefined
                 }
               >
-                <Input
+                <CurrencyInput
                   id={`home-work-order-quote-amount-${workOrder.id}`}
                   autoFocus
-                  type="number"
+                  prefix="₦"
                   min={1}
-                  step={1}
-                  inputMode="numeric"
-                  leadingIcon={<span className="text-sm">₦</span>}
                   value={form.amount}
                   disabled={createQuote.isPending}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, amount: event.target.value }))
+                  onValueChange={(v) =>
+                    setForm((current) => ({ ...current, amount: v === 0 ? '' : String(v) }))
                   }
                   placeholder="e.g. 85000"
                 />

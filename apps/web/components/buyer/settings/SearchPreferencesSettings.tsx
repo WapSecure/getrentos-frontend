@@ -5,7 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, CurrencyInput, Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
@@ -79,23 +79,23 @@ export const SearchPreferencesSettings = () => {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Min Budget (₦)</label>
-            <LegacyInput
-              type="number"
+            <CurrencyInput
+              prefix="₦"
               min={0}
               value={minBudget}
-              onChange={(e) => setMinBudget(e.target.value)}
-              placeholder="e.g. 50000000"
+              onValueChange={(v) => setMinBudget(v === 0 ? '' : String(v))}
+              placeholder="e.g. 50,000,000"
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Max Budget (₦)</label>
-            <LegacyInput
-              type="number"
+            <CurrencyInput
+              prefix="₦"
               min={0}
               value={maxBudget}
-              onChange={(e) => setMaxBudget(e.target.value)}
-              placeholder="e.g. 150000000"
+              onValueChange={(v) => setMaxBudget(v === 0 ? '' : String(v))}
+              placeholder="e.g. 150,000,000"
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>

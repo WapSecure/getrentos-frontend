@@ -1,13 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { Textarea } from '@getrentos/ui';
+import { Button, CurrencyInput, Select, Textarea } from '@getrentos/ui';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
 
 interface MakeOfferModalProps {
@@ -102,11 +98,11 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Offer Amount (₦) <span className="text-red-500">*</span>
                 </label>
-                <LegacyInput
-                  type="number"
+                <CurrencyInput
+                  prefix="₦"
                   min={0}
                   value={offerAmount}
-                  onChange={(e) => setOfferAmount(e.target.value)}
+                  onValueChange={(v) => setOfferAmount(v === 0 ? '' : String(v))}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -137,11 +133,11 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Deposit Amount (₦) <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <LegacyInput
-                  type="number"
+                <CurrencyInput
+                  prefix="₦"
                   min={0}
                   value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
+                  onValueChange={(v) => setDepositAmount(v === 0 ? '' : String(v))}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>

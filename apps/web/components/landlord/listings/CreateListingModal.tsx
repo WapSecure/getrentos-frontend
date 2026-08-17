@@ -5,9 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
+import { Button, CurrencyInput, DatePicker, Select } from '@getrentos/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 
 interface CreateListingModalProps {
@@ -186,10 +184,10 @@ export const CreateListingModal = ({
                         {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
                         <span className="text-red-500">*</span>
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <CurrencyInput
+                        prefix="₦"
                         value={monthlyRent}
-                        onChange={(e) => setMonthlyRent(e.target.value)}
+                        onValueChange={(v) => setMonthlyRent(v === 0 ? '' : String(v))}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
@@ -197,10 +195,10 @@ export const CreateListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Security Deposit (₦)
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <CurrencyInput
+                        prefix="₦"
                         value={securityDeposit}
-                        onChange={(e) => setSecurityDeposit(e.target.value)}
+                        onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
                         placeholder="Optional"
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />

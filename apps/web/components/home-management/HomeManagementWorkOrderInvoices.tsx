@@ -22,7 +22,7 @@ import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { CurrencyInput, Input } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -884,19 +884,14 @@ export function HomeManagementWorkOrderInvoices({
                                 : undefined
                             }
                           >
-                            <Input
+                            <CurrencyInput
                               id={`home-work-order-invoice-amount-${workOrder.id}-${lineItem.id}`}
-                              type="number"
+                              prefix="NGN"
                               min={1}
-                              step={1}
-                              inputMode="numeric"
-                              leadingIcon={
-                                <span className="text-sm">{DEFAULT_INVOICE_CURRENCY}</span>
-                              }
                               value={lineItem.unitAmount}
                               disabled={createInvoice.isPending}
-                              onChange={(event) =>
-                                updateLineItem(lineItem.id, 'unitAmount', event.target.value)
+                              onValueChange={(v) =>
+                                updateLineItem(lineItem.id, 'unitAmount', v === 0 ? '' : String(v))
                               }
                               placeholder="85000"
                             />

@@ -7,7 +7,7 @@ import { LegacySelect } from '@getrentos/ui';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
 import type { OwnerProperty } from '@/types/owner';
@@ -231,11 +231,11 @@ export const AddOwnerPropertyModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Purchase Price (₦)
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <CurrencyInput
+                        prefix="₦"
                         min={0}
                         value={form.purchasePrice}
-                        onChange={(e) => update('purchasePrice', e.target.value)}
+                        onValueChange={(v) => update('purchasePrice', v === 0 ? '' : String(v))}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
@@ -243,11 +243,11 @@ export const AddOwnerPropertyModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Estimated Value (₦)
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <CurrencyInput
+                        prefix="₦"
                         min={0}
                         value={form.estimatedValue}
-                        onChange={(e) => update('estimatedValue', e.target.value)}
+                        onValueChange={(v) => update('estimatedValue', v === 0 ? '' : String(v))}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>

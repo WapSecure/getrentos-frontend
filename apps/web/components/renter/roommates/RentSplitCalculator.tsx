@@ -1,10 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CurrencyInput } from '@getrentos/ui';
 
 interface Roommate {
   id: string;
@@ -65,10 +63,6 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
     setSplitMethod(method);
   };
 
-  const handleTotalRentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTotalRent(Number(e.target.value));
-  };
-
   const handleCustomShareChange = (roommateId: string, value: number) => {
     setCustomShares({
       ...customShares,
@@ -91,10 +85,10 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
           <label className="block text-sm font-medium text-foreground mb-1">
             Total Monthly Rent
           </label>
-          <LegacyInput
-            type="number"
+          <CurrencyInput
+            prefix="₦"
             value={totalRent}
-            onChange={handleTotalRentChange}
+            onValueChange={setTotalRent}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -134,12 +128,13 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
             {roommates.map((r) => (
               <div key={r.id} className="flex items-center gap-2">
                 <span className="text-sm text-foreground flex-1">{r.name}</span>
-                <LegacyInput
-                  type="number"
-                  value={customShares[r.id] || 0}
-                  onChange={(e) => handleCustomShareChange(r.id, Number(e.target.value))}
-                  className="w-20 px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div className="w-20">
+                  <CurrencyInput
+                    value={customShares[r.id] || 0}
+                    onValueChange={(v) => handleCustomShareChange(r.id, v)}
+                    className="w-full px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
               </div>
             ))}
           </div>

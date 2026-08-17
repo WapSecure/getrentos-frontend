@@ -6,8 +6,8 @@ import { LegacySelect } from '@getrentos/ui';
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calculator, DollarSign, X, Info, TrendingUp, Home, Wallet } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Calculator, X, Info, TrendingUp, Home, Wallet } from 'lucide-react';
+import { Button, CurrencyInput } from '@getrentos/ui';
 
 interface RentVsBuyCalculatorProps {
   propertyPrice: number;
@@ -147,15 +147,12 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Down Payment
                     </label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <LegacyInput
-                        type="number"
-                        value={downPayment}
-                        onChange={(e) => setDownPayment(Number(e.target.value))}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
+                    <CurrencyInput
+                      prefix="₦"
+                      value={downPayment}
+                      onValueChange={setDownPayment}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
                     <p className="text-xs text-gray-500 mt-1">
                       {downPayment < propertyPrice * 0.2
                         ? '⚠️ Consider a larger down payment to avoid extra costs'

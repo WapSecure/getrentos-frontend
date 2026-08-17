@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrento
 import { EmptyState } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { CurrencyInput, Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
@@ -736,20 +736,18 @@ export function HomeManagementWorkOrderQueue({
                                 </p>
                               ) : (
                                 <div className="mt-3 flex items-center gap-2">
-                                  <Input
+                                  <CurrencyInput
                                     aria-label={`Approved cost for ${workOrder.issueTitle}`}
-                                    type="number"
+                                    prefix="₦"
                                     min={0}
-                                    inputMode="numeric"
                                     value={currentCost}
                                     disabled={isThisWorkOrderMutationPending}
-                                    onChange={(event) =>
+                                    onValueChange={(v) =>
                                       setCosts((current) => ({
                                         ...current,
-                                        [workOrder.id]: event.target.value,
+                                        [workOrder.id]: v === 0 ? '' : String(v),
                                       }))
                                     }
-                                    leadingIcon={<span className="text-sm">₦</span>}
                                   />
                                   <Button
                                     size="sm"
@@ -1221,18 +1219,15 @@ export function HomeManagementWorkOrderQueue({
                 hint="Optional. Enter a whole amount in naira."
                 error={!hasValidEstimatedCost ? 'Enter a whole amount of zero or more.' : undefined}
               >
-                <Input
+                <CurrencyInput
                   id="home-work-order-estimated-cost"
-                  type="number"
+                  prefix="₦"
                   min={0}
-                  step={1}
-                  inputMode="numeric"
                   value={form.estimatedCost}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, estimatedCost: event.target.value }))
+                  onValueChange={(v) =>
+                    setForm((current) => ({ ...current, estimatedCost: v === 0 ? '' : String(v) }))
                   }
                   placeholder="e.g. 85000"
-                  leadingIcon={<span className="text-sm">₦</span>}
                 />
               </Field>
 
@@ -1399,16 +1394,16 @@ export function HomeManagementWorkOrderQueue({
                     : undefined
                 }
               >
-                <Input
+                <CurrencyInput
                   id="home-work-order-unit-rent"
-                  type="number"
+                  prefix="₦"
                   min={0}
-                  step={1}
-                  inputMode="numeric"
-                  leadingIcon={<span className="text-sm">₦</span>}
                   value={unitForm.monthlyRent}
-                  onChange={(event) =>
-                    setUnitForm((current) => ({ ...current, monthlyRent: event.target.value }))
+                  onValueChange={(v) =>
+                    setUnitForm((current) => ({
+                      ...current,
+                      monthlyRent: v === 0 ? '' : String(v),
+                    }))
                   }
                   placeholder="e.g. 350000"
                 />

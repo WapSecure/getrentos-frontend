@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Receipt, Trash2 } from 'lucide-react';
 import {
   Button,
+  CurrencyInput,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -211,13 +212,13 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                 />
               </Field>
               <Field label="Amount (₦)" htmlFor="expense-amount" required>
-                <Input
+                <CurrencyInput
                   id="expense-amount"
-                  type="number"
-                  min="1"
+                  prefix="₦"
+                  min={1}
                   value={form.amount}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, amount: event.target.value }))
+                  onValueChange={(v) =>
+                    setForm((current) => ({ ...current, amount: v === 0 ? '' : String(v) }))
                   }
                   placeholder="e.g. 45000"
                 />
