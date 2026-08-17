@@ -6,6 +6,8 @@ import type {
   RealtorLead,
   ViewingAppointment,
   RealtorOffer,
+  RealtorReview,
+  Commission,
 } from '@/types/realtor';
 import type { TrustProfile } from '@/types/trust-score';
 
@@ -235,6 +237,21 @@ export const realtorService = {
   getDocumentDownload: (id: string) =>
     safeCall(() => authFetch<{ name: string; url: string }>(`/realtor/documents/${id}/download`)),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/realtor/trust-profile')),
+  getReviews: () => safeCall(() => authFetch<RealtorReview[]>('/realtor/reviews')),
+  getReviewsSummary: () =>
+    safeCall(() =>
+      authFetch<{ averageRating: number; reviewCount: number }>('/realtor/reviews/summary')
+    ),
+  getCommissions: () => safeCall(() => authFetch<Commission[]>('/realtor/commissions')),
+  getCommissionsSummary: () =>
+    safeCall(() =>
+      authFetch<{
+        totalEarned: number;
+        pending: number;
+        paid: number;
+        dealsClosed: number;
+      }>('/realtor/commissions/summary')
+    ),
   listConversations: () => safeCall(() => authFetch('/realtor/messages')),
   getConversationMessages: (id: string) => safeCall(() => authFetch(`/realtor/messages/${id}`)),
   sendMessage: (id: string, text: string, files: File[] = []) => {

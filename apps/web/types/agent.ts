@@ -56,7 +56,16 @@ export interface OfflineSyncItem {
   recordLabel: string;
   capturedAt: string;
   syncStatus: SyncStatus;
-  sizeLabel: string;
+  sizeLabel?: string;
+}
+
+export interface AgentReview {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  comment?: string;
+  category?: string;
 }
 
 export interface AgentDocument {

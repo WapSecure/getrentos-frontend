@@ -108,3 +108,12 @@ export interface RealtorDocument {
   uploadedAt: string;
   sizeLabel: string;
 }
+
+export interface RealtorReview {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  comment?: string;
+  category?: string;
+}

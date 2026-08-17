@@ -1,6 +1,13 @@
 import { authFetch, safeCall } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { AgentTask, PropertyInspection, TaskStatus, VerificationVisit } from '@/types/agent';
+import type {
+  AgentTask,
+  PropertyInspection,
+  TaskStatus,
+  VerificationVisit,
+  AgentReview,
+  OfflineSyncItem,
+} from '@/types/agent';
 import type { AgentDocument } from '@/types/agent';
 import type { TrustProfile } from '@/types/trust-score';
 
@@ -144,6 +151,12 @@ export const agentService = {
       }>('/agent/profile')
     ),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/agent/trust-profile')),
+  getReviews: () => safeCall(() => authFetch<AgentReview[]>('/agent/reviews')),
+  getReviewsSummary: () =>
+    safeCall(() =>
+      authFetch<{ averageRating: number; reviewCount: number }>('/agent/reviews/summary')
+    ),
+  getSyncItems: () => safeCall(() => authFetch<OfflineSyncItem[]>('/agent/sync')),
   listTasks: async (): Promise<ApiResponse<AgentTask[]>> => {
     const response = await safeCall(() => authFetch<AgentTaskApi[]>('/agent/tasks'));
     if (response.success && response.data) {

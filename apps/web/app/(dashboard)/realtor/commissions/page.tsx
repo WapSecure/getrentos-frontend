@@ -1,44 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Wallet, Clock, CheckCircle2, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { Commission, CommissionStatus } from '@/types/realtor';
-
-const mockCommissions: Commission[] = [
-  {
-    id: 'comm_001',
-    listingTitle: 'Surulere Family Duplex',
-    clientName: 'Tobi Fashola',
-    dealValue: 54_500_000,
-    commissionRate: 5,
-    commissionAmount: 2_725_000,
-    status: 'paid',
-    closedDate: '2026-06-14T00:00:00.000Z',
-    paidDate: '2026-06-20T00:00:00.000Z',
-  },
-  {
-    id: 'comm_002',
-    listingTitle: 'Modern 2-Bed Flat, Ikeja GRA',
-    clientName: 'Emeka Chukwu',
-    dealValue: 3_200_000,
-    commissionRate: 10,
-    commissionAmount: 320_000,
-    status: 'invoiced',
-    closedDate: '2026-07-30T00:00:00.000Z',
-  },
-  {
-    id: 'comm_003',
-    listingTitle: 'Ikeja GRA Townhouse',
-    clientName: 'Segun Alabi',
-    dealValue: 68_000_000,
-    commissionRate: 5,
-    commissionAmount: 3_400_000,
-    status: 'pending',
-    closedDate: '2026-08-05T00:00:00.000Z',
-  },
-];
+import { unwrap } from '@/lib/apiHelpers';
+import { realtorService } from '@/services/realtorService';
+import { realtorKeys } from '@/lib/queryKeys';
+import type { CommissionStatus } from '@/types/realtor';
 
 const statusConfig: Record<
   CommissionStatus,
@@ -62,7 +32,10 @@ const statusConfig: Record<
 };
 
 export default function RealtorCommissionsPage() {
-  const [commissions, setCommissions] = useState<Commission[]>(mockCommissions);
+  const { data: commissions = [], isLoading } = useQuery({
+    queryKey: realtorKeys.commissions,
+    queryFn: () => unwrap(realtorService.getCommissions()),
+  });
   const [exported, setExported] = useState(false);
 
   const handleExport = () => {
@@ -111,6 +84,10 @@ export default function RealtorCommissionsPage() {
     },
   } as const;
 
+  if (isLoading) {
+    return <div className="p-10 text-center text-muted-foreground">Loading commissions…</div>;
+  }
+
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -158,38 +135,49 @@ export default function RealtorCommissionsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {commissions.map((c) => {
-                const status = statusConfig[c.status];
-                const StatusIcon = status.icon;
-                return (
-                  <tr key={c.id} className="hover:bg-secondary transition-colors">
-                    <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                      {c.listingTitle}
-                    </td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">{c.clientName}</td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">
-                      {formatCurrency(c.dealValue, { compact: true })}
-                    </td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">
-                      {c.commissionRate}%
-                    </td>
-                    <td className="p-4 font-bold text-primary whitespace-nowrap">
-                      {formatCurrency(c.commissionAmount, { compact: true })}
-                    </td>
-                    <td className="p-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${status.className}`}
-                      >
-                        <StatusIcon className="w-3 h-3" />
-                        {status.label}
-                      </span>
-                    </td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">
-                      {formatDate(c.closedDate)}
-                    </td>
-                  </tr>
-                );
-              })}
+              {commissions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-10 text-center text-sm text-muted-foreground">
+                    No closed deals yet. Commissions appear here once offers on your listings are
+                    accepted.
+                  </td>
+                </tr>
+              ) : (
+                commissions.map((c) => {
+                  const status = statusConfig[c.status];
+                  const StatusIcon = status.icon;
+                  return (
+                    <tr key={c.id} className="hover:bg-secondary transition-colors">
+                      <td className="p-4 font-medium text-foreground whitespace-nowrap">
+                        {c.listingTitle}
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {c.clientName}
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {formatCurrency(c.dealValue, { compact: true })}
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {c.commissionRate}%
+                      </td>
+                      <td className="p-4 font-bold text-primary whitespace-nowrap">
+                        {formatCurrency(c.commissionAmount, { compact: true })}
+                      </td>
+                      <td className="p-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${status.className}`}
+                        >
+                          <StatusIcon className="w-3 h-3" />
+                          {status.label}
+                        </span>
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {formatDate(c.closedDate)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

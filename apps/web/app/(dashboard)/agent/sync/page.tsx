@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   RefreshCw,
   CloudOff,
@@ -13,37 +14,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
-import type { OfflineSyncItem } from '@/types/agent';
-
-const mockSyncItems: OfflineSyncItem[] = [
-  {
-    id: 'sync_001',
-    recordType: 'inspection',
-    recordLabel: 'Move-out Inspection — Modern 2-Bed Flat, Ikeja GRA',
-    capturedAt: '2026-08-07T15:40:00.000Z',
-    syncStatus: 'pending',
-    sizeLabel: '4.2 MB',
-  },
-  {
-    id: 'sync_002',
-    recordType: 'verification',
-    recordLabel: 'Tenant Verification — David Okoro',
-    capturedAt: '2026-08-07T09:10:00.000Z',
-    syncStatus: 'pending',
-    sizeLabel: '620 KB',
-  },
-  {
-    id: 'sync_003',
-    recordType: 'inspection',
-    recordLabel: 'Move-in Inspection — Sunrise Apartments, Unit 1A',
-    capturedAt: '2026-08-05T13:00:00.000Z',
-    syncStatus: 'failed',
-    sizeLabel: '3.8 MB',
-  },
-];
+import { unwrap } from '@/lib/apiHelpers';
+import { agentService } from '@/services/agentService';
+import { agentKeys } from '@/lib/queryKeys';
 
 export default function AgentSyncPage() {
-  const [items, setItems] = useState<OfflineSyncItem[]>(mockSyncItems);
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: agentKeys.sync,
+    queryFn: () => unwrap(agentService.getSyncItems()),
+  });
+  const [locallySynced, setLocallySynced] = useState<Set<string>>(new Set());
   const [isOnline, setIsOnline] = useState(true);
   const [isSyncingAll, setIsSyncingAll] = useState(false);
 
@@ -59,20 +39,30 @@ export default function AgentSyncPage() {
   }, []);
 
   const syncItem = (id: string) => {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, syncStatus: 'synced' } : i)));
+    setLocallySynced((prev) => new Set(prev).add(id));
   };
 
   const handleSyncAll = () => {
     setIsSyncingAll(true);
     window.setTimeout(() => {
-      setItems((prev) =>
-        prev.map((i) => (i.syncStatus !== 'synced' ? { ...i, syncStatus: 'synced' } : i))
-      );
+      setLocallySynced((prev) => {
+        const next = new Set(prev);
+        items.forEach((i) => {
+          if (i.syncStatus !== 'synced') next.add(i.id);
+        });
+        return next;
+      });
       setIsSyncingAll(false);
     }, 1200);
   };
 
-  const pendingCount = items.filter((i) => i.syncStatus !== 'synced').length;
+  const pendingCount = items.filter(
+    (i) => !locallySynced.has(i.id) && i.syncStatus !== 'synced'
+  ).length;
+
+  if (isLoading) {
+    return <div className="p-10 text-center text-muted-foreground">Loading sync records…</div>;
+  }
 
   return (
     <>
@@ -132,6 +122,7 @@ export default function AgentSyncPage() {
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {items.map((item) => {
             const TypeIcon = item.recordType === 'inspection' ? ClipboardCheck : UserCheck;
+            const synced = locallySynced.has(item.id) || item.syncStatus === 'synced';
             return (
               <div
                 key={item.id}
@@ -151,10 +142,11 @@ export default function AgentSyncPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">{item.recordLabel}</p>
                   <p className="text-xs text-muted-foreground">
-                    Captured {formatRelativeTime(item.capturedAt)} · {item.sizeLabel}
+                    Captured {formatRelativeTime(item.capturedAt)}
+                    {item.sizeLabel ? ` · ${item.sizeLabel}` : ''}
                   </p>
                 </div>
-                {item.syncStatus === 'synced' ? (
+                {synced ? (
                   <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20 shrink-0">
                     <Cloud className="w-3 h-3" />
                     Synced

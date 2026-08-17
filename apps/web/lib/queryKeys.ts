@@ -102,6 +102,8 @@ export const realtorKeys = {
   assignableProperties: (invitationId: string) =>
     ['realtor', 'assignable-properties', invitationId] as const,
   trustProfile: ['realtor', 'trust-profile'] as const,
+  reviews: ['realtor', 'reviews'] as const,
+  commissions: ['realtor', 'commissions'] as const,
 };
 
 export const agentKeys = {
@@ -119,6 +121,8 @@ export const agentKeys = {
   assignableProperties: (assignmentId: string) =>
     ['agent', 'assignable-properties', assignmentId] as const,
   trustProfile: ['agent', 'trust-profile'] as const,
+  reviews: ['agent', 'reviews'] as const,
+  sync: ['agent', 'sync'] as const,
 };
 
 export const homeManagementKeys = {
