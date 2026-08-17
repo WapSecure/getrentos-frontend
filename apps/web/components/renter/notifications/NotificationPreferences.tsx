@@ -1,13 +1,17 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
 
 interface Preference {
   id: string;
+  category: string;
   label: string;
   description: string;
   enabled: boolean;
@@ -18,71 +22,165 @@ interface Preference {
   };
 }
 
-const defaultPreferences: Preference[] = [
+const CATEGORY_META: { category: string; id: string; label: string; description: string }[] = [
   {
+    category: 'application',
     id: 'applications',
     label: 'Application Updates',
     description: 'Get notified about your application status changes',
-    enabled: true,
-    channels: { email: true, push: true, inApp: true },
   },
   {
+    category: 'message',
     id: 'messages',
     label: 'Messages',
     description: 'Get notified when you receive new messages',
-    enabled: true,
-    channels: { email: true, push: true, inApp: true },
   },
   {
+    category: 'payment',
     id: 'payments',
     label: 'Payment Alerts',
     description: 'Get notified about payment confirmations and reminders',
-    enabled: true,
-    channels: { email: true, push: true, inApp: true },
   },
   {
+    category: 'maintenance',
     id: 'maintenance',
     label: 'Maintenance Updates',
     description: 'Get notified about maintenance request updates',
-    enabled: true,
-    channels: { email: true, push: true, inApp: true },
   },
   {
+    category: 'lease',
     id: 'lease',
     label: 'Lease Reminders',
     description: 'Get notified about lease renewals and important dates',
-    enabled: true,
-    channels: { email: true, push: true, inApp: true },
   },
   {
-    id: 'promotions',
-    label: 'Promotions & Offers',
-    description: 'Get notified about special offers and promotions',
-    enabled: false,
-    channels: { email: true, push: false, inApp: false },
+    category: 'system',
+    id: 'system',
+    label: 'System & Trust Score',
+    description: 'Get notified about trust score changes and security alerts',
   },
 ];
 
+const buildPreferences = (fetched?: FetchedPreference[]): Preference[] => {
+  const byCategory = new Map((fetched ?? []).map((p) => [p.category, p]));
+  return CATEGORY_META.map((meta) => {
+    const pref = byCategory.get(meta.category);
+    const channels = {
+      email: pref?.email ?? true,
+      push: pref?.push ?? true,
+      inApp: pref?.inApp ?? true,
+    };
+    return {
+      id: meta.id,
+      category: meta.category,
+      label: meta.label,
+      description: meta.description,
+      enabled: channels.email || channels.push || channels.inApp,
+      channels,
+    };
+  });
+};
+
 export const NotificationPreferences = () => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [preferences, setPreferences] = useState(defaultPreferences);
+  const { data: fetched } = useQuery({
+    queryKey: renterKeys.notificationPreferences,
+    queryFn: () => unwrap(renterService.listNotificationPreferences()),
+  });
+
+  return (
+    <NotificationPreferencesForm
+      key={fetched ? 'loaded' : 'initial'}
+      initial={buildPreferences(fetched)}
+      isExpanded={isExpanded}
+      onToggleExpand={() => setIsExpanded((prev) => !prev)}
+    />
+  );
+};
+
+const NotificationPreferencesForm = ({
+  initial,
+  isExpanded,
+  onToggleExpand,
+}: {
+  initial: Preference[];
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+}) => {
+  const [preferences, setPreferences] = useState<Preference[]>(initial);
+
+  const togglePreferenceMutation = useMutation({
+    mutationFn: (variables: { prefId: string; category: string; enabled: boolean }) =>
+      unwrap(
+        renterService.updateNotificationPreference(variables.category, {
+          email: variables.enabled,
+          push: variables.enabled,
+          inApp: variables.enabled,
+        })
+      ),
+    onSuccess: (updated, { prefId }) => {
+      setPreferences((prev) =>
+        prev.map((p) =>
+          p.id === prefId
+            ? {
+                ...p,
+                enabled: updated.email || updated.push || updated.inApp,
+                channels: { email: updated.email, push: updated.push, inApp: updated.inApp },
+              }
+            : p
+        )
+      );
+    },
+  });
 
   const togglePreference = (id: string) => {
-    setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, enabled: !p.enabled } : p)));
+    const pref = preferences.find((p) => p.id === id);
+    if (!pref) return;
+    togglePreferenceMutation.mutate({
+      prefId: id,
+      category: pref.category,
+      enabled: !pref.enabled,
+    });
   };
 
+  const toggleChannelMutation = useMutation({
+    mutationFn: (variables: {
+      prefId: string;
+      category: string;
+      channel: 'email' | 'push' | 'inApp';
+      value: boolean;
+    }) =>
+      unwrap(
+        renterService.updateNotificationPreference(variables.category, {
+          [variables.channel]: variables.value,
+        })
+      ),
+    onSuccess: (updated, { prefId }) => {
+      setPreferences((prev) =>
+        prev.map((p) =>
+          p.id === prefId
+            ? { ...p, channels: { email: updated.email, push: updated.push, inApp: updated.inApp } }
+            : p
+        )
+      );
+    },
+  });
+
   const toggleChannel = (prefId: string, channel: 'email' | 'push' | 'inApp') => {
-    setPreferences((prev) =>
-      prev.map((p) =>
-        p.id === prefId ? { ...p, channels: { ...p.channels, [channel]: !p.channels[channel] } } : p
-      )
-    );
+    const pref = preferences.find((p) => p.id === prefId);
+    if (!pref) return;
+    toggleChannelMutation.mutate({
+      prefId,
+      category: pref.category,
+      channel,
+      value: !pref.channels[channel],
+    });
   };
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={onToggleExpand}
         className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
@@ -122,10 +220,11 @@ export const NotificationPreferences = () => {
                   />
                 </button>
               </div>
+
               {pref.enabled && (
                 <div className="mt-3 pt-3 border-t border-border flex gap-4">
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LegacyInput
+                    <input
                       type="checkbox"
                       checked={pref.channels.email}
                       onChange={() => toggleChannel(pref.id, 'email')}
@@ -134,7 +233,7 @@ export const NotificationPreferences = () => {
                     Email
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LegacyInput
+                    <input
                       type="checkbox"
                       checked={pref.channels.push}
                       onChange={() => toggleChannel(pref.id, 'push')}
@@ -143,7 +242,7 @@ export const NotificationPreferences = () => {
                     Push
                   </label>
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LegacyInput
+                    <input
                       type="checkbox"
                       checked={pref.channels.inApp}
                       onChange={() => toggleChannel(pref.id, 'inApp')}

@@ -17,9 +17,6 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
   const unreadCount = total - readCount;
   const readRate = total > 0 ? Math.round((readCount / total) * 100) : 0;
 
-  // Calculate average response time (mock)
-  const avgResponseTime = '2.3 hours';
-
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
@@ -42,9 +39,9 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-blue-500" />
-              <span className="text-xs text-gray-500">Avg Response</span>
+              <span className="text-xs text-gray-500">Unread</span>
             </div>
-            <p className="text-lg font-bold text-foreground">{avgResponseTime}</p>
+            <p className="text-lg font-bold text-foreground">{unreadCount}</p>
           </div>
         </div>
 
