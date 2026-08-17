@@ -1,6 +1,6 @@
-import { authFetch, safeCall } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { Estate, Household } from '@/types/estate';
+import type { Estate, Household, Due } from '@/types/estate';
 
 export const estateService = {
   async createEstate(data: {
@@ -53,5 +53,29 @@ export const estateService = {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/households/${householdId}`, { method: 'DELETE' })
     );
+  },
+
+  async createDues(
+    estateId: string,
+    data: {
+      amount: number;
+      dueDate: string;
+      description?: string;
+      category?: 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY';
+      billingCycle?: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+      householdIds?: string[];
+    }
+  ): Promise<ApiResponse<{ created: number }>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/dues`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listDues(estateId: string, status?: string): Promise<ApiResponse<Due[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dues${toQuery({ status })}`));
+  },
+
+  async markDuePaid(estateId: string, dueId: string): Promise<ApiResponse<Due>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dues/${dueId}/pay`, { method: 'PATCH' }));
   },
 };

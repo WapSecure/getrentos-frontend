@@ -178,6 +178,7 @@ export const ROUTES = {
   ESTATE_DASHBOARD: '/estate/dashboard',
   ESTATE_SETUP: '/estate/setup',
   ESTATE_HOUSEHOLDS: '/estate/households',
+  ESTATE_DUES: '/estate/dues',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',

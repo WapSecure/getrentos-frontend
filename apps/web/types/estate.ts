@@ -21,3 +21,22 @@ export interface Household {
   status: HouseholdStatus;
   createdAt: string;
 }
+
+export type DueStatus = 'pending' | 'paid' | 'overdue';
+export type DueCategory = 'rent' | 'service_charge' | 'deposit' | 'levy';
+export type BillingCycle = 'monthly' | 'quarterly' | 'annual';
+
+export interface Due {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  amount: number;
+  dueDate: string;
+  paidDate?: string;
+  status: DueStatus;
+  category: DueCategory;
+  billingCycle: BillingCycle;
+  description?: string;
+  createdAt: string;
+}

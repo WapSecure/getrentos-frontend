@@ -175,4 +175,6 @@ export const buyerKeys = {
 export const estateKeys = {
   myEstate: ['estate', 'me'] as const,
   households: (estateId: string) => ['estate', estateId, 'households'] as const,
+  dues: (estateId: string, status?: string) =>
+    ['estate', estateId, 'dues', status ?? 'all'] as const,
 };
