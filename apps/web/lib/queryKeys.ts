@@ -171,3 +171,8 @@ export const buyerKeys = {
   messages: (conversationId: string) =>
     ['buyer', 'conversations', conversationId, 'messages'] as const,
 };
+
+export const estateKeys = {
+  myEstate: ['estate', 'me'] as const,
+  households: (estateId: string) => ['estate', estateId, 'households'] as const,
+};

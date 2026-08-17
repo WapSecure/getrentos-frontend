@@ -83,6 +83,16 @@ export const ROLES = {
     order: 6,
     dashboardRoute: '/agent/dashboard',
   },
+  ESTATE: {
+    id: 'estate',
+    name: 'Estate Manager',
+    description: 'Manage a gated community — households, dues, and access.',
+    icon: 'Briefcase',
+    requiresVerification: ['identity'],
+    canAddLater: true,
+    order: 7,
+    dashboardRoute: '/estate/dashboard',
+  },
   ADMIN: {
     id: 'admin',
     name: 'Admin',
@@ -90,7 +100,7 @@ export const ROLES = {
     icon: 'Shield',
     requiresVerification: ['identity'],
     canAddLater: false,
-    order: 7,
+    order: 8,
     dashboardRoute: '/admin/dashboard',
   },
 } as const;
@@ -165,6 +175,9 @@ export const ROUTES = {
   REALTOR_DASHBOARD: '/realtor/dashboard',
   AGENT_DASHBOARD: '/agent/dashboard',
   ADMIN_DASHBOARD: '/admin/dashboard',
+  ESTATE_DASHBOARD: '/estate/dashboard',
+  ESTATE_SETUP: '/estate/setup',
+  ESTATE_HOUSEHOLDS: '/estate/households',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',
@@ -308,6 +321,7 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   PROPERTY_BUYER: 'buyer',
   REALTOR: 'realtor',
   AGENT: 'agent',
+  ESTATE_MANAGER: 'estate',
   BACKOFFICE_ADMIN: 'admin',
   SUPER_ADMIN: 'admin',
   VERIFICATION_OFFICER: 'admin',
@@ -321,6 +335,7 @@ export const getDashboardRoute = (roleId: string): string => {
     buyer: ROUTES.BUYER_DASHBOARD,
     realtor: ROUTES.REALTOR_DASHBOARD,
     agent: ROUTES.AGENT_DASHBOARD,
+    estate: ROUTES.ESTATE_DASHBOARD,
     admin: ROUTES.ADMIN_DASHBOARD,
   };
   return roleMap[roleId] || ROUTES.DASHBOARD;
