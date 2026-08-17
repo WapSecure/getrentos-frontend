@@ -182,7 +182,7 @@ export const CreateListingModal = ({
                   variant="primary"
                   className="gap-1.5"
                   onClick={handleSubmit}
-                  disabled={!clientId || !propertyId || !title || !price}
+                  disabled={!clientId || !propertyId || !title || !(Number(price) >= 1)}
                 >
                   <Check className="w-3.5 h-3.5" />
                   Create draft

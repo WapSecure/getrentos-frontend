@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Users } from 'lucide-react';
+import { ChevronDown, User, Settings, HelpCircle, LogOut, Users } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 import { getInitials } from '@/lib/format';
@@ -72,7 +72,7 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
 
             <div className="py-2">
               <Link
-                href={ROUTES.REALTOR_SETTINGS}
+                href={ROUTES.REALTOR_TRUST_PROFILE}
                 className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -94,14 +94,6 @@ export const RealtorProfileDropdown = ({ user }: RealtorProfileDropdownProps) =>
               >
                 <Users className="w-4 h-4" />
                 My Clients
-              </Link>
-              <Link
-                href={ROUTES.REALTOR_TRUST_PROFILE}
-                className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                Trust Profile
               </Link>
               <Link
                 href={ROUTES.REALTOR_HELP}

@@ -15,6 +15,8 @@ const isImage = (mimeType: string | undefined, name: string) =>
   mimeType?.startsWith('image/') || /\.(avif|gif|jpe?g|png|webp)$/i.test(name);
 const isPdf = (mimeType: string | undefined, name: string) =>
   mimeType === 'application/pdf' || /\.pdf$/i.test(name);
+/** Only directly-embeddable URLs can be previewed (http(s) or blob object URLs). */
+const isPreviewableUrl = (url: string | undefined) => !!url && /^(https?:\/\/|blob:)/i.test(url);
 
 /** Secure in-app viewer for user-provided image and PDF URLs. */
 export function FilePreview({ url, name, mimeType, className }: FilePreviewProps) {
@@ -23,7 +25,7 @@ export function FilePreview({ url, name, mimeType, className }: FilePreviewProps
   const image = useMemo(() => isImage(mimeType, name), [mimeType, name]);
   const pdf = useMemo(() => isPdf(mimeType, name), [mimeType, name]);
 
-  if (!url) return <UnsupportedPreview name={name} />;
+  if (!url || !isPreviewableUrl(url)) return <UnsupportedPreview name={name} />;
 
   if (!image && !pdf) return <UnsupportedPreview name={name} url={url} />;
 

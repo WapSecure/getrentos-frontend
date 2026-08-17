@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import {
   ConversationList,
@@ -14,17 +15,19 @@ import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 
-export default function RealtorMessagesPage() {
+function RealtorMessagesPageContent() {
+  const searchParams = useSearchParams();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const handledClientRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
-  const { data: conversations = [] } = useQuery({
+  const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
     queryKey: realtorKeys.conversations,
     queryFn: async () => {
       const items = (await unwrap(realtorService.listConversations())) as Array<{
         id: string;
-        client: { legalName: string };
+        client: { id: string; legalName: string };
         lastMessage: string | null;
         lastMessageAt: string | null;
         unreadCount: number;
@@ -32,6 +35,7 @@ export default function RealtorMessagesPage() {
       return items.map(
         (item): Conversation => ({
           id: item.id,
+          clientId: item.client.id,
           participantName: item.client.legalName,
           participantRole: 'Client',
           lastMessage: item.lastMessage || '',
@@ -41,6 +45,33 @@ export default function RealtorMessagesPage() {
       );
     },
   });
+
+  // Open (or start) the conversation for a client the user navigated from,
+  // e.g. the "Message" button on the Clients page (?client=<id>).
+  const startConversation = useMutation({
+    mutationFn: (clientId: string) => unwrap(realtorService.startConversation(clientId)),
+    onSuccess: (conversation) => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.conversations });
+      setActiveId(conversation.id);
+    },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to open a conversation with this client.',
+        variant: 'error',
+      }),
+  });
+
+  useEffect(() => {
+    const clientId = searchParams.get('client');
+    if (!clientId || conversationsLoading) return;
+    if (handledClientRef.current === clientId) return;
+    handledClientRef.current = clientId;
+    const existing = conversations.find((c) => c.clientId === clientId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (existing) setActiveId(existing.id);
+    else if (!startConversation.isPending) startConversation.mutate(clientId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, conversations, conversationsLoading]);
   const { data: messages = [] } = useQuery({
     enabled: !!activeId,
     queryKey: realtorKeys.conversationMessages(activeId || ''),
@@ -93,6 +124,7 @@ export default function RealtorMessagesPage() {
             conversations={filteredConversations}
             activeId={activeId}
             searchQuery={searchQuery}
+            isLoading={conversationsLoading}
             onSearch={setSearchQuery}
             onSelect={setActiveId}
           />
@@ -111,7 +143,14 @@ export default function RealtorMessagesPage() {
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
                 messages={messages}
-                onSend={(text, files) => send.mutate({ text, files })}
+                onSend={async (text, files) => {
+                  try {
+                    await send.mutateAsync({ text, files });
+                    return true;
+                  } catch {
+                    return false;
+                  }
+                }}
               />
             </>
           ) : (
@@ -128,5 +167,13 @@ export default function RealtorMessagesPage() {
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
+  );
+}
+
+export default function RealtorMessagesPage() {
+  return (
+    <Suspense fallback={null}>
+      <RealtorMessagesPageContent />
+    </Suspense>
   );
 }

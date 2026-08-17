@@ -17,7 +17,7 @@ interface MessageThreadProps {
   contactName: string;
   contactRole: string;
   messages: ThreadMessage[];
-  onSend: (text: string, files: File[]) => void;
+  onSend: (text: string, files: File[]) => Promise<boolean> | boolean;
 }
 
 export const MessageThread = ({
@@ -28,12 +28,20 @@ export const MessageThread = ({
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!draft.trim() && files.length === 0) return;
-    onSend(draft.trim(), files);
-    setDraft('');
-    setFiles([]);
+    setIsSending(true);
+    try {
+      const ok = await onSend(draft.trim(), files);
+      if (ok) {
+        setDraft('');
+        setFiles([]);
+      }
+    } finally {
+      setIsSending(false);
+    }
   };
   return (
     <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
@@ -128,7 +136,7 @@ export const MessageThread = ({
           />
           <button
             onClick={handleSend}
-            disabled={!draft.trim() && files.length === 0}
+            disabled={isSending || (!draft.trim() && files.length === 0)}
             className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             <Send className="w-4 h-4" />

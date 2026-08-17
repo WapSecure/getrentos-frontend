@@ -8,6 +8,7 @@ import type {
   RealtorOffer,
   RealtorReview,
   Commission,
+  OfferThreadMessage,
 } from '@/types/realtor';
 import type { TrustProfile } from '@/types/trust-score';
 
@@ -75,13 +76,20 @@ interface RealtorOfferApi {
   amount: number;
   status: 'SUBMITTED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED';
   createdAt: string;
-  buyer: { legalName: string | null; email: string };
+  buyer: { id: string; legalName: string | null; email: string };
   listing: {
     id: string;
     listingTitle: string | null;
     price?: number;
     property: { title: string; ownerId: string };
   };
+  counterOffers?: {
+    id: string;
+    fromUserId: string;
+    amount: number;
+    message: string | null;
+    createdAt: string;
+  }[];
 }
 
 export function mapRealtorClient(client: RealtorClientApi): RealtorClient {
@@ -143,8 +151,6 @@ export function mapRealtorLead(lead: RealtorLeadApi): RealtorLead {
     phone: lead.phone || '',
     listingId: lead.listingId || '',
     listingTitle: lead.listing?.listingTitle || 'Unassigned listing',
-    trustScore: 0,
-    verified: false,
     stage: stages[lead.status],
     inquiryDate: lead.createdAt,
   };
@@ -178,6 +184,32 @@ export function mapRealtorOffer(offer: RealtorOfferApi): RealtorOffer {
     REJECTED: 'rejected',
     CLOSED: 'closed',
   };
+  const buyerName = offer.buyer.legalName || 'Lead';
+  const thread: OfferThreadMessage[] = [
+    {
+      id: `offer_${offer.id}`,
+      offerId: offer.id,
+      senderId: 'lead',
+      senderName: buyerName,
+      type: 'offer',
+      amount: offer.amount,
+      text: 'Submitted an offer of',
+      timestamp: offer.createdAt,
+    },
+    ...(offer.counterOffers ?? []).map((c) => {
+      const isRealtor = c.fromUserId !== offer.buyer.id;
+      return {
+        id: c.id,
+        offerId: offer.id,
+        senderId: (isRealtor ? 'realtor' : 'lead') as 'realtor' | 'lead',
+        senderName: isRealtor ? 'You' : buyerName,
+        type: 'counter' as const,
+        amount: c.amount,
+        text: 'Countered with',
+        timestamp: c.createdAt,
+      };
+    }),
+  ];
   return {
     id: offer.id,
     listingId: offer.listing.id,
@@ -188,6 +220,7 @@ export function mapRealtorOffer(offer: RealtorOfferApi): RealtorOffer {
     askingPrice: offer.listing.price || 0,
     status: statuses[offer.status],
     submittedAt: offer.createdAt,
+    thread,
   };
 }
 
@@ -198,6 +231,15 @@ export const realtorService = {
   inviteClient: (email: string) =>
     safeCall(() =>
       authFetch('/realtor/clients', { method: 'POST', body: JSON.stringify({ email }) })
+    ),
+  checkClientEmail: (email: string) =>
+    safeCall(() =>
+      authFetch<{
+        exists: boolean;
+        isEligible: boolean;
+        name: string | null;
+        role: 'OWNER_OR_LANDLORD' | 'OTHER' | null;
+      }>('/realtor/clients/check', { method: 'POST', body: JSON.stringify({ email }) })
     ),
   listListings: () => safeCall(() => authFetch<RealtorListingApi[]>('/realtor/listings')),
   createListing: (data: {
@@ -254,6 +296,13 @@ export const realtorService = {
     ),
   listConversations: () => safeCall(() => authFetch('/realtor/messages')),
   getConversationMessages: (id: string) => safeCall(() => authFetch(`/realtor/messages/${id}`)),
+  startConversation: (clientId: string, propertyId?: string) =>
+    safeCall(() =>
+      authFetch<{ id: string }>('/realtor/messages', {
+        method: 'POST',
+        body: JSON.stringify(propertyId ? { clientId, propertyId } : { clientId }),
+      })
+    ),
   sendMessage: (id: string, text: string, files: File[] = []) => {
     const body = new FormData();
     if (text.trim()) body.append('text', text);

@@ -34,7 +34,11 @@ function RealtorViewingsPageContent() {
         realtorService.createViewing({
           listingId: appointment.listingId,
           leadId: appointment.leadId,
-          scheduledAt: `${appointment.scheduledDate}T${appointment.scheduledTime}:00.000Z`,
+          scheduledAt: (() => {
+            const [y, m, d] = appointment.scheduledDate.split('-').map(Number);
+            const [hh, mm] = appointment.scheduledTime.split(':').map(Number);
+            return new Date(y, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0, 0).toISOString();
+          })(),
           notes: appointment.notes,
         })
       ),

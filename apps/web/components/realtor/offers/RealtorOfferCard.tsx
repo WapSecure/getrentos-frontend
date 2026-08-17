@@ -45,7 +45,10 @@ interface RealtorOfferCardProps {
 export const RealtorOfferCard = ({ offer, onClick, delay = 0 }: RealtorOfferCardProps) => {
   const status = statusConfig[offer.status];
   const StatusIcon = status.icon;
-  const diffPct = ((offer.offerAmount - offer.askingPrice) / offer.askingPrice) * 100;
+  const diffPct =
+    offer.askingPrice > 0
+      ? ((offer.offerAmount - offer.askingPrice) / offer.askingPrice) * 100
+      : null;
 
   return (
     <motion.div
@@ -76,10 +79,9 @@ export const RealtorOfferCard = ({ offer, onClick, delay = 0 }: RealtorOfferCard
           {formatCurrency(offer.offerAmount, { compact: true })}
         </p>
         <p
-          className={`text-xs ${diffPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+          className={`text-xs ${diffPct !== null && diffPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
         >
-          {diffPct >= 0 ? '+' : ''}
-          {diffPct.toFixed(1)}% vs asking
+          {diffPct === null ? '—' : `${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(1)}% vs asking`}
         </p>
       </div>
 

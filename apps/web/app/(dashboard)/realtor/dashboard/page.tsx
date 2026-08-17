@@ -17,6 +17,10 @@ export default function RealtorDashboardPage() {
     queryKey: realtorKeys.dashboard,
     queryFn: () => unwrap(realtorService.getDashboard()),
   });
+  const { data: commissionSummary } = useQuery({
+    queryKey: realtorKeys.commissions,
+    queryFn: () => unwrap(realtorService.getCommissionsSummary()),
+  });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -34,7 +38,7 @@ export default function RealtorDashboardPage() {
         activeLeads={stats?.activeLeads ?? 0}
         upcomingViewings={stats?.upcomingViewings ?? 0}
         pendingOffers={stats?.offerCount ?? 0}
-        commissionYtd={0}
+        commissionYtd={commissionSummary?.totalEarned ?? 0}
       />
 
       <div className="grid lg:grid-cols-3 gap-6">

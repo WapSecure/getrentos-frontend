@@ -7,6 +7,7 @@ import { getInitials, formatRelativeTime } from '@/lib/format';
 
 export interface Conversation {
   id: string;
+  clientId: string;
   participantName: string;
   participantRole: 'Client' | 'Buyer' | 'Renter' | 'Support';
   lastMessage: string;
@@ -18,6 +19,7 @@ interface ConversationListProps {
   conversations: Conversation[];
   activeId: string | null;
   searchQuery: string;
+  isLoading?: boolean;
   onSearch: (value: string) => void;
   onSelect: (id: string) => void;
 }
@@ -26,6 +28,7 @@ export const ConversationList = ({
   conversations,
   activeId,
   searchQuery,
+  isLoading = false,
   onSearch,
   onSelect,
 }: ConversationListProps) => {
@@ -45,7 +48,9 @@ export const ConversationList = ({
       </div>
 
       <div className="flex-1 overflow-y-auto divide-y divide-border">
-        {conversations.length === 0 ? (
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground text-center py-8">Loading conversations…</p>
+        ) : conversations.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No conversations found</p>
         ) : (
           conversations.map((conversation) => (
@@ -65,7 +70,9 @@ export const ConversationList = ({
                     {conversation.participantName}
                   </p>
                   <span className="text-xs text-gray-400 whitespace-nowrap">
-                    {formatRelativeTime(conversation.lastMessageTime)}
+                    {conversation.lastMessageTime
+                      ? formatRelativeTime(conversation.lastMessageTime)
+                      : '—'}
                   </span>
                 </div>
                 <p className="text-xs text-gray-400 mb-0.5">{conversation.participantRole}</p>

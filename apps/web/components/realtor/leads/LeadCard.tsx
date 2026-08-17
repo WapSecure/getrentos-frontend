@@ -1,15 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  ShieldCheck,
-  ShieldAlert,
-  MessageSquare,
-  CalendarClock,
-  Handshake,
-  CheckCircle2,
-  XCircle,
-} from 'lucide-react';
+import { MessageSquare, CalendarClock, Handshake, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorLead, LeadStage } from '@/types/realtor';
@@ -78,11 +70,6 @@ export const LeadCard = ({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="font-semibold text-foreground truncate">{lead.leadName}</h3>
-              {lead.verified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
-              ) : (
-                <ShieldAlert className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {lead.listingTitle} · {lead.leadType === 'buyer' ? 'Buyer' : 'Renter'}
@@ -97,9 +84,9 @@ export const LeadCard = ({
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <p className="text-xs text-gray-400">Trust Score</p>
-          <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
+        <div className="min-w-0">
+          <p className="text-xs text-gray-400">Email</p>
+          <p className="text-sm font-medium text-foreground truncate">{lead.email || '—'}</p>
         </div>
         <div>
           <p className="text-xs text-gray-400">Inquired</p>

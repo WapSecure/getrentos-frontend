@@ -5,10 +5,14 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DocumentUploadDialog } from '@getrentos/ui';
-import { DocumentRowActions } from '@getrentos/ui';
-import { FilePreviewDialog } from '@getrentos/ui';
+import {
+  Button,
+  DocumentUploadDialog,
+  DocumentRowActions,
+  FilePreviewDialog,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { RealtorDocument } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
@@ -30,8 +34,9 @@ export default function RealtorDocumentsPage() {
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
-  const { data: documents = [] } = useQuery({
+  const { data: documents = [], isLoading } = useQuery({
     queryKey: realtorKeys.documents,
     queryFn: async () => {
       const records = (await unwrap(realtorService.listDocuments())) as Array<{
@@ -61,6 +66,7 @@ export default function RealtorDocumentsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.documents });
       setIsUploadOpen(false);
+      setToast({ message: 'Document uploaded.', variant: 'success' });
     },
   });
   const previewDocument = async (id: string) =>
@@ -82,6 +88,7 @@ export default function RealtorDocumentsPage() {
     { value: 'agency_agreement', label: 'Agency Agreements' },
     { value: 'listing_contract', label: 'Listing Contracts' },
     { value: 'closing_document', label: 'Closing Documents' },
+    { value: 'other', label: 'Other' },
   ];
 
   return (
@@ -128,7 +135,11 @@ export default function RealtorDocumentsPage() {
         </div>
       </div>
 
-      {filteredDocuments.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
+          Loading documents…
+        </div>
+      ) : filteredDocuments.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No documents found</p>
@@ -172,6 +183,10 @@ export default function RealtorDocumentsPage() {
         onOpenChange={(open) => !open && setPreview(null)}
         file={preview ? { name: preview.name, url: preview.url } : null}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

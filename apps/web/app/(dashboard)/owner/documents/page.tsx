@@ -5,9 +5,12 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DocumentUploadDialog } from '@getrentos/ui';
-import { DocumentRowActions } from '@getrentos/ui';
+import {
+  Button,
+  DocumentUploadDialog,
+  DocumentRowActions,
+  type UploadedDocumentData,
+} from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -19,6 +22,15 @@ const categoryLabels: Record<OwnershipTransferDocument['category'], string> = {
   payment_receipt: 'Payment Receipt',
   government_filing: 'Government Filing',
   title_transfer: 'Title Transfer',
+};
+
+/** Owner doc category -> backend OwnerDocumentType enum. */
+const CATEGORY_TO_TYPE: Record<string, string> = {
+  transfer_agreement: 'TRANSFER_AGREEMENT',
+  payment_receipt: 'PAYMENT_RECEIPT',
+  government_filing: 'GOVERNMENT_FILING',
+  title_transfer: 'TITLE_TRANSFER',
+  other: 'OTHER',
 };
 
 type CategoryFilter = 'all' | OwnershipTransferDocument['category'];
@@ -47,18 +59,20 @@ export default function OwnerDocumentsPage() {
     if (doc) shareMutation.mutate({ id: docId, shared: !doc.sharedWithBuyer });
   };
 
-  const handleUpload = (data: { name: string; category: string; sizeLabel: string }) => {
-    // The modal currently only captures name/category; a file upload with the
-    // actual document is wired through ownerService.uploadDocument.
-    const categoryMap: Record<string, string> = {
-      transfer_agreement: 'TRANSFER_AGREEMENT',
-      payment_receipt: 'PAYMENT_RECEIPT',
-      government_filing: 'GOVERNMENT_FILING',
-      title_transfer: 'TITLE_TRANSFER',
-      other: 'OTHER',
-    };
-    void categoryMap[data.category];
-    setIsUploadOpen(false);
+  const uploadMutation = useMutation({
+    mutationFn: (data: UploadedDocumentData) =>
+      unwrap(
+        ownerService.uploadDocument(
+          data.file,
+          data.name,
+          CATEGORY_TO_TYPE[data.category] ?? 'OTHER'
+        )
+      ),
+    onSuccess: invalidate,
+  });
+
+  const handleUpload = async (data: UploadedDocumentData) => {
+    await uploadMutation.mutateAsync(data);
   };
 
   const filteredDocuments = documents.filter((d) => {

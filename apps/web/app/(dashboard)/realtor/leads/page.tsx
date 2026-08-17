@@ -46,6 +46,11 @@ export default function RealtorLeadsPage() {
     mutationFn: ({ id, status }: { id: string; status: 'CLOSED' | 'LOST' }) =>
       unwrap(realtorService.updateLeadStatus(id, status)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.leads }),
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to update this lead. Please try again.',
+        variant: 'error',
+      }),
   });
   const { data: listings = [] } = useQuery({
     queryKey: realtorKeys.listings,

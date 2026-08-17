@@ -71,6 +71,14 @@ export default function RealtorOffersPage() {
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
 
+  const openOffer = (offerId: string) => {
+    const offer = offers.find((o) => o.id === offerId);
+    if (offer && !messagesByOffer[offerId]) {
+      setMessagesByOffer((prev) => ({ ...prev, [offerId]: offer.thread }));
+    }
+    setActiveOfferId(offerId);
+  };
+
   const filteredOffers = offers.filter((o) => {
     const matchesSearch = o.listingTitle.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' || o.status === filter;
@@ -83,6 +91,7 @@ export default function RealtorOffersPage() {
     { value: 'countered', label: 'Countered' },
     { value: 'accepted', label: 'Accepted' },
     { value: 'rejected', label: 'Rejected' },
+    { value: 'closed', label: 'Closed' },
   ];
 
   return (
@@ -147,7 +156,7 @@ export default function RealtorOffersPage() {
               key={offer.id}
               offer={offer}
               delay={index * 0.05}
-              onClick={() => setActiveOfferId(offer.id)}
+              onClick={() => openOffer(offer.id)}
             />
           ))}
         </div>

@@ -48,8 +48,6 @@ export interface RealtorLead {
   phone: string;
   listingId: string;
   listingTitle: string;
-  trustScore: number;
-  verified: boolean;
   stage: LeadStage;
   inquiryDate: string;
 }
@@ -75,6 +73,7 @@ export interface RealtorOffer {
   askingPrice: number;
   status: RealtorOfferStatus;
   submittedAt: string;
+  thread: OfferThreadMessage[];
 }
 
 export interface OfferThreadMessage {
