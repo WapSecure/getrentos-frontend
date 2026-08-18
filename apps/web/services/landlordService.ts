@@ -1,5 +1,5 @@
 import { ApiError } from '@/lib/apiClient';
-import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import { getAuthToken } from '@/lib/authStorage';
 import type {
@@ -200,9 +200,11 @@ export const landlordService = {
     params: {
       search?: string;
       verificationStatus?: string;
+      page?: number;
+      pageSize?: number;
     } = {}
-  ): Promise<ApiResponse<Property[]>> {
-    return safeCall(() => authFetch(`/landlord/properties${toQuery(params)}`));
+  ): Promise<ApiResponse<Paginated<Property>>> {
+    return safeCall(() => authFetch<Paginated<Property>>(`/landlord/properties${toQuery(params)}`));
   },
 
   async createProperty(
@@ -242,9 +244,9 @@ export const landlordService = {
 
   // ---- Units ----
   async listUnits(
-    params: { search?: string; propertyId?: string } = {}
-  ): Promise<ApiResponse<Unit[]>> {
-    return safeCall(() => authFetch(`/landlord/units${toQuery(params)}`));
+    params: { search?: string; propertyId?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Unit>>> {
+    return safeCall(() => authFetch<Paginated<Unit>>(`/landlord/units${toQuery(params)}`));
   },
 
   async createUnit(
@@ -315,8 +317,12 @@ export const landlordService = {
   },
 
   // ---- Applications ----
-  async listApplications(status?: string): Promise<ApiResponse<RentalApplication[]>> {
-    return safeCall(() => authFetch(`/landlord/applications${toQuery({ status })}`));
+  async listApplications(
+    params: { status?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<RentalApplication>>> {
+    return safeCall(() =>
+      authFetch<Paginated<RentalApplication>>(`/landlord/applications${toQuery(params)}`)
+    );
   },
 
   async updateApplicationStatus(
@@ -336,8 +342,10 @@ export const landlordService = {
   },
 
   // ---- Leases ----
-  async listLeases(status?: string): Promise<ApiResponse<Lease[]>> {
-    return safeCall(() => authFetch(`/landlord/leases${toQuery({ status })}`));
+  async listLeases(
+    params: { status?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Lease>>> {
+    return safeCall(() => authFetch<Paginated<Lease>>(`/landlord/leases${toQuery(params)}`));
   },
 
   async listVacantUnitsForLease(): Promise<ApiResponse<Unit[]>> {
@@ -414,8 +422,12 @@ export const landlordService = {
   },
 
   // ---- Evictions ----
-  async listEvictions(): Promise<ApiResponse<EvictionCase[]>> {
-    return safeCall(() => authFetch('/landlord/evictions'));
+  async listEvictions(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<EvictionCase>>> {
+    return safeCall(() =>
+      authFetch<Paginated<EvictionCase>>(`/landlord/evictions${toQuery(params)}`)
+    );
   },
 
   async initiateEviction(leaseId: string, reason: string): Promise<ApiResponse<EvictionCase>> {
@@ -475,13 +487,19 @@ export const landlordService = {
   },
 
   // ---- Tenants ----
-  async listTenants(): Promise<ApiResponse<Tenant[]>> {
-    return safeCall(() => authFetch('/landlord/tenants'));
+  async listTenants(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Tenant>>> {
+    return safeCall(() => authFetch<Paginated<Tenant>>(`/landlord/tenants${toQuery(params)}`));
   },
 
   // ---- Payments ----
-  async listPayments(status?: string): Promise<ApiResponse<RentPayment[]>> {
-    return safeCall(() => authFetch(`/landlord/payments${toQuery({ status })}`));
+  async listPayments(
+    params: { status?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<RentPayment>>> {
+    return safeCall(() =>
+      authFetch<Paginated<RentPayment>>(`/landlord/payments${toQuery(params)}`)
+    );
   },
 
   async getRentCollectionStats(): Promise<ApiResponse<RentCollectionStats>> {
@@ -531,9 +549,9 @@ export const landlordService = {
 
   // ---- Expenses ----
   async listExpenses(
-    params: { propertyId?: string; category?: string } = {}
-  ): Promise<ApiResponse<Expense[]>> {
-    return safeCall(() => authFetch(`/landlord/expenses${toQuery(params)}`));
+    params: { propertyId?: string; category?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Expense>>> {
+    return safeCall(() => authFetch<Paginated<Expense>>(`/landlord/expenses${toQuery(params)}`));
   },
 
   async createExpense(data: {
@@ -570,8 +588,12 @@ export const landlordService = {
   },
 
   // ---- Owner statements ----
-  async listOwnerStatements(): Promise<ApiResponse<OwnerStatement[]>> {
-    return safeCall(() => authFetch('/landlord/owner-statements'));
+  async listOwnerStatements(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<OwnerStatement>>> {
+    return safeCall(() =>
+      authFetch<Paginated<OwnerStatement>>(`/landlord/owner-statements${toQuery(params)}`)
+    );
   },
 
   async getOwnerStatement(id: string): Promise<ApiResponse<OwnerStatement>> {
@@ -596,8 +618,10 @@ export const landlordService = {
   },
 
   // ---- Vendors ----
-  async listVendors(): Promise<ApiResponse<Vendor[]>> {
-    return safeCall(() => authFetch('/landlord/vendors'));
+  async listVendors(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Vendor>>> {
+    return safeCall(() => authFetch<Paginated<Vendor>>(`/landlord/vendors${toQuery(params)}`));
   },
 
   async addVendor(
@@ -614,9 +638,11 @@ export const landlordService = {
 
   // ---- Maintenance ----
   async listMaintenanceRequests(
-    status?: string
-  ): Promise<ApiResponse<LandlordMaintenanceRequest[]>> {
-    return safeCall(() => authFetch(`/landlord/maintenance${toQuery({ status })}`));
+    params: { status?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<LandlordMaintenanceRequest>>> {
+    return safeCall(() =>
+      authFetch<Paginated<LandlordMaintenanceRequest>>(`/landlord/maintenance${toQuery(params)}`)
+    );
   },
 
   async assignMaintenanceVendor(
@@ -647,9 +673,11 @@ export const landlordService = {
 
   // ---- Documents ----
   async listDocuments(
-    params: { search?: string; category?: string } = {}
-  ): Promise<ApiResponse<LandlordDocument[]>> {
-    return safeCall(() => authFetch(`/landlord/documents${toQuery(params)}`));
+    params: { search?: string; category?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<LandlordDocument>>> {
+    return safeCall(() =>
+      authFetch<Paginated<LandlordDocument>>(`/landlord/documents${toQuery(params)}`)
+    );
   },
 
   async uploadDocument(
@@ -669,13 +697,21 @@ export const landlordService = {
   },
 
   // ---- Reviews ----
-  async listReviews(): Promise<ApiResponse<TenantReview[]>> {
-    return safeCall(() => authFetch('/landlord/reviews'));
+  async listReviews(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<TenantReview>>> {
+    return safeCall(() =>
+      authFetch<Paginated<TenantReview>>(`/landlord/reviews${toQuery(params)}`)
+    );
   },
 
   // ---- Messages ----
-  async listConversations(search?: string): Promise<ApiResponse<Conversation[]>> {
-    return safeCall(() => authFetch(`/landlord/messages/conversations${toQuery({ search })}`));
+  async listConversations(
+    params: { search?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Conversation>>> {
+    return safeCall(() =>
+      authFetch<Paginated<Conversation>>(`/landlord/messages/conversations${toQuery(params)}`)
+    );
   },
 
   async getConversationMessages(conversationId: string): Promise<ApiResponse<ThreadMessage[]>> {

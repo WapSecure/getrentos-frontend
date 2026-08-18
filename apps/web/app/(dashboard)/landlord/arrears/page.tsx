@@ -16,10 +16,15 @@ const daysOverdue = (dueDate: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(dueDate).getTime()) / MS_PER_DAY));
 
 export default function LandlordArrearsPage() {
-  const { data: payments = [] } = useQuery({
-    queryKey: landlordKeys.payments('overdue'),
-    queryFn: () => unwrap(landlordService.listPayments('overdue')),
+  // Fetch the full overdue batch (backend max pageSize is 100) so the
+  // "Total in arrears" sum and the sorted list remain accurate.
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.payments('overdue'), { page: 1, pageSize: 100 }],
+    queryFn: () =>
+      unwrap(landlordService.listPayments({ status: 'overdue', page: 1, pageSize: 100 })),
   });
+  const payments = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const totalOverdue = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments]);
   const sorted = useMemo(
@@ -43,7 +48,7 @@ export default function LandlordArrearsPage() {
           <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalOverdue)}</p>
         </div>
         <p className="text-sm text-muted-foreground">
-          {payments.length} payment{payments.length === 1 ? '' : 's'} overdue
+          {total} payment{total === 1 ? '' : 's'} overdue
         </p>
       </div>
 

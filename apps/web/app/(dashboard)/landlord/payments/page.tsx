@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -30,15 +30,30 @@ const statusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
   { value: 'overdue', label: 'Overdue' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordPaymentsPage() {
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | RentPaymentStatus>('all');
   const [selectedPayment, setSelectedPayment] = useState<RentPayment | null>(null);
 
-  const { data: payments = [] } = useQuery({
-    queryKey: landlordKeys.payments(),
-    queryFn: () => unwrap(landlordService.listPayments()),
+  const { data } = useQuery({
+    queryKey: [
+      ...landlordKeys.payments(),
+      { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listPayments({
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const payments = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const { data: stats = EMPTY_STATS } = useQuery({
     queryKey: landlordKeys.rentCollectionStats,
@@ -47,16 +62,15 @@ export default function LandlordPaymentsPage() {
 
   const { totalCollected, outstandingBalance, escrowPending, upcomingPayments } = stats;
 
+  // The server filters by status; search stays client-side (not supported by the API).
   const filteredPayments = useMemo(
     () =>
-      payments.filter((p) => {
-        const matchesSearch =
+      payments.filter(
+        (p) =>
           p.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesFilter = filter === 'all' || p.status === filter;
-        return matchesSearch && matchesFilter;
-      }),
-    [payments, searchQuery, filter]
+          p.propertyName.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [payments, searchQuery]
   );
 
   return (
@@ -88,7 +102,10 @@ export default function LandlordPaymentsPage() {
           {statusFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -102,6 +119,16 @@ export default function LandlordPaymentsPage() {
       </div>
 
       <PaymentsTable payments={filteredPayments} onViewDetails={setSelectedPayment} />
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
 
       <PaymentDetailsModal payment={selectedPayment} onClose={() => setSelectedPayment(null)} />
     </>

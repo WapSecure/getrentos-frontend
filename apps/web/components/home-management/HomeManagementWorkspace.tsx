@@ -47,7 +47,8 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
       if (role === 'owner') {
         return normalizeProperties(await unwrap(ownerService.listProperties()));
       }
-      return normalizeProperties(await unwrap(landlordService.listProperties()));
+      const res = await unwrap(landlordService.listProperties({ page: 1, pageSize: 100 }));
+      return normalizeProperties(res.items);
     },
   });
 
@@ -69,14 +70,16 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
   const vendorsQuery = useQuery({
     enabled: role === 'landlord',
     queryKey: homeManagementKeys.vendors,
-    queryFn: async (): Promise<HomeManagementVendor[]> =>
-      (await unwrap(landlordService.listVendors())).map((vendor) => ({
+    queryFn: async (): Promise<HomeManagementVendor[]> => {
+      const res = await unwrap(landlordService.listVendors({ page: 1, pageSize: 100 }));
+      return res.items.map((vendor) => ({
         id: vendor.id,
         name: vendor.name,
         serviceType: vendor.serviceType,
         rating: vendor.rating,
         jobsCompleted: vendor.jobsCompleted,
-      })),
+      }));
+    },
   });
 
   const properties = propertiesQuery.data ?? [];

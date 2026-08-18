@@ -28,10 +28,11 @@ interface UploadData {
 
 export default function DocumentsPage() {
   const queryClient = useQueryClient();
-  const { data: documents = [] } = useQuery({
+  const { data: documentsData } = useQuery({
     queryKey: renterKeys.documents,
-    queryFn: () => unwrap(renterService.listDocuments()),
+    queryFn: () => unwrap(renterService.listDocuments({ page: 1, pageSize: 100 })),
   });
+  const documents = documentsData?.items ?? [];
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showUploadModal, setShowUploadModal] = useState(false);

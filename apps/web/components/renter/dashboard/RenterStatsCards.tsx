@@ -138,10 +138,11 @@ export const RenterStatsCards = () => {
     ? `Ends ${new Date(lease.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
     : t('dashboard.stats.current_lease_subtitle');
 
-  const { data: payments = [] } = useQuery({
-    queryKey: renterKeys.payments,
-    queryFn: () => unwrap(renterService.listPayments()),
+  const { data: paymentsData } = useQuery({
+    queryKey: [...renterKeys.payments, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 100 })),
   });
+  const payments = paymentsData?.items ?? [];
   const totalRentPaid = payments
     .filter((p) => p.status === 'paid')
     .reduce((sum, p) => sum + p.amount, 0);

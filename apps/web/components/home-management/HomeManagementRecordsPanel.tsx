@@ -61,7 +61,8 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
           }));
       }
 
-      const documents = await unwrap(landlordService.listDocuments());
+      const documents = (await unwrap(landlordService.listDocuments({ page: 1, pageSize: 100 })))
+        .items;
       return documents
         .filter((document) => hasLinkedProperty(document.propertyName))
         .map((document) => ({

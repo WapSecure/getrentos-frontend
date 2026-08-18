@@ -43,10 +43,11 @@ export default function LandlordFinancialsPage() {
     queryFn: () => unwrap(landlordService.getFinancialChart()),
   });
 
-  const { data: properties = [] } = useQuery({
-    queryKey: landlordKeys.properties,
-    queryFn: () => unwrap(landlordService.listProperties()),
+  const { data: propertiesData } = useQuery({
+    queryKey: [...landlordKeys.properties, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(landlordService.listProperties({ page: 1, pageSize: 100 })),
   });
+  const properties = propertiesData?.items ?? [];
 
   const exportMutation = useMutation({
     mutationFn: () => unwrap(landlordService.exportFinancialsCsv()),

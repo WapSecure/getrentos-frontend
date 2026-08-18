@@ -31,14 +31,17 @@ export const RenterHomeManagement = () => {
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
   });
-  const { data: requests = [] } = useQuery({
-    queryKey: renterKeys.maintenanceRequests,
-    queryFn: () => unwrap(renterService.listMaintenanceRequests()),
+  const { data: requestsData } = useQuery({
+    queryKey: [...renterKeys.maintenanceRequests, { page: 1, pageSize: 10 }],
+    queryFn: () => unwrap(renterService.listMaintenanceRequests({ page: 1, pageSize: 10 })),
   });
-  const { data: documents = [] } = useQuery({
-    queryKey: renterKeys.documents,
-    queryFn: () => unwrap(renterService.listDocuments()),
+  const { data: documentsData } = useQuery({
+    queryKey: [...renterKeys.documents, { page: 1, pageSize: 10 }],
+    queryFn: () => unwrap(renterService.listDocuments({ page: 1, pageSize: 10 })),
   });
+
+  const requests = requestsData?.items ?? [];
+  const documents = documentsData?.items ?? [];
 
   const openRequests = requests.filter(
     (request) => request.status !== 'resolved' && request.status !== 'cancelled'
@@ -113,7 +116,7 @@ export const RenterHomeManagement = () => {
             <span className="text-xs font-medium">Home records</span>
           </div>
           <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">
-            {documents.length}
+            {documentsData?.total ?? documents.length}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {expiringDocuments.length > 0

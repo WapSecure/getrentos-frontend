@@ -18,14 +18,23 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
+import { Pagination } from '@getrentos/ui';
 
 export default function MessagesPage() {
   const user = useRenterUser();
   const queryClient = useQueryClient();
-  const { data: conversations = [] } = useQuery({
-    queryKey: renterKeys.conversations,
-    queryFn: () => unwrap(renterService.listConversations()),
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const conversationsQueryKey = [
+    ...renterKeys.conversations,
+    { page, pageSize: PAGE_SIZE },
+  ] as const;
+  const { data } = useQuery({
+    queryKey: conversationsQueryKey,
+    queryFn: () => unwrap(renterService.listConversations({ page, pageSize: PAGE_SIZE })),
   });
+  const conversations = data?.items ?? [];
+  const total = data?.total ?? 0;
   const { data: reminders = [] } = useQuery({
     queryKey: renterKeys.reminders,
     queryFn: () => unwrap(renterService.listReminders()),
@@ -60,9 +69,7 @@ export default function MessagesPage() {
     }) => unwrap(renterService.sendMessage(conversationId, text, files)),
     onMutate: async ({ conversationId, text }) => {
       await queryClient.cancelQueries({ queryKey: renterKeys.conversations });
-      const previousConversations = queryClient.getQueryData<Conversation[]>(
-        renterKeys.conversations
-      );
+      const previousConversations = queryClient.getQueryData<Conversation[]>(conversationsQueryKey);
       const optimisticMessage: Message = {
         id: `optimistic-${crypto.randomUUID()}`,
         conversationId,
@@ -73,7 +80,7 @@ export default function MessagesPage() {
         timestamp: new Date().toISOString(),
         read: true,
       };
-      queryClient.setQueryData<Conversation[]>(renterKeys.conversations, (old = []) =>
+      queryClient.setQueryData<Conversation[]>(conversationsQueryKey, (old = []) =>
         old.map((conversation) =>
           conversation.id === conversationId
             ? {
@@ -264,6 +271,16 @@ export default function MessagesPage() {
           )}
         </div>
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

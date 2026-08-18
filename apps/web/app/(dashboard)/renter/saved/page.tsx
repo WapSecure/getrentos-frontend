@@ -11,17 +11,21 @@ import { RecentlyViewed } from '@/components/renter/saved/RecentlyViewed';
 import { SavedRecommendations } from '@/components/renter/saved/SavedRecommendations';
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
-import { Toast } from '@getrentos/ui';
+import { Pagination, Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export default function SavedPage() {
   const queryClient = useQueryClient();
-  const { data: savedProperties = [] } = useQuery({
-    queryKey: renterKeys.savedListings,
-    queryFn: () => unwrap(renterService.listSavedListings()),
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
+  const { data } = useQuery({
+    queryKey: [...renterKeys.savedListings, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(renterService.listSavedListings({ page, pageSize: PAGE_SIZE })),
   });
+  const savedProperties = data?.items ?? [];
+  const total = data?.total ?? 0;
   const { data: wishlists = [] } = useQuery({
     queryKey: renterKeys.wishlists,
     queryFn: () => unwrap(renterService.listWishlists()),
@@ -123,7 +127,7 @@ export default function SavedPage() {
   return (
     <>
       <SavedPropertiesHeader
-        savedCount={savedProperties.length}
+        savedCount={total}
         wishlistCount={wishlists.length}
         onExport={() => setShowExportModal(true)}
       />
@@ -184,6 +188,16 @@ export default function SavedPage() {
         onClose={() => setShowExportModal(false)}
         properties={savedProperties}
       />
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

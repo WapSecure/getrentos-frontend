@@ -16,10 +16,11 @@ export const DocumentChecklist = () => {
   const [previewDoc, setPreviewDoc] = useState<{ url: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: documents = [], isLoading } = useQuery({
-    queryKey: renterKeys.documents,
-    queryFn: () => unwrap(renterService.listDocuments()),
+  const { data, isLoading } = useQuery({
+    queryKey: [...renterKeys.documents, { page: 1, pageSize: 10 }],
+    queryFn: () => unwrap(renterService.listDocuments({ page: 1, pageSize: 10 })),
   });
+  const documents = data?.items ?? [];
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) =>
@@ -39,7 +40,7 @@ export const DocumentChecklist = () => {
     e.target.value = '';
   };
 
-  const uploadedCount = documents.length;
+  const uploadedCount = data?.total ?? documents.length;
 
   return (
     <>

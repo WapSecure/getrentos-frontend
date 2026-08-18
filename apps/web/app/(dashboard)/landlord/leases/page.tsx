@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
 import { SignLeaseModal } from '@/components/landlord/leases/SignLeaseModal';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -21,18 +21,40 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
   { value: 'expired', label: 'Expired' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordLeasesPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data: leases = [] } = useQuery({
-    queryKey: landlordKeys.leases(),
-    queryFn: () => unwrap(landlordService.listLeases()),
+  const { data } = useQuery({
+    queryKey: [
+      ...landlordKeys.leases(),
+      { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listLeases({
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const leases = data?.items ?? [];
+  const total = data?.total ?? 0;
+
+  // Header stat: total active (signed) leases across the portfolio.
+  const { data: activeData } = useQuery({
+    queryKey: [...landlordKeys.leases('signed'), { page: 1, pageSize: 1 }],
+    queryFn: () => unwrap(landlordService.listLeases({ status: 'signed', page: 1, pageSize: 1 })),
+  });
+  const activeLeaseCount = activeData?.total ?? 0;
 
   const { data: vacantUnits = [] } = useQuery({
     queryKey: landlordKeys.vacantUnitsForLease,
@@ -56,21 +78,21 @@ export default function LandlordLeasesPage() {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       queryClient.invalidateQueries({ queryKey: landlordKeys.vacantUnitsForLease });
     },
   });
 
   const sendLeaseMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.sendLease(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.leases() }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] }),
   });
 
   const signLeaseMutation = useMutation({
     mutationFn: ({ id, signatureData }: { id: string; signatureData: string }) =>
       unwrap(landlordService.signLease(id, signatureData)),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       setSigningLease(null);
       setToast({
         message:
@@ -96,7 +118,7 @@ export default function LandlordLeasesPage() {
       newEndDate: string;
     }) => unwrap(landlordService.renewLease(leaseId, newRent, newEndDate)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       setRenewingLease(null);
     },
   });
@@ -113,16 +135,6 @@ export default function LandlordLeasesPage() {
 
   const handleSendRenewalOffer = (leaseId: string, newRent: number, newEndDate: string) =>
     renewLeaseMutation.mutate({ leaseId, newRent, newEndDate });
-
-  const filteredLeases = useMemo(
-    () => leases.filter((l) => filter === 'all' || l.status === filter),
-    [leases, filter]
-  );
-
-  const activeLeaseCount = useMemo(
-    () => leases.filter((l) => l.status === 'signed').length,
-    [leases]
-  );
 
   return (
     <>
@@ -143,7 +155,10 @@ export default function LandlordLeasesPage() {
         {statusFilters.map((option) => (
           <button
             key={option.value}
-            onClick={() => setFilter(option.value)}
+            onClick={() => {
+              setFilter(option.value);
+              setPage(1);
+            }}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               filter === option.value
                 ? 'bg-card text-primary shadow-sm'
@@ -155,14 +170,14 @@ export default function LandlordLeasesPage() {
         ))}
       </div>
 
-      {filteredLeases.length === 0 ? (
+      {leases.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FileCheck className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No leases found</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredLeases.map((lease, index) => (
+          {leases.map((lease, index) => (
             <LeaseCard
               key={lease.id}
               lease={lease}
@@ -173,6 +188,16 @@ export default function LandlordLeasesPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <CreateLeaseModal

@@ -25,10 +25,11 @@ export const RenterReviews = () => {
     queryFn: () => unwrap(renterService.getPendingReviews()),
   });
 
-  const { data: submitted = [] } = useQuery({
-    queryKey: renterKeys.reviewsSubmitted,
-    queryFn: () => unwrap(renterService.getSubmittedReviews()),
+  const { data: submittedData } = useQuery({
+    queryKey: [...renterKeys.reviewsSubmitted, { page: 1, pageSize: 5 }],
+    queryFn: () => unwrap(renterService.getSubmittedReviews({ page: 1, pageSize: 5 })),
   });
+  const submitted = submittedData?.items ?? [];
 
   const submitMutation = useMutation({
     mutationFn: (input: {
@@ -72,9 +73,6 @@ export const RenterReviews = () => {
       comment: reviewText || undefined,
     });
   };
-
-  const targetName = (review: PendingReview) =>
-    review.type === 'property' ? review.property : review.landlord;
 
   return (
     <>

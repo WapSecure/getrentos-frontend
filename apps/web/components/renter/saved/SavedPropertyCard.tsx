@@ -61,10 +61,11 @@ export const SavedPropertyCard = ({
   const [showShareModal, setShowShareModal] = useState(false);
   const [note, setNote] = useState(property.note ?? '');
 
-  const { data: applications = [] } = useQuery({
-    queryKey: renterKeys.applications,
-    queryFn: () => unwrap(renterService.listMyApplications()),
+  const { data: applicationsData } = useQuery({
+    queryKey: [...renterKeys.applications, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(renterService.listMyApplications({ page: 1, pageSize: 100 })),
   });
+  const applications = applicationsData?.items ?? [];
 
   const noteMutation = useMutation({
     mutationFn: (newNote: string) =>

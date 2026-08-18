@@ -13,6 +13,7 @@ import {
   EmptyState,
   Field,
   DatePicker,
+  Pagination,
   Select,
   Toast,
   type ToastVariant,
@@ -25,22 +26,29 @@ import { landlordService, type OwnerStatement } from '@/services/landlordService
 type GenerateForm = { propertyId: string; periodStart: string; periodEnd: string };
 const initialForm: GenerateForm = { propertyId: '', periodStart: '', periodEnd: '' };
 
+const PAGE_SIZE = 10;
+
 export default function LandlordOwnerStatementsPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<GenerateForm>(initialForm);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data: statements = [] } = useQuery({
-    queryKey: landlordKeys.ownerStatements,
-    queryFn: () => unwrap(landlordService.listOwnerStatements()),
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.ownerStatements, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(landlordService.listOwnerStatements({ page, pageSize: PAGE_SIZE })),
   });
+  const statements = data?.items ?? [];
+  const total = data?.total ?? 0;
 
-  const { data: properties = [] } = useQuery({
-    queryKey: landlordKeys.properties,
-    queryFn: () => unwrap(landlordService.listProperties()),
+  // Dropdown of properties for generating a statement.
+  const { data: propertiesData } = useQuery({
+    queryKey: [...landlordKeys.properties, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(landlordService.listProperties({ page: 1, pageSize: 100 })),
   });
+  const properties = propertiesData?.items ?? [];
 
   const { data: detail } = useQuery({
     queryKey: landlordKeys.ownerStatement(detailId ?? ''),
@@ -142,6 +150,16 @@ export default function LandlordOwnerStatementsPage() {
             </button>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>

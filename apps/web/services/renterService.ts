@@ -340,8 +340,12 @@ export const renterService = {
   },
 
   // ---- Saved listings ----
-  async listSavedListings(): Promise<ApiResponse<SavedListingItem[]>> {
-    return safeCall(() => authFetch('/renter/saved-listings'));
+  async listSavedListings(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<SavedListingItem>>> {
+    return safeCall(() =>
+      authFetch<Paginated<SavedListingItem>>(`/renter/saved-listings${toQuery(params)}`)
+    );
   },
 
   async saveListing(
@@ -425,8 +429,12 @@ export const renterService = {
   },
 
   // ---- Applications ----
-  async listMyApplications(): Promise<ApiResponse<Application[]>> {
-    return safeCall(() => authFetch('/renter/applications'));
+  async listMyApplications(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Application>>> {
+    return safeCall(() =>
+      authFetch<Paginated<Application>>(`/renter/applications${toQuery(params)}`)
+    );
   },
   async withdrawApplication(id: string): Promise<ApiResponse<Application>> {
     return safeCall(() => authFetch(`/renter/applications/${id}/withdraw`, { method: 'PATCH' }));
@@ -521,8 +529,12 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/reviews/pending'));
   },
 
-  async getSubmittedReviews(): Promise<ApiResponse<ReviewItem[]>> {
-    return safeCall(() => authFetch('/renter/reviews/submitted'));
+  async getSubmittedReviews(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<ReviewItem>>> {
+    return safeCall(() =>
+      authFetch<Paginated<ReviewItem>>(`/renter/reviews/submitted${toQuery(params)}`)
+    );
   },
 
   async submitReview(data: {
@@ -650,8 +662,12 @@ export const renterService = {
   },
 
   // ---- Documents ----
-  async listDocuments(): Promise<ApiResponse<RenterDocument[]>> {
-    return safeCall(() => authFetch('/renter/documents'));
+  async listDocuments(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<RenterDocument>>> {
+    return safeCall(() =>
+      authFetch<Paginated<RenterDocument>>(`/renter/documents${toQuery(params)}`)
+    );
   },
 
   async uploadDocument(
@@ -692,8 +708,10 @@ export const renterService = {
   },
 
   // ---- Messages ----
-  async listConversations(): Promise<ApiResponse<Conversation[]>> {
-    return safeCall(() => authFetch('/renter/messages'));
+  async listConversations(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Conversation>>> {
+    return safeCall(() => authFetch<Paginated<Conversation>>(`/renter/messages${toQuery(params)}`));
   },
 
   async startConversation(
@@ -902,12 +920,18 @@ export const renterService = {
   },
 
   // ---- Payments ----
-  async listPayments(): Promise<ApiResponse<Payment[]>> {
-    return safeCall(() => authFetch('/renter/payments'));
+  async listPayments(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Payment>>> {
+    return safeCall(() => authFetch<Paginated<Payment>>(`/renter/payments${toQuery(params)}`));
   },
 
-  async listReceipts(): Promise<ApiResponse<Receipt[]>> {
-    return safeCall(() => authFetch('/renter/payments/receipts'));
+  async listReceipts(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Receipt>>> {
+    return safeCall(() =>
+      authFetch<Paginated<Receipt>>(`/renter/payments/receipts${toQuery(params)}`)
+    );
   },
 
   async payNow(paymentId: string, method?: string): Promise<ApiResponse<Payment>> {
@@ -952,8 +976,12 @@ export const renterService = {
   },
 
   // ---- Maintenance ----
-  async listMaintenanceRequests(): Promise<ApiResponse<MaintenanceRequest[]>> {
-    return safeCall(() => authFetch('/renter/maintenance'));
+  async listMaintenanceRequests(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<MaintenanceRequest>>> {
+    return safeCall(() =>
+      authFetch<Paginated<MaintenanceRequest>>(`/renter/maintenance${toQuery(params)}`)
+    );
   },
 
   async createMaintenanceRequest(
@@ -1004,8 +1032,12 @@ export const renterService = {
   },
 
   // ---- Notifications ----
-  async listNotifications(): Promise<ApiResponse<Notification[]>> {
-    return safeCall(() => authFetch('/renter/notifications'));
+  async listNotifications(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Notification>>> {
+    return safeCall(() =>
+      authFetch<Paginated<Notification>>(`/renter/notifications${toQuery(params)}`)
+    );
   },
 
   async markNotificationAsRead(id: string): Promise<ApiResponse<Notification>> {

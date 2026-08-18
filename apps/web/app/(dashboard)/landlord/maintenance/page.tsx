@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
 import { landlordService } from '@/services/landlordService';
@@ -19,23 +20,50 @@ const statusFilters: { value: 'all' | MaintenanceRequestStatus; label: string }[
   { value: 'resolved', label: 'Resolved' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordMaintenancePage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | MaintenanceRequestStatus>('all');
   const [assigningRequest, setAssigningRequest] = useState<LandlordMaintenanceRequest | null>(null);
 
-  const { data: requests = [] } = useQuery({
-    queryKey: landlordKeys.maintenanceRequests(),
-    queryFn: () => unwrap(landlordService.listMaintenanceRequests()),
+  const { data } = useQuery({
+    queryKey: [
+      ...landlordKeys.maintenanceRequests(),
+      { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listMaintenanceRequests({
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const requests = data?.items ?? [];
+  const total = data?.total ?? 0;
 
-  const { data: vendors = [] } = useQuery({
-    queryKey: landlordKeys.vendors,
-    queryFn: () => unwrap(landlordService.listVendors()),
+  // Dropdown of vendors for assignment.
+  const { data: vendorsData } = useQuery({
+    queryKey: [...landlordKeys.vendors, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(landlordService.listVendors({ page: 1, pageSize: 100 })),
   });
+  const vendors = vendorsData?.items ?? [];
+
+  // Header stat: total open (non-resolved) requests across the portfolio.
+  const { data: openData } = useQuery({
+    queryKey: [...landlordKeys.maintenanceRequests(), { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(landlordService.listMaintenanceRequests({ page: 1, pageSize: 100 })),
+  });
+  const openCount = useMemo(
+    () => (openData?.items ?? []).filter((r) => r.status !== 'resolved').length,
+    [openData]
+  );
 
   const invalidateRequests = () =>
-    queryClient.invalidateQueries({ queryKey: landlordKeys.maintenanceRequests() });
+    queryClient.invalidateQueries({ queryKey: ['landlord', 'maintenanceRequests'] });
 
   const assignVendorMutation = useMutation({
     mutationFn: ({ requestId, vendorId }: { requestId: string; vendorId: string }) =>
@@ -63,15 +91,6 @@ export default function LandlordMaintenancePage() {
 
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
 
-  const filteredRequests = useMemo(
-    () => requests.filter((r) => filter === 'all' || r.status === filter),
-    [requests, filter]
-  );
-  const openCount = useMemo(
-    () => requests.filter((r) => r.status !== 'resolved').length,
-    [requests]
-  );
-
   return (
     <>
       <div className="mb-6">
@@ -85,7 +104,10 @@ export default function LandlordMaintenancePage() {
         {statusFilters.map((option) => (
           <button
             key={option.value}
-            onClick={() => setFilter(option.value)}
+            onClick={() => {
+              setFilter(option.value);
+              setPage(1);
+            }}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               filter === option.value
                 ? 'bg-card text-primary shadow-sm'
@@ -97,14 +119,14 @@ export default function LandlordMaintenancePage() {
         ))}
       </div>
 
-      {filteredRequests.length === 0 ? (
+      {requests.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <Wrench className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No maintenance requests found</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredRequests.map((request, index) => (
+          {requests.map((request, index) => (
             <MaintenanceRequestCard
               key={request.id}
               request={request}
@@ -119,6 +141,16 @@ export default function LandlordMaintenancePage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <AssignVendorModal

@@ -62,8 +62,10 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   return response.data;
 }
 
-export function toQuery(params: Record<string, string | undefined>): string {
-  const entries = Object.entries(params).filter(([, v]) => v && v !== 'all');
+export function toQuery(params: Record<string, string | number | boolean | undefined>): string {
+  const entries = Object.entries(params).filter(
+    ([, v]) => v !== undefined && v !== '' && v !== 'all'
+  );
   if (entries.length === 0) return '';
-  return '?' + new URLSearchParams(entries as [string, string][]).toString();
+  return '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)]));
 }

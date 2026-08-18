@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,15 +13,21 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Vendor } from '@/types/landlord';
 
+const PAGE_SIZE = 10;
+
 export default function LandlordVendorsPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const { data: vendors = [] } = useQuery({
-    queryKey: landlordKeys.vendors,
-    queryFn: () => unwrap(landlordService.listVendors()),
+  // The vendors endpoint does not accept a search param, so search stays client-side.
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE })),
   });
+  const vendors = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidateVendors = () => queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
 
@@ -57,7 +63,7 @@ export default function LandlordVendorsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Vendors</h1>
           <p className="text-muted-foreground mt-1">
-            {vendors.length} vendor{vendors.length === 1 ? '' : 's'} in your directory
+            {total} vendor{total === 1 ? '' : 's'} in your directory
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
@@ -93,6 +99,16 @@ export default function LandlordVendorsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <AddVendorModal

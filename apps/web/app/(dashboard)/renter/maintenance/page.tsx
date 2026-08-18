@@ -11,12 +11,15 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
 
 export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [showReportModal, setShowReportModal] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [alerts, setAlerts] = useState<
@@ -47,9 +50,10 @@ export default function MaintenancePage() {
 
   useEffect(() => {
     const loadMaintenanceRequests = async () => {
-      const res = await renterService.listMaintenanceRequests();
+      const res = await renterService.listMaintenanceRequests({ page, pageSize: PAGE_SIZE });
       if (res.success && res.data) {
-        setRequests(res.data);
+        setRequests(res.data.items ?? []);
+        setTotal(res.data.total ?? 0);
       } else {
         showToast(res.message || 'Unable to load maintenance requests.', 'error');
       }
@@ -59,7 +63,7 @@ export default function MaintenancePage() {
     const loadAlerts = async () => {
       const res = await renterService.listNotifications();
       if (res.success && res.data) {
-        const maintenanceAlerts = res.data
+        const maintenanceAlerts = (res.data.items ?? [])
           .filter((n) => n.type === 'maintenance')
           .map((n) => ({
             id: n.id,
@@ -90,7 +94,7 @@ export default function MaintenancePage() {
       }
     };
     loadLandlordContact();
-  }, [showToast]);
+  }, [page, showToast]);
 
   const handleReportIssue = async (data: CreateMaintenanceRequestInput): Promise<boolean> => {
     const res = await renterService.createMaintenanceRequest(data);
@@ -215,6 +219,16 @@ export default function MaintenancePage() {
         onClose={() => setShowReportModal(false)}
         onSubmit={handleReportIssue}
       />
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

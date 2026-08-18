@@ -21,10 +21,11 @@ export const RenterRecommendedProperties = () => {
   });
   const recommendedProperties = listings.slice(0, 3);
 
-  const { data: savedListings = [] } = useQuery({
-    queryKey: renterKeys.savedListings,
-    queryFn: () => unwrap(renterService.listSavedListings()),
+  const { data: savedListingsData } = useQuery({
+    queryKey: [...renterKeys.savedListings, { page: 1, pageSize: 20 }],
+    queryFn: () => unwrap(renterService.listSavedListings({ page: 1, pageSize: 20 })),
   });
+  const savedListings = savedListingsData?.items ?? [];
   const savedIds = savedListings.map((p) => p.id);
 
   const invalidateSaved = () => {

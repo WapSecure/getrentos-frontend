@@ -15,13 +15,18 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
+import { Pagination } from '@getrentos/ui';
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
-  const { data: notifications = [] } = useQuery({
-    queryKey: renterKeys.notifications,
-    queryFn: () => unwrap(renterService.listNotifications()),
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data } = useQuery({
+    queryKey: [...renterKeys.notifications, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(renterService.listNotifications({ page, pageSize: PAGE_SIZE })),
   });
+  const notifications = data?.items ?? [];
+  const total = data?.total ?? 0;
   const [filterType, setFilterType] = useState<string>('all');
   const [filterRead, setFilterRead] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +114,16 @@ export default function NotificationsPage() {
           <DoNotDisturb />
         </div>
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

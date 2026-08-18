@@ -24,10 +24,11 @@ const formatPrice = (amount: number) => {
 };
 
 export const RenterUpcomingPayments = () => {
-  const { data: payments = [] } = useQuery({
-    queryKey: renterKeys.payments,
-    queryFn: () => unwrap(renterService.listPayments()),
+  const { data } = useQuery({
+    queryKey: [...renterKeys.payments, { page: 1, pageSize: 10 }],
+    queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 10 })),
   });
+  const payments = data?.items ?? [];
   const upcomingPayments = payments
     .filter((p) => p.status === 'pending' || p.status === 'overdue')
     .map((p) => ({

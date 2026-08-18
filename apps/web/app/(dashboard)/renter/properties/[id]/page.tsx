@@ -60,10 +60,11 @@ export default function PropertyDetailPage() {
     },
   });
 
-  const { data: savedListings = [] } = useQuery({
+  const { data: savedListingsData } = useQuery({
     queryKey: renterKeys.savedListings,
-    queryFn: () => unwrap(renterService.listSavedListings()),
+    queryFn: () => unwrap(renterService.listSavedListings({ page: 1, pageSize: 100 })),
   });
+  const savedListings = savedListingsData?.items ?? [];
   const isSaved = savedListings.some((p) => p.id === params.id);
 
   const showToast = (message: string, variant: ToastVariant) => {

@@ -114,11 +114,11 @@ export default function RenterHomePage() {
   });
   const maintenanceQuery = useQuery({
     queryKey: renterKeys.maintenanceRequests,
-    queryFn: () => unwrap(renterService.listMaintenanceRequests()),
+    queryFn: () => unwrap(renterService.listMaintenanceRequests({ page: 1, pageSize: 100 })),
   });
   const documentsQuery = useQuery({
     queryKey: renterKeys.documents,
-    queryFn: () => unwrap(renterService.listDocuments()),
+    queryFn: () => unwrap(renterService.listDocuments({ page: 1, pageSize: 100 })),
   });
   const remindersQuery = useQuery({
     queryKey: renterKeys.upcomingPaymentReminders,
@@ -126,8 +126,8 @@ export default function RenterHomePage() {
   });
 
   const lease = leaseQuery.data;
-  const maintenanceRequests = maintenanceQuery.data ?? [];
-  const documents = documentsQuery.data ?? [];
+  const maintenanceRequests = maintenanceQuery.data?.items ?? [];
+  const documents = documentsQuery.data?.items ?? [];
   const paymentReminders = remindersQuery.data ?? [];
 
   const openRequests = useMemo(

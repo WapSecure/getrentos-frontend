@@ -35,10 +35,11 @@ export default function DiscoverPage() {
     search: '',
   });
 
-  const { data: savedListings = [] } = useQuery({
+  const { data: savedListingsData } = useQuery({
     queryKey: renterKeys.savedListings,
-    queryFn: () => unwrap(renterService.listSavedListings()),
+    queryFn: () => unwrap(renterService.listSavedListings({ page: 1, pageSize: 100 })),
   });
+  const savedListings = savedListingsData?.items ?? [];
   const savedProperties = savedListings.map((p) => p.id);
 
   const showToast = (message: string, variant: ToastVariant) => {

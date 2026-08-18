@@ -12,6 +12,7 @@ import { ApplicationExport } from '@/components/renter/applications/ApplicationE
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { Pagination } from '@getrentos/ui';
 
 interface Note {
   id: string;
@@ -22,10 +23,14 @@ interface Note {
 
 export default function ApplicationsPage() {
   const queryClient = useQueryClient();
-  const { data: applications = [] } = useQuery({
-    queryKey: renterKeys.applications,
-    queryFn: () => unwrap(renterService.listMyApplications()),
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data } = useQuery({
+    queryKey: [...renterKeys.applications, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(renterService.listMyApplications({ page, pageSize: PAGE_SIZE })),
   });
+  const applications = data?.items ?? [];
+  const total = data?.total ?? 0;
   // Private notes are persisted server-side (ApplicationNote records).
   const { data: allNotes = [] } = useQuery({
     queryKey: renterKeys.allApplicationNotes,
@@ -135,6 +140,16 @@ export default function ApplicationsPage() {
         onClose={() => setShowExportModal(false)}
         applications={applications}
       />
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

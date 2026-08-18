@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
-import { landlordService, type LandlordDocument } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordService } from '@/services/landlordService';
 
 type DocumentCategory =
   | 'lease_agreements'
@@ -29,25 +31,53 @@ const categoryFilters: { value: 'all' | DocumentCategory; label: string }[] = [
   { value: 'inspection_reports', label: 'Inspections' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordDocumentsPage() {
-  const [documents, setDocuments] = useState<LandlordDocument[]>([]);
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<'all' | DocumentCategory>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
+  // Debounce the search input; reset to page 1 inside the timer callback.
   useEffect(() => {
-    const fetchDocuments = async () => {
-      const response = await landlordService.listDocuments();
-      if (response.success && response.data) setDocuments(response.data);
-    };
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-    fetchDocuments();
-  }, []);
+  const { data } = useQuery({
+    queryKey: [
+      'landlord',
+      'documents',
+      {
+        search: debouncedSearch,
+        category: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listDocuments({
+          search: debouncedSearch || undefined,
+          category: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const documents = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const handleUpload = async (data: UploadedDocumentData) => {
     const response = await landlordService.uploadDocument(data.name, data.category, data.file);
     if (response.success && response.data) {
-      setDocuments((prev) => [response.data!, ...prev]);
+      queryClient.invalidateQueries({ queryKey: ['landlord', 'documents'] });
     } else {
       throw new Error(response.message || 'Unable to upload document.');
     }
@@ -60,21 +90,13 @@ export default function LandlordDocumentsPage() {
     }
   };
 
-  const filteredDocuments = documents.filter((d) => {
-    const matchesSearch =
-      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || d.category === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">
-            {documents.length} document{documents.length === 1 ? '' : 's'} across your portfolio
+            {total} document{total === 1 ? '' : 's'} across your portfolio
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
@@ -98,7 +120,10 @@ export default function LandlordDocumentsPage() {
           {categoryFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -111,14 +136,14 @@ export default function LandlordDocumentsPage() {
         </div>
       </div>
 
-      {filteredDocuments.length === 0 ? (
+      {documents.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No documents found</p>
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {filteredDocuments.map((doc) => (
+          {documents.map((doc) => (
             <div
               key={doc.id}
               className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
@@ -139,6 +164,16 @@ export default function LandlordDocumentsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <DocumentUploadDialog

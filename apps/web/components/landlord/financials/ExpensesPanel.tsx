@@ -62,10 +62,12 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
   const [form, setForm] = useState<ExpenseForm>(initialForm);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data: expenses = [] } = useQuery({
-    queryKey: landlordKeys.expenses(),
-    queryFn: () => unwrap(landlordService.listExpenses()),
+  // Fetch a large batch (backend max pageSize is 100) so the panel shows recent expenses.
+  const { data: expensesData } = useQuery({
+    queryKey: [...landlordKeys.expenses(), { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(landlordService.listExpenses({ page: 1, pageSize: 100 })),
   });
+  const expenses = expensesData?.items ?? [];
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: landlordKeys.expenses() });

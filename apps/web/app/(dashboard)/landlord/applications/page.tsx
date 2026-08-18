@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { landlordService } from '@/services/landlordService';
@@ -18,21 +19,44 @@ const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
   { value: 'rejected', label: 'Rejected' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordApplicationsPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
 
-  const { data: applications = [] } = useQuery({
-    queryKey: landlordKeys.applications(),
-    queryFn: () => unwrap(landlordService.listApplications()),
+  const { data } = useQuery({
+    queryKey: [
+      ...landlordKeys.applications(),
+      { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listApplications({
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const applications = data?.items ?? [];
+  const total = data?.total ?? 0;
+
+  // Header stat: total pending applications across the portfolio.
+  const { data: pendingData } = useQuery({
+    queryKey: [...landlordKeys.applications('pending'), { page: 1, pageSize: 1 }],
+    queryFn: () =>
+      unwrap(landlordService.listApplications({ status: 'pending', page: 1, pageSize: 1 })),
+  });
+  const pendingCount = pendingData?.total ?? 0;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: ApplicationStatus }) =>
       unwrap(landlordService.updateApplicationStatus(id, status)),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: landlordKeys.applications() });
+      queryClient.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
     },
   });
@@ -41,15 +65,6 @@ export default function LandlordApplicationsPage() {
   const handleReject = (id: string) => updateStatusMutation.mutate({ id, status: 'rejected' });
   const handleRequestInfo = (id: string) =>
     updateStatusMutation.mutate({ id, status: 'under_review' });
-
-  const filteredApplications = useMemo(
-    () => applications.filter((a) => filter === 'all' || a.status === filter),
-    [applications, filter]
-  );
-  const pendingCount = useMemo(
-    () => applications.filter((a) => a.status === 'pending').length,
-    [applications]
-  );
 
   return (
     <>
@@ -64,7 +79,10 @@ export default function LandlordApplicationsPage() {
         {statusFilters.map((option) => (
           <button
             key={option.value}
-            onClick={() => setFilter(option.value)}
+            onClick={() => {
+              setFilter(option.value);
+              setPage(1);
+            }}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               filter === option.value
                 ? 'bg-card text-primary shadow-sm'
@@ -76,14 +94,14 @@ export default function LandlordApplicationsPage() {
         ))}
       </div>
 
-      {filteredApplications.length === 0 ? (
+      {applications.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FileText className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No applications found</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredApplications.map((application, index) => (
+          {applications.map((application, index) => (
             <ApplicationCard
               key={application.id}
               application={application}
@@ -95,6 +113,16 @@ export default function LandlordApplicationsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <ApplicationDetailsModal

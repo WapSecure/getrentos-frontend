@@ -36,14 +36,15 @@ export const SavedPropertiesGrid = ({
   selectedProperties = [],
   onSelectProperty,
 }: SavedPropertiesGridProps) => {
-  const { data: applications = [] } = useQuery({
-    queryKey: renterKeys.applications,
-    queryFn: () => unwrap(renterService.listMyApplications()),
+  const { data: applicationsData } = useQuery({
+    queryKey: [...renterKeys.applications, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(renterService.listMyApplications({ page: 1, pageSize: 100 })),
   });
   const { data: recentlyViewed = [] } = useQuery({
     queryKey: renterKeys.recentlyViewed,
     queryFn: () => unwrap(renterService.listRecentlyViewed()),
   });
+  const applications = applicationsData?.items ?? [];
 
   const appliedIds = useMemo(() => new Set(applications.map((a) => a.id)), [applications]);
   const viewedIds = useMemo(() => new Set(recentlyViewed.map((r) => r.id)), [recentlyViewed]);

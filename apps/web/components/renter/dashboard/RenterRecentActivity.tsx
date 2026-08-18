@@ -63,11 +63,11 @@ const formatTimeAgo = (dateString: string) => {
 
 export const RenterRecentActivity = () => {
   const router = useRouter();
-  const { data: notifications = [] } = useQuery({
-    queryKey: renterKeys.notifications,
-    queryFn: () => unwrap(renterService.listNotifications()),
+  const { data } = useQuery({
+    queryKey: [...renterKeys.notifications, { page: 1, pageSize: 5 }],
+    queryFn: () => unwrap(renterService.listNotifications({ page: 1, pageSize: 5 })),
   });
-  const activities: Activity[] = notifications.slice(0, 5).map((n) => {
+  const activities: Activity[] = (data?.items ?? []).slice(0, 5).map((n) => {
     const mapped = iconByType[n.type] || { icon: Bell, color: 'text-gray-500' };
     return {
       id: n.id,

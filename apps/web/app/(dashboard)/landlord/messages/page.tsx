@@ -20,9 +20,9 @@ export default function LandlordMessagesPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const loadConversations = useCallback(async () => {
-    const response = await landlordService.listConversations();
+    const response = await landlordService.listConversations({ pageSize: 100 });
     if (response.success && response.data) {
-      setConversations(response.data);
+      setConversations(response.data.items);
     }
   }, []);
 

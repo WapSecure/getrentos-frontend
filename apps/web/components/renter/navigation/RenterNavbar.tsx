@@ -31,10 +31,11 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const { data: notifications = [] } = useQuery({
-    queryKey: renterKeys.notifications,
-    queryFn: () => unwrap(renterService.listNotifications()),
+  const { data } = useQuery({
+    queryKey: [...renterKeys.notifications, { page: 1, pageSize: 5 }],
+    queryFn: () => unwrap(renterService.listNotifications({ page: 1, pageSize: 5 })),
   });
+  const notifications = data?.items ?? [];
 
   const invalidateNotifications = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.notifications });

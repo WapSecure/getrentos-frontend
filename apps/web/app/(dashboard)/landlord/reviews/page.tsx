@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Star, MessageCircle, Home, Clock } from 'lucide-react';
 import { getInitials, formatDate } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
 import { landlordService, type TenantReview } from '@/services/landlordService';
 
 const StarRow = ({ rating }: { rating: number }) => (
@@ -17,16 +18,14 @@ const StarRow = ({ rating }: { rating: number }) => (
 );
 
 export default function LandlordReviewsPage() {
-  const [reviews, setReviews] = useState<TenantReview[]>([]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      const response = await landlordService.listReviews();
-      if (response.success && response.data) setReviews(response.data);
-    };
-
-    fetchReviews();
-  }, []);
+  // Reviews feed the reputation averages, so fetch a full batch (backend max
+  // pageSize is 100) rather than paginating this summary page.
+  const { data } = useQuery({
+    queryKey: ['landlord', 'reviews'],
+    queryFn: () => unwrap(landlordService.listReviews({ page: 1, pageSize: 100 })),
+  });
+  const reviews = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const avg = (
     key: keyof Pick<
@@ -54,7 +53,7 @@ export default function LandlordReviewsPage() {
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
-            Based on {reviews.length} review{reviews.length === 1 ? '' : 's'}
+            Based on {total} review{total === 1 ? '' : 's'}
           </p>
         </div>
 

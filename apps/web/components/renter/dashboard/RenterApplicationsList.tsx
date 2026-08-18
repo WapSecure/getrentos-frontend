@@ -71,11 +71,11 @@ import { ROUTES } from '@/lib/constants/auth';
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
   const router = useRouter();
-  const { data: allApplications = [] } = useQuery({
-    queryKey: renterKeys.applications,
-    queryFn: () => unwrap(renterService.listMyApplications()),
+  const { data } = useQuery({
+    queryKey: [...renterKeys.applications, { page: 1, pageSize: 5 }],
+    queryFn: () => unwrap(renterService.listMyApplications({ page: 1, pageSize: 5 })),
   });
-  const applications = allApplications.slice(0, 5);
+  const applications = data?.items ?? [];
 
   return (
     <motion.div

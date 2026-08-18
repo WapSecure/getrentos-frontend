@@ -2,14 +2,14 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyModal';
 import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -19,10 +19,14 @@ import { ROUTES } from '@/lib/constants/auth';
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordPropertiesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -32,15 +36,43 @@ export default function LandlordPropertiesPage() {
       setSearchQuery(q);
     }
   }, [searchParams]);
+
+  // Debounce the search input; reset to page 1 inside the timer callback.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
-  const { data: properties = [] } = useQuery({
-    queryKey: landlordKeys.properties,
-    queryFn: () => unwrap(landlordService.listProperties()),
+  const { data } = useQuery({
+    queryKey: [
+      ...landlordKeys.properties,
+      {
+        search: debouncedSearch,
+        verificationStatus: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listProperties({
+          search: debouncedSearch || undefined,
+          verificationStatus: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const properties = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidateProperties = () =>
     queryClient.invalidateQueries({ queryKey: landlordKeys.properties });
@@ -98,17 +130,7 @@ export default function LandlordPropertiesPage() {
 
   const handleDelete = (id: string) => deleteMutation.mutate(id);
 
-  const filteredProperties = useMemo(
-    () =>
-      properties.filter((p) => {
-        const matchesSearch =
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.city.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesFilter = filter === 'all' || p.verificationStatus === filter;
-        return matchesSearch && matchesFilter;
-      }),
-    [properties, searchQuery, filter]
-  );
+  const hasActiveFilters = searchQuery !== '' || filter !== 'all';
 
   const filterOptions: { value: VerificationFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -123,7 +145,7 @@ export default function LandlordPropertiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Properties</h1>
           <p className="text-muted-foreground mt-1">
-            {properties.length} propert{properties.length === 1 ? 'y' : 'ies'} in your portfolio
+            {total} propert{total === 1 ? 'y' : 'ies'} in your portfolio
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
@@ -147,7 +169,10 @@ export default function LandlordPropertiesPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -160,20 +185,20 @@ export default function LandlordPropertiesPage() {
         </div>
       </div>
 
-      {filteredProperties.length === 0 ? (
+      {properties.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {properties.length === 0 ? 'No properties yet' : 'No properties match your filters'}
+            {hasActiveFilters ? 'No properties match your filters' : 'No properties yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {properties.length === 0
-              ? 'Add your first property to start managing units, tenants, and rent collection.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Try adjusting your search or filter.'
+              : 'Add your first property to start managing units, tenants, and rent collection.'}
           </p>
-          {properties.length === 0 && (
+          {!hasActiveFilters && (
             <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
               Add Your First Property
             </Button>
@@ -181,7 +206,7 @@ export default function LandlordPropertiesPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredProperties.map((property, index) => (
+          {properties.map((property, index) => (
             <PropertyCard
               key={property.id}
               property={property}
@@ -193,6 +218,16 @@ export default function LandlordPropertiesPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <AddPropertyModal

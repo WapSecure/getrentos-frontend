@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gavel, Plus, TriangleAlert } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -11,19 +11,27 @@ import { EvictionCaseCard } from '@/components/landlord/evictions/EvictionCaseCa
 import { InitiateEvictionModal } from '@/components/landlord/evictions/InitiateEvictionModal';
 import { EvictionCaseDetailModal } from '@/components/landlord/evictions/EvictionCaseDetailModal';
 
+const PAGE_SIZE = 10;
+
 export default function LandlordEvictionsPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
 
-  const { data: cases = [] } = useQuery({
-    queryKey: landlordKeys.evictions,
-    queryFn: () => unwrap(landlordService.listEvictions()),
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.evictions, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(landlordService.listEvictions({ page, pageSize: PAGE_SIZE })),
   });
-  const { data: signedLeases = [] } = useQuery({
-    queryKey: landlordKeys.leases('signed'),
-    queryFn: () => unwrap(landlordService.listLeases('signed')),
+  const cases = data?.items ?? [];
+  const total = data?.total ?? 0;
+
+  // Dropdown of signed leases for initiating a new case.
+  const { data: signedLeasesData } = useQuery({
+    queryKey: [...landlordKeys.leases('signed'), { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(landlordService.listLeases({ status: 'signed', page: 1, pageSize: 100 })),
   });
+  const signedLeases = signedLeasesData?.items ?? [];
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: landlordKeys.evictions });
 
@@ -74,7 +82,7 @@ export default function LandlordEvictionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Evictions</h1>
           <p className="text-muted-foreground mt-1">
-            {cases.length} case{cases.length === 1 ? '' : 's'} tracked
+            {total} case{total === 1 ? '' : 's'} tracked
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -110,6 +118,16 @@ export default function LandlordEvictionsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <InitiateEvictionModal

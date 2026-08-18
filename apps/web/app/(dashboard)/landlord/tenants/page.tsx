@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -18,14 +18,21 @@ const rentStatusFilters: { value: 'all' | RentPaymentStatus; label: string }[] =
   { value: 'overdue', label: 'Overdue' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function LandlordTenantsPage() {
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [rentFilter, setRentFilter] = useState<'all' | RentPaymentStatus>('all');
 
-  const { data: tenants = [] } = useQuery({
-    queryKey: landlordKeys.tenants,
-    queryFn: () => unwrap(landlordService.listTenants()),
+  // The tenants endpoint does not accept search/status params, so search and
+  // rent-status filtering stay client-side on the current page.
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.tenants, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(landlordService.listTenants({ page, pageSize: PAGE_SIZE })),
   });
+  const tenants = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const filteredTenants = useMemo(
     () =>
@@ -44,7 +51,7 @@ export default function LandlordTenantsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Tenants</h1>
         <p className="text-muted-foreground mt-1">
-          {tenants.length} tenant{tenants.length === 1 ? '' : 's'} across your portfolio
+          {total} tenant{total === 1 ? '' : 's'} across your portfolio
         </p>
       </div>
 
@@ -63,7 +70,10 @@ export default function LandlordTenantsPage() {
           {rentStatusFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setRentFilter(option.value)}
+              onClick={() => {
+                setRentFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 rentFilter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -87,6 +97,16 @@ export default function LandlordTenantsPage() {
             <TenantCard key={tenant.id} tenant={tenant} delay={index * 0.05} />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
     </>
   );

@@ -16,6 +16,7 @@ import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymen
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { Pagination } from '@getrentos/ui';
 
 interface Notification {
   id: string;
@@ -34,18 +35,23 @@ export default function PaymentsPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
 
-  const { data: rawPayments = [] } = useQuery({
-    queryKey: renterKeys.payments,
-    queryFn: () => unwrap(renterService.listPayments()),
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data: rawPaymentsData } = useQuery({
+    queryKey: [...renterKeys.payments, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE })),
   });
-  const { data: receipts = [] } = useQuery({
-    queryKey: renterKeys.receipts,
-    queryFn: () => unwrap(renterService.listReceipts()),
+  const { data: receiptsData } = useQuery({
+    queryKey: [...renterKeys.receipts, { page: 1, pageSize: 12 }],
+    queryFn: () => unwrap(renterService.listReceipts({ page: 1, pageSize: 12 })),
   });
   const { data: paymentMethods = [] } = useQuery({
     queryKey: renterKeys.paymentMethods,
     queryFn: () => unwrap(renterService.listPaymentMethods()),
   });
+  const rawPayments = rawPaymentsData?.items ?? [];
+  const receipts = receiptsData?.items ?? [];
+  const total = rawPaymentsData?.total ?? 0;
 
   const pushNotification = (notification: Omit<Notification, 'id' | 'date' | 'read'>) => {
     setNotifications((prev) => [
@@ -219,6 +225,16 @@ export default function PaymentsPage() {
         onOpenChange={(open) => !open && setDisputingPaymentId(null)}
         onSubmit={handleSubmitDispute}
       />
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }
