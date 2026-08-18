@@ -93,6 +93,16 @@ export const ROLES = {
     order: 7,
     dashboardRoute: '/estate/dashboard',
   },
+  GATEMAN: {
+    id: 'gateman',
+    name: 'Gateman',
+    description: 'Verify visitor passes at the estate gate.',
+    icon: 'ShieldCheck',
+    requiresVerification: [],
+    canAddLater: false,
+    order: 8,
+    dashboardRoute: '/gateman/verify',
+  },
   ADMIN: {
     id: 'admin',
     name: 'Admin',
@@ -100,7 +110,7 @@ export const ROLES = {
     icon: 'Shield',
     requiresVerification: ['identity'],
     canAddLater: false,
-    order: 8,
+    order: 9,
     dashboardRoute: '/admin/dashboard',
   },
 } as const;
@@ -179,6 +189,9 @@ export const ROUTES = {
   ESTATE_SETUP: '/estate/setup',
   ESTATE_HOUSEHOLDS: '/estate/households',
   ESTATE_DUES: '/estate/dues',
+  ESTATE_VISITOR_PASSES: '/estate/visitor-passes',
+  ESTATE_STAFF: '/estate/staff',
+  GATEMAN_DASHBOARD: '/gateman/verify',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',
@@ -323,6 +336,7 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   REALTOR: 'realtor',
   AGENT: 'agent',
   ESTATE_MANAGER: 'estate',
+  GATEMAN: 'gateman',
   BACKOFFICE_ADMIN: 'admin',
   SUPER_ADMIN: 'admin',
   VERIFICATION_OFFICER: 'admin',
@@ -337,6 +351,7 @@ export const getDashboardRoute = (roleId: string): string => {
     realtor: ROUTES.REALTOR_DASHBOARD,
     agent: ROUTES.AGENT_DASHBOARD,
     estate: ROUTES.ESTATE_DASHBOARD,
+    gateman: ROUTES.GATEMAN_DASHBOARD,
     admin: ROUTES.ADMIN_DASHBOARD,
   };
   return roleMap[roleId] || ROUTES.DASHBOARD;

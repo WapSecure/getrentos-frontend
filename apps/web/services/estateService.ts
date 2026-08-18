@@ -1,6 +1,13 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { Estate, Household, Due } from '@/types/estate';
+import type {
+  Estate,
+  Household,
+  Due,
+  VisitorPass,
+  IssuedVisitorPass,
+  StaffMember,
+} from '@/types/estate';
 
 export const estateService = {
   async createEstate(data: {
@@ -77,5 +84,61 @@ export const estateService = {
 
   async markDuePaid(estateId: string, dueId: string): Promise<ApiResponse<Due>> {
     return safeCall(() => authFetch(`/estate/${estateId}/dues/${dueId}/pay`, { method: 'PATCH' }));
+  },
+
+  async issueVisitorPass(
+    estateId: string,
+    data: {
+      householdId: string;
+      visitorName: string;
+      visitorPhone?: string;
+      purpose?: string;
+      expiresAt?: string;
+    }
+  ): Promise<ApiResponse<IssuedVisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async listVisitorPasses(estateId: string, status?: string): Promise<ApiResponse<VisitorPass[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes${toQuery({ status })}`));
+  },
+
+  async revokeVisitorPass(estateId: string, passId: string): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes/${passId}/revoke`, { method: 'PATCH' })
+    );
+  },
+
+  async verifyVisitorPass(estateId: string, pin: string): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes/verify`, {
+        method: 'POST',
+        body: JSON.stringify({ pin }),
+      })
+    );
+  },
+
+  async inviteGateman(estateId: string, email: string): Promise<ApiResponse<StaffMember>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/staff/gateman`, {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+    );
+  },
+
+  async listStaff(estateId: string): Promise<ApiResponse<StaffMember[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/staff`));
+  },
+
+  async removeGateman(estateId: string, memberUserId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/staff/${memberUserId}`, { method: 'DELETE' })
+    );
   },
 };

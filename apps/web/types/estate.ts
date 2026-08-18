@@ -40,3 +40,30 @@ export interface Due {
   description?: string;
   createdAt: string;
 }
+
+export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
+
+export interface VisitorPass {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  visitorName: string;
+  visitorPhone?: string;
+  purpose?: string;
+  status: VisitorPassStatus;
+  expiresAt: string;
+  checkedInAt?: string;
+  createdAt: string;
+}
+
+export interface IssuedVisitorPass extends VisitorPass {
+  pin: string;
+}
+
+export interface StaffMember {
+  userId: string;
+  name: string;
+  email: string;
+  addedAt: string;
+}

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Users, Receipt } from 'lucide-react';
+import { LayoutDashboard, Users, Receipt, KeyRound, ShieldCheck } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
@@ -16,6 +16,8 @@ export const navItems: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.ESTATE_DASHBOARD, icon: LayoutDashboard },
   { label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
   { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: Receipt },
+  { label: 'Visitor Passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
+  { label: 'Staff', href: ROUTES.ESTATE_STAFF, icon: ShieldCheck },
 ];
 
 export const EstateSidebar = () => {

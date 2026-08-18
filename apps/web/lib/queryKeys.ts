@@ -177,4 +177,7 @@ export const estateKeys = {
   households: (estateId: string) => ['estate', estateId, 'households'] as const,
   dues: (estateId: string, status?: string) =>
     ['estate', estateId, 'dues', status ?? 'all'] as const,
+  visitorPasses: (estateId: string, status?: string) =>
+    ['estate', estateId, 'visitorPasses', status ?? 'all'] as const,
+  staff: (estateId: string) => ['estate', estateId, 'staff'] as const,
 };
