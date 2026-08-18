@@ -21,10 +21,11 @@ function BuyerViewingsPageContent() {
     queryFn: () => unwrap(buyerService.listViewings()),
   });
 
-  const { data: listings = [] } = useQuery({
+  const { data: listingsData } = useQuery({
     queryKey: buyerKeys.listings,
-    queryFn: () => unwrap(buyerService.discover({})),
+    queryFn: () => unwrap(buyerService.discover({ pageSize: 100 })),
   });
+  const listings = listingsData?.items ?? [];
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.viewings });
 

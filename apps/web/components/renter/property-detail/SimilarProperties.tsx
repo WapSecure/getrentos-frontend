@@ -16,9 +16,9 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
 
   useEffect(() => {
     const load = async () => {
-      const res = await renterService.listListings();
+      const res = await renterService.listListings({ pageSize: 100 });
       if (res.success && res.data) {
-        setSimilar(res.data.filter((p) => p.id !== currentId).slice(0, 3));
+        setSimilar(res.data.items.filter((p) => p.id !== currentId).slice(0, 3));
       }
     };
     load();

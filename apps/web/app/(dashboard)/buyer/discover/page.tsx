@@ -1,8 +1,9 @@
 'use client';
 
 import { LegacyInput } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Building2, ArrowUpDown } from 'lucide-react';
@@ -23,12 +24,40 @@ export default function BuyerDiscoverPage() {
   const queryClient = useQueryClient();
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | ListingPropertyType>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('default');
+  const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
+  const PAGE_SIZE = 9;
 
-  const { data: listings = [], isLoading } = useQuery({
-    queryKey: buyerKeys.listings,
-    queryFn: () => unwrap(buyerService.discover({})),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data } = useQuery({
+    queryKey: [
+      'buyer',
+      'listings',
+      { search: debouncedSearch, type: typeFilter, sort: sortOrder, page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        buyerService.discover({
+          search: debouncedSearch || undefined,
+          propertyType: typeFilter === 'all' ? undefined : typeFilter,
+          sort: sortOrder === 'default' ? undefined : sortOrder,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const listings = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const saveMutation = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.saveListing(listingId)),
@@ -46,8 +75,6 @@ export default function BuyerDiscoverPage() {
       setSearchQuery(q);
     }
   }, [searchParams]);
-  const [typeFilter, setTypeFilter] = useState<'all' | ListingPropertyType>('all');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('default');
   const [activeListing, setActiveListing] = useState<BuyerPropertyListing | null>(null);
 
   useEffect(() => {
@@ -72,24 +99,6 @@ export default function BuyerDiscoverPage() {
     }
   };
 
-  const filteredListings = useMemo(
-    () =>
-      listings
-        .filter((l) => {
-          const matchesSearch =
-            l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            l.city.toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesType = typeFilter === 'all' || l.propertyType === typeFilter;
-          return matchesSearch && matchesType;
-        })
-        .sort((a, b) => {
-          if (sortOrder === 'price_asc') return a.askingPrice - b.askingPrice;
-          if (sortOrder === 'price_desc') return b.askingPrice - a.askingPrice;
-          return 0;
-        }),
-    [listings, searchQuery, typeFilter, sortOrder]
-  );
-
   const typeFilters: { value: 'all' | ListingPropertyType; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'Apartment', label: 'Apartment' },
@@ -105,7 +114,7 @@ export default function BuyerDiscoverPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Discover Properties</h1>
         <p className="text-muted-foreground mt-1">
-          {filteredListings.length} propert{filteredListings.length === 1 ? 'y' : 'ies'} for sale
+          {total} propert{total === 1 ? 'y' : 'ies'} for sale
         </p>
       </div>
 
@@ -121,11 +130,12 @@ export default function BuyerDiscoverPage() {
           />
         </div>
         <button
-          onClick={() =>
+          onClick={() => {
             setSortOrder((s) =>
               s === 'default' ? 'price_asc' : s === 'price_asc' ? 'price_desc' : 'default'
-            )
-          }
+            );
+            setPage(1);
+          }}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors w-fit"
         >
           <ArrowUpDown className="w-3.5 h-3.5" />
@@ -141,7 +151,10 @@ export default function BuyerDiscoverPage() {
         {typeFilters.map((option) => (
           <button
             key={option.value}
-            onClick={() => setTypeFilter(option.value)}
+            onClick={() => {
+              setTypeFilter(option.value);
+              setPage(1);
+            }}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               typeFilter === option.value
                 ? 'bg-card text-primary shadow-sm'
@@ -153,7 +166,7 @@ export default function BuyerDiscoverPage() {
         ))}
       </div>
 
-      {filteredListings.length === 0 ? (
+      {listings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
@@ -165,7 +178,7 @@ export default function BuyerDiscoverPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredListings.map((listing, index) => (
+          {listings.map((listing, index) => (
             <PropertyListingCard
               key={listing.id}
               listing={listing}
@@ -176,6 +189,16 @@ export default function BuyerDiscoverPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-8"
+        />
       )}
 
       <PropertyDetailModal

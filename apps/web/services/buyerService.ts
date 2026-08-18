@@ -1,4 +1,4 @@
-import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   BuyerPropertyListing,
   ViewingRequest,
@@ -120,6 +120,8 @@ export interface DiscoverFilters {
   propertyType?: string;
   sort?: string;
   search?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export const buyerService = {
@@ -129,7 +131,7 @@ export const buyerService = {
   // Discover listings
   discover: (filters: DiscoverFilters = {}) =>
     safeCall(() =>
-      authFetch<BuyerListingApi[]>(
+      authFetch<Paginated<BuyerListingApi>>(
         `/buyer/listings${toQuery({
           city: filters.city,
           state: filters.state,
@@ -139,6 +141,8 @@ export const buyerService = {
           propertyType: filters.propertyType,
           sort: filters.sort,
           search: filters.search,
+          page: filters.page?.toString(),
+          pageSize: filters.pageSize?.toString(),
         })}`
       )
     ),

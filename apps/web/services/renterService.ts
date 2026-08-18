@@ -1,5 +1,5 @@
 import { ApiError } from '@/lib/apiClient';
-import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import { getAuthToken } from '@/lib/authStorage';
 import type { Property, Application, GeoInsights, RenterInspection } from '@/types/renter';
@@ -307,15 +307,24 @@ export interface RenterListingsFilters {
   bathrooms?: string;
   propertyType?: string;
   verifiedOnly?: boolean;
+  page?: number;
+  pageSize?: number;
 }
 
 export const renterService = {
   // ---- Listings ----
-  async listListings(filters: RenterListingsFilters = {}): Promise<ApiResponse<Property[]>> {
-    const { verifiedOnly, ...rest } = filters;
+  async listListings(
+    filters: RenterListingsFilters = {}
+  ): Promise<ApiResponse<Paginated<Property>>> {
+    const { verifiedOnly, page, pageSize, ...rest } = filters;
     return safeCall(() =>
       authFetch(
-        `/renter/listings${toQuery({ ...rest, verifiedOnly: verifiedOnly ? 'true' : undefined })}`
+        `/renter/listings${toQuery({
+          ...rest,
+          verifiedOnly: verifiedOnly ? 'true' : undefined,
+          page: page?.toString(),
+          pageSize: pageSize?.toString(),
+        })}`
       )
     );
   },

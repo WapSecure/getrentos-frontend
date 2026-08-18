@@ -37,10 +37,11 @@ export const DiscoverMapView = ({ filters }: DiscoverMapViewProps) => {
     verifiedOnly: filters.verifiedOnly,
   };
 
-  const { data: properties = [], isLoading } = useQuery({
-    queryKey: renterKeys.listings(listingsFilters),
-    queryFn: () => unwrap(renterService.listListings(listingsFilters)),
+  const { data, isLoading } = useQuery({
+    queryKey: renterKeys.listings({ ...listingsFilters, pageSize: 100 }),
+    queryFn: () => unwrap(renterService.listListings({ ...listingsFilters, pageSize: 100 })),
   });
+  const properties = data?.items ?? [];
 
   const markers: MapMarker[] = properties
     .filter((p: Property) => p.latitude != null && p.longitude != null)
