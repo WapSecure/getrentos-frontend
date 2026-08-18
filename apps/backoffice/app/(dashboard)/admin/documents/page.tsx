@@ -2,13 +2,14 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
 import { formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -32,16 +33,43 @@ const categoryOptions = (Object.keys(categoryLabels) as AdminDocument['category'
 
 type CategoryFilter = 'all' | AdminDocument['category'];
 
+const PAGE_SIZE = 12;
+
 export default function AdminDocumentsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
+  const [page, setPage] = useState(1);
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  const { data: documents = [], isLoading } = useQuery({
-    queryKey: adminKeys.documents(),
-    queryFn: () => unwrap(adminService.listDocuments()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.documents({
+      search: debouncedSearch,
+      category: filter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    queryFn: () =>
+      unwrap(
+        adminService.listDocuments({
+          search: debouncedSearch || undefined,
+          category: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const documents = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const uploadMutation = useMutation({
     mutationFn: (data: UploadedDocumentData) =>
@@ -52,7 +80,7 @@ export default function AdminDocumentsPage() {
           data.file
         )
       ),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.documents() }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'documents'] }),
   });
 
   const handleUpload = (data: UploadedDocumentData) => uploadMutation.mutate(data);
@@ -63,16 +91,6 @@ export default function AdminDocumentsPage() {
       window.open(response.data.url, '_blank');
     }
   };
-
-  const filteredDocuments = useMemo(
-    () =>
-      documents.filter((d) => {
-        const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesFilter = filter === 'all' || d.category === filter;
-        return matchesSearch && matchesFilter;
-      }),
-    [documents, searchQuery, filter]
-  );
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -88,8 +106,8 @@ export default function AdminDocumentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">
-            Platform policies, compliance filings, and legal agreements, {documents.length} file
-            {documents.length === 1 ? '' : 's'}
+            Platform policies, compliance filings, and legal agreements, {total} file
+            {total === 1 ? '' : 's'}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setUploadOpen(true)}>
@@ -104,7 +122,10 @@ export default function AdminDocumentsPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search documents..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -113,7 +134,10 @@ export default function AdminDocumentsPage() {
           {categoryFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={cn(
                 'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
                 filter === option.value
@@ -131,11 +155,11 @@ export default function AdminDocumentsPage() {
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : filteredDocuments.length === 0 ? (
+      ) : documents.length === 0 ? (
         <EmptyState icon={FolderOpen} title="No documents found" />
       ) : (
         <div className="bg-card border border-border rounded-lg divide-y divide-border overflow-hidden">
-          {filteredDocuments.map((doc) => (
+          {documents.map((doc) => (
             <div
               key={doc.id}
               className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
@@ -154,6 +178,16 @@ export default function AdminDocumentsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <DocumentUploadDialog

@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
 import { DisputeResolutionModal } from '@/components/admin/disputes/DisputeResolutionModal';
 import { EmptyState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -17,17 +18,46 @@ import type { DisputeCategory, DisputeMessage, DisputeStatus } from '@/types/adm
 type StatusFilter = 'all' | DisputeStatus;
 type CategoryFilter = 'all' | DisputeCategory;
 
+const PAGE_SIZE = 12;
+
 export default function AdminDisputesPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+  const [page, setPage] = useState(1);
   const [activeDisputeId, setActiveDisputeId] = useState<string | null>(null);
 
-  const { data: disputes = [], isLoading } = useQuery({
-    queryKey: adminKeys.disputes(),
-    queryFn: () => unwrap(adminService.listDisputes()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.disputes({
+      search: debouncedSearch,
+      status: statusFilter,
+      category: categoryFilter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    queryFn: () =>
+      unwrap(
+        adminService.listDisputes({
+          search: debouncedSearch || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          category: categoryFilter === 'all' ? undefined : categoryFilter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const disputes = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const { data: activeDisputeMessages = [] } = useQuery({
     queryKey: adminKeys.disputeMessages(activeDisputeId ?? ''),
@@ -38,7 +68,7 @@ export default function AdminDisputesPage() {
   const activeDispute = disputes.find((d) => d.id === activeDisputeId) || null;
 
   const invalidateDisputes = () =>
-    queryClient.invalidateQueries({ queryKey: adminKeys.disputes() });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'disputes'] });
 
   const resolveMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.resolveDispute(id)),
@@ -85,24 +115,16 @@ export default function AdminDisputesPage() {
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
   const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
 
-  const filteredDisputes = useMemo(
-    () =>
-      disputes.filter((d) => {
-        const matchesSearch =
-          d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          d.raisedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          d.against.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || d.status === statusFilter;
-        const matchesCategory = categoryFilter === 'all' || d.category === categoryFilter;
-        return matchesSearch && matchesStatus && matchesCategory;
-      }),
-    [disputes, searchQuery, statusFilter, categoryFilter]
-  );
-
-  const activeDisputeCount = useMemo(
-    () => disputes.filter((d) => d.status === 'open' || d.status === 'under_review').length,
-    [disputes]
-  );
+  const { data: openDisputes } = useQuery({
+    queryKey: ['admin', 'disputes', 'count', 'open'],
+    queryFn: () => unwrap(adminService.listDisputes({ status: 'open', page: 1, pageSize: 1 })),
+  });
+  const { data: underReviewDisputes } = useQuery({
+    queryKey: ['admin', 'disputes', 'count', 'under_review'],
+    queryFn: () =>
+      unwrap(adminService.listDisputes({ status: 'under_review', page: 1, pageSize: 1 })),
+  });
+  const activeDisputeCount = (openDisputes?.total ?? 0) + (underReviewDisputes?.total ?? 0);
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -136,14 +158,20 @@ export default function AdminDisputesPage() {
           <Input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by title or party..."
             leadingIcon={<Search className="h-4 w-4" />}
           />
         </div>
         <Select
           value={categoryFilter}
-          onValueChange={(value) => setCategoryFilter(value as CategoryFilter)}
+          onValueChange={(value) => {
+            setCategoryFilter(value as CategoryFilter);
+            setPage(1);
+          }}
           options={categoryOptions}
           className="w-full sm:w-48"
         />
@@ -153,7 +181,10 @@ export default function AdminDisputesPage() {
         {statusOptions.map((option) => (
           <button
             key={option.value}
-            onClick={() => setStatusFilter(option.value)}
+            onClick={() => {
+              setStatusFilter(option.value);
+              setPage(1);
+            }}
             className={cn(
               'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
               statusFilter === option.value
@@ -170,11 +201,11 @@ export default function AdminDisputesPage() {
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : filteredDisputes.length === 0 ? (
+      ) : disputes.length === 0 ? (
         <EmptyState icon={Gavel} title="No disputes match your filters" />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredDisputes.map((dispute, index) => (
+          {disputes.map((dispute, index) => (
             <DisputeCard
               key={dispute.id}
               dispute={dispute}
@@ -183,6 +214,16 @@ export default function AdminDisputesPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <DisputeResolutionModal

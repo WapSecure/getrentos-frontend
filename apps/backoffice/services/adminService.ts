@@ -59,6 +59,15 @@ export interface PaginatedAuditLogs {
   limit: number;
 }
 
+/** Standard server-side paginated envelope ({ items, total, page, pageSize, totalPages }). */
+export interface Paginated<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 /** Raw staff rows as returned by the backend (enums are uppercase). */
@@ -230,9 +239,22 @@ export const adminService = {
 
   // ---- Users ----
   async listUsers(
-    params: { search?: string; status?: string; role?: string } = {}
-  ): Promise<ApiResponse<PlatformUser[]>> {
-    return safeCall(() => authFetch(`/admin/users${toQuery(params)}`));
+    params: {
+      search?: string;
+      status?: string;
+      role?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<PlatformUser>>> {
+    const query = toQuery({
+      search: params.search,
+      status: params.status,
+      role: params.role,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/users${query}`));
   },
 
   async updateUserStatus(
@@ -249,9 +271,22 @@ export const adminService = {
 
   // ---- Verifications ----
   async listVerifications(
-    params: { search?: string; status?: string; type?: string } = {}
-  ): Promise<ApiResponse<VerificationRequest[]>> {
-    return safeCall(() => authFetch(`/admin/verifications${toQuery(params)}`));
+    params: {
+      search?: string;
+      status?: string;
+      type?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<VerificationRequest>>> {
+    const query = toQuery({
+      search: params.search,
+      status: params.status,
+      type: params.type,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/verifications${query}`));
   },
 
   async approveVerification(id: string): Promise<ApiResponse<void>> {
@@ -278,9 +313,22 @@ export const adminService = {
 
   // ---- Disputes ----
   async listDisputes(
-    params: { search?: string; status?: string; category?: string } = {}
-  ): Promise<ApiResponse<Dispute[]>> {
-    return safeCall(() => authFetch(`/admin/disputes${toQuery(params)}`));
+    params: {
+      search?: string;
+      status?: string;
+      category?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<Dispute>>> {
+    const query = toQuery({
+      search: params.search,
+      status: params.status,
+      category: params.category,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/disputes${query}`));
   },
 
   async getDisputeMessages(disputeId: string): Promise<ApiResponse<DisputeMessage[]>> {
@@ -311,9 +359,22 @@ export const adminService = {
 
   // ---- Fraud alerts ----
   async listFraudAlerts(
-    params: { search?: string; status?: string; severity?: string } = {}
-  ): Promise<ApiResponse<FraudAlert[]>> {
-    return safeCall(() => authFetch(`/admin/fraud-alerts${toQuery(params)}`));
+    params: {
+      search?: string;
+      status?: string;
+      severity?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<FraudAlert>>> {
+    const query = toQuery({
+      search: params.search,
+      status: params.status,
+      severity: params.severity,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/fraud-alerts${query}`));
   },
 
   async updateFraudAlertStatus(
@@ -330,9 +391,22 @@ export const adminService = {
 
   // ---- Escrow oversight ----
   async listEscrowTransactions(
-    params: { search?: string; status?: string } = {}
-  ): Promise<ApiResponse<PlatformEscrowTransaction[]>> {
-    return safeCall(() => authFetch(`/admin/escrow${toQuery(params)}`));
+    params: {
+      search?: string;
+      status?: string;
+      flagged?: boolean;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<PlatformEscrowTransaction>>> {
+    const query = toQuery({
+      search: params.search,
+      status: params.status,
+      flagged: params.flagged === undefined ? undefined : String(params.flagged),
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/escrow${query}`));
   },
 
   async toggleEscrowFlag(
@@ -363,9 +437,15 @@ export const adminService = {
 
   // ---- Documents ----
   async listDocuments(
-    params: { search?: string; category?: string } = {}
-  ): Promise<ApiResponse<AdminDocument[]>> {
-    return safeCall(() => authFetch(`/admin/documents${toQuery(params)}`));
+    params: { search?: string; category?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminDocument>>> {
+    const query = toQuery({
+      search: params.search,
+      category: params.category,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/documents${query}`));
   },
 
   async uploadDocument(
@@ -385,8 +465,15 @@ export const adminService = {
   },
 
   // ---- Messages ----
-  async listConversations(params: { search?: string } = {}): Promise<ApiResponse<Conversation[]>> {
-    return safeCall(() => authFetch(`/admin/messages/conversations${toQuery(params)}`));
+  async listConversations(
+    params: { search?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Conversation>>> {
+    const query = toQuery({
+      search: params.search,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/messages/conversations${query}`));
   },
 
   async getConversationMessages(conversationId: string): Promise<ApiResponse<ThreadMessage[]>> {

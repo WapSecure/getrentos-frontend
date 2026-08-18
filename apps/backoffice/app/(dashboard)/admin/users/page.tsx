@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
@@ -45,21 +45,47 @@ const PAGE_SIZE = 10;
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [activeUser, setActiveUser] = useState<PlatformUser | null>(null);
   const [page, setPage] = useState(1);
 
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: adminKeys.users(),
-    queryFn: () => unwrap(adminService.listUsers()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.users({
+      search: debouncedSearch,
+      status: statusFilter,
+      role: roleFilter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    queryFn: () =>
+      unwrap(
+        adminService.listUsers({
+          search: debouncedSearch || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          role: roleFilter === 'all' ? undefined : roleFilter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const users = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const changeStatusMutation = useMutation({
     mutationFn: ({ userId, status }: { userId: string; status: UserAccountStatus }) =>
       unwrap(adminService.updateUserStatus(userId, status)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setActiveUser(null);
     },
   });
@@ -68,24 +94,6 @@ export default function AdminUsersPage() {
     if (status === 'pending') return;
     changeStatusMutation.mutate({ userId, status });
   };
-
-  const filteredUsers = useMemo(
-    () =>
-      users.filter((u) => {
-        const matchesSearch =
-          u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          u.email.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
-        const matchesRole = roleFilter === 'all' || u.roles.includes(roleFilter);
-        return matchesSearch && matchesStatus && matchesRole;
-      }),
-    [users, searchQuery, statusFilter, roleFilter]
-  );
-
-  const pagedUsers = useMemo(
-    () => filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredUsers, page]
-  );
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -167,7 +175,7 @@ export default function AdminUsersPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Users</h1>
         <p className="text-muted-foreground mt-1">
-          {users.length} user{users.length === 1 ? '' : 's'} across the platform
+          {total} user{total === 1 ? '' : 's'} across the platform
         </p>
       </div>
 
@@ -214,19 +222,14 @@ export default function AdminUsersPage() {
 
       <DataTable
         columns={columns}
-        data={pagedUsers}
+        data={users}
         isLoading={isLoading}
         getRowKey={(u) => u.id}
         onRowClick={(u) => setActiveUser(u)}
         emptyState={<EmptyState icon={Users} title="No users match your filters" />}
         footer={
-          filteredUsers.length > 0 && (
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              total={filteredUsers.length}
-              onPageChange={setPage}
-            />
+          total > 0 && (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
           )
         }
       />

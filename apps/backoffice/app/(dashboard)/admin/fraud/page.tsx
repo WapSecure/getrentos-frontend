@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldAlert } from 'lucide-react';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { EmptyState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -16,21 +17,50 @@ import type { FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 type StatusFilter = 'all' | FraudAlertStatus;
 type SeverityFilter = 'all' | FraudAlertSeverity;
 
+const PAGE_SIZE = 12;
+
 export default function AdminFraudPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
+  const [page, setPage] = useState(1);
 
-  const { data: alerts = [], isLoading } = useQuery({
-    queryKey: adminKeys.fraudAlerts(),
-    queryFn: () => unwrap(adminService.listFraudAlerts()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.fraudAlerts({
+      search: debouncedSearch,
+      status: statusFilter,
+      severity: severityFilter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    queryFn: () =>
+      unwrap(
+        adminService.listFraudAlerts({
+          search: debouncedSearch || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          severity: severityFilter === 'all' ? undefined : severityFilter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const alerts = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus }) =>
       unwrap(adminService.updateFraudAlertStatus(id, status)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.fraudAlerts() }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] }),
   });
 
   const updateStatus = (id: string, status: FraudAlertStatus) => {
@@ -38,20 +68,12 @@ export default function AdminFraudPage() {
     updateStatusMutation.mutate({ id, status });
   };
 
-  const filteredAlerts = useMemo(
-    () =>
-      alerts.filter((a) => {
-        const matchesSearch =
-          a.subjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          a.relatedEntity.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
-        const matchesSeverity = severityFilter === 'all' || a.severity === severityFilter;
-        return matchesSearch && matchesStatus && matchesSeverity;
-      }),
-    [alerts, searchQuery, statusFilter, severityFilter]
-  );
-
-  const flaggedCount = useMemo(() => alerts.filter((a) => a.status === 'flagged').length, [alerts]);
+  const { data: flaggedData } = useQuery({
+    queryKey: ['admin', 'fraudAlerts', 'count', 'flagged'],
+    queryFn: () =>
+      unwrap(adminService.listFraudAlerts({ status: 'flagged', page: 1, pageSize: 1 })),
+  });
+  const flaggedCount = flaggedData?.total ?? 0;
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -83,14 +105,20 @@ export default function AdminFraudPage() {
           <Input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by subject or entity..."
             leadingIcon={<Search className="h-4 w-4" />}
           />
         </div>
         <Select
           value={severityFilter}
-          onValueChange={(value) => setSeverityFilter(value as SeverityFilter)}
+          onValueChange={(value) => {
+            setSeverityFilter(value as SeverityFilter);
+            setPage(1);
+          }}
           options={severityOptions}
           className="w-full sm:w-48"
         />
@@ -100,7 +128,10 @@ export default function AdminFraudPage() {
         {statusOptions.map((option) => (
           <button
             key={option.value}
-            onClick={() => setStatusFilter(option.value)}
+            onClick={() => {
+              setStatusFilter(option.value);
+              setPage(1);
+            }}
             className={cn(
               'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
               statusFilter === option.value
@@ -117,11 +148,11 @@ export default function AdminFraudPage() {
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : filteredAlerts.length === 0 ? (
+      ) : alerts.length === 0 ? (
         <EmptyState icon={ShieldAlert} title="No alerts match your filters" />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredAlerts.map((alert, index) => (
+          {alerts.map((alert, index) => (
             <FraudAlertCard
               key={alert.id}
               alert={alert}
@@ -132,6 +163,16 @@ export default function AdminFraudPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
     </>
   );

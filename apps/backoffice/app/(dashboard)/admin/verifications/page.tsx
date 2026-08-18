@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
 import { EmptyState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -21,20 +22,49 @@ import type {
 type StatusFilter = 'all' | VerificationRequestStatus;
 type TypeFilter = 'all' | VerificationRequestType;
 
+const PAGE_SIZE = 12;
+
 export default function AdminVerificationsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [page, setPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
 
-  const { data: requests = [], isLoading } = useQuery({
-    queryKey: adminKeys.verifications(),
-    queryFn: () => unwrap(adminService.listVerifications()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.verifications({
+      search: debouncedSearch,
+      status: statusFilter,
+      type: typeFilter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    queryFn: () =>
+      unwrap(
+        adminService.listVerifications({
+          search: debouncedSearch || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          type: typeFilter === 'all' ? undefined : typeFilter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const requests = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidateRequests = () =>
-    queryClient.invalidateQueries({ queryKey: adminKeys.verifications() });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'verifications'] });
 
   const closeModalAndRefresh = () => {
     invalidateRequests();
@@ -63,23 +93,12 @@ export default function AdminVerificationsPage() {
   const handleRequestClarification = (id: string, reason: string) =>
     requestClarificationMutation.mutate({ id, reason });
 
-  const filteredRequests = useMemo(
-    () =>
-      requests.filter((r) => {
-        const matchesSearch =
-          r.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.subjectLabel.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-        const matchesType = typeFilter === 'all' || r.type === typeFilter;
-        return matchesSearch && matchesStatus && matchesType;
-      }),
-    [requests, searchQuery, statusFilter, typeFilter]
-  );
-
-  const pendingReviewCount = useMemo(
-    () => requests.filter((r) => r.status === 'pending_review').length,
-    [requests]
-  );
+  const { data: pendingData } = useQuery({
+    queryKey: ['admin', 'verifications', 'pending-count'],
+    queryFn: () =>
+      unwrap(adminService.listVerifications({ status: 'pending_review', page: 1, pageSize: 1 })),
+  });
+  const pendingReviewCount = pendingData?.total ?? 0;
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -110,14 +129,20 @@ export default function AdminVerificationsPage() {
           <Input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by applicant or subject..."
             leadingIcon={<Search className="h-4 w-4" />}
           />
         </div>
         <Select
           value={typeFilter}
-          onValueChange={(value) => setTypeFilter(value as TypeFilter)}
+          onValueChange={(value) => {
+            setTypeFilter(value as TypeFilter);
+            setPage(1);
+          }}
           options={typeOptions}
           className="w-full sm:w-44"
         />
@@ -127,7 +152,10 @@ export default function AdminVerificationsPage() {
         {statusOptions.map((option) => (
           <button
             key={option.value}
-            onClick={() => setStatusFilter(option.value)}
+            onClick={() => {
+              setStatusFilter(option.value);
+              setPage(1);
+            }}
             className={cn(
               'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
               statusFilter === option.value
@@ -144,11 +172,11 @@ export default function AdminVerificationsPage() {
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : filteredRequests.length === 0 ? (
+      ) : requests.length === 0 ? (
         <EmptyState icon={ShieldCheck} title="No requests match your filters" />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredRequests.map((request, index) => (
+          {requests.map((request, index) => (
             <VerificationRequestCard
               key={request.id}
               request={request}
@@ -157,6 +185,16 @@ export default function AdminVerificationsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <ReviewVerificationModal

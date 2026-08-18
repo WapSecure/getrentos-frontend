@@ -2,7 +2,7 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Landmark, Flag } from 'lucide-react';
 import { DataTable, type Column } from '@getrentos/ui';
@@ -32,18 +32,49 @@ const PAGE_SIZE = 10;
 export default function AdminEscrowPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: adminKeys.escrowTransactions(),
-    queryFn: () => unwrap(adminService.listEscrowTransactions()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.escrowTransactions({
+      search: debouncedSearch,
+      status: statusFilter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    queryFn: () =>
+      unwrap(
+        adminService.listEscrowTransactions({
+          search: debouncedSearch || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const transactions = data?.items ?? [];
+  const total = data?.total ?? 0;
+
+  const { data: flaggedData } = useQuery({
+    queryKey: ['admin', 'escrow', 'flagged-count'],
+    queryFn: () =>
+      unwrap(adminService.listEscrowTransactions({ flagged: true, page: 1, pageSize: 1 })),
+  });
+  const flaggedCount = flaggedData?.total ?? 0;
 
   const toggleFlagMutation = useMutation({
     mutationFn: ({ id, flagged }: { id: string; flagged: boolean }) =>
       unwrap(adminService.toggleEscrowFlag(id, flagged)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.escrowTransactions() }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'escrow'] }),
   });
 
   const toggleFlag = (id: string) => {
@@ -51,26 +82,6 @@ export default function AdminEscrowPage() {
     if (!current) return;
     toggleFlagMutation.mutate({ id, flagged: !current.flagged });
   };
-
-  const filteredTransactions = useMemo(
-    () =>
-      transactions.filter((t) => {
-        const matchesSearch =
-          t.propertyTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          t.buyerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          t.sellerName.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
-        return matchesSearch && matchesStatus;
-      }),
-    [transactions, searchQuery, statusFilter]
-  );
-
-  const pagedTransactions = useMemo(
-    () => filteredTransactions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredTransactions, page]
-  );
-
-  const flaggedCount = useMemo(() => transactions.filter((t) => t.flagged).length, [transactions]);
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -192,19 +203,14 @@ export default function AdminEscrowPage() {
 
       <DataTable
         columns={columns}
-        data={pagedTransactions}
+        data={transactions}
         isLoading={isLoading}
         getRowKey={(t) => t.id}
         getRowClassName={(t) => (t.flagged ? 'bg-red-50/50 dark:bg-red-900/10' : undefined)}
         emptyState={<EmptyState icon={Landmark} title="No transactions match your filters" />}
         footer={
-          filteredTransactions.length > 0 && (
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              total={filteredTransactions.length}
-              onPageChange={setPage}
-            />
+          total > 0 && (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
           )
         }
       />
