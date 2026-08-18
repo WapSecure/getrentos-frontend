@@ -1,0 +1,146 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Megaphone, Plus } from 'lucide-react';
+import { Button, EmptyState } from '@getrentos/ui';
+import { estateService } from '@/services/estateService';
+import { unwrap } from '@/lib/apiHelpers';
+import { estateKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
+import { AnnouncementModal } from '@/components/estate/announcements/AnnouncementModal';
+import { AnnouncementCard } from '@/components/estate/announcements/AnnouncementCard';
+import type { Announcement } from '@/types/estate';
+
+export default function EstateAnnouncementsPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+
+  const { data: estate, isLoading: isEstateLoading } = useQuery({
+    queryKey: estateKeys.myEstate,
+    queryFn: () => unwrap(estateService.getMyEstate()),
+  });
+
+  const { data: announcements = [], isLoading: isAnnouncementsLoading } = useQuery({
+    queryKey: estateKeys.announcements(estate?.id ?? ''),
+    queryFn: () => unwrap(estateService.listAnnouncements(estate!.id)),
+    enabled: !!estate,
+  });
+
+  const invalidate = () => {
+    if (!estate) return;
+    queryClient.invalidateQueries({ queryKey: estateKeys.announcements(estate.id) });
+  };
+
+  const createAnnouncement = useMutation({
+    mutationFn: (data: { title: string; body: string; priority?: 'NORMAL' | 'URGENT' }) =>
+      unwrap(estateService.createAnnouncement(estate!.id, data)),
+    onSuccess: () => {
+      invalidate();
+      setIsModalOpen(false);
+    },
+  });
+
+  const updateAnnouncement = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { title: string; body: string; priority?: 'NORMAL' | 'URGENT' };
+    }) => unwrap(estateService.updateAnnouncement(estate!.id, id, data)),
+    onSuccess: () => {
+      invalidate();
+      setIsModalOpen(false);
+      setEditingAnnouncement(null);
+    },
+  });
+
+  const removeAnnouncement = useMutation({
+    mutationFn: (id: string) => unwrap(estateService.removeAnnouncement(estate!.id, id)),
+    onSuccess: invalidate,
+  });
+
+  if (isEstateLoading) {
+    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+  }
+
+  if (!estate) {
+    router.replace(ROUTES.ESTATE_SETUP);
+    return null;
+  }
+
+  const handleSubmit = (data: { title: string; body: string; priority: 'NORMAL' | 'URGENT' }) => {
+    if (editingAnnouncement) {
+      updateAnnouncement.mutate({ id: editingAnnouncement.id, data });
+    } else {
+      createAnnouncement.mutate(data);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
+          <p className="text-muted-foreground mt-1">
+            {announcements.length} announcement{announcements.length === 1 ? '' : 's'} in{' '}
+            {estate.name}
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          className="gap-2"
+          onClick={() => {
+            setEditingAnnouncement(null);
+            setIsModalOpen(true);
+          }}
+        >
+          <Plus className="w-4 h-4" />
+          New Announcement
+        </Button>
+      </div>
+
+      {isAnnouncementsLoading ? (
+        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+      ) : announcements.length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border p-12">
+          <EmptyState
+            icon={Megaphone}
+            title="No announcements yet"
+            description="Post a notice for all households in this estate to see."
+          />
+        </div>
+      ) : (
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+          {announcements.map((announcement) => (
+            <AnnouncementCard
+              key={announcement.id}
+              announcement={announcement}
+              onEdit={() => {
+                setEditingAnnouncement(announcement);
+                setIsModalOpen(true);
+              }}
+              onRemove={() => removeAnnouncement.mutate(announcement.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      <AnnouncementModal
+        key={editingAnnouncement?.id ?? 'new'}
+        isOpen={isModalOpen}
+        announcement={editingAnnouncement}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingAnnouncement(null);
+        }}
+        onSubmit={handleSubmit}
+        isSubmitting={createAnnouncement.isPending || updateAnnouncement.isPending}
+      />
+    </>
+  );
+}

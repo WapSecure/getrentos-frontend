@@ -67,3 +67,15 @@ export interface StaffMember {
   email: string;
   addedAt: string;
 }
+
+export type AnnouncementPriority = 'normal' | 'urgent';
+
+export interface Announcement {
+  id: string;
+  estateId: string;
+  title: string;
+  body: string;
+  priority: AnnouncementPriority;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -7,6 +7,7 @@ import type {
   VisitorPass,
   IssuedVisitorPass,
   StaffMember,
+  Announcement,
 } from '@/types/estate';
 
 export const estateService = {
@@ -139,6 +140,38 @@ export const estateService = {
   async removeGateman(estateId: string, memberUserId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/staff/${memberUserId}`, { method: 'DELETE' })
+    );
+  },
+
+  async createAnnouncement(
+    estateId: string,
+    data: { title: string; body: string; priority?: 'NORMAL' | 'URGENT' }
+  ): Promise<ApiResponse<Announcement>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/announcements`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listAnnouncements(estateId: string): Promise<ApiResponse<Announcement[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/announcements`));
+  },
+
+  async updateAnnouncement(
+    estateId: string,
+    announcementId: string,
+    data: Partial<{ title: string; body: string; priority: 'NORMAL' | 'URGENT' }>
+  ): Promise<ApiResponse<Announcement>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/announcements/${announcementId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async removeAnnouncement(estateId: string, announcementId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/announcements/${announcementId}`, { method: 'DELETE' })
     );
   },
 };
