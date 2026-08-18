@@ -29,7 +29,7 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.sale_listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },

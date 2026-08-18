@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RefreshCcw } from 'lucide-react';
+import { X, RefreshCcw, TriangleAlert } from 'lucide-react';
 import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
-import type { Lease } from '@/types/landlord';
+import { landlordService } from '@/services/landlordService';
+import type { Lease, RentIncreaseCheck } from '@/types/landlord';
 
 interface RenewalOfferModalProps {
   lease: Lease | null;
@@ -24,8 +25,24 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
     lease ? String(Math.round(lease.rentAmount * 1.05)) : ''
   );
   const [newEndDate, setNewEndDate] = useState(() => (lease ? addOneYear(lease.leaseEnd) : ''));
+  const [check, setCheck] = useState<{ rentAmount: string; result: RentIncreaseCheck } | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!lease || !newRent) return;
+    const timer = setTimeout(() => {
+      landlordService.previewRenewalCheck(lease.id, Number(newRent)).then((response) => {
+        if (response.success && response.data)
+          setCheck({ rentAmount: newRent, result: response.data });
+      });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [lease, newRent]);
 
   if (!lease) return null;
+
+  const activeCheck = check && check.rentAmount === newRent ? check.result : null;
 
   const increasePct = newRent
     ? (((Number(newRent) - lease.rentAmount) / lease.rentAmount) * 100).toFixed(1)
@@ -69,13 +86,27 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
                   prefix="₦"
                   value={newRent}
                   onValueChange={(v) => setNewRent(v === 0 ? '' : String(v))}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   {Number(increasePct) >= 0 ? '+' : ''}
                   {increasePct}% vs current rent
                 </p>
               </div>
+
+              {activeCheck && (
+                <div
+                  className={`p-3 rounded-lg border flex gap-2 text-xs ${
+                    activeCheck.exceedsGuidance
+                      ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-300'
+                      : 'bg-gray-50 dark:bg-white/5 border-border text-muted-foreground'
+                  }`}
+                >
+                  {activeCheck.exceedsGuidance && (
+                    <TriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                  )}
+                  <p>{activeCheck.advisory}</p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">

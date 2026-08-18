@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileCheck, Download, RefreshCcw, Send } from 'lucide-react';
+import { FileCheck, Download, PenLine, RefreshCcw, Send } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useState } from 'react';
@@ -19,9 +19,16 @@ interface LeaseCardProps {
   delay?: number;
   onSendLease: (id: string) => void;
   onRequestRenewal: (lease: Lease) => void;
+  onSignLease: (lease: Lease) => void;
 }
 
-export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: LeaseCardProps) => {
+export const LeaseCard = ({
+  lease,
+  delay = 0,
+  onSendLease,
+  onRequestRenewal,
+  onSignLease,
+}: LeaseCardProps) => {
   const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
@@ -90,8 +97,16 @@ export const LeaseCard = ({ lease, delay = 0, onSendLease, onRequestRenewal }: L
           </Button>
         )}
         {lease.status === 'sent' && (
-          <Button variant="outline" size="sm" fullWidth disabled className="gap-1.5">
-            Awaiting Signature
+          <Button
+            variant={lease.landlordSigned ? 'outline' : 'primary'}
+            size="sm"
+            fullWidth
+            disabled={lease.landlordSigned}
+            className="gap-1.5"
+            onClick={() => onSignLease(lease)}
+          >
+            <PenLine className="w-3.5 h-3.5" />
+            {lease.landlordSigned ? 'Waiting on tenant' : 'Sign Lease'}
           </Button>
         )}
         {lease.status === 'signed' && (

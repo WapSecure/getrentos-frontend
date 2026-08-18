@@ -10,7 +10,12 @@ import {
   PlayCircle,
 } from 'lucide-react';
 import type { BadgeVariant } from '@getrentos/ui';
-import type { RentPaymentStatus, EscrowStatus, LeaseStatus } from '@/types/landlord';
+import type {
+  RentPaymentStatus,
+  EscrowStatus,
+  LeaseStatus,
+  EvictionStatus,
+} from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
 import type { OfferStatus } from '@/types/owner';
 import type { TaskStatus } from '@/types/agent';
@@ -46,6 +51,14 @@ export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {
   sent: { label: 'Sent', variant: 'info' },
   signed: { label: 'Signed', variant: 'success' },
   expired: { label: 'Expired', variant: 'danger' },
+};
+
+export const evictionStatusBadges: Record<EvictionStatus, StatusBadgeEntry> = {
+  draft: { label: 'Draft', variant: 'neutral' },
+  issued: { label: 'Notice issued', variant: 'warning' },
+  filed: { label: 'Filed', variant: 'info' },
+  resolved: { label: 'Resolved', variant: 'success' },
+  withdrawn: { label: 'Withdrawn', variant: 'neutral' },
 };
 
 export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry> = {

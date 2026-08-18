@@ -28,6 +28,7 @@ export * from './hooks/useSessionTimeout';
 export * from './SaveButton';
 export * from './SectionHeader';
 export * from './Select';
+export * from './SignaturePad';
 export * from './Skeleton';
 export * from './StatCard';
 export * from './Switch';

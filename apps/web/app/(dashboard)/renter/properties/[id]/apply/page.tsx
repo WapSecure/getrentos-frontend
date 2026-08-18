@@ -31,6 +31,12 @@ const buildInitialData = (
   moveInDate: property?.availableFrom || '',
   leaseTerm: '12 months',
   notes: '',
+  nextOfKinName: '',
+  nextOfKinPhone: '',
+  nextOfKinRelationship: '',
+  referenceName: '',
+  referencePhone: '',
+  referenceRelationship: '',
   documents: [
     { name: 'Government ID', uploaded: false, required: true },
     { name: 'Proof of Income', uploaded: false, required: true },

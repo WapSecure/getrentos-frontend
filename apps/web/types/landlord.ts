@@ -82,6 +82,45 @@ export interface Lease {
   rentAmount: number;
   securityDeposit?: number;
   status: LeaseStatus;
+  tenantSigned: boolean;
+  landlordSigned: boolean;
+  createdAt: string;
+}
+
+export interface TenancyStanding {
+  shared: boolean;
+  trustScore?: number;
+  signedLeaseCount?: number;
+  identityVerified?: boolean;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+}
+
+export interface RentIncreaseCheck {
+  increasePercent: number;
+  exceedsGuidance: boolean;
+  maxAnnualIncreasePercent: number | null;
+  minNoticeDays: number;
+  advisory: string;
+  source: string;
+}
+
+export type EvictionStatus = 'draft' | 'issued' | 'filed' | 'resolved' | 'withdrawn';
+
+export interface EvictionCase {
+  id: string;
+  leaseId: string;
+  propertyId: string;
+  propertyName: string;
+  unitName: string;
+  tenantName: string;
+  reason: string;
+  status: EvictionStatus;
+  noticeIssuedAt?: string;
+  cureDeadline?: string;
+  filedAt?: string;
+  resolvedAt?: string;
+  resolutionNotes?: string;
   createdAt: string;
 }
 
@@ -101,6 +140,10 @@ export interface RentalApplication {
   applicationDate: string;
   status: ApplicationStatus;
   documents: { name: string; uploaded: boolean }[];
+  nextOfKinName?: string;
+  nextOfKinPhone?: string;
+  nextOfKinRelationship?: string;
+  references: { name: string; phone: string; relationship: string }[];
 }
 
 export interface RentPayment {

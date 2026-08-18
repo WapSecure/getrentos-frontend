@@ -20,6 +20,7 @@ export type TranslationKey =
   | 'sidebar.maintenance'
   | 'sidebar.messages'
   | 'sidebar.documents'
+  | 'sidebar.legal_resources'
   | 'sidebar.roommates'
   | 'sidebar.trust_score'
   | 'sidebar.credit_report'
@@ -44,6 +45,7 @@ export type TranslationKey =
   | 'sidebar.financials'
   | 'sidebar.owner_statements'
   | 'sidebar.arrears'
+  | 'sidebar.evictions'
   | 'sidebar.sale_listings'
   | 'sidebar.buyer_leads'
   | 'sidebar.investment_analytics'
@@ -104,6 +106,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.maintenance': 'Maintenance',
     'sidebar.messages': 'Messages',
     'sidebar.documents': 'Documents',
+    'sidebar.legal_resources': 'Legal Resources',
     'sidebar.roommates': 'Roommates',
     'sidebar.trust_score': 'Trust Score',
     'sidebar.credit_report': 'Credit Report',
@@ -128,6 +131,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.financials': 'Financials',
     'sidebar.owner_statements': 'Owner Statements',
     'sidebar.arrears': 'Arrears',
+    'sidebar.evictions': 'Evictions',
     'sidebar.sale_listings': 'Sale Listings',
     'sidebar.buyer_leads': 'Buyer Leads',
     'sidebar.investment_analytics': 'Investment Analytics',
@@ -187,6 +191,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.maintenance': 'Repair Matter',
     'sidebar.messages': 'Message Dem',
     'sidebar.documents': 'Paper Dem',
+    'sidebar.legal_resources': 'Law Matter',
     'sidebar.roommates': 'House People',
     'sidebar.trust_score': 'Trust Score',
     'sidebar.credit_report': 'Credit Report',
@@ -211,6 +216,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.financials': 'Money Matter',
     'sidebar.owner_statements': 'Owner Statement Dem',
     'sidebar.arrears': 'Rent Wey Dem Owe',
+    'sidebar.evictions': 'Comot-For-House Case',
     'sidebar.sale_listings': 'House Wey Dey Sale',
     'sidebar.buyer_leads': 'Buyer Wey Fit Buy',
     'sidebar.investment_analytics': 'Investment Analytics',

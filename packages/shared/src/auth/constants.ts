@@ -84,6 +84,26 @@ export const ROLES = {
     order: 6,
     dashboardRoute: '/agent/dashboard',
   },
+  ESTATE: {
+    id: 'estate',
+    name: 'Estate Manager',
+    description: 'Manage a gated community — households, dues, and access.',
+    icon: 'Briefcase',
+    requiresVerification: ['identity'],
+    canAddLater: true,
+    order: 7,
+    dashboardRoute: '/estate/dashboard',
+  },
+  GATEMAN: {
+    id: 'gateman',
+    name: 'Gateman',
+    description: 'Verify visitor passes at the estate gate.',
+    icon: 'ShieldCheck',
+    requiresVerification: [],
+    canAddLater: false,
+    order: 8,
+    dashboardRoute: '/gateman/verify',
+  },
   ADMIN: {
     id: 'admin',
     name: 'Admin',
@@ -91,7 +111,7 @@ export const ROLES = {
     icon: 'Shield',
     requiresVerification: ['identity'],
     canAddLater: false,
-    order: 7,
+    order: 9,
     dashboardRoute: '/admin/dashboard',
   },
 } as const;
@@ -166,6 +186,14 @@ export const ROUTES = {
   REALTOR_DASHBOARD: '/realtor/dashboard',
   AGENT_DASHBOARD: '/agent/dashboard',
   ADMIN_DASHBOARD: '/admin/dashboard',
+  ESTATE_DASHBOARD: '/estate/dashboard',
+  ESTATE_SETUP: '/estate/setup',
+  ESTATE_HOUSEHOLDS: '/estate/households',
+  ESTATE_DUES: '/estate/dues',
+  ESTATE_VISITOR_PASSES: '/estate/visitor-passes',
+  ESTATE_STAFF: '/estate/staff',
+  ESTATE_ANNOUNCEMENTS: '/estate/announcements',
+  GATEMAN_DASHBOARD: '/gateman/verify',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',
@@ -186,6 +214,7 @@ export const ROUTES = {
   RENTER_NOTIFICATIONS: '/renter/notifications',
   RENTER_HELP: '/renter/help',
   RENTER_HOME: '/renter/home',
+  RENTER_LEGAL_RESOURCES: '/renter/legal-resources',
 
   // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',
@@ -200,6 +229,7 @@ export const ROUTES = {
   LANDLORD_FINANCIALS: '/landlord/financials',
   LANDLORD_OWNER_STATEMENTS: '/landlord/owner-statements',
   LANDLORD_ARREARS: '/landlord/arrears',
+  LANDLORD_EVICTIONS: '/landlord/evictions',
   LANDLORD_DOCUMENTS: '/landlord/documents',
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
@@ -307,6 +337,8 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   PROPERTY_BUYER: 'buyer',
   REALTOR: 'realtor',
   AGENT: 'agent',
+  ESTATE_MANAGER: 'estate',
+  GATEMAN: 'gateman',
   BACKOFFICE_ADMIN: 'admin',
   SUPER_ADMIN: 'admin',
   VERIFICATION_OFFICER: 'admin',
@@ -320,6 +352,8 @@ export const getDashboardRoute = (roleId: string): string => {
     buyer: ROUTES.BUYER_DASHBOARD,
     realtor: ROUTES.REALTOR_DASHBOARD,
     agent: ROUTES.AGENT_DASHBOARD,
+    estate: ROUTES.ESTATE_DASHBOARD,
+    gateman: ROUTES.GATEMAN_DASHBOARD,
     admin: ROUTES.ADMIN_DASHBOARD,
   };
   return roleMap[roleId] || ROUTES.DASHBOARD;

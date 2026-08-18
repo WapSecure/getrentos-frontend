@@ -13,6 +13,9 @@ import type {
   RentPayment,
   Vendor,
   LandlordMaintenanceRequest,
+  EvictionCase,
+  RentIncreaseCheck,
+  TenancyStanding,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -265,6 +268,18 @@ export const landlordService = {
     );
   },
 
+  async bulkUpdateUnitPricing(
+    unitIds: string[],
+    monthlyRent: number
+  ): Promise<ApiResponse<{ updated: number }>> {
+    return safeCall(() =>
+      authFetch('/landlord/units/bulk-price', {
+        method: 'PATCH',
+        body: JSON.stringify({ unitIds, monthlyRent }),
+      })
+    );
+  },
+
   // ---- Listings ----
   async listListings(status?: string): Promise<ApiResponse<Listing[]>> {
     return safeCall(() => authFetch(`/landlord/listings${toQuery({ status })}`));
@@ -316,6 +331,10 @@ export const landlordService = {
     );
   },
 
+  async getTenancyStanding(id: string): Promise<ApiResponse<TenancyStanding>> {
+    return safeCall(() => authFetch(`/landlord/applications/${id}/tenancy-standing`));
+  },
+
   // ---- Leases ----
   async listLeases(status?: string): Promise<ApiResponse<Lease[]>> {
     return safeCall(() => authFetch(`/landlord/leases${toQuery({ status })}`));
@@ -351,6 +370,108 @@ export const landlordService = {
         body: JSON.stringify({ rentAmount, leaseEnd }),
       })
     );
+  },
+
+  async previewRenewalCheck(
+    id: string,
+    rentAmount: number
+  ): Promise<ApiResponse<RentIncreaseCheck>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${id}/renewal-check`, {
+        method: 'POST',
+        body: JSON.stringify({ rentAmount }),
+      })
+    );
+  },
+
+  async signLease(id: string, signatureData: string): Promise<ApiResponse<Lease>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${id}/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ signatureData }),
+      })
+    );
+  },
+
+  async downloadLeasePdf(id: string): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/landlord/leases/${id}/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `lease-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
+  },
+
+  // ---- Evictions ----
+  async listEvictions(): Promise<ApiResponse<EvictionCase[]>> {
+    return safeCall(() => authFetch('/landlord/evictions'));
+  },
+
+  async initiateEviction(leaseId: string, reason: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() =>
+      authFetch('/landlord/evictions', {
+        method: 'POST',
+        body: JSON.stringify({ leaseId, reason }),
+      })
+    );
+  },
+
+  async issueEvictionNotice(id: string, cureDays: number): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/evictions/${id}/issue-notice`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cureDays }),
+      })
+    );
+  },
+
+  async markEvictionFiled(id: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() => authFetch(`/landlord/evictions/${id}/file`, { method: 'PATCH' }));
+  },
+
+  async resolveEviction(id: string, resolutionNotes?: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/evictions/${id}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async withdrawEviction(id: string): Promise<ApiResponse<EvictionCase>> {
+    return safeCall(() => authFetch(`/landlord/evictions/${id}/withdraw`, { method: 'PATCH' }));
+  },
+
+  async downloadEvictionNoticePdf(id: string): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/landlord/evictions/${id}/notice.pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok)
+        throw new ApiError(response.status, 'Failed to download eviction notice PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `eviction-notice-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
   },
 
   // ---- Tenants ----
@@ -401,26 +522,6 @@ export const landlordService = {
       const link = document.createElement('a');
       link.href = url;
       link.download = 'getrentos-financials.csv';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    });
-  },
-
-  async downloadLeasePdf(id: string): Promise<ApiResponse<void>> {
-    return safeCall(async () => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/landlord/leases/${id}/pdf`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `lease-${id}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();

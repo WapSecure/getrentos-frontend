@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ClipboardCheck, CloudOff, Cloud, Camera } from 'lucide-react';
+import { ClipboardCheck, CloudOff, Cloud, Camera, UserCheck } from 'lucide-react';
 import { formatDate } from '@/lib/format';
-import type { PropertyInspection, RoomCondition } from '@/types/agent';
+import type { PropertyInspection, RoomCondition, InspectionType } from '@/types/agent';
 
 const conditionConfig: Record<RoomCondition, { label: string; className: string }> = {
   excellent: {
@@ -19,6 +19,13 @@ const conditionConfig: Record<RoomCondition, { label: string; className: string 
     className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
   },
   poor: { label: 'Poor', className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20' },
+};
+
+const typeConfig: Record<InspectionType, string> = {
+  move_in: 'Move-in',
+  move_out: 'Move-out',
+  periodic: 'Periodic',
+  other: 'Other',
 };
 
 interface InspectionCardProps {
@@ -48,7 +55,9 @@ export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCar
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{inspection.propertyAddress}</h3>
-            <p className="text-xs text-muted-foreground truncate">{inspection.clientName}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {typeConfig[inspection.type]} · {inspection.clientName}
+            </p>
           </div>
         </div>
         <span
@@ -83,11 +92,19 @@ export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCar
 
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
         <p className="text-xs text-gray-400">{formatDate(inspection.scheduledDate)}</p>
-        {condition && (
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${condition.className}`}>
-            {condition.label}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {inspection.acknowledgedAt && (
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
+              <UserCheck className="w-3 h-3" />
+              Tenant signed off
+            </span>
+          )}
+          {condition && (
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${condition.className}`}>
+              {condition.label}
+            </span>
+          )}
+        </div>
       </div>
     </motion.div>
   );

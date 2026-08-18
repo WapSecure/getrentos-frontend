@@ -22,6 +22,7 @@ import {
   Star,
   Settings,
   UserRoundCheck,
+  Gavel,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -33,7 +34,7 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.LANDLORD_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.properties', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.units', href: ROUTES.LANDLORD_UNITS, icon: DoorOpen },
@@ -52,6 +53,7 @@ const navItems: NavItem[] = [
     icon: FileBarChart,
   },
   { labelKey: 'sidebar.arrears', href: ROUTES.LANDLORD_ARREARS, icon: AlertTriangle },
+  { labelKey: 'sidebar.evictions', href: ROUTES.LANDLORD_EVICTIONS, icon: Gavel },
   { labelKey: 'sidebar.documents', href: ROUTES.LANDLORD_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.LANDLORD_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.realtor_access', href: ROUTES.LANDLORD_REALTORS, icon: UserRoundCheck },

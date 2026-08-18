@@ -1,16 +1,23 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Camera, RefreshCw } from 'lucide-react';
+import { X, Camera, RefreshCw, UserCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
-import type { PropertyInspection, RoomCondition } from '@/types/agent';
+import type { PropertyInspection, RoomCondition, InspectionType } from '@/types/agent';
 
 const conditionConfig: Record<RoomCondition, string> = {
   excellent: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
   good: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
   fair: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
   poor: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
+};
+
+const typeConfig: Record<InspectionType, string> = {
+  move_in: 'Move-in',
+  move_out: 'Move-out',
+  periodic: 'Periodic',
+  other: 'Other',
 };
 
 interface InspectionDetailModalProps {
@@ -40,8 +47,15 @@ export const InspectionDetailModal = ({
               <div>
                 <h3 className="font-semibold text-foreground">{inspection.propertyAddress}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {inspection.clientName} · {formatDate(inspection.scheduledDate)}
+                  {typeConfig[inspection.type]} · {inspection.clientName} ·{' '}
+                  {formatDate(inspection.scheduledDate)}
                 </p>
+                {inspection.acknowledgedAt && (
+                  <span className="inline-flex items-center gap-1 mt-1.5 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
+                    <UserCheck className="w-3 h-3" />
+                    Tenant signed off {formatDate(inspection.acknowledgedAt)}
+                  </span>
+                )}
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />

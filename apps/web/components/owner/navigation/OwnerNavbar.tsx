@@ -11,11 +11,13 @@ import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { OwnerProfileDropdown } from './OwnerProfileDropdown';
+import { navItems } from '../dashboard/OwnerSidebar';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface OwnerNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -24,6 +26,7 @@ interface OwnerNavbarProps {
 export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -182,7 +185,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-secondary"
+                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -211,23 +214,20 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background border-b border-border md:hidden"
+            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 space-y-2">
-              <Link
-                href={ROUTES.OWNER_DASHBOARD}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href={ROUTES.OWNER_PROPERTIES}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Properties
-              </Link>
+            <div className="flex flex-col p-4 space-y-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {t(item.labelKey)}
+                </Link>
+              ))}
             </div>
           </motion.div>
         )}

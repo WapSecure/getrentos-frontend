@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   X,
   Mail,
@@ -12,9 +13,14 @@ import {
   ShieldCheck,
   Check,
   MessageSquareText,
+  Users,
+  History,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
 import type { RentalApplication } from '@/types/landlord';
 
 interface ApplicationDetailsModalProps {
@@ -33,6 +39,12 @@ export const ApplicationDetailsModal = ({
   onRequestInfo,
 }: ApplicationDetailsModalProps) => {
   const isDecided = application?.status === 'approved' || application?.status === 'rejected';
+
+  const { data: tenancyStanding } = useQuery({
+    queryKey: landlordKeys.tenancyStanding(application?.id ?? ''),
+    queryFn: () => unwrap(landlordService.getTenancyStanding(application!.id)),
+    enabled: !!application,
+  });
 
   return (
     <AnimatePresence>
@@ -70,6 +82,48 @@ export const ApplicationDetailsModal = ({
                 <span className="text-lg font-bold text-primary">{application.trustScore}</span>
               </div>
 
+              <div className="p-3 rounded-lg border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <History className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Tenancy Standing</span>
+                </div>
+                {tenancyStanding?.shared ? (
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Platform trust score</p>
+                      <p className="font-medium text-foreground">{tenancyStanding.trustScore}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Signed leases</p>
+                      <p className="font-medium text-foreground">
+                        {tenancyStanding.signedLeaseCount}
+                      </p>
+                    </div>
+                    <div className="col-span-2 flex flex-wrap gap-1.5 mt-1">
+                      {tenancyStanding.identityVerified && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                          Identity verified
+                        </span>
+                      )}
+                      {tenancyStanding.emailVerified && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                          Email verified
+                        </span>
+                      )}
+                      {tenancyStanding.phoneVerified && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                          Phone verified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    This applicant hasn&apos;t opted in to share their prior tenancy history.
+                  </p>
+                )}
+              </div>
+
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                   Personal Information
@@ -101,6 +155,46 @@ export const ApplicationDetailsModal = ({
                   </div>
                 </div>
               </div>
+
+              {(application.references.length > 0 || application.nextOfKinName) && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    References &amp; Next of Kin
+                  </h4>
+                  <div className="space-y-1.5">
+                    {application.nextOfKinName && (
+                      <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm">
+                        <p className="text-foreground font-medium">
+                          {application.nextOfKinName}{' '}
+                          <span className="text-xs text-muted-foreground font-normal">
+                            ({application.nextOfKinRelationship || 'Next of kin'})
+                          </span>
+                        </p>
+                        {application.nextOfKinPhone && (
+                          <p className="text-xs text-muted-foreground">
+                            {application.nextOfKinPhone}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {application.references.map((reference) => (
+                      <div
+                        key={reference.phone}
+                        className="p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm"
+                      >
+                        <p className="text-foreground font-medium">
+                          {reference.name}{' '}
+                          <span className="text-xs text-muted-foreground font-normal">
+                            ({reference.relationship})
+                          </span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">{reference.phone}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">

@@ -31,6 +31,9 @@ export const landlordKeys = {
       params?.status ?? 'all',
       params?.priority ?? 'all',
     ] as const,
+  evictions: ['landlord', 'evictions'] as const,
+  tenancyStanding: (applicationId: string) =>
+    ['landlord', 'tenancyStanding', applicationId] as const,
 };
 
 export const renterKeys = {
@@ -69,6 +72,7 @@ export const renterKeys = {
   quickReplies: ['renter', 'quickReplies'] as const,
   moveOutChecklist: ['renter', 'moveOutChecklist'] as const,
   lease: ['renter', 'lease'] as const,
+  pendingLease: ['renter', 'lease', 'pending'] as const,
   rentIncreases: ['renter', 'rentIncreases'] as const,
   upcomingPaymentReminders: ['renter', 'upcomingPaymentReminders'] as const,
   renewalOffer: ['renter', 'renewalOffer'] as const,
@@ -88,6 +92,7 @@ export const renterKeys = {
   settingsPreferences: ['renter', 'settings', 'preferences'] as const,
   profile: ['renter', 'profile'] as const,
   twoFactor: ['renter', 'settings', 'twoFactor'] as const,
+  inspections: ['renter', 'inspections'] as const,
 };
 
 export const realtorKeys = {
@@ -207,4 +212,15 @@ export const buyerKeys = {
   notifications: ['buyer', 'notifications'] as const,
   offerThread: (offerId: string) => ['buyer', 'offers', offerId, 'thread'] as const,
   trustProfile: ['buyer', 'trust-profile'] as const,
+};
+
+export const estateKeys = {
+  myEstate: ['estate', 'me'] as const,
+  households: (estateId: string) => ['estate', estateId, 'households'] as const,
+  dues: (estateId: string, status?: string) =>
+    ['estate', estateId, 'dues', status ?? 'all'] as const,
+  visitorPasses: (estateId: string, status?: string) =>
+    ['estate', estateId, 'visitorPasses', status ?? 'all'] as const,
+  staff: (estateId: string) => ['estate', estateId, 'staff'] as const,
+  announcements: (estateId: string) => ['estate', estateId, 'announcements'] as const,
 };

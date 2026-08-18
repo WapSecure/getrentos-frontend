@@ -13,6 +13,7 @@ import { ThemeToggle } from '@getrentos/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
+import { navItems } from '../dashboard/RenterSidebar';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -115,7 +116,9 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
 
             {/* Right Section */}
             <div className="flex items-center gap-3">
-              <LanguageToggle />
+              <div className="hidden sm:block">
+                <LanguageToggle />
+              </div>
               <ThemeToggle />
 
               {/* Notifications */}
@@ -198,7 +201,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-secondary"
+                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -226,23 +229,26 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background border-b border-border md:hidden"
+            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 space-y-2">
-              <Link
-                href={ROUTES.RENTER_DASHBOARD}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t('nav.dashboard')}
-              </Link>
-              <Link
-                href={ROUTES.RENTER_DISCOVER}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t('nav.discover')}
-              </Link>
+            <div className="flex flex-col p-4 space-y-1">
+              <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {t('language.switch_language')}
+                </span>
+                <LanguageToggle />
+              </div>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.labelKey ? t(item.labelKey) : item.label}
+                </Link>
+              ))}
             </div>
           </motion.div>
         )}

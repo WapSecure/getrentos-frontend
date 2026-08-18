@@ -10,6 +10,7 @@ import type {
   AgentTask,
   PropertyInspection,
   InspectionRoomEntry,
+  InspectionType,
   RoomCondition,
 } from '@/types/agent';
 
@@ -18,10 +19,17 @@ interface NewInspectionModalProps {
   onClose: () => void;
   tasks: AgentTask[];
   defaultTaskId?: string;
-  onSubmit: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus'>) => void;
+  onSubmit: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) => void;
 }
 
 const conditionOptions: RoomCondition[] = ['excellent', 'good', 'fair', 'poor'];
+
+const inspectionTypeOptions: { value: InspectionType; label: string }[] = [
+  { value: 'move_in', label: 'Move-in' },
+  { value: 'move_out', label: 'Move-out' },
+  { value: 'periodic', label: 'Periodic' },
+  { value: 'other', label: 'Other' },
+];
 
 const emptyRoom: InspectionRoomEntry = { room: '', condition: 'good', notes: '', photoCount: 0 };
 
@@ -33,6 +41,7 @@ export const NewInspectionModal = ({
   onSubmit,
 }: NewInspectionModalProps) => {
   const [taskId, setTaskId] = useState(defaultTaskId || '');
+  const [type, setType] = useState<InspectionType>('periodic');
   const [clientName, setClientName] = useState('');
   const [rooms, setRooms] = useState<InspectionRoomEntry[]>([{ ...emptyRoom }]);
 
@@ -40,6 +49,7 @@ export const NewInspectionModal = ({
 
   const handleClose = () => {
     setTaskId(defaultTaskId || '');
+    setType('periodic');
     setClientName('');
     setRooms([{ ...emptyRoom }]);
     onClose();
@@ -64,6 +74,7 @@ export const NewInspectionModal = ({
       clientName: clientName || selectedTask.assignedBy,
       scheduledDate: new Date().toISOString(),
       status: 'completed',
+      type,
       rooms,
       overallCondition:
         rooms.find((r) => r.condition === 'poor')?.condition ||
@@ -105,6 +116,17 @@ export const NewInspectionModal = ({
                     value: task.id,
                     label: `${task.title} — ${task.propertyAddress}`,
                   }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Inspection Type <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={type}
+                  onValueChange={(value) => setType(value as InspectionType)}
+                  options={inspectionTypeOptions}
                 />
               </div>
 

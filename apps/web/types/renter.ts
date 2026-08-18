@@ -123,6 +123,27 @@ export interface TimelineStep {
   completed: boolean;
 }
 
+export type RenterInspectionType = 'move_in' | 'move_out' | 'periodic' | 'other';
+export type RenterRoomCondition = 'excellent' | 'good' | 'fair' | 'poor';
+
+export interface RenterInspectionRoom {
+  room: string;
+  condition: RenterRoomCondition;
+  notes?: string;
+  photoCount?: number;
+}
+
+export interface RenterInspection {
+  id: string;
+  type: RenterInspectionType;
+  scheduledDate: string;
+  propertyName: string;
+  propertyAddress: string;
+  overallCondition?: RenterRoomCondition;
+  rooms: RenterInspectionRoom[];
+  acknowledgedAt?: string;
+}
+
 export interface Application {
   id: string;
   propertyId: string;

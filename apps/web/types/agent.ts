@@ -3,6 +3,7 @@ export type TaskStatus = 'assigned' | 'in_progress' | 'completed' | 'overdue' | 
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type SyncStatus = 'synced' | 'pending' | 'failed';
 export type RoomCondition = 'excellent' | 'good' | 'fair' | 'poor';
+export type InspectionType = 'move_in' | 'move_out' | 'periodic' | 'other';
 
 export interface AgentTask {
   id: string;
@@ -31,9 +32,11 @@ export interface PropertyInspection {
   clientName: string;
   scheduledDate: string;
   status: TaskStatus;
+  type: InspectionType;
   rooms: InspectionRoomEntry[];
   overallCondition?: RoomCondition;
   syncStatus: SyncStatus;
+  acknowledgedAt?: string;
 }
 
 export interface VerificationVisit {

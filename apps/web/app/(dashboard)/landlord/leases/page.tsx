@@ -6,7 +6,8 @@ import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
-import { Button } from '@getrentos/ui';
+import { SignLeaseModal } from '@/components/landlord/leases/SignLeaseModal';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -25,6 +26,8 @@ export default function LandlordLeasesPage() {
   const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
+  const [signingLease, setSigningLease] = useState<Lease | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: leases = [] } = useQuery({
     queryKey: landlordKeys.leases(),
@@ -41,7 +44,7 @@ export default function LandlordLeasesPage() {
       data,
       sendImmediately,
     }: {
-      data: Omit<Lease, 'id' | 'status' | 'createdAt'>;
+      data: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>;
       sendImmediately: boolean;
     }) => {
       const { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit } = data;
@@ -63,6 +66,25 @@ export default function LandlordLeasesPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.leases() }),
   });
 
+  const signLeaseMutation = useMutation({
+    mutationFn: ({ id, signatureData }: { id: string; signatureData: string }) =>
+      unwrap(landlordService.signLease(id, signatureData)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      setSigningLease(null);
+      setToast({
+        message:
+          updated.status === 'signed'
+            ? 'Lease fully executed — both parties have signed.'
+            : 'Your signature was recorded. Waiting on the tenant.',
+        variant: 'success',
+      });
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to sign this lease.', variant: 'error' });
+    },
+  });
+
   const renewLeaseMutation = useMutation({
     mutationFn: ({
       leaseId,
@@ -80,11 +102,14 @@ export default function LandlordLeasesPage() {
   });
 
   const handleCreateLease = (
-    data: Omit<Lease, 'id' | 'status' | 'createdAt'>,
+    data: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>,
     sendImmediately: boolean
   ) => createLeaseMutation.mutate({ data, sendImmediately });
 
   const handleSendLease = (id: string) => sendLeaseMutation.mutate(id);
+
+  const handleSignLease = (id: string, signatureData: string) =>
+    signLeaseMutation.mutate({ id, signatureData });
 
   const handleSendRenewalOffer = (leaseId: string, newRent: number, newEndDate: string) =>
     renewLeaseMutation.mutate({ leaseId, newRent, newEndDate });
@@ -144,6 +169,7 @@ export default function LandlordLeasesPage() {
               delay={index * 0.05}
               onSendLease={handleSendLease}
               onRequestRenewal={setRenewingLease}
+              onSignLease={setSigningLease}
             />
           ))}
         </div>
@@ -162,6 +188,18 @@ export default function LandlordLeasesPage() {
         onClose={() => setRenewingLease(null)}
         onSend={handleSendRenewalOffer}
       />
+
+      <SignLeaseModal
+        key={signingLease?.id ?? 'none-sign'}
+        lease={signingLease}
+        onClose={() => setSigningLease(null)}
+        onSign={handleSignLease}
+        isPending={signLeaseMutation.isPending}
+      />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }
