@@ -192,6 +192,7 @@ export const ROUTES = {
   ESTATE_VISITOR_PASSES: '/estate/visitor-passes',
   ESTATE_STAFF: '/estate/staff',
   ESTATE_ANNOUNCEMENTS: '/estate/announcements',
+  ESTATE_VIOLATIONS: '/estate/violations',
   GATEMAN_DASHBOARD: '/gateman/verify',
 
   // Renter specific routes

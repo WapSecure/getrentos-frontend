@@ -79,3 +79,25 @@ export interface Announcement {
   createdAt: string;
   updatedAt: string;
 }
+
+export type ViolationCategory =
+  | 'noise'
+  | 'unauthorized_parking'
+  | 'pet_violation'
+  | 'property_maintenance'
+  | 'other';
+export type ViolationStatus = 'reported' | 'warning_issued' | 'resolved' | 'dismissed';
+
+export interface Violation {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  category: ViolationCategory;
+  description: string;
+  status: ViolationStatus;
+  warningIssuedAt?: string;
+  resolvedAt?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+}

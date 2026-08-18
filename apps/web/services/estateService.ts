@@ -8,6 +8,7 @@ import type {
   IssuedVisitorPass,
   StaffMember,
   Announcement,
+  Violation,
 } from '@/types/estate';
 
 export const estateService = {
@@ -172,6 +173,63 @@ export const estateService = {
   async removeAnnouncement(estateId: string, announcementId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/announcements/${announcementId}`, { method: 'DELETE' })
+    );
+  },
+
+  async reportViolation(
+    estateId: string,
+    data: {
+      householdId: string;
+      description: string;
+      category?:
+        | 'NOISE'
+        | 'UNAUTHORIZED_PARKING'
+        | 'PET_VIOLATION'
+        | 'PROPERTY_MAINTENANCE'
+        | 'OTHER';
+    }
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listViolations(estateId: string, status?: string): Promise<ApiResponse<Violation[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/violations${toQuery({ status })}`));
+  },
+
+  async issueViolationWarning(
+    estateId: string,
+    violationId: string
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations/${violationId}/warn`, { method: 'PATCH' })
+    );
+  },
+
+  async resolveViolation(
+    estateId: string,
+    violationId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations/${violationId}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async dismissViolation(
+    estateId: string,
+    violationId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations/${violationId}/dismiss`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
     );
   },
 };
