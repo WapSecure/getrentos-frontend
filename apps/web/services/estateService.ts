@@ -9,6 +9,8 @@ import type {
   IssuedVisitorPass,
   StaffMember,
   Announcement,
+  Violation,
+  GovernanceRecord,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -193,6 +195,95 @@ export const estateService = {
   async removeAnnouncement(estateId: string, announcementId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/announcements/${announcementId}`, { method: 'DELETE' })
+    );
+  },
+
+  async reportViolation(
+    estateId: string,
+    data: {
+      householdId: string;
+      description: string;
+      category?:
+        | 'NOISE'
+        | 'UNAUTHORIZED_PARKING'
+        | 'PET_VIOLATION'
+        | 'PROPERTY_MAINTENANCE'
+        | 'OTHER';
+    }
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listViolations(estateId: string, status?: string): Promise<ApiResponse<Violation[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/violations${toQuery({ status })}`));
+  },
+
+  async issueViolationWarning(
+    estateId: string,
+    violationId: string
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations/${violationId}/warn`, { method: 'PATCH' })
+    );
+  },
+
+  async resolveViolation(
+    estateId: string,
+    violationId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations/${violationId}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async dismissViolation(
+    estateId: string,
+    violationId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<Violation>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/violations/${violationId}/dismiss`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async uploadGovernanceRecord(
+    estateId: string,
+    data: {
+      title: string;
+      type?: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER';
+      meetingDate?: string;
+      file: File;
+    }
+  ): Promise<ApiResponse<GovernanceRecord>> {
+    const formData = new FormData();
+    formData.append('title', data.title);
+    if (data.type) formData.append('type', data.type);
+    if (data.meetingDate) formData.append('meetingDate', data.meetingDate);
+    formData.append('file', data.file);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/governance`, { method: 'POST', body: formData })
+    );
+  },
+
+  async listGovernanceRecords(
+    estateId: string,
+    type?: string
+  ): Promise<ApiResponse<GovernanceRecord[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/governance${toQuery({ type })}`));
+  },
+
+  async removeGovernanceRecord(estateId: string, recordId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/governance/${recordId}`, { method: 'DELETE' })
     );
   },
 };
