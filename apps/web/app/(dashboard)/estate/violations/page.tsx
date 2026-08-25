@@ -37,11 +37,12 @@ export default function EstateViolationsPage() {
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
-  const { data: households = [] } = useQuery({
+  const { data: householdsData } = useQuery({
     queryKey: estateKeys.households(estate?.id ?? ''),
-    queryFn: () => unwrap(estateService.listHouseholds(estate!.id)),
+    queryFn: () => unwrap(estateService.listHouseholds(estate!.id, { page: 1, pageSize: 100 })),
     enabled: !!estate,
   });
+  const households = householdsData?.items ?? [];
 
   const { data: violations = [], isLoading: isViolationsLoading } = useQuery({
     queryKey: estateKeys.violations(
