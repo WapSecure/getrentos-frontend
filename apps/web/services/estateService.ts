@@ -9,6 +9,7 @@ import type {
   StaffMember,
   Announcement,
   Violation,
+  GovernanceRecord,
 } from '@/types/estate';
 
 export const estateService = {
@@ -230,6 +231,38 @@ export const estateService = {
         method: 'PATCH',
         body: JSON.stringify({ resolutionNotes }),
       })
+    );
+  },
+
+  async uploadGovernanceRecord(
+    estateId: string,
+    data: {
+      title: string;
+      type?: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER';
+      meetingDate?: string;
+      file: File;
+    }
+  ): Promise<ApiResponse<GovernanceRecord>> {
+    const formData = new FormData();
+    formData.append('title', data.title);
+    if (data.type) formData.append('type', data.type);
+    if (data.meetingDate) formData.append('meetingDate', data.meetingDate);
+    formData.append('file', data.file);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/governance`, { method: 'POST', body: formData })
+    );
+  },
+
+  async listGovernanceRecords(
+    estateId: string,
+    type?: string
+  ): Promise<ApiResponse<GovernanceRecord[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/governance${toQuery({ type })}`));
+  },
+
+  async removeGovernanceRecord(estateId: string, recordId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/governance/${recordId}`, { method: 'DELETE' })
     );
   },
 };

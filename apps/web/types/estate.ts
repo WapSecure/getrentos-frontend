@@ -101,3 +101,16 @@ export interface Violation {
   resolutionNotes?: string;
   createdAt: string;
 }
+
+export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
+
+export interface GovernanceRecord {
+  id: string;
+  estateId: string;
+  type: GovernanceRecordType;
+  title: string;
+  meetingDate?: string;
+  size: string;
+  url: string;
+  createdAt: string;
+}
