@@ -8,24 +8,54 @@ import { Search, Handshake } from 'lucide-react';
 import { RealtorOfferCard } from '@/components/realtor/offers/RealtorOfferCard';
 import { RealtorOfferNegotiationModal } from '@/components/realtor/offers/RealtorOfferNegotiationModal';
 import type { RealtorOfferStatus, OfferThreadMessage } from '@/types/realtor';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorOffer, realtorService } from '@/services/realtorService';
 
 type StatusFilter = 'all' | RealtorOfferStatus;
 
+const PAGE_SIZE = 10;
+
+const OFFER_STATUS_TO_API_STATUS: Record<
+  RealtorOfferStatus,
+  'SUBMITTED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED'
+> = {
+  submitted: 'SUBMITTED',
+  countered: 'COUNTERED',
+  accepted: 'ACCEPTED',
+  rejected: 'REJECTED',
+  closed: 'CLOSED',
+};
+
 export default function RealtorOffersPage() {
   const [messagesByOffer, setMessagesByOffer] = useState<Record<string, OfferThreadMessage[]>>({});
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
-  const { data: offers = [], isLoading } = useQuery({
-    queryKey: realtorKeys.offers,
-    queryFn: async () => (await unwrap(realtorService.listOffers())).map(mapRealtorOffer),
+  const offerStatus = filter === 'all' ? undefined : OFFER_STATUS_TO_API_STATUS[filter];
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      ...realtorKeys.offers,
+      { page, pageSize: PAGE_SIZE, search: searchQuery.trim() || undefined, status: offerStatus },
+    ],
+    queryFn: async () => {
+      const result = await unwrap(
+        realtorService.listOffers({
+          page,
+          pageSize: PAGE_SIZE,
+          search: searchQuery.trim() || undefined,
+          status: offerStatus,
+        })
+      );
+      return { ...result, items: result.items.map(mapRealtorOffer) };
+    },
   });
+  const offers = data?.items ?? [];
+  const total = data?.total ?? 0;
   const counterOffer = useMutation({
     mutationFn: ({ id, amount, message }: { id: string; amount: number; message?: string }) =>
       unwrap(realtorService.counterOffer(id, { amount, message })),
@@ -79,12 +109,6 @@ export default function RealtorOffersPage() {
     setActiveOfferId(offerId);
   };
 
-  const filteredOffers = offers.filter((o) => {
-    const matchesSearch = o.listingTitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || o.status === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'submitted', label: 'Submitted' },
@@ -99,7 +123,7 @@ export default function RealtorOffersPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Offers</h1>
         <p className="text-muted-foreground mt-1">
-          {offers.length} offer{offers.length === 1 ? '' : 's'} on behalf of your clients
+          {total} offer{total === 1 ? '' : 's'} on behalf of your clients
         </p>
       </div>
 
@@ -109,7 +133,10 @@ export default function RealtorOffersPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by listing..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -118,7 +145,10 @@ export default function RealtorOffersPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -135,23 +165,23 @@ export default function RealtorOffersPage() {
         <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
           Loading offers…
         </div>
-      ) : filteredOffers.length === 0 ? (
+      ) : offers.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Handshake className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {offers.length === 0 ? 'No offers yet' : 'No offers match your filters'}
+            {total === 0 ? 'No offers yet' : 'No offers match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {offers.length === 0
+            {total === 0
               ? 'Offers submitted by leads on your listings will appear here for you to negotiate.'
               : 'Try adjusting your search or filter.'}
           </p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredOffers.map((offer, index) => (
+          {offers.map((offer, index) => (
             <RealtorOfferCard
               key={offer.id}
               offer={offer}
@@ -160,6 +190,16 @@ export default function RealtorOffersPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <RealtorOfferNegotiationModal

@@ -1,25 +1,40 @@
 'use client';
 
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, X, Star } from 'lucide-react';
-import type { LandlordMaintenanceRequest, Vendor } from '@/types/landlord';
+import { Pagination } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
+import type { LandlordMaintenanceRequest } from '@/types/landlord';
+
+const PAGE_SIZE = 10;
 
 interface AssignVendorModalProps {
   request: LandlordMaintenanceRequest | null;
-  vendors: Vendor[];
   onClose: () => void;
-  onAssign: (requestId: string, vendor: Vendor) => void;
+  onAssign: (requestId: string, vendorId: string) => void;
   /** The vendor currently being assigned, if any, so the row shows in-flight feedback. */
   assigningVendorId?: string | null;
 }
 
 export const AssignVendorModal = ({
   request,
-  vendors,
   onClose,
   onAssign,
   assigningVendorId = null,
 }: AssignVendorModalProps) => {
+  const [page, setPage] = useState(1);
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE, assignment: true }],
+    queryFn: () => unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE })),
+    enabled: !!request,
+  });
+  const vendors = data?.items ?? [];
+  const total = data?.total ?? 0;
+
   return (
     <AnimatePresence>
       {request && (
@@ -51,7 +66,7 @@ export const AssignVendorModal = ({
                   return (
                     <button
                       key={vendor.id}
-                      onClick={() => onAssign(request.id, vendor)}
+                      onClick={() => onAssign(request.id, vendor.id)}
                       disabled={assigningVendorId !== null}
                       className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -70,6 +85,15 @@ export const AssignVendorModal = ({
                     </button>
                   );
                 })
+              )}
+              {total > 0 && (
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  total={total}
+                  onPageChange={setPage}
+                  className="pt-3"
+                />
               )}
             </div>
           </motion.div>

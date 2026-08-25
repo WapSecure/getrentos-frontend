@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Megaphone, Plus } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -13,22 +13,28 @@ import { AnnouncementModal } from '@/components/estate/announcements/Announcemen
 import { AnnouncementCard } from '@/components/estate/announcements/AnnouncementCard';
 import type { Announcement } from '@/types/estate';
 
+const PAGE_SIZE = 10;
+
 export default function EstateAnnouncementsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [page, setPage] = useState(1);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
-  const { data: announcements = [], isLoading: isAnnouncementsLoading } = useQuery({
-    queryKey: estateKeys.announcements(estate?.id ?? ''),
-    queryFn: () => unwrap(estateService.listAnnouncements(estate!.id)),
+  const { data, isLoading: isAnnouncementsLoading } = useQuery({
+    queryKey: [...estateKeys.announcements(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
+    queryFn: () =>
+      unwrap(estateService.listAnnouncements(estate!.id, { page, pageSize: PAGE_SIZE })),
     enabled: !!estate,
   });
+  const announcements = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidate = () => {
     if (!estate) return;
@@ -40,6 +46,7 @@ export default function EstateAnnouncementsPage() {
       unwrap(estateService.createAnnouncement(estate!.id, data)),
     onSuccess: () => {
       invalidate();
+      setPage(1);
       setIsModalOpen(false);
     },
   });
@@ -61,7 +68,10 @@ export default function EstateAnnouncementsPage() {
 
   const removeAnnouncement = useMutation({
     mutationFn: (id: string) => unwrap(estateService.removeAnnouncement(estate!.id, id)),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      setPage((current) => (current > 1 && announcements.length === 1 ? current - 1 : current));
+    },
   });
 
   if (isEstateLoading) {
@@ -87,8 +97,7 @@ export default function EstateAnnouncementsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
           <p className="text-muted-foreground mt-1">
-            {announcements.length} announcement{announcements.length === 1 ? '' : 's'} in{' '}
-            {estate.name}
+            {total} announcement{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
         <Button
@@ -128,6 +137,16 @@ export default function EstateAnnouncementsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <AnnouncementModal

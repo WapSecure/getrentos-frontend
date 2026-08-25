@@ -11,15 +11,26 @@ import { Button } from '@getrentos/ui';
 interface DocumentSearchProps {
   searchTerm: string;
   onSearch: (term: string) => void;
+  filterType: FilterType;
+  onFilterTypeChange: (type: FilterType) => void;
+  filterStatus: FilterStatus;
+  onFilterStatusChange: (status: FilterStatus) => void;
 }
 
-type FilterType = 'all' | 'lease' | 'receipt' | 'inspection' | 'other';
-type FilterStatus = 'all' | 'active' | 'expiring' | 'expired';
+export type DocumentFilterType = 'all' | 'lease' | 'receipt' | 'inspection' | 'other';
+export type DocumentFilterStatus = 'all' | 'active' | 'expiring' | 'expired';
+type FilterType = DocumentFilterType;
+type FilterStatus = DocumentFilterStatus;
 
-export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) => {
+export const DocumentSearch = ({
+  searchTerm,
+  onSearch,
+  filterType,
+  onFilterTypeChange,
+  filterStatus,
+  onFilterStatusChange,
+}: DocumentSearchProps) => {
   const [showFilters, setShowFilters] = useState(false);
-  const [filterType, setFilterType] = useState<FilterType>('all');
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
   const handleClear = () => {
     onSearch('');
@@ -62,7 +73,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
         <div className="flex flex-wrap gap-2 p-3 bg-card rounded-xl border border-border">
           <LegacySelect
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as FilterType)}
+            onChange={(e) => onFilterTypeChange(e.target.value as FilterType)}
             className="px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Types</option>
@@ -73,7 +84,7 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
           </LegacySelect>
           <LegacySelect
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+            onChange={(e) => onFilterStatusChange(e.target.value as FilterStatus)}
             className="px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Status</option>
@@ -81,8 +92,8 @@ export const DocumentSearch = ({ searchTerm, onSearch }: DocumentSearchProps) =>
             <option value="expiring">Expiring</option>
             <option value="expired">Expired</option>
           </LegacySelect>
-          <Button size="sm" variant="ghost">
-            Apply Filters
+          <Button size="sm" variant="ghost" onClick={handleClear}>
+            Clear Search
           </Button>
         </div>
       )}

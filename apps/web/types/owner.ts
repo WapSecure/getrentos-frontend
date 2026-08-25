@@ -17,8 +17,17 @@ export type SaleEscrowStatus =
   | 'verification'
   | 'final_payment'
   | 'released'
-  | 'frozen';
-export type BuyerLeadStage = 'new' | 'contacted' | 'viewing_scheduled' | 'offer_made';
+  | 'frozen'
+  | 'disputed'
+  | 'refunded';
+export type BuyerLeadStage =
+  | 'new'
+  | 'contacted'
+  | 'qualified'
+  | 'viewing_scheduled'
+  | 'offer_made'
+  | 'closed'
+  | 'lost';
 
 export interface OwnerProperty {
   id: string;
@@ -126,7 +135,12 @@ export interface OwnershipTransferDocument {
   propertyId: string;
   propertyName: string;
   name: string;
-  category: 'transfer_agreement' | 'payment_receipt' | 'government_filing' | 'title_transfer';
+  category:
+    | 'transfer_agreement'
+    | 'payment_receipt'
+    | 'government_filing'
+    | 'title_transfer'
+    | 'other';
   uploadedAt: string;
   sizeLabel: string;
   sharedWithBuyer: boolean;

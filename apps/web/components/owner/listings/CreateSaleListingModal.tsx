@@ -5,21 +5,25 @@ import { LegacyInput } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, Image as ImageIcon, Video } from 'lucide-react';
 import { Button, CurrencyInput } from '@getrentos/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
-import { Select } from '@getrentos/ui';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
+import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
+import { unwrap } from '@/lib/apiHelpers';
+import { ownerKeys } from '@/lib/queryKeys';
+import { ownerService } from '@/services/ownerService';
 
 interface CreateSaleListingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  verifiedProperties: OwnerProperty[];
   onCreate: (listing: Omit<SaleListing, 'id' | 'createdAt'>, publishNow: boolean) => void;
 }
 
 const steps = ['Listing Info', 'Media', 'Features', 'Publish'];
+const PROPERTY_PAGE_SIZE = 10;
 
 const featureOptions = [
   'Swimming Pool',
@@ -67,11 +71,41 @@ const initialFormState: FormState = {
 export const CreateSaleListingModal = ({
   isOpen,
   onClose,
-  verifiedProperties,
   onCreate,
 }: CreateSaleListingModalProps) => {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialFormState);
+  const [propertySearch, setPropertySearch] = useState('');
+  const [propertyPage, setPropertyPage] = useState(1);
+  const [selectedProperty, setSelectedProperty] = useState<OwnerProperty | null>(null);
+
+  const { data: propertiesPage, isLoading: isPropertiesLoading } = useQuery({
+    queryKey: [
+      ...ownerKeys.properties,
+      {
+        verificationStatus: 'verified',
+        search: propertySearch.trim() || undefined,
+        page: propertyPage,
+        pageSize: PROPERTY_PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.listProperties({
+          verificationStatus: 'verified',
+          search: propertySearch.trim() || undefined,
+          page: propertyPage,
+          pageSize: PROPERTY_PAGE_SIZE,
+        })
+      ),
+    enabled: isOpen,
+  });
+  const verifiedProperties = propertiesPage?.items ?? [];
+  const propertyTotal = propertiesPage?.total ?? 0;
+  const propertyForForm =
+    selectedProperty?.id === form.propertyId
+      ? selectedProperty
+      : (verifiedProperties.find((property) => property.id === form.propertyId) ?? null);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -89,19 +123,21 @@ export const CreateSaleListingModal = ({
   const handleClose = () => {
     setStep(0);
     setForm(initialFormState);
+    setPropertySearch('');
+    setPropertyPage(1);
+    setSelectedProperty(null);
     onClose();
   };
 
-  const selectedProperty = verifiedProperties.find((p) => p.id === form.propertyId);
   const canProceedFromStep1 =
     form.propertyId && form.listingTitle.trim() && Number(form.askingPrice) > 0;
   const canProceedFromStep2 = form.coverImageName.trim().length > 0;
 
   const buildListing = (status: SaleListing['status']): Omit<SaleListing, 'id' | 'createdAt'> => ({
     propertyId: form.propertyId,
-    propertyName: selectedProperty?.name || '',
+    propertyName: propertyForForm?.name || '',
     listingTitle: form.listingTitle,
-    propertyType: selectedProperty?.propertyType || '',
+    propertyType: propertyForForm?.propertyType || '',
     askingPrice: Number(form.askingPrice) || 0,
     description: form.description,
     propertySize: form.propertySize ? Number(form.propertySize) : undefined,
@@ -154,113 +190,123 @@ export const CreateSaleListingModal = ({
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               {step === 0 && (
                 <>
-                  {verifiedProperties.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-6">
-                      You need at least one verified property before you can create a sale listing.
-                    </p>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          Property <span className="text-red-500">*</span>
-                        </label>
-                        <Select
-                          value={form.propertyId}
-                          onValueChange={(value) => update('propertyId', value)}
-                          placeholder="Select a verified property"
-                          options={verifiedProperties.map((property) => ({
-                            value: property.id,
-                            label: property.name,
-                          }))}
-                        />
-                      </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Property <span className="text-red-500">*</span>
+                    </label>
+                    <PaginatedSelect
+                      value={form.propertyId}
+                      onValueChange={(value) => {
+                        setSelectedProperty(
+                          verifiedProperties.find((property) => property.id === value) ?? null
+                        );
+                        update('propertyId', value);
+                      }}
+                      items={verifiedProperties}
+                      selectedItem={propertyForForm}
+                      getItemValue={(property) => property.id}
+                      getItemLabel={(property) => property.name}
+                      search={propertySearch}
+                      onSearchChange={(value) => {
+                        setPropertySearch(value);
+                        setPropertyPage(1);
+                      }}
+                      searchPlaceholder="Search verified properties"
+                      page={propertyPage}
+                      pageSize={PROPERTY_PAGE_SIZE}
+                      total={propertyTotal}
+                      onPageChange={setPropertyPage}
+                      placeholder="Select a verified property"
+                      emptyMessage="No verified properties match this search."
+                      isLoading={isPropertiesLoading}
+                      ariaLabel="verified property"
+                    />
+                  </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          Listing Title <span className="text-red-500">*</span>
-                        </label>
-                        <LegacyInput
-                          type="text"
-                          value={form.listingTitle}
-                          onChange={(e) => update('listingTitle', e.target.value)}
-                          placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Listing Title <span className="text-red-500">*</span>
+                    </label>
+                    <LegacyInput
+                      type="text"
+                      value={form.listingTitle}
+                      onChange={(e) => update('listingTitle', e.target.value)}
+                      placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          Asking Price (₦) <span className="text-red-500">*</span>
-                        </label>
-                        <CurrencyInput
-                          prefix="₦"
-                          min={0}
-                          value={form.askingPrice}
-                          onValueChange={(v) => update('askingPrice', v === 0 ? '' : String(v))}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Asking Price (₦) <span className="text-red-500">*</span>
+                    </label>
+                    <CurrencyInput
+                      prefix="₦"
+                      min={0}
+                      value={form.askingPrice}
+                      onValueChange={(v) => update('askingPrice', v === 0 ? '' : String(v))}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
 
-                      {selectedProperty && (
-                        <MarketPriceInsights
-                          city={selectedProperty.city}
-                          onUseSuggestedPrice={(price) => update('askingPrice', String(price))}
-                        />
-                      )}
-
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Size (sqm)
-                          </label>
-                          <LegacyInput
-                            type="number"
-                            min={0}
-                            value={form.propertySize}
-                            onChange={(e) => update('propertySize', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Bedrooms
-                          </label>
-                          <LegacyInput
-                            type="number"
-                            min={0}
-                            value={form.bedrooms}
-                            onChange={(e) => update('bedrooms', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Bathrooms
-                          </label>
-                          <LegacyInput
-                            type="number"
-                            min={0}
-                            value={form.bathrooms}
-                            onChange={(e) => update('bathrooms', e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          Description
-                        </label>
-                        <Textarea
-                          value={form.description}
-                          onChange={(e) => update('description', e.target.value)}
-                          rows={3}
-                          placeholder="Describe the property to prospective buyers"
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
-                    </>
+                  {propertyForForm && (
+                    <MarketPriceInsights
+                      city={propertyForForm.city}
+                      onUseSuggestedPrice={(price) => update('askingPrice', String(price))}
+                    />
                   )}
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Size (sqm)
+                      </label>
+                      <LegacyInput
+                        type="number"
+                        min={0}
+                        value={form.propertySize}
+                        onChange={(e) => update('propertySize', e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Bedrooms
+                      </label>
+                      <LegacyInput
+                        type="number"
+                        min={0}
+                        value={form.bedrooms}
+                        onChange={(e) => update('bedrooms', e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Bathrooms
+                      </label>
+                      <LegacyInput
+                        type="number"
+                        min={0}
+                        value={form.bathrooms}
+                        onChange={(e) => update('bathrooms', e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Description
+                    </label>
+                    <Textarea
+                      value={form.description}
+                      onChange={(e) => update('description', e.target.value)}
+                      rows={3}
+                      placeholder="Describe the property to prospective buyers"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
                 </>
               )}
 
@@ -331,7 +377,7 @@ export const CreateSaleListingModal = ({
               {step === 3 && (
                 <div className="space-y-3">
                   <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-                    <SummaryRow label="Property" value={selectedProperty?.name || '—'} />
+                    <SummaryRow label="Property" value={propertyForForm?.name || '—'} />
                     <SummaryRow label="Title" value={form.listingTitle || '—'} />
                     <SummaryRow
                       label="Asking Price"

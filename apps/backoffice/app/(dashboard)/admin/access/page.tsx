@@ -23,6 +23,7 @@ import { Select } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { TableSkeleton } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -34,6 +35,8 @@ const roleOptions = Object.entries(ADMIN_ROLE_DETAILS).map(([role, details]) => 
   value: role,
   label: details.label,
 }));
+
+const PAGE_SIZE = 10;
 
 export default function AdminAccessPage() {
   const queryClient = useQueryClient();
@@ -54,12 +57,15 @@ export default function AdminAccessPage() {
     member: AdminStaffMember;
     status: 'active' | 'suspended';
   } | null>(null);
+  const [staffPage, setStaffPage] = useState(1);
 
-  const { data: staff = [], isLoading } = useQuery({
-    queryKey: adminKeys.staff,
-    queryFn: () => unwrap(adminService.listStaff()),
+  const { data: staffData, isLoading } = useQuery({
+    queryKey: adminKeys.staffList({ page: staffPage, pageSize: PAGE_SIZE }),
+    queryFn: () => unwrap(adminService.listStaff({ page: staffPage, pageSize: PAGE_SIZE })),
     enabled: canManage,
   });
+  const staff = staffData?.items ?? [];
+  const staffTotal = staffData?.total ?? 0;
 
   const updateRoleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: AdminStaffRole }) =>
@@ -89,6 +95,7 @@ export default function AdminAccessPage() {
   const handleCreated = (approvalStatus: 'APPROVED' | 'PENDING') => {
     queryClient.invalidateQueries({ queryKey: adminKeys.staff });
     queryClient.invalidateQueries({ queryKey: adminKeys.staffApprovals });
+    setStaffPage(1);
     notify(
       approvalStatus === 'PENDING'
         ? 'Staff created. It is pending approval by a senior admin.'
@@ -249,6 +256,17 @@ export default function AdminAccessPage() {
                 </li>
               ))}
             </ul>
+          )}
+
+          {staffTotal > 0 && (
+            <div className="border-t border-border px-5 py-4">
+              <Pagination
+                page={staffPage}
+                pageSize={PAGE_SIZE}
+                total={staffTotal}
+                onPageChange={setStaffPage}
+              />
+            </div>
           )}
         </section>
       )}

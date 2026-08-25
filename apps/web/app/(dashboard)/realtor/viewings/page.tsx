@@ -7,27 +7,31 @@ import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingCard } from '@/components/realtor/viewings/ViewingCard';
 import { ScheduleViewingModal } from '@/components/realtor/viewings/ScheduleViewingModal';
 import type { CreateViewingInput } from '@/components/realtor/viewings/ScheduleViewingModal';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
-import { mapRealtorLead, mapRealtorViewing, realtorService } from '@/services/realtorService';
+import { mapRealtorViewing, realtorService } from '@/services/realtorService';
+
+const PAGE_SIZE = 10;
 
 function RealtorViewingsPageContent() {
   const searchParams = useSearchParams();
   const defaultLeadId = searchParams.get('lead') || undefined;
 
   const [isModalOpen, setIsModalOpen] = useState(!!defaultLeadId);
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
-  const { data: viewings = [], isLoading } = useQuery({
-    queryKey: realtorKeys.viewings,
-    queryFn: async () => (await unwrap(realtorService.listViewings())).map(mapRealtorViewing),
+  const { data, isLoading } = useQuery({
+    queryKey: [...realtorKeys.viewings, { page, pageSize: PAGE_SIZE }],
+    queryFn: async () => {
+      const result = await unwrap(realtorService.listViewings({ page, pageSize: PAGE_SIZE }));
+      return { ...result, items: result.items.map(mapRealtorViewing) };
+    },
   });
-  const { data: leads = [] } = useQuery({
-    queryKey: realtorKeys.leads,
-    queryFn: async () => (await unwrap(realtorService.listLeads())).map(mapRealtorLead),
-  });
+  const viewings = data?.items ?? [];
+  const total = data?.total ?? 0;
   const createViewing = useMutation({
     mutationFn: (appointment: Omit<ViewingAppointment, 'id' | 'status'> & { leadId: string }) =>
       unwrap(
@@ -44,6 +48,7 @@ function RealtorViewingsPageContent() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.viewings });
+      setPage(1);
       setIsModalOpen(false);
     },
     onError: (error) =>
@@ -73,7 +78,7 @@ function RealtorViewingsPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Viewings</h1>
           <p className="text-muted-foreground mt-1">
-            {viewings.length} scheduled tour{viewings.length === 1 ? '' : 's'}
+            {total} scheduled tour{total === 1 ? '' : 's'}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -111,10 +116,19 @@ function RealtorViewingsPageContent() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
+
       <ScheduleViewingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        leads={leads}
         defaultLeadId={defaultLeadId}
         onSubmit={handleSubmit}
       />

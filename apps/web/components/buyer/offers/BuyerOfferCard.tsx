@@ -38,6 +38,16 @@ const statusConfig: Record<
     icon: XCircle,
     className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
   },
+  withdrawn: {
+    label: 'Withdrawn',
+    icon: XCircle,
+    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+  },
+  expired: {
+    label: 'Expired',
+    icon: Archive,
+    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+  },
   closed: {
     label: 'Closed',
     icon: Archive,

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt, Plus } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -20,29 +20,62 @@ const statusFilters: { value: DueStatus | 'all'; label: string }[] = [
   { value: 'overdue', label: 'Overdue' },
 ];
 
+const PAGE_SIZE = 10;
+const HOUSEHOLD_OPTIONS_PAGE_SIZE = 20;
+
 export default function EstateDuesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<DueStatus | 'all'>('all');
+  const [page, setPage] = useState(1);
+  const [householdPage, setHouseholdPage] = useState(1);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
-  const { data: households = [] } = useQuery({
-    queryKey: estateKeys.households(estate?.id ?? ''),
-    queryFn: () => unwrap(estateService.listHouseholds(estate!.id)),
-    enabled: !!estate,
-  });
-
-  const { data: dues = [], isLoading: isDuesLoading } = useQuery({
-    queryKey: estateKeys.dues(estate?.id ?? '', statusFilter === 'all' ? undefined : statusFilter),
+  const { data: householdsData, isLoading: isHouseholdsLoading } = useQuery({
+    queryKey: [
+      ...estateKeys.households(estate?.id ?? ''),
+      {
+        page: householdPage,
+        pageSize: HOUSEHOLD_OPTIONS_PAGE_SIZE,
+        status: 'active',
+        purpose: 'due-options',
+      },
+    ],
     queryFn: () =>
-      unwrap(estateService.listDues(estate!.id, statusFilter === 'all' ? undefined : statusFilter)),
+      unwrap(
+        estateService.listHouseholds(estate!.id, {
+          page: householdPage,
+          pageSize: HOUSEHOLD_OPTIONS_PAGE_SIZE,
+          status: 'active',
+        })
+      ),
     enabled: !!estate,
   });
+  const households = householdsData?.items ?? [];
+  const householdsTotal = householdsData?.total ?? 0;
+
+  const { data, isLoading: isDuesLoading } = useQuery({
+    queryKey: [
+      ...estateKeys.dues(estate?.id ?? '', statusFilter === 'all' ? undefined : statusFilter),
+      { page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        estateService.listDues(estate!.id, {
+          page,
+          pageSize: PAGE_SIZE,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+        })
+      ),
+    enabled: !!estate,
+  });
+  const dues = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidateDues = () => {
     if (!estate) return;
@@ -54,13 +87,17 @@ export default function EstateDuesPage() {
       unwrap(estateService.createDues(estate!.id, data)),
     onSuccess: () => {
       invalidateDues();
+      setPage(1);
       setIsModalOpen(false);
     },
   });
 
   const markPaid = useMutation({
     mutationFn: (dueId: string) => unwrap(estateService.markDuePaid(estate!.id, dueId)),
-    onSuccess: invalidateDues,
+    onSuccess: () => {
+      invalidateDues();
+      setPage(1);
+    },
   });
 
   if (isEstateLoading) {
@@ -78,10 +115,17 @@ export default function EstateDuesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dues</h1>
           <p className="text-muted-foreground mt-1">
-            {dues.length} due{dues.length === 1 ? '' : 's'} in {estate.name}
+            {total} due{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
+        <Button
+          variant="primary"
+          className="gap-2"
+          onClick={() => {
+            setHouseholdPage(1);
+            setIsModalOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4" />
           Charge Dues
         </Button>
@@ -93,7 +137,10 @@ export default function EstateDuesPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
-            onClick={() => setStatusFilter(filter.value)}
+            onClick={() => {
+              setStatusFilter(filter.value);
+              setPage(1);
+            }}
           >
             {filter.label}
           </Button>
@@ -123,9 +170,24 @@ export default function EstateDuesPage() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
+
       <CreateDuesModal
         isOpen={isModalOpen}
         households={households}
+        householdTotal={householdsTotal}
+        householdPage={householdPage}
+        householdPageSize={HOUSEHOLD_OPTIONS_PAGE_SIZE}
+        onHouseholdPageChange={setHouseholdPage}
+        isHouseholdsLoading={isHouseholdsLoading}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => createDues.mutate(data)}
         isSubmitting={createDues.isPending}

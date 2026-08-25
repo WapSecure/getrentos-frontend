@@ -2,28 +2,24 @@
 
 import { BarChart3, TrendingUp, FileText, Database, PieChart } from 'lucide-react';
 
-interface Document {
-  id: string;
-  type: string;
-  category: string;
-  size: string;
-  uploadedAt: string;
-  status: string;
-}
-
 interface DocumentAnalyticsProps {
-  documents: Document[];
+  summary?: {
+    total: number;
+    storageUsedBytes: number;
+    types: Record<string, number>;
+  };
 }
 
-export const DocumentAnalytics = ({ documents }: DocumentAnalyticsProps) => {
-  const totalSize = '12.8 MB';
-  const usedSpace = '4.2 MB';
-  const freeSpace = '8.6 MB';
+const formatBytes = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
-  const typeDistribution = documents.reduce<Record<string, number>>((acc, doc) => {
-    acc[doc.type] = (acc[doc.type] || 0) + 1;
-    return acc;
-  }, {});
+export const DocumentAnalytics = ({ summary }: DocumentAnalyticsProps) => {
+  if (!summary) return null;
+
+  const typeDistribution = summary.types;
 
   const getMostUsedType = (): string => {
     const entries = Object.entries(typeDistribution);
@@ -32,7 +28,7 @@ export const DocumentAnalytics = ({ documents }: DocumentAnalyticsProps) => {
   };
 
   const averageSize =
-    documents.length > 0 ? (parseFloat(usedSpace) / documents.length).toFixed(1) + ' MB' : '0 MB';
+    summary.total > 0 ? formatBytes(summary.storageUsedBytes / summary.total) : '0 B';
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -49,20 +45,19 @@ export const DocumentAnalytics = ({ documents }: DocumentAnalyticsProps) => {
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
               <Database className="w-3 h-3 text-primary" />
-              <span className="text-xs text-gray-500">Used Space</span>
+              <span className="text-xs text-gray-500">Storage Used</span>
             </div>
-            <p className="text-sm font-bold text-foreground">{usedSpace}</p>
-            <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
-              <div className="h-full bg-primary rounded-full" style={{ width: '33%' }} />
-            </div>
-            <p className="text-xs text-gray-500 mt-1">{freeSpace} free</p>
+            <p className="text-sm font-bold text-foreground">
+              {formatBytes(summary.storageUsedBytes)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Across your document library</p>
           </div>
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
               <FileText className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Documents</span>
             </div>
-            <p className="text-sm font-bold text-foreground">{documents.length}</p>
+            <p className="text-sm font-bold text-foreground">{summary.total}</p>
             <p className="text-xs text-gray-500">Avg size: {averageSize}</p>
           </div>
         </div>

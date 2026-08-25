@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
@@ -31,6 +32,10 @@ interface HomeManagementWorkspaceProps {
   role: HomeManagementWorkspaceRole;
 }
 
+const ASSET_PAGE_SIZE = 12;
+const PLAN_PAGE_SIZE = 10;
+const WORK_ORDER_PAGE_SIZE = 10;
+
 const normalizeProperties = (properties: HomeManagementProperty[]): HomeManagementProperty[] =>
   properties.map((property) => ({
     id: property.id,
@@ -41,11 +46,17 @@ const normalizeProperties = (properties: HomeManagementProperty[]): HomeManageme
   }));
 
 export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) {
+  const [assetPage, setAssetPage] = useState(1);
+  const [assetPropertyId, setAssetPropertyId] = useState('');
+  const [planPage, setPlanPage] = useState(1);
+  const [workOrderPage, setWorkOrderPage] = useState(1);
+
   const propertiesQuery = useQuery({
     queryKey: homeManagementKeys.properties(role),
     queryFn: async (): Promise<HomeManagementProperty[]> => {
       if (role === 'owner') {
-        return normalizeProperties(await unwrap(ownerService.listProperties()));
+        const res = await unwrap(ownerService.listProperties({ page: 1, pageSize: 100 }));
+        return normalizeProperties(res.items);
       }
       const res = await unwrap(landlordService.listProperties({ page: 1, pageSize: 100 }));
       return normalizeProperties(res.items);
@@ -53,18 +64,43 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
   });
 
   const assetsQuery = useQuery({
-    queryKey: homeManagementKeys.assets(),
-    queryFn: () => unwrap(homeManagementService.listAssets()),
+    queryKey: [
+      ...homeManagementKeys.assets(assetPropertyId || undefined),
+      { page: assetPage, pageSize: ASSET_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listAssets({
+          propertyId: assetPropertyId || undefined,
+          page: assetPage,
+          pageSize: ASSET_PAGE_SIZE,
+        })
+      ),
   });
 
   const plansQuery = useQuery({
-    queryKey: homeManagementKeys.plans,
-    queryFn: () => unwrap(homeManagementService.listPlans()),
+    queryKey: [...homeManagementKeys.plans, { page: planPage, pageSize: PLAN_PAGE_SIZE }],
+    queryFn: () =>
+      unwrap(homeManagementService.listPlans({ page: planPage, pageSize: PLAN_PAGE_SIZE })),
   });
 
   const workOrdersQuery = useQuery({
-    queryKey: homeManagementKeys.workOrders,
-    queryFn: () => unwrap(homeManagementService.listWorkOrders()),
+    queryKey: [
+      ...homeManagementKeys.workOrders,
+      { page: workOrderPage, pageSize: WORK_ORDER_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listWorkOrders({
+          page: workOrderPage,
+          pageSize: WORK_ORDER_PAGE_SIZE,
+        })
+      ),
+  });
+
+  const dashboardQuery = useQuery({
+    queryKey: homeManagementKeys.dashboard,
+    queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
   const vendorsQuery = useQuery({
@@ -83,9 +119,9 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
   });
 
   const properties = propertiesQuery.data ?? [];
-  const assets = assetsQuery.data ?? [];
-  const plans = plansQuery.data ?? [];
-  const workOrders = workOrdersQuery.data ?? [];
+  const assets = assetsQuery.data?.items ?? [];
+  const plans = plansQuery.data?.items ?? [];
+  const workOrders = workOrdersQuery.data?.items ?? [];
   const vendors = vendorsQuery.data ?? [];
 
   return (
@@ -94,31 +130,17 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
 
       <HomeManagementOperationsCommandCenter
         role={role}
-        properties={properties}
-        assets={assets}
-        plans={plans}
-        workOrders={workOrders}
-        isLoading={
-          propertiesQuery.isLoading ||
-          assetsQuery.isLoading ||
-          plansQuery.isLoading ||
-          workOrdersQuery.isLoading
-        }
+        summary={dashboardQuery.data}
+        isLoading={dashboardQuery.isLoading}
       />
 
       <HomeManagementPortfolioAnalytics
-        properties={properties}
-        workOrders={workOrders}
-        assets={assets}
-        isLoading={propertiesQuery.isLoading || workOrdersQuery.isLoading || assetsQuery.isLoading}
+        summary={dashboardQuery.data}
+        isLoading={dashboardQuery.isLoading}
       />
 
       {role === 'landlord' && (
-        <HomeManagementVendorPerformance
-          vendors={vendors}
-          workOrders={workOrders}
-          isLoading={vendorsQuery.isLoading}
-        />
+        <HomeManagementVendorPerformance vendors={vendors} isLoading={vendorsQuery.isLoading} />
       )}
 
       {propertiesQuery.isError && (
@@ -136,15 +158,27 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
         properties={properties}
         isLoading={assetsQuery.isLoading || propertiesQuery.isLoading}
         error={assetsQuery.error as Error | null}
+        page={assetPage}
+        pageSize={ASSET_PAGE_SIZE}
+        total={assetsQuery.data?.total ?? 0}
+        selectedPropertyId={assetPropertyId}
+        onPageChange={setAssetPage}
+        onSelectedPropertyChange={(propertyId) => {
+          setAssetPropertyId(propertyId);
+          setAssetPage(1);
+        }}
       />
 
       <PreventiveMaintenancePlans
         plans={plans}
-        assets={assets}
         properties={properties}
         vendors={vendors}
         isLoading={plansQuery.isLoading || propertiesQuery.isLoading}
         error={plansQuery.error as Error | null}
+        page={planPage}
+        pageSize={PLAN_PAGE_SIZE}
+        total={plansQuery.data?.total ?? 0}
+        onPageChange={setPlanPage}
       />
 
       <HomeManagementSlaPolicies
@@ -161,11 +195,14 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
         role={role}
         workOrders={workOrders}
         properties={properties}
-        assets={assets}
         vendors={vendors}
         isLoading={workOrdersQuery.isLoading}
         isPropertiesLoading={propertiesQuery.isLoading}
         error={workOrdersQuery.error as Error | null}
+        page={workOrderPage}
+        pageSize={WORK_ORDER_PAGE_SIZE}
+        total={workOrdersQuery.data?.total ?? 0}
+        onPageChange={setWorkOrderPage}
       />
 
       <HomeManagementTimeline />

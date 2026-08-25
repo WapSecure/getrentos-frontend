@@ -1,5 +1,6 @@
-import { authFetch, safeCall } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
+import type { Paginated } from '@/lib/apiHelpers';
 import type {
   AgentTask,
   PropertyInspection,
@@ -55,6 +56,64 @@ interface AgentVerificationApi {
   createdAt: string;
   task: { id: string };
   property: { title: string; address: string };
+}
+
+interface AgentDocumentApi {
+  id: string;
+  name: string;
+  category: string;
+  sizeBytes: number;
+  createdAt: string;
+  property: { title: string } | null;
+  task: { title: string } | null;
+}
+
+export interface AgentPageOptions {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface AgentTaskListOptions extends AgentPageOptions {
+  status?: TaskStatus;
+  type?: AgentTask['type'];
+  search?: string;
+}
+
+export interface AgentInspectionListOptions extends AgentPageOptions {
+  status?: 'draft' | 'submitted';
+  search?: string;
+}
+
+export interface AgentVerificationListOptions extends AgentPageOptions {
+  subjectType?: VerificationVisit['subjectType'];
+  search?: string;
+}
+
+export interface AgentDocumentListOptions extends AgentPageOptions {
+  category?: AgentDocument['category'];
+  search?: string;
+}
+
+export interface AgentConversationListOptions extends AgentPageOptions {
+  search?: string;
+}
+
+export interface AgentClientListOptions extends AgentPageOptions {
+  status?: 'pending' | 'active' | 'revoked';
+}
+
+export interface AgentClientAssignment {
+  id: string;
+  status: string;
+  agent?: { id: string; legalName: string; email: string; companyName?: string | null };
+  client?: { id: string; legalName: string; email?: string; phone?: string | null };
+}
+
+export interface AgentAssignableProperty {
+  id: string;
+  title: string;
+  city: string;
+  state: string;
 }
 
 const lower = <T extends string>(value: T) => value.toLowerCase() as Lowercase<T>;
@@ -113,11 +172,19 @@ function mapAgentVerification(verification: AgentVerificationApi): VerificationV
 }
 
 export const agentService = {
-  listClientAssignments: () => safeCall(() => authFetch('/agent/clients/invitations')),
-  listAgentClients: () =>
+  listClientAssignments: (options: AgentClientListOptions = {}) =>
     safeCall(() =>
-      authFetch<Array<{ status: string; client: { id: string; legalName: string } }>>(
-        '/agent/clients'
+      authFetch<Paginated<AgentClientAssignment>>(
+        `/agent/clients/invitations${toQuery({
+          ...options,
+          status: options.status?.toUpperCase(),
+        })}`
+      )
+    ),
+  listAgentClients: (options: AgentClientListOptions = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<AgentClientAssignment>>(
+        `/agent/clients${toQuery({ ...options, status: options.status?.toUpperCase() })}`
       )
     ),
   startConversation: (clientId: string) =>
@@ -131,8 +198,26 @@ export const agentService = {
     safeCall(() => authFetch(`/agent/clients/${id}/approve`, { method: 'PATCH' })),
   revokeClientAssignment: (id: string) =>
     safeCall(() => authFetch(`/agent/clients/${id}/revoke`, { method: 'POST' })),
-  listAssignableProperties: (id: string) =>
-    safeCall(() => authFetch(`/agent/clients/${id}/properties`)),
+  listAssignableProperties: (id: string, options: AgentPageOptions & { search?: string } = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<AgentAssignableProperty>>(
+        `/agent/clients/${id}/properties${toQuery({
+          page: options.page,
+          pageSize: options.pageSize,
+          search: options.search,
+        })}`
+      )
+    ),
+  listProperties: (options: AgentPageOptions & { search?: string } = {}) =>
+    safeCall(() =>
+      authFetch(
+        `/agent/properties${toQuery({
+          page: options.page,
+          pageSize: options.pageSize,
+          search: options.search,
+        })}`
+      )
+    ),
   assignClientProperty: (id: string, propertyId: string) =>
     safeCall(() =>
       authFetch(`/agent/clients/${id}/properties`, {
@@ -155,16 +240,38 @@ export const agentService = {
       }>('/agent/profile')
     ),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/agent/trust-profile')),
-  getReviews: () => safeCall(() => authFetch<AgentReview[]>('/agent/reviews')),
+  getReviews: (options: AgentPageOptions = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<AgentReview>>(
+        `/agent/reviews${toQuery({ page: options.page, pageSize: options.pageSize })}`
+      )
+    ),
   getReviewsSummary: () =>
     safeCall(() =>
-      authFetch<{ averageRating: number; reviewCount: number }>('/agent/reviews/summary')
+      authFetch<{
+        averageRating: number;
+        reviewCount: number;
+        ratingDistribution: Array<{ rating: number; count: number }>;
+      }>('/agent/reviews/summary')
     ),
   getSyncItems: () => safeCall(() => authFetch<OfflineSyncItem[]>('/agent/sync')),
-  listTasks: async (): Promise<ApiResponse<AgentTask[]>> => {
-    const response = await safeCall(() => authFetch<AgentTaskApi[]>('/agent/tasks'));
+  listTasks: async (
+    options: AgentTaskListOptions = {}
+  ): Promise<ApiResponse<Paginated<AgentTask>>> => {
+    const response = await safeCall(() =>
+      authFetch<Paginated<AgentTaskApi>>(
+        `/agent/tasks${toQuery({
+          ...options,
+          status: options.status?.toUpperCase(),
+          type: options.type?.toUpperCase(),
+        })}`
+      )
+    );
     if (response.success && response.data) {
-      return { ...response, data: response.data.map(mapAgentTask) };
+      return {
+        ...response,
+        data: { ...response.data, items: response.data.items.map(mapAgentTask) },
+      };
     }
     return { success: false, error: response.error, message: response.message };
   },
@@ -172,10 +279,22 @@ export const agentService = {
     safeCall(() =>
       authFetch(`/agent/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) })
     ),
-  listInspections: async (): Promise<ApiResponse<PropertyInspection[]>> => {
-    const response = await safeCall(() => authFetch<AgentInspectionApi[]>('/agent/inspections'));
+  listInspections: async (
+    options: AgentInspectionListOptions = {}
+  ): Promise<ApiResponse<Paginated<PropertyInspection>>> => {
+    const response = await safeCall(() =>
+      authFetch<Paginated<AgentInspectionApi>>(
+        `/agent/inspections${toQuery({
+          ...options,
+          status: options.status?.toUpperCase(),
+        })}`
+      )
+    );
     if (response.success && response.data) {
-      return { ...response, data: response.data.map(mapAgentInspection) };
+      return {
+        ...response,
+        data: { ...response.data, items: response.data.items.map(mapAgentInspection) },
+      };
     }
     return { success: false, error: response.error, message: response.message };
   },
@@ -188,12 +307,23 @@ export const agentService = {
     overallCondition?: string;
   }) =>
     safeCall(() => authFetch('/agent/inspections', { method: 'POST', body: JSON.stringify(data) })),
-  listVerifications: async (): Promise<ApiResponse<VerificationVisit[]>> => {
+  listVerifications: async (
+    options: AgentVerificationListOptions = {}
+  ): Promise<ApiResponse<Paginated<VerificationVisit>>> => {
     const response = await safeCall(() =>
-      authFetch<AgentVerificationApi[]>('/agent/verifications')
+      authFetch<Paginated<AgentVerificationApi>>(
+        `/agent/verifications${toQuery({
+          ...options,
+          subjectType: options.subjectType?.toUpperCase(),
+        })}`
+      )
     );
-    if (response.success && response.data)
-      return { ...response, data: response.data.map(mapAgentVerification) };
+    if (response.success && response.data) {
+      return {
+        ...response,
+        data: { ...response.data, items: response.data.items.map(mapAgentVerification) },
+      };
+    }
     return { success: false, error: response.error, message: response.message };
   },
   submitVerification: (data: {
@@ -207,32 +337,32 @@ export const agentService = {
     safeCall(() =>
       authFetch('/agent/verifications', { method: 'POST', body: JSON.stringify(data) })
     ),
-  listDocuments: async (): Promise<ApiResponse<AgentDocument[]>> => {
+  listDocuments: async (
+    options: AgentDocumentListOptions = {}
+  ): Promise<ApiResponse<Paginated<AgentDocument>>> => {
     const response = await safeCall(() =>
-      authFetch<
-        Array<{
-          id: string;
-          name: string;
-          category: string;
-          sizeBytes: number;
-          createdAt: string;
-          property: { title: string } | null;
-          task: { title: string } | null;
-        }>
-      >('/agent/documents')
+      authFetch<Paginated<AgentDocumentApi>>(
+        `/agent/documents${toQuery({
+          ...options,
+          category: options.category?.toUpperCase(),
+        })}`
+      )
     );
     if (!response.success || !response.data)
       return { success: false, error: response.error, message: response.message };
     return {
       success: true,
-      data: response.data.map((document) => ({
-        id: document.id,
-        name: document.name,
-        category: document.category.toLowerCase() as AgentDocument['category'],
-        relatedTo: document.property?.title || document.task?.title,
-        uploadedAt: document.createdAt,
-        sizeLabel: `${(document.sizeBytes / (1024 * 1024)).toFixed(1)} MB`,
-      })),
+      data: {
+        ...response.data,
+        items: response.data.items.map((document) => ({
+          id: document.id,
+          name: document.name,
+          category: document.category.toLowerCase() as AgentDocument['category'],
+          relatedTo: document.property?.title || document.task?.title,
+          uploadedAt: document.createdAt,
+          sizeLabel: `${(document.sizeBytes / (1024 * 1024)).toFixed(1)} MB`,
+        })),
+      },
     };
   },
   uploadDocument: (data: { file: File; name: string; category: string }) => {
@@ -244,16 +374,22 @@ export const agentService = {
   },
   getDocumentDownload: (id: string) =>
     safeCall(() => authFetch<{ name: string; url: string }>(`/agent/documents/${id}/download`)),
-  listConversations: () =>
+  listConversations: (options: AgentConversationListOptions = {}) =>
     safeCall(() =>
       authFetch<
-        Array<{
+        Paginated<{
           id: string;
           client: { legalName: string };
           lastMessage: string | null;
           lastMessageAt: string | null;
         }>
-      >('/agent/messages')
+      >(
+        `/agent/messages${toQuery({
+          page: options.page,
+          pageSize: options.pageSize,
+          search: options.search,
+        })}`
+      )
     ),
   getMessages: (id: string) =>
     safeCall(() =>

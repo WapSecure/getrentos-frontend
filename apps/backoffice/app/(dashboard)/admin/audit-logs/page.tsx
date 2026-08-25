@@ -32,14 +32,19 @@ export default function AdminAuditLogsPage() {
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
-    queryKey: adminKeys.auditLogs({ search: searchQuery, severity: severityFilter, page }),
+    queryKey: adminKeys.auditLogs({
+      search: searchQuery,
+      severity: severityFilter,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
     queryFn: () =>
       unwrap(
         adminService.listAuditLogs({
           search: searchQuery || undefined,
           severity: severityFilter === 'all' ? undefined : severityFilter,
           page,
-          limit: PAGE_SIZE,
+          pageSize: PAGE_SIZE,
         })
       ),
   });

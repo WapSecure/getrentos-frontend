@@ -37,10 +37,13 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { data: notifications = [] } = useQuery({
-    queryKey: ownerKeys.notifications,
-    queryFn: () => unwrap(ownerService.getNotifications()),
+  // The navbar is intentionally a bounded preview; the endpoint itself is
+  // paginated so a future full notifications workspace can page every record.
+  const { data: notificationsPage } = useQuery({
+    queryKey: [...ownerKeys.notifications, { page: 1, pageSize: 50 }],
+    queryFn: () => unwrap(ownerService.getNotifications({ page: 1, pageSize: 50 })),
   });
+  const notifications = notificationsPage?.items ?? [];
 
   const markRead = useMutation({
     mutationFn: (id: string) => unwrap(ownerService.markNotificationRead(id)),

@@ -7,6 +7,7 @@ import { LegacySelect } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ClipboardList } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';
@@ -21,12 +22,30 @@ type TypeFilter = 'all' | TaskType;
 export default function AgentTasksPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: tasks = [], error } = useQuery({
-    queryKey: agentKeys.tasks,
-    queryFn: () => unwrap(agentService.listTasks()),
-  });
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data: tasksData, error } = useQuery({
+    queryKey: [
+      ...agentKeys.tasks,
+      { search: searchQuery, status: statusFilter, type: typeFilter, page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        agentService.listTasks({
+          search: searchQuery || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          type: typeFilter === 'all' ? undefined : typeFilter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const tasks = tasksData?.items ?? [];
+  const total = tasksData?.total ?? 0;
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -35,8 +54,6 @@ export default function AgentTasksPage() {
       setSearchQuery(q);
     }
   }, [searchParams]);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
 
   const updateStatus = useMutation({
     mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
@@ -60,15 +77,6 @@ export default function AgentTasksPage() {
     }
   };
 
-  const filteredTasks = tasks.filter((t) => {
-    const matchesSearch =
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.propertyAddress.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
-    const matchesType = typeFilter === 'all' || t.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
-  });
-
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'assigned', label: 'Assigned' },
@@ -90,7 +98,7 @@ export default function AgentTasksPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
         <p className="text-muted-foreground mt-1">
-          {tasks.length} task{tasks.length === 1 ? '' : 's'} assigned to you
+          {total} task{total === 1 ? '' : 's'} assigned to you
         </p>
       </div>
 
@@ -111,14 +119,20 @@ export default function AgentTasksPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by title or property..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         <LegacySelect
           value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
+          onChange={(e) => {
+            setTypeFilter(e.target.value as TypeFilter);
+            setPage(1);
+          }}
           className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-fit"
         >
           {typeOptions.map((option) => (
@@ -133,7 +147,10 @@ export default function AgentTasksPage() {
         {statusOptions.map((option) => (
           <button
             key={option.value}
-            onClick={() => setStatusFilter(option.value)}
+            onClick={() => {
+              setStatusFilter(option.value);
+              setPage(1);
+            }}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               statusFilter === option.value
                 ? 'bg-card text-primary shadow-sm'
@@ -145,23 +162,23 @@ export default function AgentTasksPage() {
         ))}
       </div>
 
-      {filteredTasks.length === 0 ? (
+      {tasks.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <ClipboardList className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {tasks.length === 0 ? 'No tasks yet' : 'No tasks match your filters'}
+            {total === 0 ? 'No tasks yet' : 'No tasks match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {tasks.length === 0
+            {total === 0
               ? 'Tasks assigned to you will appear here.'
               : 'Try adjusting your search or filter.'}
           </p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredTasks.map((task, index) => (
+          {tasks.map((task, index) => (
             <TaskCard
               key={task.id}
               task={task}
@@ -172,6 +189,16 @@ export default function AgentTasksPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
     </>
   );

@@ -1,10 +1,15 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Star, MessageCircle, Home, Clock } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type TenantReview } from '@/services/landlordService';
+
+const PAGE_SIZE = 10;
 
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -18,27 +23,28 @@ const StarRow = ({ rating }: { rating: number }) => (
 );
 
 export default function LandlordReviewsPage() {
-  // Reviews feed the reputation averages, so fetch a full batch (backend max
-  // pageSize is 100) rather than paginating this summary page.
+  const [page, setPage] = useState(1);
   const { data } = useQuery({
-    queryKey: ['landlord', 'reviews'],
-    queryFn: () => unwrap(landlordService.listReviews({ page: 1, pageSize: 100 })),
+    queryKey: [...landlordKeys.reviews, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(landlordService.listReviews({ page, pageSize: PAGE_SIZE })),
   });
   const reviews = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const avg = (
-    key: keyof Pick<
-      TenantReview,
-      'rating' | 'communication' | 'propertyCondition' | 'responsiveness'
-    >
-  ) => (reviews.length ? reviews.reduce((sum, r) => sum + r[key], 0) / reviews.length : 0);
+  const { data: summary } = useQuery({
+    queryKey: landlordKeys.reviewSummary,
+    queryFn: () => unwrap(landlordService.getReviewSummary()),
+  });
 
-  const overallRating = avg('rating');
+  const overallRating = summary?.averageRating ?? 0;
   const categories = [
-    { label: 'Communication', icon: MessageCircle, value: avg('communication') },
-    { label: 'Property Condition', icon: Home, value: avg('propertyCondition') },
-    { label: 'Responsiveness', icon: Clock, value: avg('responsiveness') },
+    { label: 'Communication', icon: MessageCircle, value: summary?.averageCommunication ?? 0 },
+    {
+      label: 'Property Condition',
+      icon: Home,
+      value: summary?.averagePropertyCondition ?? 0,
+    },
+    { label: 'Responsiveness', icon: Clock, value: summary?.averageResponsiveness ?? 0 },
   ];
 
   return (
@@ -53,7 +59,8 @@ export default function LandlordReviewsPage() {
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
-            Based on {total} review{total === 1 ? '' : 's'}
+            Based on {summary?.reviewCount ?? total} review
+            {summary?.reviewCount === 1 ? '' : 's'}
           </p>
         </div>
 
@@ -77,7 +84,7 @@ export default function LandlordReviewsPage() {
       </div>
 
       <div className="space-y-4">
-        {reviews.map((review) => (
+        {reviews.map((review: TenantReview) => (
           <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -98,6 +105,16 @@ export default function LandlordReviewsPage() {
           </div>
         ))}
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

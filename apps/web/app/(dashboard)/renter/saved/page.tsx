@@ -20,23 +20,38 @@ export default function SavedPage() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 12;
   const [page, setPage] = useState(1);
+  const [selectedWishlist, setSelectedWishlist] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'trust-score'>(
+    'recent'
+  );
+  const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed'>('all');
+  const [selectedSavedListings, setSelectedSavedListings] = useState<Record<string, string>>({});
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [shareToast, setShareToast] = useState<string | null>(null);
+
+  const savedListingParams = {
+    page,
+    pageSize: PAGE_SIZE,
+    wishlistId: selectedWishlist === 'all' ? undefined : selectedWishlist,
+    status: filterStatus === 'all' ? undefined : filterStatus,
+    sortBy,
+  };
   const { data } = useQuery({
-    queryKey: [...renterKeys.savedListings, { page, pageSize: PAGE_SIZE }],
-    queryFn: () => unwrap(renterService.listSavedListings({ page, pageSize: PAGE_SIZE })),
+    queryKey: [...renterKeys.savedListings, savedListingParams],
+    queryFn: () => unwrap(renterService.listSavedListings(savedListingParams)),
   });
   const savedProperties = data?.items ?? [];
   const total = data?.total ?? 0;
+  const { data: dashboardStats } = useQuery({
+    queryKey: renterKeys.dashboardStats,
+    queryFn: () => unwrap(renterService.getDashboardStats()),
+  });
   const { data: wishlists = [] } = useQuery({
     queryKey: renterKeys.wishlists,
     queryFn: () => unwrap(renterService.listWishlists()),
   });
-  const [selectedWishlist, setSelectedWishlist] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'rating'>('recent');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed'>('all');
-  const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [shareToast, setShareToast] = useState<string | null>(null);
+  const selectedProperties = Object.keys(selectedSavedListings);
 
   const invalidateSaved = () => {
     queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
@@ -48,7 +63,12 @@ export default function SavedPage() {
     mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
     onSuccess: (_, propertyId) => {
       invalidateSaved();
-      setSelectedProperties((prev) => prev.filter((id) => id !== propertyId));
+      setSelectedSavedListings((previous) => {
+        const next = { ...previous };
+        delete next[propertyId];
+        return next;
+      });
+      if (savedProperties.length === 1 && page > 1) setPage((current) => current - 1);
     },
   });
 
@@ -59,10 +79,15 @@ export default function SavedPage() {
     }: {
       savedListingId: string;
       wishlistId: string | null;
+      propertyId: string;
     }) => unwrap(renterService.moveSavedListingToWishlist(savedListingId, wishlistId)),
-    onSuccess: () => {
+    onSuccess: (_, { propertyId }) => {
       invalidateSaved();
-      setSelectedProperties([]);
+      setSelectedSavedListings((previous) => {
+        const next = { ...previous };
+        delete next[propertyId];
+        return next;
+      });
     },
   });
 
@@ -70,19 +95,26 @@ export default function SavedPage() {
 
   const handleMoveToWishlist = (propertyId: string, wishlistId: string) => {
     const saved = savedProperties.find((p) => p.id === propertyId);
-    if (saved) moveMutation.mutate({ savedListingId: saved.savedListingId, wishlistId });
+    if (saved)
+      moveMutation.mutate({ savedListingId: saved.savedListingId, wishlistId, propertyId });
   };
 
   const handleSelectAll = () => {
-    if (selectedProperties.length === savedProperties.length) {
-      setSelectedProperties([]);
-    } else {
-      setSelectedProperties(savedProperties.map((p) => p.id));
-    }
+    const pageIsFullySelected = savedProperties.every(
+      (property) => selectedSavedListings[property.id]
+    );
+    setSelectedSavedListings((previous) => {
+      const next = { ...previous };
+      savedProperties.forEach((property) => {
+        if (pageIsFullySelected) delete next[property.id];
+        else next[property.id] = property.savedListingId;
+      });
+      return next;
+    });
   };
 
   const handleClearSelection = () => {
-    setSelectedProperties([]);
+    setSelectedSavedListings({});
   };
 
   const bulkUnsaveMutation = useMutation({
@@ -90,7 +122,14 @@ export default function SavedPage() {
       Promise.all(ids.map((id) => unwrap(renterService.unsaveListing(id)))),
     onSuccess: () => {
       invalidateSaved();
-      setSelectedProperties([]);
+      setSelectedSavedListings({});
+      if (
+        savedProperties.length > 0 &&
+        savedProperties.every((property) => selectedProperties.includes(property.id)) &&
+        page > 1
+      ) {
+        setPage((current) => current - 1);
+      }
     },
   });
 
@@ -106,28 +145,26 @@ export default function SavedPage() {
   };
 
   const handleBulkMoveToWishlist = (wishlistId: string) => {
-    savedProperties
-      .filter((p) => selectedProperties.includes(p.id))
-      .forEach((p) => moveMutation.mutate({ savedListingId: p.savedListingId, wishlistId }));
+    Object.entries(selectedSavedListings).forEach(([propertyId, savedListingId]) =>
+      moveMutation.mutate({ savedListingId, wishlistId, propertyId })
+    );
   };
 
   const handleSelectProperty = (propertyId: string) => {
-    if (selectedProperties.includes(propertyId)) {
-      setSelectedProperties(selectedProperties.filter((id) => id !== propertyId));
-    } else {
-      setSelectedProperties([...selectedProperties, propertyId]);
-    }
+    const saved = savedProperties.find((property) => property.id === propertyId);
+    if (!saved) return;
+    setSelectedSavedListings((previous) => {
+      const next = { ...previous };
+      if (next[propertyId]) delete next[propertyId];
+      else next[propertyId] = saved.savedListingId;
+      return next;
+    });
   };
-
-  const visibleProperties =
-    selectedWishlist === 'all'
-      ? savedProperties
-      : savedProperties.filter((p) => p.wishlistId === selectedWishlist);
 
   return (
     <>
       <SavedPropertiesHeader
-        savedCount={total}
+        savedCount={dashboardStats?.savedPropertiesCount ?? total}
         wishlistCount={wishlists.length}
         onExport={() => setShowExportModal(true)}
       />
@@ -137,7 +174,10 @@ export default function SavedPage() {
           <WishlistManager
             wishlists={wishlists}
             selectedWishlist={selectedWishlist}
-            setSelectedWishlist={setSelectedWishlist}
+            setSelectedWishlist={(wishlistId) => {
+              setSelectedWishlist(wishlistId);
+              setPage(1);
+            }}
           />
           <RecentlyViewed />
           <SavedSearchesList />
@@ -149,13 +189,21 @@ export default function SavedPage() {
             viewMode={viewMode}
             setViewMode={setViewMode}
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={(value) => {
+              setSortBy(value);
+              setPage(1);
+            }}
             filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
+            setFilterStatus={(value) => {
+              setFilterStatus(value);
+              setPage(1);
+            }}
           />
 
           <SavedPropertiesGrid
-            properties={visibleProperties}
+            properties={savedProperties}
+            total={total}
+            isFiltered={selectedWishlist !== 'all' || filterStatus !== 'all'}
             viewMode={viewMode}
             sortBy={sortBy}
             filterStatus={filterStatus}
@@ -174,7 +222,7 @@ export default function SavedPage() {
 
       <BulkActions
         selectedCount={selectedProperties.length}
-        totalCount={savedProperties.length}
+        pageCount={savedProperties.length}
         wishlists={wishlists}
         onSelectAll={handleSelectAll}
         onClearSelection={handleClearSelection}

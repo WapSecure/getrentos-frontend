@@ -1,8 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
@@ -17,16 +17,47 @@ import { ROUTES } from '@/lib/constants/auth';
 
 type StageFilter = 'all' | BuyerLeadStage;
 
+const PAGE_SIZE = 10;
+
 export default function OwnerLeadsPage() {
   const router = useRouter();
-  const { data: leads = [] } = useQuery({
-    queryKey: ownerKeys.leads,
-    queryFn: () => unwrap(ownerService.listLeads()),
-  });
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<StageFilter>('all');
   const [schedulingLead, setSchedulingLead] = useState<BuyerLead | null>(null);
   const [assigningLead, setAssigningLead] = useState<BuyerLead | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data } = useQuery({
+    queryKey: [
+      ...ownerKeys.leads,
+      {
+        search: debouncedSearch,
+        stage: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.listLeads({
+          search: debouncedSearch || undefined,
+          stage: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const leads = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const handleMessage = (lead: BuyerLead) => {
     router.push(`${ROUTES.OWNER_MESSAGES}?lead=${lead.id}`);
@@ -46,20 +77,15 @@ export default function OwnerLeadsPage() {
     setSchedulingLead(null);
   };
 
-  const filteredLeads = leads.filter((l) => {
-    const matchesSearch =
-      l.buyerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || l.stage === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: StageFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'new', label: 'New' },
     { value: 'contacted', label: 'Contacted' },
+    { value: 'qualified', label: 'Qualified' },
     { value: 'viewing_scheduled', label: 'Viewing Scheduled' },
     { value: 'offer_made', label: 'Offer Made' },
+    { value: 'closed', label: 'Closed' },
+    { value: 'lost', label: 'Lost' },
   ];
 
   return (
@@ -67,7 +93,7 @@ export default function OwnerLeadsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Buyer Leads</h1>
         <p className="text-muted-foreground mt-1">
-          {leads.length} inquir{leads.length === 1 ? 'y' : 'ies'} across your sale listings
+          {total} inquir{total === 1 ? 'y' : 'ies'} across your sale listings
         </p>
       </div>
 
@@ -86,7 +112,10 @@ export default function OwnerLeadsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -99,23 +128,23 @@ export default function OwnerLeadsPage() {
         </div>
       </div>
 
-      {filteredLeads.length === 0 ? (
+      {leads.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Users className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {leads.length === 0 ? 'No buyer leads yet' : 'No leads match your filters'}
+            {total === 0 ? 'No buyer leads yet' : 'No leads match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {leads.length === 0
+            {total === 0
               ? 'Inquiries from buyers on your published sale listings will appear here.'
               : 'Try adjusting your search or filter.'}
           </p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredLeads.map((lead, index) => (
+          {leads.map((lead, index) => (
             <BuyerLeadCard
               key={lead.id}
               lead={lead}
@@ -127,6 +156,16 @@ export default function OwnerLeadsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <ScheduleViewingModal

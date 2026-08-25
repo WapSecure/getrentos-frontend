@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt } from 'lucide-react';
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   DialogTitle,
   Field,
   DatePicker,
+  Pagination,
   Select,
   Toast,
   type ToastVariant,
@@ -25,7 +26,7 @@ import {
   type BillingCycle,
   type ChargeCategory,
 } from '@/services/landlordService';
-import type { Property, Unit } from '@/types/landlord';
+import type { Property } from '@/types/landlord';
 
 const categoryOptions: { value: ChargeCategory; label: string }[] = [
   { value: 'RENT', label: 'Rent' },
@@ -43,11 +44,12 @@ const billingCycleOptions: { value: BillingCycle; label: string }[] = [
 interface BulkChargeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  units: Unit[];
   properties: Property[];
 }
 
-export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChargeModalProps) {
+const PAGE_SIZE = 10;
+
+export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModalProps) {
   const queryClient = useQueryClient();
   const [propertyId, setPropertyId] = useState('');
   const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
@@ -55,7 +57,26 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('MONTHLY');
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: unitsData } = useQuery({
+    queryKey: [
+      ...landlordKeys.units(propertyId || undefined),
+      { page, pageSize: PAGE_SIZE, bulkCharge: true },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listUnits({
+          propertyId: propertyId || undefined,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+    enabled: isOpen,
+  });
+  const units = unitsData?.items ?? [];
+  const totalUnits = unitsData?.total ?? 0;
 
   const eligibleUnits = useMemo(
     () =>
@@ -73,6 +94,7 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
     setAmount('');
     setDueDate('');
     setBillingCycle('MONTHLY');
+    setPage(1);
   };
 
   const handleClose = () => {
@@ -117,8 +139,12 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
   };
 
   const toggleAll = () => {
+    const currentPageIds = eligibleUnits.map((unit) => unit.id);
+    const allCurrentPageSelected = currentPageIds.every((id) => selectedUnitIds.includes(id));
     setSelectedUnitIds((current) =>
-      current.length === eligibleUnits.length ? [] : eligibleUnits.map((unit) => unit.id)
+      allCurrentPageSelected
+        ? current.filter((id) => !currentPageIds.includes(id))
+        : [...new Set([...current, ...currentPageIds])]
     );
   };
 
@@ -148,6 +174,7 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
                   onValueChange={(value) => {
                     setPropertyId(value);
                     setSelectedUnitIds([]);
+                    setPage(1);
                   }}
                   placeholder="All properties"
                   options={[
@@ -190,7 +217,7 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-foreground">
-                  Units ({selectedUnitIds.length} of {eligibleUnits.length} selected)
+                  Units ({selectedUnitIds.length} selected across {totalUnits})
                 </p>
                 {eligibleUnits.length > 0 && (
                   <button
@@ -198,9 +225,9 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
                     onClick={toggleAll}
                     className="text-xs font-medium text-primary hover:underline"
                   >
-                    {selectedUnitIds.length === eligibleUnits.length
-                      ? 'Deselect all'
-                      : 'Select all'}
+                    {eligibleUnits.every((unit) => selectedUnitIds.includes(unit.id))
+                      ? 'Deselect page'
+                      : 'Select page'}
                   </button>
                 )}
               </div>
@@ -209,8 +236,8 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
                 <div className="rounded-xl border border-border p-6 text-center">
                   <Receipt className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    No occupied units{propertyId ? ' for this property' : ''}. Only units with a
-                    tenant can be charged.
+                    No occupied units on this page{propertyId ? ' for this property' : ''}. Only
+                    units with a tenant can be charged.
                   </p>
                 </div>
               ) : (
@@ -241,6 +268,15 @@ export function BulkChargeModal({ isOpen, onClose, units, properties }: BulkChar
                     </label>
                   ))}
                 </div>
+              )}
+              {totalUnits > 0 && (
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  total={totalUnits}
+                  onPageChange={setPage}
+                  className="mt-3"
+                />
               )}
             </div>
 

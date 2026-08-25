@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, Plus } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -22,38 +22,66 @@ const statusFilters: { value: VisitorPassStatus | 'all'; label: string }[] = [
   { value: 'revoked', label: 'Revoked' },
 ];
 
+const PAGE_SIZE = 10;
+const HOUSEHOLD_OPTIONS_PAGE_SIZE = 20;
+
 export default function EstateVisitorPassesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<VisitorPassStatus | 'all'>('all');
   const [issuedPass, setIssuedPass] = useState<IssuedVisitorPass | null>(null);
+  const [page, setPage] = useState(1);
+  const [householdPage, setHouseholdPage] = useState(1);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
-  const { data: households = [] } = useQuery({
-    queryKey: estateKeys.households(estate?.id ?? ''),
-    queryFn: () => unwrap(estateService.listHouseholds(estate!.id)),
-    enabled: !!estate,
-  });
-
-  const { data: passes = [], isLoading: isPassesLoading } = useQuery({
-    queryKey: estateKeys.visitorPasses(
-      estate?.id ?? '',
-      statusFilter === 'all' ? undefined : statusFilter
-    ),
+  const { data: householdsData, isLoading: isHouseholdsLoading } = useQuery({
+    queryKey: [
+      ...estateKeys.households(estate?.id ?? ''),
+      {
+        page: householdPage,
+        pageSize: HOUSEHOLD_OPTIONS_PAGE_SIZE,
+        status: 'active',
+        purpose: 'visitor-pass-options',
+      },
+    ],
     queryFn: () =>
       unwrap(
-        estateService.listVisitorPasses(
-          estate!.id,
-          statusFilter === 'all' ? undefined : statusFilter
-        )
+        estateService.listHouseholds(estate!.id, {
+          page: householdPage,
+          pageSize: HOUSEHOLD_OPTIONS_PAGE_SIZE,
+          status: 'active',
+        })
       ),
     enabled: !!estate,
   });
+  const households = householdsData?.items ?? [];
+  const householdsTotal = householdsData?.total ?? 0;
+
+  const { data, isLoading: isPassesLoading } = useQuery({
+    queryKey: [
+      ...estateKeys.visitorPasses(
+        estate?.id ?? '',
+        statusFilter === 'all' ? undefined : statusFilter
+      ),
+      { page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        estateService.listVisitorPasses(estate!.id, {
+          page,
+          pageSize: PAGE_SIZE,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+        })
+      ),
+    enabled: !!estate,
+  });
+  const passes = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidatePasses = () => {
     if (!estate) return;
@@ -65,6 +93,7 @@ export default function EstateVisitorPassesPage() {
       unwrap(estateService.issueVisitorPass(estate!.id, data)),
     onSuccess: (result) => {
       invalidatePasses();
+      setPage(1);
       setIsModalOpen(false);
       setIssuedPass(result);
     },
@@ -72,7 +101,10 @@ export default function EstateVisitorPassesPage() {
 
   const revokePass = useMutation({
     mutationFn: (passId: string) => unwrap(estateService.revokeVisitorPass(estate!.id, passId)),
-    onSuccess: invalidatePasses,
+    onSuccess: () => {
+      invalidatePasses();
+      setPage(1);
+    },
   });
 
   if (isEstateLoading) {
@@ -90,10 +122,17 @@ export default function EstateVisitorPassesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Visitor Passes</h1>
           <p className="text-muted-foreground mt-1">
-            {passes.length} pass{passes.length === 1 ? '' : 'es'} in {estate.name}
+            {total} pass{total === 1 ? '' : 'es'} in {estate.name}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
+        <Button
+          variant="primary"
+          className="gap-2"
+          onClick={() => {
+            setHouseholdPage(1);
+            setIsModalOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4" />
           Issue Pass
         </Button>
@@ -105,7 +144,10 @@ export default function EstateVisitorPassesPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
-            onClick={() => setStatusFilter(filter.value)}
+            onClick={() => {
+              setStatusFilter(filter.value);
+              setPage(1);
+            }}
           >
             {filter.label}
           </Button>
@@ -135,9 +177,24 @@ export default function EstateVisitorPassesPage() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
+
       <IssueVisitorPassModal
         isOpen={isModalOpen}
         households={households}
+        householdTotal={householdsTotal}
+        householdPage={householdPage}
+        householdPageSize={HOUSEHOLD_OPTIONS_PAGE_SIZE}
+        onHouseholdPageChange={setHouseholdPage}
+        isHouseholdsLoading={isHouseholdsLoading}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => issuePass.mutate(data)}
         isSubmitting={issuePass.isPending}

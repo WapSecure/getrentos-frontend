@@ -24,11 +24,22 @@ export default function GatemanVerifyPage() {
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
-  const { data: checkIns = [] } = useQuery({
-    queryKey: estateKeys.visitorPasses(estate?.id ?? '', 'checked_in'),
-    queryFn: () => unwrap(estateService.listVisitorPasses(estate!.id, 'checked_in')),
+  const { data: checkInsData } = useQuery({
+    queryKey: [
+      ...estateKeys.visitorPasses(estate?.id ?? '', 'checked_in'),
+      { page: 1, pageSize: 100, purpose: 'today-check-ins' },
+    ],
+    queryFn: () =>
+      unwrap(
+        estateService.listVisitorPasses(estate!.id, {
+          status: 'checked_in',
+          page: 1,
+          pageSize: 100,
+        })
+      ),
     enabled: !!estate,
   });
+  const checkIns = checkInsData?.items ?? [];
 
   const todaysCheckIns = checkIns.filter((pass) => pass.checkedInAt && isToday(pass.checkedInAt));
 

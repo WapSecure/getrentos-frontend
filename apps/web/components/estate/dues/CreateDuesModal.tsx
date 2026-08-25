@@ -3,12 +3,17 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, Checkbox, DatePicker, LegacyInput, Select } from '@getrentos/ui';
+import { Button, Checkbox, DatePicker, LegacyInput, Pagination, Select } from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface CreateDuesModalProps {
   isOpen: boolean;
   households: Household[];
+  householdTotal: number;
+  householdPage: number;
+  householdPageSize: number;
+  onHouseholdPageChange: (page: number) => void;
+  isHouseholdsLoading?: boolean;
   onClose: () => void;
   onSubmit: (data: {
     amount: number;
@@ -36,6 +41,11 @@ const billingCycleOptions = [
 export const CreateDuesModal = ({
   isOpen,
   households,
+  householdTotal,
+  householdPage,
+  householdPageSize,
+  onHouseholdPageChange,
+  isHouseholdsLoading,
   onClose,
   onSubmit,
   isSubmitting,
@@ -48,6 +58,8 @@ export const CreateDuesModal = ({
   const [chargeAll, setChargeAll] = useState(true);
   const [selectedHouseholdIds, setSelectedHouseholdIds] = useState<string[]>([]);
 
+  // The caller requests only active households from the server. Retaining the
+  // local guard makes this safe if a cached response predates that filter.
   const activeHouseholds = households.filter((h) => h.status === 'active');
 
   const handleClose = () => {
@@ -135,24 +147,46 @@ export const CreateDuesModal = ({
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
                   <Checkbox checked={chargeAll} onCheckedChange={setChargeAll} />
-                  Charge all active households ({activeHouseholds.length})
+                  Charge all active households ({householdTotal})
                 </label>
 
                 {!chargeAll && (
                   <div className="max-h-40 overflow-y-auto rounded-lg border border-border divide-y divide-border">
-                    {activeHouseholds.map((household) => (
-                      <label
-                        key={household.id}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-foreground cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={selectedHouseholdIds.includes(household.id)}
-                          onCheckedChange={() => toggleHousehold(household.id)}
-                        />
-                        {household.unitLabel} — {household.residentName}
-                      </label>
-                    ))}
+                    {isHouseholdsLoading ? (
+                      <p className="px-3 py-4 text-sm text-muted-foreground">Loading households…</p>
+                    ) : activeHouseholds.length === 0 ? (
+                      <p className="px-3 py-4 text-sm text-muted-foreground">
+                        No active households on this page.
+                      </p>
+                    ) : (
+                      activeHouseholds.map((household) => (
+                        <label
+                          key={household.id}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-foreground cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={selectedHouseholdIds.includes(household.id)}
+                            onCheckedChange={() => toggleHousehold(household.id)}
+                          />
+                          {household.unitLabel} — {household.residentName}
+                        </label>
+                      ))
+                    )}
+                    {householdTotal > 0 && (
+                      <Pagination
+                        page={householdPage}
+                        pageSize={householdPageSize}
+                        total={householdTotal}
+                        onPageChange={onHouseholdPageChange}
+                      />
+                    )}
                   </div>
+                )}
+                {!chargeAll && selectedHouseholdIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {selectedHouseholdIds.length} household
+                    {selectedHouseholdIds.length === 1 ? '' : 's'} selected across pages.
+                  </p>
                 )}
               </div>
             </div>

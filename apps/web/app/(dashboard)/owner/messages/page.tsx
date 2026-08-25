@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -33,15 +34,37 @@ const toThreadMessage = (m: OwnerMessage): ThreadMessage => ({
   read: m.read,
 });
 
+const PAGE_SIZE = 10;
+
 export default function OwnerMessagesPage() {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const { data: conversations = [] } = useQuery({
-    queryKey: ownerKeys.conversations,
-    queryFn: () => unwrap(ownerService.listConversations()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+      setActiveId(null);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data } = useQuery({
+    queryKey: [...ownerKeys.conversations, { search: debouncedSearch, page, pageSize: PAGE_SIZE }],
+    queryFn: () =>
+      unwrap(
+        ownerService.listConversations({
+          search: debouncedSearch || undefined,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const conversations = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const { data: activeMessages = [] } = useQuery({
     queryKey: ownerKeys.messages(activeId ?? ''),
@@ -75,9 +98,7 @@ export default function OwnerMessagesPage() {
     sendMutation.mutate({ conversationId: activeId, text });
   };
 
-  const filteredConversations = conversations
-    .map(toConversation)
-    .filter((c) => c.participantName.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredConversations = conversations.map(toConversation);
   const activeConversation = conversations.find((c) => c.id === activeId);
   const threadMessages: ThreadMessage[] = activeMessages.map(toThreadMessage);
 
@@ -89,7 +110,9 @@ export default function OwnerMessagesPage() {
       </div>
 
       <div className="flex gap-4 h-[calc(100%-4.5rem)]">
-        <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
+        <div
+          className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto flex-col gap-3')}
+        >
           <ConversationList
             conversations={filteredConversations}
             activeId={activeId}
@@ -97,6 +120,17 @@ export default function OwnerMessagesPage() {
             onSearch={setSearchQuery}
             onSelect={handleSelect}
           />
+          {total > 0 && (
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              total={total}
+              onPageChange={(nextPage) => {
+                setPage(nextPage);
+                setActiveId(null);
+              }}
+            />
+          )}
         </div>
 
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>

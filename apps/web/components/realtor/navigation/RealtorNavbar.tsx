@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import { Pagination, ThemeToggle } from '@getrentos/ui';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
 import { navItems } from '../dashboard/RealtorSidebar';
 import { formatRelativeTime } from '@/lib/format';
@@ -22,6 +22,8 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 interface RealtorNavbarProps {
   user: { fullName: string; email: string } | null;
 }
+
+const NOTIFICATIONS_PAGE_SIZE = 50;
 
 export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
   const router = useRouter();
@@ -37,10 +39,22 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
   };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { data: notifications = [] } = useQuery({
-    queryKey: realtorKeys.notifications,
-    queryFn: () => unwrap(realtorService.getNotifications()),
+  const [notificationPage, setNotificationPage] = useState(1);
+  const { data: notificationsPage } = useQuery({
+    queryKey: [
+      ...realtorKeys.notifications,
+      { page: notificationPage, pageSize: NOTIFICATIONS_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        realtorService.getNotifications({
+          page: notificationPage,
+          pageSize: NOTIFICATIONS_PAGE_SIZE,
+        })
+      ),
   });
+  const notifications = notificationsPage?.items ?? [];
+  const notificationsTotal = notificationsPage?.total ?? 0;
 
   const markRead = useMutation({
     mutationFn: (id: string) => unwrap(realtorService.markNotificationRead(id)),
@@ -114,7 +128,10 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
               <div className="relative">
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() => {
+                    if (!showNotifications) setNotificationPage(1);
+                    setShowNotifications(!showNotifications);
+                  }}
                   className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
                 >
                   <Bell className="w-5 h-5 text-muted-foreground" />
@@ -167,6 +184,14 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                           ))
                         )}
                       </div>
+                      {notificationsTotal > NOTIFICATIONS_PAGE_SIZE && (
+                        <Pagination
+                          page={notificationPage}
+                          pageSize={NOTIFICATIONS_PAGE_SIZE}
+                          total={notificationsTotal}
+                          onPageChange={setNotificationPage}
+                        />
+                      )}
                       <div className="p-2 border-t border-border">
                         <Link
                           href={ROUTES.REALTOR_DASHBOARD}

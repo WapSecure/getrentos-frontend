@@ -52,13 +52,6 @@ export interface AdminNotification {
   createdAt: string;
 }
 
-export interface PaginatedAuditLogs {
-  items: AuditLogEntry[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
 /** Standard server-side paginated envelope ({ items, total, page, pageSize, totalPages }). */
 export interface Paginated<T> {
   items: T[];
@@ -127,10 +120,16 @@ function normalizeApprovalRow(row: RawApprovalRow): AdminStaffApproval {
 
 export const adminService = {
   // ---- Staff access ----
-  async listStaff(): Promise<ApiResponse<AdminStaffMember[]>> {
+  async listStaff(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminStaffMember>>> {
     return safeCall(async () => {
-      const rows = await authFetch<RawStaffRow[]>('/admin/access/staff');
-      return rows.map(normalizeStaffRow);
+      const query = toQuery({
+        page: params.page?.toString(),
+        pageSize: params.pageSize?.toString(),
+      });
+      const response = await authFetch<Paginated<RawStaffRow>>(`/admin/access/staff${query}`);
+      return { ...response, items: response.items.map(normalizeStaffRow) };
     });
   },
 
@@ -189,10 +188,18 @@ export const adminService = {
     );
   },
 
-  async listApprovals(): Promise<ApiResponse<AdminStaffApproval[]>> {
+  async listApprovals(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminStaffApproval>>> {
     return safeCall(async () => {
-      const rows = await authFetch<RawApprovalRow[]>('/admin/access/approvals');
-      return rows.map(normalizeApprovalRow);
+      const query = toQuery({
+        page: params.page?.toString(),
+        pageSize: params.pageSize?.toString(),
+      });
+      const response = await authFetch<Paginated<RawApprovalRow>>(
+        `/admin/access/approvals${query}`
+      );
+      return { ...response, items: response.items.map(normalizeApprovalRow) };
     });
   },
 
@@ -424,13 +431,13 @@ export const adminService = {
 
   // ---- Audit logs ----
   async listAuditLogs(
-    params: { search?: string; severity?: string; page?: number; limit?: number } = {}
-  ): Promise<ApiResponse<PaginatedAuditLogs>> {
+    params: { search?: string; severity?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AuditLogEntry>>> {
     const query = toQuery({
       search: params.search,
       severity: params.severity,
       page: params.page?.toString(),
-      limit: params.limit?.toString(),
+      pageSize: params.pageSize?.toString(),
     });
     return safeCall(() => authFetch(`/admin/audit-logs${query}`));
   },

@@ -1,8 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Megaphone } from 'lucide-react';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
@@ -16,22 +16,47 @@ import type { SaleListing, SaleListingStatus } from '@/types/owner';
 
 type StatusFilter = 'all' | SaleListingStatus;
 
+const PAGE_SIZE = 10;
+
 export default function OwnerListingsPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [manageListing, setManageListing] = useState<SaleListing | null>(null);
 
-  const { data: listings = [], isLoading } = useQuery({
-    queryKey: ownerKeys.listings,
-    queryFn: () => unwrap(ownerService.listListings()),
-  });
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  const { data: properties = [] } = useQuery({
-    queryKey: ownerKeys.properties,
-    queryFn: () => unwrap(ownerService.listProperties()),
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      ...ownerKeys.listings,
+      {
+        search: debouncedSearch,
+        status: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.listListings({
+          search: debouncedSearch || undefined,
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const listings = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.listings });
 
@@ -67,16 +92,6 @@ export default function OwnerListingsPage() {
     statusMutation.mutate({ id: listingId, status });
   };
 
-  const verifiedProperties = properties.filter((p) => p.verificationStatus === 'verified');
-
-  const filteredListings = listings.filter((l) => {
-    const matchesSearch =
-      l.listingTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || l.status === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'draft', label: 'Draft' },
@@ -93,7 +108,7 @@ export default function OwnerListingsPage() {
           <p className="text-muted-foreground mt-1">
             {isLoading
               ? 'Loading…'
-              : `${listings.length} listing${listings.length === 1 ? '' : 's'} across your portfolio`}
+              : `${total} listing${total === 1 ? '' : 's'} across your portfolio`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
@@ -117,7 +132,10 @@ export default function OwnerListingsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -130,20 +148,20 @@ export default function OwnerListingsPage() {
         </div>
       </div>
 
-      {!isLoading && filteredListings.length === 0 ? (
+      {!isLoading && listings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Megaphone className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {listings.length === 0 ? 'No sale listings yet' : 'No listings match your filters'}
+            {total === 0 ? 'No sale listings yet' : 'No listings match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {listings.length === 0
+            {total === 0
               ? 'Create a sale listing for one of your verified properties to start reaching buyers.'
               : 'Try adjusting your search or filter.'}
           </p>
-          {listings.length === 0 && (
+          {total === 0 && (
             <Button variant="primary" className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
               Create Your First Listing
             </Button>
@@ -151,7 +169,7 @@ export default function OwnerListingsPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredListings.map((listing, index) => (
+          {listings.map((listing, index) => (
             <SaleListingCard
               key={listing.id}
               listing={listing}
@@ -162,10 +180,19 @@ export default function OwnerListingsPage() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
+
       <CreateSaleListingModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        verifiedProperties={verifiedProperties}
         onCreate={handleCreate}
       />
 

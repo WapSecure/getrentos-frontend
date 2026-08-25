@@ -2,7 +2,13 @@ import { ApiError } from '@/lib/apiClient';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import { getAuthToken } from '@/lib/authStorage';
-import type { Property, Application, GeoInsights, RenterInspection } from '@/types/renter';
+import type {
+  Application,
+  ApplicationStatus,
+  GeoInsights,
+  Property,
+  RenterInspection,
+} from '@/types/renter';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
@@ -232,7 +238,16 @@ export type SavedListingItem = Property & {
   wishlistId: string | null;
   note: string | null;
   savedAt: string;
+  applicationStatus?: ApplicationStatus;
 };
+
+export interface ListSavedListingsParams {
+  page?: number;
+  pageSize?: number;
+  wishlistId?: string;
+  status?: 'applied' | 'viewed';
+  sortBy?: 'recent' | 'price-low' | 'price-high' | 'trust-score';
+}
 
 export interface ApplicationNote {
   id: string;
@@ -298,6 +313,29 @@ export interface RenterDocument {
   tags?: string[];
 }
 
+export interface RenterDocumentSummary {
+  total: number;
+  active: number;
+  expiring: number;
+  expired: number;
+  favorites: number;
+  shared: number;
+  storageUsedBytes: number;
+  categories: Record<string, number>;
+  types: Record<string, number>;
+}
+
+export interface ListRenterDocumentsParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  category?: string;
+  type?: 'lease' | 'receipt' | 'inspection' | 'other';
+  status?: 'active' | 'expiring' | 'expired';
+  sortBy?: 'date' | 'name' | 'size';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface RenterListingsFilters {
   search?: string;
   location?: string;
@@ -341,10 +379,10 @@ export const renterService = {
 
   // ---- Saved listings ----
   async listSavedListings(
-    params: { page?: number; pageSize?: number } = {}
+    params: ListSavedListingsParams = {}
   ): Promise<ApiResponse<Paginated<SavedListingItem>>> {
     return safeCall(() =>
-      authFetch<Paginated<SavedListingItem>>(`/renter/saved-listings${toQuery(params)}`)
+      authFetch<Paginated<SavedListingItem>>(`/renter/saved-listings${toQuery({ ...params })}`)
     );
   },
 
@@ -663,11 +701,15 @@ export const renterService = {
 
   // ---- Documents ----
   async listDocuments(
-    params: { page?: number; pageSize?: number } = {}
+    params: ListRenterDocumentsParams = {}
   ): Promise<ApiResponse<Paginated<RenterDocument>>> {
     return safeCall(() =>
-      authFetch<Paginated<RenterDocument>>(`/renter/documents${toQuery(params)}`)
+      authFetch<Paginated<RenterDocument>>(`/renter/documents${toQuery({ ...params })}`)
     );
+  },
+
+  async getDocumentSummary(): Promise<ApiResponse<RenterDocumentSummary>> {
+    return safeCall(() => authFetch<RenterDocumentSummary>('/renter/documents/summary'));
   },
 
   async uploadDocument(

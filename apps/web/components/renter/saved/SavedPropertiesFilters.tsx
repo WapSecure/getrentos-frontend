@@ -7,8 +7,8 @@ import { LayoutGrid, List } from 'lucide-react';
 interface SavedPropertiesFiltersProps {
   viewMode: 'grid' | 'list';
   setViewMode: (mode: 'grid' | 'list') => void;
-  sortBy: 'recent' | 'price-low' | 'price-high' | 'rating';
-  setSortBy: (sort: 'recent' | 'price-low' | 'price-high' | 'rating') => void;
+  sortBy: 'recent' | 'price-low' | 'price-high' | 'trust-score';
+  setSortBy: (sort: 'recent' | 'price-low' | 'price-high' | 'trust-score') => void;
   filterStatus: 'all' | 'applied' | 'viewed';
   setFilterStatus: (status: 'all' | 'applied' | 'viewed') => void;
 }
@@ -19,11 +19,14 @@ const statusOptions: { value: 'all' | 'applied' | 'viewed'; label: string }[] = 
   { value: 'viewed', label: 'Recently Viewed' },
 ];
 
-const sortOptions: { value: 'recent' | 'price-low' | 'price-high' | 'rating'; label: string }[] = [
+const sortOptions: {
+  value: 'recent' | 'price-low' | 'price-high' | 'trust-score';
+  label: string;
+}[] = [
   { value: 'recent', label: 'Recently Saved' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Highest Rated' },
+  { value: 'trust-score', label: 'Highest Landlord Trust' },
 ];
 
 export const SavedPropertiesFilters = ({
@@ -56,7 +59,7 @@ export const SavedPropertiesFilters = ({
         <LegacySelect
           value={sortBy}
           onChange={(e) =>
-            setSortBy(e.target.value as 'recent' | 'price-low' | 'price-high' | 'rating')
+            setSortBy(e.target.value as 'recent' | 'price-low' | 'price-high' | 'trust-score')
           }
           className="px-4 py-1.5 text-sm cursor-pointer"
         >

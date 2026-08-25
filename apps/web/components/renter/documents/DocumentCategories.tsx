@@ -11,19 +11,13 @@ import {
   ClipboardCheck,
   Shield,
   Plus,
-  Tag,
   X,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
-interface Document {
-  id: string;
-  category: string;
-  tags?: string[];
-}
-
 interface DocumentCategoriesProps {
-  documents: Document[];
+  categories: Record<string, number>;
+  total: number;
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
 }
@@ -45,17 +39,13 @@ const categoryColors: Record<string, string> = {
 };
 
 export const DocumentCategories = ({
-  documents,
+  categories,
+  total,
   selectedCategory,
   onSelectCategory,
 }: DocumentCategoriesProps) => {
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategory, setNewCategory] = useState('');
-
-  const categories = documents.reduce<Record<string, number>>((acc, doc) => {
-    acc[doc.category] = (acc[doc.category] || 0) + 1;
-    return acc;
-  }, {});
 
   const categoryList = Object.keys(categories).sort();
 
@@ -89,7 +79,7 @@ export const DocumentCategories = ({
             <FolderOpen className="w-4 h-4" />
             <span>All Documents</span>
           </div>
-          <span className="text-xs text-gray-500">{documents.length}</span>
+          <span className="text-xs text-gray-500">{total}</span>
         </button>
 
         {categoryList.map((category) => {

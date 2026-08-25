@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Gavel, TriangleAlert } from 'lucide-react';
-import { Button, Select, Textarea } from '@getrentos/ui';
-import type { Lease } from '@/types/landlord';
+import { Button, Pagination, Select, Textarea } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
+
+const PAGE_SIZE = 10;
 
 interface InitiateEvictionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  leases: Lease[];
   onSubmit: (leaseId: string, reason: string) => void;
   isSubmitting?: boolean;
 }
@@ -17,16 +21,26 @@ interface InitiateEvictionModalProps {
 export const InitiateEvictionModal = ({
   isOpen,
   onClose,
-  leases,
   onSubmit,
   isSubmitting,
 }: InitiateEvictionModalProps) => {
   const [leaseId, setLeaseId] = useState('');
   const [reason, setReason] = useState('');
+  const [page, setPage] = useState(1);
+
+  const { data } = useQuery({
+    queryKey: [...landlordKeys.leases('signed'), { page, pageSize: PAGE_SIZE, eviction: true }],
+    queryFn: () =>
+      unwrap(landlordService.listLeases({ status: 'signed', page, pageSize: PAGE_SIZE })),
+    enabled: isOpen,
+  });
+  const leases = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const handleClose = () => {
     setLeaseId('');
     setReason('');
+    setPage(1);
     onClose();
   };
 
@@ -73,8 +87,17 @@ export const InitiateEvictionModal = ({
                 />
                 {leases.length === 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    No signed leases are available to start an eviction case for.
+                    No signed leases are available on this page to start an eviction case for.
                   </p>
+                )}
+                {total > 0 && (
+                  <Pagination
+                    page={page}
+                    pageSize={PAGE_SIZE}
+                    total={total}
+                    onPageChange={setPage}
+                    className="mt-3"
+                  />
                 )}
               </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -19,15 +19,14 @@ import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 
 type VerificationFilter = 'all' | OwnershipVerificationStatus;
 
+const PAGE_SIZE = 10;
+
 export default function OwnerPropertiesPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchParams = useSearchParams();
-
-  const { data: properties = [], isLoading } = useQuery({
-    queryKey: ownerKeys.properties,
-    queryFn: () => unwrap(ownerService.listProperties()),
-  });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.properties });
 
@@ -48,11 +47,43 @@ export default function OwnerPropertiesPage() {
       setSearchQuery(q);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const [filter, setFilter] = useState<VerificationFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [statusModalProperty, setStatusModalProperty] = useState<OwnerProperty | null>(null);
   const [editingProperty, setEditingProperty] = useState<OwnerProperty | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
+
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      ...ownerKeys.properties,
+      {
+        search: debouncedSearch,
+        verificationStatus: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.listProperties({
+          search: debouncedSearch || undefined,
+          verificationStatus: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const properties = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const handleSubmit = (
     data: Omit<OwnerProperty, 'id' | 'hasActiveSaleListing' | 'createdAt' | 'verificationStatus'>
@@ -80,14 +111,6 @@ export default function OwnerPropertiesPage() {
     deleteMutation.mutate(id);
   };
 
-  const filteredProperties = properties.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.city.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || p.verificationStatus === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: VerificationFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'verified', label: 'Verified' },
@@ -104,7 +127,7 @@ export default function OwnerPropertiesPage() {
           <p className="text-muted-foreground mt-1">
             {isLoading
               ? 'Loading…'
-              : `${properties.length} propert${properties.length === 1 ? 'y' : 'ies'} in your portfolio`}
+              : `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
@@ -128,7 +151,10 @@ export default function OwnerPropertiesPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -141,20 +167,20 @@ export default function OwnerPropertiesPage() {
         </div>
       </div>
 
-      {!isLoading && filteredProperties.length === 0 ? (
+      {!isLoading && properties.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {properties.length === 0 ? 'No properties yet' : 'No properties match your filters'}
+            {total === 0 ? 'No properties yet' : 'No properties match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {properties.length === 0
+            {total === 0
               ? 'Add your first property to verify ownership and unlock sale listings and investment tracking.'
               : 'Try adjusting your search or filter.'}
           </p>
-          {properties.length === 0 && (
+          {total === 0 && (
             <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
               Add Your First Property
             </Button>
@@ -162,7 +188,7 @@ export default function OwnerPropertiesPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredProperties.map((property, index) => (
+          {properties.map((property, index) => (
             <OwnerPropertyCard
               key={property.id}
               property={property}
@@ -173,6 +199,16 @@ export default function OwnerPropertiesPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <AddOwnerPropertyModal

@@ -5,7 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { DocumentUploadDialog } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
 import { FilePreviewDialog } from '@getrentos/ui';
@@ -21,16 +21,34 @@ const categoryLabels: Record<AgentDocument['category'], string> = {
   verification_form: 'Verification Form',
   id_scan: 'ID Scan',
   agreement: 'Agreement',
+  other: 'Other',
 };
 
 type CategoryFilter = 'all' | AgentDocument['category'];
 
 export default function AgentDocumentsPage() {
   const queryClient = useQueryClient();
-  const { data: documents = [], error } = useQuery({
-    queryKey: agentKeys.documents,
-    queryFn: () => unwrap(agentService.listDocuments()),
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<CategoryFilter>('all');
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data: documentsData, error } = useQuery({
+    queryKey: [
+      ...agentKeys.documents,
+      { search: searchQuery, category: filter, page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        agentService.listDocuments({
+          search: searchQuery || undefined,
+          category: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const documents = documentsData?.items ?? [];
+  const total = documentsData?.total ?? 0;
   const upload = useMutation({
     mutationFn: agentService.uploadDocument,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: agentKeys.documents }),
@@ -41,8 +59,6 @@ export default function AgentDocumentsPage() {
         [payload.file]
       ),
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
 
@@ -54,18 +70,13 @@ export default function AgentDocumentsPage() {
     setPreview(file);
   };
 
-  const filteredDocuments = documents.filter((d) => {
-    const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || d.category === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'inspection_report', label: 'Inspections' },
     { value: 'verification_form', label: 'Verifications' },
     { value: 'id_scan', label: 'ID Scans' },
     { value: 'agreement', label: 'Agreements' },
+    { value: 'other', label: 'Other' },
   ];
 
   return (
@@ -74,8 +85,8 @@ export default function AgentDocumentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">
-            Inspection reports, verification forms, and agreements, {documents.length} file
-            {documents.length === 1 ? '' : 's'}
+            Inspection reports, verification forms, and agreements, {total} file
+            {total === 1 ? '' : 's'}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
@@ -95,7 +106,10 @@ export default function AgentDocumentsPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search documents..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -104,7 +118,10 @@ export default function AgentDocumentsPage() {
           {categoryFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -117,14 +134,14 @@ export default function AgentDocumentsPage() {
         </div>
       </div>
 
-      {filteredDocuments.length === 0 ? (
+      {documents.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No documents found</p>
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {filteredDocuments.map((doc) => (
+          {documents.map((doc) => (
             <div
               key={doc.id}
               className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
@@ -149,6 +166,16 @@ export default function AgentDocumentsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <DocumentUploadDialog

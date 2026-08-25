@@ -2,7 +2,6 @@
 
 import { LegacySelect } from '@getrentos/ui';
 
-import { useState } from 'react';
 import { LayoutGrid, List, FileText, Check, ArrowDownUp } from 'lucide-react';
 import { DocumentCard } from './DocumentCard';
 import { Button } from '@getrentos/ui';
@@ -26,8 +25,11 @@ interface Document {
 
 interface DocumentsListProps {
   documents: Document[];
+  total: number;
   viewMode: 'grid' | 'list';
   setViewMode: (mode: 'grid' | 'list') => void;
+  sortBy: SortByType;
+  onSortByChange: (sortBy: SortByType) => void;
   selectedDocuments: string[];
   onSelectDocument: (id: string) => void;
   onSelectAll: () => void;
@@ -38,12 +40,14 @@ interface DocumentsListProps {
 }
 
 type SortByType = 'name' | 'date' | 'size';
-type SortOrderType = 'asc' | 'desc';
 
 export const DocumentsList = ({
   documents,
+  total,
   viewMode,
   setViewMode,
+  sortBy,
+  onSortByChange,
   selectedDocuments,
   onSelectDocument,
   onSelectAll,
@@ -52,27 +56,11 @@ export const DocumentsList = ({
   onShare,
   onDownload,
 }: DocumentsListProps) => {
-  const [sortBy, setSortBy] = useState<SortByType>('date');
-  const [sortOrder, setSortOrder] = useState<SortOrderType>('desc');
-
-  const sortedDocuments = [...documents].sort((a, b) => {
-    let comparison = 0;
-    switch (sortBy) {
-      case 'name':
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case 'date':
-        comparison = new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
-        break;
-      case 'size':
-        comparison = parseFloat(a.size) - parseFloat(b.size);
-        break;
-    }
-    return sortOrder === 'asc' ? comparison : -comparison;
-  });
+  const pageFullySelected =
+    documents.length > 0 && documents.every((document) => selectedDocuments.includes(document.id));
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value as SortByType);
+    onSortByChange(e.target.value as SortByType);
   };
 
   const handleSelectAll = () => {
@@ -103,17 +91,15 @@ export const DocumentsList = ({
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={handleSelectAll} className="p-1 h-auto">
             <div
-              className={`w-4 h-4 rounded border-2 ${selectedDocuments.length === documents.length && documents.length > 0 ? 'bg-primary border-primary' : 'border-border'}`}
+              className={`w-4 h-4 rounded border-2 ${pageFullySelected ? 'bg-primary border-primary' : 'border-border'}`}
             >
-              {selectedDocuments.length === documents.length && documents.length > 0 && (
-                <Check className="w-3 h-3 text-white" />
-              )}
+              {pageFullySelected && <Check className="w-3 h-3 text-white" />}
             </div>
           </Button>
           <div>
             <h3 className="font-semibold text-foreground">All Documents</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {documents.length} documents • {selectedDocuments.length} selected
+              Showing {documents.length} of {total} documents • {selectedDocuments.length} selected
             </p>
           </div>
         </div>
@@ -160,7 +146,7 @@ export const DocumentsList = ({
             : 'divide-y divide-border'
         }
       >
-        {sortedDocuments.map((document) => (
+        {documents.map((document) => (
           <DocumentCard
             key={document.id}
             document={document}

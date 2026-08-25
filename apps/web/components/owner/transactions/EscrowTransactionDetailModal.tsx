@@ -76,7 +76,8 @@ export const EscrowTransactionDetailModal = ({
 
   if (!transaction) return null;
 
-  const isFrozen = transaction.escrowStatus === 'frozen';
+  const isFrozen = transaction.escrowStatus === 'frozen' || transaction.escrowStatus === 'disputed';
+  const isRefunded = transaction.escrowStatus === 'refunded';
   const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
 
   return (
@@ -119,6 +120,16 @@ export const EscrowTransactionDetailModal = ({
                     <p className="text-xs text-red-600 dark:text-red-300 mt-0.5">
                       {transaction.disputeReason ||
                         'A dispute has been raised on this transaction. Funds are held until resolution.'}
+                    </p>
+                  </div>
+                </div>
+              ) : isRefunded ? (
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border flex items-start gap-2">
+                  <ShieldAlert className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-foreground">Escrow refunded</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      The buyer&apos;s escrow funds were refunded and this sale will not progress.
                     </p>
                   </div>
                 </div>

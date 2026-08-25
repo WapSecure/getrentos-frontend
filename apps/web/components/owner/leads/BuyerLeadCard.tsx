@@ -22,6 +22,10 @@ const stageConfig: Record<BuyerLeadStage, { label: string; className: string }> 
     label: 'Contacted',
     className: 'text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/20',
   },
+  qualified: {
+    label: 'Qualified',
+    className: 'text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20',
+  },
   viewing_scheduled: {
     label: 'Viewing Scheduled',
     className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
@@ -29,6 +33,14 @@ const stageConfig: Record<BuyerLeadStage, { label: string; className: string }> 
   offer_made: {
     label: 'Offer Made',
     className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+  },
+  closed: {
+    label: 'Closed',
+    className: 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-white/10',
+  },
+  lost: {
+    label: 'Lost',
+    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
   },
 };
 

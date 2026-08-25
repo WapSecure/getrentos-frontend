@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
 import { Pagination } from '@getrentos/ui';
@@ -9,7 +9,7 @@ import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendo
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
-import type { LandlordMaintenanceRequest, Vendor } from '@/types/landlord';
+import type { LandlordMaintenanceRequest } from '@/types/landlord';
 import type { MaintenanceRequestStatus } from '@/types/maintenance';
 
 const statusFilters: { value: 'all' | MaintenanceRequestStatus; label: string }[] = [
@@ -45,25 +45,16 @@ export default function LandlordMaintenancePage() {
   const requests = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Dropdown of vendors for assignment.
-  const { data: vendorsData } = useQuery({
-    queryKey: [...landlordKeys.vendors, { page: 1, pageSize: 100 }],
-    queryFn: () => unwrap(landlordService.listVendors({ page: 1, pageSize: 100 })),
+  const { data: summary } = useQuery({
+    queryKey: landlordKeys.maintenanceSummary,
+    queryFn: () => unwrap(landlordService.getMaintenanceSummary()),
   });
-  const vendors = vendorsData?.items ?? [];
+  const openCount = summary?.openCount ?? 0;
 
-  // Header stat: total open (non-resolved) requests across the portfolio.
-  const { data: openData } = useQuery({
-    queryKey: [...landlordKeys.maintenanceRequests(), { page: 1, pageSize: 100 }],
-    queryFn: () => unwrap(landlordService.listMaintenanceRequests({ page: 1, pageSize: 100 })),
-  });
-  const openCount = useMemo(
-    () => (openData?.items ?? []).filter((r) => r.status !== 'resolved').length,
-    [openData]
-  );
-
-  const invalidateRequests = () =>
-    queryClient.invalidateQueries({ queryKey: ['landlord', 'maintenanceRequests'] });
+  const invalidateRequests = () => {
+    void queryClient.invalidateQueries({ queryKey: ['landlord', 'maintenanceRequests'] });
+    void queryClient.invalidateQueries({ queryKey: landlordKeys.maintenanceSummary });
+  };
 
   const assignVendorMutation = useMutation({
     mutationFn: ({ requestId, vendorId }: { requestId: string; vendorId: string }) =>
@@ -84,8 +75,8 @@ export default function LandlordMaintenancePage() {
     onSuccess: invalidateRequests,
   });
 
-  const handleAssignVendor = (requestId: string, vendor: Vendor) =>
-    assignVendorMutation.mutate({ requestId, vendorId: vendor.id });
+  const handleAssignVendor = (requestId: string, vendorId: string) =>
+    assignVendorMutation.mutate({ requestId, vendorId });
 
   const handleMarkResolved = (id: string) => markResolvedMutation.mutate(id);
 
@@ -155,7 +146,6 @@ export default function LandlordMaintenancePage() {
 
       <AssignVendorModal
         request={assigningRequest}
-        vendors={vendors}
         onClose={() => setAssigningRequest(null)}
         onAssign={handleAssignVendor}
         assigningVendorId={

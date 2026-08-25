@@ -9,50 +9,51 @@ import { Plus, Search, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
-import {
-  mapRealtorClient,
-  mapRealtorListing,
-  realtorService,
-  type RealtorClientApi,
-} from '@/services/realtorService';
-import type {
-  CreateRealtorListingInput,
-  RealtorClientProperty,
-} from '@/components/realtor/listings/CreateListingModal';
+import { mapRealtorListing, realtorService } from '@/services/realtorService';
+import type { CreateRealtorListingInput } from '@/components/realtor/listings/CreateListingModal';
 
 type StatusFilter = 'all' | RealtorListingStatus;
+
+const PAGE_SIZE = 10;
 
 export default function RealtorListingsPage() {
   const searchParams = useSearchParams();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewListing, setPreviewListing] = useState<RealtorListing | null>(null);
   const queryClient = useQueryClient();
-  const { data: listings = [], isLoading } = useQuery({
-    queryKey: realtorKeys.listings,
-    queryFn: async () => (await unwrap(realtorService.listListings())).map(mapRealtorListing),
+  const listingStatus =
+    filter === 'all'
+      ? undefined
+      : filter === 'pending_approval'
+        ? 'PENDING_VERIFICATION'
+        : (filter.toUpperCase() as 'DRAFT' | 'PUBLISHED' | 'PAUSED' | 'CLOSED');
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      ...realtorKeys.listings,
+      { page, pageSize: PAGE_SIZE, search: searchQuery.trim() || undefined, status: listingStatus },
+    ],
+    queryFn: async () => {
+      const result = await unwrap(
+        realtorService.listListings({
+          page,
+          pageSize: PAGE_SIZE,
+          search: searchQuery.trim() || undefined,
+          status: listingStatus,
+        })
+      );
+      return { ...result, items: result.items.map(mapRealtorListing) };
+    },
   });
-  const { data: clientRelationships = [] } = useQuery({
-    queryKey: realtorKeys.clients,
-    queryFn: () => unwrap(realtorService.listClients()),
-  });
-  const clients = clientRelationships.map(mapRealtorClient);
-  const clientProperties: RealtorClientProperty[] = clientRelationships.flatMap(
-    (client: RealtorClientApi) =>
-      client.status === 'ACTIVE'
-        ? client.properties.map(({ property }) => ({
-            id: property.id,
-            clientId: client.id,
-            title: property.title,
-          }))
-        : []
-  );
+  const listings = data?.items ?? [];
+  const total = data?.total ?? 0;
   const createListing = useMutation({
     mutationFn: (listing: CreateRealtorListingInput) =>
       unwrap(
@@ -65,6 +66,7 @@ export default function RealtorListingsPage() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.listings });
+      setPage(1);
       setIsCreateModalOpen(false);
     },
     onError: (error) =>
@@ -79,18 +81,11 @@ export default function RealtorListingsPage() {
     if (q) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery(q);
+      setPage(1);
     }
   }, [searchParams]);
 
   const handleCreate = (data: CreateRealtorListingInput) => createListing.mutate(data);
-
-  const filteredListings = listings.filter((l) => {
-    const matchesSearch =
-      l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.clientName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || l.status === filter;
-    return matchesSearch && matchesFilter;
-  });
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -107,7 +102,7 @@ export default function RealtorListingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Listings</h1>
           <p className="text-muted-foreground mt-1">
-            {listings.length} listing{listings.length === 1 ? '' : 's'} across your clients
+            {total} listing{total === 1 ? '' : 's'} across your clients
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
@@ -122,7 +117,10 @@ export default function RealtorListingsPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by title or client..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -131,7 +129,10 @@ export default function RealtorListingsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -148,20 +149,20 @@ export default function RealtorListingsPage() {
         <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
           Loading listings…
         </div>
-      ) : filteredListings.length === 0 ? (
+      ) : listings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Megaphone className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {listings.length === 0 ? 'No listings yet' : 'No listings match your filters'}
+            {total === 0 ? 'No listings yet' : 'No listings match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {listings.length === 0
+            {total === 0
               ? 'Add a listing on behalf of one of your clients to get started.'
               : 'Try adjusting your search or filter.'}
           </p>
-          {listings.length === 0 && (
+          {total === 0 && (
             <Button variant="primary" className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
               Add Your First Listing
             </Button>
@@ -169,7 +170,7 @@ export default function RealtorListingsPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredListings.map((listing, index) => (
+          {listings.map((listing, index) => (
             <RealtorListingCard
               key={listing.id}
               listing={listing}
@@ -180,11 +181,19 @@ export default function RealtorListingsPage() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
+
       <CreateListingModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        clients={clients}
-        properties={clientProperties}
         onSubmit={handleCreate}
       />
 

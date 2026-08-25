@@ -1,8 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search, Check } from 'lucide-react';
 import {
@@ -22,6 +22,7 @@ const categoryLabels: Record<OwnershipTransferDocument['category'], string> = {
   payment_receipt: 'Payment Receipt',
   government_filing: 'Government Filing',
   title_transfer: 'Title Transfer',
+  other: 'Other',
 };
 
 /** Owner doc category -> backend OwnerDocumentType enum. */
@@ -35,16 +36,46 @@ const CATEGORY_TO_TYPE: Record<string, string> = {
 
 type CategoryFilter = 'all' | OwnershipTransferDocument['category'];
 
+const PAGE_SIZE = 10;
+
 export default function OwnerDocumentsPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-  const { data: documents = [] } = useQuery({
-    queryKey: ownerKeys.documents,
-    queryFn: () => unwrap(ownerService.listDocuments()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data } = useQuery({
+    queryKey: [
+      ...ownerKeys.documents,
+      {
+        search: debouncedSearch,
+        category: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.listDocuments({
+          search: debouncedSearch || undefined,
+          category: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const documents = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.documents });
 
@@ -75,14 +106,6 @@ export default function OwnerDocumentsPage() {
     await uploadMutation.mutateAsync(data);
   };
 
-  const filteredDocuments = documents.filter((d) => {
-    const matchesSearch =
-      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || d.category === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'transfer_agreement', label: 'Transfer Agreements' },
@@ -97,7 +120,7 @@ export default function OwnerDocumentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">
-            Ownership verification and sale transfer documents across your portfolio
+            {total} document{total === 1 ? '' : 's'} across your portfolio
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
@@ -121,7 +144,10 @@ export default function OwnerDocumentsPage() {
           {categoryFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -134,14 +160,14 @@ export default function OwnerDocumentsPage() {
         </div>
       </div>
 
-      {filteredDocuments.length === 0 ? (
+      {documents.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No documents found</p>
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {filteredDocuments.map((doc) => (
+          {documents.map((doc) => (
             <div
               key={doc.id}
               className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
@@ -173,6 +199,16 @@ export default function OwnerDocumentsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <DocumentUploadDialog

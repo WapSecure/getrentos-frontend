@@ -1,27 +1,27 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { ClipboardCheck, CircleAlert, FileSearch, MapPin, UserRound } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { homeManagementService } from '@/services/homeManagementService';
 
-const MAX_VISIBLE_INSPECTIONS = 6;
+const INSPECTION_PAGE_SIZE = 6;
 
 export function HomeManagementInspectionFeed() {
-  const {
-    data: inspections = [],
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: homeManagementKeys.inspections,
-    queryFn: () => unwrap(homeManagementService.listInspections()),
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error } = useQuery({
+    queryKey: [...homeManagementKeys.inspections, { page, pageSize: INSPECTION_PAGE_SIZE }],
+    queryFn: () =>
+      unwrap(homeManagementService.listInspections({ page, pageSize: INSPECTION_PAGE_SIZE })),
   });
-
-  const visibleInspections = inspections.slice(0, MAX_VISIBLE_INSPECTIONS);
+  const inspections = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   return (
     <section aria-labelledby="inspection-feed-heading" className="mt-10">
@@ -39,9 +39,10 @@ export function HomeManagementInspectionFeed() {
             report.
           </p>
         </div>
-        {!isLoading && inspections.length > MAX_VISIBLE_INSPECTIONS && (
+        {!isLoading && total > 0 && (
           <p className="text-xs text-muted-foreground">
-            Showing the latest {MAX_VISIBLE_INSPECTIONS} reports
+            Showing {Math.min((page - 1) * INSPECTION_PAGE_SIZE + 1, total)}–
+            {Math.min(page * INSPECTION_PAGE_SIZE, total)} of {total} reports
           </p>
         )}
       </div>
@@ -55,7 +56,7 @@ export function HomeManagementInspectionFeed() {
             title="Inspection reports could not be loaded"
             description="Refresh the page to try again."
           />
-        ) : visibleInspections.length === 0 ? (
+        ) : inspections.length === 0 ? (
           <EmptyState
             icon={FileSearch}
             title="No field inspection reports yet"
@@ -64,7 +65,7 @@ export function HomeManagementInspectionFeed() {
         ) : (
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="divide-y divide-border">
-              {visibleInspections.map((inspection) => {
+              {inspections.map((inspection) => {
                 const submittedAt = inspection.submittedAt ?? inspection.createdAt;
                 const condition = inspection.overallCondition?.trim() || 'Condition not recorded';
 
@@ -110,6 +111,15 @@ export function HomeManagementInspectionFeed() {
               })}
             </div>
           </div>
+        )}
+        {total > 0 && (
+          <Pagination
+            page={page}
+            pageSize={INSPECTION_PAGE_SIZE}
+            total={total}
+            onPageChange={setPage}
+            className="rounded-b-2xl border border-border bg-card"
+          />
         )}
       </div>
     </section>

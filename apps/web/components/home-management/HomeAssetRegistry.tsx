@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Archive,
@@ -29,6 +29,7 @@ import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -120,6 +121,12 @@ interface HomeAssetRegistryProps {
   properties: HomeManagementProperty[];
   isLoading?: boolean;
   error?: Error | null;
+  page: number;
+  pageSize: number;
+  total: number;
+  selectedPropertyId: string;
+  onPageChange: (page: number) => void;
+  onSelectedPropertyChange: (propertyId: string) => void;
 }
 
 export function HomeAssetRegistry({
@@ -127,9 +134,14 @@ export function HomeAssetRegistry({
   properties,
   isLoading = false,
   error,
+  page,
+  pageSize,
+  total,
+  selectedPropertyId,
+  onPageChange,
+  onSelectedPropertyChange,
 }: HomeAssetRegistryProps) {
   const queryClient = useQueryClient();
-  const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<AssetForm>(initialAssetForm);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
@@ -140,14 +152,6 @@ export function HomeAssetRegistry({
     queryFn: () => unwrap(homeManagementService.listUnits(form.propertyId)),
   });
   const units = unitsQuery.data ?? [];
-
-  const visibleAssets = useMemo(
-    () =>
-      selectedPropertyId
-        ? assets.filter((asset) => asset.propertyId === selectedPropertyId)
-        : assets,
-    [assets, selectedPropertyId]
-  );
 
   const createAsset = useMutation({
     mutationFn: (input: CreateHomeAssetInput) => unwrap(homeManagementService.createAsset(input)),
@@ -225,7 +229,7 @@ export function HomeAssetRegistry({
             ariaLabel="Filter assets by property"
             className="min-w-56"
             value={selectedPropertyId}
-            onValueChange={setSelectedPropertyId}
+            onValueChange={onSelectedPropertyChange}
             options={[
               { value: '', label: 'All properties' },
               ...properties.map((property) => ({
@@ -249,17 +253,17 @@ export function HomeAssetRegistry({
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <AssetSummary
           icon={<Boxes className="h-4 w-4" />}
-          label="Active assets"
+          label="Active on this page"
           value={activeAssets}
         />
         <AssetSummary
           icon={<CalendarClock className="h-4 w-4" />}
-          label="Covered by a plan"
+          label="Covered on this page"
           value={plannedAssets}
         />
         <AssetSummary
           icon={<ShieldCheck className="h-4 w-4" />}
-          label="Warranties expiring"
+          label="Expiring on this page"
           value={expiringWarranties}
         />
       </div>
@@ -273,7 +277,7 @@ export function HomeAssetRegistry({
             title="Assets could not be loaded"
             description="Refresh the page to try again."
           />
-        ) : visibleAssets.length === 0 ? (
+        ) : assets.length === 0 ? (
           <EmptyState
             icon={Archive}
             title={
@@ -298,7 +302,7 @@ export function HomeAssetRegistry({
           />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {visibleAssets.map((asset) => {
+            {assets.map((asset) => {
               const status = assetStatus[asset.status];
               const nextPlan = asset.preventivePlans?.[0];
 
@@ -413,6 +417,15 @@ export function HomeAssetRegistry({
               );
             })}
           </div>
+        )}
+        {total > 0 && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={onPageChange}
+            className="mt-5 rounded-2xl border border-border bg-card"
+          />
         )}
       </div>
 

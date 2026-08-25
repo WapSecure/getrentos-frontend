@@ -10,7 +10,7 @@ interface BulkActionsWishlist {
 
 interface BulkActionsProps {
   selectedCount: number;
-  totalCount: number;
+  pageCount: number;
   wishlists: BulkActionsWishlist[];
   onSelectAll: () => void;
   onClearSelection: () => void;
@@ -21,7 +21,7 @@ interface BulkActionsProps {
 
 export const BulkActions = ({
   selectedCount,
-  totalCount,
+  pageCount,
   wishlists,
   onSelectAll,
   onClearSelection,
@@ -42,7 +42,7 @@ export const BulkActions = ({
           onClick={onSelectAll}
           className="text-sm text-muted-foreground hover:text-primary transition-colors"
         >
-          Select all ({totalCount})
+          Select page ({pageCount})
         </button>
         <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
         <button

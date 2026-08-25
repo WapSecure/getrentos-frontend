@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Star, MessageCircle } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
@@ -19,19 +21,25 @@ const StarRow = ({ rating }: { rating: number }) => (
 );
 
 export default function AgentReviewsPage() {
-  const { data: reviews = [], isLoading } = useQuery({
-    queryKey: agentKeys.reviews,
-    queryFn: () => unwrap(agentService.getReviews()),
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data: reviewsData, isLoading } = useQuery({
+    queryKey: [...agentKeys.reviews, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(agentService.getReviews({ page, pageSize: PAGE_SIZE })),
   });
+  const { data: summary } = useQuery({
+    queryKey: [...agentKeys.reviews, 'summary'],
+    queryFn: () => unwrap(agentService.getReviewsSummary()),
+  });
+  const reviews = reviewsData?.items ?? [];
+  const total = reviewsData?.total ?? 0;
 
-  const overallRating = reviews.length
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0;
+  const overallRating = summary?.averageRating ?? 0;
+  const reviewCount = summary?.reviewCount ?? total;
 
-  const distribution = [5, 4, 3, 2, 1].map((star) => ({
-    star,
-    count: reviews.filter((r) => Math.round(r.rating) === star).length,
-  }));
+  const distribution =
+    summary?.ratingDistribution.map(({ rating, count }) => ({ star: rating, count })) ??
+    [5, 4, 3, 2, 1].map((star) => ({ star, count: 0 }));
   const maxCount = Math.max(1, ...distribution.map((d) => d.count));
 
   if (isLoading) {
@@ -50,7 +58,7 @@ export default function AgentReviewsPage() {
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
-            Based on {reviews.length} review{reviews.length === 1 ? '' : 's'}
+            Based on {reviewCount} review{reviewCount === 1 ? '' : 's'}
           </p>
         </div>
 
@@ -114,6 +122,16 @@ export default function AgentReviewsPage() {
           ))
         )}
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

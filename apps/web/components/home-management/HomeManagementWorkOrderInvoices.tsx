@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrento
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { CurrencyInput, Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -58,6 +59,7 @@ type InvoiceActionDialog = {
 } | null;
 
 const DEFAULT_INVOICE_CURRENCY = 'NGN';
+const INVOICE_PAGE_SIZE = 5;
 
 const invoiceStatusMeta: Record<
   HomeManagementWorkOrderInvoiceStatus,
@@ -171,6 +173,7 @@ export function HomeManagementWorkOrderInvoices({
 }: HomeManagementWorkOrderInvoicesProps) {
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [page, setPage] = useState(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<InvoiceForm>(newInvoiceForm);
   const [actionDialog, setActionDialog] = useState<InvoiceActionDialog>(null);
@@ -182,11 +185,21 @@ export function HomeManagementWorkOrderInvoices({
 
   const invoicesQuery = useQuery({
     enabled: isExpanded,
-    queryKey: homeManagementKeys.workOrderInvoices(workOrder.id),
-    queryFn: () => unwrap(homeManagementService.listWorkOrderInvoices(workOrder.id)),
+    queryKey: [
+      ...homeManagementKeys.workOrderInvoices(workOrder.id),
+      { page, pageSize: INVOICE_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listWorkOrderInvoices(workOrder.id, {
+          page,
+          pageSize: INVOICE_PAGE_SIZE,
+        })
+      ),
   });
 
-  const invoices = useMemo(() => invoicesQuery.data ?? [], [invoicesQuery.data]);
+  const invoices = useMemo(() => invoicesQuery.data?.items ?? [], [invoicesQuery.data]);
+  const totalInvoices = invoicesQuery.data?.total ?? 0;
   const activeInvoice = invoices.find(isActiveInvoice);
   const approvedCost = workOrder.approvedCost;
   const hasApprovedCost =
@@ -243,6 +256,7 @@ export function HomeManagementWorkOrderInvoices({
       unwrap(homeManagementService.createWorkOrderInvoice(workOrder.id, input)),
     onSuccess: async () => {
       await invalidateInvoiceViews();
+      setPage(1);
       setForm(newInvoiceForm());
       setIsCreateOpen(false);
       setToast({
@@ -262,6 +276,7 @@ export function HomeManagementWorkOrderInvoices({
     mutationFn: ({ invoiceId }) => unwrap(homeManagementService.submitWorkOrderInvoice(invoiceId)),
     onSuccess: async () => {
       await invalidateInvoiceViews();
+      setPage(1);
       setActionDialog(null);
       setToast({
         message: 'Invoice submitted for a different operator to approve.',
@@ -277,6 +292,7 @@ export function HomeManagementWorkOrderInvoices({
     mutationFn: ({ invoiceId }) => unwrap(homeManagementService.approveWorkOrderInvoice(invoiceId)),
     onSuccess: async () => {
       await invalidateInvoiceViews();
+      setPage(1);
       setActionDialog(null);
       setToast({
         message:
@@ -298,6 +314,7 @@ export function HomeManagementWorkOrderInvoices({
       unwrap(homeManagementService.rejectWorkOrderInvoice(invoiceId, { reason })),
     onSuccess: async () => {
       await invalidateInvoiceViews();
+      setPage(1);
       setActionDialog(null);
       setActionReason('');
       setToast({ message: 'Invoice rejected and the reason was recorded.', variant: 'success' });
@@ -316,6 +333,7 @@ export function HomeManagementWorkOrderInvoices({
       unwrap(homeManagementService.voidWorkOrderInvoice(invoiceId, { reason })),
     onSuccess: async () => {
       await invalidateInvoiceViews();
+      setPage(1);
       setActionDialog(null);
       setActionReason('');
       setToast({ message: 'Invoice voided and the decision was recorded.', variant: 'success' });
@@ -438,7 +456,7 @@ export function HomeManagementWorkOrderInvoices({
             <FileText className="h-4 w-4 text-primary" />
             <p className="text-sm font-semibold text-foreground">Vendor invoices</p>
             {isExpanded && !invoicesQuery.isLoading && (
-              <Badge variant="neutral">{invoices.length}</Badge>
+              <Badge variant="neutral">{totalInvoices}</Badge>
             )}
           </div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -471,7 +489,12 @@ export function HomeManagementWorkOrderInvoices({
               )
             }
             iconPosition="right"
-            onClick={() => setIsExpanded((current) => !current)}
+            onClick={() =>
+              setIsExpanded((current) => {
+                if (!current) setPage(1);
+                return !current;
+              })
+            }
           >
             {isExpanded ? 'Hide invoices' : 'View invoices'}
           </Button>
@@ -727,6 +750,15 @@ export function HomeManagementWorkOrderInvoices({
                 );
               })}
             </div>
+          )}
+          {totalInvoices > 0 && (
+            <Pagination
+              page={page}
+              pageSize={INVOICE_PAGE_SIZE}
+              total={totalInvoices}
+              onPageChange={setPage}
+              className="rounded-xl border border-border bg-card"
+            />
           )}
         </div>
       )}

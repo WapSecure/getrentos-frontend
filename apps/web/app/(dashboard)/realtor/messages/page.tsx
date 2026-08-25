@@ -13,38 +13,54 @@ import { cn } from '@/lib/cn';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+
+const PAGE_SIZE = 10;
 
 function RealtorMessagesPageContent() {
   const searchParams = useSearchParams();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [messagePage, setMessagePage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const handledClientRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
-  const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
-    queryKey: realtorKeys.conversations,
+  const { data: conversationsResult, isLoading: conversationsLoading } = useQuery({
+    queryKey: [
+      ...realtorKeys.conversations,
+      { page, pageSize: PAGE_SIZE, search: searchQuery.trim() || undefined },
+    ],
     queryFn: async () => {
-      const items = (await unwrap(realtorService.listConversations())) as Array<{
-        id: string;
-        client: { id: string; legalName: string };
-        lastMessage: string | null;
-        lastMessageAt: string | null;
-        unreadCount: number;
-      }>;
-      return items.map(
-        (item): Conversation => ({
-          id: item.id,
-          clientId: item.client.id,
-          participantName: item.client.legalName,
-          participantRole: 'Client',
-          lastMessage: item.lastMessage || '',
-          lastMessageTime: item.lastMessageAt || '',
-          unreadCount: item.unreadCount,
+      const result = await unwrap(
+        realtorService.listConversations({
+          page,
+          pageSize: PAGE_SIZE,
+          search: searchQuery.trim() || undefined,
         })
       );
+      return {
+        ...result,
+        items: result.items.map(
+          (item): Conversation => ({
+            id: item.id,
+            clientId: item.client.id,
+            participantName: item.client.legalName,
+            participantRole: 'Client',
+            lastMessage: item.lastMessage || '',
+            lastMessageTime: item.lastMessageAt || '',
+            unreadCount: item.unreadCount,
+          })
+        ),
+      };
     },
   });
+  const conversations = conversationsResult?.items ?? [];
+  const conversationTotal = conversationsResult?.total ?? 0;
+  const activateConversation = (conversationId: string) => {
+    setMessagePage(1);
+    setActiveId(conversationId);
+  };
 
   // Open (or start) the conversation for a client the user navigated from,
   // e.g. the "Message" button on the Clients page (?client=<id>).
@@ -52,7 +68,8 @@ function RealtorMessagesPageContent() {
     mutationFn: (clientId: string) => unwrap(realtorService.startConversation(clientId)),
     onSuccess: (conversation) => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.conversations });
-      setActiveId(conversation.id);
+      setPage(1);
+      activateConversation(conversation.id);
     },
     onError: (error) =>
       setToast({
@@ -67,39 +84,48 @@ function RealtorMessagesPageContent() {
     if (handledClientRef.current === clientId) return;
     handledClientRef.current = clientId;
     const existing = conversations.find((c) => c.clientId === clientId);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (existing) setActiveId(existing.id);
-    else if (!startConversation.isPending) startConversation.mutate(clientId);
+    if (existing) {
+      const timeoutId = window.setTimeout(() => activateConversation(existing.id), 0);
+      return () => window.clearTimeout(timeoutId);
+    } else if (!startConversation.isPending) startConversation.mutate(clientId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, conversations, conversationsLoading]);
-  const { data: messages = [] } = useQuery({
+  const { data: messagesResult } = useQuery({
     enabled: !!activeId,
-    queryKey: realtorKeys.conversationMessages(activeId || ''),
+    queryKey: [
+      ...realtorKeys.conversationMessages(activeId || ''),
+      { page: messagePage, pageSize: PAGE_SIZE },
+    ],
     queryFn: async () => {
-      const items = (await unwrap(realtorService.getConversationMessages(activeId!))) as Array<{
-        id: string;
-        senderType: 'realtor' | 'contact';
-        text: string;
-        createdAt: string;
-        read: boolean;
-      }>;
-      return items.map(
-        (item): ThreadMessage => ({
-          id: item.id,
-          senderId: item.senderType,
-          text: item.text,
-          timestamp: item.createdAt,
-          read: item.read,
+      const result = await unwrap(
+        realtorService.getConversationMessages(activeId!, {
+          page: messagePage,
+          pageSize: PAGE_SIZE,
         })
       );
+      return {
+        ...result,
+        items: result.items.map(
+          (item): ThreadMessage => ({
+            id: item.id,
+            senderId: item.senderType,
+            text: item.text,
+            timestamp: item.createdAt,
+            read: item.read,
+          })
+        ),
+      };
     },
   });
+  const messages = messagesResult?.items ?? [];
+  const messageTotal = messagesResult?.total ?? 0;
   const send = useMutation({
     mutationFn: ({ text, files }: { text: string; files: File[] }) =>
       unwrap(realtorService.sendMessage(activeId!, text, files)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.conversationMessages(activeId || '') });
       queryClient.invalidateQueries({ queryKey: realtorKeys.conversations });
+      setMessagePage(1);
     },
     onError: (error) =>
       setToast({
@@ -107,9 +133,6 @@ function RealtorMessagesPageContent() {
         variant: 'error',
       }),
   });
-  const filteredConversations = conversations.filter((conversation) =>
-    conversation.participantName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
   const activeConversation = conversations.find((conversation) => conversation.id === activeId);
 
   return (
@@ -119,21 +142,40 @@ function RealtorMessagesPageContent() {
         <p className="text-muted-foreground mt-1">Communicate securely with active clients</p>
       </div>
       <div className="flex gap-4 h-[calc(100%-4.5rem)]">
-        <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
+        <div
+          className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto flex-col gap-2')}
+        >
           <ConversationList
-            conversations={filteredConversations}
+            conversations={conversations}
             activeId={activeId}
             searchQuery={searchQuery}
             isLoading={conversationsLoading}
-            onSearch={setSearchQuery}
-            onSelect={setActiveId}
+            onSearch={(value) => {
+              setSearchQuery(value);
+              setPage(1);
+            }}
+            onSelect={(id) => {
+              activateConversation(id);
+            }}
           />
+          {conversationTotal > 0 && (
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              total={conversationTotal}
+              onPageChange={setPage}
+              className="rounded-xl border border-border bg-card"
+            />
+          )}
         </div>
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
           {activeConversation ? (
-            <>
+            <div className="flex flex-1 min-h-0 flex-col gap-2">
               <button
-                onClick={() => setActiveId(null)}
+                onClick={() => {
+                  setMessagePage(1);
+                  setActiveId(null);
+                }}
                 className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -152,7 +194,16 @@ function RealtorMessagesPageContent() {
                   }
                 }}
               />
-            </>
+              {messageTotal > 0 && (
+                <Pagination
+                  page={messagePage}
+                  pageSize={PAGE_SIZE}
+                  total={messageTotal}
+                  onPageChange={setMessagePage}
+                  className="rounded-xl border border-border bg-card"
+                />
+              )}
+            </div>
           ) : (
             <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
               <p className="text-sm text-muted-foreground">

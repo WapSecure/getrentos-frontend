@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Plus } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -13,22 +13,27 @@ import { HouseholdCard } from '@/components/estate/households/HouseholdCard';
 import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
 import type { Household } from '@/types/estate';
 
+const PAGE_SIZE = 10;
+
 export default function EstateHouseholdsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<Household | null>(null);
+  const [page, setPage] = useState(1);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
-  const { data: households = [], isLoading: isHouseholdsLoading } = useQuery({
-    queryKey: estateKeys.households(estate?.id ?? ''),
-    queryFn: () => unwrap(estateService.listHouseholds(estate!.id)),
+  const { data, isLoading: isHouseholdsLoading } = useQuery({
+    queryKey: [...estateKeys.households(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(estateService.listHouseholds(estate!.id, { page, pageSize: PAGE_SIZE })),
     enabled: !!estate,
   });
+  const households = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidate = () => {
     if (!estate) return;
@@ -45,6 +50,7 @@ export default function EstateHouseholdsPage() {
     }) => unwrap(estateService.addHousehold(estate!.id, data)),
     onSuccess: () => {
       invalidate();
+      setPage(1);
       setIsModalOpen(false);
     },
   });
@@ -71,7 +77,10 @@ export default function EstateHouseholdsPage() {
 
   const removeHousehold = useMutation({
     mutationFn: (id: string) => unwrap(estateService.removeHousehold(estate!.id, id)),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      setPage((current) => (current > 1 && households.length === 1 ? current - 1 : current));
+    },
   });
 
   if (isEstateLoading) {
@@ -102,7 +111,7 @@ export default function EstateHouseholdsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Households</h1>
           <p className="text-muted-foreground mt-1">
-            {households.length} household{households.length === 1 ? '' : 's'} in {estate.name}
+            {total} household{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
         <Button
@@ -142,6 +151,16 @@ export default function EstateHouseholdsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <HouseholdModal

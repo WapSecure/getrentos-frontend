@@ -1,14 +1,20 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
-import type { ApiResponse } from '@/lib/apiHelpers';
+import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type {
   Estate,
   Household,
+  HouseholdStatus,
   Due,
   VisitorPass,
   IssuedVisitorPass,
   StaffMember,
   Announcement,
 } from '@/types/estate';
+
+type EstatePageQuery = {
+  page?: number;
+  pageSize?: number;
+};
 
 export const estateService = {
   async createEstate(data: {
@@ -25,8 +31,11 @@ export const estateService = {
     return safeCall(() => authFetch('/estate/me'));
   },
 
-  async listHouseholds(estateId: string): Promise<ApiResponse<Household[]>> {
-    return safeCall(() => authFetch(`/estate/${estateId}/households`));
+  async listHouseholds(
+    estateId: string,
+    query: EstatePageQuery & { status?: HouseholdStatus } = {}
+  ): Promise<ApiResponse<Paginated<Household>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/households${toQuery(query)}`));
   },
 
   async addHousehold(
@@ -79,8 +88,11 @@ export const estateService = {
     );
   },
 
-  async listDues(estateId: string, status?: string): Promise<ApiResponse<Due[]>> {
-    return safeCall(() => authFetch(`/estate/${estateId}/dues${toQuery({ status })}`));
+  async listDues(
+    estateId: string,
+    query: EstatePageQuery & { status?: string } = {}
+  ): Promise<ApiResponse<Paginated<Due>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dues${toQuery(query)}`));
   },
 
   async markDuePaid(estateId: string, dueId: string): Promise<ApiResponse<Due>> {
@@ -105,8 +117,11 @@ export const estateService = {
     );
   },
 
-  async listVisitorPasses(estateId: string, status?: string): Promise<ApiResponse<VisitorPass[]>> {
-    return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes${toQuery({ status })}`));
+  async listVisitorPasses(
+    estateId: string,
+    query: EstatePageQuery & { status?: string } = {}
+  ): Promise<ApiResponse<Paginated<VisitorPass>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes${toQuery(query)}`));
   },
 
   async revokeVisitorPass(estateId: string, passId: string): Promise<ApiResponse<VisitorPass>> {
@@ -133,8 +148,11 @@ export const estateService = {
     );
   },
 
-  async listStaff(estateId: string): Promise<ApiResponse<StaffMember[]>> {
-    return safeCall(() => authFetch(`/estate/${estateId}/staff`));
+  async listStaff(
+    estateId: string,
+    query: EstatePageQuery = {}
+  ): Promise<ApiResponse<Paginated<StaffMember>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/staff${toQuery(query)}`));
   },
 
   async removeGateman(estateId: string, memberUserId: string): Promise<ApiResponse<void>> {
@@ -152,8 +170,11 @@ export const estateService = {
     );
   },
 
-  async listAnnouncements(estateId: string): Promise<ApiResponse<Announcement[]>> {
-    return safeCall(() => authFetch(`/estate/${estateId}/announcements`));
+  async listAnnouncements(
+    estateId: string,
+    query: EstatePageQuery = {}
+  ): Promise<ApiResponse<Paginated<Announcement>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/announcements${toQuery(query)}`));
   },
 
   async updateAnnouncement(

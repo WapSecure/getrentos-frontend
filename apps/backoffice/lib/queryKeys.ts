@@ -82,13 +82,14 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
-  auditLogs: (params?: { search?: string; severity?: string; page?: number }) =>
+  auditLogs: (params?: { search?: string; severity?: string; page?: number; pageSize?: number }) =>
     [
       'admin',
       'auditLogs',
       params?.search ?? '',
       params?.severity ?? 'all',
       params?.page ?? 1,
+      params?.pageSize ?? 20,
     ] as const,
   documents: (params?: { search?: string; category?: string; page?: number; pageSize?: number }) =>
     [
@@ -117,4 +118,8 @@ export const adminKeys = {
   platformConfig: ['admin', 'platformConfig'] as const,
   staff: ['admin', 'staff'] as const,
   staffApprovals: ['admin', 'staffApprovals'] as const,
+  staffList: (params?: { page?: number; pageSize?: number }) =>
+    ['admin', 'staff', params?.page ?? 1, params?.pageSize ?? 20] as const,
+  staffApprovalsList: (params?: { page?: number; pageSize?: number }) =>
+    ['admin', 'staffApprovals', params?.page ?? 1, params?.pageSize ?? 20] as const,
 };

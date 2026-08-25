@@ -15,6 +15,7 @@ export const landlordKeys = {
   tenants: ['landlord', 'tenants'] as const,
   payments: (status?: string) => ['landlord', 'payments', status ?? 'all'] as const,
   rentCollectionStats: ['landlord', 'rentCollectionStats'] as const,
+  arrearsSummary: ['landlord', 'arrearsSummary'] as const,
   financialStats: (period: string) => ['landlord', 'financialStats', period] as const,
   financialChart: ['landlord', 'financialChart'] as const,
   expenses: (params?: { propertyId?: string; category?: string }) =>
@@ -31,7 +32,13 @@ export const landlordKeys = {
       params?.status ?? 'all',
       params?.priority ?? 'all',
     ] as const,
+  maintenanceSummary: ['landlord', 'maintenanceSummary'] as const,
   evictions: ['landlord', 'evictions'] as const,
+  reviews: ['landlord', 'reviews'] as const,
+  reviewSummary: ['landlord', 'reviews', 'summary'] as const,
+  conversations: ['landlord', 'conversations'] as const,
+  conversationMessages: (conversationId: string) =>
+    ['landlord', 'conversations', conversationId, 'messages'] as const,
   tenancyStanding: (applicationId: string) =>
     ['landlord', 'tenancyStanding', applicationId] as const,
 };
@@ -50,6 +57,8 @@ export const renterKeys = {
       filters?.bathrooms ?? '',
       filters?.propertyType ?? '',
       filters?.verifiedOnly ?? false,
+      filters?.page ?? 1,
+      filters?.pageSize ?? 20,
     ] as const,
   listing: (id: string) => ['renter', 'listing', id] as const,
   geoInsights: (id: string) => ['renter', 'listing', id, 'geo-insights'] as const,
@@ -66,6 +75,7 @@ export const renterKeys = {
   financing: ['renter', 'financing'] as const,
   ussdMenu: ['renter', 'ussdMenu'] as const,
   documents: ['renter', 'documents'] as const,
+  documentSummary: ['renter', 'documents', 'summary'] as const,
   conversations: ['renter', 'conversations'] as const,
   reminders: ['renter', 'reminders'] as const,
   messageTemplates: ['renter', 'messageTemplates'] as const,

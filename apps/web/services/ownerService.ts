@@ -1,4 +1,4 @@
-import { authFetch, safeCall } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   OwnerProperty,
   SaleListing,
@@ -143,7 +143,10 @@ export const ownerService = {
   getDashboard: () => safeCall(() => authFetch<OwnerDashboard>('/owner/dashboard')),
 
   // Properties
-  listProperties: () => safeCall(() => authFetch<OwnerPropertyApi[]>('/owner/properties')),
+  listProperties: (
+    params: { search?: string; verificationStatus?: string; page?: number; pageSize?: number } = {}
+  ) =>
+    safeCall(() => authFetch<Paginated<OwnerPropertyApi>>(`/owner/properties${toQuery(params)}`)),
   getProperty: (id: string) =>
     safeCall(() => authFetch<OwnerPropertyApi>(`/owner/properties/${id}`)),
   createProperty: (data: Partial<OwnerPropertyApi>) =>
@@ -156,7 +159,10 @@ export const ownerService = {
     safeCall(() => authFetch(`/owner/properties/${id}`, { method: 'DELETE' })),
 
   // Sale listings
-  listListings: () => safeCall(() => authFetch<OwnerSaleListingApi[]>('/owner/listings')),
+  listListings: (
+    params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
+  ) =>
+    safeCall(() => authFetch<Paginated<OwnerSaleListingApi>>(`/owner/listings${toQuery(params)}`)),
   createListing: (data: {
     propertyId: string;
     price: number;
@@ -173,7 +179,9 @@ export const ownerService = {
     ),
 
   // Offers
-  listOffers: () => safeCall(() => authFetch<OwnerOfferApi[]>('/owner/offers')),
+  listOffers: (
+    params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
+  ) => safeCall(() => authFetch<Paginated<OwnerOfferApi>>(`/owner/offers${toQuery(params)}`)),
   acceptOffer: (id: string) =>
     safeCall(() => authFetch(`/owner/offers/${id}/accept`, { method: 'POST' })),
   rejectOffer: (id: string) =>
@@ -187,7 +195,12 @@ export const ownerService = {
     ),
 
   // Transactions / escrow
-  listTransactions: () => safeCall(() => authFetch<OwnerTransactionApi[]>('/owner/transactions')),
+  listTransactions: (
+    params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
+  ) =>
+    safeCall(() =>
+      authFetch<Paginated<OwnerTransactionApi>>(`/owner/transactions${toQuery(params)}`)
+    ),
   releaseTransaction: (id: string) =>
     safeCall(() => authFetch(`/owner/transactions/${id}/release`, { method: 'POST' })),
 
@@ -197,11 +210,15 @@ export const ownerService = {
   getAnalyticsSummary: () => safeCall(() => authFetch('/owner/analytics/summary')),
 
   // Leads
-  listLeads: () => safeCall(() => authFetch<OwnerLeadApi[]>('/owner/leads')),
-  getRealtors: () => safeCall(() => authFetch<RealtorOption[]>('/owner/leads/realtors')),
+  listLeads: (params: { search?: string; stage?: string; page?: number; pageSize?: number } = {}) =>
+    safeCall(() => authFetch<Paginated<OwnerLeadApi>>(`/owner/leads${toQuery(params)}`)),
+  getRealtors: (params: { search?: string; page?: number; pageSize?: number } = {}) =>
+    safeCall(() => authFetch<Paginated<RealtorOption>>(`/owner/leads/realtors${toQuery(params)}`)),
 
   // Documents
-  listDocuments: () => safeCall(() => authFetch<OwnerDocumentApi[]>('/owner/documents')),
+  listDocuments: (
+    params: { search?: string; category?: string; page?: number; pageSize?: number } = {}
+  ) => safeCall(() => authFetch<Paginated<OwnerDocumentApi>>(`/owner/documents${toQuery(params)}`)),
   uploadDocument: (file: File, name: string, type: string, propertyId?: string) => {
     const form = new FormData();
     form.append('file', file);
@@ -221,7 +238,8 @@ export const ownerService = {
     safeCall(() => authFetch(`/owner/documents/${id}`, { method: 'DELETE' })),
 
   // Reviews
-  listReviews: () => safeCall(() => authFetch<OwnerReview[]>('/owner/reviews')),
+  listReviews: (params: { page?: number; pageSize?: number } = {}) =>
+    safeCall(() => authFetch<Paginated<OwnerReview>>(`/owner/reviews${toQuery(params)}`)),
   getRatingSummary: () => safeCall(() => authFetch<OwnerRatingSummary>('/owner/reviews/summary')),
 
   // Profile / settings
@@ -262,7 +280,10 @@ export const ownerService = {
     ),
 
   // Notifications feed
-  getNotifications: () => safeCall(() => authFetch<OwnerNotification[]>('/owner/notifications')),
+  getNotifications: (params: { page?: number; pageSize?: number } = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<OwnerNotification>>(`/owner/notifications${toQuery(params)}`)
+    ),
   markNotificationRead: (id: string) =>
     safeCall(() => authFetch(`/owner/notifications/${id}/read`, { method: 'PATCH' })),
   markAllNotificationsRead: () =>
@@ -287,8 +308,10 @@ export const ownerService = {
     safeCall(() => authFetch<OwnerOfferThreadMessage[]>(`/owner/offers/${offerId}/thread`)),
 
   // Messages
-  listConversations: () =>
-    safeCall(() => authFetch<OwnerConversation[]>('/owner/messages/conversations')),
+  listConversations: (params: { search?: string; page?: number; pageSize?: number } = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<OwnerConversation>>(`/owner/messages/conversations${toQuery(params)}`)
+    ),
   listMessages: (conversationId: string) =>
     safeCall(() =>
       authFetch<OwnerMessage[]>(`/owner/messages/conversations/${conversationId}/messages`)

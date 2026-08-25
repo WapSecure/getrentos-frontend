@@ -12,13 +12,19 @@ interface Document {
 
 interface DocumentExpiryAlertsProps {
   documents: Document[];
+  summary?: { expiring: number; expired: number };
 }
 
-export const DocumentExpiryAlerts = ({ documents }: DocumentExpiryAlertsProps) => {
-  const expiringDocs = documents.filter((d) => d.status === 'expiring' || d.status === 'expired');
-  const expiredDocs = documents.filter((d) => d.status === 'expired');
+export const DocumentExpiryAlerts = ({ documents, summary }: DocumentExpiryAlertsProps) => {
+  if (!summary) return null;
 
-  if (expiringDocs.length === 0) {
+  const expiringDocsOnPage = documents.filter(
+    (d) => d.status === 'expiring' || d.status === 'expired'
+  );
+  const needsAttention = summary.expiring + summary.expired;
+  const visibleDocumentCount = Math.min(expiringDocsOnPage.length, 3);
+
+  if (needsAttention === 0) {
     return (
       <div className="mb-6 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
         <div className="flex items-center gap-2">
@@ -39,21 +45,21 @@ export const DocumentExpiryAlerts = ({ documents }: DocumentExpiryAlertsProps) =
       <div className="flex items-center gap-2">
         <AlertCircle className="w-5 h-5 text-yellow-600" />
         <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-          {expiringDocs.length} document{expiringDocs.length > 1 ? 's' : ''} need attention
+          {needsAttention} document{needsAttention > 1 ? 's' : ''} need attention
         </span>
         <span className="text-xs text-yellow-600 dark:text-yellow-400 ml-auto">
-          {expiredDocs.length} expired • {expiringDocs.length - expiredDocs.length} expiring soon
+          {summary.expired} expired • {summary.expiring} expiring soon
         </span>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
-        {expiringDocs.slice(0, 3).map((doc) => (
+        {expiringDocsOnPage.slice(0, 3).map((doc) => (
           <span key={doc.id} className="text-xs px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full">
             {doc.name}
           </span>
         ))}
-        {expiringDocs.length > 3 && (
+        {needsAttention > visibleDocumentCount && (
           <span className="text-xs px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full">
-            +{expiringDocs.length - 3} more
+            +{needsAttention - visibleDocumentCount} more
           </span>
         )}
         <Button size="sm" variant="ghost" className="text-xs">

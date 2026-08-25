@@ -1,7 +1,9 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Star, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ownerService, type OwnerReview } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -24,11 +26,16 @@ const categoryIcon: Record<string, React.ElementType> = {
   responsiveness: Clock,
 };
 
+const PAGE_SIZE = 10;
+
 export default function OwnerReviewsPage() {
-  const { data: reviews = [] } = useQuery({
-    queryKey: ownerKeys.reviews,
-    queryFn: () => unwrap(ownerService.listReviews()),
+  const [page, setPage] = useState(1);
+  const { data } = useQuery({
+    queryKey: [...ownerKeys.reviews, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(ownerService.listReviews({ page, pageSize: PAGE_SIZE })),
   });
+  const reviews = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const { data: summary } = useQuery({
     queryKey: ownerKeys.reviewSummary,
@@ -54,7 +61,7 @@ export default function OwnerReviewsPage() {
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
-            Based on {summary?.reviewCount ?? reviews.length} review
+            Based on {summary?.reviewCount ?? total} review
             {summary?.reviewCount === 1 ? '' : 's'}
           </p>
         </div>
@@ -111,6 +118,16 @@ export default function OwnerReviewsPage() {
           </div>
         ))}
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

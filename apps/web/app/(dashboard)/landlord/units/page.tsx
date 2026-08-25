@@ -57,13 +57,14 @@ function LandlordUnitsPageContent() {
   const properties = propertiesData?.items ?? [];
   const totalProperties = propertiesData?.total ?? 0;
 
-  // Full batch for the bulk actions + portfolio-wide unit count.
-  const { data: allUnitsData } = useQuery({
-    queryKey: [...landlordKeys.units(), { page: 1, pageSize: 100 }],
-    queryFn: () => unwrap(landlordService.listUnits({ page: 1, pageSize: 100 })),
+  // Fetch one row solely to read the portfolio-wide count. Bulk-action
+  // modals load their own paginated unit lists rather than treating a 100-row
+  // batch as the full portfolio.
+  const { data: unitsSummaryData } = useQuery({
+    queryKey: [...landlordKeys.units(), { page: 1, pageSize: 1 }],
+    queryFn: () => unwrap(landlordService.listUnits({ page: 1, pageSize: 1 })),
   });
-  const allUnits = allUnitsData?.items ?? [];
-  const totalUnits = allUnitsData?.total ?? 0;
+  const totalUnits = unitsSummaryData?.total ?? 0;
 
   // Paginated, server-filtered list for the table.
   const { data } = useQuery({
@@ -216,14 +217,12 @@ function LandlordUnitsPageContent() {
       <BulkChargeModal
         isOpen={isBulkChargeOpen}
         onClose={() => setIsBulkChargeOpen(false)}
-        units={allUnits}
         properties={properties}
       />
 
       <BulkPricingModal
         isOpen={isBulkPricingOpen}
         onClose={() => setIsBulkPricingOpen(false)}
-        units={allUnits}
         properties={properties}
       />
     </>

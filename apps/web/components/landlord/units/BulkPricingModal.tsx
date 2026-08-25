@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Tag } from 'lucide-react';
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   EmptyState,
   Field,
   Input,
+  Pagination,
   Select,
   Toast,
   type ToastVariant,
@@ -21,21 +22,41 @@ import { formatCurrency } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
-import type { Property, Unit } from '@/types/landlord';
+import type { Property } from '@/types/landlord';
 
 interface BulkPricingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  units: Unit[];
   properties: Property[];
 }
 
-export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPricingModalProps) {
+const PAGE_SIZE = 10;
+
+export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingModalProps) {
   const queryClient = useQueryClient();
   const [propertyId, setPropertyId] = useState('');
   const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
   const [monthlyRent, setMonthlyRent] = useState('');
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: unitsData } = useQuery({
+    queryKey: [
+      ...landlordKeys.units(propertyId || undefined),
+      { page, pageSize: PAGE_SIZE, bulkPricing: true },
+    ],
+    queryFn: () =>
+      unwrap(
+        landlordService.listUnits({
+          propertyId: propertyId || undefined,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+    enabled: isOpen,
+  });
+  const units = unitsData?.items ?? [];
+  const totalUnits = unitsData?.total ?? 0;
 
   const eligibleUnits = useMemo(
     () => units.filter((unit) => !propertyId || unit.propertyId === propertyId),
@@ -46,6 +67,7 @@ export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPri
     setPropertyId('');
     setSelectedUnitIds([]);
     setMonthlyRent('');
+    setPage(1);
   };
 
   const handleClose = () => {
@@ -81,8 +103,12 @@ export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPri
   };
 
   const toggleAll = () => {
+    const currentPageIds = eligibleUnits.map((unit) => unit.id);
+    const allCurrentPageSelected = currentPageIds.every((id) => selectedUnitIds.includes(id));
     setSelectedUnitIds((current) =>
-      current.length === eligibleUnits.length ? [] : eligibleUnits.map((unit) => unit.id)
+      allCurrentPageSelected
+        ? current.filter((id) => !currentPageIds.includes(id))
+        : [...new Set([...current, ...currentPageIds])]
     );
   };
 
@@ -112,6 +138,7 @@ export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPri
                   onValueChange={(value) => {
                     setPropertyId(value);
                     setSelectedUnitIds([]);
+                    setPage(1);
                   }}
                   placeholder="All properties"
                   options={[
@@ -140,7 +167,7 @@ export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPri
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-foreground">
-                  Units ({selectedUnitIds.length} of {eligibleUnits.length} selected)
+                  Units ({selectedUnitIds.length} selected across {totalUnits})
                 </p>
                 {eligibleUnits.length > 0 && (
                   <button
@@ -148,9 +175,9 @@ export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPri
                     onClick={toggleAll}
                     className="text-xs font-medium text-primary hover:underline"
                   >
-                    {selectedUnitIds.length === eligibleUnits.length
-                      ? 'Deselect all'
-                      : 'Select all'}
+                    {eligibleUnits.every((unit) => selectedUnitIds.includes(unit.id))
+                      ? 'Deselect page'
+                      : 'Select page'}
                   </button>
                 )}
               </div>
@@ -188,6 +215,15 @@ export function BulkPricingModal({ isOpen, onClose, units, properties }: BulkPri
                     </label>
                   ))}
                 </div>
+              )}
+              {totalUnits > 0 && (
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  total={totalUnits}
+                  onPageChange={setPage}
+                  className="mt-3"
+                />
               )}
             </div>
 

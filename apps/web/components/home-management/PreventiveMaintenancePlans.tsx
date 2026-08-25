@@ -19,6 +19,7 @@ import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -98,20 +99,26 @@ const planIsDueSoon = (plan: PreventiveMaintenancePlan) => {
 
 interface PreventiveMaintenancePlansProps {
   plans: PreventiveMaintenancePlan[];
-  assets: HomeAsset[];
   properties: HomeManagementProperty[];
   vendors?: HomeManagementVendor[];
   isLoading?: boolean;
   error?: Error | null;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
 }
 
 export function PreventiveMaintenancePlans({
   plans,
-  assets,
   properties,
   vendors = [],
   isLoading = false,
   error,
+  page,
+  pageSize,
+  total,
+  onPageChange,
 }: PreventiveMaintenancePlansProps) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -125,15 +132,25 @@ export function PreventiveMaintenancePlans({
   });
   const units = unitsQuery.data ?? [];
 
+  const assetsQuery = useQuery({
+    enabled: isCreateOpen && Boolean(form.propertyId),
+    queryKey: [...homeManagementKeys.assets(form.propertyId), 'plan-selector'],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listAssets({ propertyId: form.propertyId, page: 1, pageSize: 100 })
+      ),
+  });
+  const propertyAssets = assetsQuery.data?.items ?? [];
+
   const availableAssets = useMemo(
     () =>
-      assets.filter(
+      propertyAssets.filter(
         (asset) =>
           asset.propertyId === form.propertyId &&
           asset.status !== 'RETIRED' &&
           (asset.unitId ?? '') === form.unitId
       ),
-    [assets, form.propertyId, form.unitId]
+    [propertyAssets, form.propertyId, form.unitId]
   );
 
   const createPlan = useMutation({
@@ -234,18 +251,18 @@ export function PreventiveMaintenancePlans({
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <PlanSummary
           icon={<Repeat2 className="h-4 w-4" />}
-          label="Active care plans"
+          label="Active on this page"
           value={activePlans}
         />
         <PlanSummary
           icon={<CircleAlert className="h-4 w-4" />}
-          label="Due now"
+          label="Due on this page"
           value={duePlans}
           intent="urgent"
         />
         <PlanSummary
           icon={<CalendarClock className="h-4 w-4" />}
-          label="Due within 30 days"
+          label="Due soon on this page"
           value={dueSoonPlans}
         />
       </div>
@@ -362,6 +379,15 @@ export function PreventiveMaintenancePlans({
               })}
             </div>
           </div>
+        )}
+        {total > 0 && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={onPageChange}
+            className="rounded-b-2xl border border-border bg-card"
+          />
         )}
       </div>
 

@@ -74,7 +74,7 @@ export interface AgentReview {
 export interface AgentDocument {
   id: string;
   name: string;
-  category: 'inspection_report' | 'verification_form' | 'id_scan' | 'agreement';
+  category: 'inspection_report' | 'verification_form' | 'id_scan' | 'agreement' | 'other';
   relatedTo?: string;
   uploadedAt: string;
   sizeLabel: string;

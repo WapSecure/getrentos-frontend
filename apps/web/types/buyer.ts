@@ -6,7 +6,14 @@ export type ListingPropertyType =
   | 'Land'
   | 'Commercial';
 export type ViewingRequestStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
-export type BuyerOfferStatus = 'submitted' | 'countered' | 'accepted' | 'rejected' | 'closed';
+export type BuyerOfferStatus =
+  | 'submitted'
+  | 'countered'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+  | 'expired'
+  | 'closed';
 export type FinancingType = 'cash' | 'mortgage' | 'installment';
 export type BuyerEscrowStatus =
   | 'deposit_pending'
@@ -14,7 +21,9 @@ export type BuyerEscrowStatus =
   | 'verification'
   | 'final_payment'
   | 'released'
-  | 'frozen';
+  | 'frozen'
+  | 'disputed'
+  | 'refunded';
 
 export interface BuyerPropertyListing {
   id: string;

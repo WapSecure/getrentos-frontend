@@ -7,6 +7,7 @@ import { Button } from '@getrentos/ui';
 import { Badge } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -19,15 +20,20 @@ interface StaffApprovalsPanelProps {
   notify: (message: string, variant: ToastVariant) => void;
 }
 
+const PAGE_SIZE = 10;
+
 export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
   const queryClient = useQueryClient();
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [page, setPage] = useState(1);
 
-  const { data: approvals = [], isLoading } = useQuery({
-    queryKey: adminKeys.staffApprovals,
-    queryFn: () => unwrap(adminService.listApprovals()),
+  const { data, isLoading } = useQuery({
+    queryKey: adminKeys.staffApprovalsList({ page, pageSize: PAGE_SIZE }),
+    queryFn: () => unwrap(adminService.listApprovals({ page, pageSize: PAGE_SIZE })),
   });
+  const approvals = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: adminKeys.staffApprovals });
@@ -38,6 +44,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
     mutationFn: (id: string) => unwrap(adminService.approveStaff(id)),
     onSuccess: () => {
       invalidate();
+      setPage(1);
       notify('Staff member approved — they can now sign in.', 'success');
     },
     onError: (err) =>
@@ -49,6 +56,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
       unwrap(adminService.rejectStaff(id, reason)),
     onSuccess: () => {
       invalidate();
+      setPage(1);
       setRejectingId(null);
       setRejectReason('');
       notify('Staff creation rejected.', 'success');
@@ -169,7 +177,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
             Staff creations by junior admins wait here for a senior admin to approve.
           </p>
         </div>
-        {approvals.length > 0 && <Badge variant="warning">{approvals.length} pending</Badge>}
+        {total > 0 && <Badge variant="warning">{total} pending</Badge>}
       </div>
 
       {isLoading ? (
@@ -183,6 +191,12 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
         />
       ) : (
         <ul className="divide-y divide-border">{approvals.map(renderApproval)}</ul>
+      )}
+
+      {total > 0 && (
+        <div className="border-t border-border px-5 py-4">
+          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+        </div>
       )}
     </section>
   );

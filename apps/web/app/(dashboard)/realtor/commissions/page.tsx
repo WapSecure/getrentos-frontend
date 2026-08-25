@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Wallet, Clock, CheckCircle2, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import type { CommissionStatus } from '@/types/realtor';
+
+const PAGE_SIZE = 10;
 
 const statusConfig: Record<
   CommissionStatus,
@@ -32,10 +34,17 @@ const statusConfig: Record<
 };
 
 export default function RealtorCommissionsPage() {
-  const { data: commissions = [], isLoading } = useQuery({
-    queryKey: realtorKeys.commissions,
-    queryFn: () => unwrap(realtorService.getCommissions()),
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useQuery({
+    queryKey: [...realtorKeys.commissions, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(realtorService.getCommissions({ page, pageSize: PAGE_SIZE })),
   });
+  const { data: summary } = useQuery({
+    queryKey: [...realtorKeys.commissions, 'summary'],
+    queryFn: () => unwrap(realtorService.getCommissionsSummary()),
+  });
+  const commissions = data?.items ?? [];
+  const total = data?.total ?? 0;
   const [exported, setExported] = useState(false);
 
   const handleExport = () => {
@@ -74,14 +83,10 @@ export default function RealtorCommissionsPage() {
     window.setTimeout(() => setExported(false), 2500);
   };
 
-  const totalEarned = commissions.reduce((sum, c) => sum + c.commissionAmount, 0);
-  const totalPending = commissions
-    .filter((c) => c.status === 'pending')
-    .reduce((sum, c) => sum + c.commissionAmount, 0);
-  const totalPaid = commissions
-    .filter((c) => c.status === 'paid')
-    .reduce((sum, c) => sum + c.commissionAmount, 0);
-  const dealsClosed = commissions.length;
+  const totalEarned = summary?.totalEarned ?? 0;
+  const totalPending = summary?.pending ?? 0;
+  const totalPaid = summary?.paid ?? 0;
+  const dealsClosed = summary?.dealsClosed ?? 0;
 
   const stats = [
     {
@@ -132,7 +137,7 @@ export default function RealtorCommissionsPage() {
           ) : (
             <FileSpreadsheet className="w-3.5 h-3.5" />
           )}
-          {exported ? 'Exported' : 'Export CSV'}
+          {exported ? 'Exported' : 'Export current page'}
         </Button>
       </div>
 
@@ -213,6 +218,16 @@ export default function RealtorCommissionsPage() {
           </table>
         </div>
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

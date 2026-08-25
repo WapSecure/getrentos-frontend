@@ -1,11 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Star, MessageCircle } from 'lucide-react';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
+import { Pagination } from '@getrentos/ui';
+
+const PAGE_SIZE = 10;
 
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -19,18 +23,23 @@ const StarRow = ({ rating }: { rating: number }) => (
 );
 
 export default function RealtorReviewsPage() {
-  const { data: reviews = [], isLoading } = useQuery({
-    queryKey: realtorKeys.reviews,
-    queryFn: () => unwrap(realtorService.getReviews()),
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useQuery({
+    queryKey: [...realtorKeys.reviews, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(realtorService.getReviews({ page, pageSize: PAGE_SIZE })),
   });
+  const { data: summary } = useQuery({
+    queryKey: [...realtorKeys.reviews, 'summary'],
+    queryFn: () => unwrap(realtorService.getReviewsSummary()),
+  });
+  const reviews = data?.items ?? [];
+  const total = data?.total ?? 0;
 
-  const overallRating = reviews.length
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0;
+  const overallRating = summary?.averageRating ?? 0;
 
   const distribution = [5, 4, 3, 2, 1].map((star) => ({
     star,
-    count: reviews.filter((r) => Math.round(r.rating) === star).length,
+    count: summary?.distribution[star] ?? 0,
   }));
   const maxCount = Math.max(1, ...distribution.map((d) => d.count));
 
@@ -52,7 +61,7 @@ export default function RealtorReviewsPage() {
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
-            Based on {reviews.length} review{reviews.length === 1 ? '' : 's'}
+            Based on {total} review{total === 1 ? '' : 's'}
           </p>
         </div>
 
@@ -116,6 +125,16 @@ export default function RealtorReviewsPage() {
           ))
         )}
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
+      )}
     </>
   );
 }

@@ -29,6 +29,11 @@ export interface RentCollectionStats {
   upcomingPayments: number;
 }
 
+export interface LandlordArrearsSummary {
+  totalOverdue: number;
+  overdueCount: number;
+}
+
 export interface FinancialStats {
   rentalIncome: number;
   outstandingRent: number;
@@ -121,6 +126,18 @@ export interface TenantReview {
   responsiveness: number;
   comment: string;
   createdAt: string;
+}
+
+export interface LandlordReviewSummary {
+  averageRating: number;
+  reviewCount: number;
+  averageCommunication: number;
+  averagePropertyCondition: number;
+  averageResponsiveness: number;
+}
+
+export interface LandlordMaintenanceSummary {
+  openCount: number;
 }
 
 export interface LandlordNotificationPreference {
@@ -495,7 +512,12 @@ export const landlordService = {
 
   // ---- Payments ----
   async listPayments(
-    params: { status?: string; page?: number; pageSize?: number } = {}
+    params: {
+      status?: string;
+      sort?: 'due_date_asc' | 'due_date_desc';
+      page?: number;
+      pageSize?: number;
+    } = {}
   ): Promise<ApiResponse<Paginated<RentPayment>>> {
     return safeCall(() =>
       authFetch<Paginated<RentPayment>>(`/landlord/payments${toQuery(params)}`)
@@ -504,6 +526,10 @@ export const landlordService = {
 
   async getRentCollectionStats(): Promise<ApiResponse<RentCollectionStats>> {
     return safeCall(() => authFetch('/landlord/payments/stats'));
+  },
+
+  async getArrearsSummary(): Promise<ApiResponse<LandlordArrearsSummary>> {
+    return safeCall(() => authFetch('/landlord/payments/arrears-summary'));
   },
 
   async bulkCharge(data: {
@@ -645,6 +671,10 @@ export const landlordService = {
     );
   },
 
+  async getMaintenanceSummary(): Promise<ApiResponse<LandlordMaintenanceSummary>> {
+    return safeCall(() => authFetch('/landlord/maintenance/summary'));
+  },
+
   async assignMaintenanceVendor(
     requestId: string,
     vendorId: string
@@ -705,6 +735,10 @@ export const landlordService = {
     );
   },
 
+  async getReviewSummary(): Promise<ApiResponse<LandlordReviewSummary>> {
+    return safeCall(() => authFetch('/landlord/reviews/summary'));
+  },
+
   // ---- Messages ----
   async listConversations(
     params: { search?: string; page?: number; pageSize?: number } = {}
@@ -714,8 +748,15 @@ export const landlordService = {
     );
   },
 
-  async getConversationMessages(conversationId: string): Promise<ApiResponse<ThreadMessage[]>> {
-    return safeCall(() => authFetch(`/landlord/messages/conversations/${conversationId}/messages`));
+  async getConversationMessages(
+    conversationId: string,
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<ThreadMessage>>> {
+    return safeCall(() =>
+      authFetch<Paginated<ThreadMessage>>(
+        `/landlord/messages/conversations/${conversationId}/messages${toQuery(params)}`
+      )
+    );
   },
 
   async sendConversationMessage(

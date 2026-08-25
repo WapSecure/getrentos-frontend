@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Star, PenLine } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerService, type BuyerReview } from '@/services/buyerService';
@@ -21,10 +22,14 @@ const StarRow = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }
 );
 
 export default function BuyerReviewsPage() {
-  const { data: reviews = [] } = useQuery({
-    queryKey: buyerKeys.reviews,
-    queryFn: () => unwrap(buyerService.listReviews()),
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const { data: reviewsData } = useQuery({
+    queryKey: [...buyerKeys.reviews, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(buyerService.listReviews({ page, pageSize: PAGE_SIZE })),
   });
+  const reviews = reviewsData?.items ?? [];
+  const total = reviewsData?.total ?? 0;
 
   return (
     <>
@@ -78,6 +83,16 @@ export default function BuyerReviewsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
     </>
   );

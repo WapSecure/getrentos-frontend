@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrento
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
@@ -100,6 +101,7 @@ const defaultTargets: Record<
 };
 
 const MAX_TARGET_MINUTES = 525_600;
+const SLA_POLICY_PAGE_SIZE = 8;
 
 const propertyLabel = (property: HomeManagementProperty) =>
   property.title ?? property.name ?? 'Unnamed property';
@@ -184,6 +186,7 @@ export function HomeManagementSlaPolicies({
 }: HomeManagementSlaPoliciesProps) {
   const queryClient = useQueryClient();
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
+  const [page, setPage] = useState(1);
   const [dialogState, setDialogState] = useState<PolicyDialogState>(null);
   const [form, setForm] = useState<SlaPolicyForm>(() => createPolicyForm('MEDIUM'));
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
@@ -195,12 +198,35 @@ export function HomeManagementSlaPolicies({
 
   const policiesQuery = useQuery({
     enabled: Boolean(effectivePropertyId),
-    queryKey: homeManagementKeys.slaPolicies(effectivePropertyId),
-    queryFn: () => unwrap(homeManagementService.listSlaPolicies(effectivePropertyId)),
+    queryKey: [
+      ...homeManagementKeys.slaPolicies(effectivePropertyId),
+      { page, pageSize: SLA_POLICY_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listSlaPolicies(effectivePropertyId, {
+          page,
+          pageSize: SLA_POLICY_PAGE_SIZE,
+        })
+      ),
   });
 
-  const policies = useMemo(() => policiesQuery.data ?? [], [policiesQuery.data]);
-  const activePolicies = useMemo(() => policies.filter((policy) => policy.isActive), [policies]);
+  const activePoliciesQuery = useQuery({
+    enabled: Boolean(effectivePropertyId),
+    queryKey: [...homeManagementKeys.slaPolicies(effectivePropertyId), 'active'],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listSlaPolicies(effectivePropertyId, {
+          page: 1,
+          pageSize: 4,
+          isActive: true,
+        })
+      ),
+  });
+
+  const policies = policiesQuery.data?.items ?? [];
+  const totalPolicies = policiesQuery.data?.total ?? 0;
+  const activePolicies = activePoliciesQuery.data?.items ?? [];
   const configuredPriorities = useMemo(
     () => new Set(activePolicies.map((policy) => policy.priority)),
     [activePolicies]
@@ -322,7 +348,10 @@ export function HomeManagementSlaPolicies({
             className="min-w-56"
             disabled={isPropertiesLoading || properties.length === 0}
             value={effectivePropertyId}
-            onValueChange={setSelectedPropertyId}
+            onValueChange={(propertyId) => {
+              setSelectedPropertyId(propertyId);
+              setPage(1);
+            }}
             placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
             options={properties.map((property) => ({
               value: property.id,
@@ -333,7 +362,10 @@ export function HomeManagementSlaPolicies({
             icon={<Plus className="h-4 w-4" />}
             rounded="md"
             disabled={
-              !effectivePropertyId || policiesQuery.isLoading || remainingPriorities.length === 0
+              !effectivePropertyId ||
+              policiesQuery.isLoading ||
+              activePoliciesQuery.isLoading ||
+              remainingPriorities.length === 0
             }
             title={
               remainingPriorities.length === 0
@@ -348,7 +380,9 @@ export function HomeManagementSlaPolicies({
       </div>
 
       <div className="mt-5">
-        {isPropertiesLoading || (Boolean(effectivePropertyId) && policiesQuery.isLoading) ? (
+        {isPropertiesLoading ||
+        (Boolean(effectivePropertyId) &&
+          (policiesQuery.isLoading || activePoliciesQuery.isLoading)) ? (
           <SlaPoliciesLoadingState />
         ) : properties.length === 0 ? (
           <EmptyState
@@ -373,108 +407,150 @@ export function HomeManagementSlaPolicies({
             }
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {priorities.map((priority) => {
-              const policy =
-                activePolicies.find((item) => item.priority === priority.value) ??
-                policies.find((item) => item.priority === priority.value);
-              const meta = priorityMeta[priority.value];
+          <>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {priorities.map((priority) => {
+                const policy =
+                  activePolicies.find((item) => item.priority === priority.value) ??
+                  policies.find((item) => item.priority === priority.value);
+                const meta = priorityMeta[priority.value];
 
-              return policy ? (
-                <article
-                  key={priority.value}
-                  className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <Badge variant={meta.variant}>{meta.label}</Badge>
-                      <p className="mt-3 text-sm font-semibold text-foreground">
-                        {policy.isActive ? 'Policy is active' : 'Policy is paused'}
-                      </p>
+                return policy ? (
+                  <article
+                    key={priority.value}
+                    className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <Badge variant={meta.variant}>{meta.label}</Badge>
+                        <p className="mt-3 text-sm font-semibold text-foreground">
+                          {policy.isActive ? 'Policy is active' : 'Policy is paused'}
+                        </p>
+                      </div>
+                      <div
+                        className={
+                          policy.isActive
+                            ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary'
+                            : 'flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground'
+                        }
+                      >
+                        {policy.isActive ? (
+                          <ShieldCheck className="h-5 w-5" />
+                        ) : (
+                          <Settings2 className="h-5 w-5" />
+                        )}
+                      </div>
                     </div>
-                    <div
-                      className={
-                        policy.isActive
-                          ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary'
-                          : 'flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground'
-                      }
-                    >
-                      {policy.isActive ? (
-                        <ShieldCheck className="h-5 w-5" />
-                      ) : (
-                        <Settings2 className="h-5 w-5" />
-                      )}
-                    </div>
-                  </div>
 
-                  <p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">
-                    {meta.summary}
-                  </p>
+                    <p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">
+                      {meta.summary}
+                    </p>
 
-                  <dl className="mt-4 space-y-2 rounded-xl bg-secondary/70 p-3 text-sm">
-                    <SlaMetric
-                      label="Respond"
-                      value={formatMinutes(policy.responseTargetMinutes)}
-                    />
-                    <SlaMetric
-                      label="Resolve"
-                      value={formatMinutes(policy.resolutionTargetMinutes)}
-                    />
-                    <SlaMetric
-                      label="Escalate"
-                      value={formatMinutes(policy.escalationTargetMinutes)}
-                    />
-                  </dl>
+                    <dl className="mt-4 space-y-2 rounded-xl bg-secondary/70 p-3 text-sm">
+                      <SlaMetric
+                        label="Respond"
+                        value={formatMinutes(policy.responseTargetMinutes)}
+                      />
+                      <SlaMetric
+                        label="Resolve"
+                        value={formatMinutes(policy.resolutionTargetMinutes)}
+                      />
+                      <SlaMetric
+                        label="Escalate"
+                        value={formatMinutes(policy.escalationTargetMinutes)}
+                      />
+                    </dl>
 
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
-                    <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-                      {policy.emergencyRoutingEnabled ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" />
-                      ) : (
-                        <Clock3 className="h-3.5 w-3.5 shrink-0" />
-                      )}
-                      <span className="truncate">
-                        {policy.emergencyRoutingEnabled
-                          ? 'Emergency routing on'
-                          : 'Standard routing'}
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+                      <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                        {policy.emergencyRoutingEnabled ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" />
+                        ) : (
+                          <Clock3 className="h-3.5 w-3.5 shrink-0" />
+                        )}
+                        <span className="truncate">
+                          {policy.emergencyRoutingEnabled
+                            ? 'Emergency routing on'
+                            : 'Standard routing'}
+                        </span>
                       </span>
-                    </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        rounded="md"
+                        onClick={() => openEdit(policy)}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </article>
+                ) : (
+                  <article
+                    key={priority.value}
+                    className="flex min-h-72 flex-col rounded-2xl border border-dashed border-border bg-secondary/30 p-5"
+                  >
+                    <Badge variant={meta.variant} className="w-fit">
+                      {meta.label}
+                    </Badge>
+                    <div className="mt-5 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-muted-foreground">
+                      <Clock3 className="h-5 w-5" />
+                    </div>
+                    <p className="mt-4 text-sm font-semibold text-foreground">
+                      No policy configured
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">{meta.summary}</p>
                     <Button
                       size="sm"
                       variant="outline"
                       rounded="md"
-                      onClick={() => openEdit(policy)}
+                      className="mt-auto"
+                      onClick={() => openCreate(priority.value)}
                     >
-                      Edit
+                      Configure {meta.label.toLowerCase()}
                     </Button>
-                  </div>
-                </article>
-              ) : (
-                <article
-                  key={priority.value}
-                  className="flex min-h-72 flex-col rounded-2xl border border-dashed border-border bg-secondary/30 p-5"
-                >
-                  <Badge variant={meta.variant} className="w-fit">
-                    {meta.label}
-                  </Badge>
-                  <div className="mt-5 flex h-10 w-10 items-center justify-center rounded-xl bg-card text-muted-foreground">
-                    <Clock3 className="h-5 w-5" />
-                  </div>
-                  <p className="mt-4 text-sm font-semibold text-foreground">No policy configured</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{meta.summary}</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    rounded="md"
-                    className="mt-auto"
-                    onClick={() => openCreate(priority.value)}
-                  >
-                    Configure {meta.label.toLowerCase()}
-                  </Button>
-                </article>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+            {totalPolicies > 0 && (
+              <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card">
+                <div className="border-b border-border px-5 py-3">
+                  <p className="text-sm font-medium text-foreground">Policy history</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Review active and superseded policy records for this property.
+                  </p>
+                </div>
+                <div className="divide-y divide-border">
+                  {policies.map((policy) => {
+                    const meta = priorityMeta[policy.priority];
+                    return (
+                      <div
+                        key={policy.id}
+                        className="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant={meta.variant}>{meta.label}</Badge>
+                          <span className="text-sm text-foreground">
+                            Respond {formatMinutes(policy.responseTargetMinutes)} · Resolve{' '}
+                            {formatMinutes(policy.resolutionTargetMinutes)}
+                          </span>
+                        </div>
+                        <Badge variant={policy.isActive ? 'success' : 'neutral'}>
+                          {policy.isActive ? 'Active' : 'Superseded'}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Pagination
+                  page={page}
+                  pageSize={SLA_POLICY_PAGE_SIZE}
+                  total={totalPolicies}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

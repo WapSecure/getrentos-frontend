@@ -1,11 +1,45 @@
-import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
+import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 
 export type HomeManagementDashboard = {
   assets: number;
+  totalAssets: number;
+  assetsNeedingService: number;
   plansDue: number;
   openWorkOrders: number;
   approvalQueue: number;
   overdue: number;
+  unacknowledgedEmergencies: number;
+  approvedSpend: number;
+  propertiesTotal: number;
+};
+
+export type HomeManagementPageParams = {
+  page?: number;
+  pageSize?: number;
+};
+
+export type HomeManagementAssetsParams = HomeManagementPageParams & {
+  propertyId?: string;
+  status?: HomeAssetStatus;
+};
+
+export type HomeManagementPlansParams = HomeManagementPageParams & {
+  propertyId?: string;
+  status?: PreventivePlanStatus;
+};
+
+export type HomeManagementWorkOrdersParams = HomeManagementPageParams & {
+  propertyId?: string;
+  status?: HomeManagementWorkOrder['status'];
+};
+
+export type HomeManagementInspectionsParams = HomeManagementPageParams & {
+  propertyId?: string;
+  status?: HomeManagementInspection['status'];
+};
+
+export type HomeManagementSlaPoliciesParams = HomeManagementPageParams & {
+  isActive?: boolean;
 };
 
 export type HomeAssetStatus = 'ACTIVE' | 'NEEDS_SERVICE' | 'RETIRED';
@@ -471,8 +505,8 @@ const normalizeTimelineEvents = (payload: unknown): HomeManagementTimelineEvent[
 export const homeManagementService = {
   getDashboard: () =>
     safeCall(() => authFetch<HomeManagementDashboard>('/home-management/dashboard')),
-  listAssets: (propertyId?: string) =>
-    safeCall(() => authFetch<HomeAsset[]>(`/home-management/assets${toQuery({ propertyId })}`)),
+  listAssets: (params: HomeManagementAssetsParams = {}) =>
+    safeCall(() => authFetch<Paginated<HomeAsset>>(`/home-management/assets${toQuery(params)}`)),
   createAsset: (data: CreateHomeAssetInput) =>
     safeCall(() =>
       authFetch<HomeAsset>('/home-management/assets', {
@@ -487,7 +521,10 @@ export const homeManagementService = {
         body: JSON.stringify({ status }),
       })
     ),
-  listPlans: () => safeCall(() => authFetch<PreventiveMaintenancePlan[]>('/home-management/plans')),
+  listPlans: (params: HomeManagementPlansParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<PreventiveMaintenancePlan>>(`/home-management/plans${toQuery(params)}`)
+    ),
   createPlan: (data: CreatePreventivePlanInput) =>
     safeCall(() =>
       authFetch<PreventiveMaintenancePlan>('/home-management/plans', {
@@ -512,8 +549,12 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  listWorkOrders: () =>
-    safeCall(() => authFetch<HomeManagementWorkOrder[]>('/home-management/work-orders')),
+  listWorkOrders: (params: HomeManagementWorkOrdersParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<HomeManagementWorkOrder>>(
+        `/home-management/work-orders${toQuery(params)}`
+      )
+    ),
   createWorkOrder: (data: CreateHomeManagementWorkOrderInput) =>
     safeCall(() =>
       authFetch<HomeManagementWorkOrder>('/home-management/work-orders', {
@@ -548,8 +589,12 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  listInspections: () =>
-    safeCall(() => authFetch<HomeManagementInspection[]>('/home-management/inspections')),
+  listInspections: (params: HomeManagementInspectionsParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<HomeManagementInspection>>(
+        `/home-management/inspections${toQuery(params)}`
+      )
+    ),
   listTimeline: ({ propertyId, limit }: HomeManagementTimelineParams = {}) => {
     const normalizedLimit =
       typeof limit === 'number' && Number.isInteger(limit) && limit > 0 ? String(limit) : undefined;
@@ -569,10 +614,10 @@ export const homeManagementService = {
         body: JSON.stringify({ approvedCost }),
       })
     ),
-  listSlaPolicies: (propertyId: string) =>
+  listSlaPolicies: (propertyId: string, params: HomeManagementSlaPoliciesParams = {}) =>
     safeCall(() =>
-      authFetch<HomeManagementSlaPolicy[]>(
-        `/home-management/sla-policies${toQuery({ propertyId })}`
+      authFetch<Paginated<HomeManagementSlaPolicy>>(
+        `/home-management/sla-policies${toQuery({ propertyId, ...params })}`
       )
     ),
   createSlaPolicy: (data: CreateHomeManagementSlaPolicyInput) =>
@@ -589,10 +634,10 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  listEscalations: (propertyId: string) =>
+  listEscalations: (propertyId: string, params: HomeManagementPageParams = {}) =>
     safeCall(() =>
-      authFetch<HomeManagementEscalation[]>(
-        `/home-management/escalations${toQuery({ propertyId })}`
+      authFetch<Paginated<HomeManagementEscalation>>(
+        `/home-management/escalations${toQuery({ propertyId, ...params })}`
       )
     ),
   acknowledgeWorkOrder: (id: string) =>
@@ -607,10 +652,10 @@ export const homeManagementService = {
         method: 'POST',
       })
     ),
-  listWorkOrderQuotes: (workOrderId: string) =>
+  listWorkOrderQuotes: (workOrderId: string, params: HomeManagementPageParams = {}) =>
     safeCall(() =>
-      authFetch<HomeManagementWorkOrderQuote[]>(
-        `/home-management/work-orders/${workOrderId}/quotes`
+      authFetch<Paginated<HomeManagementWorkOrderQuote>>(
+        `/home-management/work-orders/${workOrderId}/quotes${toQuery(params)}`
       )
     ),
   createWorkOrderQuote: (workOrderId: string, data: CreateHomeManagementWorkOrderQuoteInput) =>
@@ -644,10 +689,10 @@ export const homeManagementService = {
         }
       )
     ),
-  listWorkOrderInvoices: (workOrderId: string) =>
+  listWorkOrderInvoices: (workOrderId: string, params: HomeManagementPageParams = {}) =>
     safeCall(() =>
-      authFetch<HomeManagementWorkOrderInvoice[]>(
-        `/home-management/work-orders/${workOrderId}/invoices`
+      authFetch<Paginated<HomeManagementWorkOrderInvoice>>(
+        `/home-management/work-orders/${workOrderId}/invoices${toQuery(params)}`
       )
     ),
   createWorkOrderInvoice: (workOrderId: string, data: CreateHomeManagementWorkOrderInvoiceInput) =>

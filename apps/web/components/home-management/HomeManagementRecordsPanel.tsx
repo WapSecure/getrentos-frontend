@@ -48,8 +48,8 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
     queryKey: homeManagementKeys.documents(role),
     queryFn: async (): Promise<HomeRecord[]> => {
       if (role === 'owner') {
-        const documents = await unwrap(ownerService.listDocuments());
-        return documents
+        const documents = await unwrap(ownerService.listDocuments({ page: 1, pageSize: 100 }));
+        return documents.items
           .filter((document) => hasLinkedProperty(document.propertyName))
           .map((document) => ({
             id: document.id,

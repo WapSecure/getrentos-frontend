@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, Pagination } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -11,27 +11,37 @@ import { landlordService } from '@/services/landlordService';
 import { paymentStatusBadges } from '@/lib/statusBadge';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const PAGE_SIZE = 10;
 
 const daysOverdue = (dueDate: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(dueDate).getTime()) / MS_PER_DAY));
 
 export default function LandlordArrearsPage() {
-  // Fetch the full overdue batch (backend max pageSize is 100) so the
-  // "Total in arrears" sum and the sorted list remain accurate.
+  const [page, setPage] = useState(1);
   const { data } = useQuery({
-    queryKey: [...landlordKeys.payments('overdue'), { page: 1, pageSize: 100 }],
+    queryKey: [
+      ...landlordKeys.payments('overdue'),
+      { page, pageSize: PAGE_SIZE, sort: 'due_date_asc' },
+    ],
     queryFn: () =>
-      unwrap(landlordService.listPayments({ status: 'overdue', page: 1, pageSize: 100 })),
+      unwrap(
+        landlordService.listPayments({
+          status: 'overdue',
+          sort: 'due_date_asc',
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
   const payments = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const totalOverdue = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments]);
-  const sorted = useMemo(
-    () =>
-      [...payments].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()),
-    [payments]
-  );
+  const { data: summary } = useQuery({
+    queryKey: landlordKeys.arrearsSummary,
+    queryFn: () => unwrap(landlordService.getArrearsSummary()),
+  });
+  const totalOverdue = summary?.totalOverdue ?? 0;
+  const overdueCount = summary?.overdueCount ?? total;
 
   return (
     <>
@@ -48,11 +58,11 @@ export default function LandlordArrearsPage() {
           <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalOverdue)}</p>
         </div>
         <p className="text-sm text-muted-foreground">
-          {total} payment{total === 1 ? '' : 's'} overdue
+          {overdueCount} payment{overdueCount === 1 ? '' : 's'} overdue
         </p>
       </div>
 
-      {sorted.length === 0 ? (
+      {payments.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState
             icon={AlertTriangle}
@@ -62,7 +72,7 @@ export default function LandlordArrearsPage() {
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {sorted.map((payment) => {
+          {payments.map((payment) => {
             const badge = paymentStatusBadges[payment.status];
             const overdueDays = daysOverdue(payment.dueDate);
             return (
@@ -86,6 +96,16 @@ export default function LandlordArrearsPage() {
             );
           })}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
     </>
   );

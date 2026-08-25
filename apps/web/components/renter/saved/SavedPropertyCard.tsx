@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -60,12 +60,6 @@ export const SavedPropertyCard = ({
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [note, setNote] = useState(property.note ?? '');
-
-  const { data: applicationsData } = useQuery({
-    queryKey: [...renterKeys.applications, { page: 1, pageSize: 100 }],
-    queryFn: () => unwrap(renterService.listMyApplications({ page: 1, pageSize: 100 })),
-  });
-  const applications = applicationsData?.items ?? [];
 
   const noteMutation = useMutation({
     mutationFn: (newNote: string) =>
@@ -128,8 +122,9 @@ export const SavedPropertyCard = ({
     }
   };
 
-  const application = applications.find((a) => a.propertyId === property.id);
-  const statusConfig = application ? getStatusConfig(application.status) : null;
+  const statusConfig = property.applicationStatus
+    ? getStatusConfig(property.applicationStatus)
+    : null;
 
   // List View
   if (viewMode === 'list') {

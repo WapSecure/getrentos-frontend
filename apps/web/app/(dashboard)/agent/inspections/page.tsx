@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';
 import { InspectionDetailModal } from '@/components/agent/inspections/InspectionDetailModal';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import type { PropertyInspection } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -21,14 +21,19 @@ function AgentInspectionsPageContent() {
   const [isModalOpen, setIsModalOpen] = useState(!!defaultTaskId);
   const [activeInspectionId, setActiveInspectionId] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const { data: inspections = [], error } = useQuery({
-    queryKey: agentKeys.inspections,
-    queryFn: () => unwrap(agentService.listInspections()),
+  const PAGE_SIZE = 9;
+  const [page, setPage] = useState(1);
+  const { data: inspectionsData, error } = useQuery({
+    queryKey: [...agentKeys.inspections, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(agentService.listInspections({ page, pageSize: PAGE_SIZE })),
   });
-  const { data: tasks = [] } = useQuery({
-    queryKey: agentKeys.tasks,
-    queryFn: () => unwrap(agentService.listTasks()),
+  const inspections = inspectionsData?.items ?? [];
+  const total = inspectionsData?.total ?? 0;
+  const { data: tasksData } = useQuery({
+    queryKey: [...agentKeys.tasks, { type: 'inspection', page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(agentService.listTasks({ type: 'inspection', page: 1, pageSize: 100 })),
   });
+  const tasks = tasksData?.items ?? [];
   const submitInspection = useMutation({
     mutationFn: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) =>
       unwrap(
@@ -73,7 +78,7 @@ function AgentInspectionsPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Inspections</h1>
           <p className="text-muted-foreground mt-1">
-            {inspections.length} inspection{inspections.length === 1 ? '' : 's'} recorded
+            {total} inspection{total === 1 ? '' : 's'} recorded
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -109,6 +114,19 @@ function AgentInspectionsPageContent() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={(nextPage) => {
+            setPage(nextPage);
+            setActiveInspectionId(null);
+          }}
+          className="mt-6"
+        />
       )}
 
       <NewInspectionModal

@@ -96,7 +96,7 @@ export const ExportSavedProperties = ({
               <div>
                 <h3 className="font-semibold text-foreground">Export Saved Properties</h3>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {properties.length} properties to export
+                  {properties.length} properties on this page to export
                 </p>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">

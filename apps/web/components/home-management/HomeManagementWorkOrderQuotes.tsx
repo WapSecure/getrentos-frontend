@@ -21,6 +21,7 @@ import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { CurrencyInput } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
@@ -56,6 +57,8 @@ const initialQuoteForm: QuoteForm = {
   scopeOfWork: '',
   validUntil: '',
 };
+
+const QUOTE_PAGE_SIZE = 5;
 
 const quoteStatusMeta: Record<
   HomeManagementWorkOrderQuote['status'],
@@ -113,6 +116,7 @@ export function HomeManagementWorkOrderQuotes({
 }: HomeManagementWorkOrderQuotesProps) {
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [page, setPage] = useState(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<QuoteForm>(initialQuoteForm);
   const [actionDialog, setActionDialog] = useState<QuoteActionDialog>(null);
@@ -125,11 +129,18 @@ export function HomeManagementWorkOrderQuotes({
 
   const quotesQuery = useQuery({
     enabled: isExpanded,
-    queryKey: homeManagementKeys.workOrderQuotes(workOrder.id),
-    queryFn: () => unwrap(homeManagementService.listWorkOrderQuotes(workOrder.id)),
+    queryKey: [
+      ...homeManagementKeys.workOrderQuotes(workOrder.id),
+      { page, pageSize: QUOTE_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listWorkOrderQuotes(workOrder.id, { page, pageSize: QUOTE_PAGE_SIZE })
+      ),
   });
 
-  const quotes = useMemo(() => quotesQuery.data ?? [], [quotesQuery.data]);
+  const quotes = useMemo(() => quotesQuery.data?.items ?? [], [quotesQuery.data]);
+  const totalQuotes = quotesQuery.data?.total ?? 0;
   const amount = Number(form.amount);
   const formExpiry = toValidUntilIso(form.validUntil);
   const validAmount = Number.isInteger(amount) && amount >= 1;
@@ -160,6 +171,7 @@ export function HomeManagementWorkOrderQuotes({
     mutationFn: (input) => unwrap(homeManagementService.createWorkOrderQuote(workOrder.id, input)),
     onSuccess: async () => {
       await invalidateQuoteViews();
+      setPage(1);
       setForm(initialQuoteForm);
       setIsCreateOpen(false);
       setToast({
@@ -177,6 +189,7 @@ export function HomeManagementWorkOrderQuotes({
       unwrap(homeManagementService.approveWorkOrderQuote(workOrder.id, quoteId)),
     onSuccess: async () => {
       await invalidateQuoteViews();
+      setPage(1);
       setActionDialog(null);
       setToast({
         message: 'Quote selected, budget approved, and vendor assignment recorded.',
@@ -197,6 +210,7 @@ export function HomeManagementWorkOrderQuotes({
       unwrap(homeManagementService.rejectWorkOrderQuote(workOrder.id, quoteId, { reason })),
     onSuccess: async () => {
       await invalidateQuoteViews();
+      setPage(1);
       setActionDialog(null);
       setRejectionReason('');
       setToast({ message: 'Quote rejected and the decision was recorded.', variant: 'success' });
@@ -277,9 +291,7 @@ export function HomeManagementWorkOrderQuotes({
           <div className="flex items-center gap-2">
             <Landmark className="h-4 w-4 text-primary" />
             <p className="text-sm font-semibold text-foreground">Vendor quotes</p>
-            {isExpanded && !quotesQuery.isLoading && (
-              <Badge variant="neutral">{quotes.length}</Badge>
-            )}
+            {isExpanded && !quotesQuery.isLoading && <Badge variant="neutral">{totalQuotes}</Badge>}
           </div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             Compare auditable vendor estimates before a controlled spend is selected.
@@ -311,7 +323,12 @@ export function HomeManagementWorkOrderQuotes({
               )
             }
             iconPosition="right"
-            onClick={() => setIsExpanded((current) => !current)}
+            onClick={() =>
+              setIsExpanded((current) => {
+                if (!current) setPage(1);
+                return !current;
+              })
+            }
           >
             {isExpanded ? 'Hide quotes' : 'View quotes'}
           </Button>
@@ -494,6 +511,15 @@ export function HomeManagementWorkOrderQuotes({
                 );
               })}
             </div>
+          )}
+          {totalQuotes > 0 && (
+            <Pagination
+              page={page}
+              pageSize={QUOTE_PAGE_SIZE}
+              total={totalQuotes}
+              onPageChange={setPage}
+              className="rounded-xl border border-border bg-card"
+            />
           )}
         </div>
       )}

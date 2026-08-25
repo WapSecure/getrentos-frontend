@@ -2,38 +2,63 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { Search } from 'lucide-react';
+import { Button, Input, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 
-type Invitation = {
-  id: string;
-  status: string;
-  realtor: { legalName: string; email: string; companyName?: string | null };
-};
-type Property = { id: string; title: string; city: string; state: string };
+const PAGE_SIZE = 10;
 
 export function ClientRealtorAccess() {
-  const client = useQueryClient();
+  const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [propertiesFor, setPropertiesFor] = useState<string | null>(null);
-  const { data: invitations = [], isLoading } = useQuery({
-    queryKey: realtorKeys.clientInvitations,
-    queryFn: () => unwrap(realtorService.listRealtorInvitations()) as Promise<Invitation[]>,
-  });
-  const { data: properties = [] } = useQuery({
-    enabled: !!propertiesFor,
-    queryKey: realtorKeys.assignableProperties(propertiesFor ?? ''),
+  const [propertyPage, setPropertyPage] = useState(1);
+  const [propertySearch, setPropertySearch] = useState('');
+  const invitationSearch = search.trim() || undefined;
+  const assignablePropertySearch = propertySearch.trim() || undefined;
+  const { data: invitationsData, isLoading } = useQuery({
+    queryKey: [
+      ...realtorKeys.clientInvitations,
+      { page, pageSize: PAGE_SIZE, search: invitationSearch },
+    ],
     queryFn: () =>
-      unwrap(realtorService.getAssignableProperties(propertiesFor!)) as Promise<Property[]>,
+      unwrap(
+        realtorService.listRealtorInvitations({
+          page,
+          pageSize: PAGE_SIZE,
+          search: invitationSearch,
+        })
+      ),
   });
-  const refresh = () => client.invalidateQueries({ queryKey: realtorKeys.clientInvitations });
+  const invitations = invitationsData?.items ?? [];
+  const invitationTotal = invitationsData?.total ?? 0;
+  const { data: propertiesData, isLoading: isLoadingProperties } = useQuery({
+    enabled: !!propertiesFor,
+    queryKey: [
+      ...realtorKeys.assignableProperties(propertiesFor ?? ''),
+      { page: propertyPage, pageSize: PAGE_SIZE, search: assignablePropertySearch },
+    ],
+    queryFn: () =>
+      unwrap(
+        realtorService.getAssignableProperties(propertiesFor!, {
+          page: propertyPage,
+          pageSize: PAGE_SIZE,
+          search: assignablePropertySearch,
+        })
+      ),
+  });
+  const properties = propertiesData?.items ?? [];
+  const propertyTotal = propertiesData?.total ?? 0;
+  const refreshInvitations = () =>
+    queryClient.invalidateQueries({ queryKey: realtorKeys.clientInvitations });
   const approve = useMutation({
     mutationFn: (id: string) => unwrap(realtorService.approveRealtorInvitation(id)),
     onSuccess: () => {
-      refresh();
+      refreshInvitations();
       setToast({ message: 'Realtor access approved.', variant: 'success' });
     },
     onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
@@ -41,7 +66,8 @@ export function ClientRealtorAccess() {
   const revoke = useMutation({
     mutationFn: (id: string) => unwrap(realtorService.revokeRealtorAccess(id)),
     onSuccess: () => {
-      refresh();
+      refreshInvitations();
+      setPropertiesFor(null);
       setToast({ message: 'Realtor access revoked.', variant: 'success' });
     },
     onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
@@ -49,11 +75,20 @@ export function ClientRealtorAccess() {
   const assign = useMutation({
     mutationFn: ({ id, propertyId }: { id: string; propertyId: string }) =>
       unwrap(realtorService.assignProperty(id, propertyId)),
-    onSuccess: () => {
+    onSuccess: (_result, { id }) => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.assignableProperties(id) });
+      refreshInvitations();
       setToast({ message: 'Property assigned to Realtor.', variant: 'success' });
     },
     onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
   });
+
+  const toggleProperties = (relationshipId: string) => {
+    setPropertiesFor((current) => (current === relationshipId ? null : relationshipId));
+    setPropertyPage(1);
+    setPropertySearch('');
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -62,17 +97,35 @@ export function ClientRealtorAccess() {
           Approve representatives and choose exactly which properties they may manage.
         </p>
       </div>
+      <div className="mb-6 max-w-md">
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
+            setPropertiesFor(null);
+          }}
+          placeholder="Search Realtors..."
+          leadingIcon={<Search className="h-4 w-4" />}
+          aria-label="Search Realtor invitations"
+        />
+      </div>
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading invitations…</p>
       ) : invitations.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground">
-          No pending Realtor invitations.
+          {invitationTotal === 0 && invitationSearch
+            ? 'No Realtor invitations match your search.'
+            : 'No Realtor invitations.'}
         </div>
       ) : (
         <div className="space-y-4">
           {invitations.map((invitation) => (
             <div key={invitation.id} className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="font-semibold text-foreground">{invitation.realtor.legalName}</h2>
+              <h2 className="font-semibold text-foreground">
+                {invitation.realtor.legalName || invitation.realtor.email}
+              </h2>
               <p className="text-sm text-muted-foreground">
                 {invitation.realtor.companyName || invitation.realtor.email}
               </p>
@@ -84,14 +137,9 @@ export function ClientRealtorAccess() {
                   >
                     Approve access
                   </Button>
-                ) : (
+                ) : invitation.status === 'ACTIVE' ? (
                   <>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setPropertiesFor(propertiesFor === invitation.id ? null : invitation.id)
-                      }
-                    >
+                    <Button variant="outline" onClick={() => toggleProperties(invitation.id)}>
                       Choose properties
                     </Button>
                     <Button
@@ -103,36 +151,84 @@ export function ClientRealtorAccess() {
                       Revoke
                     </Button>
                   </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Access revoked</span>
                 )}
               </div>
               {propertiesFor === invitation.id && (
                 <div className="mt-4 border-t border-border pt-4">
-                  <p className="mb-2 text-sm font-medium">Your properties</p>
-                  {properties.map((property) => (
-                    <div
-                      key={property.id}
-                      className="flex items-center justify-between py-2 text-sm"
-                    >
-                      <span>
-                        {property.title} · {property.city}, {property.state}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        isLoading={assign.isPending}
-                        onClick={() =>
-                          assign.mutate({ id: invitation.id, propertyId: property.id })
-                        }
-                      >
-                        Assign
-                      </Button>
+                  <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-medium">Your properties</p>
+                    <div className="w-full sm:max-w-xs">
+                      <Input
+                        type="search"
+                        value={propertySearch}
+                        onChange={(event) => {
+                          setPropertySearch(event.target.value);
+                          setPropertyPage(1);
+                        }}
+                        placeholder="Search properties..."
+                        leadingIcon={<Search className="h-4 w-4" />}
+                        aria-label="Search properties available to assign"
+                      />
                     </div>
-                  ))}
+                  </div>
+                  {isLoadingProperties ? (
+                    <p className="py-2 text-sm text-muted-foreground">Loading properties…</p>
+                  ) : properties.length === 0 ? (
+                    <p className="py-2 text-sm text-muted-foreground">
+                      {assignablePropertySearch
+                        ? 'No properties match your search.'
+                        : 'No properties are available to assign.'}
+                    </p>
+                  ) : (
+                    properties.map((property) => (
+                      <div
+                        key={property.id}
+                        className="flex items-center justify-between gap-3 py-2 text-sm"
+                      >
+                        <span>
+                          {property.title} · {property.city}, {property.state}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          isLoading={assign.isPending}
+                          onClick={() =>
+                            assign.mutate({ id: invitation.id, propertyId: property.id })
+                          }
+                        >
+                          Assign
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                  {propertyTotal > 0 && (
+                    <Pagination
+                      page={propertyPage}
+                      pageSize={PAGE_SIZE}
+                      total={propertyTotal}
+                      onPageChange={setPropertyPage}
+                      className="mt-3"
+                    />
+                  )}
                 </div>
               )}
             </div>
           ))}
         </div>
+      )}
+      {invitationTotal > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={invitationTotal}
+          onPageChange={(nextPage) => {
+            setPage(nextPage);
+            setPropertiesFor(null);
+          }}
+          className="mt-6"
+        />
       )}
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />

@@ -6,7 +6,7 @@ import { Plus, UserCheck } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationCard } from '@/components/agent/verifications/VerificationCard';
 import { NewVerificationModal } from '@/components/agent/verifications/NewVerificationModal';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import type { VerificationVisit } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -19,14 +19,19 @@ function AgentVerificationsPageContent() {
 
   const [isModalOpen, setIsModalOpen] = useState(!!defaultTaskId);
   const queryClient = useQueryClient();
-  const { data: visits = [], error } = useQuery({
-    queryKey: agentKeys.verifications,
-    queryFn: () => unwrap(agentService.listVerifications()),
+  const PAGE_SIZE = 9;
+  const [page, setPage] = useState(1);
+  const { data: visitsData, error } = useQuery({
+    queryKey: [...agentKeys.verifications, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(agentService.listVerifications({ page, pageSize: PAGE_SIZE })),
   });
-  const { data: tasks = [] } = useQuery({
-    queryKey: agentKeys.tasks,
-    queryFn: () => unwrap(agentService.listTasks()),
+  const visits = visitsData?.items ?? [];
+  const total = visitsData?.total ?? 0;
+  const { data: tasksData } = useQuery({
+    queryKey: [...agentKeys.tasks, { type: 'verification', page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(agentService.listTasks({ type: 'verification', page: 1, pageSize: 100 })),
   });
+  const tasks = tasksData?.items ?? [];
   const submitVerification = useMutation({
     mutationFn: (visit: Omit<VerificationVisit, 'id' | 'syncStatus'>) =>
       unwrap(
@@ -65,7 +70,7 @@ function AgentVerificationsPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Verification Visits</h1>
           <p className="text-muted-foreground mt-1">
-            {visits.length} visit{visits.length === 1 ? '' : 's'} recorded
+            {total} visit{total === 1 ? '' : 's'} recorded
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -96,6 +101,16 @@ function AgentVerificationsPageContent() {
             <VerificationCard key={visit.id} visit={visit} delay={index * 0.05} />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <NewVerificationModal

@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send } from 'lucide-react';
-import { Button, CurrencyInput, Select, Textarea } from '@getrentos/ui';
+import { Button, CurrencyInput, Textarea } from '@getrentos/ui';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
+import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
+import { buyerService } from '@/services/buyerService';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
   onClose: () => void;
-  listings: BuyerPropertyListing[];
   defaultPropertyId?: string;
   onSubmit: (offer: Omit<BuyerOffer, 'id' | 'status' | 'submittedAt'>) => void;
 }
@@ -19,24 +23,56 @@ const financingOptions: { value: FinancingType; label: string }[] = [
   { value: 'mortgage', label: 'Mortgage' },
   { value: 'installment', label: 'Installment' },
 ];
+const LISTING_PAGE_SIZE = 10;
 
 export const MakeOfferModal = ({
   isOpen,
   onClose,
-  listings,
   defaultPropertyId,
   onSubmit,
 }: MakeOfferModalProps) => {
   const [propertyId, setPropertyId] = useState(defaultPropertyId || '');
+  const [listingSearch, setListingSearch] = useState('');
+  const [listingPage, setListingPage] = useState(1);
+  const [selectedListingState, setSelectedListingState] = useState<BuyerPropertyListing | null>(
+    null
+  );
   const [offerAmount, setOfferAmount] = useState('');
   const [financingType, setFinancingType] = useState<FinancingType>('cash');
   const [depositAmount, setDepositAmount] = useState('');
   const [message, setMessage] = useState('');
 
-  const selectedListing = listings.find((l) => l.id === propertyId);
+  const { data: listingsPage, isLoading: isListingsLoading } = useQuery({
+    queryKey: [
+      ...buyerKeys.listings,
+      { search: listingSearch.trim() || undefined, page: listingPage, pageSize: LISTING_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        buyerService.discover({
+          search: listingSearch.trim() || undefined,
+          page: listingPage,
+          pageSize: LISTING_PAGE_SIZE,
+        })
+      ),
+    enabled: isOpen,
+  });
+  const { data: defaultListing } = useQuery({
+    queryKey: [...buyerKeys.listings, 'detail', defaultPropertyId],
+    queryFn: () => unwrap(buyerService.getListing(defaultPropertyId as string)),
+    enabled: isOpen && !!defaultPropertyId,
+  });
+  const listings = listingsPage?.items ?? [];
+  const selectedListing =
+    (selectedListingState?.id === propertyId ? selectedListingState : null) ??
+    listings.find((listing) => listing.id === propertyId) ??
+    (defaultListing?.id === propertyId ? defaultListing : undefined);
 
   const handleClose = () => {
     setPropertyId(defaultPropertyId || '');
+    setListingSearch('');
+    setListingPage(1);
+    setSelectedListingState(null);
     setOfferAmount('');
     setFinancingType('cash');
     setDepositAmount('');
@@ -81,11 +117,33 @@ export const MakeOfferModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Property <span className="text-red-500">*</span>
                 </label>
-                <Select
+                <PaginatedSelect
                   value={propertyId}
-                  onValueChange={setPropertyId}
+                  onValueChange={(value) => {
+                    setPropertyId(value);
+                    setSelectedListingState(
+                      listings.find((listing) => listing.id === value) ??
+                        (defaultListing?.id === value ? defaultListing : null)
+                    );
+                  }}
+                  items={listings}
+                  selectedItem={selectedListing}
+                  getItemValue={(listing) => listing.id}
+                  getItemLabel={(listing) => listing.title}
+                  search={listingSearch}
+                  onSearchChange={(value) => {
+                    setListingSearch(value);
+                    setListingPage(1);
+                  }}
+                  searchPlaceholder="Search available properties"
+                  page={listingPage}
+                  pageSize={LISTING_PAGE_SIZE}
+                  total={listingsPage?.total ?? 0}
+                  onPageChange={setListingPage}
                   placeholder="Select a property"
-                  options={listings.map((listing) => ({ value: listing.id, label: listing.title }))}
+                  emptyMessage="No available properties match this search."
+                  isLoading={isListingsLoading}
+                  ariaLabel="property"
                 />
                 {selectedListing && (
                   <p className="text-xs text-gray-400 mt-1">

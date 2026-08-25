@@ -1,28 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
 import {
   BadgeDollarSign,
+  CalendarClock,
   CheckCircle2,
   ClipboardList,
-  ShieldCheck,
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
-import { Card } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Skeleton } from '@getrentos/ui';
+import { Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
-import type {
-  HomeAsset,
-  HomeManagementProperty,
-  HomeManagementWorkOrder,
-} from '@/services/homeManagementService';
-
-const CLOSED_WORK_ORDER_STATUSES = new Set<HomeManagementWorkOrder['status']>([
-  'RESOLVED',
-  'CANCELLED',
-]);
+import type { HomeManagementDashboard } from '@/services/homeManagementService';
 
 type PortfolioMetric = {
   id: string;
@@ -32,43 +20,11 @@ type PortfolioMetric = {
   icon: LucideIcon;
 };
 
-type PropertyRow = {
-  id: string;
-  label: string;
-  openWorkOrders: number;
-  overdueWorkOrders: number;
-  approvedSpend: number;
-  assetsNeedingService: number;
-};
-
 interface HomeManagementPortfolioAnalyticsProps {
-  properties: HomeManagementProperty[];
-  workOrders: HomeManagementWorkOrder[];
-  assets: HomeAsset[];
+  /** Server-calculated across the complete active portfolio, not list pages. */
+  summary?: HomeManagementDashboard;
   isLoading?: boolean;
 }
-
-const timestamp = (value?: string | null): number | null => {
-  if (!value) return null;
-  const parsed = new Date(value).getTime();
-  return Number.isNaN(parsed) ? null : parsed;
-};
-
-const isOpenWorkOrder = (workOrder: HomeManagementWorkOrder) =>
-  !CLOSED_WORK_ORDER_STATUSES.has(workOrder.status);
-
-const workOrderDeadline = (workOrder: HomeManagementWorkOrder) =>
-  workOrder.dueAt ?? workOrder.resolutionDueAt ?? workOrder.responseDueAt ?? null;
-
-const isWorkOrderOverdue = (workOrder: HomeManagementWorkOrder, now: number) => {
-  const deadline = timestamp(workOrderDeadline(workOrder));
-  return isOpenWorkOrder(workOrder) && deadline !== null && deadline < now;
-};
-
-const workOrderPropertyId = (workOrder: HomeManagementWorkOrder) => workOrder.unit?.property?.id;
-
-const propertyLabel = (property: HomeManagementProperty) =>
-  property.title ?? property.name ?? 'Property';
 
 function AnalyticsLoadingState() {
   return (
@@ -107,104 +63,42 @@ function MetricCard({ metric }: { metric: PortfolioMetric }) {
   );
 }
 
-/**
- * A portfolio-wide rollup of spend, SLA compliance, and asset health. It
- * reuses the properties/work-orders/assets already loaded in this workspace
- * rather than issuing a dedicated analytics request.
- */
+/** Exact portfolio roll-up supplied by the dedicated dashboard API summary. */
 export function HomeManagementPortfolioAnalytics({
-  properties,
-  workOrders,
-  assets,
+  summary,
   isLoading = false,
 }: HomeManagementPortfolioAnalyticsProps) {
-  const [now] = useState(() => Date.now());
-  const hasRecords = properties.length > 0;
-  const showLoadingState = isLoading && !hasRecords;
-
-  const { metrics, propertyRows } = useMemo(() => {
-    const openWorkOrders = workOrders.filter(isOpenWorkOrder);
-    const resolvedWorkOrders = workOrders.filter((workOrder) => workOrder.status === 'RESOLVED');
-    const overdueWorkOrders = workOrders.filter((workOrder) => isWorkOrderOverdue(workOrder, now));
-
-    const slaTrackedResolved = resolvedWorkOrders.filter(
-      (workOrder) => workOrder.resolutionDueAt && workOrder.resolvedAt
-    );
-    const slaMetResolved = slaTrackedResolved.filter(
-      (workOrder) => timestamp(workOrder.resolvedAt)! <= timestamp(workOrder.resolutionDueAt)!
-    );
-    const slaComplianceRate =
-      slaTrackedResolved.length > 0
-        ? Math.round((slaMetResolved.length / slaTrackedResolved.length) * 100)
-        : null;
-
-    const approvedSpend = workOrders.reduce(
-      (total, workOrder) => total + (workOrder.approvedCost ?? 0),
-      0
-    );
-
-    const assetsNeedingService = assets.filter((asset) => asset.status === 'NEEDS_SERVICE').length;
-
-    const metrics: PortfolioMetric[] = [
-      {
-        id: 'open-work-orders',
-        label: 'Open work orders',
-        value: String(openWorkOrders.length),
-        subtext: `${overdueWorkOrders.length} currently overdue`,
-        icon: ClipboardList,
-      },
-      {
-        id: 'sla-compliance',
-        label: 'SLA compliance',
-        value: slaComplianceRate === null ? 'N/A' : `${slaComplianceRate}%`,
-        subtext:
-          slaTrackedResolved.length > 0
-            ? `Across ${slaTrackedResolved.length} resolved work order${
-                slaTrackedResolved.length === 1 ? '' : 's'
-              } with an SLA target`
-            : 'No resolved work orders have SLA data yet',
-        icon: ShieldCheck,
-      },
-      {
-        id: 'approved-spend',
-        label: 'Approved spend',
-        value: formatCurrency(approvedSpend, { compact: true }),
-        subtext: 'Across all recorded work orders',
-        icon: BadgeDollarSign,
-      },
-      {
-        id: 'assets-needing-service',
-        label: 'Assets needing service',
-        value: String(assetsNeedingService),
-        subtext: `Out of ${assets.length} registered asset${assets.length === 1 ? '' : 's'}`,
-        icon: Wrench,
-      },
-    ];
-
-    const propertyRows: PropertyRow[] = properties.map((property) => {
-      const propertyWorkOrders = workOrders.filter(
-        (workOrder) => workOrderPropertyId(workOrder) === property.id
-      );
-      const propertyAssets = assets.filter((asset) => asset.propertyId === property.id);
-
-      return {
-        id: property.id,
-        label: propertyLabel(property),
-        openWorkOrders: propertyWorkOrders.filter(isOpenWorkOrder).length,
-        overdueWorkOrders: propertyWorkOrders.filter((workOrder) =>
-          isWorkOrderOverdue(workOrder, now)
-        ).length,
-        approvedSpend: propertyWorkOrders.reduce(
-          (total, workOrder) => total + (workOrder.approvedCost ?? 0),
-          0
-        ),
-        assetsNeedingService: propertyAssets.filter((asset) => asset.status === 'NEEDS_SERVICE')
-          .length,
-      };
-    });
-
-    return { metrics, propertyRows };
-  }, [assets, now, properties, workOrders]);
+  const hasProperties = (summary?.propertiesTotal ?? 0) > 0;
+  const metrics: PortfolioMetric[] = [
+    {
+      id: 'open-work-orders',
+      label: 'Open work orders',
+      value: String(summary?.openWorkOrders ?? 0),
+      subtext: `${summary?.overdue ?? 0} currently overdue`,
+      icon: ClipboardList,
+    },
+    {
+      id: 'care-plans-due',
+      label: 'Care plans due',
+      value: String(summary?.plansDue ?? 0),
+      subtext: 'Across all active properties',
+      icon: CalendarClock,
+    },
+    {
+      id: 'approved-spend',
+      label: 'Approved spend',
+      value: formatCurrency(summary?.approvedSpend ?? 0, { compact: true }),
+      subtext: 'Across all recorded work orders',
+      icon: BadgeDollarSign,
+    },
+    {
+      id: 'assets-needing-service',
+      label: 'Assets needing service',
+      value: String(summary?.assetsNeedingService ?? 0),
+      subtext: `Out of ${summary?.totalAssets ?? 0} registered asset${summary?.totalAssets === 1 ? '' : 's'}`,
+      icon: Wrench,
+    },
+  ];
 
   return (
     <section aria-labelledby="portfolio-analytics-heading" className="mt-8">
@@ -217,64 +111,27 @@ export function HomeManagementPortfolioAnalytics({
           Roll up service delivery across your portfolio.
         </h2>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Spend, SLA compliance, and asset health computed from the operational records already in
-          this workspace.
+          These metrics are calculated server-side across the whole portfolio, independently of the
+          page currently visible in each operational queue.
         </p>
       </div>
 
-      {showLoadingState ? (
+      {isLoading ? (
         <AnalyticsLoadingState />
-      ) : !hasRecords ? (
+      ) : !hasProperties ? (
         <div className="mt-5">
           <EmptyState
             icon={CheckCircle2}
             title="No properties are available for analytics yet"
-            description="Add a property to begin rolling up work-order spend and SLA compliance here."
+            description="Add a property to begin rolling up work-order spend and asset health here."
           />
         </div>
       ) : (
-        <>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {metrics.map((metric) => (
-              <MetricCard key={metric.id} metric={metric} />
-            ))}
-          </div>
-
-          <Card static hover={false} className="mt-5 overflow-hidden">
-            <div className="border-b border-border px-5 py-4">
-              <h3 className="font-semibold text-foreground">By property</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Open work, overdue items, spend, and asset health per property.
-              </p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="px-5 py-3 font-medium">Property</th>
-                    <th className="px-5 py-3 font-medium">Open</th>
-                    <th className="px-5 py-3 font-medium">Overdue</th>
-                    <th className="px-5 py-3 font-medium">Approved spend</th>
-                    <th className="px-5 py-3 font-medium">Assets needing service</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {propertyRows.map((row) => (
-                    <tr key={row.id}>
-                      <td className="px-5 py-3 font-medium text-foreground">{row.label}</td>
-                      <td className="px-5 py-3 text-foreground">{row.openWorkOrders}</td>
-                      <td className="px-5 py-3 text-foreground">{row.overdueWorkOrders}</td>
-                      <td className="px-5 py-3 text-foreground">
-                        {formatCurrency(row.approvedSpend, { compact: true })}
-                      </td>
-                      <td className="px-5 py-3 text-foreground">{row.assetsNeedingService}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {metrics.map((metric) => (
+            <MetricCard key={metric.id} metric={metric} />
+          ))}
+        </div>
       )}
     </section>
   );

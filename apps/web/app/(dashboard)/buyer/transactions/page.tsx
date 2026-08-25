@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,11 +19,26 @@ export default function BuyerTransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeTransactionId, setActiveTransactionId] = useState<string | null>(null);
+  const PAGE_SIZE = 9;
+  const [page, setPage] = useState(1);
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: buyerKeys.transactions,
-    queryFn: () => unwrap(buyerService.listTransactions()),
+  const { data: transactionsData, isLoading } = useQuery({
+    queryKey: [
+      ...buyerKeys.transactions,
+      { search: searchQuery, status: filter, page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        buyerService.listTransactions({
+          search: searchQuery || undefined,
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const transactions = transactionsData?.items ?? [];
+  const total = transactionsData?.total ?? 0;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.transactions });
 
@@ -43,14 +58,6 @@ export default function BuyerTransactionsPage() {
 
   const activeTransaction = transactions.find((t) => t.id === activeTransactionId) || null;
 
-  const filteredTransactions = transactions.filter((t) => {
-    const matchesSearch =
-      t.propertyTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.ownerName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || t.escrowStatus === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'deposit_pending', label: 'Deposit Pending' },
@@ -59,6 +66,8 @@ export default function BuyerTransactionsPage() {
     { value: 'final_payment', label: 'Final Payment' },
     { value: 'released', label: 'Completed' },
     { value: 'frozen', label: 'Frozen' },
+    { value: 'disputed', label: 'Disputed' },
+    { value: 'refunded', label: 'Refunded' },
   ];
 
   return (
@@ -68,7 +77,7 @@ export default function BuyerTransactionsPage() {
         <p className="text-muted-foreground mt-1">
           {isLoading
             ? 'Loading…'
-            : `${transactions.length} purchase transaction${transactions.length === 1 ? '' : 's'} in escrow`}
+            : `${total} purchase transaction${total === 1 ? '' : 's'} in escrow`}
         </p>
       </div>
 
@@ -78,7 +87,10 @@ export default function BuyerTransactionsPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by property or owner..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -87,7 +99,10 @@ export default function BuyerTransactionsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -100,25 +115,23 @@ export default function BuyerTransactionsPage() {
         </div>
       </div>
 
-      {filteredTransactions.length === 0 ? (
+      {transactions.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <ShieldCheck className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {transactions.length === 0
-              ? 'No transactions yet'
-              : 'No transactions match your filters'}
+            {total === 0 ? 'No transactions match your filters' : 'No transactions on this page'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {transactions.length === 0
+            {total === 0
               ? 'Once an owner accepts your offer, the escrow transaction will appear here.'
-              : 'Try adjusting your search or filter.'}
+              : 'Choose another page to view more transactions.'}
           </p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredTransactions.map((transaction, index) => (
+          {transactions.map((transaction, index) => (
             <BuyerEscrowTransactionCard
               key={transaction.id}
               transaction={transaction}
@@ -127,6 +140,16 @@ export default function BuyerTransactionsPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-8"
+        />
       )}
 
       <BuyerEscrowTransactionDetailModal

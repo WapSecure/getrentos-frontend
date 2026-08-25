@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
+import { Pagination } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/buyer/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/buyer/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -37,11 +38,22 @@ export default function BuyerMessagesPage() {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
-  const { data: conversations = [] } = useQuery({
-    queryKey: buyerKeys.conversations,
-    queryFn: () => unwrap(buyerService.listConversations()),
+  const { data: conversationsData } = useQuery({
+    queryKey: [...buyerKeys.conversations, { search: searchQuery, page, pageSize: PAGE_SIZE }],
+    queryFn: () =>
+      unwrap(
+        buyerService.listConversations({
+          search: searchQuery || undefined,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const conversations = conversationsData?.items ?? [];
+  const total = conversationsData?.total ?? 0;
 
   const { data: activeMessages = [] } = useQuery({
     queryKey: buyerKeys.messages(activeId ?? ''),
@@ -75,9 +87,7 @@ export default function BuyerMessagesPage() {
     sendMutation.mutate({ conversationId: activeId, text });
   };
 
-  const filteredConversations = conversations
-    .map(toConversation)
-    .filter((c) => c.participantName.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredConversations = conversations.map(toConversation);
   const activeConversation = conversations.find((c) => c.id === activeId);
   const threadMessages: ThreadMessage[] = activeMessages.map(toThreadMessage);
 
@@ -94,7 +104,11 @@ export default function BuyerMessagesPage() {
             conversations={filteredConversations}
             activeId={activeId}
             searchQuery={searchQuery}
-            onSearch={setSearchQuery}
+            onSearch={(value) => {
+              setSearchQuery(value);
+              setPage(1);
+              setActiveId(null);
+            }}
             onSelect={handleSelect}
           />
         </div>
@@ -125,6 +139,19 @@ export default function BuyerMessagesPage() {
           )}
         </div>
       </div>
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={(nextPage) => {
+            setPage(nextPage);
+            setActiveId(null);
+          }}
+          className="mt-4"
+        />
+      )}
     </div>
   );
 }

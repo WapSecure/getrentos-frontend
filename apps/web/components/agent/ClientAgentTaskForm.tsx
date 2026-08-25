@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
@@ -26,18 +26,45 @@ export function ClientAgentTaskForm() {
   const [priority, setPriority] = useState<(typeof PRIORITIES)[number]>('MEDIUM');
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
+  const PAGE_SIZE = 10;
+  const [assignmentPage, setAssignmentPage] = useState(1);
+  const [propertyPage, setPropertyPage] = useState(1);
+  const [propertySearch, setPropertySearch] = useState('');
 
-  const { data: assignments = [] } = useQuery({
-    queryKey: agentKeys.clientAssignments,
-    queryFn: () => unwrap(agentService.listClientAssignments()) as Promise<Assignment[]>,
-  });
-  const selected = assignments.find((item) => item.id === assignmentId);
-  const { data: properties = [] } = useQuery({
-    enabled: Boolean(assignmentId),
-    queryKey: agentKeys.assignableProperties(assignmentId),
+  const { data: assignmentsData } = useQuery({
+    queryKey: [
+      ...agentKeys.clientAssignments,
+      { status: 'active', page: assignmentPage, pageSize: PAGE_SIZE },
+    ],
     queryFn: () =>
-      unwrap(agentService.listAssignableProperties(assignmentId)) as Promise<Property[]>,
+      unwrap(
+        agentService.listClientAssignments({
+          status: 'active',
+          page: assignmentPage,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const assignments = (assignmentsData?.items ?? []) as Assignment[];
+  const assignmentTotal = assignmentsData?.total ?? 0;
+  const selected = assignments.find((item) => item.id === assignmentId);
+  const { data: propertiesData } = useQuery({
+    enabled: Boolean(assignmentId),
+    queryKey: [
+      ...agentKeys.assignableProperties(assignmentId),
+      { search: propertySearch, page: propertyPage, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        agentService.listAssignableProperties(assignmentId, {
+          search: propertySearch || undefined,
+          page: propertyPage,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const properties = (propertiesData?.items ?? []) as Property[];
+  const propertyTotal = propertiesData?.total ?? 0;
   const create = useMutation({
     mutationFn: () =>
       unwrap(
@@ -57,7 +84,7 @@ export function ClientAgentTaskForm() {
       setDueTime('');
     },
   });
-  const active = assignments.filter((item) => item.status === 'ACTIVE');
+  const active = assignments;
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
@@ -74,6 +101,8 @@ export function ClientAgentTaskForm() {
             onValueChange={(value) => {
               setAssignmentId(value);
               setPropertyId('');
+              setPropertySearch('');
+              setPropertyPage(1);
             }}
             options={active.map((item) => ({ value: item.id, label: item.agent.legalName }))}
           />
@@ -91,6 +120,44 @@ export function ClientAgentTaskForm() {
             }))}
           />
         </Field>
+        {assignmentTotal > 0 && (
+          <div className="sm:col-span-2">
+            <Pagination
+              page={assignmentPage}
+              pageSize={PAGE_SIZE}
+              total={assignmentTotal}
+              onPageChange={(nextPage) => {
+                setAssignmentPage(nextPage);
+                setAssignmentId('');
+                setPropertyId('');
+              }}
+            />
+          </div>
+        )}
+        {assignmentId && (
+          <div className="sm:col-span-2 space-y-3">
+            <Input
+              value={propertySearch}
+              onChange={(event) => {
+                setPropertySearch(event.target.value);
+                setPropertyPage(1);
+                setPropertyId('');
+              }}
+              placeholder="Search properties to assign"
+            />
+            {propertyTotal > 0 && (
+              <Pagination
+                page={propertyPage}
+                pageSize={PAGE_SIZE}
+                total={propertyTotal}
+                onPageChange={(nextPage) => {
+                  setPropertyPage(nextPage);
+                  setPropertyId('');
+                }}
+              />
+            )}
+          </div>
+        )}
         <Field label="Task title">
           <Input
             value={title}

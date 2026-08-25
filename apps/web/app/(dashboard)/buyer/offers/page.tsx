@@ -9,7 +9,7 @@ import { Plus, Search, Handshake } from 'lucide-react';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -22,17 +22,28 @@ function BuyerOffersPageContent() {
   const searchParams = useSearchParams();
   const defaultPropertyId = searchParams.get('property') || undefined;
   const queryClient = useQueryClient();
+  const PAGE_SIZE = 9;
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<StatusFilter>('all');
 
-  const { data: offers = [] } = useQuery({
-    queryKey: buyerKeys.offers,
-    queryFn: () => unwrap(buyerService.listOffers()),
+  const { data: offersData } = useQuery({
+    queryKey: [
+      ...buyerKeys.offers,
+      { search: searchQuery, status: filter, page, pageSize: PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        buyerService.listOffers({
+          search: searchQuery || undefined,
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
-
-  const { data: listingsData } = useQuery({
-    queryKey: buyerKeys.listings,
-    queryFn: () => unwrap(buyerService.discover({ pageSize: 100 })),
-  });
-  const listings = listingsData?.items ?? [];
+  const offers = offersData?.items ?? [];
+  const total = offersData?.total ?? 0;
 
   const invalidate = (offerId?: string) => {
     queryClient.invalidateQueries({ queryKey: buyerKeys.offers });
@@ -63,8 +74,6 @@ function BuyerOffersPageContent() {
   });
 
   const [pendingMessages, setPendingMessages] = useState<Record<string, BuyerOfferMessage[]>>({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<StatusFilter>('all');
   const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(!!defaultPropertyId);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
@@ -173,17 +182,14 @@ function BuyerOffersPageContent() {
       ]
     : [];
 
-  const filteredOffers = offers.filter((o) => {
-    const matchesSearch = o.propertyTitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || o.status === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'submitted', label: 'Submitted' },
     { value: 'countered', label: 'Countered' },
     { value: 'accepted', label: 'Accepted' },
+    { value: 'rejected', label: 'Rejected' },
+    { value: 'withdrawn', label: 'Withdrawn' },
+    { value: 'expired', label: 'Expired' },
     { value: 'closed', label: 'Closed' },
   ];
 
@@ -193,7 +199,7 @@ function BuyerOffersPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Offers</h1>
           <p className="text-muted-foreground mt-1">
-            {offers.length} offer{offers.length === 1 ? '' : 's'} you&apos;ve made
+            {total} offer{total === 1 ? '' : 's'} you&apos;ve made
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsMakeOfferOpen(true)}>
@@ -208,7 +214,10 @@ function BuyerOffersPageContent() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by property..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -217,7 +226,10 @@ function BuyerOffersPageContent() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={cn(
                 'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
                 filter === option.value
@@ -231,23 +243,23 @@ function BuyerOffersPageContent() {
         </div>
       </div>
 
-      {filteredOffers.length === 0 ? (
+      {offers.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Handshake className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {offers.length === 0 ? 'No offers yet' : 'No offers match your filters'}
+            {total === 0 ? 'No offers match your filters' : 'No offers on this page'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {offers.length === 0
-              ? 'Found a property you like? Make an offer to start negotiating with the owner.'
-              : 'Try adjusting your search or filter.'}
+            {total === 0
+              ? 'Try adjusting your search or filter.'
+              : 'Choose another page to view more offers.'}
           </p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredOffers.map((offer, index) => (
+          {offers.map((offer, index) => (
             <BuyerOfferCard
               key={offer.id}
               offer={offer}
@@ -258,10 +270,19 @@ function BuyerOffersPageContent() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-8"
+        />
+      )}
+
       <MakeOfferModal
         isOpen={isMakeOfferOpen}
         onClose={() => setIsMakeOfferOpen(false)}
-        listings={listings}
         defaultPropertyId={defaultPropertyId}
         onSubmit={handleMakeOffer}
       />

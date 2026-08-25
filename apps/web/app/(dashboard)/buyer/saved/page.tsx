@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Heart } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -17,11 +17,15 @@ export default function BuyerSavedPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [activeListing, setActiveListing] = useState<BuyerPropertyListing | null>(null);
+  const PAGE_SIZE = 9;
+  const [page, setPage] = useState(1);
 
-  const { data: savedListings = [], isLoading } = useQuery({
-    queryKey: buyerKeys.saved,
-    queryFn: () => unwrap(buyerService.listSaved()),
+  const { data: savedData, isLoading } = useQuery({
+    queryKey: [...buyerKeys.saved, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(buyerService.listSaved({ page, pageSize: PAGE_SIZE })),
   });
+  const savedListings = savedData?.items ?? [];
+  const total = savedData?.total ?? 0;
 
   const unsaveMutation = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.unsaveListing(listingId)),
@@ -39,7 +43,7 @@ export default function BuyerSavedPage() {
         <p className="text-muted-foreground mt-1">
           {isLoading
             ? 'Loading…'
-            : `${savedListings.length} propert${savedListings.length === 1 ? 'y' : 'ies'} in your shortlist`}
+            : `${total} propert${total === 1 ? 'y' : 'ies'} in your shortlist`}
         </p>
       </div>
 
@@ -69,6 +73,16 @@ export default function BuyerSavedPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-8"
+        />
       )}
 
       <PropertyDetailModal

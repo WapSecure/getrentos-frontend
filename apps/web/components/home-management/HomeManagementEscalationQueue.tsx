@@ -14,6 +14,7 @@ import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -85,6 +86,7 @@ const relativeDeadline = (value?: string | null) => {
 };
 
 const isEmergency = (escalation: HomeManagementEscalation) => Boolean(escalation.isEmergency);
+const ESCALATION_PAGE_SIZE = 10;
 
 interface HomeManagementEscalationQueueProps {
   properties: HomeManagementProperty[];
@@ -101,6 +103,7 @@ export function HomeManagementEscalationQueue({
 }: HomeManagementEscalationQueueProps) {
   const queryClient = useQueryClient();
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
+  const [page, setPage] = useState(1);
   const [escalationConfirmation, setEscalationConfirmation] =
     useState<HomeManagementEscalation | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
@@ -112,11 +115,21 @@ export function HomeManagementEscalationQueue({
 
   const escalationsQuery = useQuery({
     enabled: Boolean(effectivePropertyId),
-    queryKey: homeManagementKeys.escalations(effectivePropertyId || undefined),
-    queryFn: () => unwrap(homeManagementService.listEscalations(effectivePropertyId)),
+    queryKey: [
+      ...homeManagementKeys.escalations(effectivePropertyId || undefined),
+      { page, pageSize: ESCALATION_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listEscalations(effectivePropertyId, {
+          page,
+          pageSize: ESCALATION_PAGE_SIZE,
+        })
+      ),
   });
 
-  const escalations = useMemo(() => escalationsQuery.data ?? [], [escalationsQuery.data]);
+  const escalations = useMemo(() => escalationsQuery.data?.items ?? [], [escalationsQuery.data]);
+  const totalEscalations = escalationsQuery.data?.total ?? 0;
   const orderedEscalations = useMemo(
     () =>
       [...escalations].sort((left, right) => {
@@ -198,7 +211,10 @@ export function HomeManagementEscalationQueue({
           className="min-w-56"
           disabled={isPropertiesLoading}
           value={effectivePropertyId}
-          onValueChange={setSelectedPropertyId}
+          onValueChange={(propertyId) => {
+            setSelectedPropertyId(propertyId);
+            setPage(1);
+          }}
           placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
           options={properties.map((property) => ({
             value: property.id,
@@ -211,17 +227,17 @@ export function HomeManagementEscalationQueue({
         <EscalationStat
           icon={<BellRing className="h-4 w-4" />}
           label="Active escalations"
-          value={escalations.length}
+          value={totalEscalations}
         />
         <EscalationStat
           icon={<ShieldAlert className="h-4 w-4" />}
-          label="Emergency routed"
+          label="Emergency on this page"
           value={emergencyCount}
           urgent={emergencyCount > 0}
         />
         <EscalationStat
           icon={<AlertTriangle className="h-4 w-4" />}
-          label="Awaiting acknowledgement"
+          label="Awaiting acknowledgement on page"
           value={unacknowledgedCount}
           urgent={unacknowledgedCount > 0}
         />
@@ -364,6 +380,15 @@ export function HomeManagementEscalationQueue({
               })}
             </div>
           </div>
+        )}
+        {totalEscalations > 0 && (
+          <Pagination
+            page={page}
+            pageSize={ESCALATION_PAGE_SIZE}
+            total={totalEscalations}
+            onPageChange={setPage}
+            className="rounded-b-2xl border border-border bg-card"
+          />
         )}
       </div>
 

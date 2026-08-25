@@ -19,6 +19,7 @@ import { EmptyState } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { CurrencyInput, Input } from '@getrentos/ui';
+import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
@@ -33,7 +34,6 @@ import {
   homeManagementService,
   type CreateHomeManagementUnitInput,
   type CreateHomeManagementWorkOrderInput,
-  type HomeAsset,
   type HomeManagementMaintenanceCategory,
   type HomeManagementProperty,
   type HomeManagementVendor,
@@ -186,22 +186,28 @@ interface HomeManagementWorkOrderQueueProps {
   role: 'owner' | 'landlord';
   workOrders: HomeManagementWorkOrder[];
   properties: HomeManagementProperty[];
-  assets: HomeAsset[];
   vendors?: HomeManagementVendor[];
   isLoading?: boolean;
   isPropertiesLoading?: boolean;
   error?: Error | null;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
 }
 
 export function HomeManagementWorkOrderQueue({
   role,
   workOrders,
   properties,
-  assets,
   vendors = [],
   isLoading = false,
   isPropertiesLoading = false,
   error,
+  page,
+  pageSize,
+  total,
+  onPageChange,
 }: HomeManagementWorkOrderQueueProps) {
   const queryClient = useQueryClient();
   const [costs, setCosts] = useState<Record<string, string>>({});
@@ -224,16 +230,25 @@ export function HomeManagementWorkOrderQueue({
   });
 
   const units = unitsQuery.data ?? [];
+  const assetsQuery = useQuery({
+    enabled: isCreateOpen && Boolean(form.propertyId),
+    queryKey: [...homeManagementKeys.assets(form.propertyId), 'work-order-selector'],
+    queryFn: () =>
+      unwrap(
+        homeManagementService.listAssets({ propertyId: form.propertyId, page: 1, pageSize: 100 })
+      ),
+  });
+  const propertyAssets = assetsQuery.data?.items ?? [];
   const selectedProperty = properties.find((property) => property.id === form.propertyId);
   const availableAssets = useMemo(
     () =>
-      assets.filter(
+      propertyAssets.filter(
         (asset) =>
           asset.propertyId === form.propertyId &&
           asset.status !== 'RETIRED' &&
           (!asset.unitId || asset.unitId === form.unitId)
       ),
-    [assets, form.propertyId, form.unitId]
+    [propertyAssets, form.propertyId, form.unitId]
   );
   const estimatedCost = Number(form.estimatedCost);
   const hasValidEstimatedCost =
@@ -528,18 +543,18 @@ export function HomeManagementWorkOrderQueue({
           </Button>
           <QueueStat
             icon={<BadgeDollarSign className="h-4 w-4" />}
-            label="Needs approval"
+            label="Needs approval on page"
             value={pendingApprovals.length}
             urgent={pendingApprovals.length > 0}
           />
           <QueueStat
             icon={<Clock3 className="h-4 w-4" />}
-            label="Open"
+            label="Open on page"
             value={activeWorkOrders.length}
           />
           <QueueStat
             icon={<CircleAlert className="h-4 w-4" />}
-            label="Overdue"
+            label="Overdue on page"
             value={overdueWorkOrders.length}
             urgent={overdueWorkOrders.length > 0}
           />
@@ -914,6 +929,15 @@ export function HomeManagementWorkOrderQueue({
               })}
             </div>
           </div>
+        )}
+        {total > 0 && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={onPageChange}
+            className="rounded-b-2xl border border-border bg-card"
+          />
         )}
       </div>
 

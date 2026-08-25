@@ -37,10 +37,11 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { data: notifications = [] } = useQuery({
-    queryKey: buyerKeys.notifications,
-    queryFn: () => unwrap(buyerService.getNotifications()),
+  const { data: notificationsData } = useQuery({
+    queryKey: [...buyerKeys.notifications, { page: 1, pageSize: 20 }],
+    queryFn: () => unwrap(buyerService.getNotifications({ page: 1, pageSize: 20 })),
   });
+  const notifications = notificationsData?.items ?? [];
 
   const markRead = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.markNotificationRead(id)),

@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -15,17 +15,15 @@ function BuyerViewingsPageContent() {
   const searchParams = useSearchParams();
   const defaultPropertyId = searchParams.get('property') || undefined;
   const queryClient = useQueryClient();
+  const PAGE_SIZE = 9;
+  const [page, setPage] = useState(1);
 
-  const { data: requests = [], isLoading } = useQuery({
-    queryKey: buyerKeys.viewings,
-    queryFn: () => unwrap(buyerService.listViewings()),
+  const { data: viewingsData, isLoading } = useQuery({
+    queryKey: [...buyerKeys.viewings, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(buyerService.listViewings({ page, pageSize: PAGE_SIZE })),
   });
-
-  const { data: listingsData } = useQuery({
-    queryKey: buyerKeys.listings,
-    queryFn: () => unwrap(buyerService.discover({ pageSize: 100 })),
-  });
-  const listings = listingsData?.items ?? [];
+  const requests = viewingsData?.items ?? [];
+  const total = viewingsData?.total ?? 0;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.viewings });
 
@@ -61,9 +59,7 @@ function BuyerViewingsPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Viewing Requests</h1>
           <p className="text-muted-foreground mt-1">
-            {isLoading
-              ? 'Loading…'
-              : `${requests.length} request${requests.length === 1 ? '' : 's'}`}
+            {isLoading ? 'Loading…' : `${total} request${total === 1 ? '' : 's'}`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -95,10 +91,19 @@ function BuyerViewingsPageContent() {
         </div>
       )}
 
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-8"
+        />
+      )}
+
       <RequestViewingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        listings={listings}
         defaultPropertyId={defaultPropertyId}
         onSubmit={handleSubmit}
       />

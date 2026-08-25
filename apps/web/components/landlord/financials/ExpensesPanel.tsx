@@ -15,6 +15,7 @@ import {
   Input,
   DatePicker,
   Select,
+  Pagination,
   Toast,
   type ToastVariant,
 } from '@getrentos/ui';
@@ -52,6 +53,8 @@ const initialForm: ExpenseForm = {
   note: '',
 };
 
+const PAGE_SIZE = 10;
+
 interface ExpensesPanelProps {
   properties: Property[];
 }
@@ -60,14 +63,15 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<ExpenseForm>(initialForm);
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  // Fetch a large batch (backend max pageSize is 100) so the panel shows recent expenses.
   const { data: expensesData } = useQuery({
-    queryKey: [...landlordKeys.expenses(), { page: 1, pageSize: 100 }],
-    queryFn: () => unwrap(landlordService.listExpenses({ page: 1, pageSize: 100 })),
+    queryKey: [...landlordKeys.expenses(), { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(landlordService.listExpenses({ page, pageSize: PAGE_SIZE })),
   });
   const expenses = expensesData?.items ?? [];
+  const total = expensesData?.total ?? 0;
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: landlordKeys.expenses() });
@@ -85,6 +89,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
     }) => unwrap(landlordService.createExpense(input)),
     onSuccess: () => {
       invalidate();
+      setPage(1);
       setForm(initialForm);
       setIsCreateOpen(false);
       setToast({ message: 'Expense recorded.', variant: 'success' });
@@ -98,6 +103,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
     mutationFn: (id: string) => unwrap(landlordService.deleteExpense(id)),
     onSuccess: () => {
       invalidate();
+      if (expenses.length === 1 && page > 1) setPage((current) => current - 1);
       setToast({ message: 'Expense removed.', variant: 'success' });
     },
     onError: (error: Error) => {
@@ -176,6 +182,12 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {total > 0 && (
+        <div className="border-t border-border px-5 py-4">
+          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
         </div>
       )}
 

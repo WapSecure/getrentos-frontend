@@ -1,8 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Pagination } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Handshake } from 'lucide-react';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
@@ -14,17 +14,47 @@ import type { OfferStatus, OfferMessage } from '@/types/owner';
 
 type StatusFilter = 'all' | OfferStatus;
 
+const PAGE_SIZE = 10;
+
 export default function OwnerOffersPage() {
   const queryClient = useQueryClient();
   const [pendingMessages, setPendingMessages] = useState<Record<string, OfferMessage[]>>({});
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
-  const { data: offers = [], isLoading } = useQuery({
-    queryKey: ownerKeys.offers,
-    queryFn: () => unwrap(ownerService.listOffers()),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      ...ownerKeys.offers,
+      {
+        search: debouncedSearch,
+        status: filter === 'all' ? undefined : filter,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.listOffers({
+          search: debouncedSearch || undefined,
+          status: filter === 'all' ? undefined : filter,
+          page,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const offers = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   // Negotiation thread for the currently-open offer, fetched from the backend.
   const { data: thread = [] } = useQuery({
@@ -140,14 +170,6 @@ export default function OwnerOffersPage() {
       ]
     : [];
 
-  const filteredOffers = offers.filter((o) => {
-    const matchesSearch =
-      o.buyerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || o.status === filter;
-    return matchesSearch && matchesFilter;
-  });
-
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'submitted', label: 'Submitted' },
@@ -163,7 +185,7 @@ export default function OwnerOffersPage() {
         <p className="text-muted-foreground mt-1">
           {isLoading
             ? 'Loading…'
-            : `${offers.length} offer${offers.length === 1 ? '' : 's'} across your sale listings`}
+            : `${total} offer${total === 1 ? '' : 's'} across your sale listings`}
         </p>
       </div>
 
@@ -182,7 +204,10 @@ export default function OwnerOffersPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -195,23 +220,23 @@ export default function OwnerOffersPage() {
         </div>
       </div>
 
-      {!isLoading && filteredOffers.length === 0 ? (
+      {!isLoading && offers.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Handshake className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {offers.length === 0 ? 'No offers yet' : 'No offers match your filters'}
+            {total === 0 ? 'No offers yet' : 'No offers match your filters'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {offers.length === 0
+            {total === 0
               ? 'Offers submitted by buyers on your published sale listings will appear here.'
               : 'Try adjusting your search or filter.'}
           </p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredOffers.map((offer, index) => (
+          {offers.map((offer, index) => (
             <OfferCard
               key={offer.id}
               offer={offer}
@@ -220,6 +245,16 @@ export default function OwnerOffersPage() {
             />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <OfferNegotiationModal

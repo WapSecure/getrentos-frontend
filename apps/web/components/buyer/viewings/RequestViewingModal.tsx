@@ -1,37 +1,75 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { TimePicker } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import type { BuyerPropertyListing } from '@/types/buyer';
+import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
+import { unwrap } from '@/lib/apiHelpers';
+import { buyerKeys } from '@/lib/queryKeys';
+import { buyerService } from '@/services/buyerService';
 
 interface RequestViewingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  listings: BuyerPropertyListing[];
   defaultPropertyId?: string;
   onSubmit: (propertyId: string, date: string, time: string, notes: string) => void;
 }
 
+const LISTING_PAGE_SIZE = 10;
+
 export const RequestViewingModal = ({
   isOpen,
   onClose,
-  listings,
   defaultPropertyId,
   onSubmit,
 }: RequestViewingModalProps) => {
   const [propertyId, setPropertyId] = useState(defaultPropertyId || '');
+  const [listingSearch, setListingSearch] = useState('');
+  const [listingPage, setListingPage] = useState(1);
+  const [selectedListingState, setSelectedListingState] = useState<BuyerPropertyListing | null>(
+    null
+  );
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
 
+  const { data: listingsPage, isLoading: isListingsLoading } = useQuery({
+    queryKey: [
+      ...buyerKeys.listings,
+      { search: listingSearch.trim() || undefined, page: listingPage, pageSize: LISTING_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        buyerService.discover({
+          search: listingSearch.trim() || undefined,
+          page: listingPage,
+          pageSize: LISTING_PAGE_SIZE,
+        })
+      ),
+    enabled: isOpen,
+  });
+  const { data: defaultListing } = useQuery({
+    queryKey: [...buyerKeys.listings, 'detail', defaultPropertyId],
+    queryFn: () => unwrap(buyerService.getListing(defaultPropertyId as string)),
+    enabled: isOpen && !!defaultPropertyId,
+  });
+  const listings = listingsPage?.items ?? [];
+  const selectedListing =
+    (selectedListingState?.id === propertyId ? selectedListingState : null) ??
+    listings.find((listing) => listing.id === propertyId) ??
+    (defaultListing?.id === propertyId ? defaultListing : undefined);
+
   const handleClose = () => {
     setPropertyId(defaultPropertyId || '');
+    setListingSearch('');
+    setListingPage(1);
+    setSelectedListingState(null);
     setDate('');
     setTime('');
     setNotes('');
@@ -39,6 +77,7 @@ export const RequestViewingModal = ({
   };
 
   const handleSubmit = () => {
+    if (!selectedListing) return;
     onSubmit(propertyId, date, time, notes);
     handleClose();
   };
@@ -65,11 +104,33 @@ export const RequestViewingModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Property <span className="text-red-500">*</span>
                 </label>
-                <Select
+                <PaginatedSelect
                   value={propertyId}
-                  onValueChange={setPropertyId}
+                  onValueChange={(value) => {
+                    setPropertyId(value);
+                    setSelectedListingState(
+                      listings.find((listing) => listing.id === value) ??
+                        (defaultListing?.id === value ? defaultListing : null)
+                    );
+                  }}
+                  items={listings}
+                  selectedItem={selectedListing}
+                  getItemValue={(listing) => listing.id}
+                  getItemLabel={(listing) => listing.title}
+                  search={listingSearch}
+                  onSearchChange={(value) => {
+                    setListingSearch(value);
+                    setListingPage(1);
+                  }}
+                  searchPlaceholder="Search available properties"
+                  page={listingPage}
+                  pageSize={LISTING_PAGE_SIZE}
+                  total={listingsPage?.total ?? 0}
+                  onPageChange={setListingPage}
                   placeholder="Select a property"
-                  options={listings.map((listing) => ({ value: listing.id, label: listing.title }))}
+                  emptyMessage="No available properties match this search."
+                  isLoading={isListingsLoading}
+                  ariaLabel="property"
                 />
               </div>
 
@@ -104,7 +165,7 @@ export const RequestViewingModal = ({
                 variant="primary"
                 className="flex-1 gap-1.5"
                 onClick={handleSubmit}
-                disabled={!propertyId || !date || !time}
+                disabled={!selectedListing || !date || !time}
               >
                 <CalendarClock className="w-4 h-4" />
                 Request

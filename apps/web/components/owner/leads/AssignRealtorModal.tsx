@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, UserPlus, Check, Loader2, Users } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { X, UserPlus, Check, Loader2, Search, Users } from 'lucide-react';
+import { Button, Input, Pagination } from '@getrentos/ui';
 import { getInitials } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerService } from '@/services/ownerService';
@@ -17,23 +17,48 @@ interface AssignRealtorModalProps {
   onAssign: (leadId: string, realtorName: string) => void;
 }
 
+const REALTOR_PAGE_SIZE = 10;
+
 export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorModalProps) => {
   const [selectedId, setSelectedId] = useState('');
+  const [selectedRealtorState, setSelectedRealtorState] = useState<{
+    id: string;
+    name: string;
+    speciality?: string;
+  } | null>(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [assigned, setAssigned] = useState(false);
-  const { data: realtors = [], isLoading } = useQuery({
-    queryKey: ownerKeys.realtors,
-    queryFn: () => unwrap(ownerService.getRealtors()),
+  const { data: realtorsPage, isLoading } = useQuery({
+    queryKey: [
+      ...ownerKeys.realtors,
+      { search: search.trim() || undefined, page, pageSize: REALTOR_PAGE_SIZE },
+    ],
+    queryFn: () =>
+      unwrap(
+        ownerService.getRealtors({
+          search: search.trim() || undefined,
+          page,
+          pageSize: REALTOR_PAGE_SIZE,
+        })
+      ),
+    enabled: !!lead,
   });
+  const realtors = realtorsPage?.items ?? [];
+  const selectedRealtor =
+    (selectedRealtorState?.id === selectedId ? selectedRealtorState : null) ??
+    realtors.find((realtor) => realtor.id === selectedId);
 
   if (!lead) return null;
 
   const handleClose = () => {
     setSelectedId('');
+    setSelectedRealtorState(null);
+    setSearch('');
+    setPage(1);
     setAssigned(false);
     onClose();
   };
-
-  const selectedRealtor = realtors.find((r) => r.id === selectedId);
 
   const handleAssign = () => {
     if (!selectedRealtor) return;
@@ -78,36 +103,73 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Loading realtors…
                 </div>
-              ) : realtors.length === 0 ? (
-                <div className="text-center py-6">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-secondary flex items-center justify-center">
-                    <Users className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-foreground">No verified realtors yet</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Realtors appear here once their identity is verified.
-                  </p>
-                </div>
               ) : (
-                realtors.map((realtor) => (
-                  <button
-                    key={realtor.id}
-                    onClick={() => setSelectedId(realtor.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${
-                      selectedId === realtor.id
-                        ? 'border-primary bg-accent'
-                        : 'border-border hover:bg-secondary'
-                    }`}
-                  >
-                    <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
-                      {getInitials(realtor.name)}
+                <>
+                  <Input
+                    type="search"
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Search verified realtors"
+                    leadingIcon={<Search className="h-4 w-4" />}
+                    aria-label="Search verified realtors"
+                  />
+                  {realtors.length === 0 ? (
+                    <div className="text-center py-6">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-secondary flex items-center justify-center">
+                        <Users className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-foreground">
+                        {search.trim()
+                          ? 'No realtors match this search'
+                          : 'No verified realtors yet'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {search.trim()
+                          ? 'Try a different name, email, or company.'
+                          : 'Realtors appear here once their identity is verified.'}
+                      </p>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{realtor.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{realtor.speciality}</p>
-                    </div>
-                  </button>
-                ))
+                  ) : (
+                    <>
+                      {realtors.map((realtor) => (
+                        <button
+                          key={realtor.id}
+                          onClick={() => {
+                            setSelectedId(realtor.id);
+                            setSelectedRealtorState(realtor);
+                          }}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${
+                            selectedId === realtor.id
+                              ? 'border-primary bg-accent'
+                              : 'border-border hover:bg-secondary'
+                          }`}
+                        >
+                          <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+                            {getInitials(realtor.name)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {realtor.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {realtor.speciality}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                      <Pagination
+                        page={page}
+                        pageSize={REALTOR_PAGE_SIZE}
+                        total={realtorsPage?.total ?? 0}
+                        onPageChange={setPage}
+                        className="rounded-xl border border-border bg-secondary/30 px-3 py-2 text-xs"
+                      />
+                    </>
+                  )}
+                </>
               )}
             </div>
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@getrentos/ui';
+import { Button, Pagination } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
@@ -19,16 +19,31 @@ export function ClientAgentAccess() {
   const queryClient = useQueryClient();
   const [propertiesFor, setPropertiesFor] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const { data: assignments = [], isLoading } = useQuery({
-    queryKey: agentKeys.clientAssignments,
-    queryFn: () => unwrap(agentService.listClientAssignments()) as Promise<Assignment[]>,
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const [propertyPage, setPropertyPage] = useState(1);
+  const { data: assignmentsData, isLoading } = useQuery({
+    queryKey: [...agentKeys.clientAssignments, { page, pageSize: PAGE_SIZE }],
+    queryFn: () => unwrap(agentService.listClientAssignments({ page, pageSize: PAGE_SIZE })),
   });
-  const { data: properties = [] } = useQuery({
+  const assignments = (assignmentsData?.items ?? []) as Assignment[];
+  const assignmentTotal = assignmentsData?.total ?? 0;
+  const { data: propertiesData } = useQuery({
     enabled: Boolean(propertiesFor),
-    queryKey: agentKeys.assignableProperties(propertiesFor ?? ''),
+    queryKey: [
+      ...agentKeys.assignableProperties(propertiesFor ?? ''),
+      { page: propertyPage, pageSize: PAGE_SIZE },
+    ],
     queryFn: () =>
-      unwrap(agentService.listAssignableProperties(propertiesFor!)) as Promise<Property[]>,
+      unwrap(
+        agentService.listAssignableProperties(propertiesFor!, {
+          page: propertyPage,
+          pageSize: PAGE_SIZE,
+        })
+      ),
   });
+  const properties = (propertiesData?.items ?? []) as Property[];
+  const propertyTotal = propertiesData?.total ?? 0;
   const refresh = () => queryClient.invalidateQueries({ queryKey: agentKeys.clientAssignments });
   const approve = useMutation({
     mutationFn: (id: string) => unwrap(agentService.approveClientAssignment(id)),
@@ -49,7 +64,12 @@ export function ClientAgentAccess() {
   const assign = useMutation({
     mutationFn: ({ id, propertyId }: { id: string; propertyId: string }) =>
       unwrap(agentService.assignClientProperty(id, propertyId)),
-    onSuccess: () => setToast({ message: 'Property assigned to Agent.', variant: 'success' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: agentKeys.assignableProperties(propertiesFor ?? ''),
+      });
+      setToast({ message: 'Property assigned to Agent.', variant: 'success' });
+    },
     onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
   });
 
@@ -83,13 +103,14 @@ export function ClientAgentAccess() {
                   >
                     Approve access
                   </Button>
-                ) : (
+                ) : assignment.status === 'ACTIVE' ? (
                   <>
                     <Button
                       variant="outline"
-                      onClick={() =>
-                        setPropertiesFor(propertiesFor === assignment.id ? null : assignment.id)
-                      }
+                      onClick={() => {
+                        setPropertiesFor(propertiesFor === assignment.id ? null : assignment.id);
+                        setPropertyPage(1);
+                      }}
                     >
                       Choose properties
                     </Button>
@@ -102,6 +123,8 @@ export function ClientAgentAccess() {
                       Revoke
                     </Button>
                   </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Access revoked</span>
                 )}
               </div>
               {propertiesFor === assignment.id && (
@@ -126,11 +149,32 @@ export function ClientAgentAccess() {
                       </Button>
                     </div>
                   ))}
+                  {propertyTotal > 0 && (
+                    <Pagination
+                      page={propertyPage}
+                      pageSize={PAGE_SIZE}
+                      total={propertyTotal}
+                      onPageChange={setPropertyPage}
+                      className="mt-3"
+                    />
+                  )}
                 </div>
               )}
             </div>
           ))}
         </div>
+      )}
+      {assignmentTotal > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={assignmentTotal}
+          onPageChange={(nextPage) => {
+            setPage(nextPage);
+            setPropertiesFor(null);
+          }}
+          className="mt-6"
+        />
       )}
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />

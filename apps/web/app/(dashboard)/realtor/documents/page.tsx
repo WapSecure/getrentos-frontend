@@ -10,6 +10,7 @@ import {
   DocumentUploadDialog,
   DocumentRowActions,
   FilePreviewDialog,
+  Pagination,
   Toast,
   type ToastVariant,
 } from '@getrentos/ui';
@@ -29,42 +30,61 @@ const categoryLabels: Record<RealtorDocument['category'], string> = {
 
 type CategoryFilter = 'all' | RealtorDocument['category'];
 
+const PAGE_SIZE = 10;
+
 export default function RealtorDocumentsPage() {
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
-  const { data: documents = [], isLoading } = useQuery({
-    queryKey: realtorKeys.documents,
+  const documentCategory =
+    filter === 'all' ? undefined : (filter.toUpperCase() as Uppercase<RealtorDocument['category']>);
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      ...realtorKeys.documents,
+      {
+        page,
+        pageSize: PAGE_SIZE,
+        search: searchQuery.trim() || undefined,
+        category: documentCategory,
+      },
+    ],
     queryFn: async () => {
-      const records = (await unwrap(realtorService.listDocuments())) as Array<{
-        id: string;
-        name: string;
-        category: string;
-        createdAt: string;
-        sizeBytes: number;
-        client?: { legalName: string } | null;
-      }>;
-      return records.map((doc) => ({
-        id: doc.id,
-        name: doc.name,
-        category: doc.category.toLowerCase() as RealtorDocument['category'],
-        clientName: doc.client?.legalName,
-        uploadedAt: doc.createdAt,
-        sizeLabel:
-          doc.sizeBytes < 1024 * 1024
-            ? `${Math.round(doc.sizeBytes / 1024)} KB`
-            : `${(doc.sizeBytes / (1024 * 1024)).toFixed(1)} MB`,
-      }));
+      const result = await unwrap(
+        realtorService.listDocuments({
+          page,
+          pageSize: PAGE_SIZE,
+          search: searchQuery.trim() || undefined,
+          category: documentCategory,
+        })
+      );
+      return {
+        ...result,
+        items: result.items.map((doc) => ({
+          id: doc.id,
+          name: doc.name,
+          category: doc.category.toLowerCase() as RealtorDocument['category'],
+          clientName: doc.client?.legalName ?? undefined,
+          uploadedAt: doc.createdAt,
+          sizeLabel:
+            doc.sizeBytes < 1024 * 1024
+              ? `${Math.round(doc.sizeBytes / 1024)} KB`
+              : `${(doc.sizeBytes / (1024 * 1024)).toFixed(1)} MB`,
+        })),
+      };
     },
   });
+  const documents = data?.items ?? [];
+  const total = data?.total ?? 0;
   const upload = useMutation({
     mutationFn: (data: { file: File; name: string; category: string }) =>
       unwrap(realtorService.uploadDocument(data.file, data.name, data.category)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.documents });
+      setPage(1);
       setIsUploadOpen(false);
       setToast({ message: 'Document uploaded.', variant: 'success' });
     },
@@ -75,12 +95,6 @@ export default function RealtorDocumentsPage() {
   const handleUpload = async (data: { name: string; category: string; file: File }) => {
     await upload.mutateAsync(data);
   };
-
-  const filteredDocuments = documents.filter((d) => {
-    const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || d.category === filter;
-    return matchesSearch && matchesFilter;
-  });
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -97,8 +111,7 @@ export default function RealtorDocumentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">
-            Agency agreements, contracts, and license, {documents.length} file
-            {documents.length === 1 ? '' : 's'}
+            Agency agreements, contracts, and license, {total} file{total === 1 ? '' : 's'}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
@@ -113,7 +126,10 @@ export default function RealtorDocumentsPage() {
           <LegacyInput
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search documents..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -122,7 +138,10 @@ export default function RealtorDocumentsPage() {
           {categoryFilters.map((option) => (
             <button
               key={option.value}
-              onClick={() => setFilter(option.value)}
+              onClick={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
@@ -139,14 +158,14 @@ export default function RealtorDocumentsPage() {
         <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
           Loading documents…
         </div>
-      ) : filteredDocuments.length === 0 ? (
+      ) : documents.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No documents found</p>
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {filteredDocuments.map((doc) => (
+          {documents.map((doc) => (
             <div
               key={doc.id}
               className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
@@ -168,6 +187,16 @@ export default function RealtorDocumentsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Pagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+          className="mt-6"
+        />
       )}
 
       <DocumentUploadDialog

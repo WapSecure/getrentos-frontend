@@ -26,13 +26,6 @@ export default function LandlordEvictionsPage() {
   const cases = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Dropdown of signed leases for initiating a new case.
-  const { data: signedLeasesData } = useQuery({
-    queryKey: [...landlordKeys.leases('signed'), { page: 1, pageSize: 100 }],
-    queryFn: () => unwrap(landlordService.listLeases({ status: 'signed', page: 1, pageSize: 100 })),
-  });
-  const signedLeases = signedLeasesData?.items ?? [];
-
   const invalidate = () => queryClient.invalidateQueries({ queryKey: landlordKeys.evictions });
 
   const initiate = useMutation({
@@ -133,7 +126,6 @@ export default function LandlordEvictionsPage() {
       <InitiateEvictionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        leases={signedLeases}
         onSubmit={(leaseId, reason) => initiate.mutate({ leaseId, reason })}
         isSubmitting={initiate.isPending}
       />

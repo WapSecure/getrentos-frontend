@@ -12,10 +12,14 @@ import { DocumentExpiryAlerts } from '@/components/renter/documents/DocumentExpi
 import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkActions';
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
-import { Toast } from '@getrentos/ui';
+import { Pagination, Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import type {
+  DocumentFilterStatus,
+  DocumentFilterType,
+} from '@/components/renter/documents/DocumentSearch';
 
 interface UploadData {
   file: File;
@@ -28,21 +32,44 @@ interface UploadData {
 
 export default function DocumentsPage() {
   const queryClient = useQueryClient();
-  const { data: documentsData } = useQuery({
-    queryKey: renterKeys.documents,
-    queryFn: () => unwrap(renterService.listDocuments({ page: 1, pageSize: 100 })),
-  });
-  const documents = documentsData?.items ?? [];
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [filterType, setFilterType] = useState<DocumentFilterType>('all');
+  const [filterStatus, setFilterStatus] = useState<DocumentFilterStatus>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
+
+  const documentParams = {
+    page,
+    pageSize: PAGE_SIZE,
+    search: searchTerm || undefined,
+    category: selectedCategory === 'all' ? undefined : selectedCategory,
+    type: filterType === 'all' ? undefined : filterType,
+    status: filterStatus === 'all' ? undefined : filterStatus,
+    sortBy,
+    sortOrder: 'desc' as const,
+  };
+  const { data: documentsData } = useQuery({
+    queryKey: [...renterKeys.documents, documentParams],
+    queryFn: () => unwrap(renterService.listDocuments(documentParams)),
+  });
+  const { data: documentSummary } = useQuery({
+    queryKey: renterKeys.documentSummary,
+    queryFn: () => unwrap(renterService.getDocumentSummary()),
+  });
+  const documents = documentsData?.items ?? [];
+  const total = documentsData?.total ?? 0;
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sharingDocumentId, setSharingDocumentId] = useState<string | null>(null);
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
 
-  const invalidateDocuments = () =>
+  const invalidateDocuments = () => {
     queryClient.invalidateQueries({ queryKey: renterKeys.documents });
+    queryClient.invalidateQueries({ queryKey: renterKeys.documentSummary });
+  };
 
   const uploadMutation = useMutation({
     mutationFn: (data: UploadData) =>
@@ -57,15 +84,23 @@ export default function DocumentsPage() {
     onSuccess: (_, id) => {
       invalidateDocuments();
       setSelectedDocuments((prev) => prev.filter((sid) => sid !== id));
+      if (documents.length === 1 && page > 1) setPage((current) => current - 1);
     },
   });
 
   const bulkDeleteMutation = useMutation({
     mutationFn: (ids: string[]) =>
       Promise.all(ids.map((id) => unwrap(renterService.deleteDocument(id)))),
-    onSuccess: () => {
+    onSuccess: (_, ids) => {
       invalidateDocuments();
       setSelectedDocuments([]);
+      if (
+        documents.length > 0 &&
+        documents.every((document) => ids.includes(document.id)) &&
+        page > 1
+      ) {
+        setPage((current) => current - 1);
+      }
     },
   });
 
@@ -110,47 +145,58 @@ export default function DocumentsPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedDocuments.length === filteredDocuments.length) {
-      setSelectedDocuments([]);
-    } else {
-      setSelectedDocuments(filteredDocuments.map((d) => d.id));
-    }
+    const documentIds = documents.map((document) => document.id);
+    setSelectedDocuments((previous) =>
+      documentIds.every((id) => previous.includes(id))
+        ? previous.filter((id) => !documentIds.includes(id))
+        : Array.from(new Set([...previous, ...documentIds]))
+    );
   };
 
-  const filteredDocuments = documents.filter((doc) => {
-    const matchesSearch =
-      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (doc.tags && doc.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())));
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const resetPageAndSet = <T,>(setter: (value: T) => void, value: T) => {
+    setter(value);
+    setPage(1);
+  };
 
   return (
     <>
-      <DocumentsHeader documentCount={documents.length} onUpload={() => setShowUploadModal(true)} />
+      <DocumentsHeader
+        documentCount={documentSummary?.total ?? total}
+        onUpload={() => setShowUploadModal(true)}
+      />
 
-      <DocumentsStats documents={documents} />
+      <DocumentsStats summary={documentSummary} />
 
-      <DocumentExpiryAlerts documents={documents} />
+      <DocumentExpiryAlerts documents={documents} summary={documentSummary} />
 
       <div className="grid lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-6">
           <DocumentCategories
-            documents={documents}
+            categories={documentSummary?.categories ?? {}}
+            total={documentSummary?.total ?? total}
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(category) => resetPageAndSet(setSelectedCategory, category)}
           />
-          <DocumentAnalytics documents={documents} />
+          <DocumentAnalytics summary={documentSummary} />
         </div>
 
         <div className="lg:col-span-3 space-y-6">
-          <DocumentSearch searchTerm={searchTerm} onSearch={setSearchTerm} />
+          <DocumentSearch
+            searchTerm={searchTerm}
+            onSearch={(value) => resetPageAndSet(setSearchTerm, value)}
+            filterType={filterType}
+            onFilterTypeChange={(value) => resetPageAndSet(setFilterType, value)}
+            filterStatus={filterStatus}
+            onFilterStatusChange={(value) => resetPageAndSet(setFilterStatus, value)}
+          />
 
           <DocumentsList
-            documents={filteredDocuments}
+            documents={documents}
+            total={total}
             viewMode={viewMode}
             setViewMode={setViewMode}
+            sortBy={sortBy}
+            onSortByChange={(value) => resetPageAndSet(setSortBy, value)}
             selectedDocuments={selectedDocuments}
             onSelectDocument={handleSelectDocument}
             onSelectAll={handleSelectAll}
@@ -159,6 +205,16 @@ export default function DocumentsPage() {
             onShare={handleShare}
             onDownload={handleDownload}
           />
+
+          {total > 0 && (
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              total={total}
+              onPageChange={setPage}
+              className="mt-6"
+            />
+          )}
         </div>
       </div>
 
