@@ -18,6 +18,8 @@ import type {
   TenancyStanding,
   LandlordLead,
   LandlordViewingRequest,
+  LeadNudgeResult,
+  BulkNudgeResult,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -793,9 +795,33 @@ export const landlordService = {
 
   // ---- Leads inbox ----
   async listLeads(
-    params: { search?: string; stage?: string; page?: number; pageSize?: number } = {}
+    params: {
+      search?: string;
+      stage?: string;
+      staleOnly?: boolean;
+      page?: number;
+      pageSize?: number;
+    } = {}
   ): Promise<ApiResponse<Paginated<LandlordLead>>> {
     return safeCall(() => authFetch<Paginated<LandlordLead>>(`/landlord/leads${toQuery(params)}`));
+  },
+
+  async nudgeLead(leadId: string, message: string): Promise<ApiResponse<LeadNudgeResult>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leads/${leadId}/nudge`, {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+      })
+    );
+  },
+
+  async bulkNudgeLeads(leadIds: string[], message: string): Promise<ApiResponse<BulkNudgeResult>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leads/bulk-nudge`, {
+        method: 'POST',
+        body: JSON.stringify({ leadIds, message }),
+      })
+    );
   },
 
   async confirmViewingRequest(

@@ -233,6 +233,21 @@ export interface LandlordLead {
   stage: LeadStage;
   applicationId?: string;
   viewingRequestId?: string;
+  lastActivityAt: string;
+  daysSinceActivity: number;
+  stale: boolean;
+  lastNudgedAt?: string;
+}
+
+export interface LeadNudgeResult {
+  leadId: string;
+  nudgedAt: string;
+}
+
+export interface BulkNudgeResult {
+  nudged: number;
+  skipped: number;
+  errors: { leadId: string; reason: string }[];
 }
 
 export type ViewingRequestStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled';
