@@ -232,6 +232,7 @@ export const ROUTES = {
   LANDLORD_OWNER_STATEMENTS: '/landlord/owner-statements',
   LANDLORD_ARREARS: '/landlord/arrears',
   LANDLORD_EVICTIONS: '/landlord/evictions',
+  LANDLORD_LEADS: '/landlord/leads',
   LANDLORD_DOCUMENTS: '/landlord/documents',
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',

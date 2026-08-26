@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Video, Check, CalendarCheck, PhoneCall } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { VideoCallSimulator } from './VideoCallSimulator';
 import { tourRooms, videoViewingSlots } from '@/lib/tourRooms';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
 import type { TourModalMode } from '@/types/virtual-tour';
 
 interface VirtualTourViewerModalProps {
   propertyTitle: string | null;
+  propertyId: string | null;
   initialMode?: TourModalMode;
   onClose: () => void;
 }
@@ -18,6 +22,7 @@ const AGENT_NAME = 'Chidinma Nwosu';
 
 export const VirtualTourViewerModal = ({
   propertyTitle,
+  propertyId,
   initialMode = 'tour',
   onClose,
 }: VirtualTourViewerModalProps) => {
@@ -26,11 +31,21 @@ export const VirtualTourViewerModal = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [confirmedSlotId, setConfirmedSlotId] = useState<string | null>(null);
 
+  const requestViewing = useMutation({
+    mutationFn: (slotLabel: string) =>
+      unwrap(renterService.requestViewing(propertyId!, undefined, `Preferred time: ${slotLabel}`)),
+    onSuccess: () => {
+      setConfirmedSlotId(selectedSlotId);
+      setMode('confirmed');
+    },
+  });
+
   const handleClose = () => {
     setMode(initialMode);
     setRoomIndex(0);
     setSelectedSlotId(null);
     setConfirmedSlotId(null);
+    requestViewing.reset();
     onClose();
   };
 
@@ -45,7 +60,7 @@ export const VirtualTourViewerModal = ({
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {mode === 'tour' && 'Self-guided virtual tour'}
             {mode === 'booking' && 'Book a live video viewing'}
-            {mode === 'confirmed' && 'Video viewing scheduled'}
+            {mode === 'confirmed' && 'Viewing requested'}
             {mode === 'call' && 'Live video viewing'}
           </DialogDescription>
         </div>
@@ -129,6 +144,11 @@ export const VirtualTourViewerModal = ({
                 <span className="text-sm font-medium text-foreground">{slot.label}</span>
               </button>
             ))}
+            {requestViewing.isError && (
+              <p className="text-xs text-red-500">
+                Couldn&apos;t submit your viewing request. Please try again.
+              </p>
+            )}
             <div className="flex gap-2 pt-1">
               <Button variant="ghost" className="flex-1" onClick={() => setMode('tour')}>
                 Back
@@ -136,13 +156,13 @@ export const VirtualTourViewerModal = ({
               <Button
                 variant="primary"
                 className="flex-1"
-                disabled={!selectedSlotId}
+                disabled={!selectedSlotId || !propertyId || requestViewing.isPending}
                 onClick={() => {
-                  setConfirmedSlotId(selectedSlotId);
-                  setMode('confirmed');
+                  const slot = videoViewingSlots.find((s) => s.id === selectedSlotId);
+                  if (slot) requestViewing.mutate(slot.label);
                 }}
               >
-                Confirm
+                {requestViewing.isPending ? 'Submitting…' : 'Confirm'}
               </Button>
             </div>
           </div>
@@ -154,10 +174,11 @@ export const VirtualTourViewerModal = ({
               <CalendarCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  Video viewing scheduled for {confirmedSlot?.label}
+                  Viewing request sent for {confirmedSlot?.label}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {AGENT_NAME} will call you on GetRentos video at the scheduled time.
+                  The landlord will confirm your requested time — you&apos;ll see it in your viewing
+                  requests once confirmed.
                 </p>
               </div>
             </div>

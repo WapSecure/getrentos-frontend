@@ -207,3 +207,46 @@ export interface Tenant {
   verified: boolean;
   rentStatus: RentPaymentStatus;
 }
+
+export type LeadStage =
+  | 'inquiry'
+  | 'requested'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'pending'
+  | 'under_review'
+  | 'approved'
+  | 'rejected';
+
+export interface LandlordLead {
+  id: string;
+  leadName: string;
+  email: string;
+  phone: string;
+  leadUserId?: string;
+  propertyId: string;
+  propertyName: string;
+  inquiryDate: string;
+  trustScore: number;
+  verified: boolean;
+  stage: LeadStage;
+  applicationId?: string;
+  viewingRequestId?: string;
+}
+
+export type ViewingRequestStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled';
+
+export interface LandlordViewingRequest {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  renterId: string;
+  renterName: string;
+  renterEmail: string;
+  status: ViewingRequestStatus;
+  requestedAt: string;
+  scheduledAt?: string;
+  notes?: string;
+}

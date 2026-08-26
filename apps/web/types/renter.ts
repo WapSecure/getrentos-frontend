@@ -18,6 +18,7 @@ export interface PropertyFee {
 
 export interface Property {
   id: string;
+  propertyId: string;
   title: string;
   location: string;
   address?: string;

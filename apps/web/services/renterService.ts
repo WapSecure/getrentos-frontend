@@ -22,6 +22,17 @@ import type { UssdMenu } from '@/types/ussd';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+export interface ViewingRequest {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  status: 'requested' | 'confirmed' | 'completed' | 'cancelled';
+  requestedAt: string;
+  scheduledAt?: string;
+  notes?: string;
+}
+
 export interface SavedSearch {
   id: string;
   name: string;
@@ -766,6 +777,23 @@ export const renterService = {
         body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
       })
     );
+  },
+
+  async requestViewing(
+    propertyId: string,
+    unitId?: string,
+    notes?: string
+  ): Promise<ApiResponse<ViewingRequest>> {
+    return safeCall(() =>
+      authFetch('/renter/viewing-requests', {
+        method: 'POST',
+        body: JSON.stringify({ propertyId, unitId, notes }),
+      })
+    );
+  },
+
+  async listViewingRequests(): Promise<ApiResponse<ViewingRequest[]>> {
+    return safeCall(() => authFetch('/renter/viewing-requests'));
   },
 
   async sendMessage(

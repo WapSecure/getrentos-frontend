@@ -320,6 +320,7 @@ export default function PropertyDetailPage() {
       {tourOpen && (
         <VirtualTourViewerModal
           propertyTitle={property.title}
+          propertyId={property.propertyId}
           initialMode={tourMode}
           onClose={() => setTourOpen(false)}
         />

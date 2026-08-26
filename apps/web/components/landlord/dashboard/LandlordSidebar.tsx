@@ -23,6 +23,7 @@ import {
   Settings,
   UserRoundCheck,
   Gavel,
+  UsersRound,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -39,6 +40,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.properties', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.units', href: ROUTES.LANDLORD_UNITS, icon: DoorOpen },
   { labelKey: 'sidebar.listings', href: ROUTES.LANDLORD_LISTINGS, icon: Megaphone },
+  { labelKey: 'sidebar.landlord_leads', href: ROUTES.LANDLORD_LEADS, icon: UsersRound },
   { labelKey: 'sidebar.applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
   { labelKey: 'sidebar.tenants', href: ROUTES.LANDLORD_TENANTS, icon: Users },
   { labelKey: 'sidebar.leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },

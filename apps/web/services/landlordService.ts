@@ -16,6 +16,8 @@ import type {
   EvictionCase,
   RentIncreaseCheck,
   TenancyStanding,
+  LandlordLead,
+  LandlordViewingRequest,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -786,6 +788,31 @@ export const landlordService = {
         method: 'POST',
         body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
       })
+    );
+  },
+
+  // ---- Leads inbox ----
+  async listLeads(
+    params: { search?: string; stage?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<LandlordLead>>> {
+    return safeCall(() => authFetch<Paginated<LandlordLead>>(`/landlord/leads${toQuery(params)}`));
+  },
+
+  async confirmViewingRequest(
+    id: string,
+    scheduledAt: string
+  ): Promise<ApiResponse<LandlordViewingRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/viewing-requests/${id}/confirm`, {
+        method: 'PATCH',
+        body: JSON.stringify({ scheduledAt }),
+      })
+    );
+  },
+
+  async cancelViewingRequest(id: string): Promise<ApiResponse<LandlordViewingRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/viewing-requests/${id}/cancel`, { method: 'PATCH' })
     );
   },
 

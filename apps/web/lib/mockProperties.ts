@@ -3,6 +3,7 @@ import type { Property } from '@/types/renter';
 export const mockProperties: Property[] = [
   {
     id: '1',
+    propertyId: '1',
     title: 'Modern Downtown Loft',
     location: 'Ikeja, Lagos',
     price: 2400000,
@@ -61,6 +62,7 @@ export const mockProperties: Property[] = [
   },
   {
     id: '2',
+    propertyId: '2',
     title: 'Cozy Studio Apartment',
     location: 'Victoria Island, Lagos',
     price: 1800000,
@@ -109,6 +111,7 @@ export const mockProperties: Property[] = [
   },
   {
     id: '3',
+    propertyId: '3',
     title: 'Luxury Beachfront Villa',
     location: 'Elegushi Beach, Lagos',
     price: 9600000,
@@ -168,6 +171,7 @@ export const mockProperties: Property[] = [
   },
   {
     id: '4',
+    propertyId: '4',
     title: 'Executive 3-Bed Apartment',
     location: 'Ikoyi, Lagos',
     price: 4200000,
@@ -218,6 +222,7 @@ export const mockProperties: Property[] = [
   },
   {
     id: '5',
+    propertyId: '5',
     title: 'Affordable 2-Bed Flat',
     location: 'Surulere, Lagos',
     price: 1440000,
@@ -265,6 +270,7 @@ export const mockProperties: Property[] = [
   },
   {
     id: '6',
+    propertyId: '6',
     title: 'Penthouse with Ocean View',
     location: 'Lekki Phase 1, Lagos',
     price: 6600000,
