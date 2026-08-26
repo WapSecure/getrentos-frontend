@@ -92,6 +92,16 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
     queryClient.invalidateQueries({ queryKey: shortletKeys.public });
   };
 
+  const setStatus = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'PUBLISHED' | 'PAUSED' | 'CLOSED' }) =>
+      unwrap(shortletService.setListingStatus(id, status)),
+    onSuccess: () => {
+      invalidateAll();
+      setToast({ message: 'Listing updated.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
   const decide = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'approve' | 'decline' }) =>
       unwrap(
@@ -161,6 +171,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">{l.title}</h3>
+                      {l.status !== 'PUBLISHED' && (
+                        <Badge variant={l.status === 'PAUSED' ? 'warning' : 'neutral'}>
+                          {l.status}
+                        </Badge>
+                      )}
                       {l.instantBooking && (
                         <Badge>
                           <Zap className="mr-1 h-3 w-3" /> Instant
@@ -178,7 +193,32 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                       {l.cleaningFee ? ` · ${formatCurrency(l.cleaningFee)} cleaning` : ''}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {l.status !== 'CLOSED' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setStatus.mutate({
+                            id: l.id,
+                            status: l.status === 'PUBLISHED' ? 'PAUSED' : 'PUBLISHED',
+                          })
+                        }
+                        disabled={setStatus.isPending}
+                      >
+                        {l.status === 'PUBLISHED' ? 'Pause' : 'Resume'}
+                      </Button>
+                    )}
+                    {l.status !== 'CLOSED' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setStatus.mutate({ id: l.id, status: 'CLOSED' })}
+                        disabled={setStatus.isPending}
+                      >
+                        Close
+                      </Button>
+                    )}
                     <Button variant="outline" size="sm" onClick={() => setEditTarget(l)}>
                       Edit
                     </Button>

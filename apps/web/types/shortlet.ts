@@ -27,6 +27,7 @@ export interface ShortletListing {
   maxGuests: number;
   checkInTime?: string;
   checkOutTime?: string;
+  status: string;
   hostName: string;
   hostVerified: boolean;
   isVerified: boolean;

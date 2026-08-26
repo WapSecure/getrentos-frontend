@@ -85,6 +85,14 @@ export const shortletService = {
       })
     ),
 
+  setListingStatus: (listingId: string, status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>
+    safeCall(() =>
+      authFetch<ShortletListing>(`/host/shortlets/${listingId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+    ),
+
   myListings: (params: ShortletListParams = {}) =>
     safeCall(() => authFetch<Paginated<ShortletListing>>(`/host/shortlets${listQuery(params)}`)),
 
