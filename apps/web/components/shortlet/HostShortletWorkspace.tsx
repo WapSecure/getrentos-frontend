@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  CurrencyInput,
+  DatePicker,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -16,6 +18,7 @@ import {
   Select,
   Skeleton,
   Switch,
+  TimePicker,
   Toast,
   type BadgeVariant,
   type ToastVariant,
@@ -37,6 +40,7 @@ import type {
 const PAGE_SIZE = 10;
 type Tab = 'listings' | 'bookings';
 type HostRole = 'owner' | 'landlord';
+const TODAY = new Date().toISOString().slice(0, 10);
 
 const STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   REQUESTED: 'info',
@@ -298,6 +302,8 @@ function CreateListingDialog({
   const [weekendUpliftPct, setWeekendUpliftPct] = useState('');
   const [instantBooking, setInstantBooking] = useState(false);
   const [maxGuests, setMaxGuests] = useState('2');
+  const [checkInTime, setCheckInTime] = useState('14:00');
+  const [checkOutTime, setCheckOutTime] = useState('11:00');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: properties, isLoading } = useQuery({
@@ -344,17 +350,21 @@ function CreateListingDialog({
       weekendUpliftPct: weekendUpliftPct ? Number(weekendUpliftPct) : undefined,
       instantBooking,
       maxGuests: Number(maxGuests) || 2,
+      checkInTime,
+      checkOutTime,
     });
   };
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogTitle>New Shortlet Listing</DialogTitle>
-        <DialogDescription>
-          Publish a furnished short-stay listing on one of your properties.
-        </DialogDescription>
-        <div className="space-y-4">
+      <DialogContent className="sm:max-w-lg">
+        <div className="p-5">
+          <DialogTitle>New Shortlet Listing</DialogTitle>
+          <DialogDescription>
+            Publish a furnished short-stay listing on one of your properties.
+          </DialogDescription>
+        </div>
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
           <Field label="Property">
             <Select
               value={propertyId}
@@ -381,20 +391,21 @@ function CreateListingDialog({
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label={pricingMode === 'PER_NIGHT' ? 'Nightly rate (₦)' : 'Flat rate (₦)'}>
-              <Input
-                type="number"
-                min={1}
+            <Field
+              label={pricingMode === 'PER_NIGHT' ? 'Nightly rate' : 'Flat rate'}
+              hint="Naira (₦)"
+            >
+              <CurrencyInput
+                prefix="₦"
                 value={nightlyRate}
-                onChange={(e) => setNightlyRate(e.target.value)}
+                onValueChange={(v) => setNightlyRate(v === 0 ? '' : String(v))}
               />
             </Field>
-            <Field label="Cleaning fee (₦)" hint="Optional">
-              <Input
-                type="number"
-                min={0}
+            <Field label="Cleaning fee" hint="Optional, Naira (₦)">
+              <CurrencyInput
+                prefix="₦"
                 value={cleaningFee}
-                onChange={(e) => setCleaningFee(e.target.value)}
+                onValueChange={(v) => setCleaningFee(v === 0 ? '' : String(v))}
               />
             </Field>
           </div>
@@ -423,6 +434,14 @@ function CreateListingDialog({
                 value={weekendUpliftPct}
                 onChange={(e) => setWeekendUpliftPct(e.target.value)}
               />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Check-in time">
+              <TimePicker value={checkInTime} onChange={setCheckInTime} />
+            </Field>
+            <Field label="Check-out time">
+              <TimePicker value={checkOutTime} onChange={setCheckOutTime} />
             </Field>
           </div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
@@ -466,6 +485,8 @@ function EditListingDialog({
   );
   const [instantBooking, setInstantBooking] = useState(listing.instantBooking);
   const [maxGuests, setMaxGuests] = useState(listing.maxGuests.toString());
+  const [checkInTime, setCheckInTime] = useState(listing.checkInTime ?? '14:00');
+  const [checkOutTime, setCheckOutTime] = useState(listing.checkOutTime ?? '11:00');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const save = useMutation({
@@ -479,6 +500,8 @@ function EditListingDialog({
           weekendUpliftPct: weekendUpliftPct ? Number(weekendUpliftPct) : undefined,
           instantBooking,
           maxGuests: Number(maxGuests) || 2,
+          checkInTime,
+          checkOutTime,
         })
       ),
     onSuccess: () => onSaved(),
@@ -487,10 +510,12 @@ function EditListingDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogTitle>Edit {listing.title}</DialogTitle>
-        <DialogDescription>Update pricing and availability rules.</DialogDescription>
-        <div className="space-y-4">
+      <DialogContent className="sm:max-w-lg">
+        <div className="p-5">
+          <DialogTitle>Edit {listing.title}</DialogTitle>
+          <DialogDescription>Update pricing and availability rules.</DialogDescription>
+        </div>
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
           <Field label="Pricing">
             <Select
               value={pricingMode}
@@ -502,20 +527,21 @@ function EditListingDialog({
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label={pricingMode === 'PER_NIGHT' ? 'Nightly rate (₦)' : 'Flat rate (₦)'}>
-              <Input
-                type="number"
-                min={1}
+            <Field
+              label={pricingMode === 'PER_NIGHT' ? 'Nightly rate' : 'Flat rate'}
+              hint="Naira (₦)"
+            >
+              <CurrencyInput
+                prefix="₦"
                 value={nightlyRate}
-                onChange={(e) => setNightlyRate(e.target.value)}
+                onValueChange={(v) => setNightlyRate(v === 0 ? '' : String(v))}
               />
             </Field>
-            <Field label="Cleaning fee (₦)">
-              <Input
-                type="number"
-                min={0}
+            <Field label="Cleaning fee" hint="Naira (₦)">
+              <CurrencyInput
+                prefix="₦"
                 value={cleaningFee}
-                onChange={(e) => setCleaningFee(e.target.value)}
+                onValueChange={(v) => setCleaningFee(v === 0 ? '' : String(v))}
               />
             </Field>
           </div>
@@ -544,6 +570,14 @@ function EditListingDialog({
                 value={weekendUpliftPct}
                 onChange={(e) => setWeekendUpliftPct(e.target.value)}
               />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Check-in time">
+              <TimePicker value={checkInTime} onChange={setCheckInTime} />
+            </Field>
+            <Field label="Check-out time">
+              <TimePicker value={checkOutTime} onChange={setCheckOutTime} />
             </Field>
           </div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
@@ -576,7 +610,7 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
   const [reason, setReason] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data: blocked, refetch } = useQuery({
+  const { data: blocked } = useQuery({
     queryKey: shortletKeys.hostBlockedDates(listing.id),
     queryFn: () => unwrap(shortletService.listBlockedDates(listing.id)),
   });
@@ -594,7 +628,7 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
       setStartDate('');
       setEndDate('');
       setReason('');
-      refetch();
+      queryClient.invalidateQueries({ queryKey: shortletKeys.hostBlockedDates(listing.id) });
       queryClient.invalidateQueries({ queryKey: shortletKeys.public });
       setToast({ message: 'Dates blocked.', variant: 'success' });
     },
@@ -604,7 +638,7 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
   const removeBlock = useMutation({
     mutationFn: (id: string) => unwrap(shortletService.unblockDates(id)),
     onSuccess: () => {
-      refetch();
+      queryClient.invalidateQueries({ queryKey: shortletKeys.hostBlockedDates(listing.id) });
       setToast({ message: 'Blocked range removed.', variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
@@ -621,15 +655,27 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
-        <DialogTitle>Block dates · {listing.title}</DialogTitle>
-        <DialogDescription>Unavailable check-in dates for this listing.</DialogDescription>
-        <div className="space-y-4">
+        <div className="p-5">
+          <DialogTitle>Block dates · {listing.title}</DialogTitle>
+          <DialogDescription>Unavailable check-in dates for this listing.</DialogDescription>
+        </div>
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
           <div className="grid grid-cols-2 gap-3">
             <Field label="From">
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              <DatePicker
+                value={startDate}
+                onChange={setStartDate}
+                min={TODAY}
+                placeholder="Select start"
+              />
             </Field>
             <Field label="To (exclusive)">
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <DatePicker
+                value={endDate}
+                onChange={setEndDate}
+                min={startDate || TODAY}
+                placeholder="Select end"
+              />
             </Field>
           </div>
           <Field label="Reason" hint="Optional">

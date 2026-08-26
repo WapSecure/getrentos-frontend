@@ -5,11 +5,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  CurrencyInput,
+  DatePicker,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   EmptyState,
+  Field,
   Input,
   Pagination,
   Select,
@@ -26,6 +29,7 @@ import type { ShortletBooking, ShortletListing } from '@/types/shortlet';
 
 const PAGE_SIZE = 9;
 type Sort = 'newest' | 'price_asc' | 'price_desc';
+const TODAY = new Date().toISOString().slice(0, 10);
 
 export const ShortletMarketplaceBrowser = () => {
   const queryClient = useQueryClient();
@@ -116,19 +120,17 @@ export const ShortletMarketplaceBrowser = () => {
           value={guests}
           onChange={(e) => updateFilter(setGuests, e.target.value)}
         />
-        <Input
-          placeholder="Min ₦"
-          type="number"
-          min={0}
+        <CurrencyInput
+          prefix="₦"
+          placeholder="Min price"
           value={minPrice}
-          onChange={(e) => updateFilter(setMinPrice, e.target.value)}
+          onValueChange={(v) => updateFilter(setMinPrice, v === 0 ? '' : String(v))}
         />
-        <Input
-          placeholder="Max ₦"
-          type="number"
-          min={0}
+        <CurrencyInput
+          prefix="₦"
+          placeholder="Max price"
           value={maxPrice}
-          onChange={(e) => updateFilter(setMaxPrice, e.target.value)}
+          onValueChange={(v) => updateFilter(setMaxPrice, v === 0 ? '' : String(v))}
         />
         <Select
           value={sort}
@@ -285,6 +287,11 @@ function BookingDialog({
     enabled: Boolean(checkIn && checkOut),
   });
 
+  const handleCheckIn = (value: string) => {
+    setCheckIn(value);
+    if (checkOut && value && checkOut <= value) setCheckOut('');
+  };
+
   const submit = () => {
     setError(null);
     if (!checkIn || !checkOut) {
@@ -304,13 +311,15 @@ function BookingDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogTitle>{listing.title}</DialogTitle>
-        <DialogDescription>
-          {listing.city}, {listing.state} · {listing.hostName}
-        </DialogDescription>
+      <DialogContent className="sm:max-w-lg">
+        <div className="p-5">
+          <DialogTitle>{listing.title}</DialogTitle>
+          <DialogDescription>
+            {listing.city}, {listing.state} · {listing.hostName}
+          </DialogDescription>
+        </div>
 
-        <div className="space-y-4">
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
           <div>
             <p className="text-2xl font-semibold">
               {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
@@ -338,17 +347,24 @@ function BookingDialog({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Check-in</label>
-              <Input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Check-out</label>
-              <Input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
-            </div>
+            <Field label="Check-in">
+              <DatePicker
+                value={checkIn}
+                onChange={handleCheckIn}
+                min={TODAY}
+                placeholder="Select check-in"
+              />
+            </Field>
+            <Field label="Check-out">
+              <DatePicker
+                value={checkOut}
+                onChange={setCheckOut}
+                min={checkIn || TODAY}
+                placeholder="Select check-out"
+              />
+            </Field>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">Guests</label>
+          <Field label="Guests" hint={`Max ${listing.maxGuests}`}>
             <Input
               type="number"
               min={1}
@@ -356,7 +372,7 @@ function BookingDialog({
               value={guestCount}
               onChange={(e) => setGuestCount(e.target.value)}
             />
-          </div>
+          </Field>
 
           {availability && (
             <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
