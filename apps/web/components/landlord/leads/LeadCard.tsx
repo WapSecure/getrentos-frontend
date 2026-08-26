@@ -1,10 +1,25 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, MessageSquare, FileText, CalendarCheck, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { getInitials, formatDate } from '@/lib/format';
+import {
+  ShieldCheck,
+  ShieldAlert,
+  MessageSquare,
+  FileText,
+  CalendarCheck,
+  X,
+  Flame,
+  Send,
+} from 'lucide-react';
+import { Button, Checkbox } from '@getrentos/ui';
+import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
 import type { LandlordLead, LeadStage } from '@/types/landlord';
+
+const NUDGE_COOLDOWN_HOURS = 24;
+
+const isNudgeCooldownActive = (lastNudgedAt?: string): boolean =>
+  !!lastNudgedAt &&
+  Date.now() - new Date(lastNudgedAt).getTime() < NUDGE_COOLDOWN_HOURS * 60 * 60 * 1000;
 
 const stageConfig: Record<LeadStage, { label: string; className: string }> = {
   inquiry: {
@@ -48,33 +63,41 @@ const stageConfig: Record<LeadStage, { label: string; className: string }> = {
 interface LeadCardProps {
   lead: LandlordLead;
   delay?: number;
+  selected: boolean;
+  onToggleSelect: () => void;
   onMessage: () => void;
   onViewApplication: () => void;
   onConfirmViewing: () => void;
   onCancelViewing: () => void;
+  onNudge: () => void;
   isUpdatingViewing?: boolean;
 }
 
 export const LeadCard = ({
   lead,
   delay = 0,
+  selected,
+  onToggleSelect,
   onMessage,
   onViewApplication,
   onConfirmViewing,
   onCancelViewing,
+  onNudge,
   isUpdatingViewing,
 }: LeadCardProps) => {
   const stage = stageConfig[lead.stage];
+  const cooldownActive = isNudgeCooldownActive(lead.lastNudgedAt);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
+      className={`bg-card rounded-2xl border p-4 ${selected ? 'border-primary' : 'border-border'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
+          <Checkbox checked={selected} onCheckedChange={onToggleSelect} className="shrink-0 mt-1" />
           <div className="w-11 h-11 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
             {getInitials(lead.leadName)}
           </div>
@@ -90,11 +113,19 @@ export const LeadCard = ({
             <p className="text-xs text-muted-foreground truncate">{lead.propertyName}</p>
           </div>
         </div>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${stage.className}`}
-        >
-          {stage.label}
-        </span>
+        <div className="flex flex-col items-end gap-1.5">
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${stage.className}`}
+          >
+            {stage.label}
+          </span>
+          {lead.stale && (
+            <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20">
+              <Flame className="w-3 h-3" />
+              Going cold · {lead.daysSinceActivity}d
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
@@ -108,7 +139,7 @@ export const LeadCard = ({
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-border flex-wrap">
+      <div className="flex gap-2 mt-4 pt-4 border-t border-border flex-wrap items-center">
         {lead.leadUserId && (
           <Button
             variant="ghost"
@@ -149,6 +180,18 @@ export const LeadCard = ({
               <X className="w-4 h-4" />
             </Button>
           </>
+        )}
+        {lead.stale && lead.leadUserId && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={cooldownActive}
+            onClick={onNudge}
+          >
+            <Send className="w-3.5 h-3.5" />
+            {cooldownActive ? `Nudged ${formatRelativeTime(lead.lastNudgedAt!)}` : 'Nudge'}
+          </Button>
         )}
       </div>
     </motion.div>
