@@ -22,6 +22,7 @@ import {
   Clock3,
   MapPin,
   Pause,
+  Play,
   ShieldCheck,
 } from 'lucide-react';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
@@ -122,11 +123,26 @@ export const ShortletOversight = () => {
   });
   const bookings = bookingsData?.items ?? [];
 
-  const pause = useMutation({
-    mutationFn: (listingId: string) => unwrap(adminShortletService.pauseListing(listingId)),
-    onSuccess: () => {
+  const moderation = useMutation({
+    mutationFn: (input: { listingId: string; action: 'pause' | 'resume' | 'close' }) =>
+      unwrap(
+        input.action === 'pause'
+          ? adminShortletService.pauseListing(input.listingId)
+          : input.action === 'resume'
+            ? adminShortletService.resumeListing(input.listingId)
+            : adminShortletService.closeListing(input.listingId)
+      ),
+    onSuccess: (_, input) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets'] });
-      setToast({ message: 'Listing paused. It no longer appears publicly.', variant: 'success' });
+      setToast({
+        message:
+          input.action === 'pause'
+            ? 'Listing paused. It no longer appears publicly.'
+            : input.action === 'resume'
+              ? 'Listing resumed and is public again.'
+              : 'Listing closed permanently.',
+        variant: 'success',
+      });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -253,8 +269,8 @@ export const ShortletOversight = () => {
                 <ListingRow
                   key={l.id}
                   listing={l}
-                  onPause={() => pause.mutate(l.id)}
-                  pausing={pause.isPending}
+                  busy={moderation.isPending}
+                  onModerate={(action) => moderation.mutate({ listingId: l.id, action })}
                 />
               ))}
             </div>
@@ -317,12 +333,12 @@ export const ShortletOversight = () => {
 
 function ListingRow({
   listing,
-  onPause,
-  pausing,
+  busy,
+  onModerate,
 }: {
   listing: AdminShortletListing;
-  onPause: () => void;
-  pausing: boolean;
+  busy: boolean;
+  onModerate: (action: 'pause' | 'resume' | 'close') => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -342,11 +358,23 @@ function ListingRow({
           {listing.bookingCount === 1 ? '' : 's'} · Hosted by {listing.hostName}
         </p>
       </div>
-      {listing.status !== 'CLOSED' && (
-        <Button variant="outline" size="sm" onClick={onPause} disabled={pausing}>
-          <Pause className="mr-1.5 h-4 w-4" /> Pause
-        </Button>
-      )}
+      <div className="flex flex-wrap gap-2">
+        {listing.status === 'PUBLISHED' && (
+          <Button variant="outline" size="sm" onClick={() => onModerate('pause')} disabled={busy}>
+            <Pause className="mr-1.5 h-4 w-4" /> Pause
+          </Button>
+        )}
+        {listing.status === 'PAUSED' && (
+          <Button variant="outline" size="sm" onClick={() => onModerate('resume')} disabled={busy}>
+            <Play className="mr-1.5 h-4 w-4" /> Resume
+          </Button>
+        )}
+        {listing.status !== 'CLOSED' && (
+          <Button variant="ghost" size="sm" onClick={() => onModerate('close')} disabled={busy}>
+            Close
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
