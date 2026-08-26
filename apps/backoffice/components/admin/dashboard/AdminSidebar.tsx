@@ -17,6 +17,7 @@ import {
   Settings,
   KeyRound,
   MapPinned,
+  BedDouble,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -48,6 +49,12 @@ const navItems: NavItem[] = [
     href: '/admin/land/diligence',
     icon: MapPinned,
     permission: 'verifications.review',
+  },
+  {
+    label: 'Shortlets',
+    href: ROUTES.ADMIN_SHORTLETS,
+    icon: BedDouble,
+    permission: 'shortlet.view',
   },
   {
     label: 'Disputes',

@@ -37,7 +37,9 @@ export type AdminPermission =
   | 'platform.configure'
   | 'staff.manage'
   | 'staff.create'
-  | 'staff.approve';
+  | 'staff.approve'
+  | 'shortlet.view'
+  | 'shortlet.moderate';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 

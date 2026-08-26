@@ -20,6 +20,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'staff.manage',
   'staff.create',
   'staff.approve',
+  'shortlet.view',
+  'shortlet.moderate',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -95,12 +97,13 @@ export const ADMIN_ROLE_DETAILS: Record<
       'documents.manage',
       'reports.view',
       'platform.configure',
+      'shortlet.view',
     ],
   },
   support_agent: {
     label: 'Support Agent',
     description: 'Assists users without approving or moving money.',
-    permissions: ['dashboard.view', 'users.view', 'messages.manage'],
+    permissions: ['dashboard.view', 'users.view', 'messages.manage', 'shortlet.view'],
   },
 };
 

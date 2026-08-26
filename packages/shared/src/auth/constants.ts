@@ -310,6 +310,7 @@ export const ROUTES = {
   ADMIN_DISPUTES: '/admin/disputes',
   ADMIN_FRAUD: '/admin/fraud',
   ADMIN_ESCROW: '/admin/escrow',
+  ADMIN_SHORTLETS: '/admin/shortlets',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   ADMIN_DOCUMENTS: '/admin/documents',
   ADMIN_MESSAGES: '/admin/messages',
