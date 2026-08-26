@@ -64,6 +64,12 @@ export const Navigation = () => {
               >
                 Land
               </Link>
+              <Link
+                href={ROUTES.SHORTLET_MARKETPLACE}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Shortlets
+              </Link>
               {!isSignedIn ? (
                 <>
                   <Link
@@ -152,6 +158,13 @@ export const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Land
+              </Link>
+              <Link
+                href={ROUTES.SHORTLET_MARKETPLACE}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Shortlets
               </Link>
               {!isSignedIn ? (
                 <>

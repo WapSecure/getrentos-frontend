@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getAuthToken } from '@getrentos/shared';
 import {
   Badge,
   Button,
@@ -24,6 +26,7 @@ import { BedDouble, CalendarCheck, MapPin, Search, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency } from '@/lib/format';
 import type { ShortletBooking, ShortletListing } from '@/types/shortlet';
 
@@ -32,7 +35,10 @@ type Sort = 'newest' | 'price_asc' | 'price_desc';
 const TODAY = new Date().toISOString().slice(0, 10);
 
 export const ShortletMarketplaceBrowser = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const [isSignedIn] = useState(() => Boolean(getAuthToken()));
+
   const [city, setCity] = useState('');
   const [guests, setGuests] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -93,6 +99,11 @@ export const ShortletMarketplaceBrowser = () => {
   const updateFilter = (setter: (v: string) => void, value: string) => {
     setter(value);
     setPage(1);
+  };
+
+  const openListing = (listing: ShortletListing) => {
+    if (isSignedIn) setActive(listing);
+    else router.push(ROUTES.LOGIN);
   };
 
   return (
@@ -172,11 +183,11 @@ export const ShortletMarketplaceBrowser = () => {
               key={listing.id}
               role="button"
               tabIndex={0}
-              onClick={() => setActive(listing)}
+              onClick={() => openListing(listing)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  setActive(listing);
+                  openListing(listing);
                 }
               }}
               className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition hover:shadow-md"
@@ -227,10 +238,11 @@ export const ShortletMarketplaceBrowser = () => {
                     className="opacity-90 group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setActive(listing);
+                      openListing(listing);
                     }}
                   >
-                    <CalendarCheck className="mr-1.5 h-4 w-4" /> Book
+                    <CalendarCheck className="mr-1.5 h-4 w-4" />{' '}
+                    {isSignedIn ? 'Book' : 'Sign in to book'}
                   </Button>
                 </div>
               </div>

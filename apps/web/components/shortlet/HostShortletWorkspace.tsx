@@ -42,6 +42,19 @@ type Tab = 'listings' | 'bookings';
 type HostRole = 'owner' | 'landlord';
 const TODAY = new Date().toISOString().slice(0, 10);
 
+const SHORTLET_AMENITIES = [
+  'WiFi',
+  'Parking',
+  'Swimming Pool',
+  'Security',
+  '24/7 Power',
+  'Gym',
+  'Elevator',
+  'Air Conditioning',
+  'Kitchen',
+  'Washer',
+];
+
 const STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   REQUESTED: 'info',
   CONFIRMED: 'success',
@@ -304,6 +317,8 @@ function CreateListingDialog({
   const [maxGuests, setMaxGuests] = useState('2');
   const [checkInTime, setCheckInTime] = useState('14:00');
   const [checkOutTime, setCheckOutTime] = useState('11:00');
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [furnished, setFurnished] = useState(true);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: properties, isLoading } = useQuery({
@@ -352,6 +367,8 @@ function CreateListingDialog({
       maxGuests: Number(maxGuests) || 2,
       checkInTime,
       checkOutTime,
+      amenities,
+      furnished,
     });
   };
 
@@ -453,6 +470,40 @@ function CreateListingDialog({
             </div>
             <Switch checked={instantBooking} onCheckedChange={setInstantBooking} />
           </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <p className="text-sm font-medium">Furnished</p>
+              <p className="text-xs text-muted-foreground">
+                This shortlet is furnished and ready to stay.
+              </p>
+            </div>
+            <Switch checked={furnished} onCheckedChange={setFurnished} />
+          </div>
+          <Field label="Amenities">
+            <div className="flex flex-wrap gap-2">
+              {SHORTLET_AMENITIES.map((amenity) => {
+                const selected = amenities.includes(amenity);
+                return (
+                  <button
+                    key={amenity}
+                    type="button"
+                    onClick={() =>
+                      setAmenities((prev) =>
+                        selected ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+                      )
+                    }
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      selected
+                        ? 'bg-accent border-primary text-primary'
+                        : 'border-border text-muted-foreground hover:border-gray-300'
+                    }`}
+                  >
+                    {amenity}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
           <Button className="w-full" onClick={submit} disabled={create.isPending}>
             {create.isPending ? 'Publishing…' : 'Publish listing'}
           </Button>
