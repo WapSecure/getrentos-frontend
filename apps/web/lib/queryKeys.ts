@@ -211,6 +211,17 @@ export const landKeys = {
   publicListing: (listingId: string) => ['land', 'public', listingId] as const,
 };
 
+export const shortletKeys = {
+  public: ['shortlets', 'public'] as const,
+  listing: (listingId: string) => ['shortlets', 'public', listingId] as const,
+  availability: (listingId: string) => ['shortlets', 'availability', listingId] as const,
+  guestBookings: ['shortlets', 'bookings'] as const,
+  hostListings: ['shortlets', 'host', 'listings'] as const,
+  hostBookings: ['shortlets', 'host', 'bookings'] as const,
+  hostBlockedDates: (listingId: string) =>
+    ['shortlets', 'host', listingId, 'blocked-dates'] as const,
+};
+
 export const buyerKeys = {
   dashboard: ['buyer', 'dashboard'] as const,
   listings: ['buyer', 'listings'] as const,

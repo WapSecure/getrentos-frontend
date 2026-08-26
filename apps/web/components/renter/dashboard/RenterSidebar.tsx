@@ -24,6 +24,7 @@ import {
   TrendingUp,
   Smartphone,
   Scale,
+  BedDouble,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -40,6 +41,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.RENTER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.discover', href: ROUTES.RENTER_DISCOVER, icon: Search },
   { labelKey: 'sidebar.saved', href: ROUTES.RENTER_SAVED, icon: Heart },
+  { labelKey: 'sidebar.shortlet_bookings', href: ROUTES.RENTER_BOOKINGS, icon: BedDouble },
   { labelKey: 'sidebar.applications', href: ROUTES.RENTER_APPLICATIONS, icon: FileText },
   { labelKey: 'sidebar.my_lease', href: ROUTES.RENTER_LEASE, icon: FileCheck },
   { labelKey: 'sidebar.payments', href: ROUTES.RENTER_PAYMENTS, icon: CreditCard },

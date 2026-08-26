@@ -175,6 +175,7 @@ export const ROUTES = {
   VERIFICATION: '/verification',
   HOME_MANAGEMENT: '/home-management',
   LAND_MARKETPLACE: '/land',
+  SHORTLET_MARKETPLACE: '/shortlets',
 
   // Dashboard base routes
   DASHBOARD: '/dashboard',
@@ -218,6 +219,7 @@ export const ROUTES = {
   RENTER_HELP: '/renter/help',
   RENTER_HOME: '/renter/home',
   RENTER_LEGAL_RESOURCES: '/renter/legal-resources',
+  RENTER_BOOKINGS: '/renter/bookings',
 
   // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',
@@ -237,6 +239,7 @@ export const ROUTES = {
   LANDLORD_DOCUMENTS: '/landlord/documents',
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',
+  LANDLORD_SHORTLETS: '/landlord/shortlets',
   LANDLORD_SETTINGS: '/landlord/settings',
   LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',
@@ -258,6 +261,7 @@ export const ROUTES = {
   OWNER_HELP: '/owner/help',
   OWNER_HOME_MANAGEMENT: '/owner/home-management',
   OWNER_LAND: '/owner/land',
+  OWNER_SHORTLETS: '/owner/shortlets',
 
   // Buyer specific routes
   BUYER_DISCOVER: '/buyer/discover',
@@ -272,6 +276,7 @@ export const ROUTES = {
   BUYER_SETTINGS: '/buyer/settings',
   BUYER_HELP: '/buyer/help',
   BUYER_LAND: '/buyer/land',
+  BUYER_BOOKINGS: '/buyer/bookings',
 
   // Realtor specific routes
   REALTOR_CLIENTS: '/realtor/clients',

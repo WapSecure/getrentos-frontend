@@ -19,6 +19,7 @@ import {
   Wrench,
   Settings,
   MapPinned,
+  BedDouble,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -34,6 +35,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.land_marketplace', href: ROUTES.OWNER_LAND, icon: MapPinned },
+  { labelKey: 'sidebar.shortlets', href: ROUTES.OWNER_SHORTLETS, icon: BedDouble },
   { labelKey: 'sidebar.sale_listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
   { labelKey: 'sidebar.buyer_leads', href: ROUTES.OWNER_LEADS, icon: Users },
   { labelKey: 'sidebar.offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
