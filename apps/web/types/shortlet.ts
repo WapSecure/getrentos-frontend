@@ -55,11 +55,22 @@ export interface ShortletBooking {
   subtotal: number;
   total: number;
   status: ShortletBookingStatus;
+  paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
+  paidAt?: string;
+  paymentRequired?: boolean;
   paymentReference?: string;
   notes?: string;
   hostName: string;
   guestName?: string;
   createdAt: string;
+}
+
+export interface ShortletPayResponse {
+  id: string;
+  total: number;
+  paymentStatus: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
+  authorizationUrl?: string;
+  reference?: string;
 }
 
 export interface ShortletAvailability {

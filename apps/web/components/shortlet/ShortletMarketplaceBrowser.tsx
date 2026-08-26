@@ -22,12 +22,12 @@ import {
   Toast,
   type ToastVariant,
 } from '@getrentos/ui';
-import { BedDouble, CalendarCheck, MapPin, Search, Zap } from 'lucide-react';
+import { BedDouble, CalendarCheck, CreditCard, MapPin, Search, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import type { ShortletBooking, ShortletListing } from '@/types/shortlet';
 
 const PAGE_SIZE = 9;
@@ -46,6 +46,7 @@ export const ShortletMarketplaceBrowser = () => {
   const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<ShortletListing | null>(null);
+  const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const queryParams = useMemo(
@@ -83,15 +84,33 @@ export const ShortletMarketplaceBrowser = () => {
         })
       ),
     onSuccess: (booking: ShortletBooking) => {
-      setActive(null);
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
+      if (booking.status === 'CONFIRMED') {
+        // Keep the dialog open with a payment step for instant bookings.
+        setCreatedBooking(booking);
+        return;
+      }
+      setActive(null);
+      setCreatedBooking(null);
       setToast({
-        message:
-          booking.status === 'CONFIRMED'
-            ? `Booked! Your stay is confirmed (${formatCurrency(booking.total)}).`
-            : 'Booking request sent — the host will confirm shortly.',
+        message: 'Booking request sent — the host will confirm shortly.',
         variant: 'success',
       });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const pay = useMutation({
+    mutationFn: (bookingId: string) => unwrap(shortletService.payBooking(bookingId)),
+    onSuccess: (res) => {
+      if (res.authorizationUrl) {
+        window.location.href = res.authorizationUrl;
+        return;
+      }
+      setActive(null);
+      setCreatedBooking(null);
+      queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
+      setToast({ message: 'Payment received — your stay is confirmed.', variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -104,6 +123,11 @@ export const ShortletMarketplaceBrowser = () => {
   const openListing = (listing: ShortletListing) => {
     if (isSignedIn) setActive(listing);
     else router.push(ROUTES.LOGIN);
+  };
+
+  const closeBooking = () => {
+    setActive(null);
+    setCreatedBooking(null);
   };
 
   return (
@@ -256,7 +280,10 @@ export const ShortletMarketplaceBrowser = () => {
       {active && (
         <BookingDialog
           listing={active}
-          onClose={() => setActive(null)}
+          onClose={closeBooking}
+          createdBooking={createdBooking}
+          paying={pay.isPending}
+          onPay={(id) => pay.mutate(id)}
           onBook={(input) =>
             book.mutate({
               listingId: active.id,
@@ -281,11 +308,17 @@ function BookingDialog({
   onClose,
   onBook,
   busy,
+  createdBooking,
+  paying,
+  onPay,
 }: {
   listing: ShortletListing;
   onClose: () => void;
   onBook: (input: { checkIn: string; checkOut: string; guestCount?: number }) => void;
   busy: boolean;
+  createdBooking: ShortletBooking | null;
+  paying: boolean;
+  onPay: (bookingId: string) => void;
 }) {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
@@ -404,18 +437,54 @@ function BookingDialog({
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button className="w-full" onClick={submit} disabled={busy}>
-            {busy
-              ? 'Booking…'
-              : listing.instantBooking
-                ? 'Book now — instant confirmation'
-                : 'Request to book'}
-          </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            {listing.instantBooking
-              ? 'Instant booking is enabled for this stay.'
-              : 'The host will confirm your request before it is booked.'}
-          </p>
+          {createdBooking ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-success/30 bg-success/10 p-4 text-sm">
+                <p className="font-medium">Booked! Your stay is confirmed.</p>
+                <p className="mt-1 text-muted-foreground">
+                  {formatDate(createdBooking.checkIn)} → {formatDate(createdBooking.checkOut)} ·{' '}
+                  {createdBooking.nights} night{createdBooking.nights > 1 ? 's' : ''}
+                </p>
+                {createdBooking.paymentRequired && (
+                  <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
+                    <CreditCard className="h-4 w-4" />
+                    <span className="font-semibold text-foreground">
+                      {formatCurrency(createdBooking.total)}
+                    </span>{' '}
+                    due to complete this booking.
+                  </p>
+                )}
+              </div>
+              {createdBooking.paymentRequired && (
+                <Button
+                  className="w-full"
+                  onClick={() => onPay(createdBooking.id)}
+                  disabled={paying}
+                >
+                  <CreditCard className="mr-1.5 h-4 w-4" />
+                  {paying ? 'Opening checkout…' : `Pay ${formatCurrency(createdBooking.total)}`}
+                </Button>
+              )}
+              <Button variant="outline" className="w-full" onClick={onClose}>
+                Done
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Button className="w-full" onClick={submit} disabled={busy}>
+                {busy
+                  ? 'Booking…'
+                  : listing.instantBooking
+                    ? 'Book now — instant confirmation'
+                    : 'Request to book'}
+              </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                {listing.instantBooking
+                  ? 'Instant booking is enabled for this stay.'
+                  : 'The host will confirm your request before it is booked.'}
+              </p>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

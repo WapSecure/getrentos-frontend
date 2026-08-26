@@ -12,7 +12,7 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarX, MapPin } from 'lucide-react';
+import { CalendarX, CreditCard, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -48,6 +48,20 @@ export const GuestBookingsWorkspace = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
       setToast({ message: 'Booking cancelled.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const pay = useMutation({
+    mutationFn: (bookingId: string) => unwrap(shortletService.payBooking(bookingId)),
+    onSuccess: (res) => {
+      if (res.authorizationUrl) {
+        // Real gateway flow — redirect to Paystack checkout.
+        window.location.href = res.authorizationUrl;
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
+      setToast({ message: 'Payment received — your stay is confirmed.', variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -90,21 +104,46 @@ export const GuestBookingsWorkspace = () => {
                 <div className="text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
+                  {b.paymentStatus && b.paymentStatus !== 'UNPAID' && (
+                    <Badge
+                      variant={b.paymentStatus === 'PAID' ? 'success' : 'info'}
+                      className="mt-1"
+                    >
+                      {b.paymentStatus === 'PAID'
+                        ? 'Paid'
+                        : b.paymentStatus === 'PROCESSING'
+                          ? 'Payment processing'
+                          : b.paymentStatus}
+                    </Badge>
+                  )}
                   {b.paymentReference && (
                     <p className="text-xs text-muted-foreground">Ref {b.paymentReference}</p>
                   )}
                 </div>
               </div>
-              {canCancel(b) && (
-                <div className="mt-3 flex justify-end border-t border-border pt-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => cancel.mutate(b.id)}
-                    disabled={cancel.isPending}
-                  >
-                    <CalendarX className="mr-1.5 h-4 w-4" /> Cancel booking
-                  </Button>
+              {(canCancel(b) || b.paymentRequired) && (
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
+                  {b.paymentRequired && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => pay.mutate(b.id)}
+                      disabled={pay.isPending}
+                    >
+                      <CreditCard className="mr-1.5 h-4 w-4" />
+                      {pay.isPending ? 'Processing…' : `Pay ${formatCurrency(b.total)}`}
+                    </Button>
+                  )}
+                  {canCancel(b) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => cancel.mutate(b.id)}
+                      disabled={cancel.isPending}
+                    >
+                      <CalendarX className="mr-1.5 h-4 w-4" /> Cancel booking
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

@@ -7,6 +7,7 @@ import type {
   ShortletAvailability,
   ShortletBooking,
   ShortletListing,
+  ShortletPayResponse,
   UpdateShortletListingInput,
 } from '@/types/shortlet';
 
@@ -69,6 +70,11 @@ export const shortletService = {
   cancelBooking: (bookingId: string) =>
     safeCall(() =>
       authFetch<ShortletBooking>(`/shortlets/bookings/${bookingId}/cancel`, { method: 'POST' })
+    ),
+
+  payBooking: (bookingId: string) =>
+    safeCall(() =>
+      authFetch<ShortletPayResponse>(`/shortlets/bookings/${bookingId}/pay`, { method: 'POST' })
     ),
 
   // -------- Host --------
