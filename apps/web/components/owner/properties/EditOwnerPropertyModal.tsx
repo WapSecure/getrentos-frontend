@@ -1,12 +1,11 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
 import type { OwnerProperty } from '@/types/owner';
 import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
+import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 
 type OwnerPropertyUpdates = Pick<
   OwnerProperty,
@@ -16,7 +15,7 @@ type OwnerPropertyUpdates = Pick<
 interface EditOwnerPropertyModalProps {
   property: OwnerProperty | null;
   onClose: () => void;
-  onSave: (id: string, updates: OwnerPropertyUpdates) => void;
+  onSave: (id: string, updates: OwnerPropertyUpdates) => Promise<void>;
 }
 
 export const EditOwnerPropertyModal = ({
@@ -46,7 +45,7 @@ const EditOwnerPropertyForm = ({
   onClose,
 }: {
   property: OwnerProperty;
-  onSave: (id: string, updates: OwnerPropertyUpdates) => void;
+  onSave: (id: string, updates: OwnerPropertyUpdates) => Promise<void>;
   onClose: () => void;
 }) => {
   const [name, setName] = useState(property.name);
@@ -56,18 +55,28 @@ const EditOwnerPropertyForm = ({
   const [state, setState] = useState(property.state);
   const [country, setCountry] = useState(property.country ?? 'Nigeria');
   const [estimatedValue, setEstimatedValue] = useState(String(property.estimatedValue));
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = () => {
-    onSave(property.id, {
-      name,
-      propertyType,
-      address,
-      city,
-      state,
-      country,
-      estimatedValue: Number(estimatedValue) || property.estimatedValue,
-    });
-    onClose();
+  const handleSave = async () => {
+    setIsSaving(true);
+    setError(null);
+    try {
+      await onSave(property.id, {
+        name,
+        propertyType,
+        address,
+        city,
+        state,
+        country,
+        estimatedValue: Number(estimatedValue) || property.estimatedValue,
+      });
+      onClose();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to update the property.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -82,43 +91,27 @@ const EditOwnerPropertyForm = ({
       <div className="p-4 space-y-3">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Property Name</label>
-          <LegacyInput
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Property Type</label>
-          <LegacyInput
-            type="text"
+          <Select
             value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
-            placeholder="e.g. Apartment, Duplex, Bungalow"
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            onValueChange={setPropertyType}
+            options={PROPERTY_TYPE_OPTIONS.map(({ value, label }) => ({ value: label, label }))}
+            ariaLabel="Property type"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Address</label>
-          <LegacyInput
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <Input value={address} onChange={(e) => setAddress(e.target.value)} />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">City</label>
-          <LegacyInput
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <Input value={city} onChange={(e) => setCity(e.target.value)} />
         </div>
 
         <CountryStateFields
@@ -145,10 +138,13 @@ const EditOwnerPropertyForm = ({
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim()}
+          disabled={!name.trim() || !address.trim() || isSaving}
+          isLoading={isSaving}
         >
-          Save Changes
+          {isSaving ? 'Saving…' : 'Save Changes'}
         </Button>
+
+        {error && <p className="text-sm text-destructive">{error}</p>}
       </div>
     </>
   );

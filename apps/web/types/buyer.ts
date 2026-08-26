@@ -1,10 +1,6 @@
-export type ListingPropertyType =
-  | 'Apartment'
-  | 'Duplex'
-  | 'Bungalow'
-  | 'Terrace'
-  | 'Land'
-  | 'Commercial';
+import type { DisplayPropertyType } from '@/lib/propertyTypes';
+
+export type ListingPropertyType = DisplayPropertyType;
 export type ViewingRequestStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type BuyerOfferStatus =
   | 'submitted'

@@ -5,14 +5,15 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Select } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
+import type { LandOwnershipProofInput } from '@/types/land';
 
 interface OwnerVerificationStatusModalProps {
   property: OwnerProperty | null;
   onClose: () => void;
-  onResubmit: (propertyId: string) => void;
+  onResubmit: (propertyId: string, proof: LandOwnershipProofInput) => Promise<void>;
 }
 
 const statusConfig: Record<
@@ -57,19 +58,33 @@ export const OwnerVerificationStatusModal = ({
   onClose,
   onResubmit,
 }: OwnerVerificationStatusModalProps) => {
-  const [resubmitFileName, setResubmitFileName] = useState('');
+  const [resubmitFile, setResubmitFile] = useState<File | null>(null);
+  const [documentType, setDocumentType] =
+    useState<LandOwnershipProofInput['documentType']>('C_OF_O');
+  const [isResubmitting, setIsResubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!property) return null;
 
   const config = statusConfig[property.verificationStatus];
   const Icon = config.icon;
-  const canResubmit =
-    property.verificationStatus === 'rejected' ||
-    property.verificationStatus === 'needs_clarification';
+  // Pending properties may need supplemental evidence too. This also gives an
+  // owner a safe retry path if one document upload failed after registration.
+  const canResubmit = property.verificationStatus !== 'verified';
 
-  const handleResubmit = () => {
-    onResubmit(property.id);
-    setResubmitFileName('');
+  const handleResubmit = async () => {
+    if (!resubmitFile) return;
+    setIsResubmitting(true);
+    setError(null);
+    try {
+      await onResubmit(property.id, { documentType, file: resubmitFile });
+      setResubmitFile(null);
+      onClose();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to submit the updated document.');
+    } finally {
+      setIsResubmitting(false);
+    }
   };
 
   return (
@@ -142,24 +157,50 @@ export const OwnerVerificationStatusModal = ({
               {canResubmit && (
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
-                    Upload updated document
+                    Upload ownership evidence
                   </label>
                   <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
                     <LegacyInput
                       type="file"
                       className="hidden"
-                      onChange={(e) => setResubmitFileName(e.target.files?.[0]?.name || '')}
+                      accept=".pdf,.jpg,.jpeg,.png,.webp"
+                      onChange={(e) => setResubmitFile(e.target.files?.[0] ?? null)}
                     />
                     <FileText className="w-4 h-4 text-gray-400 shrink-0" />
                     <span className="text-sm text-muted-foreground truncate">
-                      {resubmitFileName || 'Click to upload'}
+                      {resubmitFile?.name || 'Click to upload'}
                     </span>
-                    {resubmitFileName && (
-                      <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />
-                    )}
+                    {resubmitFile && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
                   </label>
+                  <div className="mt-3">
+                    <Select
+                      value={documentType}
+                      onValueChange={(value) =>
+                        setDocumentType(value as LandOwnershipProofInput['documentType'])
+                      }
+                      options={[
+                        { value: 'C_OF_O', label: 'Certificate of Occupancy (C of O)' },
+                        { value: 'DEED', label: 'Deed' },
+                        { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
+                        { value: 'GOVERNOR_CONSENT', label: "Governor's Consent" },
+                        { value: 'ALLOCATION_LETTER', label: 'Allocation Letter' },
+                        { value: 'EXCISION_GAZETTE', label: 'Excision Gazette' },
+                        { value: 'REGISTERED_CONVEYANCE', label: 'Registered Conveyance' },
+                        { value: 'SURVEY_PLAN', label: 'Survey plan' },
+                        { value: 'LAND_USE_PERMIT', label: 'Land use permit' },
+                        {
+                          value: 'GOVERNMENT_RECEIPT',
+                          label: 'Government receipt / registry extract',
+                        },
+                        { value: 'OTHER', label: 'Other supporting evidence' },
+                      ]}
+                      ariaLabel="Ownership proof type"
+                    />
+                  </div>
                 </div>
               )}
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -170,10 +211,11 @@ export const OwnerVerificationStatusModal = ({
                 <Button
                   variant="primary"
                   onClick={handleResubmit}
-                  disabled={!resubmitFileName}
+                  disabled={!resubmitFile || isResubmitting}
+                  isLoading={isResubmitting}
                   className="flex-1"
                 >
-                  Resubmit Documents
+                  {isResubmitting ? 'Submitting…' : 'Submit Documents'}
                 </Button>
               )}
             </div>

@@ -15,6 +15,7 @@ import {
   Star,
   BadgeCheck,
   Settings,
+  MapPinned,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -29,6 +30,7 @@ interface NavItem {
 export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.BUYER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.discover', href: ROUTES.BUYER_DISCOVER, icon: Search },
+  { labelKey: 'sidebar.land_marketplace', href: ROUTES.BUYER_LAND, icon: MapPinned },
   { labelKey: 'sidebar.saved_properties', href: ROUTES.BUYER_SAVED, icon: Heart },
   { labelKey: 'sidebar.viewing_requests', href: ROUTES.BUYER_VIEWINGS, icon: CalendarClock },
   { labelKey: 'sidebar.offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },

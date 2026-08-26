@@ -9,6 +9,7 @@ import type {
   OwnershipTransferDocument,
 } from '@/types/owner';
 import type { TrustProfile } from '@/types/trust-score';
+import { toApiPropertyType, toDisplayPropertyType } from '@/lib/propertyTypes';
 
 export interface OwnerDashboard {
   totalProperties: number;
@@ -138,6 +139,16 @@ export interface RealtorOption {
   speciality?: string;
 }
 
+const mapOwnerProperty = (property: OwnerPropertyApi): OwnerPropertyApi => ({
+  ...property,
+  propertyType: toDisplayPropertyType(property.propertyType),
+});
+
+const toOwnerPropertyPayload = (property: Partial<OwnerPropertyApi>): Partial<OwnerPropertyApi> => {
+  const apiPropertyType = toApiPropertyType(property.propertyType);
+  return apiPropertyType ? { ...property, propertyType: apiPropertyType } : property;
+};
+
 export const ownerService = {
   // Dashboard
   getDashboard: () => safeCall(() => authFetch<OwnerDashboard>('/owner/dashboard')),
@@ -146,14 +157,33 @@ export const ownerService = {
   listProperties: (
     params: { search?: string; verificationStatus?: string; page?: number; pageSize?: number } = {}
   ) =>
-    safeCall(() => authFetch<Paginated<OwnerPropertyApi>>(`/owner/properties${toQuery(params)}`)),
+    safeCall(async () => {
+      const response = await authFetch<Paginated<OwnerPropertyApi>>(
+        `/owner/properties${toQuery(params)}`
+      );
+      return { ...response, items: response.items.map(mapOwnerProperty) };
+    }),
   getProperty: (id: string) =>
-    safeCall(() => authFetch<OwnerPropertyApi>(`/owner/properties/${id}`)),
+    safeCall(async () =>
+      mapOwnerProperty(await authFetch<OwnerPropertyApi>(`/owner/properties/${id}`))
+    ),
   createProperty: (data: Partial<OwnerPropertyApi>) =>
-    safeCall(() => authFetch('/owner/properties', { method: 'POST', body: JSON.stringify(data) })),
+    safeCall(async () =>
+      mapOwnerProperty(
+        await authFetch<OwnerPropertyApi>('/owner/properties', {
+          method: 'POST',
+          body: JSON.stringify(toOwnerPropertyPayload(data)),
+        })
+      )
+    ),
   updateProperty: (id: string, data: Partial<OwnerPropertyApi>) =>
-    safeCall(() =>
-      authFetch(`/owner/properties/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
+    safeCall(async () =>
+      mapOwnerProperty(
+        await authFetch<OwnerPropertyApi>(`/owner/properties/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(toOwnerPropertyPayload(data)),
+        })
+      )
     ),
   archiveProperty: (id: string) =>
     safeCall(() => authFetch(`/owner/properties/${id}`, { method: 'DELETE' })),

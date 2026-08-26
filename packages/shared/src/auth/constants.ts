@@ -174,6 +174,7 @@ export const ROUTES = {
   ROLE_SELECTION: '/role-selection',
   VERIFICATION: '/verification',
   HOME_MANAGEMENT: '/home-management',
+  LAND_MARKETPLACE: '/land',
 
   // Dashboard base routes
   DASHBOARD: '/dashboard',
@@ -256,6 +257,7 @@ export const ROUTES = {
   OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
   OWNER_HOME_MANAGEMENT: '/owner/home-management',
+  OWNER_LAND: '/owner/land',
 
   // Buyer specific routes
   BUYER_DISCOVER: '/buyer/discover',
@@ -269,6 +271,7 @@ export const ROUTES = {
   BUYER_TRUST_PROFILE: '/buyer/trust-profile',
   BUYER_SETTINGS: '/buyer/settings',
   BUYER_HELP: '/buyer/help',
+  BUYER_LAND: '/buyer/land',
 
   // Realtor specific routes
   REALTOR_CLIENTS: '/realtor/clients',
@@ -345,6 +348,12 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   BACKOFFICE_ADMIN: 'admin',
   SUPER_ADMIN: 'admin',
   VERIFICATION_OFFICER: 'admin',
+  FRAUD_ANALYST: 'admin',
+  DISPUTE_OFFICER: 'admin',
+  ESCROW_OFFICER: 'admin',
+  FINANCE_APPROVER: 'admin',
+  COMPLIANCE_MANAGER: 'admin',
+  SUPPORT_AGENT: 'admin',
 };
 
 export const getDashboardRoute = (roleId: string): string => {

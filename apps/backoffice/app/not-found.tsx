@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Home, SearchX } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, SearchX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button, Logo } from '@getrentos/ui';
 import { ROUTES } from '@getrentos/shared';
@@ -14,7 +14,7 @@ export default function NotFound() {
       return;
     }
 
-    router.replace(ROUTES.HOME);
+    router.replace(ROUTES.ADMIN_LOGIN);
   };
 
   return (
@@ -29,7 +29,7 @@ export default function NotFound() {
       />
 
       <section className="relative w-full max-w-lg rounded-[28px] border border-border/70 bg-card/85 p-7 text-center shadow-[0_24px_80px_rgba(0,0,0,0.10)] backdrop-blur-xl sm:p-10">
-        <Logo href={ROUTES.HOME} size="md" className="mx-auto w-fit" />
+        <Logo href={ROUTES.ADMIN_LOGIN} size="md" className="mx-auto w-fit" />
 
         <div className="mx-auto mt-10 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary shadow-sm">
           <SearchX aria-hidden="true" className="h-7 w-7" strokeWidth={1.8} />
@@ -39,21 +39,21 @@ export default function NotFound() {
           Error 404
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">
-          This page isn&apos;t here.
+          This workspace isn&apos;t here.
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          The link may be outdated, or the address may have been entered incorrectly. Let&apos;s get
-          you back on track.
+          The requested backoffice page is unavailable or the address is incorrect. Return to a
+          trusted starting point.
         </p>
 
         <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
           <Button
-            href={ROUTES.HOME}
+            href={ROUTES.ADMIN_LOGIN}
             variant="primary"
             className="min-w-40"
-            icon={<Home className="h-4 w-4" />}
+            icon={<LayoutDashboard className="h-4 w-4" />}
           >
-            Go to GetRentos
+            Admin sign in
           </Button>
           <Button
             variant="outline"

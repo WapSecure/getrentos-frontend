@@ -1,21 +1,26 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
+import { LegacyInput, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
-import { AddOwnerPropertyModal } from '@/components/owner/properties/AddOwnerPropertyModal';
+import {
+  AddOwnerPropertyModal,
+  type OwnerPropertySubmissionResult,
+} from '@/components/owner/properties/AddOwnerPropertyModal';
 import { OwnerVerificationStatusModal } from '@/components/owner/properties/OwnerVerificationStatusModal';
 import { EditOwnerPropertyModal } from '@/components/owner/properties/EditOwnerPropertyModal';
 import { Button } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
+import { landService } from '@/services/landService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
+import type { LandOwnershipProofInput } from '@/types/land';
 
 type VerificationFilter = 'all' | OwnershipVerificationStatus;
 
@@ -27,17 +32,50 @@ export default function OwnerPropertiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchParams = useSearchParams();
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.properties });
 
   const createMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) =>
-      unwrap(ownerService.createProperty(data as Partial<OwnerProperty>)),
-    onSuccess: invalidate,
+    mutationFn: async ({
+      property,
+      ownershipProofs,
+    }: {
+      property: Partial<OwnerProperty>;
+      ownershipProofs: LandOwnershipProofInput[];
+    }) => {
+      const created = await unwrap(ownerService.createProperty(property));
+      const uploads = await Promise.allSettled(
+        ownershipProofs.map((proof) => unwrap(landService.submitOwnershipProof(created.id, proof)))
+      );
+      return {
+        propertyId: created.id,
+        failedProofCount: uploads.filter((upload) => upload.status === 'rejected').length,
+      } satisfies OwnerPropertySubmissionResult;
+    },
+    onSuccess: ({ failedProofCount }) => {
+      invalidate();
+      setToast({
+        message:
+          failedProofCount > 0
+            ? 'Property created. Some documents need to be uploaded again from its verification status.'
+            : 'Property and ownership documents submitted for verification.',
+        variant: failedProofCount > 0 ? 'warning' : 'success',
+      });
+    },
   });
   const deleteMutation = useMutation({
     mutationFn: (id: string) => unwrap(ownerService.archiveProperty(id)),
     onSuccess: invalidate,
+  });
+  const updateMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<OwnerProperty> }) =>
+      unwrap(ownerService.updateProperty(id, updates)),
+    onSuccess: () => {
+      invalidate();
+      setToast({ message: 'Property details updated.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
   useEffect(() => {
@@ -85,25 +123,29 @@ export default function OwnerPropertiesPage() {
   const properties = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const handleSubmit = (
-    data: Omit<OwnerProperty, 'id' | 'hasActiveSaleListing' | 'createdAt' | 'verificationStatus'>
-  ) => {
-    createMutation.mutate(data as Record<string, unknown>);
-    setIsAddModalOpen(false);
+  const handleSubmit = async (
+    data: Omit<OwnerProperty, 'id' | 'hasActiveSaleListing' | 'createdAt' | 'verificationStatus'>,
+    ownershipProofs: LandOwnershipProofInput[]
+  ): Promise<OwnerPropertySubmissionResult> => {
+    const result = await createMutation.mutateAsync({ property: data, ownershipProofs });
+    return result;
   };
 
-  const handleResubmit = (_propertyId: string) => {
+  const handleResubmit = async (propertyId: string, proof: LandOwnershipProofInput) => {
+    await unwrap(landService.submitOwnershipProof(propertyId, proof));
+    invalidate();
+    setToast({ message: 'Updated ownership evidence submitted for review.', variant: 'success' });
     setStatusModalProperty(null);
   };
 
-  const handleEditSave = (
-    _id: string,
-    _updates: Pick<
+  const handleEditSave = async (
+    id: string,
+    updates: Pick<
       OwnerProperty,
       'name' | 'propertyType' | 'address' | 'city' | 'state' | 'estimatedValue'
     >
   ) => {
-    // The API persists the fields it supports; keep the edit optimistic.
+    await updateMutation.mutateAsync({ id, updates });
     setEditingProperty(null);
   };
 
@@ -236,6 +278,10 @@ export default function OwnerPropertiesPage() {
         description="This will permanently remove the property and any associated sale listings. This cannot be undone."
         onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

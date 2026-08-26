@@ -16,6 +16,7 @@ import {
   BarChart3,
   Settings,
   KeyRound,
+  MapPinned,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -40,6 +41,12 @@ const navItems: NavItem[] = [
     label: 'Verifications',
     href: ROUTES.ADMIN_VERIFICATIONS,
     icon: ShieldCheck,
+    permission: 'verifications.review',
+  },
+  {
+    label: 'Land Diligence',
+    href: '/admin/land/diligence',
+    icon: MapPinned,
     permission: 'verifications.review',
   },
   {

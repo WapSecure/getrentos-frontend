@@ -11,6 +11,9 @@ import { Button, CurrencyInput } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
 import type { OwnerProperty } from '@/types/owner';
+import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
+import type { LandOwnershipProofInput } from '@/types/land';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface AddOwnerPropertyModalProps {
   isOpen: boolean;
@@ -19,13 +22,19 @@ interface AddOwnerPropertyModalProps {
     property: Omit<
       OwnerProperty,
       'id' | 'hasActiveSaleListing' | 'createdAt' | 'verificationStatus'
-    >
-  ) => void;
+    >,
+    ownershipProofs: LandOwnershipProofInput[]
+  ) => Promise<OwnerPropertySubmissionResult>;
+}
+
+export interface OwnerPropertySubmissionResult {
+  propertyId: string;
+  failedProofCount: number;
 }
 
 const steps = ['Ownership Info', 'Documents', 'Declaration', 'Status'];
 
-const propertyTypes = ['Apartment', 'Duplex', 'Bungalow', 'Terrace', 'Land', 'Commercial'];
+const propertyTypes = PROPERTY_TYPE_OPTIONS;
 
 interface FormState {
   name: string;
@@ -38,16 +47,16 @@ interface FormState {
   estimatedValue: string;
   purchasePrice: string;
   purchaseDate: string;
-  titleDeedName: string;
-  certificateOfOccupancyName: string;
-  deedOfAssignmentName: string;
-  govtRegistryExtractName: string;
+  titleDeed: File | null;
+  certificateOfOccupancy: File | null;
+  deedOfAssignment: File | null;
+  govtRegistryExtract: File | null;
   declared: boolean;
 }
 
 const initialFormState: FormState = {
   name: '',
-  propertyType: 'Apartment',
+  propertyType: 'APARTMENT',
   address: '',
   city: '',
   state: '',
@@ -56,10 +65,10 @@ const initialFormState: FormState = {
   estimatedValue: '',
   purchasePrice: '',
   purchaseDate: '',
-  titleDeedName: '',
-  certificateOfOccupancyName: '',
-  deedOfAssignmentName: '',
-  govtRegistryExtractName: '',
+  titleDeed: null,
+  certificateOfOccupancy: null,
+  deedOfAssignment: null,
+  govtRegistryExtract: null,
   declared: false,
 };
 
@@ -71,15 +80,22 @@ export const AddOwnerPropertyModal = ({
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialFormState);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [uploadWarning, setUploadWarning] = useState<string | null>(null);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setStep(0);
     setForm(initialFormState);
     setSubmitted(false);
+    setIsSubmitting(false);
+    setSubmitError(null);
+    setUploadWarning(null);
     onClose();
   };
 
@@ -91,26 +107,60 @@ export const AddOwnerPropertyModal = ({
     form.ownerName.trim();
 
   const hasAnyDocument =
-    form.titleDeedName ||
-    form.certificateOfOccupancyName ||
-    form.deedOfAssignmentName ||
-    form.govtRegistryExtractName;
+    form.titleDeed ||
+    form.certificateOfOccupancy ||
+    form.deedOfAssignment ||
+    form.govtRegistryExtract;
 
-  const handleSubmitForVerification = () => {
-    onSubmit({
-      name: form.name,
-      propertyType: form.propertyType,
-      address: form.address,
-      city: form.city,
-      state: form.state,
-      country: form.country,
-      ownerName: form.ownerName,
-      estimatedValue: Number(form.estimatedValue) || 0,
-      purchasePrice: Number(form.purchasePrice) || 0,
-      purchaseDate: form.purchaseDate || new Date().toISOString(),
-    });
-    setSubmitted(true);
-    setStep(3);
+  const handleSubmitForVerification = async () => {
+    const ownershipProofs: LandOwnershipProofInput[] = [
+      form.titleDeed && { documentType: 'DEED', file: form.titleDeed },
+      form.certificateOfOccupancy && {
+        documentType: 'C_OF_O' as const,
+        file: form.certificateOfOccupancy,
+      },
+      form.deedOfAssignment && {
+        documentType: 'DEED_OF_ASSIGNMENT' as const,
+        file: form.deedOfAssignment,
+      },
+      form.govtRegistryExtract && {
+        documentType: 'GOVERNMENT_RECEIPT' as const,
+        file: form.govtRegistryExtract,
+      },
+    ].filter((proof): proof is LandOwnershipProofInput => Boolean(proof));
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await onSubmit(
+        {
+          name: form.name,
+          propertyType: form.propertyType,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          country: form.country,
+          ownerName: form.ownerName,
+          estimatedValue: Number(form.estimatedValue) || 0,
+          purchasePrice: Number(form.purchasePrice) || 0,
+          purchaseDate: form.purchaseDate || new Date().toISOString(),
+        },
+        ownershipProofs
+      );
+      if (result.failedProofCount > 0) {
+        setUploadWarning(
+          `${result.failedProofCount} document${result.failedProofCount === 1 ? '' : 's'} could not upload. Your property was still created—open its verification status to retry the evidence.`
+        );
+      }
+      setSubmitted(true);
+      setStep(3);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : 'Unable to submit property documents.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -130,7 +180,11 @@ export const AddOwnerPropertyModal = ({
                   Step {step + 1} of {steps.length}: {steps[step]}
                 </p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="p-1 rounded-lg hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -173,9 +227,9 @@ export const AddOwnerPropertyModal = ({
                       onChange={(e) => update('propertyType', e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                      {propertyTypes.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
+                      {propertyTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
                         </option>
                       ))}
                     </LegacySelect>
@@ -277,23 +331,23 @@ export const AddOwnerPropertyModal = ({
                   </div>
                   <UploadField
                     label="Title Deed"
-                    fileName={form.titleDeedName}
-                    onSelect={(name) => update('titleDeedName', name)}
+                    file={form.titleDeed}
+                    onSelect={(file) => update('titleDeed', file)}
                   />
                   <UploadField
                     label="Certificate of Occupancy (C of O)"
-                    fileName={form.certificateOfOccupancyName}
-                    onSelect={(name) => update('certificateOfOccupancyName', name)}
+                    file={form.certificateOfOccupancy}
+                    onSelect={(file) => update('certificateOfOccupancy', file)}
                   />
                   <UploadField
                     label="Deed of Assignment"
-                    fileName={form.deedOfAssignmentName}
-                    onSelect={(name) => update('deedOfAssignmentName', name)}
+                    file={form.deedOfAssignment}
+                    onSelect={(file) => update('deedOfAssignment', file)}
                   />
                   <UploadField
                     label="Government Registry Extract"
-                    fileName={form.govtRegistryExtractName}
-                    onSelect={(name) => update('govtRegistryExtractName', name)}
+                    file={form.govtRegistryExtract}
+                    onSelect={(file) => update('govtRegistryExtract', file)}
                   />
                   {!hasAnyDocument && (
                     <p className="text-xs text-red-500">
@@ -333,6 +387,12 @@ export const AddOwnerPropertyModal = ({
                 </div>
               )}
 
+              {submitError && (
+                <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  {submitError}
+                </p>
+              )}
+
               {step === 3 && (
                 <div className="text-center py-6">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
@@ -343,6 +403,22 @@ export const AddOwnerPropertyModal = ({
                     Your ownership documents for <strong>{form.name}</strong> have been submitted.
                     Our compliance team typically completes review within 24–48 hours.
                   </p>
+                  {uploadWarning && (
+                    <p className="mt-3 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-foreground">
+                      {uploadWarning}
+                    </p>
+                  )}
+                  {form.propertyType === 'LAND' && (
+                    <Button
+                      href={ROUTES.OWNER_LAND}
+                      variant="outline"
+                      size="sm"
+                      rounded="lg"
+                      className="mt-4"
+                    >
+                      Complete parcel record
+                    </Button>
+                  )}
                   <div className="mt-5 flex items-center justify-center gap-2 text-xs text-gray-400">
                     <FileText className="w-3.5 h-3.5" />
                     You&apos;ll be notified as soon as a decision is made
@@ -377,10 +453,11 @@ export const AddOwnerPropertyModal = ({
                   variant="primary"
                   className="gap-2"
                   onClick={handleSubmitForVerification}
-                  disabled={!form.declared}
+                  disabled={!form.declared || isSubmitting}
+                  isLoading={isSubmitting}
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  Submit for Verification
+                  {isSubmitting ? 'Submitting…' : 'Submit for Verification'}
                 </Button>
               )}
               {step === 3 && (
@@ -399,12 +476,12 @@ export const AddOwnerPropertyModal = ({
 
 const UploadField = ({
   label,
-  fileName,
+  file,
   onSelect,
 }: {
   label: string;
-  fileName: string;
-  onSelect: (name: string) => void;
+  file: File | null;
+  onSelect: (file: File | null) => void;
 }) => {
   return (
     <div>
@@ -413,13 +490,14 @@ const UploadField = ({
         <LegacyInput
           type="file"
           className="hidden"
-          onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
+          onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
         <FileText className="w-4 h-4 text-gray-400 shrink-0" />
         <span className="text-sm text-muted-foreground truncate">
-          {fileName || 'Click to upload'}
+          {file?.name || 'Click to upload'}
         </span>
-        {fileName && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
+        {file && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
       </label>
     </div>
   );

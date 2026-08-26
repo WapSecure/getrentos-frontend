@@ -58,6 +58,12 @@ export const Navigation = () => {
               >
                 Home Management
               </Link>
+              <Link
+                href={ROUTES.LAND_MARKETPLACE}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Land
+              </Link>
               {!isSignedIn ? (
                 <>
                   <Link
@@ -139,6 +145,13 @@ export const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home Management
+              </Link>
+              <Link
+                href={ROUTES.LAND_MARKETPLACE}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Land
               </Link>
               {!isSignedIn ? (
                 <>

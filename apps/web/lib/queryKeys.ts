@@ -204,6 +204,13 @@ export const ownerKeys = {
   offerThread: (offerId: string) => ['owner', 'offers', offerId, 'thread'] as const,
 };
 
+export const landKeys = {
+  owner: ['land', 'owner'] as const,
+  ownerDetail: (propertyId: string) => ['land', 'owner', propertyId] as const,
+  public: ['land', 'public'] as const,
+  publicListing: (listingId: string) => ['land', 'public', listingId] as const,
+};
+
 export const buyerKeys = {
   dashboard: ['buyer', 'dashboard'] as const,
   listings: ['buyer', 'listings'] as const,

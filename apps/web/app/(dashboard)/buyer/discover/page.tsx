@@ -14,6 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerPropertyListing, ListingPropertyType } from '@/types/buyer';
 import { ROUTES } from '@/lib/constants/auth';
+import { PROPERTY_TYPE_OPTIONS, toApiPropertyType } from '@/lib/propertyTypes';
 
 const SAVED_PROPERTIES_KEY = 'buyer_saved_properties';
 
@@ -49,7 +50,7 @@ export default function BuyerDiscoverPage() {
       unwrap(
         buyerService.discover({
           search: debouncedSearch || undefined,
-          propertyType: typeFilter === 'all' ? undefined : typeFilter,
+          propertyType: typeFilter === 'all' ? undefined : toApiPropertyType(typeFilter),
           sort: sortOrder === 'default' ? undefined : sortOrder,
           page,
           pageSize: PAGE_SIZE,
@@ -101,12 +102,7 @@ export default function BuyerDiscoverPage() {
 
   const typeFilters: { value: 'all' | ListingPropertyType; label: string }[] = [
     { value: 'all', label: 'All' },
-    { value: 'Apartment', label: 'Apartment' },
-    { value: 'Duplex', label: 'Duplex' },
-    { value: 'Bungalow', label: 'Bungalow' },
-    { value: 'Terrace', label: 'Terrace' },
-    { value: 'Land', label: 'Land' },
-    { value: 'Commercial', label: 'Commercial' },
+    ...PROPERTY_TYPE_OPTIONS.map(({ label }) => ({ value: label, label })),
   ];
 
   return (

@@ -7,6 +7,7 @@ import type {
   BuyerDocument,
 } from '@/types/buyer';
 import type { TrustProfile } from '@/types/trust-score';
+import { toDisplayPropertyType } from '@/lib/propertyTypes';
 
 export interface BuyerDashboard {
   savedListings: number;
@@ -111,6 +112,11 @@ export type BuyerOfferApi = BuyerOffer;
 export type BuyerTransactionApi = BuyerEscrowTransaction;
 export type BuyerDocumentApi = BuyerDocument;
 
+const mapBuyerListing = (listing: BuyerListingApi): BuyerListingApi => ({
+  ...listing,
+  propertyType: toDisplayPropertyType(listing.propertyType) as BuyerPropertyListing['propertyType'],
+});
+
 export interface DiscoverFilters {
   city?: string;
   state?: string;
@@ -172,8 +178,8 @@ export const buyerService = {
 
   // Discover listings
   discover: (filters: DiscoverFilters = {}) =>
-    safeCall(() =>
-      authFetch<Paginated<BuyerListingApi>>(
+    safeCall(async () => {
+      const response = await authFetch<Paginated<BuyerListingApi>>(
         `/buyer/listings${toQuery({
           city: filters.city,
           state: filters.state,
@@ -186,19 +192,26 @@ export const buyerService = {
           page: filters.page?.toString(),
           pageSize: filters.pageSize?.toString(),
         })}`
-      )
+      );
+      return { ...response, items: response.items.map(mapBuyerListing) };
+    }),
+  getListing: (id: string) =>
+    safeCall(async () =>
+      mapBuyerListing(await authFetch<BuyerListingApi>(`/buyer/listings/${id}`))
     ),
-  getListing: (id: string) => safeCall(() => authFetch<BuyerListingApi>(`/buyer/listings/${id}`)),
   getRecommendations: () =>
-    safeCall(() => authFetch<BuyerListingApi[]>('/buyer/listings/recommendations')),
+    safeCall(async () =>
+      (await authFetch<BuyerListingApi[]>('/buyer/listings/recommendations')).map(mapBuyerListing)
+    ),
 
   // Saved listings
   listSaved: (options: BuyerListOptions = {}) =>
-    safeCall(() =>
-      authFetch<Paginated<BuyerListingApi>>(
+    safeCall(async () => {
+      const response = await authFetch<Paginated<BuyerListingApi>>(
         `/buyer/saved${toQuery({ page: options.page, pageSize: options.pageSize })}`
-      )
-    ),
+      );
+      return { ...response, items: response.items.map(mapBuyerListing) };
+    }),
   saveListing: (listingId: string) =>
     safeCall(() => authFetch(`/buyer/saved/${listingId}`, { method: 'POST' })),
   unsaveListing: (listingId: string) =>
