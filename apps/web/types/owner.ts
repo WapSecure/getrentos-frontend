@@ -43,6 +43,10 @@ export interface OwnerProperty {
   estimatedValue: number;
   purchasePrice?: number;
   purchaseDate?: string;
+  coverImageKey?: string;
+  galleryImageKeys?: string[];
+  coverImageUrl?: string;
+  galleryImageUrls?: string[];
   hasActiveSaleListing: boolean;
   createdAt: string;
 }

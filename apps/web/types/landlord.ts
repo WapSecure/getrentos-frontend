@@ -25,6 +25,8 @@ export interface Property {
   description?: string;
   coverImage: string;
   galleryImages?: string[];
+  coverImageKey?: string;
+  galleryImageKeys?: string[];
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;

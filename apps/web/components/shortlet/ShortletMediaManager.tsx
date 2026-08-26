@@ -14,8 +14,6 @@ export interface ShortletMediaState {
   tourUrl: string;
 }
 
-const EMPTY: ShortletMediaState = { imageKeys: [], videoKey: '', videoUrl: '', tourUrl: '' };
-
 /**
  * Lets a host manage a shortlet listing's media: an ordered photo gallery
  * (first photo = cover), an uploaded or external video, and a 360/tour URL.
@@ -27,6 +25,7 @@ export function ShortletMediaManager({
   onChange,
   initialImages = [],
   initialVideoPreview,
+  suggestions = [],
 }: {
   value: ShortletMediaState;
   onChange: (next: ShortletMediaState) => void;
@@ -34,6 +33,8 @@ export function ShortletMediaManager({
   initialImages?: string[];
   /** Signed URL of the already-uploaded video (edit mode). */
   initialVideoPreview?: string;
+  /** Property gallery the host can import as a starting point: {key, url}. */
+  suggestions?: { key: string; url: string }[];
 }) {
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [previews, setPreviews] = useState<Record<string, string>>(() => {
@@ -47,6 +48,12 @@ export function ShortletMediaManager({
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const importSuggestion = (s: { key: string; url: string }) => {
+    if (value.imageKeys.includes(s.key)) return; // already added
+    setPreviews((prev) => ({ ...prev, [s.key]: s.url }));
+    onChange({ ...value, imageKeys: [...value.imageKeys, s.key] });
+  };
 
   const uploadImage = useMutation({
     mutationFn: async (file: File) => {
@@ -184,6 +191,40 @@ export function ShortletMediaManager({
             </button>
           </div>
         )}
+
+        {suggestions.length > 0 && (
+          <div className="mt-3">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
+              Use photos already on this property — click to add
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((s) => {
+                const added = value.imageKeys.includes(s.key);
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => importSuggestion(s)}
+                    disabled={added}
+                    className={`relative h-16 w-20 overflow-hidden rounded-lg border-2 transition ${
+                      added
+                        ? 'cursor-default border-primary opacity-60'
+                        : 'border-dashed border-border opacity-80 hover:border-primary hover:opacity-100'
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.url} alt="" className="h-full w-full object-cover" />
+                    {added && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-[10px] font-semibold text-white">
+                        Added
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -270,5 +311,3 @@ export function ShortletMediaManager({
     </div>
   );
 }
-
-export { EMPTY as EMPTY_SHORTLET_MEDIA };

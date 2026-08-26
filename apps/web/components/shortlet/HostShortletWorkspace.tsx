@@ -30,11 +30,7 @@ import { landlordService } from '@/services/landlordService';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
-import {
-  EMPTY_SHORTLET_MEDIA,
-  ShortletMediaManager,
-  type ShortletMediaState,
-} from './ShortletMediaManager';
+import { ShortletMediaManager, type ShortletMediaState } from './ShortletMediaManager';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -320,6 +316,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
       {editTarget && (
         <EditListingDialog
           listing={editTarget}
+          role={role}
           onClose={() => setEditTarget(null)}
           onSaved={() => {
             setEditTarget(null);
@@ -364,7 +361,12 @@ function CreateListingDialog({
   const [checkOutTime, setCheckOutTime] = useState('11:00');
   const [amenities, setAmenities] = useState<string[]>([]);
   const [furnished, setFurnished] = useState(true);
-  const [media, setMedia] = useState<ShortletMediaState>(EMPTY_SHORTLET_MEDIA);
+  const [media, setMedia] = useState<ShortletMediaState>({
+    imageKeys: [],
+    videoKey: '',
+    videoUrl: '',
+    tourUrl: '',
+  });
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: properties, isLoading } = useQuery({
@@ -375,12 +377,33 @@ function CreateListingDialog({
           ? await unwrap(ownerService.listProperties({ page: 1, pageSize: 100 }))
           : await unwrap(landlordService.listProperties({ page: 1, pageSize: 100 }));
       return res.items.map((p) => {
-        const anyP = p as { id: string; title?: string; name?: string };
-        return { id: anyP.id, title: anyP.title || anyP.name || anyP.id };
+        const anyP = p as {
+          id: string;
+          title?: string;
+          name?: string;
+          galleryImageKeys?: string[];
+          galleryImageUrls?: string[];
+          galleryImages?: string[];
+        };
+        return {
+          id: anyP.id,
+          title: anyP.title || anyP.name || anyP.id,
+          galleryKeys: anyP.galleryImageKeys ?? [],
+          galleryUrls: anyP.galleryImageUrls ?? anyP.galleryImages ?? [],
+        };
       });
     },
   });
   const propertyOptions = useMemo(() => properties ?? [], [properties]);
+
+  // Photos already on the selected property, offered as one-click suggestions.
+  const mediaSuggestions = useMemo(() => {
+    const selected = propertyOptions.find((p) => p.id === propertyId);
+    if (!selected) return [];
+    return selected.galleryKeys
+      .map((key, i) => ({ key, url: selected.galleryUrls[i] ?? '' }))
+      .filter((s) => s.url);
+  }, [propertyOptions, propertyId]);
 
   const create = useMutation({
     mutationFn: (input: CreateShortletListingInput) => unwrap(shortletService.createListing(input)),
@@ -555,7 +578,11 @@ function CreateListingDialog({
             </div>
           </Field>
           <div className="rounded-lg border border-border p-3">
-            <ShortletMediaManager value={media} onChange={setMedia} />
+            <ShortletMediaManager
+              value={media}
+              onChange={setMedia}
+              suggestions={mediaSuggestions}
+            />
           </div>
           <Button className="w-full" onClick={submit} disabled={create.isPending}>
             {create.isPending ? 'Publishing…' : 'Publish listing'}
@@ -573,10 +600,12 @@ function CreateListingDialog({
 
 function EditListingDialog({
   listing,
+  role,
   onClose,
   onSaved,
 }: {
   listing: ShortletListing;
+  role: HostRole;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -598,6 +627,40 @@ function EditListingDialog({
     tourUrl: listing.tourUrl ?? '',
   });
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  // Photos already on the underlying property, offered as one-click suggestions.
+  const { data: properties } = useQuery({
+    queryKey: [role, 'properties', 'for-shortlet'],
+    queryFn: async () => {
+      const res =
+        role === 'owner'
+          ? await unwrap(ownerService.listProperties({ page: 1, pageSize: 100 }))
+          : await unwrap(landlordService.listProperties({ page: 1, pageSize: 100 }));
+      return res.items.map((p) => {
+        const anyP = p as {
+          id: string;
+          title?: string;
+          name?: string;
+          galleryImageKeys?: string[];
+          galleryImageUrls?: string[];
+          galleryImages?: string[];
+        };
+        return {
+          id: anyP.id,
+          title: anyP.title || anyP.name || anyP.id,
+          galleryKeys: anyP.galleryImageKeys ?? [],
+          galleryUrls: anyP.galleryImageUrls ?? anyP.galleryImages ?? [],
+        };
+      });
+    },
+  });
+  const mediaSuggestions = useMemo(() => {
+    const selected = (properties ?? []).find((p) => p.id === listing.propertyId);
+    if (!selected) return [];
+    return selected.galleryKeys
+      .map((key, i) => ({ key, url: selected.galleryUrls[i] ?? '' }))
+      .filter((s) => s.url);
+  }, [properties, listing.propertyId]);
 
   const save = useMutation({
     mutationFn: () =>
@@ -709,6 +772,7 @@ function EditListingDialog({
               onChange={setMedia}
               initialImages={listing.images ?? []}
               initialVideoPreview={listing.videoKey ? listing.videoUrl : undefined}
+              suggestions={mediaSuggestions}
             />
           </div>
           <Button className="w-full" onClick={() => save.mutate()} disabled={save.isPending}>
