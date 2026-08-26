@@ -267,3 +267,10 @@ export interface LandlordViewingRequest {
   scheduledAt?: string;
   notes?: string;
 }
+
+export interface LandlordMicrositeSettings {
+  slug: string;
+  bio?: string;
+  bannerUrl?: string;
+  enabled: boolean;
+}

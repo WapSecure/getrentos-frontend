@@ -20,6 +20,7 @@ import type {
   LandlordViewingRequest,
   LeadNudgeResult,
   BulkNudgeResult,
+  LandlordMicrositeSettings,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -839,6 +840,27 @@ export const landlordService = {
   async cancelViewingRequest(id: string): Promise<ApiResponse<LandlordViewingRequest>> {
     return safeCall(() =>
       authFetch(`/landlord/viewing-requests/${id}/cancel`, { method: 'PATCH' })
+    );
+  },
+
+  // ---- Microsite ----
+  async getMicrositeSettings(): Promise<ApiResponse<LandlordMicrositeSettings>> {
+    return safeCall(() => authFetch('/landlord/microsite'));
+  },
+
+  async updateMicrositeSettings(
+    patch: Partial<Pick<LandlordMicrositeSettings, 'slug' | 'bio' | 'enabled'>>
+  ): Promise<ApiResponse<LandlordMicrositeSettings>> {
+    return safeCall(() =>
+      authFetch('/landlord/microsite', { method: 'PATCH', body: JSON.stringify(patch) })
+    );
+  },
+
+  async uploadMicrositeBanner(file: File): Promise<ApiResponse<LandlordMicrositeSettings>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return safeCall(() =>
+      authFetch('/landlord/microsite/banner', { method: 'POST', body: formData })
     );
   },
 
