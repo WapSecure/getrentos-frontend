@@ -16,6 +16,11 @@ export interface ShortletListing {
   state: string;
   address: string;
   coverImageUrl?: string;
+  imageKeys: string[];
+  images: string[];
+  videoKey?: string;
+  videoUrl?: string;
+  tourUrl?: string;
   pricingMode: ShortletPricingMode;
   nightlyRate?: number;
   cleaningFee?: number;
@@ -98,6 +103,10 @@ export interface CreateShortletListingInput {
   maxGuests?: number;
   checkInTime?: string;
   checkOutTime?: string;
+  imageKeys?: string[];
+  videoKey?: string;
+  videoUrl?: string;
+  tourUrl?: string;
 }
 
 export interface UpdateShortletListingInput {
@@ -112,6 +121,10 @@ export interface UpdateShortletListingInput {
   maxGuests?: number;
   checkInTime?: string;
   checkOutTime?: string;
+  imageKeys?: string[];
+  videoKey?: string;
+  videoUrl?: string;
+  tourUrl?: string;
 }
 
 export interface CreateShortletBookingInput {

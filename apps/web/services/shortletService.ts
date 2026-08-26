@@ -99,6 +99,18 @@ export const shortletService = {
       })
     ),
 
+  uploadMedia: (kind: 'image' | 'video', file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('kind', kind);
+    return safeCall(() =>
+      authFetch<{ key: string; kind: 'image' | 'video' }>('/host/shortlets/media/upload', {
+        method: 'POST',
+        body: fd,
+      })
+    );
+  },
+
   myListings: (params: ShortletListParams = {}) =>
     safeCall(() => authFetch<Paginated<ShortletListing>>(`/host/shortlets${listQuery(params)}`)),
 

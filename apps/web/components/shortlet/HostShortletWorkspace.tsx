@@ -30,6 +30,11 @@ import { landlordService } from '@/services/landlordService';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
+import {
+  EMPTY_SHORTLET_MEDIA,
+  ShortletMediaManager,
+  type ShortletMediaState,
+} from './ShortletMediaManager';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -359,6 +364,7 @@ function CreateListingDialog({
   const [checkOutTime, setCheckOutTime] = useState('11:00');
   const [amenities, setAmenities] = useState<string[]>([]);
   const [furnished, setFurnished] = useState(true);
+  const [media, setMedia] = useState<ShortletMediaState>(EMPTY_SHORTLET_MEDIA);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: properties, isLoading } = useQuery({
@@ -409,6 +415,10 @@ function CreateListingDialog({
       checkOutTime,
       amenities,
       furnished,
+      imageKeys: media.imageKeys,
+      videoKey: media.videoKey || undefined,
+      videoUrl: media.videoUrl || undefined,
+      tourUrl: media.tourUrl || undefined,
     });
   };
 
@@ -544,6 +554,9 @@ function CreateListingDialog({
               })}
             </div>
           </Field>
+          <div className="rounded-lg border border-border p-3">
+            <ShortletMediaManager value={media} onChange={setMedia} />
+          </div>
           <Button className="w-full" onClick={submit} disabled={create.isPending}>
             {create.isPending ? 'Publishing…' : 'Publish listing'}
           </Button>
@@ -578,6 +591,12 @@ function EditListingDialog({
   const [maxGuests, setMaxGuests] = useState(listing.maxGuests.toString());
   const [checkInTime, setCheckInTime] = useState(listing.checkInTime ?? '14:00');
   const [checkOutTime, setCheckOutTime] = useState(listing.checkOutTime ?? '11:00');
+  const [media, setMedia] = useState<ShortletMediaState>({
+    imageKeys: listing.imageKeys ?? [],
+    videoKey: listing.videoKey ?? '',
+    videoUrl: listing.videoKey ? '' : (listing.videoUrl ?? ''),
+    tourUrl: listing.tourUrl ?? '',
+  });
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const save = useMutation({
@@ -593,6 +612,10 @@ function EditListingDialog({
           maxGuests: Number(maxGuests) || 2,
           checkInTime,
           checkOutTime,
+          imageKeys: media.imageKeys,
+          videoKey: media.videoKey || undefined,
+          videoUrl: media.videoUrl || undefined,
+          tourUrl: media.tourUrl || undefined,
         })
       ),
     onSuccess: () => onSaved(),
@@ -679,6 +702,14 @@ function EditListingDialog({
               </p>
             </div>
             <Switch checked={instantBooking} onCheckedChange={setInstantBooking} />
+          </div>
+          <div className="rounded-lg border border-border p-3">
+            <ShortletMediaManager
+              value={media}
+              onChange={setMedia}
+              initialImages={listing.images ?? []}
+              initialVideoPreview={listing.videoKey ? listing.videoUrl : undefined}
+            />
           </div>
           <Button className="w-full" onClick={() => save.mutate()} disabled={save.isPending}>
             {save.isPending ? 'Saving…' : 'Save changes'}
