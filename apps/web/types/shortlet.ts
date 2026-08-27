@@ -1,4 +1,5 @@
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
+export type ShortletCancellationPolicy = 'FLEXIBLE' | 'MODERATE' | 'STRICT';
 export type ShortletBookingStatus =
   | 'REQUESTED'
   | 'CONFIRMED'
@@ -21,6 +22,7 @@ export interface ShortletListing {
   videoKey?: string;
   videoUrl?: string;
   tourUrl?: string;
+  cancellationPolicy: ShortletCancellationPolicy;
   pricingMode: ShortletPricingMode;
   nightlyRate?: number;
   cleaningFee?: number;
@@ -64,6 +66,9 @@ export interface ShortletBooking {
   paidAt?: string;
   paymentRequired?: boolean;
   paymentReference?: string;
+  cancellationPolicy?: ShortletCancellationPolicy;
+  refundAmount?: number;
+  refundedAt?: string;
   notes?: string;
   hostName: string;
   guestName?: string;
@@ -107,6 +112,7 @@ export interface CreateShortletListingInput {
   videoKey?: string;
   videoUrl?: string;
   tourUrl?: string;
+  cancellationPolicy?: ShortletCancellationPolicy;
 }
 
 export interface UpdateShortletListingInput {
@@ -125,6 +131,7 @@ export interface UpdateShortletListingInput {
   videoKey?: string;
   videoUrl?: string;
   tourUrl?: string;
+  cancellationPolicy?: ShortletCancellationPolicy;
 }
 
 export interface CreateShortletBookingInput {

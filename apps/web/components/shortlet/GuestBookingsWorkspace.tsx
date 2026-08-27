@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  ConfirmDialog,
   EmptyState,
   Pagination,
   Skeleton,
@@ -12,12 +13,16 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarX, CreditCard, MapPin } from 'lucide-react';
+import { CalendarX, CreditCard, MapPin, RotateCcw } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { ShortletBooking, ShortletBookingStatus } from '@/types/shortlet';
+import type {
+  ShortletBooking,
+  ShortletBookingStatus,
+  ShortletCancellationPolicy,
+} from '@/types/shortlet';
 
 const PAGE_SIZE = 10;
 
@@ -32,9 +37,42 @@ const STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
 const canCancel = (b: ShortletBooking) =>
   (b.status === 'REQUESTED' || b.status === 'CONFIRMED') && new Date(b.checkIn) > new Date();
 
+const POLICY_LABEL: Record<ShortletCancellationPolicy, string> = {
+  FLEXIBLE: 'Flexible',
+  MODERATE: 'Moderate',
+  STRICT: 'Strict',
+};
+
+/** Mirrors the backend refund rules so guests see what they'd get back. */
+function refundPercentFor(b: ShortletBooking, daysBefore: number): number {
+  const policy = b.cancellationPolicy ?? 'FLEXIBLE';
+  if (policy === 'FLEXIBLE') return daysBefore >= 1 ? 100 : 0;
+  if (policy === 'MODERATE') return daysBefore >= 5 ? 100 : daysBefore >= 1 ? 50 : 0;
+  return daysBefore >= 7 ? 100 : daysBefore >= 3 ? 50 : 0;
+}
+
+function cancelDescription(b: ShortletBooking): string {
+  const daysBefore = Math.ceil(
+    (new Date(b.checkIn).getTime() - new Date(new Date().toISOString().slice(0, 10)).getTime()) /
+      86_400_000
+  );
+  const label = POLICY_LABEL[b.cancellationPolicy ?? 'FLEXIBLE'];
+  if (b.paymentStatus === 'PAID') {
+    const pct = refundPercentFor(b, daysBefore);
+    if (pct > 0) {
+      return `Under the ${label} policy you'll be refunded ${formatCurrency(
+        Math.floor((b.total * pct) / 100)
+      )} (${pct}%).`;
+    }
+    return `No refund applies under the ${label} policy this close to check-in.`;
+  }
+  return 'This will cancel your booking.';
+}
+
 export const GuestBookingsWorkspace = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -45,9 +83,17 @@ export const GuestBookingsWorkspace = () => {
 
   const cancel = useMutation({
     mutationFn: (bookingId: string) => unwrap(shortletService.cancelBooking(bookingId)),
-    onSuccess: () => {
+    onSuccess: (cancelled: ShortletBooking) => {
+      setCancelTarget(null);
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
-      setToast({ message: 'Booking cancelled.', variant: 'success' });
+      if (cancelled.refundAmount != null && cancelled.refundAmount > 0) {
+        setToast({
+          message: `Booking cancelled — ${formatCurrency(cancelled.refundAmount)} refunded.`,
+          variant: 'success',
+        });
+      } else {
+        setToast({ message: 'Booking cancelled.', variant: 'success' });
+      }
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -119,6 +165,17 @@ export const GuestBookingsWorkspace = () => {
                   {b.paymentReference && (
                     <p className="text-xs text-muted-foreground">Ref {b.paymentReference}</p>
                   )}
+                  {b.cancellationPolicy && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {POLICY_LABEL[b.cancellationPolicy]} cancellation
+                    </p>
+                  )}
+                  {b.refundAmount != null && b.refundAmount > 0 && (
+                    <Badge variant="info" className="mt-1">
+                      <RotateCcw className="mr-1 h-3 w-3" /> Refunded{' '}
+                      {formatCurrency(b.refundAmount)}
+                    </Badge>
+                  )}
                 </div>
               </div>
               {(canCancel(b) || b.paymentRequired) && (
@@ -135,12 +192,7 @@ export const GuestBookingsWorkspace = () => {
                     </Button>
                   )}
                   {canCancel(b) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => cancel.mutate(b.id)}
-                      disabled={cancel.isPending}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setCancelTarget(b)}>
                       <CalendarX className="mr-1.5 h-4 w-4" /> Cancel booking
                     </Button>
                   )}
@@ -156,6 +208,14 @@ export const GuestBookingsWorkspace = () => {
         pageSize={PAGE_SIZE}
         total={data?.total ?? 0}
         onPageChange={setPage}
+      />
+      <ConfirmDialog
+        open={Boolean(cancelTarget)}
+        onOpenChange={(o) => !o && setCancelTarget(null)}
+        title="Cancel this booking?"
+        description={cancelTarget ? cancelDescription(cancelTarget) : ''}
+        confirmLabel="Cancel booking"
+        onConfirm={() => cancelTarget && cancel.mutate(cancelTarget.id)}
       />
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />

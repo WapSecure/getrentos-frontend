@@ -35,6 +35,7 @@ import type {
   BlockedDateRange,
   CreateShortletListingInput,
   ShortletBookingStatus,
+  ShortletCancellationPolicy,
   ShortletListing,
 } from '@/types/shortlet';
 
@@ -55,6 +56,25 @@ const SHORTLET_AMENITIES = [
   'Kitchen',
   'Washer',
 ];
+
+const CANCELLATION_POLICIES: { value: ShortletCancellationPolicy; label: string; hint: string }[] =
+  [
+    {
+      value: 'FLEXIBLE',
+      label: 'Flexible',
+      hint: 'Full refund up to 1 day before check-in.',
+    },
+    {
+      value: 'MODERATE',
+      label: 'Moderate',
+      hint: 'Full refund 5+ days before; 50% up to 1 day before.',
+    },
+    {
+      value: 'STRICT',
+      label: 'Strict',
+      hint: 'Full refund 7+ days before; 50% 3+ days before; nothing after.',
+    },
+  ];
 
 const STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   REQUESTED: 'info',
@@ -361,6 +381,8 @@ function CreateListingDialog({
   const [checkOutTime, setCheckOutTime] = useState('11:00');
   const [amenities, setAmenities] = useState<string[]>([]);
   const [furnished, setFurnished] = useState(true);
+  const [cancellationPolicy, setCancellationPolicy] =
+    useState<ShortletCancellationPolicy>('FLEXIBLE');
   const [media, setMedia] = useState<ShortletMediaState>({
     imageKeys: [],
     videoKey: '',
@@ -442,6 +464,7 @@ function CreateListingDialog({
       videoKey: media.videoKey || undefined,
       videoUrl: media.videoUrl || undefined,
       tourUrl: media.tourUrl || undefined,
+      cancellationPolicy,
     });
   };
 
@@ -469,6 +492,16 @@ function CreateListingDialog({
               onChange={(e) => setListingTitle(e.target.value)}
               placeholder="e.g. Lagos Island Penthouse"
             />
+          </Field>
+          <Field label="Cancellation policy" hint="How much guests get back if they cancel.">
+            <Select
+              value={cancellationPolicy}
+              onValueChange={(v) => setCancellationPolicy(v as ShortletCancellationPolicy)}
+              options={CANCELLATION_POLICIES.map((p) => ({ value: p.value, label: p.label }))}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              {CANCELLATION_POLICIES.find((p) => p.value === cancellationPolicy)?.hint}
+            </p>
           </Field>
           <Field label="Pricing">
             <Select
@@ -620,6 +653,9 @@ function EditListingDialog({
   const [maxGuests, setMaxGuests] = useState(listing.maxGuests.toString());
   const [checkInTime, setCheckInTime] = useState(listing.checkInTime ?? '14:00');
   const [checkOutTime, setCheckOutTime] = useState(listing.checkOutTime ?? '11:00');
+  const [cancellationPolicy, setCancellationPolicy] = useState<ShortletCancellationPolicy>(
+    listing.cancellationPolicy ?? 'FLEXIBLE'
+  );
   const [media, setMedia] = useState<ShortletMediaState>({
     imageKeys: listing.imageKeys ?? [],
     videoKey: listing.videoKey ?? '',
@@ -679,6 +715,7 @@ function EditListingDialog({
           videoKey: media.videoKey || undefined,
           videoUrl: media.videoUrl || undefined,
           tourUrl: media.tourUrl || undefined,
+          cancellationPolicy,
         })
       ),
     onSuccess: () => onSaved(),
@@ -693,6 +730,16 @@ function EditListingDialog({
           <DialogDescription>Update pricing and availability rules.</DialogDescription>
         </div>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
+          <Field label="Cancellation policy" hint="How much guests get back if they cancel.">
+            <Select
+              value={cancellationPolicy}
+              onValueChange={(v) => setCancellationPolicy(v as ShortletCancellationPolicy)}
+              options={CANCELLATION_POLICIES.map((p) => ({ value: p.value, label: p.label }))}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              {CANCELLATION_POLICIES.find((p) => p.value === cancellationPolicy)?.hint}
+            </p>
+          </Field>
           <Field label="Pricing">
             <Select
               value={pricingMode}

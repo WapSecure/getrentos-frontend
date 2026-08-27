@@ -25,9 +25,15 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency } from '@/lib/format';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
-import type { ShortletBooking } from '@/types/shortlet';
+import type { ShortletBooking, ShortletCancellationPolicy } from '@/types/shortlet';
 
 type MediaTab = 'photos' | 'video' | 'tour';
+
+const CANCELLATION_RULE: Record<ShortletCancellationPolicy, string> = {
+  FLEXIBLE: 'Full refund up to 1 day before check-in.',
+  MODERATE: 'Full refund 5+ days before; 50% up to 1 day before check-in.',
+  STRICT: 'Full refund 7+ days before; 50% from 3 days; no refund within 3 days.',
+};
 
 export function ShortletListingDetail({ listingId }: { listingId: string }) {
   const router = useRouter();
@@ -325,6 +331,13 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
                   <CalendarCheck className="h-4 w-4" /> Max {listing.maxNights} nights
                 </div>
               )}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <CalendarCheck className="h-4 w-4" />
+                <span className="capitalize">
+                  {listing.cancellationPolicy.toLowerCase()} cancellation
+                </span>
+                — {CANCELLATION_RULE[listing.cancellationPolicy]}
+              </div>
             </div>
           </section>
         </div>
