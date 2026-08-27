@@ -20,6 +20,15 @@ export interface AuthResult extends AuthUser {
   expiresIn: number;
 }
 
+/** Returned after credential verification when the account requires a TOTP step. */
+export interface TwoFactorChallenge extends AuthUser {
+  requiresTwoFactor: true;
+  challengeToken: string;
+  expiresIn: number;
+}
+
+export type LoginResult = AuthResult | TwoFactorChallenge;
+
 type OtpPurpose = 'signup' | 'password_reset';
 
 export const authService = {
@@ -79,11 +88,26 @@ export const authService = {
      *  reject non-staff accounts before issuing a token, instead of relying
      *  solely on the caller's own post-login role check. */
     clientApp?: string
-  ): Promise<ApiResponse<AuthResult>> {
+  ): Promise<ApiResponse<LoginResult>> {
     return safeCall(() =>
-      apiFetch('/auth/login', {
+      apiFetch<LoginResult>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ identifier, password, rememberMe }),
+        headers: clientApp ? { 'x-client-app': clientApp } : undefined,
+      })
+    );
+  },
+
+  /** Completes an authenticator-app challenge and issues a full session. */
+  async completeTwoFactorLogin(
+    challengeToken: string,
+    token: string,
+    clientApp?: string
+  ): Promise<ApiResponse<AuthResult>> {
+    return safeCall(() =>
+      apiFetch<AuthResult>('/auth/login/2fa', {
+        method: 'POST',
+        body: JSON.stringify({ challengeToken, token }),
         headers: clientApp ? { 'x-client-app': clientApp } : undefined,
       })
     );

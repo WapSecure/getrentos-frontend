@@ -10,7 +10,14 @@ import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
 import { Input } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Toast, ToastVariant } from '@getrentos/ui';
-import { BACKEND_ROLE_TO_ID, ROUTES } from '@getrentos/shared';
+import {
+  BACKEND_ROLE_TO_ID,
+  ROUTES,
+  VALIDATION_PATTERNS,
+  type AuthResult,
+  type LoginResult,
+  type TwoFactorChallenge,
+} from '@getrentos/shared';
 import {
   saveAuthSession,
   getRememberedIdentifier,
@@ -35,11 +42,17 @@ export const AdminSignInForm = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [pendingChallenge, setPendingChallenge] = useState<string | null>(null);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const loginMutation = useMutation({
     mutationFn: ({ identifier, password }: AdminFormData) =>
       authService.login(identifier, password, rememberMe, 'backoffice'),
+  });
+  const twoFactorMutation = useMutation({
+    mutationFn: ({ challengeToken, token }: { challengeToken: string; token: string }) =>
+      authService.completeTwoFactorLogin(challengeToken, token, 'backoffice'),
   });
 
   const {
@@ -67,15 +80,8 @@ export const AdminSignInForm = () => {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [setValue]);
 
-  const onSubmit = async (data: AdminFormData) => {
-    const response = await loginMutation.mutateAsync(data);
-
-    if (!response.success || !response.data) {
-      setToast({ message: response.message || 'Invalid credentials.', variant: 'error' });
-      return;
-    }
-
-    const isAdmin = (response.data.roles || []).some((r) => BACKEND_ROLE_TO_ID[r] === 'admin');
+  const completeSignIn = (result: AuthResult, identifier?: string) => {
+    const isAdmin = (result.roles || []).some((r) => BACKEND_ROLE_TO_ID[r] === 'admin');
     if (!isAdmin) {
       setToast({
         message: 'This account does not have administrator access.',
@@ -84,7 +90,7 @@ export const AdminSignInForm = () => {
       return;
     }
 
-    const { accessToken, ...user } = response.data;
+    const { accessToken, ...user } = result;
     saveAuthSession(
       {
         accessToken,
@@ -92,9 +98,61 @@ export const AdminSignInForm = () => {
       },
       rememberMe
     );
-    if (rememberMe) saveRememberedIdentifier(data.identifier);
+    if (rememberMe && identifier) saveRememberedIdentifier(identifier);
 
     router.push(ROUTES.ADMIN_DASHBOARD);
+  };
+
+  const isTwoFactorChallenge = (result: LoginResult): result is TwoFactorChallenge =>
+    'requiresTwoFactor' in result &&
+    result.requiresTwoFactor === true &&
+    typeof result.challengeToken === 'string';
+
+  const onSubmit = async (data: AdminFormData) => {
+    const response = await loginMutation.mutateAsync(data);
+
+    if (!response.success || !response.data) {
+      setToast({ message: response.message || 'Invalid credentials.', variant: 'error' });
+      return;
+    }
+
+    if (isTwoFactorChallenge(response.data)) {
+      setPendingChallenge(response.data.challengeToken);
+      setTwoFactorCode('');
+      setToast({
+        message: 'Enter the 6-digit code from your authenticator app to continue.',
+        variant: 'info',
+      });
+      return;
+    }
+
+    completeSignIn(response.data, data.identifier);
+  };
+
+  const completeTwoFactorSignIn = async () => {
+    if (!pendingChallenge || twoFactorCode.length !== 6) return;
+
+    const response = await twoFactorMutation.mutateAsync({
+      challengeToken: pendingChallenge,
+      token: twoFactorCode,
+    });
+
+    if (!response.success || !response.data) {
+      setTwoFactorCode('');
+      setToast({
+        message:
+          response.message || 'The authentication code is invalid or has expired. Try again.',
+        variant: 'error',
+      });
+      return;
+    }
+
+    completeSignIn(response.data);
+  };
+
+  const cancelTwoFactor = () => {
+    setPendingChallenge(null);
+    setTwoFactorCode('');
   };
 
   return (
@@ -114,63 +172,120 @@ export const AdminSignInForm = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
-          <Input
-            type="email"
-            {...register('identifier')}
-            inputClassName="py-3"
-            placeholder="admin@getrentos.com"
-          />
-          {errors.identifier && (
-            <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
-          )}
-        </div>
+        {pendingChallenge ? (
+          <>
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                Two-factor authentication
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Enter the 6-digit code from your authenticator app to finish signing in.
+              </p>
+            </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Password</label>
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              {...register('password')}
-              inputClassName="py-3 pr-8"
-              placeholder="Enter your password"
-            />
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                Authentication code
+              </label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={twoFactorCode}
+                onChange={(event) =>
+                  setTwoFactorCode(
+                    event.target.value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6)
+                  )
+                }
+                inputClassName="py-3 text-center font-mono tracking-[0.5em]"
+                placeholder="••••••"
+                aria-label="Authentication code"
+              />
+            </div>
+
+            <Button
+              type="button"
+              variant="primary"
+              size="lg"
+              fullWidth
+              disabled={twoFactorCode.length !== 6 || twoFactorMutation.isPending}
+              isLoading={twoFactorMutation.isPending}
+              onClick={completeTwoFactorSignIn}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Verify and sign in
+            </Button>
+
             <button
               type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={cancelTwoFactor}
+              className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              Back to sign in
             </button>
-          </div>
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-          )}
-        </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
+              <Input
+                type="email"
+                {...register('identifier')}
+                inputClassName="py-3"
+                placeholder="admin@getrentos.com"
+              />
+              {errors.identifier && (
+                <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
+              )}
+            </div>
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-          />
-          <span className="text-sm text-muted-foreground">Remember me</span>
-        </label>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Password</label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password')}
+                  inputClassName="py-3 pr-8"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+              )}
+            </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          fullWidth
-          disabled={!isValid || loginMutation.isPending}
-          isLoading={loginMutation.isPending}
-        >
-          <Lock className="h-4 w-4" />
-          Sign in
-        </Button>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <span className="text-sm text-muted-foreground">Remember me</span>
+            </label>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              disabled={!isValid || loginMutation.isPending}
+              isLoading={loginMutation.isPending}
+            >
+              <Lock className="h-4 w-4" />
+              Sign in
+            </Button>
+          </>
+        )}
       </form>
     </div>
   );

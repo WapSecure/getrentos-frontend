@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, LogIn, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import {
@@ -15,6 +15,9 @@ import {
   ROUTES,
   VALIDATION_PATTERNS,
   getDashboardRoute,
+  type AuthResult,
+  type LoginResult,
+  type TwoFactorChallenge,
 } from '@/lib/constants/auth';
 import { ToastVariant } from '@getrentos/ui';
 import { authService } from '@/services/authService';
@@ -56,10 +59,61 @@ export const PhoneSignIn = ({
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [pendingChallenge, setPendingChallenge] = useState<{
+    token: string;
+    identifier: string;
+  } | null>(null);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [isVerifying2fa, setIsVerifying2fa] = useState(false);
   const loginMutation = useMutation({
     mutationFn: ({ identifier, password }: PhoneFormData) =>
       authService.login(identifier, password, rememberMe),
   });
+
+  const finishLogin = (result: AuthResult, identifier?: string) => {
+    const primaryRoleId = BACKEND_ROLE_TO_ID[result.roles[0]] || 'renter';
+
+    saveAuthSession(
+      {
+        accessToken: result.accessToken,
+        user: { ...result, fullName: result.legalName, role: primaryRoleId },
+      },
+      rememberMe
+    );
+    if (rememberMe && identifier) saveRememberedIdentifier(identifier);
+
+    router.push(getDashboardRoute(primaryRoleId));
+  };
+
+  const isTwoFactorChallenge = (result: LoginResult): result is TwoFactorChallenge =>
+    'requiresTwoFactor' in result &&
+    result.requiresTwoFactor === true &&
+    typeof result.challengeToken === 'string';
+
+  const completeTwoFactorLogin = async () => {
+    if (!pendingChallenge || twoFactorCode.length !== 6) return;
+
+    setIsVerifying2fa(true);
+    const response = await authService.completeTwoFactorLogin(
+      pendingChallenge.token,
+      twoFactorCode
+    );
+
+    if (response.success && response.data) {
+      finishLogin(response.data, pendingChallenge.identifier);
+      showToast('Successfully signed in! Redirecting...', 'success');
+    } else {
+      setTwoFactorCode('');
+      showToast(response.message || 'The code is invalid or has expired. Try again.', 'error');
+    }
+
+    setIsVerifying2fa(false);
+  };
+
+  const cancelTwoFactor = () => {
+    setPendingChallenge(null);
+    setTwoFactorCode('');
+  };
 
   const {
     register,
@@ -97,16 +151,15 @@ export const PhoneSignIn = ({
     const response = await loginMutation.mutateAsync(data);
 
     if (response.success && response.data) {
-      const { accessToken, ...user } = response.data;
-      const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
+      if (isTwoFactorChallenge(response.data)) {
+        setPendingChallenge({ token: response.data.challengeToken, identifier: data.identifier });
+        setTwoFactorCode('');
+        showToast('Enter the 6-digit code from your authenticator app to continue.', 'info');
+        setIsLoading(false);
+        return;
+      }
 
-      saveAuthSession(
-        { accessToken, user: { ...user, fullName: user.legalName, role: primaryRoleId } },
-        rememberMe
-      );
-      if (rememberMe) saveRememberedIdentifier(data.identifier);
-
-      router.push(getDashboardRoute(primaryRoleId));
+      finishLogin(response.data, data.identifier);
       showToast('Successfully signed in! Redirecting...', 'success');
     } else {
       onLoginAttempt();
@@ -118,86 +171,145 @@ export const PhoneSignIn = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Phone Number
-        </label>
-        <div className="relative">
-          <Input
-            type="tel"
-            {...register('identifier')}
-            className={
-              errors.identifier
-                ? 'border-red-500'
-                : touchedFields.identifier
-                  ? 'border-green-500'
-                  : undefined
-            }
-            inputClassName="py-3"
-            placeholder="+1 234 567 8900"
-          />
-          {touchedFields.identifier && !errors.identifier && (
-            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
-          )}
-          {errors.identifier && (
-            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
-          )}
-        </div>
-        {errors.identifier && (
-          <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
-        )}
-      </div>
+      {pendingChallenge ? (
+        <div className="space-y-4">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+            <div className="mb-2 flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-blue-600" />
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Two-factor authentication
+              </p>
+            </div>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Enter the 6-digit code from your authenticator app to finish signing in.
+            </p>
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Password
-        </label>
-        <div className="relative">
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            {...register('password')}
-            inputClassName="py-3 pr-8"
-            placeholder="Enter your password"
-          />
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Authentication code
+            </label>
+            <Input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={twoFactorCode}
+              onChange={(event) =>
+                setTwoFactorCode(
+                  event.target.value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6)
+                )
+              }
+              inputClassName="py-3 text-center font-mono tracking-[0.5em]"
+              placeholder="••••••"
+              aria-label="Authentication code"
+            />
+          </div>
+
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            fullWidth
+            disabled={twoFactorCode.length !== 6 || isVerifying2fa}
+            isLoading={isVerifying2fa}
+            onClick={completeTwoFactorLogin}
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Verify &amp; Sign In
+          </Button>
+
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            onClick={cancelTwoFactor}
+            className="w-full text-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            Back to sign in
           </button>
         </div>
-      </div>
+      ) : (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Phone Number
+            </label>
+            <div className="relative">
+              <Input
+                type="tel"
+                {...register('identifier')}
+                className={
+                  errors.identifier
+                    ? 'border-red-500'
+                    : touchedFields.identifier
+                      ? 'border-green-500'
+                      : undefined
+                }
+                inputClassName="py-3"
+                placeholder="+1 234 567 8900"
+              />
+              {touchedFields.identifier && !errors.identifier && (
+                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+              )}
+              {errors.identifier && (
+                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+              )}
+            </div>
+            {errors.identifier && (
+              <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
+            )}
+          </div>
 
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2">
-          <LegacyInput
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
-          />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-        </label>
-        <a
-          href={ROUTES.FORGOT_PASSWORD}
-          className="text-sm text-primary hover:text-primary-hover transition-colors"
-        >
-          Forgot password?
-        </a>
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                {...register('password')}
+                inputClassName="py-3 pr-8"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        fullWidth
-        disabled={!isValid || isLoading || loginMutation.isPending || isLocked}
-        isLoading={isLoading || loginMutation.isPending}
-      >
-        <LogIn className="w-4 h-4" />
-        Sign In
-      </Button>
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2">
+              <LegacyInput
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+            </label>
+            <a
+              href={ROUTES.FORGOT_PASSWORD}
+              className="text-sm text-primary hover:text-primary-hover transition-colors"
+            >
+              Forgot password?
+            </a>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            fullWidth
+            disabled={!isValid || isLoading || loginMutation.isPending || isLocked}
+            isLoading={isLoading || loginMutation.isPending}
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In
+          </Button>
+        </>
+      )}
     </form>
   );
 };

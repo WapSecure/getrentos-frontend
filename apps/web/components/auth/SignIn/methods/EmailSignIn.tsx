@@ -10,10 +10,17 @@ import { z } from 'zod';
 import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
-import { BACKEND_ROLE_TO_ID, ROUTES, getDashboardRoute } from '@/lib/constants/auth';
+import {
+  BACKEND_ROLE_TO_ID,
+  ROUTES,
+  VALIDATION_PATTERNS,
+  getDashboardRoute,
+  type AuthResult,
+  type LoginResult,
+  type TwoFactorChallenge,
+} from '@/lib/constants/auth';
 import { ToastVariant } from '@getrentos/ui';
 import { authService } from '@/services/authService';
-import { authFetch, safeCall } from '@/lib/apiHelpers';
 import { useMutation } from '@tanstack/react-query';
 import {
   getRememberedIdentifier,
@@ -21,15 +28,6 @@ import {
   saveRememberedIdentifier,
 } from '@/lib/authStorage';
 import { consumeSessionExpiredFlag } from '@/lib/apiClient';
-
-/** authService.login may return a 2FA challenge instead of tokens. */
-interface TwoFactorLoginResult {
-  accessToken?: string;
-  roles: string[];
-  legalName: string;
-  requiresTwoFactor?: boolean;
-  challengeToken?: string;
-}
 
 const emailSchema = z.object({
   identifier: z.string().email('Please enter a valid email address'),
@@ -58,7 +56,10 @@ export const EmailSignIn = ({
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [pendingChallenge, setPendingChallenge] = useState<string | null>(null);
+  const [pendingChallenge, setPendingChallenge] = useState<{
+    token: string;
+    identifier: string;
+  } | null>(null);
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [isVerifying2fa, setIsVerifying2fa] = useState(false);
   const loginMutation = useMutation({
@@ -67,10 +68,7 @@ export const EmailSignIn = ({
   });
 
   /** Saves the session and navigates to the role dashboard. */
-  const finishLogin = (
-    result: { accessToken: string; roles: string[]; legalName: string },
-    identifier?: string
-  ) => {
+  const finishLogin = (result: AuthResult, identifier?: string) => {
     const primaryRoleId = BACKEND_ROLE_TO_ID[result.roles[0]] || 'renter';
     saveAuthSession(
       {
@@ -86,14 +84,12 @@ export const EmailSignIn = ({
   const completeTwoFactorLogin = async () => {
     if (!pendingChallenge || twoFactorCode.length !== 6) return;
     setIsVerifying2fa(true);
-    const response = await safeCall(() =>
-      authFetch('/auth/login/2fa', {
-        method: 'POST',
-        body: JSON.stringify({ challengeToken: pendingChallenge, token: twoFactorCode }),
-      })
+    const response = await authService.completeTwoFactorLogin(
+      pendingChallenge.token,
+      twoFactorCode
     );
     if (response.success && response.data) {
-      finishLogin(response.data as { accessToken: string; roles: string[]; legalName: string });
+      finishLogin(response.data, pendingChallenge.identifier);
       showToast('Successfully signed in! Redirecting...', 'success');
     } else {
       setTwoFactorCode('');
@@ -106,6 +102,11 @@ export const EmailSignIn = ({
     setPendingChallenge(null);
     setTwoFactorCode('');
   };
+
+  const isTwoFactorChallenge = (result: LoginResult): result is TwoFactorChallenge =>
+    'requiresTwoFactor' in result &&
+    result.requiresTwoFactor === true &&
+    typeof result.challengeToken === 'string';
 
   const {
     register,
@@ -143,20 +144,17 @@ export const EmailSignIn = ({
     const response = await loginMutation.mutateAsync(data);
 
     if (response.success && response.data) {
-      const result = response.data as TwoFactorLoginResult;
-
       // Account has two-factor authentication: hold the challenge token and
       // prompt for the authenticator-app code before issuing a session.
-      if (result.requiresTwoFactor && result.challengeToken) {
-        setPendingChallenge(result.challengeToken);
+      if (isTwoFactorChallenge(response.data)) {
+        setPendingChallenge({ token: response.data.challengeToken, identifier: data.identifier });
         setTwoFactorCode('');
         showToast('Enter the 6-digit code from your authenticator app to continue.', 'info');
         setIsLoading(false);
         return;
       }
 
-      const { accessToken, ...user } = response.data;
-      finishLogin({ accessToken, roles: user.roles, legalName: user.legalName }, data.identifier);
+      finishLogin(response.data, data.identifier);
       showToast('Successfully signed in! Redirecting...', 'success');
     } else {
       onLoginAttempt();
@@ -192,7 +190,11 @@ export const EmailSignIn = ({
               inputMode="numeric"
               autoComplete="one-time-code"
               value={twoFactorCode}
-              onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(e) =>
+                setTwoFactorCode(
+                  e.target.value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6)
+                )
+              }
               inputClassName="py-3 text-center tracking-[0.5em] font-mono"
               placeholder="••••••"
             />
