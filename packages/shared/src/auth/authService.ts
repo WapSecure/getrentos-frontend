@@ -62,6 +62,7 @@ export const authService = {
     method: 'email' | 'phone';
     selectedRoles: string[];
     reference: string;
+    referralCode?: string;
   }): Promise<ApiResponse<AuthResult>> {
     return safeCall(() =>
       apiFetch('/auth/signup', {

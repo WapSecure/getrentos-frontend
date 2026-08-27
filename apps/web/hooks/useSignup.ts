@@ -53,6 +53,7 @@ export const useSignup = () => {
         method: data.method,
         selectedRoles: data.selectedRoles,
         reference: otpReference || '',
+        referralCode: data.referralCode || undefined,
       }),
   });
 

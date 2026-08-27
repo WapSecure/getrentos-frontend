@@ -9,6 +9,7 @@ export interface SignupData {
   method: 'email' | 'phone';
   selectedRoles: string[];
   isVerified: boolean;
+  referralCode?: string;
 }
 
 export type SignupStep = 'signup' | 'otp' | 'roles' | 'verification';
@@ -40,6 +41,7 @@ const initialState: SignupData = {
   // different role card during role selection.
   selectedRoles: ['renter'],
   isVerified: false,
+  referralCode: '',
 };
 
 export const useSignupStore = create<SignupStore>()(

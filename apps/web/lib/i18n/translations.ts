@@ -48,6 +48,7 @@ export type TranslationKey =
   | 'sidebar.evictions'
   | 'sidebar.landlord_leads'
   | 'sidebar.microsite'
+  | 'sidebar.referrals'
   | 'sidebar.sale_listings'
   | 'sidebar.buyer_leads'
   | 'sidebar.investment_analytics'
@@ -139,6 +140,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.evictions': 'Evictions',
     'sidebar.landlord_leads': 'Leads',
     'sidebar.microsite': 'Microsite',
+    'sidebar.referrals': 'Refer & Earn',
     'sidebar.sale_listings': 'Sale Listings',
     'sidebar.buyer_leads': 'Buyer Leads',
     'sidebar.investment_analytics': 'Investment Analytics',
@@ -229,6 +231,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.evictions': 'Comot-For-House Case',
     'sidebar.landlord_leads': 'Leads',
     'sidebar.microsite': 'Microsite',
+    'sidebar.referrals': 'Refer Person, Chop Money',
     'sidebar.sale_listings': 'House Wey Dey Sale',
     'sidebar.buyer_leads': 'Buyer Wey Fit Buy',
     'sidebar.investment_analytics': 'Investment Analytics',
