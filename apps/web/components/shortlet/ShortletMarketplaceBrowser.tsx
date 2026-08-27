@@ -14,7 +14,7 @@ import {
   Select,
   Skeleton,
 } from '@getrentos/ui';
-import { BedDouble, CalendarCheck, MapPin, Search, Zap } from 'lucide-react';
+import { BedDouble, CalendarCheck, MapPin, Search, Star, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -179,6 +179,13 @@ export const ShortletMarketplaceBrowser = () => {
                 <h3 className="font-medium leading-snug">{listing.title}</h3>
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" /> {listing.city}, {listing.state}
+                  {listing.reviewCount > 0 && listing.ratingAverage != null && (
+                    <span className="ml-1 flex items-center gap-0.5">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      {listing.ratingAverage.toFixed(1)}
+                      <span className="text-muted-foreground/70">({listing.reviewCount})</span>
+                    </span>
+                  )}
                 </p>
                 <div className="mt-3 flex items-end justify-between">
                   <div>

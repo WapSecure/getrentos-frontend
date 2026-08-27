@@ -4,10 +4,12 @@ import type {
   BlockedDateRange,
   CreateShortletBookingInput,
   CreateShortletListingInput,
+  CreateShortletReviewInput,
   ShortletAvailability,
   ShortletBooking,
   ShortletListing,
   ShortletPayResponse,
+  ShortletReview,
   UpdateShortletListingInput,
 } from '@/types/shortlet';
 
@@ -75,6 +77,21 @@ export const shortletService = {
   payBooking: (bookingId: string) =>
     safeCall(() =>
       authFetch<ShortletPayResponse>(`/shortlets/bookings/${bookingId}/pay`, { method: 'POST' })
+    ),
+
+  createReview: (bookingId: string, input: CreateShortletReviewInput) =>
+    safeCall(() =>
+      authFetch<ShortletReview>(`/shortlets/bookings/${bookingId}/review`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  reviews: (listingId: string, page = 1, pageSize = 20) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletReview>>(
+        `/shortlets/${listingId}/reviews${toQuery({ page, pageSize })}`
+      )
     ),
 
   // -------- Host --------

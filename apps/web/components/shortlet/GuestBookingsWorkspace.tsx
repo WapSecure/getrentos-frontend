@@ -13,11 +13,12 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarX, CreditCard, MapPin, RotateCcw } from 'lucide-react';
+import { CalendarX, CreditCard, MapPin, RotateCcw, Star } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { ShortletReviewDialog } from './ShortletReviewDialog';
 import type {
   ShortletBooking,
   ShortletBookingStatus,
@@ -73,6 +74,7 @@ export const GuestBookingsWorkspace = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
+  const [reviewTarget, setReviewTarget] = useState<ShortletBooking | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -176,9 +178,14 @@ export const GuestBookingsWorkspace = () => {
                       {formatCurrency(b.refundAmount)}
                     </Badge>
                   )}
+                  {b.status === 'COMPLETED' && b.reviewed && (
+                    <Badge variant="success" className="mt-1">
+                      <Star className="mr-1 h-3 w-3" /> Reviewed
+                    </Badge>
+                  )}
                 </div>
               </div>
-              {(canCancel(b) || b.paymentRequired) && (
+              {(canCancel(b) || b.paymentRequired || (b.status === 'COMPLETED' && !b.reviewed)) && (
                 <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
                   {b.paymentRequired && (
                     <Button
@@ -189,6 +196,11 @@ export const GuestBookingsWorkspace = () => {
                     >
                       <CreditCard className="mr-1.5 h-4 w-4" />
                       {pay.isPending ? 'Processing…' : `Pay ${formatCurrency(b.total)}`}
+                    </Button>
+                  )}
+                  {b.status === 'COMPLETED' && !b.reviewed && (
+                    <Button variant="outline" size="sm" onClick={() => setReviewTarget(b)}>
+                      <Star className="mr-1.5 h-4 w-4" /> Leave a review
                     </Button>
                   )}
                   {canCancel(b) && (
@@ -217,6 +229,18 @@ export const GuestBookingsWorkspace = () => {
         confirmLabel="Cancel booking"
         onConfirm={() => cancelTarget && cancel.mutate(cancelTarget.id)}
       />
+      {reviewTarget && (
+        <ShortletReviewDialog
+          booking={reviewTarget}
+          onClose={() => setReviewTarget(null)}
+          onSubmitted={() => {
+            setReviewTarget(null);
+            queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
+            queryClient.invalidateQueries({ queryKey: shortletKeys.public });
+            setToast({ message: 'Thanks! Your review was published.', variant: 'success' });
+          }}
+        />
+      )}
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}

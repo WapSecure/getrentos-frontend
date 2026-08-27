@@ -15,6 +15,7 @@ import {
   MapPin,
   PlayCircle,
   Ruler,
+  Star,
   Users,
   Video,
   Zap,
@@ -23,7 +24,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
 import type { ShortletBooking, ShortletCancellationPolicy } from '@/types/shortlet';
 
@@ -53,6 +54,13 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
     queryKey: shortletKeys.listing(listingId),
     queryFn: () => unwrap(shortletService.getListing(listingId)),
   });
+
+  const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
+    queryKey: [...shortletKeys.listing(listingId), 'reviews'],
+    queryFn: () => unwrap(shortletService.reviews(listingId, 1, 50)),
+    enabled: Boolean(listing),
+  });
+  const reviews = reviewsData?.items ?? [];
 
   const book = useMutation({
     mutationFn: (input: { checkIn: string; checkOut: string; guestCount?: number }) =>
@@ -339,6 +347,54 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
                 — {CANCELLATION_RULE[listing.cancellationPolicy]}
               </div>
             </div>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-semibold">Reviews</h2>
+            <div className="mb-3 flex items-center gap-3">
+              {listing.ratingAverage != null ? (
+                <div className="flex items-center gap-1 text-xl font-semibold">
+                  <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+                  {listing.ratingAverage.toFixed(1)}
+                </div>
+              ) : null}
+              <span className="text-sm text-muted-foreground">
+                {listing.reviewCount} review{listing.reviewCount === 1 ? '' : 's'}
+              </span>
+            </div>
+            {reviewsLoading ? (
+              <Skeleton className="h-24 w-full rounded-lg" />
+            ) : reviews.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No reviews yet — be the first to stay and share your experience.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {reviews.map((r) => (
+                  <div key={r.id} className="rounded-lg border border-border p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">{r.guestName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(r.createdAt, 'long')}
+                      </p>
+                    </div>
+                    <div className="mt-1 flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star
+                          key={n}
+                          className={`h-3.5 w-3.5 ${
+                            n <= r.rating
+                              ? 'fill-amber-400 text-amber-400'
+                              : 'text-muted-foreground/40'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {r.comment && <p className="mt-2 text-sm text-muted-foreground">{r.comment}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
 

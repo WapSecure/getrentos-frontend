@@ -23,6 +23,8 @@ export interface ShortletListing {
   videoUrl?: string;
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
+  ratingAverage?: number;
+  reviewCount: number;
   pricingMode: ShortletPricingMode;
   nightlyRate?: number;
   cleaningFee?: number;
@@ -69,6 +71,7 @@ export interface ShortletBooking {
   cancellationPolicy?: ShortletCancellationPolicy;
   refundAmount?: number;
   refundedAt?: string;
+  reviewed?: boolean;
   notes?: string;
   hostName: string;
   guestName?: string;
@@ -139,6 +142,22 @@ export interface CreateShortletBookingInput {
   checkOut: string;
   guestCount?: number;
   notes?: string;
+}
+
+export interface ShortletReview {
+  id: string;
+  bookingId: string;
+  listingId: string;
+  guestId: string;
+  guestName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface CreateShortletReviewInput {
+  rating: number;
+  comment?: string;
 }
 
 export interface BlockShortletDatesInput {
