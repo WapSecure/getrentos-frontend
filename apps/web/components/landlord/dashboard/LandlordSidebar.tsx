@@ -26,6 +26,7 @@ import {
   UsersRound,
   BedDouble,
   Globe,
+  Gift,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -45,6 +46,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.shortlets', href: ROUTES.LANDLORD_SHORTLETS, icon: BedDouble },
   { labelKey: 'sidebar.landlord_leads', href: ROUTES.LANDLORD_LEADS, icon: UsersRound },
   { labelKey: 'sidebar.microsite', href: ROUTES.LANDLORD_MICROSITE, icon: Globe },
+  { labelKey: 'sidebar.referrals', href: ROUTES.LANDLORD_REFERRALS, icon: Gift },
   { labelKey: 'sidebar.applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
   { labelKey: 'sidebar.tenants', href: ROUTES.LANDLORD_TENANTS, icon: Users },
   { labelKey: 'sidebar.leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },

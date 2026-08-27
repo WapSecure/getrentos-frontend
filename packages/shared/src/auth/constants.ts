@@ -220,6 +220,7 @@ export const ROUTES = {
   RENTER_HOME: '/renter/home',
   RENTER_LEGAL_RESOURCES: '/renter/legal-resources',
   RENTER_BOOKINGS: '/renter/bookings',
+  RENTER_REFERRALS: '/renter/referrals',
 
   // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',
@@ -237,6 +238,7 @@ export const ROUTES = {
   LANDLORD_EVICTIONS: '/landlord/evictions',
   LANDLORD_LEADS: '/landlord/leads',
   LANDLORD_MICROSITE: '/landlord/microsite',
+  LANDLORD_REFERRALS: '/landlord/referrals',
   LANDLORD_DOCUMENTS: '/landlord/documents',
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_REVIEWS: '/landlord/reviews',

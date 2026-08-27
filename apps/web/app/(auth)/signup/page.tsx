@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail,
@@ -14,6 +14,7 @@ import {
 import { EmailSignup } from '@/components/auth/SignupForm/EmailSignup';
 import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
+import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeField';
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
 import { AnimatedParticles } from '@getrentos/ui';
 import { ThemeToggle } from '@getrentos/ui';
@@ -186,6 +187,12 @@ export default function SignupPage() {
                 ) : (
                   <PhoneSignup onSubmit={handleSendOtp} isLoading={isLoading} />
                 )}
+
+                <div className="mt-5">
+                  <Suspense fallback={null}>
+                    <ReferralCodeField />
+                  </Suspense>
+                </div>
               </motion.div>
             )}
 
