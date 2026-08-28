@@ -92,9 +92,14 @@ export const GuestBookingsWorkspace = () => {
     onSuccess: (cancelled: ShortletBooking) => {
       setCancelTarget(null);
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
-      if (cancelled.refundAmount != null && cancelled.refundAmount > 0) {
+      const totalRefund =
+        (cancelled.refundAmount ?? 0) +
+        (cancelled.deposit != null && cancelled.depositStatus === 'REFUNDED'
+          ? cancelled.deposit
+          : 0);
+      if (totalRefund > 0) {
         setToast({
-          message: `Booking cancelled — ${formatCurrency(cancelled.refundAmount)} refunded.`,
+          message: `Booking cancelled — ${formatCurrency(totalRefund)} refunded.`,
           variant: 'success',
         });
       } else {
@@ -187,6 +192,17 @@ export const GuestBookingsWorkspace = () => {
                       {formatCurrency(b.refundAmount)}
                     </Badge>
                   )}
+                  {b.deposit != null && b.depositStatus === 'HELD' && (
+                    <Badge variant="info" className="mt-1">
+                      Deposit held {formatCurrency(b.deposit)}
+                    </Badge>
+                  )}
+                  {b.deposit != null && b.depositStatus === 'REFUNDED' && (
+                    <Badge variant="success" className="mt-1">
+                      <RotateCcw className="mr-1 h-3 w-3" /> Deposit refunded{' '}
+                      {formatCurrency(b.deposit)}
+                    </Badge>
+                  )}
                   {b.status === 'COMPLETED' && b.reviewed && (
                     <Badge variant="success" className="mt-1">
                       <Star className="mr-1 h-3 w-3" /> Reviewed
@@ -204,7 +220,9 @@ export const GuestBookingsWorkspace = () => {
                       disabled={pay.isPending}
                     >
                       <CreditCard className="mr-1.5 h-4 w-4" />
-                      {pay.isPending ? 'Processing…' : `Pay ${formatCurrency(b.total)}`}
+                      {pay.isPending
+                        ? 'Processing…'
+                        : `Pay ${formatCurrency((b.total ?? 0) + (b.deposit ?? 0))}`}
                     </Button>
                   )}
                   {b.status === 'COMPLETED' && !b.reviewed && (

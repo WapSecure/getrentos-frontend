@@ -222,6 +222,7 @@ export const ShortletMarketplaceBrowser = () => {
                         : `min ${listing.minNights} night${listing.minNights > 1 ? 's' : ''}`}
                       {' · '}
                       up to {listing.maxGuests} guests
+                      {listing.deposit ? ` · ${formatCurrency(listing.deposit)} deposit` : ''}
                     </p>
                   </div>
                   <Button

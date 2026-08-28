@@ -16,6 +16,7 @@ import {
   MessageSquare,
   PlayCircle,
   Ruler,
+  ShieldCheck,
   Star,
   Users,
   Video,
@@ -349,6 +350,12 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
                 </span>
                 — {CANCELLATION_RULE[listing.cancellationPolicy]}
               </div>
+              {listing.deposit != null && listing.deposit > 0 && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4" />
+                  {formatCurrency(listing.deposit)} refundable security deposit
+                </div>
+              )}
             </div>
           </section>
 
@@ -420,6 +427,12 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Cleaning fee</span>
                   <span>{formatCurrency(listing.cleaningFee)}</span>
+                </div>
+              ) : null}
+              {listing.deposit != null && listing.deposit > 0 ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Security deposit</span>
+                  <span>{formatCurrency(listing.deposit)}</span>
                 </div>
               ) : null}
               {listing.weekendUpliftPct ? (

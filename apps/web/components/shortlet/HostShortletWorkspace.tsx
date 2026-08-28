@@ -224,6 +224,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                       {l.minNights} night
                       {l.minNights > 1 ? 's' : ''}
                       {l.cleaningFee ? ` · ${formatCurrency(l.cleaningFee)} cleaning` : ''}
+                      {l.deposit ? ` · ${formatCurrency(l.deposit)} deposit` : ''}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -391,6 +392,7 @@ function CreateListingDialog({
   const [pricingMode, setPricingMode] = useState<'PER_NIGHT' | 'FLAT_STAY'>('PER_NIGHT');
   const [nightlyRate, setNightlyRate] = useState('');
   const [cleaningFee, setCleaningFee] = useState('');
+  const [deposit, setDeposit] = useState('');
   const [minNights, setMinNights] = useState('1');
   const [weekendUpliftPct, setWeekendUpliftPct] = useState('');
   const [instantBooking, setInstantBooking] = useState(false);
@@ -470,6 +472,7 @@ function CreateListingDialog({
       pricingMode,
       nightlyRate: Number(nightlyRate),
       cleaningFee: cleaningFee ? Number(cleaningFee) : undefined,
+      deposit: deposit ? Number(deposit) : undefined,
       minNights: Number(minNights) || 1,
       weekendUpliftPct: weekendUpliftPct ? Number(weekendUpliftPct) : undefined,
       instantBooking,
@@ -550,6 +553,16 @@ function CreateListingDialog({
               />
             </Field>
           </div>
+          <Field
+            label="Security deposit"
+            hint="Refundable, returned to the guest after check-out. Naira (₦)"
+          >
+            <CurrencyInput
+              prefix="₦"
+              value={deposit}
+              onValueChange={(v) => setDeposit(v === 0 ? '' : String(v))}
+            />
+          </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Min nights">
               <Input
@@ -663,6 +676,7 @@ function EditListingDialog({
   const [pricingMode, setPricingMode] = useState<'PER_NIGHT' | 'FLAT_STAY'>(listing.pricingMode);
   const [nightlyRate, setNightlyRate] = useState(listing.nightlyRate?.toString() ?? '');
   const [cleaningFee, setCleaningFee] = useState(listing.cleaningFee?.toString() ?? '');
+  const [deposit, setDeposit] = useState(listing.deposit?.toString() ?? '');
   const [minNights, setMinNights] = useState(listing.minNights.toString());
   const [weekendUpliftPct, setWeekendUpliftPct] = useState(
     listing.weekendUpliftPct?.toString() ?? ''
@@ -723,6 +737,7 @@ function EditListingDialog({
           pricingMode,
           nightlyRate: nightlyRate ? Number(nightlyRate) : undefined,
           cleaningFee: cleaningFee ? Number(cleaningFee) : undefined,
+          deposit: deposit ? Number(deposit) : undefined,
           minNights: Number(minNights) || 1,
           weekendUpliftPct: weekendUpliftPct ? Number(weekendUpliftPct) : undefined,
           instantBooking,
@@ -787,6 +802,16 @@ function EditListingDialog({
               />
             </Field>
           </div>
+          <Field
+            label="Security deposit"
+            hint="Refundable, returned to the guest after check-out. Naira (₦)"
+          >
+            <CurrencyInput
+              prefix="₦"
+              value={deposit}
+              onValueChange={(v) => setDeposit(v === 0 ? '' : String(v))}
+            />
+          </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Min nights">
               <Input

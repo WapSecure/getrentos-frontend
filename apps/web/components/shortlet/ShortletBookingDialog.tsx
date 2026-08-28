@@ -109,6 +109,7 @@ export function ShortletBookingDialog({
                 : 'Flat rate for the whole stay'}
               {listing.cleaningFee ? ` · ${formatCurrency(listing.cleaningFee)} cleaning fee` : ''}
               {listing.weekendUpliftPct ? ` · +${listing.weekendUpliftPct}% on weekends` : ''}
+              {listing.deposit ? ` · ${formatCurrency(listing.deposit)} refundable deposit` : ''}
             </p>
           </div>
 
@@ -180,9 +181,10 @@ export function ShortletBookingDialog({
                   <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
                     <CreditCard className="h-4 w-4" />
                     <span className="font-semibold text-foreground">
-                      {formatCurrency(createdBooking.total)}
+                      {formatCurrency((createdBooking.total ?? 0) + (createdBooking.deposit ?? 0))}
                     </span>{' '}
-                    due to complete this booking.
+                    due to complete this booking
+                    {createdBooking.deposit ? ' (includes refundable deposit)' : ''}.
                   </p>
                 )}
               </div>
@@ -193,7 +195,9 @@ export function ShortletBookingDialog({
                   disabled={paying}
                 >
                   <CreditCard className="mr-1.5 h-4 w-4" />
-                  {paying ? 'Opening checkout…' : `Pay ${formatCurrency(createdBooking.total)}`}
+                  {paying
+                    ? 'Opening checkout…'
+                    : `Pay ${formatCurrency((createdBooking.total ?? 0) + (createdBooking.deposit ?? 0))}`}
                 </Button>
               )}
               <Button variant="outline" className="w-full" onClick={onClose}>

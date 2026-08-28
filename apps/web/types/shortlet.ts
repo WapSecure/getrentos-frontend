@@ -23,6 +23,7 @@ export interface ShortletListing {
   videoUrl?: string;
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
+  deposit?: number;
   ratingAverage?: number;
   reviewCount: number;
   pricingMode: ShortletPricingMode;
@@ -71,6 +72,9 @@ export interface ShortletBooking {
   cancellationPolicy?: ShortletCancellationPolicy;
   refundAmount?: number;
   refundedAt?: string;
+  deposit?: number;
+  depositStatus: 'UNPAID' | 'HELD' | 'REFUNDED';
+  depositRefundedAt?: string;
   reviewed?: boolean;
   notes?: string;
   hostName: string;
@@ -81,6 +85,8 @@ export interface ShortletBooking {
 export interface ShortletPayResponse {
   id: string;
   total: number;
+  deposit?: number;
+  chargeTotal?: number;
   paymentStatus: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   authorizationUrl?: string;
   reference?: string;
@@ -116,6 +122,7 @@ export interface CreateShortletListingInput {
   videoUrl?: string;
   tourUrl?: string;
   cancellationPolicy?: ShortletCancellationPolicy;
+  deposit?: number;
 }
 
 export interface UpdateShortletListingInput {
@@ -135,6 +142,7 @@ export interface UpdateShortletListingInput {
   videoUrl?: string;
   tourUrl?: string;
   cancellationPolicy?: ShortletCancellationPolicy;
+  deposit?: number;
 }
 
 export interface CreateShortletBookingInput {
