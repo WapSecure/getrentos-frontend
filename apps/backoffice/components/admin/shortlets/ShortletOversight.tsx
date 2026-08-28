@@ -40,6 +40,7 @@ const BOOKINGS_PAGE_SIZE = 12;
 const LISTING_STATUS_VALUES: { value: 'all' | ShortletListingStatus; label: string }[] = [
   { value: 'all', label: 'All statuses' },
   { value: 'PUBLISHED', label: 'Published' },
+  { value: 'PENDING_VERIFICATION', label: 'Pending verification' },
   { value: 'PAUSED', label: 'Paused' },
   { value: 'CLOSED', label: 'Closed' },
   { value: 'DRAFT', label: 'Draft' },
@@ -124,25 +125,31 @@ export const ShortletOversight = () => {
   const bookings = bookingsData?.items ?? [];
 
   const moderation = useMutation({
-    mutationFn: (input: { listingId: string; action: 'pause' | 'resume' | 'close' }) =>
+    mutationFn: (input: {
+      listingId: string;
+      action: 'pause' | 'resume' | 'close' | 'flag' | 'approve';
+    }) =>
       unwrap(
         input.action === 'pause'
           ? adminShortletService.pauseListing(input.listingId)
           : input.action === 'resume'
             ? adminShortletService.resumeListing(input.listingId)
-            : adminShortletService.closeListing(input.listingId)
+            : input.action === 'close'
+              ? adminShortletService.closeListing(input.listingId)
+              : input.action === 'flag'
+                ? adminShortletService.flagListing(input.listingId)
+                : adminShortletService.approveListing(input.listingId)
       ),
     onSuccess: (_, input) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets'] });
-      setToast({
-        message:
-          input.action === 'pause'
-            ? 'Listing paused. It no longer appears publicly.'
-            : input.action === 'resume'
-              ? 'Listing resumed and is public again.'
-              : 'Listing closed permanently.',
-        variant: 'success',
-      });
+      const messages: Record<string, string> = {
+        pause: 'Listing paused. It no longer appears publicly.',
+        resume: 'Listing resumed and is public again.',
+        close: 'Listing closed permanently.',
+        flag: 'Listing flagged for verification and hidden from the marketplace.',
+        approve: 'Listing approved and published.',
+      };
+      setToast({ message: messages[input.action], variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -338,7 +345,7 @@ function ListingRow({
 }: {
   listing: AdminShortletListing;
   busy: boolean;
-  onModerate: (action: 'pause' | 'resume' | 'close') => void;
+  onModerate: (action: 'pause' | 'resume' | 'close' | 'flag' | 'approve') => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -362,6 +369,16 @@ function ListingRow({
         {listing.status === 'PUBLISHED' && (
           <Button variant="outline" size="sm" onClick={() => onModerate('pause')} disabled={busy}>
             <Pause className="mr-1.5 h-4 w-4" /> Pause
+          </Button>
+        )}
+        {listing.status === 'PUBLISHED' && (
+          <Button variant="outline" size="sm" onClick={() => onModerate('flag')} disabled={busy}>
+            <ShieldCheck className="mr-1.5 h-4 w-4" /> Flag for review
+          </Button>
+        )}
+        {listing.status === 'PENDING_VERIFICATION' && (
+          <Button variant="outline" size="sm" onClick={() => onModerate('approve')} disabled={busy}>
+            <Play className="mr-1.5 h-4 w-4" /> Approve
           </Button>
         )}
         {listing.status === 'PAUSED' && (

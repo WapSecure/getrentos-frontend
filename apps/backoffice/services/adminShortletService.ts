@@ -84,4 +84,20 @@ export const adminShortletService = {
       })
     );
   },
+
+  flagListing(listingId: string): Promise<ApiResponse<AdminShortletListing>> {
+    return safeCall(() =>
+      authFetch<AdminShortletListing>(`/admin/shortlets/listings/${listingId}/flag`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  approveListing(listingId: string): Promise<ApiResponse<AdminShortletListing>> {
+    return safeCall(() =>
+      authFetch<AdminShortletListing>(`/admin/shortlets/listings/${listingId}/approve`, {
+        method: 'POST',
+      })
+    );
+  },
 };

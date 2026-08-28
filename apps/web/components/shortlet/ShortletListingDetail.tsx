@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
   Map as MapIcon,
   MapPin,
+  MessageSquare,
   PlayCircle,
   Ruler,
   Star,
@@ -26,6 +27,7 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
+import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
 import type { ShortletBooking, ShortletCancellationPolicy } from '@/types/shortlet';
 
 type MediaTab = 'photos' | 'video' | 'tour';
@@ -42,6 +44,7 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
   const [isSignedIn] = useState(() => Boolean(getAuthToken()));
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
+  const [messageOpen, setMessageOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [mediaTab, setMediaTab] = useState<MediaTab>('photos');
@@ -430,6 +433,15 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
               <PlayCircle className="mr-1.5 h-4 w-4" />
               {listing.instantBooking ? 'Book now — instant confirmation' : 'Request to book'}
             </Button>
+            {isSignedIn && (
+              <Button
+                variant="outline"
+                className="mt-2 w-full"
+                onClick={() => setMessageOpen(true)}
+              >
+                <MessageSquare className="mr-1.5 h-4 w-4" /> Message host
+              </Button>
+            )}
             <p className="mt-2 text-center text-xs text-muted-foreground">
               {listing.instantBooking
                 ? 'Instant booking is enabled for this stay.'
@@ -454,6 +466,16 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
         />
       )}
 
+      {messageOpen && (
+        <ShortletMessageHostDialog
+          listing={listing}
+          onClose={() => setMessageOpen(false)}
+          onSent={() => {
+            setMessageOpen(false);
+            setToast({ message: 'Message sent to the host.', variant: 'success' });
+          }}
+        />
+      )}
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}

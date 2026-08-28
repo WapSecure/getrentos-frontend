@@ -6,6 +6,8 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  Dialog,
+  DialogContent,
   EmptyState,
   Pagination,
   Skeleton,
@@ -13,11 +15,12 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarX, CreditCard, MapPin, RotateCcw, Star } from 'lucide-react';
+import { CalendarX, CreditCard, MapPin, MessageSquare, RotateCcw, Star } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletReviewDialog } from './ShortletReviewDialog';
 import type {
   ShortletBooking,
@@ -75,6 +78,7 @@ export const GuestBookingsWorkspace = () => {
   const [page, setPage] = useState(1);
   const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
   const [reviewTarget, setReviewTarget] = useState<ShortletBooking | null>(null);
+  const [messagesOpen, setMessagesOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -116,9 +120,14 @@ export const GuestBookingsWorkspace = () => {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">My Shortlet Bookings</h1>
-        <p className="mt-1 text-muted-foreground">Track your stays and requests.</p>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">My Shortlet Bookings</h1>
+          <p className="mt-1 text-muted-foreground">Track your stays and requests.</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
+          <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+        </Button>
       </div>
 
       {isLoading ? (
@@ -241,6 +250,11 @@ export const GuestBookingsWorkspace = () => {
           }}
         />
       )}
+      <Dialog open={messagesOpen} onOpenChange={(o) => !o && setMessagesOpen(false)}>
+        <DialogContent className="sm:max-w-3xl">
+          <ShortletMessagesInbox role="guest" />
+        </DialogContent>
+      </Dialog>
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}

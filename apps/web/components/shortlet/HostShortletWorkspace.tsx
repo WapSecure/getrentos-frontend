@@ -23,7 +23,7 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarOff, Plus, Zap } from 'lucide-react';
+import { CalendarOff, MessageSquare, Plus, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerService } from '@/services/ownerService';
 import { landlordService } from '@/services/landlordService';
@@ -31,6 +31,7 @@ import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletMediaManager, type ShortletMediaState } from './ShortletMediaManager';
+import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -92,6 +93,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ShortletListing | null>(null);
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
+  const [messagesOpen, setMessagesOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: listingsData, isLoading: listingsLoading } = useQuery({
@@ -149,9 +151,14 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             Publish short-stay listings and manage bookings.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-1.5 h-4 w-4" /> New listing
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setMessagesOpen(true)}>
+            <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+          </Button>
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-1.5 h-4 w-4" /> New listing
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 inline-flex rounded-lg border border-border bg-card p-1 text-sm">
@@ -348,6 +355,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
       {blockTarget && (
         <BlockDatesDialog listing={blockTarget} onClose={() => setBlockTarget(null)} />
       )}
+      <Dialog open={messagesOpen} onOpenChange={(o) => !o && setMessagesOpen(false)}>
+        <DialogContent className="sm:max-w-3xl">
+          <ShortletMessagesInbox role="host" />
+        </DialogContent>
+      </Dialog>
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />

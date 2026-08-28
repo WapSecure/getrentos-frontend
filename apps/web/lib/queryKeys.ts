@@ -221,6 +221,8 @@ export const shortletKeys = {
   hostBookings: ['shortlets', 'host', 'bookings'] as const,
   hostBlockedDates: (listingId: string) =>
     ['shortlets', 'host', listingId, 'blocked-dates'] as const,
+  guestMessages: ['shortlets', 'messages'] as const,
+  hostMessages: ['shortlets', 'host', 'messages'] as const,
 };
 
 export const buyerKeys = {

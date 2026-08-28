@@ -7,6 +7,7 @@ import type {
   CreateShortletReviewInput,
   ShortletAvailability,
   ShortletBooking,
+  ShortletConversation,
   ShortletListing,
   ShortletPayResponse,
   ShortletReview,
@@ -92,6 +93,50 @@ export const shortletService = {
       authFetch<Paginated<ShortletReview>>(
         `/shortlets/${listingId}/reviews${toQuery({ page, pageSize })}`
       )
+    ),
+
+  // -------- Guest messaging --------
+  startConversation: (listingId: string, text: string) =>
+    safeCall(() =>
+      authFetch<ShortletConversation>(`/shortlets/${listingId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+    ),
+
+  myMessages: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletConversation>>(`/shortlets/messages${listQuery(params)}`)
+    ),
+
+  sendMessage: (conversationId: string, text: string) =>
+    safeCall(() =>
+      authFetch<ShortletConversation>(`/shortlets/messages/${conversationId}/send`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+    ),
+
+  markRead: (conversationId: string) =>
+    safeCall(() => authFetch(`/shortlets/messages/${conversationId}/read`, { method: 'POST' })),
+
+  // -------- Host messaging --------
+  hostMessages: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletConversation>>(`/host/shortlets/messages${listQuery(params)}`)
+    ),
+
+  hostSendMessage: (conversationId: string, text: string) =>
+    safeCall(() =>
+      authFetch<ShortletConversation>(`/host/shortlets/messages/${conversationId}/send`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+    ),
+
+  hostMarkRead: (conversationId: string) =>
+    safeCall(() =>
+      authFetch(`/host/shortlets/messages/${conversationId}/read`, { method: 'POST' })
     ),
 
   // -------- Host --------

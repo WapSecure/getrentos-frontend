@@ -160,6 +160,33 @@ export interface CreateShortletReviewInput {
   comment?: string;
 }
 
+export interface ShortletMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+  read: boolean;
+}
+
+export interface ShortletConversation {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  participantId: string;
+  participantName: string;
+  participantRole: 'guest' | 'host';
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+  messages: ShortletMessage[];
+}
+
+export interface SendShortletMessageInput {
+  text: string;
+}
+
 export interface BlockShortletDatesInput {
   startDate: string;
   endDate: string;

@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   CurrencyInput,
+  DatePicker,
   EmptyState,
   Input,
   Pagination,
@@ -24,6 +25,7 @@ import type { ShortletListing } from '@/types/shortlet';
 
 const PAGE_SIZE = 9;
 type Sort = 'newest' | 'price_asc' | 'price_desc';
+const TODAY = new Date().toISOString().slice(0, 10);
 
 export const ShortletMarketplaceBrowser = () => {
   const router = useRouter();
@@ -33,6 +35,8 @@ export const ShortletMarketplaceBrowser = () => {
   const [guests, setGuests] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
 
@@ -42,11 +46,13 @@ export const ShortletMarketplaceBrowser = () => {
       guests: guests ? Number(guests) : undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      checkIn: checkIn || undefined,
+      checkOut: checkOut || undefined,
       sort,
       page,
       pageSize: PAGE_SIZE,
     }),
-    [city, guests, maxPrice, minPrice, page, sort]
+    [checkIn, checkOut, city, guests, maxPrice, minPrice, page, sort]
   );
 
   const { data, isLoading, isError } = useQuery({
@@ -79,7 +85,7 @@ export const ShortletMarketplaceBrowser = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-7">
         <div className="col-span-2 md:col-span-1">
           <Input
             placeholder="City"
@@ -105,6 +111,21 @@ export const ShortletMarketplaceBrowser = () => {
           placeholder="Max price"
           value={maxPrice}
           onValueChange={(v) => updateFilter(setMaxPrice, v === 0 ? '' : String(v))}
+        />
+        <DatePicker
+          value={checkIn}
+          onChange={(v) => {
+            updateFilter(setCheckIn, v);
+            if (checkOut && v && checkOut <= v) setCheckOut('');
+          }}
+          min={TODAY}
+          placeholder="Check-in"
+        />
+        <DatePicker
+          value={checkOut}
+          onChange={(v) => updateFilter(setCheckOut, v)}
+          min={checkIn || TODAY}
+          placeholder="Check-out"
         />
         <Select
           value={sort}
