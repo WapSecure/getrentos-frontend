@@ -10,8 +10,11 @@ import type {
   ShortletConversation,
   ShortletListing,
   ShortletPayResponse,
+  ShortletPayout,
+  ShortletPayoutAccount,
   ShortletReview,
   UpdateShortletListingInput,
+  UpsertPayoutAccountInput,
 } from '@/types/shortlet';
 
 export interface ShortletListParams {
@@ -137,6 +140,33 @@ export const shortletService = {
   hostMarkRead: (conversationId: string) =>
     safeCall(() =>
       authFetch(`/host/shortlets/messages/${conversationId}/read`, { method: 'POST' })
+    ),
+
+  // -------- Host payouts --------
+  payoutAccount: () =>
+    safeCall(() => authFetch<ShortletPayoutAccount | null>('/host/shortlets/payout-account')),
+
+  savePayoutAccount: (input: UpsertPayoutAccountInput) =>
+    safeCall(() =>
+      authFetch<ShortletPayoutAccount>('/host/shortlets/payout-account', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  myPayouts: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletPayout>>(`/host/shortlets/payouts${listQuery(params)}`)
+    ),
+
+  payoutSummary: () =>
+    safeCall(() =>
+      authFetch<{ available: number; accountSet: boolean }>('/host/shortlets/payouts/summary')
+    ),
+
+  requestPayout: () =>
+    safeCall(() =>
+      authFetch<ShortletPayout>('/host/shortlets/payouts/request', { method: 'POST' })
     ),
 
   // -------- Host --------

@@ -5,6 +5,7 @@ import type {
   AdminShortletBooking,
   AdminShortletListing,
   AdminShortletOverview,
+  AdminShortletPayout,
   ShortletBookingStatus,
   ShortletListingStatus,
 } from '@/types/shortlet';
@@ -98,6 +99,15 @@ export const adminShortletService = {
       authFetch<AdminShortletListing>(`/admin/shortlets/listings/${listingId}/approve`, {
         method: 'POST',
       })
+    );
+  },
+
+  listPayouts(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminShortletPayout>>> {
+    const query = toQuery({ page: params.page, pageSize: params.pageSize });
+    return safeCall(() =>
+      authFetch<Paginated<AdminShortletPayout>>(`/admin/shortlets/payouts${query}`)
     );
   },
 };

@@ -30,6 +30,7 @@ import { adminShortletService } from '@/services/adminShortletService';
 import type {
   AdminShortletBooking,
   AdminShortletListing,
+  AdminShortletPayout,
   ShortletBookingStatus,
   ShortletListingStatus,
 } from '@/types/shortlet';
@@ -71,7 +72,7 @@ const BOOKING_STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   COMPLETED: 'neutral',
 };
 
-type Tab = 'listings' | 'bookings';
+type Tab = 'listings' | 'bookings' | 'payouts';
 
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
@@ -86,6 +87,7 @@ export const ShortletOversight = () => {
   // Bookings filters
   const [bookingStatus, setBookingStatus] = useState<'all' | ShortletBookingStatus>('all');
   const [bookingsPage, setBookingsPage] = useState(1);
+  const [payoutsPage, setPayoutsPage] = useState(1);
 
   const { data: overview } = useQuery({
     queryKey: ['admin', 'shortlets', 'overview'],
@@ -123,6 +125,12 @@ export const ShortletOversight = () => {
       ),
   });
   const bookings = bookingsData?.items ?? [];
+
+  const { data: payoutsData, isLoading: payoutsLoading } = useQuery({
+    queryKey: ['admin', 'shortlets', 'payouts', { page: payoutsPage }],
+    queryFn: () => unwrap(adminShortletService.listPayouts({ page: payoutsPage, pageSize: 12 })),
+  });
+  const payouts = payoutsData?.items ?? [];
 
   const moderation = useMutation({
     mutationFn: (input: {
@@ -218,7 +226,7 @@ export const ShortletOversight = () => {
 
       {/* Tabs */}
       <div className="inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['listings', 'bookings'] as Tab[]).map((t) => (
+        {(['listings', 'bookings', 'payouts'] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -231,7 +239,9 @@ export const ShortletOversight = () => {
           >
             {t === 'listings'
               ? `Listings (${listingsData?.total ?? 0})`
-              : `Bookings (${bookingsData?.total ?? 0})`}
+              : t === 'bookings'
+                ? `Bookings (${bookingsData?.total ?? 0})`
+                : `Payouts (${payoutsData?.total ?? 0})`}
           </button>
         ))}
       </div>
@@ -290,7 +300,7 @@ export const ShortletOversight = () => {
             onPageChange={setListingsPage}
           />
         </div>
-      ) : (
+      ) : tab === 'bookings' ? (
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
             <div className="w-52">
@@ -327,6 +337,42 @@ export const ShortletOversight = () => {
             pageSize={BOOKINGS_PAGE_SIZE}
             total={bookingsData?.total ?? 0}
             onPageChange={setBookingsPage}
+          />
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+            <p className="text-sm font-medium">Host payout ledger</p>
+            <p className="text-xs text-muted-foreground">
+              Transfers paid to hosts for confirmed shortlet stays.
+            </p>
+          </div>
+
+          {payoutsLoading ? (
+            <div className="space-y-2 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : payouts.length === 0 ? (
+            <EmptyState
+              icon={CircleDollarSign}
+              title="No payouts yet"
+              description="Hosts receive payouts once they withdraw available earnings."
+            />
+          ) : (
+            <div className="divide-y divide-border">
+              {payouts.map((p) => (
+                <PayoutRow key={p.id} payout={p} />
+              ))}
+            </div>
+          )}
+
+          <Pagination
+            page={payoutsPage}
+            pageSize={12}
+            total={payoutsData?.total ?? 0}
+            onPageChange={setPayoutsPage}
           />
         </div>
       )}
@@ -416,6 +462,36 @@ function BookingRow({ booking }: { booking: AdminShortletBooking }) {
       <div className="text-right">
         <p className="font-semibold">{formatCurrency(booking.total)}</p>
         <p className="text-xs text-muted-foreground">{booking.city}</p>
+      </div>
+    </div>
+  );
+}
+
+const PAYOUT_STATUS_VARIANT: Record<AdminShortletPayout['status'], BadgeVariant> = {
+  SUCCESS: 'success',
+  PENDING: 'info',
+  FAILED: 'danger',
+};
+
+function PayoutRow({ payout }: { payout: AdminShortletPayout }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium">{payout.hostName ?? 'Host'}</p>
+          <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>{payout.status}</Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {payout.bookingCount} booking{payout.bookingCount === 1 ? '' : 's'} ·{' '}
+          {formatDate(payout.createdAt, 'short')}
+          {payout.transferRef && <span className="ml-1 text-xs">· Ref {payout.transferRef}</span>}
+        </p>
+      </div>
+      <div className="text-right">
+        <p className="font-semibold">{formatCurrency(payout.amount)}</p>
+        {payout.paidAt && (
+          <p className="text-xs text-muted-foreground">Paid {formatDate(payout.paidAt, 'short')}</p>
+        )}
       </div>
     </div>
   );

@@ -53,3 +53,15 @@ export interface AdminShortletOverview {
   confirmedBookings: number;
   totalBookingValue: number;
 }
+
+export interface AdminShortletPayout {
+  id: string;
+  hostId: string;
+  hostName?: string;
+  amount: number;
+  status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  transferRef?: string;
+  paidAt?: string;
+  bookingCount: number;
+  createdAt: string;
+}

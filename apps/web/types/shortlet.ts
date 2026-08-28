@@ -187,6 +187,31 @@ export interface SendShortletMessageInput {
   text: string;
 }
 
+export interface ShortletPayoutAccount {
+  id: string;
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+}
+
+export interface ShortletPayout {
+  id: string;
+  hostId: string;
+  hostName?: string;
+  amount: number;
+  status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  transferRef?: string;
+  paidAt?: string;
+  bookingCount: number;
+  createdAt: string;
+}
+
+export interface UpsertPayoutAccountInput {
+  bankCode: string;
+  accountNumber: string;
+}
+
 export interface BlockShortletDatesInput {
   startDate: string;
   endDate: string;
