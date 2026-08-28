@@ -23,7 +23,7 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarOff, MessageSquare, Plus, Zap } from 'lucide-react';
+import { CalendarOff, Banknote, MessageSquare, Plus, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerService } from '@/services/ownerService';
 import { landlordService } from '@/services/landlordService';
@@ -32,6 +32,7 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletMediaManager, type ShortletMediaState } from './ShortletMediaManager';
 import { ShortletMessagesInbox } from './ShortletMessagesInbox';
+import { ShortletPayoutsDialog } from './ShortletPayoutsDialog';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -94,6 +95,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [editTarget, setEditTarget] = useState<ShortletListing | null>(null);
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: listingsData, isLoading: listingsLoading } = useQuery({
@@ -154,6 +156,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setMessagesOpen(true)}>
             <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+          </Button>
+          <Button variant="outline" onClick={() => setPayoutsOpen(true)}>
+            <Banknote className="mr-1.5 h-4 w-4" /> Payouts
           </Button>
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-1.5 h-4 w-4" /> New listing
@@ -360,6 +365,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           <ShortletMessagesInbox role="host" />
         </DialogContent>
       </Dialog>
+      {payoutsOpen && <ShortletPayoutsDialog onClose={() => setPayoutsOpen(false)} />}
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
