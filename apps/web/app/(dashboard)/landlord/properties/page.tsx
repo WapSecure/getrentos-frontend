@@ -9,12 +9,15 @@ import { Plus, Search, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyModal';
 import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
+import { LandlordVerificationStatusModal } from '@/components/landlord/properties/LandlordVerificationStatusModal';
 import { Button, Pagination } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
+import { landService } from '@/services/landService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Property } from '@/types/landlord';
+import type { LandOwnershipProofInput } from '@/types/land';
 import { ROUTES } from '@/lib/constants/auth';
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
@@ -50,6 +53,7 @@ export default function LandlordPropertiesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
+  const [verifyingProperty, setVerifyingProperty] = useState<Property | null>(null);
 
   const { data } = useQuery({
     queryKey: [
@@ -129,6 +133,11 @@ export default function LandlordPropertiesPage() {
   const handleToggleArchive = (id: string) => toggleArchiveMutation.mutate(id);
 
   const handleDelete = (id: string) => deleteMutation.mutate(id);
+
+  const handleVerifyResubmit = async (propertyId: string, proof: LandOwnershipProofInput) => {
+    await unwrap(landService.submitOwnershipProof(propertyId, proof));
+    invalidateProperties();
+  };
 
   const hasActiveFilters = searchQuery !== '' || filter !== 'all';
 
@@ -215,6 +224,7 @@ export default function LandlordPropertiesPage() {
               onEdit={() => setEditingProperty(property)}
               onToggleArchive={() => handleToggleArchive(property.id)}
               onDelete={() => setDeletingPropertyId(property.id)}
+              onVerify={() => setVerifyingProperty(property)}
             />
           ))}
         </div>
@@ -240,6 +250,12 @@ export default function LandlordPropertiesPage() {
         property={editingProperty}
         onClose={() => setEditingProperty(null)}
         onSave={handleEditSave}
+      />
+
+      <LandlordVerificationStatusModal
+        property={verifyingProperty}
+        onClose={() => setVerifyingProperty(null)}
+        onResubmit={handleVerifyResubmit}
       />
 
       <ConfirmDialog

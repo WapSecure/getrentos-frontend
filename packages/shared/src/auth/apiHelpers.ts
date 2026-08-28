@@ -1,11 +1,39 @@
 import { apiFetch, ApiError, refreshSession } from './apiClient';
 import { getAuthToken } from './authStorage';
 
+/** Machine-readable reasons the backend attaches to a 403 when an action requires verification. */
+export const VERIFICATION_REASONS = [
+  'IDENTITY_REQUIRED',
+  'LICENSE_REQUIRED',
+  'OWNERSHIP_PROOF_REQUIRED',
+] as const;
+export type VerificationReason = (typeof VERIFICATION_REASONS)[number];
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
   message?: string;
+  status?: number;
+  /** Set when a 403 was rejected by ActionVerificationGuard — see VERIFICATION_REASONS. */
+  reason?: VerificationReason;
+}
+
+/** Thrown by unwrap() when a request 403s because an action-level verification requirement wasn't met. */
+export class VerificationRequiredError extends Error {
+  reason: VerificationReason;
+  constructor(message: string, reason: VerificationReason) {
+    super(message);
+    this.name = 'VerificationRequiredError';
+    this.reason = reason;
+  }
+}
+
+function extractReason(details: unknown): VerificationReason | undefined {
+  const code = (details as { error?: string } | undefined)?.error;
+  return (VERIFICATION_REASONS as readonly string[]).includes(code ?? '')
+    ? (code as VerificationReason)
+    : undefined;
 }
 
 export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>> {
@@ -14,7 +42,13 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
     return { success: true, data };
   } catch (err) {
     if (err instanceof ApiError) {
-      return { success: false, error: err.message, message: err.message };
+      return {
+        success: false,
+        error: err.message,
+        message: err.message,
+        status: err.status,
+        reason: err.status === 403 ? extractReason(err.details) : undefined,
+      };
     }
     return {
       success: false,
@@ -57,7 +91,9 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
 export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   const response = await promise;
   if (!response.success || response.data === undefined) {
-    throw new Error(response.message || response.error || 'Request failed');
+    const message = response.message || response.error || 'Request failed';
+    if (response.reason) throw new VerificationRequiredError(message, response.reason);
+    throw new Error(message);
   }
   return response.data;
 }

@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAgentUser } from '../layout';
-import { User, Bell, Landmark, MapPin } from 'lucide-react';
+import { User, Bell, Landmark, MapPin, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/agent/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/agent/settings/NotificationSettings';
 import { PayoutSettings } from '@/components/agent/settings/PayoutSettings';
 import { FieldPreferencesSettings } from '@/components/agent/settings/FieldPreferencesSettings';
+import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences';
+type SettingsTab = 'profile' | 'verification' | 'notifications' | 'payouts' | 'preferences';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
+  { id: 'verification', label: 'Verification', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout Account', icon: Landmark },
   { id: 'preferences', label: 'Field Preferences', icon: MapPin },
@@ -19,12 +22,16 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 
 export default function AgentSettingsPage() {
   const user = useAgentUser();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as SettingsTab | null) ?? 'profile';
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
         return <ProfileSettings user={user} />;
+      case 'verification':
+        return <LicenseVerificationSettings />;
       case 'notifications':
         return <NotificationSettings />;
       case 'payouts':

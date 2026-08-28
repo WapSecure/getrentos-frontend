@@ -63,6 +63,7 @@ interface PropertyCardProps {
   onEdit?: () => void;
   onToggleArchive?: () => void;
   onDelete?: () => void;
+  onVerify?: () => void;
   delay?: number;
 }
 
@@ -72,6 +73,7 @@ export const PropertyCard = ({
   onEdit,
   onToggleArchive,
   onDelete,
+  onVerify,
   delay = 0,
 }: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
@@ -92,12 +94,16 @@ export const PropertyCard = ({
         <div className="absolute inset-0 flex items-center justify-center">
           <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
         </div>
-        <div
-          className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${verification.className}`}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onVerify?.();
+          }}
+          className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium hover:opacity-80 transition-opacity ${verification.className}`}
         >
           <VerificationIcon className="w-3 h-3" />
           {verification.label}
-        </div>
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button

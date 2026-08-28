@@ -2,6 +2,7 @@
 
 import { useRenterUser } from '../layout';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ProfileSettings } from '@/components/renter/settings/ProfileSettings';
 import { AccountSettings } from '@/components/renter/settings/AccountSettings';
 import { NotificationSettings } from '@/components/renter/settings/NotificationSettings';
@@ -13,12 +14,14 @@ import { ThemeSettings } from '@/components/renter/settings/ThemeSettings';
 import { LanguageSettings } from '@/components/renter/settings/LanguageSettings';
 import { DataExport } from '@/components/renter/settings/DataExport';
 import { AccountDeletion } from '@/components/renter/settings/AccountDeletion';
+import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
 import {
   Settings,
   User,
   Lock,
   Bell,
   Shield,
+  ShieldCheck,
   CreditCard,
   Palette,
   Globe,
@@ -30,6 +33,7 @@ import {
 type SettingsTab =
   | 'profile'
   | 'account'
+  | 'verification'
   | 'notifications'
   | 'whatsapp'
   | 'privacy'
@@ -43,6 +47,7 @@ type SettingsTab =
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'account', label: 'Account', icon: Settings },
+  { id: 'verification', label: 'Verification', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
   { id: 'privacy', label: 'Privacy', icon: Shield },
@@ -56,7 +61,9 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 
 export default function SettingsPage() {
   const user = useRenterUser();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as SettingsTab | null) ?? 'profile';
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -64,6 +71,10 @@ export default function SettingsPage() {
         return <ProfileSettings user={user} />;
       case 'account':
         return <AccountSettings user={user} />;
+      case 'verification':
+        return (
+          <IdentityVerificationSettings description="Verify your identity to unlock submitting rental applications." />
+        );
       case 'notifications':
         return <NotificationSettings />;
       case 'whatsapp':

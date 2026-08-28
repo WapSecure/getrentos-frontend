@@ -12,7 +12,7 @@ export interface SignupData {
   referralCode?: string;
 }
 
-export type SignupStep = 'signup' | 'otp' | 'roles' | 'verification';
+export type SignupStep = 'signup' | 'otp' | 'roles';
 
 interface SignupStore {
   data: SignupData;
