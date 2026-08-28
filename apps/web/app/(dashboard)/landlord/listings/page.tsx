@@ -69,6 +69,7 @@ export default function LandlordListingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: landlordKeys.listings() });
       queryClient.invalidateQueries({ queryKey: landlordKeys.vacantUnits });
+      setIsCreateModalOpen(false);
     },
   });
 
@@ -156,6 +157,7 @@ export default function LandlordListingsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         vacantUnits={vacantUnits}
         onPublish={handlePublish}
+        submitError={publishMutation.error}
       />
 
       <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />

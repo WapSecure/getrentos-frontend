@@ -172,6 +172,7 @@ export default function RealtorClientsPage() {
       <AddClientModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        submitError={inviteClient.error}
         onSubmit={handleAddClient}
         isSubmitting={inviteClient.isPending}
         error={inviteClient.isError ? inviteClient.error.message : null}

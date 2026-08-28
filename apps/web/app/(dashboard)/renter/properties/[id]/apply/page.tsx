@@ -16,6 +16,7 @@ import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 
 const buildInitialData = (
   property: Property | null,
@@ -135,7 +136,13 @@ export default function PropertyApplyPage() {
         </p>
       </div>
 
-      <div className="max-w-2xl">
+      <div className="max-w-2xl space-y-4">
+        {submitMutation.error && (
+          <VerificationRequiredNotice
+            error={submitMutation.error}
+            href={`${ROUTES.RENTER_SETTINGS}?tab=verification`}
+          />
+        )}
         <ApplicationWizard
           property={property}
           initialData={buildInitialData(property, user)}

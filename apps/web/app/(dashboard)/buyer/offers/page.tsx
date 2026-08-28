@@ -14,6 +14,8 @@ import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { cn } from '@/lib/cn';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import { ROUTES } from '@/lib/constants/auth';
 import type { BuyerOffer, BuyerOfferStatus, BuyerOfferMessage } from '@/types/buyer';
 
 type StatusFilter = 'all' | BuyerOfferStatus;
@@ -57,7 +59,10 @@ function BuyerOffersPageContent() {
       financingType?: string;
       message?: string;
     }) => unwrap(buyerService.createOffer(data)),
-    onSuccess: () => invalidate(),
+    onSuccess: () => {
+      invalidate();
+      setIsMakeOfferOpen(false);
+    },
   });
   const withdrawMutation = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.withdrawOffer(id)),
@@ -98,7 +103,6 @@ function BuyerOffersPageContent() {
       financingType: offerData.financingType,
       message: offerData.message,
     });
-    setIsMakeOfferOpen(false);
   };
 
   const handleAcceptCounter = (offerId: string) => {
@@ -207,6 +211,15 @@ function BuyerOffersPageContent() {
           Make an Offer
         </Button>
       </div>
+
+      {createMutation.error && (
+        <div className="mb-6">
+          <VerificationRequiredNotice
+            error={createMutation.error}
+            href={`${ROUTES.BUYER_SETTINGS}?tab=verification`}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">

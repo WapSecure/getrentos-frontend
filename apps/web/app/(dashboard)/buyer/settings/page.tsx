@@ -2,16 +2,19 @@
 
 import { useBuyerUser } from '../layout';
 import { useState } from 'react';
-import { User, Bell, Landmark, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/buyer/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/buyer/settings/NotificationSettings';
 import { PaymentMethodSettings } from '@/components/buyer/settings/PaymentMethodSettings';
 import { SearchPreferencesSettings } from '@/components/buyer/settings/SearchPreferencesSettings';
+import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
 
-type SettingsTab = 'profile' | 'notifications' | 'payment' | 'preferences';
+type SettingsTab = 'profile' | 'verification' | 'notifications' | 'payment' | 'preferences';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
+  { id: 'verification', label: 'Verification', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payment', label: 'Payment Method', icon: Landmark },
   { id: 'preferences', label: 'Search Preferences', icon: SlidersHorizontal },
@@ -19,12 +22,18 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 
 export default function BuyerSettingsPage() {
   const user = useBuyerUser();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as SettingsTab | null) ?? 'profile';
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
         return <ProfileSettings user={user} />;
+      case 'verification':
+        return (
+          <IdentityVerificationSettings description="Verify your identity to unlock making offers on for-sale listings." />
+        );
       case 'notifications':
         return <NotificationSettings />;
       case 'payment':

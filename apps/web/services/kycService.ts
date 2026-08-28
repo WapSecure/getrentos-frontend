@@ -1,4 +1,3 @@
-import { apiFetch } from '@/lib/apiClient';
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
 export interface KycItem {
@@ -15,13 +14,6 @@ export interface IdentityKyc extends KycItem {
   matchScore?: number;
   /** User id or 'AUTO_FACE_MATCH'. */
   verifiedBy?: string;
-}
-
-export interface PreVerifyResult {
-  status: 'APPROVED' | 'REJECTED' | 'PENDING_REVIEW';
-  score: number;
-  message: string;
-  nextStep?: 'proceed' | 'retry' | 'manual_review';
 }
 
 export interface LicenseKyc extends KycItem {
@@ -55,13 +47,6 @@ export const IDENTITY_DOCUMENT_TYPES = [
 
 export type IdentityDocumentType = (typeof IDENTITY_DOCUMENT_TYPES)[number];
 
-export const ID_TYPE_TO_BACKEND: Record<string, IdentityDocumentType> = {
-  nin: 'NIN',
-  voters: 'VOTERS_CARD',
-  drivers: 'DRIVERS_LICENSE',
-  passport: 'PASSPORT',
-};
-
 export const kycService = {
   async getStatus(): Promise<ApiResponse<KycStatus>> {
     return safeCall(() => authFetch<KycStatus>('/users/me/kyc'));
@@ -87,19 +72,16 @@ export const kycService = {
     });
   },
 
-  async preVerify(params: {
-    reference: string;
-    document: File;
-    selfie?: File;
-    documentType: IdentityDocumentType;
-  }): Promise<ApiResponse<PreVerifyResult>> {
+  /** Submits a realtor/agent license (multipart) for human review. */
+  async submitLicense(params: {
+    licenseNumber: string;
+    document?: File;
+  }): Promise<ApiResponse<LicenseKyc>> {
     return safeCall(async () => {
       const form = new FormData();
-      form.append('reference', params.reference);
-      form.append('documentType', params.documentType);
-      form.append('document', params.document);
-      if (params.selfie) form.append('selfie', params.selfie);
-      return apiFetch<PreVerifyResult>('/auth/pre-verify', {
+      form.append('licenseNumber', params.licenseNumber);
+      if (params.document) form.append('document', params.document);
+      return authFetch<LicenseKyc>('/users/me/kyc/license', {
         method: 'POST',
         body: form,
       });

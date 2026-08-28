@@ -60,12 +60,10 @@ export default function SignupPage() {
     window.location.href = ROUTES.SIGNUP;
   };
 
-  // If step is 'roles' or 'verification', redirect to those pages
+  // If step is 'roles', redirect to role selection.
   useEffect(() => {
     if (step === 'roles') {
       window.location.href = ROUTES.ROLE_SELECTION;
-    } else if (step === 'verification') {
-      window.location.href = ROUTES.VERIFICATION;
     }
   }, [step]);
 

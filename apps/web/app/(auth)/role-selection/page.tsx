@@ -8,7 +8,7 @@ import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
-import { ROLES, ROUTES } from '@/lib/constants/auth';
+import { ROLES } from '@/lib/constants/auth';
 
 export default function RoleSelectionPage() {
   const router = useRouter();
@@ -19,18 +19,14 @@ export default function RoleSelectionPage() {
     canAddMoreRoles,
     setCanAddMoreRoles,
     createAccount,
-    needsVerification,
     isLoading,
   } = useSignup();
 
   const handleContinue = async () => {
     if (signupData.selectedRoles.length === 0) return;
-    // Roles that require identity verification run the wizard BEFORE the
-    // account is created — the auto face-match status is known up front.
-    if (needsVerification) {
-      router.push(ROUTES.VERIFICATION);
-      return;
-    }
+    // Every account is created immediately, with no upfront document/facial
+    // verification — identity/license/ownership checks happen later, at the
+    // point of use, for the specific actions that need them.
     await createAccount();
   };
 

@@ -7,12 +7,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap } from 'lucide-react';
 import { Button, CurrencyInput, DatePicker, Select } from '@getrentos/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface CreateListingModalProps {
   isOpen: boolean;
   onClose: () => void;
   vacantUnits: Unit[];
   onPublish: (listing: Omit<Listing, 'id' | 'status' | 'createdAt'>) => void;
+  submitError?: unknown;
 }
 
 const amenityOptions = ['Parking', 'Swimming Pool', 'Security', '24/7 Power', 'Gym', 'Elevator'];
@@ -22,6 +25,7 @@ export const CreateListingModal = ({
   onClose,
   vacantUnits,
   onPublish,
+  submitError = null,
 }: CreateListingModalProps) => {
   const [unitId, setUnitId] = useState('');
   const [listingTitle, setListingTitle] = useState('');
@@ -93,7 +97,6 @@ export const CreateListingModal = ({
       furnished,
       shortLetEnabled,
     });
-    handleClose();
   };
 
   return (
@@ -289,13 +292,16 @@ export const CreateListingModal = ({
             </div>
 
             {vacantUnits.length > 0 && (
-              <div className="p-4 border-t border-border flex gap-3 shrink-0">
-                <Button variant="primary" fullWidth onClick={handlePublish} disabled={!isValid}>
-                  Publish Listing
-                </Button>
-                <Button variant="ghost" fullWidth onClick={handleClose}>
-                  Cancel
-                </Button>
+              <div className="p-4 border-t border-border space-y-3 shrink-0">
+                <VerificationRequiredNotice error={submitError} href={ROUTES.LANDLORD_PROPERTIES} />
+                <div className="flex gap-3">
+                  <Button variant="primary" fullWidth onClick={handlePublish} disabled={!isValid}>
+                    Publish Listing
+                  </Button>
+                  <Button variant="ghost" fullWidth onClick={handleClose}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
             )}
           </motion.div>

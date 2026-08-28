@@ -7,6 +7,8 @@ import { X, UserPlus, Mail, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button, Field, Input } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import { ROUTES } from '@/lib/constants/auth';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -18,6 +20,8 @@ interface AddClientModalProps {
   onSubmit: (email: string) => void;
   isSubmitting?: boolean;
   error?: string | null;
+  /** The raw invite-mutation error, so a verification 403 can render an actionable link. */
+  submitError?: unknown;
 }
 
 export const AddClientModal = ({
@@ -26,6 +30,7 @@ export const AddClientModal = ({
   onSubmit,
   isSubmitting = false,
   error = null,
+  submitError = null,
 }: AddClientModalProps) => {
   const [email, setEmail] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
@@ -122,6 +127,10 @@ export const AddClientModal = ({
             </div>
 
             <div className="p-4 space-y-4">
+              <VerificationRequiredNotice
+                error={submitError}
+                href={`${ROUTES.REALTOR_SETTINGS}?tab=verification`}
+              />
               <Field
                 label="Email"
                 htmlFor="realtor-client-email"

@@ -4,12 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { authService } from '@/services/authService';
 import { saveAuthSession } from '@/lib/authStorage';
-import {
-  ROLES_REQUIRING_VERIFICATION,
-  ROUTES,
-  STORAGE_KEYS,
-  getDashboardRoute,
-} from '@/lib/constants/auth';
+import { ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 
 export const useSignup = () => {
   const router = useRouter();
@@ -127,9 +122,9 @@ export const useSignup = () => {
       );
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 
-      // Account is created now — route to the primary role dashboard. If the
-      // account was created pre-verified (auto face match), the dashboard is
-      // fully unlocked; otherwise the caller decided when to run verification.
+      // Account is created now, with no document/facial verification required
+      // — route straight to the primary role dashboard. Identity/license/
+      // ownership checks happen later, at the point of use.
       const primaryRole = data.selectedRoles[0];
       router.push(getDashboardRoute(primaryRole));
     } else {
@@ -152,18 +147,10 @@ export const useSignup = () => {
     setError(null);
   };
 
-  // Whether any selected role requires identity verification before it can
-  // be used (landlord/owner/realtor/agent). Callers use this to decide
-  // whether to run the verification wizard before creating the account.
-  const needsVerification = data.selectedRoles.some((roleId: string) =>
-    (ROLES_REQUIRING_VERIFICATION as readonly string[]).includes(roleId)
-  );
-
   return {
     signupData: data,
     step,
     otpReference,
-    needsVerification,
     isLoading:
       sendOtpMutation.isPending ||
       verifyOtpMutation.isPending ||
