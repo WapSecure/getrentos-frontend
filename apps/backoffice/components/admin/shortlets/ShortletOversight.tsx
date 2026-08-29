@@ -10,6 +10,7 @@ import {
   DialogDescription,
   DialogTitle,
   EmptyState,
+  Field,
   Input,
   Pagination,
   Select,
@@ -30,12 +31,15 @@ import {
   Pause,
   Play,
   Send,
+  ShieldAlert,
   ShieldCheck,
 } from 'lucide-react';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import type {
   AdminShortletBooking,
+  AdminShortletDepositClaim,
+  AdminShortletDepositClaimStatus,
   AdminShortletDispute,
   AdminShortletDisputeMessage,
   AdminShortletDisputeStatus,
@@ -82,7 +86,7 @@ const BOOKING_STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   COMPLETED: 'neutral',
 };
 
-type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes';
+type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes' | 'claims';
 
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
@@ -102,6 +106,12 @@ export const ShortletOversight = () => {
   const [disputeStatus, setDisputeStatus] = useState<'all' | AdminShortletDisputeStatus>('all');
   const [activeDispute, setActiveDispute] = useState<AdminShortletDispute | null>(null);
   const [threadDraft, setThreadDraft] = useState('');
+
+  // Deposit claim filters
+  const [claimsPage, setClaimsPage] = useState(1);
+  const [claimStatus, setClaimStatus] = useState<'all' | AdminShortletDepositClaimStatus>('all');
+  const [claimSearch, setClaimSearch] = useState('');
+  const [activeClaim, setActiveClaim] = useState<AdminShortletDepositClaim | null>(null);
 
   const { data: overview } = useQuery({
     queryKey: ['admin', 'shortlets', 'overview'],
@@ -158,6 +168,53 @@ export const ShortletOversight = () => {
       ),
   });
   const disputes = disputesData?.items ?? [];
+
+  const { data: claimsData, isLoading: claimsLoading } = useQuery({
+    queryKey: [
+      'admin',
+      'shortlets',
+      'deposit-claims',
+      { status: claimStatus, search: claimSearch, page: claimsPage },
+    ],
+    queryFn: () =>
+      unwrap(
+        adminShortletService.listDepositClaims({
+          status: claimStatus === 'all' ? undefined : claimStatus,
+          search: claimSearch.trim() || undefined,
+          page: claimsPage,
+          pageSize: 12,
+        })
+      ),
+  });
+  const claims = claimsData?.items ?? [];
+
+  const adjudicate = useMutation({
+    mutationFn: (input: {
+      claimId: string;
+      decision: 'APPROVED' | 'PARTIAL' | 'REJECTED';
+      resolution?: string;
+      deductedAmount?: number;
+    }) =>
+      unwrap(
+        adminShortletService.adjudicateDepositClaim(input.claimId, {
+          decision: input.decision,
+          resolution: input.resolution,
+          deductedAmount: input.deductedAmount,
+        })
+      ),
+    onSuccess: (_, input) => {
+      setActiveClaim(null);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'deposit-claims'] });
+      const label =
+        input.decision === 'APPROVED'
+          ? 'Claim approved — deposit withheld from the guest refund.'
+          : input.decision === 'PARTIAL'
+            ? 'Claim partially approved — remainder refunded to the guest.'
+            : 'Claim rejected — deposit released to the guest.';
+      setToast({ message: label, variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
 
   const { data: threadMessages = [], isLoading: threadLoading } = useQuery({
     queryKey: ['admin', 'shortlets', 'disputes', activeDispute?.id, 'messages'],
@@ -237,6 +294,10 @@ export const ShortletOversight = () => {
     setDisputeStatus(value as 'all' | AdminShortletDisputeStatus);
     setDisputesPage(1);
   };
+  const changeClaimStatus = (value: string) => {
+    setClaimStatus(value as 'all' | AdminShortletDepositClaimStatus);
+    setClaimsPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -293,7 +354,7 @@ export const ShortletOversight = () => {
 
       {/* Tabs */}
       <div className="inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['listings', 'bookings', 'payouts', 'disputes'] as Tab[]).map((t) => (
+        {(['listings', 'bookings', 'payouts', 'disputes', 'claims'] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -310,7 +371,9 @@ export const ShortletOversight = () => {
                 ? `Bookings (${bookingsData?.total ?? 0})`
                 : t === 'payouts'
                   ? `Payouts (${payoutsData?.total ?? 0})`
-                  : `Disputes (${disputesData?.total ?? 0})`}
+                  : t === 'disputes'
+                    ? `Disputes (${disputesData?.total ?? 0})`
+                    : `Deposit claims (${claimsData?.total ?? 0})`}
           </button>
         ))}
       </div>
@@ -444,7 +507,7 @@ export const ShortletOversight = () => {
             onPageChange={setPayoutsPage}
           />
         </div>
-      ) : (
+      ) : tab === 'disputes' ? (
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
             <div className="w-52">
@@ -483,6 +546,64 @@ export const ShortletOversight = () => {
             onPageChange={setDisputesPage}
           />
         </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
+            <div className="min-w-[220px] flex-1">
+              <Input
+                placeholder="Search by host, guest, or reason"
+                value={claimSearch}
+                onChange={(e) => {
+                  setClaimSearch(e.target.value);
+                  setClaimsPage(1);
+                }}
+              />
+            </div>
+            <div className="w-44">
+              <Select
+                value={claimStatus}
+                onValueChange={changeClaimStatus}
+                options={CLAIM_STATUS_VALUES}
+              />
+            </div>
+          </div>
+
+          {claimsLoading ? (
+            <div className="space-y-2 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : claims.length === 0 ? (
+            <EmptyState
+              icon={ShieldAlert}
+              title="No deposit claims"
+              description="Host claims against held deposits appear here for adjudication."
+            />
+          ) : (
+            <div className="divide-y divide-border">
+              {claims.map((c) => (
+                <DepositClaimRow key={c.id} claim={c} onOpen={() => setActiveClaim(c)} />
+              ))}
+            </div>
+          )}
+
+          <Pagination
+            page={claimsPage}
+            pageSize={12}
+            total={claimsData?.total ?? 0}
+            onPageChange={setClaimsPage}
+          />
+        </div>
+      )}
+
+      {activeClaim && (
+        <AdjudicateClaimModal
+          claim={activeClaim}
+          pending={adjudicate.isPending}
+          onSubmit={(input) => adjudicate.mutate({ claimId: activeClaim.id, ...input })}
+          onClose={() => setActiveClaim(null)}
+        />
       )}
 
       {activeDispute && (
@@ -762,6 +883,169 @@ function DisputeThreadModal({
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const CLAIM_STATUS_VALUES: { value: 'all' | AdminShortletDepositClaimStatus; label: string }[] = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'APPROVED', label: 'Approved' },
+  { value: 'PARTIAL', label: 'Partially approved' },
+  { value: 'REJECTED', label: 'Rejected' },
+];
+
+const CLAIM_STATUS_VARIANT: Record<AdminShortletDepositClaimStatus, BadgeVariant> = {
+  PENDING: 'warning',
+  APPROVED: 'danger',
+  PARTIAL: 'warning',
+  REJECTED: 'success',
+};
+
+function DepositClaimRow({
+  claim,
+  onOpen,
+}: {
+  claim: AdminShortletDepositClaim;
+  onOpen: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium">
+            {formatCurrency(claim.amount)} claim · {claim.listingTitle ?? 'Shortlet'}
+          </p>
+          <Badge variant={CLAIM_STATUS_VARIANT[claim.status]}>{claim.status}</Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {claim.claimedBy} → {claim.guestName} · {formatDate(claim.createdAt, 'short')}
+          {claim.evidence.length > 0 && (
+            <span className="ml-1 text-xs">· {claim.evidence.length} photo(s)</span>
+          )}
+        </p>
+        <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{claim.reason}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={onOpen} disabled={claim.status !== 'PENDING'}>
+          {claim.status === 'PENDING' ? (
+            <>
+              <ShieldAlert className="mr-1.5 h-4 w-4" /> Adjudicate
+            </>
+          ) : (
+            'View'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AdjudicateClaimModal({
+  claim,
+  pending,
+  onSubmit,
+  onClose,
+}: {
+  claim: AdminShortletDepositClaim;
+  pending: boolean;
+  onSubmit: (input: {
+    decision: 'APPROVED' | 'PARTIAL' | 'REJECTED';
+    resolution?: string;
+    deductedAmount?: number;
+  }) => void;
+  onClose: () => void;
+}) {
+  const [decision, setDecision] = useState<'APPROVED' | 'PARTIAL' | 'REJECTED'>('APPROVED');
+  const [deducted, setDeducted] = useState(String(claim.amount));
+  const [resolution, setResolution] = useState('');
+
+  const submit = () => {
+    onSubmit({
+      decision,
+      resolution: resolution.trim() || undefined,
+      ...(decision === 'PARTIAL'
+        ? { deductedAmount: Number(deducted) || 0 }
+        : decision === 'APPROVED'
+          ? { deductedAmount: claim.amount }
+          : { deductedAmount: 0 }),
+    });
+  };
+
+  const canSubmit =
+    (decision !== 'PARTIAL' || (Number(deducted) > 0 && Number(deducted) <= claim.amount)) &&
+    !pending;
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <div className="p-5">
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5" /> Adjudicate deposit claim
+          </DialogTitle>
+          <DialogDescription>
+            {claim.claimedBy} claims {formatCurrency(claim.amount)} against the deposit for{' '}
+            {claim.listingTitle ?? 'this stay'} (guest: {claim.guestName}). Choosing a deduction
+            refunds the guest the remainder of their deposit.
+          </DialogDescription>
+        </div>
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
+          <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
+            <p className="font-medium text-muted-foreground">Claim reason</p>
+            <p className="mt-1">{claim.reason}</p>
+            {claim.evidence.length > 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {claim.evidence.length} evidence photo{claim.evidence.length > 1 ? 's' : ''} on file
+              </p>
+            )}
+          </div>
+
+          <Field label="Decision">
+            <Select
+              value={decision}
+              onValueChange={(v) => setDecision(v as 'APPROVED' | 'PARTIAL' | 'REJECTED')}
+              options={[
+                { value: 'APPROVED', label: 'Approve in full' },
+                { value: 'PARTIAL', label: 'Partially approve' },
+                { value: 'REJECTED', label: 'Reject' },
+              ]}
+            />
+          </Field>
+
+          {decision === 'PARTIAL' && (
+            <Field
+              label={`Amount to withhold from the guest refund (max ${formatCurrency(claim.amount)})`}
+            >
+              <Input
+                type="number"
+                min={1}
+                max={claim.amount}
+                value={deducted}
+                onChange={(e) => setDeducted(e.target.value)}
+              />
+            </Field>
+          )}
+
+          <Field label="Resolution note (shown to both parties)" hint="Optional but recommended.">
+            <Textarea
+              value={resolution}
+              onChange={(e) => setResolution(e.target.value)}
+              placeholder="e.g. Evidence confirms partial damage; deducted ₦10,000…"
+              rows={3}
+              maxLength={2000}
+            />
+          </Field>
+
+          <div className="flex justify-end gap-2 pt-1">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={submit} disabled={!canSubmit}>
+              {pending ? 'Processing…' : 'Confirm decision'}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

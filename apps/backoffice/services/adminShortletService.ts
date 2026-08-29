@@ -3,6 +3,7 @@ import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminShortletBooking,
+  AdminShortletDepositClaim,
   AdminShortletDispute,
   AdminShortletDisputeMessage,
   AdminShortletListing,
@@ -169,6 +170,44 @@ export const adminShortletService = {
       authFetch<AdminShortletDispute>(`/admin/shortlets/disputes/${disputeId}/escalate`, {
         method: 'POST',
       })
+    );
+  },
+
+  listDepositClaims(
+    params: {
+      status?: string;
+      search?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<AdminShortletDepositClaim>>> {
+    const query = toQuery({
+      status: params.status,
+      search: params.search,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() =>
+      authFetch<Paginated<AdminShortletDepositClaim>>(`/admin/shortlets/deposit-claims${query}`)
+    );
+  },
+
+  adjudicateDepositClaim(
+    claimId: string,
+    input: {
+      decision: 'APPROVED' | 'PARTIAL' | 'REJECTED';
+      resolution?: string;
+      deductedAmount?: number;
+    }
+  ): Promise<ApiResponse<AdminShortletDepositClaim>> {
+    return safeCall(() =>
+      authFetch<AdminShortletDepositClaim>(
+        `/admin/shortlets/deposit-claims/${claimId}/adjudicate`,
+        {
+          method: 'POST',
+          body: JSON.stringify(input),
+        }
+      )
     );
   },
 };

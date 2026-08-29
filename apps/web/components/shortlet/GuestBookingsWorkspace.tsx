@@ -23,6 +23,7 @@ import {
   MapPin,
   MessageSquare,
   RotateCcw,
+  ShieldAlert,
   Star,
 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -34,6 +35,7 @@ import { ShortletReviewDialog } from './ShortletReviewDialog';
 import { ShortletWishlistDialog } from './ShortletWishlistDialog';
 import { ShortletDisputesInbox } from './ShortletDisputesInbox';
 import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
+import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import type {
   ShortletBooking,
   ShortletBookingStatus,
@@ -92,6 +94,7 @@ export const GuestBookingsWorkspace = () => {
   const [reviewTarget, setReviewTarget] = useState<ShortletBooking | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
+  const [claimsOpen, setClaimsOpen] = useState(false);
   const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
@@ -174,6 +177,9 @@ export const GuestBookingsWorkspace = () => {
           <Button variant="outline" size="sm" onClick={() => setDisputesOpen(true)}>
             <Gavel className="mr-1.5 h-4 w-4" /> Disputes
           </Button>
+          <Button variant="outline" size="sm" onClick={() => setClaimsOpen(true)}>
+            <ShieldAlert className="mr-1.5 h-4 w-4" /> Deposit claims
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setWishlistOpen(true)}>
             <Heart className="mr-1.5 h-4 w-4" /> Saved
           </Button>
@@ -246,6 +252,24 @@ export const GuestBookingsWorkspace = () => {
                     <Badge variant="success" className="mt-1">
                       <RotateCcw className="mr-1 h-3 w-3" /> Deposit refunded{' '}
                       {formatCurrency(b.deposit)}
+                    </Badge>
+                  )}
+                  {b.depositClaimStatus && (
+                    <Badge
+                      variant={
+                        b.depositClaimStatus === 'PENDING'
+                          ? 'warning'
+                          : b.depositClaimStatus === 'REJECTED'
+                            ? 'success'
+                            : 'danger'
+                      }
+                      className="mt-1"
+                    >
+                      <ShieldAlert className="mr-1 h-3 w-3" /> Claim{' '}
+                      {b.depositClaimStatus.toLowerCase()}
+                      {b.depositClaimAmount != null
+                        ? ` ${formatCurrency(b.depositClaimAmount)}`
+                        : ''}
                     </Badge>
                   )}
                   {b.status === 'COMPLETED' && b.reviewed && (
@@ -326,6 +350,11 @@ export const GuestBookingsWorkspace = () => {
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
         <DialogContent className="sm:max-w-3xl">
           <ShortletDisputesInbox />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={claimsOpen} onOpenChange={(o) => !o && setClaimsOpen(false)}>
+        <DialogContent className="sm:max-w-2xl">
+          <ShortletDepositClaimsInbox role="guest" />
         </DialogContent>
       </Dialog>
       {wishlistOpen && <ShortletWishlistDialog onClose={() => setWishlistOpen(false)} />}

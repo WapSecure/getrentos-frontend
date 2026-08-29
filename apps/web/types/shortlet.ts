@@ -75,6 +75,8 @@ export interface ShortletBooking {
   deposit?: number;
   depositStatus: 'UNPAID' | 'HELD' | 'REFUNDED';
   depositRefundedAt?: string;
+  depositClaimStatus?: ShortletDepositClaimStatus;
+  depositClaimAmount?: number;
   reviewed?: boolean;
   guestReviewed?: boolean;
   guestRatingAverage?: number;
@@ -83,6 +85,35 @@ export interface ShortletBooking {
   hostName: string;
   guestName?: string;
   createdAt: string;
+}
+
+export type ShortletDepositClaimStatus = 'PENDING' | 'APPROVED' | 'PARTIAL' | 'REJECTED';
+
+export interface ShortletDepositClaim {
+  id: string;
+  bookingId: string;
+  listingTitle?: string;
+  claimedBy: string;
+  guestName: string;
+  amount: number;
+  reason: string;
+  evidence: string[];
+  status: ShortletDepositClaimStatus;
+  resolution?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface OpenDepositClaimInput {
+  amount: number;
+  reason: string;
+  imageKeys?: string[];
+}
+
+export interface AdjudicateDepositClaimInput {
+  decision: 'APPROVED' | 'PARTIAL' | 'REJECTED';
+  resolution?: string;
+  deductedAmount?: number;
 }
 
 export interface ShortletPayResponse {

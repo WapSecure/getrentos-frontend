@@ -5,10 +5,12 @@ import type {
   CreateShortletBookingInput,
   CreateShortletListingInput,
   CreateShortletReviewInput,
+  OpenDepositClaimInput,
   OpenShortletDisputeInput,
   ShortletAvailability,
   ShortletBooking,
   ShortletConversation,
+  ShortletDepositClaim,
   ShortletDispute,
   ShortletDisputeMessage,
   ShortletEarningsAnalytics,
@@ -303,6 +305,29 @@ export const shortletService = {
   myDisputes: (params: ShortletListParams = {}) =>
     safeCall(() =>
       authFetch<Paginated<ShortletDispute>>(`/shortlets/disputes${listQuery(params)}`)
+    ),
+
+  // -------- Deposit claims --------
+  openDepositClaim: (bookingId: string, input: OpenDepositClaimInput) =>
+    safeCall(() =>
+      authFetch<ShortletDepositClaim>(`/host/shortlets/bookings/${bookingId}/deposit-claim`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  myDepositClaims: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletDepositClaim>>(
+        `/host/shortlets/deposit-claims${listQuery(params)}`
+      )
+    ),
+
+  guestDepositClaims: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletDepositClaim>>(
+        `/shortlets/bookings/deposit-claims${listQuery(params)}`
+      )
     ),
 
   disputeMessages: (disputeId: string) =>

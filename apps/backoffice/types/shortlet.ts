@@ -100,3 +100,20 @@ export interface AdminShortletDisputeMessage {
   text: string;
   timestamp: string;
 }
+
+export type AdminShortletDepositClaimStatus = 'PENDING' | 'APPROVED' | 'PARTIAL' | 'REJECTED';
+
+export interface AdminShortletDepositClaim {
+  id: string;
+  bookingId: string;
+  listingTitle?: string;
+  claimedBy: string;
+  guestName: string;
+  amount: number;
+  reason: string;
+  evidence: string[];
+  status: AdminShortletDepositClaimStatus;
+  resolution?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}

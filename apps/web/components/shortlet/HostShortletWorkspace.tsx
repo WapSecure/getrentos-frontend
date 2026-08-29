@@ -30,6 +30,7 @@ import {
   Gavel,
   MessageSquare,
   Plus,
+  ShieldAlert,
   Star,
   Zap,
 } from 'lucide-react';
@@ -45,6 +46,8 @@ import { ShortletPayoutsDialog } from './ShortletPayoutsDialog';
 import { ShortletGuestReviewDialog } from './ShortletGuestReviewDialog';
 import { ShortletDisputesInbox } from './ShortletDisputesInbox';
 import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
+import { ShortletOpenDepositClaimDialog } from './ShortletOpenDepositClaimDialog';
+import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
 import type {
   BlockedDateRange,
@@ -111,7 +114,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
+  const [claimsOpen, setClaimsOpen] = useState(false);
   const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
+  const [claimTarget, setClaimTarget] = useState<ShortletBooking | null>(null);
   const [guestReviewTarget, setGuestReviewTarget] = useState<ShortletBooking | null>(null);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
@@ -177,6 +182,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           </Button>
           <Button variant="outline" onClick={() => setDisputesOpen(true)}>
             <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+          </Button>
+          <Button variant="outline" onClick={() => setClaimsOpen(true)}>
+            <ShieldAlert className="mr-1.5 h-4 w-4" /> Deposit claims
           </Button>
           <Button variant="outline" onClick={() => setAnalyticsOpen(true)}>
             <BarChart3 className="mr-1.5 h-4 w-4" /> Analytics
@@ -339,11 +347,26 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                 <div className="text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
+                  {b.depositStatus === 'HELD' && b.deposit != null && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {formatCurrency(b.deposit)} deposit held
+                      {b.depositClaimStatus ? ` · claim ${b.depositClaimStatus.toLowerCase()}` : ''}
+                    </p>
+                  )}
                   {b.paymentReference && (
                     <p className="text-xs text-muted-foreground">Ref {b.paymentReference}</p>
                   )}
                 </div>
               </div>
+              {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') &&
+                b.depositStatus === 'HELD' &&
+                b.depositClaimStatus !== 'PENDING' && (
+                  <div className="mt-3 flex justify-end gap-2 border-t border-border pt-3">
+                    <Button variant="outline" size="sm" onClick={() => setClaimTarget(b)}>
+                      <ShieldAlert className="mr-1.5 h-4 w-4" /> Claim deposit
+                    </Button>
+                  </div>
+                )}
               {b.status === 'REQUESTED' && (
                 <div className="mt-3 flex justify-end gap-2 border-t border-border pt-3">
                   <Button
@@ -428,6 +451,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           <ShortletDisputesInbox />
         </DialogContent>
       </Dialog>
+      <Dialog open={claimsOpen} onOpenChange={(o) => !o && setClaimsOpen(false)}>
+        <DialogContent className="sm:max-w-2xl">
+          <ShortletDepositClaimsInbox role="host" />
+        </DialogContent>
+      </Dialog>
       {analyticsOpen && <HostEarningsAnalyticsDialog onClose={() => setAnalyticsOpen(false)} />}
       {guestReviewTarget && (
         <ShortletGuestReviewDialog
@@ -449,6 +477,21 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
             setToast({
               message: 'Dispute opened — the other party has been notified.',
+              variant: 'success',
+            });
+          }}
+        />
+      )}
+      {claimTarget && (
+        <ShortletOpenDepositClaimDialog
+          booking={claimTarget}
+          onClose={() => setClaimTarget(null)}
+          onOpened={() => {
+            setClaimTarget(null);
+            queryClient.invalidateQueries({ queryKey: shortletKeys.hostBookings });
+            queryClient.invalidateQueries({ queryKey: shortletKeys.depositClaims });
+            setToast({
+              message: 'Deposit claim filed — an admin will review it.',
               variant: 'success',
             });
           }}
