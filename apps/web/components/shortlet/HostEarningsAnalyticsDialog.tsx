@@ -9,7 +9,7 @@ import {
   DialogTitle,
   Skeleton,
 } from '@getrentos/ui';
-import { BedDouble, CalendarCheck, CircleDollarSign, TrendingUp, Wallet } from 'lucide-react';
+import { BedDouble, CalendarCheck, CircleDollarSign, Eye, TrendingUp, Wallet } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -43,9 +43,15 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
     queryKey: shortletKeys.hostAnalytics,
     queryFn: () => unwrap(shortletService.hostEarningsAnalytics()),
   });
+  const { data: views } = useQuery({
+    queryKey: shortletKeys.hostAnalyticsViews,
+    queryFn: () => unwrap(shortletService.hostViewsAnalytics()),
+  });
 
   const maxMonthly = Math.max(1, ...(data?.monthly.map((m) => m.earned) ?? []));
   const maxListing = Math.max(1, ...(data?.byListing.map((l) => l.earned) ?? []));
+  const maxDailyViews = Math.max(1, ...(views?.daily.map((d) => d.views) ?? []));
+  const maxListingViews = Math.max(1, ...(views?.byListing.map((l) => l.views) ?? []));
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -136,6 +142,70 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                     ))}
                   </div>
                 </div>
+              )}
+
+              {views && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <StatCard
+                      icon={Eye}
+                      label="Total views"
+                      value={String(views.totalViews)}
+                      hint="Times a detail page was opened"
+                    />
+                    <StatCard
+                      icon={Eye}
+                      label="Unique viewers"
+                      value={String(views.totalUniqueViewers)}
+                      hint="Distinct signed-in visitors"
+                    />
+                  </div>
+
+                  {views.daily.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Views — last 30 days</p>
+                      <div className="flex h-28 items-end gap-1 rounded-lg border border-border p-3">
+                        {views.daily.map((d) => (
+                          <div
+                            key={d.date}
+                            className="flex h-full flex-1 items-end"
+                            title={`${d.date}: ${d.views} view${d.views === 1 ? '' : 's'}`}
+                          >
+                            <div
+                              className="w-full rounded-t bg-emerald-500/70"
+                              style={{ height: `${Math.max(4, (d.views / maxDailyViews) * 100)}%` }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {views.byListing.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Views by listing</p>
+                      <div className="divide-y divide-border rounded-lg border border-border">
+                        {views.byListing.map((l) => (
+                          <div key={l.listingId} className="p-3">
+                            <div className="flex items-center justify-between">
+                              <p className="truncate text-sm font-medium">{l.title}</p>
+                              <p className="font-semibold">{l.views}</p>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {l.uniqueViewers} unique viewer{l.uniqueViewers === 1 ? '' : 's'}
+                            </p>
+                            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                              <div
+                                className="h-full rounded-full bg-emerald-500/70"
+                                style={{ width: `${(l.views / maxListingViews) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

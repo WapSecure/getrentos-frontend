@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
@@ -52,6 +52,14 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [mediaTab, setMediaTab] = useState<MediaTab>('photos');
+
+  // Record one view/impression per page visit (fire-and-forget).
+  const viewRecorded = useRef(false);
+  useEffect(() => {
+    if (viewRecorded.current || !listingId) return;
+    viewRecorded.current = true;
+    shortletService.recordView(listingId).catch(() => undefined);
+  }, [listingId]);
 
   const {
     data: listing,

@@ -291,3 +291,15 @@ export interface ShortletEarningsAnalytics {
   }[];
   monthly: { month: string; earned: number }[];
 }
+
+export interface ShortletViewsAnalytics {
+  totalViews: number;
+  totalUniqueViewers: number;
+  byListing: {
+    listingId: string;
+    title: string;
+    views: number;
+    uniqueViewers: number;
+  }[];
+  daily: { date: string; views: number }[];
+}

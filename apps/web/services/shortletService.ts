@@ -17,6 +17,7 @@ import type {
   ShortletPayout,
   ShortletPayoutAccount,
   ShortletReview,
+  ShortletViewsAnalytics,
   UpdateShortletListingInput,
   UpsertPayoutAccountInput,
 } from '@/types/shortlet';
@@ -265,6 +266,12 @@ export const shortletService = {
 
   hostEarningsAnalytics: () =>
     safeCall(() => authFetch<ShortletEarningsAnalytics>('/host/shortlets/analytics')),
+
+  hostViewsAnalytics: () =>
+    safeCall(() => authFetch<ShortletViewsAnalytics>('/host/shortlets/analytics/views')),
+
+  recordView: (listingId: string) =>
+    safeCall(() => authFetch(`/shortlets/${listingId}/view`, { method: 'POST' })),
 
   // -------- Disputes --------
   openDispute: (bookingId: string, input: OpenShortletDisputeInput) =>
