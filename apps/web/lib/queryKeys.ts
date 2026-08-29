@@ -267,3 +267,12 @@ export const estateKeys = {
   governanceRecords: (estateId: string, type?: string) =>
     ['estate', estateId, 'governanceRecords', type ?? 'all'] as const,
 };
+
+export const estateResidentKeys = {
+  myHousehold: ['estate', 'resident', 'household'] as const,
+  dues: (status?: string) => ['estate', 'resident', 'dues', status ?? 'all'] as const,
+  announcements: ['estate', 'resident', 'announcements'] as const,
+  violations: ['estate', 'resident', 'violations'] as const,
+  visitorPasses: (status?: string) =>
+    ['estate', 'resident', 'visitorPasses', status ?? 'all'] as const,
+};

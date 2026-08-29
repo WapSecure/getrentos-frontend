@@ -19,7 +19,25 @@ export interface Household {
   contactPhone?: string;
   contactEmail?: string;
   status: HouseholdStatus;
+  residentUserId?: string;
+  residentLinked: boolean;
   createdAt: string;
+}
+
+export interface ResidentHousehold {
+  id: string;
+  unitLabel: string;
+  residentName: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  status: HouseholdStatus;
+  estate: {
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+  };
 }
 
 export type DueStatus = 'pending' | 'paid' | 'overdue';
