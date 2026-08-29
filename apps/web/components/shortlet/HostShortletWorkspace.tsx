@@ -218,8 +218,16 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">{l.title}</h3>
                       {l.status !== 'PUBLISHED' && (
-                        <Badge variant={l.status === 'PAUSED' ? 'warning' : 'neutral'}>
-                          {l.status}
+                        <Badge
+                          variant={
+                            l.status === 'PAUSED'
+                              ? 'warning'
+                              : l.status === 'PENDING_VERIFICATION'
+                                ? 'info'
+                                : 'neutral'
+                          }
+                        >
+                          {l.status === 'PENDING_VERIFICATION' ? 'Under review' : l.status}
                         </Badge>
                       )}
                       {l.instantBooking && (
@@ -241,7 +249,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {l.status !== 'CLOSED' && (
+                    {l.status !== 'CLOSED' && l.status !== 'PENDING_VERIFICATION' && (
                       <Button
                         variant="outline"
                         size="sm"
