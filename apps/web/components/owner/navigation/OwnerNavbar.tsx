@@ -17,6 +17,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface OwnerNavbarProps {
@@ -52,6 +53,11 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
   const markAllRead = useMutation({
     mutationFn: () => unwrap(ownerService.markAllNotificationsRead()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ownerKeys.notifications }),
+  });
+
+  // Real-time: refresh the bell when the backend pushes a new notification.
+  useRealtimeEvent('notification:new', () => {
+    queryClient.invalidateQueries({ queryKey: ownerKeys.notifications });
   });
 
   useEffect(() => {

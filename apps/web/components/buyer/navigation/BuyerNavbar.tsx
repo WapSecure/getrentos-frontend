@@ -17,6 +17,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
 import { ROUTES } from '@/lib/constants/auth';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface BuyerNavbarProps {
@@ -50,6 +51,11 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
   const markAllRead = useMutation({
     mutationFn: () => unwrap(buyerService.markAllNotificationsRead()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.notifications }),
+  });
+
+  // Real-time: refresh the bell when the backend pushes a new notification.
+  useRealtimeEvent('notification:new', () => {
+    queryClient.invalidateQueries({ queryKey: buyerKeys.notifications });
   });
 
   useEffect(() => {

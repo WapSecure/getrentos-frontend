@@ -17,6 +17,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import { ROUTES } from '@/lib/constants/auth';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface LandlordNavbarProps {
@@ -49,6 +50,11 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
   const markAllRead = useMutation({
     mutationFn: () => unwrap(landlordService.markAllNotificationsRead()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.notifications }),
+  });
+
+  // Real-time: refresh the bell when the backend pushes a new notification.
+  useRealtimeEvent('notification:new', () => {
+    queryClient.invalidateQueries({ queryKey: landlordKeys.notifications });
   });
 
   useEffect(() => {
