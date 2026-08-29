@@ -23,7 +23,7 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarOff, Banknote, MessageSquare, Plus, Zap } from 'lucide-react';
+import { BarChart3, CalendarOff, Banknote, Gavel, MessageSquare, Plus, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerService } from '@/services/ownerService';
 import { landlordService } from '@/services/landlordService';
@@ -33,9 +33,13 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletMediaManager, type ShortletMediaState } from './ShortletMediaManager';
 import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletPayoutsDialog } from './ShortletPayoutsDialog';
+import { ShortletDisputesInbox } from './ShortletDisputesInbox';
+import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
+import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
+  ShortletBooking,
   ShortletBookingStatus,
   ShortletCancellationPolicy,
   ShortletListing,
@@ -96,6 +100,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
+  const [disputesOpen, setDisputesOpen] = useState(false);
+  const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data: listingsData, isLoading: listingsLoading } = useQuery({
@@ -156,6 +163,12 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setMessagesOpen(true)}>
             <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+          </Button>
+          <Button variant="outline" onClick={() => setDisputesOpen(true)}>
+            <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+          </Button>
+          <Button variant="outline" onClick={() => setAnalyticsOpen(true)}>
+            <BarChart3 className="mr-1.5 h-4 w-4" /> Analytics
           </Button>
           <Button variant="outline" onClick={() => setPayoutsOpen(true)}>
             <Banknote className="mr-1.5 h-4 w-4" /> Payouts
@@ -324,6 +337,13 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   </Button>
                 </div>
               )}
+              {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
+                <div className="mt-3 flex justify-end border-t border-border pt-3">
+                  <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
+                    <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
           <Pagination
@@ -367,6 +387,26 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         </DialogContent>
       </Dialog>
       {payoutsOpen && <ShortletPayoutsDialog onClose={() => setPayoutsOpen(false)} />}
+      <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
+        <DialogContent className="sm:max-w-3xl">
+          <ShortletDisputesInbox />
+        </DialogContent>
+      </Dialog>
+      {analyticsOpen && <HostEarningsAnalyticsDialog onClose={() => setAnalyticsOpen(false)} />}
+      {disputeTarget && (
+        <ShortletOpenDisputeDialog
+          booking={disputeTarget}
+          onClose={() => setDisputeTarget(null)}
+          onOpened={() => {
+            setDisputeTarget(null);
+            queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
+            setToast({
+              message: 'Dispute opened — the other party has been notified.',
+              variant: 'success',
+            });
+          }}
+        />
+      )}
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />

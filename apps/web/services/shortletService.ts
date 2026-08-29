@@ -5,9 +5,13 @@ import type {
   CreateShortletBookingInput,
   CreateShortletListingInput,
   CreateShortletReviewInput,
+  OpenShortletDisputeInput,
   ShortletAvailability,
   ShortletBooking,
   ShortletConversation,
+  ShortletDispute,
+  ShortletDisputeMessage,
+  ShortletEarningsAnalytics,
   ShortletListing,
   ShortletPayResponse,
   ShortletPayout,
@@ -239,5 +243,35 @@ export const shortletService = {
   unblockDates: (blockedDateId: string) =>
     safeCall(() =>
       authFetch(`/host/shortlets/blocked-dates/${blockedDateId}`, { method: 'DELETE' })
+    ),
+
+  hostEarningsAnalytics: () =>
+    safeCall(() => authFetch<ShortletEarningsAnalytics>('/host/shortlets/analytics')),
+
+  // -------- Disputes --------
+  openDispute: (bookingId: string, input: OpenShortletDisputeInput) =>
+    safeCall(() =>
+      authFetch<ShortletDispute>(`/shortlets/bookings/${bookingId}/dispute`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  myDisputes: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletDispute>>(`/shortlets/disputes${listQuery(params)}`)
+    ),
+
+  disputeMessages: (disputeId: string) =>
+    safeCall(() =>
+      authFetch<ShortletDisputeMessage[]>(`/shortlets/disputes/${disputeId}/messages`)
+    ),
+
+  sendDisputeMessage: (disputeId: string, text: string) =>
+    safeCall(() =>
+      authFetch<ShortletDisputeMessage>(`/shortlets/disputes/${disputeId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
     ),
 };

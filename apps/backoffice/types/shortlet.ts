@@ -65,3 +65,38 @@ export interface AdminShortletPayout {
   bookingCount: number;
   createdAt: string;
 }
+
+export type AdminShortletDisputeCategory =
+  | 'SERVICE_QUALITY'
+  | 'PAYMENT'
+  | 'DAMAGE'
+  | 'CANCELLATION'
+  | 'OTHER';
+export type AdminShortletDisputeStatus = 'OPEN' | 'UNDER_REVIEW' | 'ESCALATED' | 'RESOLVED';
+export type AdminShortletDisputePriority = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface AdminShortletDispute {
+  id: string;
+  bookingId: string;
+  listingTitle?: string;
+  title: string;
+  category: AdminShortletDisputeCategory;
+  priority: AdminShortletDisputePriority;
+  status: AdminShortletDisputeStatus;
+  raisedBy: string;
+  against: string;
+  amount?: number;
+  description: string;
+  resolution?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface AdminShortletDisputeMessage {
+  id: string;
+  disputeId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+}

@@ -5,12 +5,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   EmptyState,
   Input,
   Pagination,
   Select,
   Skeleton,
   StatCard,
+  Textarea,
   Toast,
   type BadgeVariant,
   type ToastVariant,
@@ -20,15 +25,20 @@ import {
   CalendarCheck,
   CircleDollarSign,
   Clock3,
+  Gavel,
   MapPin,
   Pause,
   Play,
+  Send,
   ShieldCheck,
 } from 'lucide-react';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import type {
   AdminShortletBooking,
+  AdminShortletDispute,
+  AdminShortletDisputeMessage,
+  AdminShortletDisputeStatus,
   AdminShortletListing,
   AdminShortletPayout,
   ShortletBookingStatus,
@@ -72,7 +82,7 @@ const BOOKING_STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   COMPLETED: 'neutral',
 };
 
-type Tab = 'listings' | 'bookings' | 'payouts';
+type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes';
 
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
@@ -88,6 +98,10 @@ export const ShortletOversight = () => {
   const [bookingStatus, setBookingStatus] = useState<'all' | ShortletBookingStatus>('all');
   const [bookingsPage, setBookingsPage] = useState(1);
   const [payoutsPage, setPayoutsPage] = useState(1);
+  const [disputesPage, setDisputesPage] = useState(1);
+  const [disputeStatus, setDisputeStatus] = useState<'all' | AdminShortletDisputeStatus>('all');
+  const [activeDispute, setActiveDispute] = useState<AdminShortletDispute | null>(null);
+  const [threadDraft, setThreadDraft] = useState('');
 
   const { data: overview } = useQuery({
     queryKey: ['admin', 'shortlets', 'overview'],
@@ -132,6 +146,55 @@ export const ShortletOversight = () => {
   });
   const payouts = payoutsData?.items ?? [];
 
+  const { data: disputesData, isLoading: disputesLoading } = useQuery({
+    queryKey: ['admin', 'shortlets', 'disputes', { status: disputeStatus, page: disputesPage }],
+    queryFn: () =>
+      unwrap(
+        adminShortletService.listDisputes({
+          status: disputeStatus === 'all' ? undefined : disputeStatus,
+          page: disputesPage,
+          pageSize: 12,
+        })
+      ),
+  });
+  const disputes = disputesData?.items ?? [];
+
+  const { data: threadMessages = [], isLoading: threadLoading } = useQuery({
+    queryKey: ['admin', 'shortlets', 'disputes', activeDispute?.id, 'messages'],
+    queryFn: () => unwrap(adminShortletService.disputeMessages(activeDispute!.id)),
+    enabled: Boolean(activeDispute),
+  });
+
+  const disputeReply = useMutation({
+    mutationFn: (text: string) =>
+      unwrap(adminShortletService.sendDisputeMessage(activeDispute!.id, text)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'shortlets', 'disputes', activeDispute?.id, 'messages'],
+      });
+      setThreadDraft('');
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const disputeAction = useMutation({
+    mutationFn: (action: 'resolve' | 'escalate') =>
+      unwrap(
+        action === 'resolve'
+          ? adminShortletService.resolveDispute(activeDispute!.id)
+          : adminShortletService.escalateDispute(activeDispute!.id)
+      ),
+    onSuccess: (_, action) => {
+      setActiveDispute(null);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'disputes'] });
+      setToast({
+        message: action === 'resolve' ? 'Dispute resolved.' : 'Dispute escalated.',
+        variant: 'success',
+      });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
   const moderation = useMutation({
     mutationFn: (input: {
       listingId: string;
@@ -169,6 +232,10 @@ export const ShortletOversight = () => {
   const changeBookingStatus = (value: string) => {
     setBookingStatus(value as 'all' | ShortletBookingStatus);
     setBookingsPage(1);
+  };
+  const changeDisputeStatus = (value: string) => {
+    setDisputeStatus(value as 'all' | AdminShortletDisputeStatus);
+    setDisputesPage(1);
   };
 
   return (
@@ -226,7 +293,7 @@ export const ShortletOversight = () => {
 
       {/* Tabs */}
       <div className="inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['listings', 'bookings', 'payouts'] as Tab[]).map((t) => (
+        {(['listings', 'bookings', 'payouts', 'disputes'] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -241,7 +308,9 @@ export const ShortletOversight = () => {
               ? `Listings (${listingsData?.total ?? 0})`
               : t === 'bookings'
                 ? `Bookings (${bookingsData?.total ?? 0})`
-                : `Payouts (${payoutsData?.total ?? 0})`}
+                : t === 'payouts'
+                  ? `Payouts (${payoutsData?.total ?? 0})`
+                  : `Disputes (${disputesData?.total ?? 0})`}
           </button>
         ))}
       </div>
@@ -339,7 +408,7 @@ export const ShortletOversight = () => {
             onPageChange={setBookingsPage}
           />
         </div>
-      ) : (
+      ) : tab === 'payouts' ? (
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
             <p className="text-sm font-medium">Host payout ledger</p>
@@ -375,6 +444,60 @@ export const ShortletOversight = () => {
             onPageChange={setPayoutsPage}
           />
         </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
+            <div className="w-52">
+              <Select
+                value={disputeStatus}
+                onValueChange={changeDisputeStatus}
+                options={DISPUTE_STATUS_VALUES}
+              />
+            </div>
+          </div>
+
+          {disputesLoading ? (
+            <div className="space-y-2 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : disputes.length === 0 ? (
+            <EmptyState
+              icon={Gavel}
+              title="No shortlet disputes"
+              description="Disputes raised by guests or hosts appear here."
+            />
+          ) : (
+            <div className="divide-y divide-border">
+              {disputes.map((d) => (
+                <DisputeRow key={d.id} dispute={d} onOpen={() => setActiveDispute(d)} />
+              ))}
+            </div>
+          )}
+
+          <Pagination
+            page={disputesPage}
+            pageSize={12}
+            total={disputesData?.total ?? 0}
+            onPageChange={setDisputesPage}
+          />
+        </div>
+      )}
+
+      {activeDispute && (
+        <DisputeThreadModal
+          dispute={activeDispute}
+          messages={threadMessages}
+          loading={threadLoading}
+          draft={threadDraft}
+          onDraftChange={setThreadDraft}
+          replying={disputeReply.isPending}
+          onReply={() => disputeReply.mutate(threadDraft)}
+          actionPending={disputeAction.isPending}
+          onAction={(action) => disputeAction.mutate(action)}
+          onClose={() => setActiveDispute(null)}
+        />
       )}
 
       {toast && (
@@ -494,5 +617,153 @@ function PayoutRow({ payout }: { payout: AdminShortletPayout }) {
         )}
       </div>
     </div>
+  );
+}
+
+const DISPUTE_STATUS_VALUES: { value: 'all' | AdminShortletDisputeStatus; label: string }[] = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'OPEN', label: 'Open' },
+  { value: 'UNDER_REVIEW', label: 'Under review' },
+  { value: 'ESCALATED', label: 'Escalated' },
+  { value: 'RESOLVED', label: 'Resolved' },
+];
+
+const DISPUTE_STATUS_VARIANT: Record<AdminShortletDisputeStatus, BadgeVariant> = {
+  OPEN: 'danger',
+  UNDER_REVIEW: 'info',
+  ESCALATED: 'warning',
+  RESOLVED: 'success',
+};
+
+function DisputeRow({ dispute, onOpen }: { dispute: AdminShortletDispute; onOpen: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium">{dispute.title}</p>
+          <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>{dispute.status}</Badge>
+          <Badge variant="neutral">{dispute.category}</Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {dispute.raisedBy} ↔ {dispute.against} · {dispute.listingTitle ?? 'Shortlet'}
+          {dispute.amount != null ? ` · ${formatCurrency(dispute.amount)}` : ''} ·{' '}
+          {formatDate(dispute.createdAt, 'short')}
+        </p>
+        <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{dispute.description}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={onOpen}>
+          <Gavel className="mr-1.5 h-4 w-4" /> Review
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function DisputeThreadModal({
+  dispute,
+  messages,
+  loading,
+  draft,
+  onDraftChange,
+  replying,
+  onReply,
+  actionPending,
+  onAction,
+  onClose,
+}: {
+  dispute: AdminShortletDispute;
+  messages: AdminShortletDisputeMessage[];
+  loading: boolean;
+  draft: string;
+  onDraftChange: (v: string) => void;
+  replying: boolean;
+  onReply: () => void;
+  actionPending: boolean;
+  onAction: (action: 'resolve' | 'escalate') => void;
+  onClose: () => void;
+}) {
+  const resolved = dispute.status === 'RESOLVED';
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-2xl">
+        <div className="p-5">
+          <DialogTitle>{dispute.title}</DialogTitle>
+          <DialogDescription>
+            <span className="flex flex-wrap items-center gap-2">
+              <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>{dispute.status}</Badge>
+              <Badge variant="neutral">{dispute.category}</Badge>
+              <span className="text-sm text-muted-foreground">
+                {dispute.raisedBy} ↔ {dispute.against} · {dispute.listingTitle ?? 'Shortlet'} ·{' '}
+                {formatDate(dispute.createdAt, 'short')}
+              </span>
+            </span>
+          </DialogDescription>
+        </div>
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto border-t border-border p-5">
+          <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
+            <p className="font-medium text-muted-foreground">Details</p>
+            <p className="mt-1">{dispute.description}</p>
+            {dispute.resolution && (
+              <p className="mt-2">
+                <span className="font-medium">Resolution:</span> {dispute.resolution}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Thread</p>
+            {loading ? (
+              <Skeleton className="h-24 w-full rounded-lg" />
+            ) : messages.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No messages yet.</p>
+            ) : (
+              messages.map((m) => (
+                <div key={m.id} className="rounded-lg border border-border p-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{m.senderName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(m.timestamp, 'short')}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{m.text}</p>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <Textarea
+              value={draft}
+              onChange={(e) => onDraftChange(e.target.value)}
+              placeholder="Reply as GetRentos support…"
+              rows={2}
+            />
+            <Button onClick={onReply} disabled={replying || !draft.trim()} className="self-end">
+              <Send className="mr-1.5 h-4 w-4" /> Send
+            </Button>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 border-t border-border p-4">
+          {!resolved && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => onAction('escalate')}
+                disabled={actionPending}
+              >
+                Escalate
+              </Button>
+              <Button onClick={() => onAction('resolve')} disabled={actionPending}>
+                Resolve
+              </Button>
+            </>
+          )}
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

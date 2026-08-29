@@ -232,3 +232,62 @@ export interface BlockedDateRange {
   endDate: string;
   reason?: string;
 }
+
+export type ShortletDisputeCategory =
+  | 'SERVICE_QUALITY'
+  | 'PAYMENT'
+  | 'DAMAGE'
+  | 'CANCELLATION'
+  | 'OTHER';
+export type ShortletDisputePriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type ShortletDisputeStatus = 'OPEN' | 'UNDER_REVIEW' | 'ESCALATED' | 'RESOLVED';
+
+export interface ShortletDispute {
+  id: string;
+  bookingId: string;
+  listingTitle?: string;
+  title: string;
+  category: ShortletDisputeCategory;
+  priority: ShortletDisputePriority;
+  status: ShortletDisputeStatus;
+  raisedBy: string;
+  against: string;
+  amount?: number;
+  description: string;
+  resolution?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface ShortletDisputeMessage {
+  id: string;
+  disputeId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface OpenShortletDisputeInput {
+  title: string;
+  category: ShortletDisputeCategory;
+  priority?: ShortletDisputePriority;
+  description: string;
+}
+
+export interface ShortletEarningsAnalytics {
+  totalEarned: number;
+  paidOut: number;
+  available: number;
+  bookingsCount: number;
+  nightsSold: number;
+  avgNightlyRate?: number;
+  byListing: {
+    listingId: string;
+    title: string;
+    bookings: number;
+    earned: number;
+    nights: number;
+  }[];
+  monthly: { month: string; earned: number }[];
+}

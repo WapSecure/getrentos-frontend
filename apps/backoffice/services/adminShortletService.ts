@@ -3,6 +3,8 @@ import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminShortletBooking,
+  AdminShortletDispute,
+  AdminShortletDisputeMessage,
   AdminShortletListing,
   AdminShortletOverview,
   AdminShortletPayout,
@@ -108,6 +110,65 @@ export const adminShortletService = {
     const query = toQuery({ page: params.page, pageSize: params.pageSize });
     return safeCall(() =>
       authFetch<Paginated<AdminShortletPayout>>(`/admin/shortlets/payouts${query}`)
+    );
+  },
+
+  listDisputes(
+    params: {
+      status?: string;
+      category?: string;
+      search?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<AdminShortletDispute>>> {
+    const query = toQuery({
+      status: params.status,
+      category: params.category,
+      search: params.search,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() =>
+      authFetch<Paginated<AdminShortletDispute>>(`/admin/shortlets/disputes${query}`)
+    );
+  },
+
+  disputeMessages(disputeId: string): Promise<ApiResponse<AdminShortletDisputeMessage[]>> {
+    return safeCall(() =>
+      authFetch<AdminShortletDisputeMessage[]>(`/admin/shortlets/disputes/${disputeId}/messages`)
+    );
+  },
+
+  sendDisputeMessage(
+    disputeId: string,
+    text: string
+  ): Promise<ApiResponse<AdminShortletDisputeMessage>> {
+    return safeCall(() =>
+      authFetch<AdminShortletDisputeMessage>(`/admin/shortlets/disputes/${disputeId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+    );
+  },
+
+  resolveDispute(
+    disputeId: string,
+    resolution?: string
+  ): Promise<ApiResponse<AdminShortletDispute>> {
+    return safeCall(() =>
+      authFetch<AdminShortletDispute>(`/admin/shortlets/disputes/${disputeId}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ resolution: resolution ?? '' }),
+      })
+    );
+  },
+
+  escalateDispute(disputeId: string): Promise<ApiResponse<AdminShortletDispute>> {
+    return safeCall(() =>
+      authFetch<AdminShortletDispute>(`/admin/shortlets/disputes/${disputeId}/escalate`, {
+        method: 'POST',
+      })
     );
   },
 };

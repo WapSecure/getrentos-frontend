@@ -15,13 +15,15 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarX, CreditCard, MapPin, MessageSquare, RotateCcw, Star } from 'lucide-react';
+import { CalendarX, CreditCard, Gavel, MapPin, MessageSquare, RotateCcw, Star } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletReviewDialog } from './ShortletReviewDialog';
+import { ShortletDisputesInbox } from './ShortletDisputesInbox';
+import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
 import type {
   ShortletBooking,
   ShortletBookingStatus,
@@ -79,6 +81,8 @@ export const GuestBookingsWorkspace = () => {
   const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
   const [reviewTarget, setReviewTarget] = useState<ShortletBooking | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [disputesOpen, setDisputesOpen] = useState(false);
+  const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -130,9 +134,14 @@ export const GuestBookingsWorkspace = () => {
           <h1 className="text-2xl font-semibold tracking-tight">My Shortlet Bookings</h1>
           <p className="mt-1 text-muted-foreground">Track your stays and requests.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
-          <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
+            <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setDisputesOpen(true)}>
+            <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -225,6 +234,11 @@ export const GuestBookingsWorkspace = () => {
                         : `Pay ${formatCurrency((b.total ?? 0) + (b.deposit ?? 0))}`}
                     </Button>
                   )}
+                  {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
+                    <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
+                      <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
+                    </Button>
+                  )}
                   {b.status === 'COMPLETED' && !b.reviewed && (
                     <Button variant="outline" size="sm" onClick={() => setReviewTarget(b)}>
                       <Star className="mr-1.5 h-4 w-4" /> Leave a review
@@ -273,6 +287,25 @@ export const GuestBookingsWorkspace = () => {
           <ShortletMessagesInbox role="guest" />
         </DialogContent>
       </Dialog>
+      <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
+        <DialogContent className="sm:max-w-3xl">
+          <ShortletDisputesInbox />
+        </DialogContent>
+      </Dialog>
+      {disputeTarget && (
+        <ShortletOpenDisputeDialog
+          booking={disputeTarget}
+          onClose={() => setDisputeTarget(null)}
+          onOpened={() => {
+            setDisputeTarget(null);
+            queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
+            setToast({
+              message: 'Dispute opened — the other party has been notified.',
+              variant: 'success',
+            });
+          }}
+        />
+      )}
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
