@@ -11,6 +11,7 @@ import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { HouseholdCard } from '@/components/estate/households/HouseholdCard';
 import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
+import { LinkResidentModal } from '@/components/estate/households/LinkResidentModal';
 import type { Household } from '@/types/estate';
 
 const PAGE_SIZE = 10;
@@ -20,6 +21,7 @@ export default function EstateHouseholdsPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<Household | null>(null);
+  const [linkingHousehold, setLinkingHousehold] = useState<Household | null>(null);
   const [page, setPage] = useState(1);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
@@ -81,6 +83,20 @@ export default function EstateHouseholdsPage() {
       invalidate();
       setPage((current) => (current > 1 && households.length === 1 ? current - 1 : current));
     },
+  });
+
+  const linkResident = useMutation({
+    mutationFn: (email: string) =>
+      unwrap(estateService.linkResident(estate!.id, linkingHousehold!.id, email)),
+    onSuccess: () => {
+      invalidate();
+      setLinkingHousehold(null);
+    },
+  });
+
+  const unlinkResident = useMutation({
+    mutationFn: (id: string) => unwrap(estateService.unlinkResident(estate!.id, id)),
+    onSuccess: invalidate,
   });
 
   if (isEstateLoading) {
@@ -148,6 +164,8 @@ export default function EstateHouseholdsPage() {
                 setIsModalOpen(true);
               }}
               onRemove={() => removeHousehold.mutate(household.id)}
+              onLinkResident={() => setLinkingHousehold(household)}
+              onUnlinkResident={() => unlinkResident.mutate(household.id)}
             />
           ))}
         </div>
@@ -173,6 +191,14 @@ export default function EstateHouseholdsPage() {
         }}
         onSubmit={handleSubmit}
         isSubmitting={addHousehold.isPending || updateHousehold.isPending}
+      />
+
+      <LinkResidentModal
+        household={linkingHousehold}
+        onClose={() => setLinkingHousehold(null)}
+        onSubmit={(email) => linkResident.mutate(email)}
+        isSubmitting={linkResident.isPending}
+        error={linkResident.isError ? linkResident.error.message : null}
       />
     </>
   );

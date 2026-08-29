@@ -74,6 +74,25 @@ export const estateService = {
     );
   },
 
+  async linkResident(
+    estateId: string,
+    householdId: string,
+    email: string
+  ): Promise<ApiResponse<Household>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/households/${householdId}/resident`, {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+    );
+  },
+
+  async unlinkResident(estateId: string, householdId: string): Promise<ApiResponse<Household>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/households/${householdId}/resident`, { method: 'DELETE' })
+    );
+  },
+
   async createDues(
     estateId: string,
     data: {

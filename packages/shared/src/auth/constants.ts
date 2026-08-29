@@ -104,6 +104,16 @@ export const ROLES = {
     order: 8,
     dashboardRoute: '/gateman/verify',
   },
+  RESIDENT: {
+    id: 'resident',
+    name: 'Resident',
+    description: 'View dues, announcements, and issue your own visitor passes.',
+    icon: 'Home',
+    requiresVerification: [],
+    canAddLater: false,
+    order: 100,
+    dashboardRoute: '/resident/dashboard',
+  },
   ADMIN: {
     id: 'admin',
     name: 'Admin',
@@ -193,6 +203,11 @@ export const ROUTES = {
   ESTATE_VIOLATIONS: '/estate/violations',
   ESTATE_GOVERNANCE: '/estate/governance',
   GATEMAN_DASHBOARD: '/gateman/verify',
+  RESIDENT_DASHBOARD: '/resident/dashboard',
+  RESIDENT_DUES: '/resident/dues',
+  RESIDENT_ANNOUNCEMENTS: '/resident/announcements',
+  RESIDENT_VISITOR_PASSES: '/resident/visitor-passes',
+  RESIDENT_VIOLATIONS: '/resident/violations',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',
@@ -349,6 +364,7 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   AGENT: 'agent',
   ESTATE_MANAGER: 'estate',
   GATEMAN: 'gateman',
+  RESIDENT: 'resident',
   BACKOFFICE_ADMIN: 'admin',
   SUPER_ADMIN: 'admin',
   VERIFICATION_OFFICER: 'admin',
@@ -370,6 +386,7 @@ export const getDashboardRoute = (roleId: string): string => {
     agent: ROUTES.AGENT_DASHBOARD,
     estate: ROUTES.ESTATE_DASHBOARD,
     gateman: ROUTES.GATEMAN_DASHBOARD,
+    resident: ROUTES.RESIDENT_DASHBOARD,
     admin: ROUTES.ADMIN_DASHBOARD,
   };
   return roleMap[roleId] || ROUTES.DASHBOARD;
