@@ -15,11 +15,12 @@ import {
   Select,
   Skeleton,
 } from '@getrentos/ui';
-import { BedDouble, CalendarCheck, MapPin, Search, Star, Zap } from 'lucide-react';
+import { BedDouble, CalendarCheck, Heart, MapPin, Search, Star, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency } from '@/lib/format';
 import type { ShortletListing } from '@/types/shortlet';
 
@@ -30,6 +31,7 @@ const TODAY = new Date().toISOString().slice(0, 10);
 export const ShortletMarketplaceBrowser = () => {
   const router = useRouter();
   const [isSignedIn] = useState(() => Boolean(getAuthToken()));
+  const wishlist = useShortletWishlist();
 
   const [city, setCity] = useState('');
   const [guests, setGuests] = useState('');
@@ -195,6 +197,21 @@ export const ShortletMarketplaceBrowser = () => {
                   )}
                   {listing.isVerified && <Badge variant="info">Verified host</Badge>}
                 </div>
+                {isSignedIn && (
+                  <button
+                    type="button"
+                    aria-label={wishlist.isSaved(listing.id) ? 'Remove from saved' : 'Save listing'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      wishlist.toggle.mutate(listing.id);
+                    }}
+                    className="absolute right-3 top-3 rounded-full bg-background/80 p-2 shadow-sm backdrop-blur transition-colors hover:bg-background"
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${wishlist.isSaved(listing.id) ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`}
+                    />
+                  </button>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-medium leading-snug">{listing.title}</h3>

@@ -226,6 +226,8 @@ export const shortletKeys = {
   hostPayouts: ['shortlets', 'host', 'payouts'] as const,
   hostAnalytics: ['shortlets', 'host', 'analytics'] as const,
   disputes: ['shortlets', 'disputes'] as const,
+  wishlistIds: ['shortlets', 'wishlist', 'ids'] as const,
+  wishlist: ['shortlets', 'wishlist'] as const,
 };
 
 export const buyerKeys = {

@@ -102,6 +102,24 @@ export const shortletService = {
       )
     ),
 
+  // -------- Guest wishlist --------
+  wishlistIds: () => safeCall(() => authFetch<string[]>(`/shortlets/wishlist/ids`)),
+
+  myWishlist: (params: ShortletListParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletListing>>(`/shortlets/wishlist${listQuery(params)}`)
+    ),
+
+  saveWishlist: (listingId: string) =>
+    safeCall(() =>
+      authFetch<{ saved: boolean }>(`/shortlets/${listingId}/wishlist`, { method: 'POST' })
+    ),
+
+  unsaveWishlist: (listingId: string) =>
+    safeCall(() =>
+      authFetch<{ saved: boolean }>(`/shortlets/${listingId}/wishlist`, { method: 'DELETE' })
+    ),
+
   // -------- Guest messaging --------
   startConversation: (listingId: string, text: string) =>
     safeCall(() =>

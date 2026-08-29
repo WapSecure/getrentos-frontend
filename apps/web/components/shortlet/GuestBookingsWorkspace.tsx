@@ -15,13 +15,23 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { CalendarX, CreditCard, Gavel, MapPin, MessageSquare, RotateCcw, Star } from 'lucide-react';
+import {
+  CalendarX,
+  CreditCard,
+  Gavel,
+  Heart,
+  MapPin,
+  MessageSquare,
+  RotateCcw,
+  Star,
+} from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletReviewDialog } from './ShortletReviewDialog';
+import { ShortletWishlistDialog } from './ShortletWishlistDialog';
 import { ShortletDisputesInbox } from './ShortletDisputesInbox';
 import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
 import type {
@@ -83,6 +93,7 @@ export const GuestBookingsWorkspace = () => {
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
   const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -140,6 +151,9 @@ export const GuestBookingsWorkspace = () => {
           </Button>
           <Button variant="outline" size="sm" onClick={() => setDisputesOpen(true)}>
             <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setWishlistOpen(true)}>
+            <Heart className="mr-1.5 h-4 w-4" /> Saved
           </Button>
         </div>
       </div>
@@ -292,6 +306,7 @@ export const GuestBookingsWorkspace = () => {
           <ShortletDisputesInbox />
         </DialogContent>
       </Dialog>
+      {wishlistOpen && <ShortletWishlistDialog onClose={() => setWishlistOpen(false)} />}
       {disputeTarget && (
         <ShortletOpenDisputeDialog
           booking={disputeTarget}

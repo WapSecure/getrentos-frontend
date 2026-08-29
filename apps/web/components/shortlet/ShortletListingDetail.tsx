@@ -10,6 +10,7 @@ import {
   BedDouble,
   CalendarCheck,
   Clock,
+  Heart,
   Image as ImageIcon,
   Map as MapIcon,
   MapPin,
@@ -26,6 +27,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
 import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
@@ -43,6 +45,7 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isSignedIn] = useState(() => Boolean(getAuthToken()));
+  const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
   const [messageOpen, setMessageOpen] = useState(false);
@@ -453,6 +456,19 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
                 onClick={() => setMessageOpen(true)}
               >
                 <MessageSquare className="mr-1.5 h-4 w-4" /> Message host
+              </Button>
+            )}
+            {isSignedIn && (
+              <Button
+                variant={wishlist.isSaved(listing.id) ? 'secondary' : 'outline'}
+                className="mt-2 w-full"
+                onClick={() => wishlist.toggle.mutate(listing.id)}
+                disabled={wishlist.toggle.isPending}
+              >
+                <Heart
+                  className={`mr-1.5 h-4 w-4 ${wishlist.isSaved(listing.id) ? 'fill-destructive text-destructive' : ''}`}
+                />
+                {wishlist.isSaved(listing.id) ? 'Saved' : 'Save listing'}
               </Button>
             )}
             <p className="mt-2 text-center text-xs text-muted-foreground">
