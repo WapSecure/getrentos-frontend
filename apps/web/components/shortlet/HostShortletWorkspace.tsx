@@ -23,7 +23,16 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { BarChart3, CalendarOff, Banknote, Gavel, MessageSquare, Plus, Zap } from 'lucide-react';
+import {
+  BarChart3,
+  CalendarOff,
+  Banknote,
+  Gavel,
+  MessageSquare,
+  Plus,
+  Star,
+  Zap,
+} from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerService } from '@/services/ownerService';
 import { landlordService } from '@/services/landlordService';
@@ -33,6 +42,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletMediaManager, type ShortletMediaState } from './ShortletMediaManager';
 import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletPayoutsDialog } from './ShortletPayoutsDialog';
+import { ShortletGuestReviewDialog } from './ShortletGuestReviewDialog';
 import { ShortletDisputesInbox } from './ShortletDisputesInbox';
 import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
 import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
@@ -102,6 +112,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
   const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
+  const [guestReviewTarget, setGuestReviewTarget] = useState<ShortletBooking | null>(null);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
@@ -316,6 +327,13 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     {formatDate(b.checkIn, 'long')} → {formatDate(b.checkOut, 'long')} · {b.nights}{' '}
                     night{b.nights > 1 ? 's' : ''}
                   </p>
+                  {b.guestRatingAverage != null && (
+                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      {b.guestRatingAverage.toFixed(1)} guest rating
+                      {b.guestRatingCount != null ? ` (${b.guestRatingCount})` : ''}
+                    </p>
+                  )}
                   {b.notes && <p className="mt-1 text-sm text-muted-foreground">“{b.notes}”</p>}
                 </div>
                 <div className="text-right">
@@ -346,7 +364,17 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                 </div>
               )}
               {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
-                <div className="mt-3 flex justify-end border-t border-border pt-3">
+                <div className="mt-3 flex flex-wrap justify-end gap-2 border-t border-border pt-3">
+                  {b.status === 'COMPLETED' && !b.guestReviewed && (
+                    <Button variant="outline" size="sm" onClick={() => setGuestReviewTarget(b)}>
+                      <Star className="mr-1.5 h-4 w-4" /> Review guest
+                    </Button>
+                  )}
+                  {b.status === 'COMPLETED' && b.guestReviewed && (
+                    <Badge variant="success" className="mt-0.5">
+                      <Star className="mr-1 h-3 w-3" /> Reviewed
+                    </Badge>
+                  )}
                   <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
                     <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
                   </Button>
@@ -401,6 +429,17 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         </DialogContent>
       </Dialog>
       {analyticsOpen && <HostEarningsAnalyticsDialog onClose={() => setAnalyticsOpen(false)} />}
+      {guestReviewTarget && (
+        <ShortletGuestReviewDialog
+          booking={guestReviewTarget}
+          onClose={() => setGuestReviewTarget(null)}
+          onSubmitted={() => {
+            setGuestReviewTarget(null);
+            queryClient.invalidateQueries({ queryKey: shortletKeys.hostBookings });
+            setToast({ message: 'Guest review submitted. Thanks!', variant: 'success' });
+          }}
+        />
+      )}
       {disputeTarget && (
         <ShortletOpenDisputeDialog
           booking={disputeTarget}

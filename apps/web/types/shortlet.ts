@@ -76,6 +76,9 @@ export interface ShortletBooking {
   depositStatus: 'UNPAID' | 'HELD' | 'REFUNDED';
   depositRefundedAt?: string;
   reviewed?: boolean;
+  guestReviewed?: boolean;
+  guestRatingAverage?: number;
+  guestRatingCount?: number;
   notes?: string;
   hostName: string;
   guestName?: string;
@@ -158,6 +161,19 @@ export interface ShortletReview {
   listingId: string;
   guestId: string;
   guestName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface ShortletGuestReview {
+  id: string;
+  bookingId: string;
+  listingId: string;
+  listingTitle?: string;
+  guestId: string;
+  guestName: string;
+  hostName: string;
   rating: number;
   comment?: string;
   createdAt: string;

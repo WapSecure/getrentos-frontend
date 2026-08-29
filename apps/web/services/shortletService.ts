@@ -12,6 +12,7 @@ import type {
   ShortletDispute,
   ShortletDisputeMessage,
   ShortletEarningsAnalytics,
+  ShortletGuestReview,
   ShortletListing,
   ShortletPayResponse,
   ShortletPayout,
@@ -100,6 +101,23 @@ export const shortletService = {
     safeCall(() =>
       authFetch<Paginated<ShortletReview>>(
         `/shortlets/${listingId}/reviews${toQuery({ page, pageSize })}`
+      )
+    ),
+
+  // -------- Host rates guest --------
+  createGuestReview: (bookingId: string, input: CreateShortletReviewInput) =>
+    safeCall(() =>
+      authFetch<ShortletGuestReview>(`/host/shortlets/bookings/${bookingId}/guest-review`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  // -------- Guest received reviews --------
+  myGuestReviews: (page = 1, pageSize = 20) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletGuestReview>>(
+        `/shortlets/bookings/guest-reviews${toQuery({ page, pageSize })}`
       )
     ),
 

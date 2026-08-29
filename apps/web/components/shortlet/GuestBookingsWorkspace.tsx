@@ -102,6 +102,18 @@ export const GuestBookingsWorkspace = () => {
   });
   const bookings = data?.items ?? [];
 
+  const { data: guestReviews } = useQuery({
+    queryKey: shortletKeys.guestReviews,
+    queryFn: () => unwrap(shortletService.myGuestReviews(1, 50)),
+  });
+  const guestRatingCount = guestReviews?.total ?? 0;
+  const guestRatingAverage =
+    guestRatingCount > 0
+      ? Math.round(
+          ((guestReviews?.items ?? []).reduce((s, r) => s + r.rating, 0) / guestRatingCount) * 10
+        ) / 10
+      : undefined;
+
   const cancel = useMutation({
     mutationFn: (bookingId: string) => unwrap(shortletService.cancelBooking(bookingId)),
     onSuccess: (cancelled: ShortletBooking) => {
@@ -144,6 +156,16 @@ export const GuestBookingsWorkspace = () => {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My Shortlet Bookings</h1>
           <p className="mt-1 text-muted-foreground">Track your stays and requests.</p>
+          {guestRatingAverage != null && (
+            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              Your guest rating:{' '}
+              <span className="font-medium text-foreground">{guestRatingAverage.toFixed(1)}</span>
+              <span>
+                ({guestRatingCount} review{guestRatingCount === 1 ? '' : 's'})
+              </span>
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
