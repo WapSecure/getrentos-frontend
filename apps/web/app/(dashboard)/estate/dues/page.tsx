@@ -16,6 +16,7 @@ import type { DueStatus } from '@/types/estate';
 const statusFilters: { value: DueStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'pending', label: 'Pending' },
+  { value: 'processing', label: 'Processing' },
   { value: 'paid', label: 'Paid' },
   { value: 'overdue', label: 'Overdue' },
 ];

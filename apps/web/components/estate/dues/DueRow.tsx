@@ -1,5 +1,6 @@
 'use client';
 
+import { Repeat } from 'lucide-react';
 import { Badge, Button } from '@getrentos/ui';
 import type { Due } from '@/types/estate';
 
@@ -7,6 +8,7 @@ const statusVariant: Record<Due['status'], 'success' | 'warning' | 'danger'> = {
   paid: 'success',
   pending: 'warning',
   overdue: 'danger',
+  processing: 'warning',
 };
 
 const categoryLabels: Record<Due['category'], string> = {
@@ -41,9 +43,15 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
         <p className="text-sm font-medium text-foreground truncate">
           {due.unitLabel} — {due.residentName}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
           {categoryLabels[due.category]} · Due {formatDate(due.dueDate)}
           {due.description ? ` · ${due.description}` : ''}
+          {due.isRecurring && (
+            <span className="inline-flex items-center gap-0.5 text-primary">
+              <Repeat className="w-3 h-3" />
+              Recurring
+            </span>
+          )}
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">

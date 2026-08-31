@@ -22,6 +22,10 @@ export const estateResidentService = {
     return safeCall(() => authFetch(`/estate/resident/dues${toQuery(query)}`));
   },
 
+  async payMyDue(dueId: string): Promise<ApiResponse<Due>> {
+    return safeCall(() => authFetch(`/estate/resident/dues/${dueId}/pay`, { method: 'POST' }));
+  },
+
   async listMyAnnouncements(query: PageQuery = {}): Promise<ApiResponse<Paginated<Announcement>>> {
     return safeCall(() => authFetch(`/estate/resident/announcements${toQuery(query)}`));
   },

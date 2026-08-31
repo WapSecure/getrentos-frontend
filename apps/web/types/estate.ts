@@ -40,7 +40,7 @@ export interface ResidentHousehold {
   };
 }
 
-export type DueStatus = 'pending' | 'paid' | 'overdue';
+export type DueStatus = 'pending' | 'paid' | 'overdue' | 'processing';
 export type DueCategory = 'rent' | 'service_charge' | 'deposit' | 'levy';
 export type BillingCycle = 'monthly' | 'quarterly' | 'annual';
 
@@ -56,7 +56,11 @@ export interface Due {
   category: DueCategory;
   billingCycle: BillingCycle;
   description?: string;
+  isRecurring: boolean;
   createdAt: string;
+  /** Only set when payMyDue started a real Paystack checkout (Paystack configured). */
+  authorizationUrl?: string;
+  reference?: string;
 }
 
 export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
