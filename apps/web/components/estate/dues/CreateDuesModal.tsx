@@ -21,6 +21,7 @@ interface CreateDuesModalProps {
     description?: string;
     category?: 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY';
     billingCycle?: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+    isRecurring?: boolean;
     householdIds?: string[];
   }) => void;
   isSubmitting?: boolean;
@@ -55,6 +56,7 @@ export const CreateDuesModal = ({
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('LEVY');
   const [billingCycle, setBillingCycle] = useState('MONTHLY');
+  const [isRecurring, setIsRecurring] = useState(false);
   const [chargeAll, setChargeAll] = useState(true);
   const [selectedHouseholdIds, setSelectedHouseholdIds] = useState<string[]>([]);
 
@@ -68,6 +70,7 @@ export const CreateDuesModal = ({
     setDescription('');
     setCategory('LEVY');
     setBillingCycle('MONTHLY');
+    setIsRecurring(false);
     setChargeAll(true);
     setSelectedHouseholdIds([]);
     onClose();
@@ -131,6 +134,11 @@ export const CreateDuesModal = ({
                   />
                 </div>
               </div>
+
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <Checkbox checked={isRecurring} onCheckedChange={setIsRecurring} />
+                Repeat automatically every billing cycle
+              </label>
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
@@ -206,6 +214,7 @@ export const CreateDuesModal = ({
                     description: description.trim() || undefined,
                     category: category as 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY',
                     billingCycle: billingCycle as 'MONTHLY' | 'QUARTERLY' | 'ANNUAL',
+                    isRecurring,
                     householdIds: chargeAll ? undefined : selectedHouseholdIds,
                   })
                 }

@@ -101,6 +101,7 @@ export const estateService = {
       description?: string;
       category?: 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY';
       billingCycle?: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+      isRecurring?: boolean;
       householdIds?: string[];
     }
   ): Promise<ApiResponse<{ created: number }>> {
