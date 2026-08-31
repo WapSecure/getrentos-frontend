@@ -254,6 +254,11 @@ export const GuestBookingsWorkspace = () => {
                       {formatCurrency(b.deposit)}
                     </Badge>
                   )}
+                  {b.taxAmount != null && b.taxAmount > 0 && (
+                    <Badge variant="neutral" className="mt-1">
+                      Tax {formatCurrency(b.taxAmount)}
+                    </Badge>
+                  )}
                   {b.depositClaimStatus && (
                     <Badge
                       variant={
@@ -291,7 +296,7 @@ export const GuestBookingsWorkspace = () => {
                       <CreditCard className="mr-1.5 h-4 w-4" />
                       {pay.isPending
                         ? 'Processing…'
-                        : `Pay ${formatCurrency((b.total ?? 0) + (b.deposit ?? 0))}`}
+                        : `Pay ${formatCurrency((b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0))}`}
                     </Button>
                   )}
                   {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (

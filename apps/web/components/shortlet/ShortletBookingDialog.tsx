@@ -155,12 +155,19 @@ export function ShortletBookingDialog({
             <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
               {availability.available ? (
                 <p>
-                  {availability.estimatedNights} night{availability.estimatedNights! > 1 ? 's' : ''}{' '}
-                  ·{' '}
+                  {availability.estimatedNights} night
+                  {availability.estimatedNights! > 1 ? 's' : ''} ·{' '}
                   <span className="font-semibold">
                     {formatCurrency(availability.estimatedTotal ?? 0)}
                   </span>{' '}
                   total
+                  {availability.estimatedTax ? (
+                    <span className="text-muted-foreground">
+                      {' '}
+                      (incl. {formatCurrency(availability.estimatedTax)}{' '}
+                      {availability.taxName ?? 'tax'})
+                    </span>
+                  ) : null}
                 </p>
               ) : (
                 <p className="text-destructive">{availability.reason}</p>
@@ -181,10 +188,15 @@ export function ShortletBookingDialog({
                   <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
                     <CreditCard className="h-4 w-4" />
                     <span className="font-semibold text-foreground">
-                      {formatCurrency((createdBooking.total ?? 0) + (createdBooking.deposit ?? 0))}
+                      {formatCurrency(
+                        (createdBooking.total ?? 0) +
+                          (createdBooking.taxAmount ?? 0) +
+                          (createdBooking.deposit ?? 0)
+                      )}
                     </span>{' '}
                     due to complete this booking
-                    {createdBooking.deposit ? ' (includes refundable deposit)' : ''}.
+                    {createdBooking.deposit ? ' (includes refundable deposit)' : ''}
+                    {createdBooking.taxAmount ? ' (incl. tax)' : ''}.
                   </p>
                 )}
               </div>
@@ -197,7 +209,11 @@ export function ShortletBookingDialog({
                   <CreditCard className="mr-1.5 h-4 w-4" />
                   {paying
                     ? 'Opening checkout…'
-                    : `Pay ${formatCurrency((createdBooking.total ?? 0) + (createdBooking.deposit ?? 0))}`}
+                    : `Pay ${formatCurrency(
+                        (createdBooking.total ?? 0) +
+                          (createdBooking.taxAmount ?? 0) +
+                          (createdBooking.deposit ?? 0)
+                      )}`}
                 </Button>
               )}
               <Button variant="outline" className="w-full" onClick={onClose}>

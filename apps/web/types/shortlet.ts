@@ -46,6 +46,8 @@ export interface ShortletListing {
   bedrooms?: number;
   bathrooms?: number;
   propertySize?: number;
+  taxName?: string;
+  taxPct?: number;
   publishedAt: string;
 }
 
@@ -75,6 +77,9 @@ export interface ShortletBooking {
   deposit?: number;
   depositStatus: 'UNPAID' | 'HELD' | 'REFUNDED';
   depositRefundedAt?: string;
+  platformFee?: number;
+  taxAmount?: number;
+  hostNet?: number;
   depositClaimStatus?: ShortletDepositClaimStatus;
   depositClaimAmount?: number;
   reviewed?: boolean;
@@ -120,6 +125,7 @@ export interface ShortletPayResponse {
   id: string;
   total: number;
   deposit?: number;
+  taxAmount?: number;
   chargeTotal?: number;
   paymentStatus: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   authorizationUrl?: string;
@@ -132,6 +138,9 @@ export interface ShortletAvailability {
   reason?: string;
   estimatedNights?: number;
   estimatedTotal?: number;
+  estimatedTax?: number;
+  taxName?: string;
+  taxPct?: number;
 }
 
 export interface CreateShortletListingInput {
@@ -324,6 +333,11 @@ export interface OpenShortletDisputeInput {
 
 export interface ShortletEarningsAnalytics {
   totalEarned: number;
+  grossEarned: number;
+  platformFees: number;
+  commissionPct?: number;
+  taxName?: string;
+  taxPct?: number;
   paidOut: number;
   available: number;
   bookingsCount: number;

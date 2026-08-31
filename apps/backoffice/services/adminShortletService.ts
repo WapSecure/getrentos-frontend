@@ -6,6 +6,7 @@ import type {
   AdminShortletDepositClaim,
   AdminShortletDispute,
   AdminShortletDisputeMessage,
+  AdminShortletFeeConfig,
   AdminShortletListing,
   AdminShortletOverview,
   AdminShortletPayout,
@@ -208,6 +209,23 @@ export const adminShortletService = {
           body: JSON.stringify(input),
         }
       )
+    );
+  },
+
+  getFeeConfig(): Promise<ApiResponse<AdminShortletFeeConfig>> {
+    return safeCall(() => authFetch<AdminShortletFeeConfig>('/admin/shortlets/fees'));
+  },
+
+  updateFeeConfig(input: {
+    commissionPct: number;
+    taxName?: string;
+    taxPct: number;
+  }): Promise<ApiResponse<AdminShortletFeeConfig>> {
+    return safeCall(() =>
+      authFetch<AdminShortletFeeConfig>('/admin/shortlets/fees', {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
     );
   },
 };

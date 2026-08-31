@@ -347,6 +347,12 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                 <div className="text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
+                  {b.platformFee != null && b.platformFee > 0 && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Fee −{formatCurrency(b.platformFee)}
+                      {b.hostNet != null ? ` · you earn ${formatCurrency(b.hostNet)}` : ''}
+                    </p>
+                  )}
                   {b.depositStatus === 'HELD' && b.deposit != null && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {formatCurrency(b.deposit)} deposit held

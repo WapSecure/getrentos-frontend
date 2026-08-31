@@ -117,3 +117,10 @@ export interface AdminShortletDepositClaim {
   createdAt: string;
   resolvedAt?: string;
 }
+
+export interface AdminShortletFeeConfig {
+  commissionPct: number;
+  taxName?: string;
+  taxPct: number;
+  updatedAt: string;
+}

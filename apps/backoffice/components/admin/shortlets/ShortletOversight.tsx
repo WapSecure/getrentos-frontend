@@ -29,6 +29,7 @@ import {
   Gavel,
   MapPin,
   Pause,
+  Percent,
   Play,
   Send,
   ShieldAlert,
@@ -43,6 +44,7 @@ import type {
   AdminShortletDispute,
   AdminShortletDisputeMessage,
   AdminShortletDisputeStatus,
+  AdminShortletFeeConfig,
   AdminShortletListing,
   AdminShortletPayout,
   ShortletBookingStatus,
@@ -86,7 +88,7 @@ const BOOKING_STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   COMPLETED: 'neutral',
 };
 
-type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes' | 'claims';
+type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes' | 'claims' | 'fees';
 
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
@@ -212,6 +214,24 @@ export const ShortletOversight = () => {
             ? 'Claim partially approved — remainder refunded to the guest.'
             : 'Claim rejected — deposit released to the guest.';
       setToast({ message: label, variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const { data: feeConfig } = useQuery({
+    queryKey: ['admin', 'shortlets', 'fees'],
+    queryFn: () => unwrap(adminShortletService.getFeeConfig()),
+  });
+
+  const saveFees = useMutation({
+    mutationFn: (input: { commissionPct: number; taxName?: string; taxPct: number }) =>
+      unwrap(adminShortletService.updateFeeConfig(input)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'fees'] });
+      setToast({
+        message: 'Platform fees & taxes saved — new bookings will use them.',
+        variant: 'success',
+      });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -354,7 +374,7 @@ export const ShortletOversight = () => {
 
       {/* Tabs */}
       <div className="inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['listings', 'bookings', 'payouts', 'disputes', 'claims'] as Tab[]).map((t) => (
+        {(['listings', 'bookings', 'payouts', 'disputes', 'claims', 'fees'] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -373,7 +393,9 @@ export const ShortletOversight = () => {
                   ? `Payouts (${payoutsData?.total ?? 0})`
                   : t === 'disputes'
                     ? `Disputes (${disputesData?.total ?? 0})`
-                    : `Deposit claims (${claimsData?.total ?? 0})`}
+                    : t === 'claims'
+                      ? `Deposit claims (${claimsData?.total ?? 0})`
+                      : 'Fees & taxes'}
           </button>
         ))}
       </div>
@@ -546,7 +568,7 @@ export const ShortletOversight = () => {
             onPageChange={setDisputesPage}
           />
         </div>
-      ) : (
+      ) : tab === 'claims' ? (
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
             <div className="min-w-[220px] flex-1">
@@ -594,6 +616,17 @@ export const ShortletOversight = () => {
             total={claimsData?.total ?? 0}
             onPageChange={setClaimsPage}
           />
+        </div>
+      ) : feeConfig ? (
+        <FeeConfigForm
+          key={feeConfig.updatedAt}
+          feeConfig={feeConfig}
+          saving={saveFees.isPending}
+          onSave={(input) => saveFees.mutate(input)}
+        />
+      ) : (
+        <div className="rounded-xl border border-border bg-card shadow-sm p-5">
+          <Skeleton className="h-24 w-full rounded-lg" />
         </div>
       )}
 
@@ -1049,5 +1082,87 @@ function AdjudicateClaimModal({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FeeConfigForm({
+  feeConfig,
+  saving,
+  onSave,
+}: {
+  feeConfig: AdminShortletFeeConfig;
+  saving: boolean;
+  onSave: (input: { commissionPct: number; taxName?: string; taxPct: number }) => void;
+}) {
+  const [commission, setCommission] = useState(String(feeConfig.commissionPct));
+  const [taxName, setTaxName] = useState(feeConfig.taxName ?? '');
+  const [taxPct, setTaxPct] = useState(String(feeConfig.taxPct));
+
+  const submit = () => {
+    onSave({
+      commissionPct: Math.min(100, Math.max(0, Number(commission) || 0)),
+      taxName: taxName.trim() || undefined,
+      taxPct: Math.min(100, Math.max(0, Number(taxPct) || 0)),
+    });
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border p-5">
+        <div className="flex items-center gap-2">
+          <Percent className="h-5 w-5" />
+          <p className="font-medium">Platform fees & taxes</p>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          A commission is withheld from each host payout; a tax (e.g. VAT) is added to the guest
+          charge. Both are snapshotted at booking time, so changes apply to new bookings only.
+        </p>
+      </div>
+      <div className="grid gap-5 p-5 md:grid-cols-3">
+        <Field
+          label="Platform commission (%)"
+          hint="Withheld from the host payout. Hosts see net earnings."
+        >
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={commission}
+            onChange={(e) => setCommission(e.target.value)}
+            placeholder="e.g. 10"
+          />
+        </Field>
+        <Field label="Tax label" hint="Shown at checkout, e.g. VAT. Empty clears it.">
+          <Input
+            value={taxName}
+            onChange={(e) => setTaxName(e.target.value)}
+            placeholder="e.g. VAT"
+            maxLength={60}
+          />
+        </Field>
+        <Field label="Tax (%)" hint="Added to the guest charge on top of the stay total.">
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={taxPct}
+            onChange={(e) => setTaxPct(e.target.value)}
+            placeholder="e.g. 7.5"
+          />
+        </Field>
+      </div>
+      <div className="flex items-center justify-end gap-3 border-t border-border p-4">
+        <p className="text-xs text-muted-foreground">
+          Current: {feeConfig.commissionPct}% commission
+          {feeConfig.taxPct > 0
+            ? ` · ${feeConfig.taxName ?? 'Tax'} ${feeConfig.taxPct}%`
+            : ' · no tax'}{' '}
+          · updated {formatDate(feeConfig.updatedAt, 'short')}
+        </p>
+        <Button onClick={submit} disabled={saving}>
+          {saving ? 'Saving…' : 'Save fees & taxes'}
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -75,8 +75,23 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 <StatCard
                   icon={CircleDollarSign}
-                  label="Total earned"
+                  label="Take-home (net)"
                   value={formatCurrency(data.totalEarned)}
+                  hint={
+                    data.grossEarned !== data.totalEarned
+                      ? `Before fees: ${formatCurrency(data.grossEarned)}`
+                      : undefined
+                  }
+                />
+                <StatCard
+                  icon={Wallet}
+                  label="GetRentos fee"
+                  value={formatCurrency(data.platformFees)}
+                  hint={
+                    data.commissionPct != null && data.commissionPct > 0
+                      ? `${data.commissionPct}% commission`
+                      : 'No commission set'
+                  }
                 />
                 <StatCard icon={Wallet} label="Paid out" value={formatCurrency(data.paidOut)} />
                 <StatCard
@@ -95,6 +110,14 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                   label="Avg nightly rate"
                   value={data.avgNightlyRate != null ? formatCurrency(data.avgNightlyRate) : '—'}
                 />
+                {data.taxName && data.taxPct ? (
+                  <StatCard
+                    icon={CircleDollarSign}
+                    label={`Guest ${data.taxName}`}
+                    value={`${data.taxPct}%`}
+                    hint="Added at checkout, collected by GetRentos"
+                  />
+                ) : null}
               </div>
 
               {data.monthly.length > 0 && (
