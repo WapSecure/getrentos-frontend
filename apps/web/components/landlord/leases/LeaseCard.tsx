@@ -33,13 +33,14 @@ export const LeaseCard = ({
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const handleDownload = async () => {
+    setDownloadError(null);
     setDownloading(true);
     try {
-      await landlordService.downloadLeasePdf(lease.id);
-    } catch {
-      // swallow — the service surfaces the error via safeCall already
+      const result = await landlordService.downloadLeasePdf(lease.id);
+      if (!result.success) setDownloadError(result.message ?? 'The lease could not be downloaded.');
     } finally {
       setDownloading(false);
     }
@@ -147,6 +148,11 @@ export const LeaseCard = ({
           </Button>
         )}
       </div>
+      {downloadError ? (
+        <p className="mt-3 text-xs text-red-600 dark:text-red-400" role="alert">
+          {downloadError}
+        </p>
+      ) : null}
     </motion.div>
   );
 };

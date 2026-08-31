@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { FileText, Download, Mail, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import type { RenewalOffer } from '@/types/lease';
 
@@ -21,6 +22,20 @@ interface LeaseHeaderProps {
 }
 
 export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const handleDownload = async () => {
+    setDownloadError(null);
+    setIsDownloading(true);
+    try {
+      const result = await renterService.downloadLeasePdf();
+      if (!result.success) setDownloadError(result.message ?? 'The lease could not be downloaded.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const getStatusConfig = () => {
     switch (lease.status) {
       case 'active':
@@ -80,10 +95,11 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             variant="outline"
             className="gap-2"
             size="sm"
-            onClick={() => void renterService.downloadLeasePdf()}
+            disabled={isDownloading}
+            onClick={() => void handleDownload()}
           >
             <Download className="w-4 h-4" />
-            Download Lease
+            {isDownloading ? 'Downloading…' : 'Download Lease'}
           </Button>
           <Button variant="primary" className="gap-2" size="sm">
             <Mail className="w-4 h-4" />
@@ -91,6 +107,11 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
           </Button>
         </div>
       </div>
+      {downloadError ? (
+        <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+          {downloadError}
+        </p>
+      ) : null}
 
       <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
         <div className="flex flex-wrap items-center gap-4 text-sm">

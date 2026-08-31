@@ -65,6 +65,10 @@ export default function LandlordEvictionsPage() {
     },
   });
 
+  const downloadNotice = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.downloadEvictionNoticePdf(id)),
+  });
+
   const activeCase = cases.find((c) => c.id === activeCaseId) || null;
   const isActing =
     issueNotice.isPending || markFiled.isPending || resolve.isPending || withdraw.isPending;
@@ -137,7 +141,9 @@ export default function LandlordEvictionsPage() {
         onMarkFiled={(id) => markFiled.mutate(id)}
         onResolve={(id, resolutionNotes) => resolve.mutate({ id, resolutionNotes })}
         onWithdraw={(id) => withdraw.mutate(id)}
-        onDownloadPdf={(id) => landlordService.downloadEvictionNoticePdf(id)}
+        onDownloadPdf={(id) => downloadNotice.mutate(id)}
+        isDownloading={downloadNotice.isPending}
+        downloadError={downloadNotice.error instanceof Error ? downloadNotice.error.message : null}
         isActing={isActing}
       />
     </>

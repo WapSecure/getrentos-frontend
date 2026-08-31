@@ -1,7 +1,5 @@
-import { ApiError } from '@getrentos/shared';
-import { authFetch, safeCall, toQuery } from '@getrentos/shared';
+import { authDownload, authFetch, safeCall, toQuery } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
-import { getAuthToken } from '@getrentos/shared';
 import type {
   PlatformUser,
   UserAccountStatus,
@@ -60,8 +58,6 @@ export interface Paginated<T> {
   pageSize: number;
   totalPages: number;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 /** Raw staff rows as returned by the backend (enums are uppercase). */
 interface RawStaffRow {
@@ -528,13 +524,7 @@ export const adminService = {
   /** Triggers a browser download of the transactions CSV export. */
   async exportReportsCsv(): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/admin/reports/export`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok) throw new ApiError(response.status, 'Failed to export report');
-
-      const blob = await response.blob();
+      const blob = await authDownload('/admin/reports/export');
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

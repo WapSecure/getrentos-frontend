@@ -17,6 +17,8 @@ interface EvictionCaseDetailModalProps {
   onResolve: (id: string, resolutionNotes?: string) => void;
   onWithdraw: (id: string) => void;
   onDownloadPdf: (id: string) => void;
+  isDownloading?: boolean;
+  downloadError?: string | null;
   isActing?: boolean;
 }
 
@@ -28,6 +30,8 @@ export const EvictionCaseDetailModal = ({
   onResolve,
   onWithdraw,
   onDownloadPdf,
+  isDownloading,
+  downloadError,
   isActing,
 }: EvictionCaseDetailModalProps) => {
   const [cureDays, setCureDays] = useState('14');
@@ -172,11 +176,17 @@ export const EvictionCaseDetailModal = ({
                 variant="outline"
                 fullWidth
                 className="gap-1.5"
+                disabled={isDownloading}
                 onClick={() => onDownloadPdf(evictionCase.id)}
               >
                 <Download className="w-3.5 h-3.5" />
-                Download Draft Record (PDF)
+                {isDownloading ? 'Downloading…' : 'Download Draft Record (PDF)'}
               </Button>
+              {downloadError ? (
+                <p className="text-xs text-red-600 dark:text-red-400" role="alert">
+                  {downloadError}
+                </p>
+              ) : null}
 
               {evictionCase.status === 'draft' && (
                 <div className="flex gap-2">

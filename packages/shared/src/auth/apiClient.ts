@@ -10,17 +10,71 @@ if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://'
 export class ApiError extends Error {
   status: number;
   details?: unknown;
+  code?: string;
+  requestId?: string;
 
   constructor(status: number, message: string, details?: unknown) {
     super(message);
+    this.name = 'ApiError';
     this.status = status;
     this.details = details;
+    const errorBody = details as BackendErrorBody | undefined;
+    this.code = errorBody?.error;
+    this.requestId = errorBody?.requestId;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+
+  get isRetryable(): boolean {
+    return this.status === 0 || this.status === 408 || this.status === 429 || this.status >= 500;
   }
 }
 
 interface BackendErrorBody {
   message?: string | string[];
   error?: string;
+  requestId?: string;
+}
+
+const FALLBACK_MESSAGES: Record<number, string> = {
+  400: 'Please check the information you entered and try again.',
+  401: 'Your session has expired. Please sign in again.',
+  403: 'You do not have permission to perform this action.',
+  404: 'The requested information could not be found.',
+  409: 'This action conflicts with an existing record. Refresh and try again.',
+  413: 'The selected file is too large.',
+  429: 'Too many requests. Please wait a moment and try again.',
+};
+
+function fallbackMessage(status: number): string {
+  if (FALLBACK_MESSAGES[status]) return FALLBACK_MESSAGES[status];
+  if (status >= 500) return 'The service is temporarily unavailable. Please try again shortly.';
+  return 'We could not complete your request. Please try again.';
+}
+
+async function toApiError(response: Response): Promise<ApiError> {
+  const body = (await readResponseBody<never>(response)) as BackendErrorBody | undefined;
+  const message = Array.isArray(body?.message)
+    ? body.message.join(', ')
+    : body?.message || fallbackMessage(response.status);
+  return new ApiError(response.status, message, {
+    ...body,
+    requestId: body?.requestId ?? response.headers.get('x-request-id') ?? undefined,
+  });
+}
+
+async function readResponseBody<T>(response: Response): Promise<T | BackendErrorBody | undefined> {
+  if (response.status === 204 || response.status === 205) return undefined;
+
+  const text = await response.text();
+  if (!text) return undefined;
+
+  if (!response.headers.get('content-type')?.includes('application/json')) return undefined;
+
+  try {
+    return JSON.parse(text) as T | BackendErrorBody;
+  } catch {
+    return undefined;
+  }
 }
 
 // ---- Silent session refresh (remember-me) -----------------------------------
@@ -164,20 +218,42 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
         ...options.headers,
       },
     });
-  } catch {
+  } catch (error) {
+    // Preserve cancellation semantics for query libraries and route changes.
+    if (error instanceof Error && error.name === 'AbortError') throw error;
     throw new ApiError(0, 'Unable to reach the server. Please check your connection.');
   }
 
-  const isJson = response.headers.get('content-type')?.includes('application/json');
-  const body: BackendErrorBody | T | undefined = isJson ? await response.json() : undefined;
+  const body = await readResponseBody<T>(response);
 
   if (!response.ok) {
     const errorBody = body as BackendErrorBody | undefined;
     const message = Array.isArray(errorBody?.message)
       ? errorBody.message.join(', ')
-      : errorBody?.message || 'Something went wrong. Please try again.';
-    throw new ApiError(response.status, message, body);
+      : errorBody?.message || fallbackMessage(response.status);
+    throw new ApiError(response.status, message, {
+      ...errorBody,
+      requestId: errorBody?.requestId ?? response.headers.get('x-request-id') ?? undefined,
+    });
   }
 
   return body as T;
+}
+
+/** Fetches a binary response while preserving the same API error contract. */
+export async function apiDownload(path: string, options: RequestInit = {}): Promise<Blob> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      credentials: 'include',
+      headers: { ...options.headers },
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw error;
+    throw new ApiError(0, 'Unable to reach the server. Please check your connection.');
+  }
+
+  if (!response.ok) throw await toApiError(response);
+  return response.blob();
 }

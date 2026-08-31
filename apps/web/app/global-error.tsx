@@ -6,7 +6,7 @@ export default function GlobalError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
+  error: Error & { digest?: string; requestId?: string };
   reset: () => void;
 }) {
   return (
@@ -23,9 +23,9 @@ export default function GlobalError({
             GetRentos hit an unexpected error and couldn&apos;t load this page.
           </p>
 
-          {error.digest && (
+          {(error.requestId || error.digest) && (
             <p className="mt-2 text-xs text-gray-400 dark:text-gray-600 font-mono">
-              Error reference: {error.digest}
+              Error reference: {error.requestId ?? error.digest}
             </p>
           )}
 

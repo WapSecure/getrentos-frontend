@@ -1,7 +1,5 @@
-import { ApiError } from '@/lib/apiClient';
-import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import { getAuthToken } from '@/lib/authStorage';
 import type {
   Application,
   ApplicationStatus,
@@ -19,8 +17,6 @@ import type { Notification } from '@/types/notification';
 import type { CreditBureau, CreditReportingProfile } from '@/types/credit-reporting';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 import type { UssdMenu } from '@/types/ussd';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export interface ViewingRequest {
   id: string;
@@ -971,13 +967,7 @@ export const renterService = {
 
   async downloadLeasePdf(): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/renter/lease/pdf`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
-
-      const blob = await response.blob();
+      const blob = await authDownload('/renter/lease/pdf');
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

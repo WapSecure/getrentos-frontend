@@ -1,4 +1,4 @@
-import { apiFetch, ApiError, refreshSession } from './apiClient';
+import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
 import { getAuthToken } from './authStorage';
 
 /** Machine-readable reasons the backend attaches to a 403 when an action requires verification. */
@@ -15,6 +15,7 @@ export interface ApiResponse<T = unknown> {
   error?: string;
   message?: string;
   status?: number;
+  requestId?: string;
   /** Set when a 403 was rejected by ActionVerificationGuard — see VERIFICATION_REASONS. */
   reason?: VerificationReason;
 }
@@ -47,6 +48,7 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
         error: err.message,
         message: err.message,
         status: err.status,
+        requestId: err.requestId,
         reason: err.status === 403 ? extractReason(err.details) : undefined,
       };
     }
@@ -88,14 +90,39 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
   }
 }
 
+/** Downloads an authenticated binary response, refreshing an expired session once. */
+export async function authDownload(path: string, options: RequestInit = {}): Promise<Blob> {
+  const doDownload = (token: string | null) =>
+    apiDownload(path, {
+      ...options,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+
+  try {
+    return await doDownload(getAuthToken());
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      const refreshed = await refreshSession();
+      if (refreshed) return doDownload(getAuthToken());
+    }
+    throw error;
+  }
+}
+
 export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   const response = await promise;
-  if (!response.success || response.data === undefined) {
+  if (!response.success) {
     const message = response.message || response.error || 'Request failed';
     if (response.reason) throw new VerificationRequiredError(message, response.reason);
-    throw new Error(message);
+    throw new ApiError(response.status ?? 0, message, {
+      error: response.error,
+      requestId: response.requestId,
+    });
   }
-  return response.data;
+  return response.data as T;
 }
 
 export function toQuery(params: Record<string, string | number | boolean | undefined>): string {

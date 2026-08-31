@@ -1,7 +1,5 @@
-import { ApiError } from '@/lib/apiClient';
-import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import { getAuthToken } from '@/lib/authStorage';
 import type {
   Property,
   Unit,
@@ -24,8 +22,6 @@ import type {
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export interface RentCollectionStats {
   totalCollected: number;
@@ -425,13 +421,7 @@ export const landlordService = {
 
   async downloadLeasePdf(id: string): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/landlord/leases/${id}/pdf`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok) throw new ApiError(response.status, 'Failed to download lease PDF');
-
-      const blob = await response.blob();
+      const blob = await authDownload(`/landlord/leases/${id}/pdf`);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -489,14 +479,7 @@ export const landlordService = {
 
   async downloadEvictionNoticePdf(id: string): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/landlord/evictions/${id}/notice.pdf`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok)
-        throw new ApiError(response.status, 'Failed to download eviction notice PDF');
-
-      const blob = await response.blob();
+      const blob = await authDownload(`/landlord/evictions/${id}/notice.pdf`);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -560,13 +543,7 @@ export const landlordService = {
 
   async exportFinancialsCsv(): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/landlord/financials/export`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok) throw new ApiError(response.status, 'Failed to export financials');
-
-      const blob = await response.blob();
+      const blob = await authDownload('/landlord/financials/export');
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
