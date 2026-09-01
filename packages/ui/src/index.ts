@@ -20,6 +20,7 @@ export * from './LanguageToggle';
 export * from './LegacyInput';
 export * from './LegacySelect';
 export * from './Logo';
+export * from './NumberInput';
 export * from './Pagination';
 export * from './ParticleBackground';
 export * from './providers/ThemeProvider';

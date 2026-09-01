@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
-  Input,
+  NumberInput,
 } from '@getrentos/ui';
 import { CreditCard, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -142,12 +142,11 @@ export function ShortletBookingDialog({
             </Field>
           </div>
           <Field label="Guests" hint={`Max ${listing.maxGuests}`}>
-            <Input
-              type="number"
+            <NumberInput
               min={1}
               max={listing.maxGuests}
               value={guestCount}
-              onChange={(e) => setGuestCount(e.target.value)}
+              onValueChange={setGuestCount}
             />
           </Field>
 

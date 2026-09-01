@@ -14,6 +14,7 @@ import {
   EmptyState,
   Field,
   Input,
+  NumberInput,
   Pagination,
   Select,
   Skeleton,
@@ -701,28 +702,17 @@ function CreateListingDialog({
           </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Min nights">
-              <Input
-                type="number"
-                min={1}
-                value={minNights}
-                onChange={(e) => setMinNights(e.target.value)}
-              />
+              <NumberInput min={1} value={minNights} onValueChange={setMinNights} />
             </Field>
             <Field label="Max guests">
-              <Input
-                type="number"
-                min={1}
-                value={maxGuests}
-                onChange={(e) => setMaxGuests(e.target.value)}
-              />
+              <NumberInput min={1} value={maxGuests} onValueChange={setMaxGuests} />
             </Field>
             <Field label="Weekend +%" hint="Optional">
-              <Input
-                type="number"
+              <NumberInput
                 min={0}
                 max={100}
                 value={weekendUpliftPct}
-                onChange={(e) => setWeekendUpliftPct(e.target.value)}
+                onValueChange={setWeekendUpliftPct}
               />
             </Field>
           </div>
@@ -950,28 +940,17 @@ function EditListingDialog({
           </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Min nights">
-              <Input
-                type="number"
-                min={1}
-                value={minNights}
-                onChange={(e) => setMinNights(e.target.value)}
-              />
+              <NumberInput min={1} value={minNights} onValueChange={setMinNights} />
             </Field>
             <Field label="Max guests">
-              <Input
-                type="number"
-                min={1}
-                value={maxGuests}
-                onChange={(e) => setMaxGuests(e.target.value)}
-              />
+              <NumberInput min={1} value={maxGuests} onValueChange={setMaxGuests} />
             </Field>
             <Field label="Weekend +%">
-              <Input
-                type="number"
+              <NumberInput
                 min={0}
                 max={100}
                 value={weekendUpliftPct}
-                onChange={(e) => setWeekendUpliftPct(e.target.value)}
+                onValueChange={setWeekendUpliftPct}
               />
             </Field>
           </div>

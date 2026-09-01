@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrento
 import { EmptyState } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { CurrencyInput, Input } from '@getrentos/ui';
+import { CurrencyInput, Input, NumberInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
@@ -1371,15 +1371,13 @@ export function HomeManagementWorkOrderQueue({
                     : undefined
                 }
               >
-                <Input
+                <NumberInput
                   id="home-work-order-unit-bedrooms"
-                  type="number"
                   min={0}
                   step={1}
-                  inputMode="numeric"
                   value={unitForm.bedrooms}
-                  onChange={(event) =>
-                    setUnitForm((current) => ({ ...current, bedrooms: event.target.value }))
+                  onValueChange={(value) =>
+                    setUnitForm((current) => ({ ...current, bedrooms: value }))
                   }
                 />
               </Field>
@@ -1394,15 +1392,13 @@ export function HomeManagementWorkOrderQueue({
                     : undefined
                 }
               >
-                <Input
+                <NumberInput
                   id="home-work-order-unit-bathrooms"
-                  type="number"
                   min={0}
                   step={1}
-                  inputMode="numeric"
                   value={unitForm.bathrooms}
-                  onChange={(event) =>
-                    setUnitForm((current) => ({ ...current, bathrooms: event.target.value }))
+                  onValueChange={(value) =>
+                    setUnitForm((current) => ({ ...current, bathrooms: value }))
                   }
                 />
               </Field>

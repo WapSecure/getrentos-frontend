@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
 import type { OwnerProperty } from '@/types/owner';
-import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
+import { LocationFields } from '@/components/shared/location/LocationFields';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 
 type OwnerPropertyUpdates = Pick<
@@ -109,16 +109,14 @@ const EditOwnerPropertyForm = ({
           <Input value={address} onChange={(e) => setAddress(e.target.value)} />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">City</label>
-          <Input value={city} onChange={(e) => setCity(e.target.value)} />
-        </div>
-
-        <CountryStateFields
+        <LocationFields
           country={country}
           state={state}
+          city={city}
           onCountryChange={setCountry}
           onStateChange={setState}
+          onCityChange={setCity}
+          required
         />
 
         <div>

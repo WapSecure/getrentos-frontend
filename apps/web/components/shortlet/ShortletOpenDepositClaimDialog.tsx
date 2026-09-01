@@ -4,12 +4,12 @@ import { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Button,
+  CurrencyInput,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   Field,
-  Input,
   Textarea,
   Toast,
   type ToastVariant,
@@ -100,12 +100,12 @@ export function ShortletOpenDepositClaimDialog({
             label={`Claim amount (max ${formatCurrency(held)})`}
             hint="This is withheld from the guest's deposit refund if approved."
           >
-            <Input
-              type="number"
+            <CurrencyInput
+              prefix="₦"
               min={1}
               max={held}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={(v) => setAmount(v === 0 ? '' : String(v))}
               placeholder="e.g. 25000"
             />
           </Field>

@@ -10,7 +10,7 @@ import {
   CurrencyInput,
   DatePicker,
   EmptyState,
-  Input,
+  NumberInput,
   Pagination,
   Select,
   Skeleton,
@@ -20,6 +20,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency } from '@/lib/format';
 import type { ShortletListing } from '@/types/shortlet';
@@ -89,18 +90,22 @@ export const ShortletMarketplaceBrowser = () => {
       {/* Filters */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-7">
         <div className="col-span-2 md:col-span-1">
-          <Input
-            placeholder="City"
+          <Select
             value={city}
-            onChange={(e) => updateFilter(setCity, e.target.value)}
+            onValueChange={(value) => updateFilter(setCity, value)}
+            options={[
+              { value: '', label: 'All cities' },
+              ...ALL_NIGERIAN_CITIES.map((c) => ({ value: c, label: c })),
+            ]}
+            placeholder="City"
+            ariaLabel="Filter by city"
           />
         </div>
-        <Input
+        <NumberInput
           placeholder="Guests"
-          type="number"
           min={1}
           value={guests}
-          onChange={(e) => updateFilter(setGuests, e.target.value)}
+          onValueChange={(value) => updateFilter(setGuests, value)}
         />
         <CurrencyInput
           prefix="₦"

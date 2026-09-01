@@ -7,12 +7,32 @@ export const AUTH_CONSTANTS = {
 } as const;
 
 /** Shared client-side validation patterns. Keep these centralized so every
- * authentication surface accepts the same input format. */
+ * surface accepts the same input format. */
 export const VALIDATION_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,6}[-\s.]?[0-9]{1,6}$/,
+  /** Whole numbers only (allows empty string while typing). */
   DIGITS_ONLY: /^\d*$/,
+  /** Strips anything that is not a digit. */
   NON_DIGITS: /\D/g,
+  /** Whole numbers with at least one digit. */
+  INTEGER: /^\d+$/,
+  /** Decimal numbers (allows empty string while typing, at most one dot). */
+  DECIMAL: /^\d*(\.\d*)?$/,
+  /** Strips anything that is not a digit or a single decimal point. */
+  NON_NUMERIC: /[^\d.]/g,
+  /** Person / entity names: letters with spaces, apostrophes, dots and hyphens. */
+  NAME: /^[A-Za-z][A-Za-z\s.'-]{0,}$/,
+  /** Strips characters not allowed in a name. */
+  NON_NAME: /[^A-Za-z\s.'-]/g,
+  /** Alphanumeric only. */
+  ALPHANUMERIC: /^[A-Za-z0-9]*$/,
+  /** Alphanumeric with common address punctuation. */
+  ALPHANUMERIC_SPACES: /^[A-Za-z0-9\s.,#'/-]*$/,
+  /** Strips characters not allowed in an alphanumeric-with-punctuation field. */
+  NON_ALPHANUMERIC_SPACES: /[^A-Za-z0-9\s.,#'/-]/g,
+  /** Plot / unit numbers like "24B", "5A" (letters allowed but at least one digit). */
+  PLOT_NUMBER: /^[A-Za-z0-9-]{1,10}$/,
 } as const;
 
 export const SIGNUP_METHODS = {
@@ -159,6 +179,10 @@ export const ERROR_MESSAGES = {
   OTP_EXPIRED: 'Verification code has expired. Please request a new one',
   USER_EXISTS: 'An account with this email/phone already exists',
   SOMETHING_WRONG: 'Something went wrong. Please try again',
+  INVALID_NUMBER: 'Please enter a valid number',
+  INVALID_INTEGER: 'Please enter a whole number',
+  INVALID_NAME: 'Please enter a valid name (letters only)',
+  INVALID_PLOT_NUMBER: 'Please enter a valid plot number',
 } as const;
 
 export const STORAGE_KEYS = {

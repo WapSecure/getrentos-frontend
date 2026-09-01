@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Download, TriangleAlert } from 'lucide-react';
 import { Badge, Button, Textarea } from '@getrentos/ui';
-import { LegacyInput } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import { evictionStatusBadges } from '@/lib/statusBadge';
 import type { EvictionCase } from '@/types/landlord';
@@ -129,13 +129,7 @@ export const EvictionCaseDetailModal = ({
                   <label className="block text-sm font-medium text-foreground">
                     Cure period (days)
                   </label>
-                  <LegacyInput
-                    type="number"
-                    value={cureDays}
-                    onChange={(e) => setCureDays(e.target.value)}
-                    min={1}
-                    max={180}
-                  />
+                  <NumberInput value={cureDays} onValueChange={setCureDays} min={1} max={180} />
                   <Button
                     variant="primary"
                     size="sm"

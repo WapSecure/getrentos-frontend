@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
 
@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, FileText, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
+import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { Property, PropertyType } from '@/types/landlord';
 
 interface AddPropertyModalProps {
@@ -183,34 +183,24 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      City <span className="text-red-500">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={form.city}
-                      onChange={(e) => update('city', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <CountryStateFields
+                  <LocationFields
                     country={form.country}
                     state={form.state}
+                    city={form.city}
                     onCountryChange={(c) => update('country', c)}
                     onStateChange={(s) => update('state', s)}
+                    onCityChange={(c) => update('city', c)}
+                    required
                   />
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Number of Units
                     </label>
-                    <LegacyInput
-                      type="number"
+                    <NumberInput
                       min={1}
                       value={form.totalUnits}
-                      onChange={(e) => update('totalUnits', e.target.value)}
+                      onValueChange={(v) => update('totalUnits', v)}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>

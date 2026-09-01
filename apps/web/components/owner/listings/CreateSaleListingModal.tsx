@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
 
@@ -261,11 +261,10 @@ export const CreateSaleListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Size (sqm)
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <NumberInput
                         min={0}
                         value={form.propertySize}
-                        onChange={(e) => update('propertySize', e.target.value)}
+                        onValueChange={(v) => update('propertySize', v)}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
@@ -273,11 +272,10 @@ export const CreateSaleListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Bedrooms
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <NumberInput
                         min={0}
                         value={form.bedrooms}
-                        onChange={(e) => update('bedrooms', e.target.value)}
+                        onValueChange={(v) => update('bedrooms', v)}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
@@ -285,11 +283,10 @@ export const CreateSaleListingModal = ({
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Bathrooms
                       </label>
-                      <LegacyInput
-                        type="number"
+                      <NumberInput
                         min={0}
                         value={form.bathrooms}
-                        onChange={(e) => update('bathrooms', e.target.value)}
+                        onValueChange={(v) => update('bathrooms', v)}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>

@@ -6,6 +6,7 @@ import {
   DocumentUploadDialog,
   Field,
   Input,
+  NumberInput,
   Select,
   Switch,
   Textarea,
@@ -161,12 +162,11 @@ export const LandParcelEditor = ({
             />
           </Field>
           <Field label="Land area" required>
-            <Input
-              type="number"
+            <NumberInput
+              integer={false}
               min="0"
-              step="0.01"
               value={textValue(parcel.areaValue || '')}
-              onChange={(event) => update('areaValue', Number(event.target.value) || 0)}
+              onValueChange={(value) => update('areaValue', Number(value) || 0)}
               placeholder="e.g. 600"
             />
           </Field>
@@ -182,25 +182,19 @@ export const LandParcelEditor = ({
             />
           </Field>
           <Field label="Frontage (m)">
-            <Input
-              type="number"
+            <NumberInput
+              integer={false}
               min="0"
-              step="0.01"
               value={textValue(parcel.frontage)}
-              onChange={(event) =>
-                update('frontage', event.target.value ? Number(event.target.value) : undefined)
-              }
+              onValueChange={(value) => update('frontage', value ? Number(value) : undefined)}
             />
           </Field>
           <Field label="Depth (m)">
-            <Input
-              type="number"
+            <NumberInput
+              integer={false}
               min="0"
-              step="0.01"
               value={textValue(parcel.depth)}
-              onChange={(event) =>
-                update('depth', event.target.value ? Number(event.target.value) : undefined)
-              }
+              onValueChange={(value) => update('depth', value ? Number(value) : undefined)}
             />
           </Field>
           <Field label="Zoning">

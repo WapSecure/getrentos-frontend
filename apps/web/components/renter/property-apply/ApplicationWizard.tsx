@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
 
@@ -11,6 +11,7 @@ import { Check, Upload, FileText, User, Briefcase, ClipboardCheck } from 'lucide
 import { Button } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
+import { nameOnly } from '@/lib/validations/input';
 
 export interface ApplicationFormData {
   fullName: string;
@@ -130,7 +131,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
             <Field label="Full name">
               <LegacyInput
                 value={data.fullName}
-                onChange={(e) => update('fullName', e.target.value)}
+                onChange={(e) => update('fullName', nameOnly(e.target.value))}
                 className={inputClass}
                 placeholder="e.g. David Okoro"
               />
@@ -186,10 +187,9 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
               </LegacySelect>
             </Field>
             <Field label="Monthly income (₦)">
-              <LegacyInput
-                inputMode="numeric"
+              <NumberInput
                 value={data.monthlyIncome}
-                onChange={(e) => update('monthlyIncome', e.target.value.replace(/[^0-9]/g, ''))}
+                onValueChange={(v) => update('monthlyIncome', v)}
                 className={inputClass}
                 placeholder="e.g. 600000"
               />

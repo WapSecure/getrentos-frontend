@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 
 import { LegacySelect } from '@getrentos/ui';
 
@@ -165,11 +165,10 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Interest Rate (%)
                       </label>
-                      <LegacyInput
-                        type="number"
-                        step="0.5"
+                      <NumberInput
+                        integer={false}
                         value={interestRate}
-                        onChange={(e) => setInterestRate(Number(e.target.value))}
+                        onValueChange={(v) => setInterestRate(Number(v) || 0)}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>

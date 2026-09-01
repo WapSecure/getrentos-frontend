@@ -8,7 +8,7 @@ import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
@@ -596,52 +596,46 @@ export function HomeManagementSlaPolicies({
 
             <div className="grid gap-4 sm:grid-cols-3">
               <Field htmlFor="sla-response-target" label="Respond in" required hint="Minutes">
-                <Input
+                <NumberInput
                   id="sla-response-target"
-                  type="number"
                   min={1}
                   max={MAX_TARGET_MINUTES}
-                  inputMode="numeric"
                   value={form.responseTargetMinutes}
                   disabled={mutationPending}
-                  onChange={(event) =>
+                  onValueChange={(value) =>
                     setForm((current) => ({
                       ...current,
-                      responseTargetMinutes: event.target.value,
+                      responseTargetMinutes: value,
                     }))
                   }
                 />
               </Field>
               <Field htmlFor="sla-resolution-target" label="Resolve in" required hint="Minutes">
-                <Input
+                <NumberInput
                   id="sla-resolution-target"
-                  type="number"
                   min={1}
                   max={MAX_TARGET_MINUTES}
-                  inputMode="numeric"
                   value={form.resolutionTargetMinutes}
                   disabled={mutationPending}
-                  onChange={(event) =>
+                  onValueChange={(value) =>
                     setForm((current) => ({
                       ...current,
-                      resolutionTargetMinutes: event.target.value,
+                      resolutionTargetMinutes: value,
                     }))
                   }
                 />
               </Field>
               <Field htmlFor="sla-escalation-target" label="Escalate in" required hint="Minutes">
-                <Input
+                <NumberInput
                   id="sla-escalation-target"
-                  type="number"
                   min={1}
                   max={MAX_TARGET_MINUTES}
-                  inputMode="numeric"
                   value={form.escalationTargetMinutes}
                   disabled={mutationPending}
-                  onChange={(event) =>
+                  onValueChange={(value) =>
                     setForm((current) => ({
                       ...current,
-                      escalationTargetMinutes: event.target.value,
+                      escalationTargetMinutes: value,
                     }))
                   }
                 />

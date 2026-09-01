@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, Checkbox, DatePicker, LegacyInput, Pagination, Select } from '@getrentos/ui';
+import {
+  Button,
+  Checkbox,
+  CurrencyInput,
+  DatePicker,
+  LegacyInput,
+  Pagination,
+  Select,
+} from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface CreateDuesModalProps {
@@ -105,10 +113,10 @@ export const CreateDuesModal = ({
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Amount (₦)</label>
-                <LegacyInput
-                  type="number"
+                <CurrencyInput
+                  prefix="₦"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onValueChange={(v) => setAmount(v === 0 ? '' : String(v))}
                   min={1}
                 />
               </div>

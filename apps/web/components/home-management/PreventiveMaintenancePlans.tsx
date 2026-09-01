@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrento
 import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { Input, NumberInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
@@ -28,7 +28,6 @@ import { homeManagementKeys } from '@/lib/queryKeys';
 import {
   homeManagementService,
   type CreatePreventivePlanInput,
-  type HomeAsset,
   type HomeManagementMaintenanceCategory,
   type HomeManagementProperty,
   type HomeManagementVendor,
@@ -505,14 +504,12 @@ export function PreventiveMaintenancePlans({
                 required
                 hint="Number of days between services."
               >
-                <Input
+                <NumberInput
                   id="care-plan-frequency"
-                  type="number"
                   min={1}
-                  inputMode="numeric"
                   value={form.frequencyDays}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, frequencyDays: event.target.value }))
+                  onValueChange={(value) =>
+                    setForm((current) => ({ ...current, frequencyDays: value }))
                   }
                   trailingIcon={<span className="text-xs">days</span>}
                 />

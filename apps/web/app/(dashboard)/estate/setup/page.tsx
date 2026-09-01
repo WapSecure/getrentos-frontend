@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, LegacyInput, NumberInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -86,13 +86,7 @@ export default function EstateSetupPage() {
           <label className="block text-sm font-medium text-foreground mb-1">
             Number of Gates <span className="text-gray-400 font-normal">(optional)</span>
           </label>
-          <LegacyInput
-            type="number"
-            value={gateCount}
-            onChange={(e) => setGateCount(e.target.value)}
-            min={1}
-            max={50}
-          />
+          <NumberInput value={gateCount} onValueChange={setGateCount} min={1} max={50} />
         </div>
 
         {createEstate.isError && (
