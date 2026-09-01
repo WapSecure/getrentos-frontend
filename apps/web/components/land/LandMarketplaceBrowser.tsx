@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Input,
+  NumberInput,
   Pagination,
   Select,
   Toast,
@@ -22,7 +22,6 @@ import {
   MapPin,
   MessageSquare,
   Ruler,
-  Search,
   ShieldCheck,
   Sparkles,
   Trees,
@@ -32,6 +31,11 @@ import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import {
+  NIGERIA_STATES,
+  NIGERIA_STATE_CITIES,
+  ALL_NIGERIAN_CITIES,
+} from '@/lib/constants/locations';
 import { formatCurrency, formatDate } from '@/lib/format';
 import {
   LAND_AREA_UNIT_LABELS,
@@ -47,6 +51,16 @@ interface LandMarketplaceBrowserProps {
 }
 
 const PAGE_SIZE = 9;
+
+const stateFilterOptions = [
+  { value: '', label: 'All states' },
+  ...NIGERIA_STATES.map((s) => ({ value: s, label: s })),
+];
+
+const cityFilterOptionsFor = (state: string) => {
+  const cities = state ? (NIGERIA_STATE_CITIES[state] ?? []) : ALL_NIGERIAN_CITIES;
+  return [{ value: '', label: 'All cities' }, ...cities.map((c) => ({ value: c, label: c }))];
+};
 
 const areaLabel = (listing: PublicLandListing) =>
   `${listing.parcel.areaValue.toLocaleString()} ${LAND_AREA_UNIT_LABELS[listing.parcel.areaUnit]}`;
@@ -140,30 +154,37 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         </div>
 
         <div className="mb-6 grid gap-3 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_0.8fr]">
-          <Input
-            value={city}
-            onChange={(event) => updateFilter(setCity, event.target.value)}
-            placeholder="City"
-            leadingIcon={<MapPin className="h-4 w-4" />}
-          />
-          <Input
+          <Select
             value={state}
-            onChange={(event) => updateFilter(setState, event.target.value)}
+            onValueChange={(value) => {
+              updateFilter(setState, value);
+              updateFilter(setCity, '');
+            }}
+            options={stateFilterOptions}
             placeholder="State"
-            leadingIcon={<Search className="h-4 w-4" />}
+            ariaLabel="Filter by state"
+            className="min-h-11"
           />
-          <Input
-            type="number"
+          <Select
+            value={city}
+            onValueChange={(value) => updateFilter(setCity, value)}
+            options={cityFilterOptionsFor(state)}
+            placeholder="City"
+            ariaLabel="Filter by city"
+            className="min-h-11"
+          />
+          <NumberInput
+            integer
             min="0"
             value={minPrice}
-            onChange={(event) => updateFilter(setMinPrice, event.target.value)}
+            onValueChange={(value) => updateFilter(setMinPrice, value)}
             placeholder="Min price"
           />
-          <Input
-            type="number"
+          <NumberInput
+            integer
             min="0"
             value={maxPrice}
-            onChange={(event) => updateFilter(setMaxPrice, event.target.value)}
+            onValueChange={(value) => updateFilter(setMaxPrice, value)}
             placeholder="Max price"
           />
           <Select

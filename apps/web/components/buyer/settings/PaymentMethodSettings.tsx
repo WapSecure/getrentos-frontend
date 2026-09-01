@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -87,11 +87,9 @@ export const PaymentMethodSettings = () => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Account Number</label>
-          <LegacyInput
-            type="text"
-            inputMode="numeric"
+          <NumberInput
             value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
+            onValueChange={setAccountNumber}
             placeholder="0123456789"
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />

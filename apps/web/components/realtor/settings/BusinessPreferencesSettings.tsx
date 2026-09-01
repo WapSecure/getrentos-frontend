@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -85,12 +85,11 @@ export const BusinessPreferencesSettings = () => {
           <label className="block text-sm font-medium text-foreground mb-1">
             Default Commission Rate (%)
           </label>
-          <LegacyInput
-            type="number"
+          <NumberInput
             min={1}
             max={100}
             value={defaultCommissionRate}
-            onChange={(e) => setDefaultCommissionRate(e.target.value)}
+            onValueChange={setDefaultCommissionRate}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

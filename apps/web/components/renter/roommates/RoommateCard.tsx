@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import {
@@ -147,10 +147,10 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
           <div className="text-right">
             {isEditingShare ? (
               <div className="flex items-center gap-1">
-                <LegacyInput
-                  type="number"
+                <NumberInput
+                  integer={false}
                   value={sharePercentage}
-                  onChange={(e) => setSharePercentage(Number(e.target.value))}
+                  onValueChange={(v) => setSharePercentage(Number(v) || 0)}
                   className="w-16 px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   min="0"
                   max="100"

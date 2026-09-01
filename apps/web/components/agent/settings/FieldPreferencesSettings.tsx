@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Wifi } from 'lucide-react';
@@ -79,12 +79,11 @@ export const FieldPreferencesSettings = () => {
           <label className="block text-sm font-medium text-foreground mb-1">
             Max Tasks Per Day
           </label>
-          <LegacyInput
-            type="number"
+          <NumberInput
             min={1}
             max={20}
             value={maxDailyTasks}
-            onChange={(e) => setMaxDailyTasks(e.target.value)}
+            onValueChange={setMaxDailyTasks}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

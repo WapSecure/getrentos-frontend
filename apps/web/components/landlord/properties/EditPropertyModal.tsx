@@ -1,13 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
-import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
+import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { Property, PropertyType } from '@/types/landlord';
 
 type PropertyUpdates = Pick<
@@ -121,30 +121,22 @@ const EditPropertyForm = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">City</label>
-          <LegacyInput
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-
-        <CountryStateFields
+        <LocationFields
           country={country}
           state={state}
+          city={city}
           onCountryChange={setCountry}
           onStateChange={setState}
+          onCityChange={setCity}
+          required
         />
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Number of Units</label>
-          <LegacyInput
-            type="number"
+          <NumberInput
             min={1}
             value={totalUnits}
-            onChange={(e) => setTotalUnits(e.target.value)}
+            onValueChange={setTotalUnits}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

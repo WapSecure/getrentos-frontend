@@ -6,13 +6,13 @@ import { Tag } from 'lucide-react';
 import {
   Button,
   Checkbox,
+  CurrencyInput,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   EmptyState,
   Field,
-  Input,
   Pagination,
   Select,
   Toast,
@@ -153,12 +153,12 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
                 required
                 className="sm:col-span-2"
               >
-                <Input
+                <CurrencyInput
                   id="bulk-price-amount"
-                  type="number"
+                  prefix="₦"
                   min="1"
                   value={monthlyRent}
-                  onChange={(event) => setMonthlyRent(event.target.value)}
+                  onValueChange={(v) => setMonthlyRent(v === 0 ? '' : String(v))}
                   placeholder="e.g. 200000"
                 />
               </Field>

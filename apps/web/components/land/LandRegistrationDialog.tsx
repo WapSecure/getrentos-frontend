@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import {
   Button,
+  CurrencyInput,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   Field,
   Input,
+  NumberInput,
   Select,
 } from '@getrentos/ui';
 import { MapPinned, Upload } from 'lucide-react';
@@ -18,6 +20,8 @@ import {
   type LandOwnershipProofInput,
   type LandParcelInput,
 } from '@/types/land';
+import { LocationFields } from '@/components/shared/location/LocationFields';
+import { alphanumericOnly } from '@/lib/validations/input';
 
 export interface LandRegistrationInput {
   property: Pick<
@@ -190,37 +194,30 @@ export const LandRegistrationDialog = ({
                 placeholder="Street, layout, or nearest landmark"
               />
             </Field>
-            <Field label="City" required>
-              <Input
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
-                placeholder="e.g. Ibeju-Lekki"
-              />
-            </Field>
-            <Field label="State" required>
-              <Input
-                value={state}
-                onChange={(event) => setState(event.target.value)}
-                placeholder="e.g. Lagos"
-              />
-            </Field>
-            <Field label="Country" required>
-              <Input value={country} onChange={(event) => setCountry(event.target.value)} />
-            </Field>
+            <LocationFields
+              country={country}
+              state={state}
+              city={city}
+              onCountryChange={setCountry}
+              onStateChange={setState}
+              onCityChange={setCity}
+              className="sm:col-span-2"
+              required
+            />
             <Field label="Plot number">
               <Input
                 value={plotNumber}
-                onChange={(event) => setPlotNumber(event.target.value)}
+                onChange={(event) => setPlotNumber(alphanumericOnly(event.target.value))}
                 placeholder="e.g. 24B"
+                maxLength={10}
               />
             </Field>
             <Field label="Parcel area" required>
-              <Input
-                type="number"
+              <NumberInput
+                integer={false}
                 min="0"
-                step="0.01"
                 value={areaValue}
-                onChange={(event) => setAreaValue(event.target.value)}
+                onValueChange={setAreaValue}
                 placeholder="e.g. 600"
               />
             </Field>
@@ -261,19 +258,19 @@ export const LandRegistrationDialog = ({
               />
             </Field>
             <Field label="Estimated value (₦)">
-              <Input
-                type="number"
+              <CurrencyInput
+                prefix="₦"
                 min="0"
                 value={estimatedValue}
-                onChange={(event) => setEstimatedValue(event.target.value)}
+                onValueChange={(v) => setEstimatedValue(v === 0 ? '' : String(v))}
               />
             </Field>
             <Field label="Purchase price (₦)">
-              <Input
-                type="number"
+              <CurrencyInput
+                prefix="₦"
                 min="0"
                 value={purchasePrice}
-                onChange={(event) => setPurchasePrice(event.target.value)}
+                onValueChange={(v) => setPurchasePrice(v === 0 ? '' : String(v))}
               />
             </Field>
           </div>

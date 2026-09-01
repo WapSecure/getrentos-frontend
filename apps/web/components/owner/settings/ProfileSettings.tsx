@@ -9,6 +9,7 @@ import { SaveButton } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
+import { nameOnly } from '@/lib/validations/input';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -88,7 +89,7 @@ const ProfileSettingsForm = ({
             <LegacyInput
               type="text"
               value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>

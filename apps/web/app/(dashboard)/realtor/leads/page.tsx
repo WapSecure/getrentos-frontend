@@ -22,6 +22,7 @@ import {
 } from '@getrentos/ui';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
+import { nameOnly } from '@/lib/validations/input';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorLead, realtorService, type RealtorListingApi } from '@/services/realtorService';
 
@@ -266,7 +267,7 @@ export default function RealtorLeadsPage() {
                 leadingIcon={<User className="h-4 w-4" />}
                 value={newLead.fullName}
                 onChange={(event) =>
-                  setNewLead((value) => ({ ...value, fullName: event.target.value }))
+                  setNewLead((value) => ({ ...value, fullName: nameOnly(event.target.value) }))
                 }
                 disabled={createLead.isPending}
               />

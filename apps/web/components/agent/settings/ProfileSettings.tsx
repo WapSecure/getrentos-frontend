@@ -8,6 +8,7 @@ import { useRef, useState } from 'react';
 import { getInitials } from '@/lib/format';
 import { Button } from '@getrentos/ui';
 import { SaveButton } from '@getrentos/ui';
+import { nameOnly } from '@/lib/validations/input';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -60,7 +61,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           <LegacyInput
             type="text"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => setFullName(nameOnly(e.target.value))}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

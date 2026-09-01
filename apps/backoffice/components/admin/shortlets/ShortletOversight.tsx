@@ -12,6 +12,7 @@ import {
   EmptyState,
   Field,
   Input,
+  NumberInput,
   Pagination,
   Select,
   Skeleton,
@@ -1051,12 +1052,11 @@ function AdjudicateClaimModal({
             <Field
               label={`Amount to withhold from the guest refund (max ${formatCurrency(claim.amount)})`}
             >
-              <Input
-                type="number"
+              <NumberInput
                 min={1}
                 max={claim.amount}
                 value={deducted}
-                onChange={(e) => setDeducted(e.target.value)}
+                onValueChange={setDeducted}
               />
             </Field>
           )}
@@ -1123,12 +1123,11 @@ function FeeConfigForm({
           label="Platform commission (%)"
           hint="Withheld from the host payout. Hosts see net earnings."
         >
-          <Input
-            type="number"
+          <NumberInput
             min={0}
             max={100}
             value={commission}
-            onChange={(e) => setCommission(e.target.value)}
+            onValueChange={setCommission}
             placeholder="e.g. 10"
           />
         </Field>
@@ -1141,12 +1140,12 @@ function FeeConfigForm({
           />
         </Field>
         <Field label="Tax (%)" hint="Added to the guest charge on top of the stay total.">
-          <Input
-            type="number"
+          <NumberInput
+            integer={false}
             min={0}
             max={100}
             value={taxPct}
-            onChange={(e) => setTaxPct(e.target.value)}
+            onValueChange={setTaxPct}
             placeholder="e.g. 7.5"
           />
         </Field>

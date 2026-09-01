@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { NumberInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -95,12 +95,11 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
           <label className="block text-sm font-medium text-foreground mb-1">
             Minimum Trust Score for Auto-Approval
           </label>
-          <LegacyInput
-            type="number"
+          <NumberInput
             min={0}
             max={100}
             value={minTrustScore}
-            onChange={(e) => setMinTrustScore(Number(e.target.value))}
+            onValueChange={(v) => setMinTrustScore(Number(v) || 0)}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -109,12 +108,11 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
           <label className="block text-sm font-medium text-foreground mb-1">
             Escrow Verification Hold Period (days)
           </label>
-          <LegacyInput
-            type="number"
+          <NumberInput
             min={0}
             max={30}
             value={escrowHoldDays}
-            onChange={(e) => setEscrowHoldDays(Number(e.target.value))}
+            onValueChange={(v) => setEscrowHoldDays(Number(v) || 0)}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

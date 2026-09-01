@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
 import { Button, CurrencyInput } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
-import { CountryStateFields } from '@/components/shared/location/CountryStateFields';
+import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import type { LandOwnershipProofInput } from '@/types/land';
@@ -261,23 +261,14 @@ export const AddOwnerPropertyModal = ({
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      City <span className="text-red-500">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={form.city}
-                      onChange={(e) => update('city', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <CountryStateFields
+                  <LocationFields
                     country={form.country}
                     state={form.state}
+                    city={form.city}
                     onCountryChange={(c) => update('country', c)}
                     onStateChange={(s) => update('state', s)}
+                    onCityChange={(c) => update('city', c)}
+                    required
                   />
 
                   <div className="grid grid-cols-2 gap-3">

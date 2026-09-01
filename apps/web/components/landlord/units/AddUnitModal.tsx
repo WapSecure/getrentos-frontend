@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { LegacySelect } from '@getrentos/ui';
 
@@ -116,11 +116,10 @@ export const AddUnitModal = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
-                  <LegacyInput
-                    type="number"
+                  <NumberInput
                     min={0}
                     value={bedrooms}
-                    onChange={(e) => setBedrooms(e.target.value)}
+                    onValueChange={setBedrooms}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
@@ -128,11 +127,10 @@ export const AddUnitModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Bathrooms
                   </label>
-                  <LegacyInput
-                    type="number"
+                  <NumberInput
                     min={0}
                     value={bathrooms}
-                    onChange={(e) => setBathrooms(e.target.value)}
+                    onValueChange={setBathrooms}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
