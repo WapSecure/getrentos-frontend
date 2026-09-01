@@ -92,6 +92,21 @@ export interface StaffMember {
   addedAt: string;
 }
 
+export type VehicleLogPurpose = 'visitor' | 'resident' | 'delivery' | 'staff' | 'other';
+
+export interface VehicleLog {
+  id: string;
+  estateId: string;
+  plateNumber: string;
+  vehicleDescription?: string;
+  driverName?: string;
+  purpose: VehicleLogPurpose;
+  photoUrl?: string;
+  enteredAt: string;
+  exitedAt?: string;
+  createdAt: string;
+}
+
 export type AnnouncementPriority = 'normal' | 'urgent';
 
 export interface Announcement {

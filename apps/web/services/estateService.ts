@@ -11,6 +11,8 @@ import type {
   Announcement,
   Violation,
   GovernanceRecord,
+  VehicleLog,
+  VehicleLogPurpose,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -158,6 +160,47 @@ export const estateService = {
         method: 'POST',
         body: JSON.stringify({ pin }),
       })
+    );
+  },
+
+  async logVehicleEntry(
+    estateId: string,
+    data: {
+      plateNumber: string;
+      vehicleDescription?: string;
+      driverName?: string;
+      purpose?: 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER';
+      photo?: File;
+    }
+  ): Promise<ApiResponse<VehicleLog>> {
+    const formData = new FormData();
+    formData.append('plateNumber', data.plateNumber);
+    if (data.vehicleDescription) formData.append('vehicleDescription', data.vehicleDescription);
+    if (data.driverName) formData.append('driverName', data.driverName);
+    if (data.purpose) formData.append('purpose', data.purpose);
+    if (data.photo) formData.append('file', data.photo);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/vehicle-logs`, { method: 'POST', body: formData })
+    );
+  },
+
+  async listVehicleLogs(
+    estateId: string,
+    query: EstatePageQuery & { purpose?: VehicleLogPurpose; open?: boolean } = {}
+  ): Promise<ApiResponse<Paginated<VehicleLog>>> {
+    return safeCall(() =>
+      authFetch(
+        `/estate/${estateId}/vehicle-logs${toQuery({
+          ...query,
+          purpose: query.purpose?.toUpperCase(),
+        })}`
+      )
+    );
+  },
+
+  async markVehicleExited(estateId: string, logId: string): Promise<ApiResponse<VehicleLog>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/vehicle-logs/${logId}/exit`, { method: 'PATCH' })
     );
   },
 

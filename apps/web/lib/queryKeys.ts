@@ -267,6 +267,8 @@ export const estateKeys = {
     ['estate', estateId, 'violations', status ?? 'all'] as const,
   governanceRecords: (estateId: string, type?: string) =>
     ['estate', estateId, 'governanceRecords', type ?? 'all'] as const,
+  vehicleLogs: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'vehicleLogs', filter ?? 'all'] as const,
 };
 
 export const estateResidentKeys = {
