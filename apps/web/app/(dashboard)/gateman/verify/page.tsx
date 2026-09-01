@@ -1,13 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, KeyRound, XCircle } from 'lucide-react';
+import jsQR from 'jsqr';
+import { CheckCircle2, KeyRound, QrCode, XCircle } from 'lucide-react';
 import { Button, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { VisitorPass } from '@/types/estate';
+
+/** Decodes a QR code from a captured photo — draws it to an off-screen canvas so jsQR can read the pixel data. */
+async function decodeQrFromFile(file: File): Promise<string | null> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Could not read that photo'));
+    img.src = dataUrl;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height);
+  return code?.data ?? null;
+}
 
 const formatTime = (value: string) =>
   new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
@@ -18,6 +46,8 @@ export default function GatemanVerifyPage() {
   const queryClient = useQueryClient();
   const [pin, setPin] = useState('');
   const [result, setResult] = useState<{ pass?: VisitorPass; error?: string } | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const scanInputRef = useRef<HTMLInputElement>(null);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
@@ -57,6 +87,27 @@ export default function GatemanVerifyPage() {
     },
   });
 
+  const handleScanFile = async (file: File) => {
+    setResult(null);
+    setIsScanning(true);
+    try {
+      const decoded = await decodeQrFromFile(file);
+      if (!decoded) {
+        setResult({
+          error: "Couldn't read a QR code in that photo — try again or enter the PIN manually.",
+        });
+        return;
+      }
+      const scannedPin = decoded.replace(/\D/g, '').slice(0, 6);
+      setPin(scannedPin);
+      verify.mutate(scannedPin);
+    } catch {
+      setResult({ error: 'Could not read that photo. Please try again.' });
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
   if (isEstateLoading) {
     return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
   }
@@ -77,11 +128,40 @@ export default function GatemanVerifyPage() {
         </div>
         <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Enter the visitor&apos;s 6-digit PIN to check them in.
+          Scan the visitor&apos;s QR code, or enter their 6-digit PIN to check them in.
         </p>
       </div>
 
       <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+        <input
+          ref={scanInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) handleScanFile(file);
+          }}
+        />
+        <Button
+          variant="outline"
+          fullWidth
+          className="gap-2"
+          disabled={isScanning || verify.isPending}
+          onClick={() => scanInputRef.current?.click()}
+        >
+          <QrCode className="w-4 h-4" />
+          {isScanning ? 'Reading photo…' : 'Scan QR'}
+        </Button>
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex-1 h-px bg-border" />
+          or enter the PIN
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
         <LegacyInput
           type="text"
           inputMode="numeric"

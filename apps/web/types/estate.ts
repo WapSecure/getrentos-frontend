@@ -81,6 +81,8 @@ export interface VisitorPass {
 
 export interface IssuedVisitorPass extends VisitorPass {
   pin: string;
+  /** The pin encoded as a scannable QR code (data:image/png;base64,...). */
+  qrDataUrl: string;
 }
 
 export interface StaffMember {

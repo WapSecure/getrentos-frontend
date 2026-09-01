@@ -37,10 +37,16 @@ export const VisitorPinDialog = ({ pass, onClose }: VisitorPinDialogProps) => {
             <p className="text-sm text-muted-foreground mb-4">
               For {pass.visitorName} — {pass.unitLabel}
             </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={pass.qrDataUrl}
+              alt="Scannable QR code for this visitor pass"
+              className="w-40 h-40 mx-auto mb-4 rounded-lg border border-border bg-white"
+            />
             <p className="text-4xl font-bold tracking-[0.3em] text-foreground mb-4">{pass.pin}</p>
             <p className="text-xs text-muted-foreground mb-6">
-              Share this PIN with the visitor. It expires {formatDate(pass.expiresAt)} and
-              won&apos;t be shown again.
+              Show this QR code at the gate, or share the PIN. It expires{' '}
+              {formatDate(pass.expiresAt)} and won&apos;t be shown again.
             </p>
             <Button variant="primary" fullWidth onClick={onClose}>
               Done
