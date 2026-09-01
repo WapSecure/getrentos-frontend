@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { getInitials } from '@/lib/format';
 import { Button } from '@getrentos/ui';
 import { SaveButton } from '@getrentos/ui';
@@ -59,11 +60,13 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
 
       <div className="flex items-center gap-4 mb-6">
         {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={avatarUrl}
             alt={fullName || 'User'}
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">

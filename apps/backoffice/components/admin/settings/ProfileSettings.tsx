@@ -3,6 +3,7 @@
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
 import { getInitials } from '@getrentos/shared';
@@ -70,11 +71,13 @@ const ProfileSettingsForm = ({ initial }: { initial: AdminProfile }) => {
 
       <div className="flex items-center gap-4 mb-6">
         {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={avatarUrl}
             alt={fullName || 'Admin'}
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">

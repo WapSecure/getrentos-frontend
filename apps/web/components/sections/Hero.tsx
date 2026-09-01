@@ -20,7 +20,7 @@ export const Hero = () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const newParticles = Array.from({ length: 20 }).map(() => ({
+    const newParticles = Array.from({ length: 12 }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
       duration: Math.random() * 5 + 3,

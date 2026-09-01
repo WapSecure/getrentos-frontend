@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
@@ -31,7 +32,11 @@ import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
 import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
-import type { ShortletBooking, ShortletCancellationPolicy } from '@/types/shortlet';
+import type {
+  ShortletBooking,
+  ShortletCancellationPolicy,
+  ShortletListing,
+} from '@/types/shortlet';
 
 type MediaTab = 'photos' | 'video' | 'tour';
 
@@ -41,7 +46,14 @@ const CANCELLATION_RULE: Record<ShortletCancellationPolicy, string> = {
   STRICT: 'Full refund 7+ days before; 50% from 3 days; no refund within 3 days.',
 };
 
-export function ShortletListingDetail({ listingId }: { listingId: string }) {
+export function ShortletListingDetail({
+  listingId,
+  initialListing,
+}: {
+  listingId: string;
+  /** Server-rendered listing (ISR) used to hydrate the query instantly. */
+  initialListing?: ShortletListing;
+}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isSignedIn] = useState(() => Boolean(getAuthToken()));
@@ -61,13 +73,12 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
     shortletService.recordView(listingId).catch(() => undefined);
   }, [listingId]);
 
-  const {
-    data: listing,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: listing, isLoading } = useQuery({
     queryKey: shortletKeys.listing(listingId),
     queryFn: () => unwrap(shortletService.getListing(listingId)),
+    // Hydrate from the ISR-rendered payload; avoid an immediate refetch.
+    initialData: initialListing,
+    staleTime: 5 * 60_000,
   });
 
   const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
@@ -124,6 +135,9 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
     setBookingOpen(true);
   };
 
+  // `isError` may be true after a failed background refresh even though the
+  // ISR-rendered `listing` is still present — only treat it as missing when
+  // there is genuinely no listing to show.
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-8">
@@ -136,7 +150,7 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
     );
   }
 
-  if (isError || !listing) {
+  if (!listing) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-16">
         <EmptyState
@@ -224,11 +238,13 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
         ) : listing.images.length > 0 ? (
           <>
             <div className="relative aspect-[16/9] w-full bg-secondary/50">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={listing.images[activeImage]}
                 alt={listing.title}
-                className="h-full w-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 66vw"
+                className="object-cover"
+                priority={activeImage === 0}
               />
               <div className="absolute left-3 top-3 flex gap-2">
                 {listing.instantBooking && (
@@ -251,14 +267,20 @@ export function ShortletListingDetail({ listingId }: { listingId: string }) {
                     key={url}
                     type="button"
                     onClick={() => setActiveImage(i)}
-                    className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition ${
+                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition ${
                       i === activeImage
                         ? 'border-primary'
                         : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      src={url}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                      loading="lazy"
+                    />
                   </button>
                 ))}
               </div>

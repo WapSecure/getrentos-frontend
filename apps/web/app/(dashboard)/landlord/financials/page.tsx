@@ -1,10 +1,10 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
-import { FinancialChart } from '@/components/landlord/financials/FinancialChart';
 import { ExpensesPanel } from '@/components/landlord/financials/ExpensesPanel';
 import { Button } from '@getrentos/ui';
 import {
@@ -13,6 +13,15 @@ import {
 } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+
+// recharts is heavy — load it only when the financials tab is rendered.
+const FinancialChart = dynamic(
+  () => import('@/components/landlord/financials/FinancialChart').then((m) => m.FinancialChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 type ReportPeriod = 'monthly' | 'quarterly' | 'yearly';
 

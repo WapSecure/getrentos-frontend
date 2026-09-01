@@ -133,7 +133,7 @@ export const PropertyMap = ({
 
       if (markerData.title || markerData.priceLabel) {
         const image = markerData.imageUrl
-          ? `<img src="${escapeHtml(markerData.imageUrl)}" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:8px" />`
+          ? `<img src="${escapeHtml(markerData.imageUrl)}" alt="" loading="lazy" decoding="async" width="220" height="120" style="width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:8px" />`
           : '';
         const link = markerData.href
           ? `<a href="${escapeHtml(markerData.href)}" style="display:inline-block;margin-top:8px;color:#0b6e4f;font-weight:600;text-decoration:none">View details →</a>`

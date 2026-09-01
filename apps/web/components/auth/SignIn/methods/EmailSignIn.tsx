@@ -43,6 +43,8 @@ interface EmailSignInProps {
   onLoginAttempt: () => void;
   isLocked: boolean;
   lockoutTimer: number | null;
+  /** Internal destination to return to after login (from ?next=). */
+  nextPath?: string | null;
 }
 
 export const EmailSignIn = ({
@@ -52,6 +54,7 @@ export const EmailSignIn = ({
   onLoginAttempt,
   isLocked,
   lockoutTimer,
+  nextPath,
 }: EmailSignInProps) => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -78,7 +81,9 @@ export const EmailSignIn = ({
       rememberMe
     );
     if (rememberMe && identifier) saveRememberedIdentifier(identifier);
-    router.push(getDashboardRoute(primaryRoleId));
+    // Bounce the user back to their intended destination when present (e.g.
+    // deep links gated by the proxy), otherwise the role dashboard.
+    router.push(nextPath || getDashboardRoute(primaryRoleId));
   };
 
   const completeTwoFactorLogin = async () => {

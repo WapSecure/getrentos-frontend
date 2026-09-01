@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -113,6 +114,13 @@ const operatingPlans = [
     ],
   },
 ];
+
+export const metadata: Metadata = {
+  title: 'Home Management — Assets, Care, Vendors',
+  description:
+    'Track assets, schedule preventive care, and control work orders for your property with GetRentos home management.',
+  alternates: { canonical: '/home-management' },
+};
 
 export default function HomeManagementProductPage() {
   return (

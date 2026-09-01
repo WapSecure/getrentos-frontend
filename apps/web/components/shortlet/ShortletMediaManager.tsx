@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
 import { Badge, Button, Field, Input, Toast, type ToastVariant } from '@getrentos/ui';
 import { ImagePlus, Link2, Map as MapIcon, Star, Trash2, Video } from 'lucide-react';
@@ -212,8 +213,14 @@ export function ShortletMediaManager({
                         : 'border-dashed border-border opacity-80 hover:border-primary hover:opacity-100'
                     }`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={s.url} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      src={s.url}
+                      alt=""
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                      loading="lazy"
+                    />
                     {added && (
                       <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-[10px] font-semibold text-white">
                         Added

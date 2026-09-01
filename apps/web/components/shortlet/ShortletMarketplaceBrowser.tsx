@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
@@ -185,11 +186,13 @@ export const ShortletMarketplaceBrowser = () => {
             >
               <div className="relative flex h-40 items-center justify-center bg-secondary/60">
                 {listing.coverImageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={listing.coverImageUrl}
                     alt={listing.title}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                    loading="lazy"
                   />
                 ) : (
                   <BedDouble className="h-10 w-10 text-muted-foreground" />

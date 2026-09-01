@@ -46,6 +46,8 @@ interface PhoneSignInProps {
   onLoginAttempt: () => void;
   isLocked: boolean;
   lockoutTimer: number | null;
+  /** Internal destination to return to after login (from ?next=). */
+  nextPath?: string | null;
 }
 
 export const PhoneSignIn = ({
@@ -55,6 +57,7 @@ export const PhoneSignIn = ({
   onLoginAttempt,
   isLocked,
   lockoutTimer,
+  nextPath,
 }: PhoneSignInProps) => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -82,7 +85,9 @@ export const PhoneSignIn = ({
     );
     if (rememberMe && identifier) saveRememberedIdentifier(identifier);
 
-    router.push(getDashboardRoute(primaryRoleId));
+    // Bounce the user back to their intended destination when present (e.g.
+    // deep links gated by the proxy), otherwise the role dashboard.
+    router.push(nextPath || getDashboardRoute(primaryRoleId));
   };
 
   const isTwoFactorChallenge = (result: LoginResult): result is TwoFactorChallenge =>

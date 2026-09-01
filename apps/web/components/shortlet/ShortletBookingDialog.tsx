@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import {
   Badge,
@@ -87,12 +88,16 @@ export function ShortletBookingDialog({
         </div>
 
         {listing.coverImageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={listing.coverImageUrl}
-            alt={listing.title}
-            className="h-40 w-full border-y border-border object-cover"
-          />
+          <div className="relative h-40 w-full border-y border-border">
+            <Image
+              src={listing.coverImageUrl}
+              alt={listing.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 512px"
+              className="object-cover"
+              loading="lazy"
+            />
+          </div>
         )}
 
         <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">

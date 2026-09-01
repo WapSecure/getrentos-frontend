@@ -50,10 +50,14 @@ export async function generateMetadata({ params }: MicrositePageProps): Promise<
 export default async function MicrositePage({ params }: MicrositePageProps) {
   const { slug } = await params;
 
+  // Pre-fetch the profile server-side (also used for metadata) so the client
+  // component hydrates instantly instead of re-fetching the same endpoint.
+  const profile = await fetchProfile(slug);
+
   return (
     <main className="min-h-screen bg-background pt-16">
       <Navigation />
-      <MicrositePageClient slug={slug} />
+      <MicrositePageClient slug={slug} initialProfile={profile ?? undefined} />
       <Footer />
     </main>
   );

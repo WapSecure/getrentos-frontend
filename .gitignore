@@ -12,6 +12,9 @@ out
 .expo
 web-build
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Environment files
 .env
 .env.local

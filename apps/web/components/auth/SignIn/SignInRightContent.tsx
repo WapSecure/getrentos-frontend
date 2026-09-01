@@ -23,6 +23,13 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTimer, setLockoutTimer] = useState<number | null>(null);
+  // Internal post-login destination, e.g. `/shortlets/abc` when the proxy
+  // redirected here via `?next=`. Only same-origin paths are accepted.
+  const [nextPath] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const next = new URLSearchParams(window.location.search).get('next');
+    return next && next.startsWith('/') ? next : null;
+  });
 
   useEffect(() => {
     if (isLocked && lockoutTimer && lockoutTimer > 0) {
@@ -69,6 +76,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             onLoginAttempt={handleLoginAttempt}
             isLocked={isLocked}
             lockoutTimer={lockoutTimer}
+            nextPath={nextPath}
           />
         );
       case 'phone':
@@ -80,6 +88,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             onLoginAttempt={handleLoginAttempt}
             isLocked={isLocked}
             lockoutTimer={lockoutTimer}
+            nextPath={nextPath}
           />
         );
       case 'magic-link':

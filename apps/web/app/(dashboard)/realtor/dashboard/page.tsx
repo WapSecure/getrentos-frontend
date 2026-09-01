@@ -1,15 +1,27 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useRealtorUser } from '../layout';
 import { RealtorDashboardHeader } from '@/components/realtor/dashboard/RealtorDashboardHeader';
 import { RealtorStatsCards } from '@/components/realtor/dashboard/RealtorStatsCards';
-import { RealtorCommissionChart } from '@/components/realtor/dashboard/RealtorCommissionChart';
 import { RealtorActivityFeed } from '@/components/realtor/dashboard/RealtorActivityFeed';
 import { RealtorQuickActions } from '@/components/realtor/dashboard/RealtorQuickActions';
 import { useQuery } from '@tanstack/react-query';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+
+// recharts is heavy — load it only when this dashboard mounts.
+const RealtorCommissionChart = dynamic(
+  () =>
+    import('@/components/realtor/dashboard/RealtorCommissionChart').then(
+      (m) => m.RealtorCommissionChart
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 export default function RealtorDashboardPage() {
   const user = useRealtorUser();

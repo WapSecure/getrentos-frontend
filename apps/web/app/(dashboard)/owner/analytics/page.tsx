@@ -1,18 +1,27 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
-import { ROIComparisonChart } from '@/components/owner/analytics/ROIComparisonChart';
 import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import type { InvestmentMetrics } from '@/types/owner';
+
+// recharts is heavy — load it only when the analytics page mounts.
+const ROIComparisonChart = dynamic(
+  () => import('@/components/owner/analytics/ROIComparisonChart').then((m) => m.ROIComparisonChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 export default function OwnerAnalyticsPage() {
   const { data: metrics = [] } = useQuery({

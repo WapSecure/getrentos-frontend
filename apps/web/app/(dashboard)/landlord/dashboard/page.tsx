@@ -1,11 +1,11 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useLandlordUser } from '../layout';
 import { useQuery } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
 import { LandlordDashboardHeader } from '@/components/landlord/dashboard/LandlordDashboardHeader';
 import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStatsCards';
-import { LandlordRevenueChart } from '@/components/landlord/dashboard/LandlordRevenueChart';
 import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordActivityFeed';
 import { LandlordQuickActions } from '@/components/landlord/dashboard/LandlordQuickActions';
 import { Button } from '@getrentos/ui';
@@ -13,6 +13,18 @@ import { landlordService, type LandlordDashboardStats } from '@/services/landlor
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+
+// recharts is heavy (~400 KB) — load it only when this dashboard mounts.
+const LandlordRevenueChart = dynamic(
+  () =>
+    import('@/components/landlord/dashboard/LandlordRevenueChart').then(
+      (m) => m.LandlordRevenueChart
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 const EMPTY_STATS: LandlordDashboardStats = {
   totalProperties: 0,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -101,12 +102,16 @@ function WishlistRow({
     <div className="flex items-center gap-3 p-3">
       <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary/60">
         {listing.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={listing.coverImageUrl}
-            alt={listing.title}
-            className="h-full w-full object-cover"
-          />
+          <div className="relative h-full w-full">
+            <Image
+              src={listing.coverImageUrl}
+              alt={listing.title}
+              fill
+              sizes="80px"
+              className="object-cover"
+              loading="lazy"
+            />
+          </div>
         ) : (
           <BedDouble className="h-6 w-6 text-muted-foreground" />
         )}

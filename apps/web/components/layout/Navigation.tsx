@@ -2,17 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@getrentos/ui';
 import { Logo } from '@/components/ui/Logo';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ROUTES, isAuthenticated } from '@/lib/constants/auth';
-import { logoutSession } from '@/lib/apiClient';
+import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export const Navigation = () => {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const isSignedIn = useAuthStore((s) => s.isAuthenticated);
+  // Computed client-side only (localStorage is unavailable on the server).
+  // The Dashboard link only renders once the reactive auth store flips to
+  // signed-in — after hydration — so there is no SSR/client mismatch.
+  const [dashboardHref] = useState<string>(() =>
+    typeof window === 'undefined' ? ROUTES.DASHBOARD : getDashboardRoute(getUserRole() || 'renter')
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,8 +28,8 @@ export const Navigation = () => {
     };
     window.addEventListener('scroll', handleScroll);
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsSignedIn(isAuthenticated());
+    // Sync auth state from storage into the reactive store on first paint.
+    useAuthStore.getState().init();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -89,7 +97,7 @@ export const Navigation = () => {
               ) : (
                 <>
                   <Link
-                    href={ROUTES.DASHBOARD}
+                    href={dashboardHref}
                     className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Dashboard
@@ -97,9 +105,8 @@ export const Navigation = () => {
                   <ThemeToggle />
                   <button
                     onClick={async () => {
-                      await logoutSession();
-                      setIsSignedIn(false);
-                      window.location.href = ROUTES.HOME;
+                      await useAuthStore.getState().logout();
+                      router.push(ROUTES.HOME);
                     }}
                     className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                   >
@@ -186,7 +193,7 @@ export const Navigation = () => {
               ) : (
                 <>
                   <Link
-                    href={ROUTES.DASHBOARD}
+                    href={dashboardHref}
                     className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -194,9 +201,8 @@ export const Navigation = () => {
                   </Link>
                   <button
                     onClick={async () => {
-                      await logoutSession();
-                      setIsSignedIn(false);
-                      window.location.href = ROUTES.HOME;
+                      await useAuthStore.getState().logout();
+                      router.push(ROUTES.HOME);
                     }}
                     className="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-left"
                   >

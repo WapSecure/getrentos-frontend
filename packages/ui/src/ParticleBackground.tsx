@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface Particle {
   x: number;
@@ -12,10 +12,16 @@ interface Particle {
   opacity: number;
 }
 
-export const ParticleBackground = ({ count = 50, color = '#2c5583', className = '' }) => {
+/** Upper bound so marketing pages never spawn hundreds of animated nodes. */
+const MAX_PARTICLES = 30;
+
+export const ParticleBackground = ({ count = 20, color = '#2c5583', className = '' }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const initialized = useRef(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const particleCount = Math.min(count, MAX_PARTICLES);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -38,7 +44,7 @@ export const ParticleBackground = ({ count = 50, color = '#2c5583', className = 
 
       // Use requestAnimationFrame to defer state update
       requestAnimationFrame(() => {
-        const newParticles = Array.from({ length: count }).map(() => ({
+        const newParticles = Array.from({ length: particleCount }).map(() => ({
           x: Math.random() * dimensions.width,
           y: Math.random() * dimensions.height,
           size: Math.random() * 4 + 1,
@@ -51,7 +57,7 @@ export const ParticleBackground = ({ count = 50, color = '#2c5583', className = 
     }
   }, [dimensions, count]);
 
-  if (particles.length === 0) return null;
+  if (prefersReducedMotion || particles.length === 0) return null;
 
   return (
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>

@@ -1,11 +1,11 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useOwnerUser } from '../layout';
 import { Building2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { OwnerDashboardHeader } from '@/components/owner/dashboard/OwnerDashboardHeader';
 import { OwnerStatsCards } from '@/components/owner/dashboard/OwnerStatsCards';
-import { OwnerPortfolioChart } from '@/components/owner/dashboard/OwnerPortfolioChart';
 import { OwnerActivityFeed } from '@/components/owner/dashboard/OwnerActivityFeed';
 import { OwnerQuickActions } from '@/components/owner/dashboard/OwnerQuickActions';
 import { Button } from '@getrentos/ui';
@@ -13,6 +13,16 @@ import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+
+// recharts is heavy — load it only when this dashboard mounts.
+const OwnerPortfolioChart = dynamic(
+  () =>
+    import('@/components/owner/dashboard/OwnerPortfolioChart').then((m) => m.OwnerPortfolioChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 export default function OwnerDashboardPage() {
   const user = useOwnerUser();

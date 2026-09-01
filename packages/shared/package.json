@@ -40,7 +40,8 @@
   "devDependencies": {
     "@getrentos/eslint-config": "workspace:*",
     "@getrentos/typescript-config": "workspace:*",
-    "typescript": "^5.4.5",
-    "date-fns": "^3.6.0"
+    "@types/node": "^22.19.20",
+    "date-fns": "^3.6.0",
+    "typescript": "^5.4.5"
   }
 }

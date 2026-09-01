@@ -1,15 +1,25 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { DollarSign, Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
-import { PlatformRevenueChart } from '@/components/admin/reports/PlatformRevenueChart';
 import { Button } from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+
+// recharts is heavy — load it only when the reports page mounts.
+const PlatformRevenueChart = dynamic(
+  () =>
+    import('@/components/admin/reports/PlatformRevenueChart').then((m) => m.PlatformRevenueChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 interface ReportsStats {
   gmvYtd: number;

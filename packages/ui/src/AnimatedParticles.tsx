@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface Particle {
   id: number;
@@ -12,13 +12,19 @@ interface Particle {
   delay: number;
 }
 
-export const AnimatedParticles = ({ count = 30, color = 'rgba(44, 85, 131, 0.2)' }) => {
+/** Upper bound so auth/marketing pages never spawn hundreds of animated nodes. */
+const MAX_PARTICLES = 30;
+
+export const AnimatedParticles = ({ count = 20, color = 'rgba(44, 85, 131, 0.2)' }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [mounted, setMounted] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const particleCount = Math.min(count, MAX_PARTICLES);
 
   useEffect(() => {
     setMounted(true);
-    const newParticles = Array.from({ length: count }).map((_, i) => ({
+    const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
       id: i,
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
@@ -28,7 +34,7 @@ export const AnimatedParticles = ({ count = 30, color = 'rgba(44, 85, 131, 0.2)'
     setParticles(newParticles);
   }, [count]);
 
-  if (!mounted || particles.length === 0) {
+  if (prefersReducedMotion || !mounted || particles.length === 0) {
     return null;
   }
 

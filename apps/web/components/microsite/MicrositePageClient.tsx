@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from 'lucide-react';
@@ -10,14 +11,17 @@ import { renterService } from '@/services/renterService';
 import { unwrap, isAuthenticated, getStoredUser } from '@/lib/apiHelpers';
 import { formatCurrency, getInitials } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
+import type { MicrositeProfile } from '@/types/microsite';
 
 const PAGE_SIZE = 12;
 
 interface MicrositePageClientProps {
   slug: string;
+  /** Server-fetched profile (from generateMetadata) used to hydrate the query. */
+  initialProfile?: MicrositeProfile;
 }
 
-export const MicrositePageClient = ({ slug }: MicrositePageClientProps) => {
+export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClientProps) => {
   const router = useRouter();
   const [page, setPage] = useState(1);
 
@@ -28,6 +32,8 @@ export const MicrositePageClient = ({ slug }: MicrositePageClientProps) => {
   } = useQuery({
     queryKey: ['microsite', slug, 'profile'],
     queryFn: () => unwrap(micrositeService.getProfile(slug)),
+    initialData: initialProfile,
+    staleTime: 5 * 60_000,
     retry: false,
   });
 
@@ -74,8 +80,14 @@ export const MicrositePageClient = ({ slug }: MicrositePageClientProps) => {
     <div className="max-w-5xl mx-auto px-4 pb-16">
       <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-secondary mt-6">
         {profile.bannerUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={profile.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <Image
+            src={profile.bannerUrl}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 1024px"
+            className="object-cover"
+            loading="lazy"
+          />
         ) : (
           <div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5" />
         )}
@@ -84,11 +96,13 @@ export const MicrositePageClient = ({ slug }: MicrositePageClientProps) => {
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 px-2">
         <div className="w-20 h-20 rounded-2xl bg-card border-4 border-background shadow-sm flex items-center justify-center overflow-hidden shrink-0 -mt-10">
           {profile.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={profile.avatarUrl}
               alt={profile.displayName}
+              width={80}
+              height={80}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <span className="text-xl font-bold text-primary">
@@ -139,13 +153,15 @@ export const MicrositePageClient = ({ slug }: MicrositePageClientProps) => {
                 key={listing.id}
                 className="bg-card rounded-2xl border border-border overflow-hidden"
               >
-                <div className="h-40 bg-secondary">
+                <div className="relative h-40 bg-secondary">
                   {listing.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={listing.image}
                       alt={listing.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      className="object-cover"
+                      loading="lazy"
                     />
                   ) : null}
                 </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
 import { Button, Switch, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
@@ -106,12 +107,16 @@ export default function LandlordMicrositePage() {
           <label className="block text-sm font-medium text-foreground mb-1">Banner image</label>
           <div className="flex items-center gap-4">
             {bannerUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={bannerUrl}
-                alt="Microsite banner"
-                className="w-32 h-20 rounded-lg object-cover border border-border"
-              />
+              <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-border">
+                <Image
+                  src={bannerUrl}
+                  alt="Microsite banner"
+                  fill
+                  sizes="128px"
+                  className="object-cover"
+                  loading="lazy"
+                />
+              </div>
             ) : (
               <div className="w-32 h-20 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
                 <Globe className="w-6 h-6" />

@@ -1,15 +1,25 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { AdminDashboardHeader } from '@/components/admin/dashboard/AdminDashboardHeader';
 import { AdminStatsCards } from '@/components/admin/dashboard/AdminStatsCards';
-import { PlatformGrowthChart } from '@/components/admin/dashboard/PlatformGrowthChart';
 import { AdminActivityFeed } from '@/components/admin/dashboard/AdminActivityFeed';
 import { AdminQuickActions } from '@/components/admin/dashboard/AdminQuickActions';
 import { adminService, type DashboardStats } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminUser } from '../layout';
+
+// recharts is heavy — load it only when this dashboard mounts.
+const PlatformGrowthChart = dynamic(
+  () =>
+    import('@/components/admin/dashboard/PlatformGrowthChart').then((m) => m.PlatformGrowthChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+  }
+);
 
 const EMPTY_STATS: DashboardStats = {
   totalUsers: 0,
