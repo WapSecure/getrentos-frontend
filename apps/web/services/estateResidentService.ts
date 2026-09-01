@@ -2,6 +2,7 @@ import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type {
   Announcement,
+  DeliveryLog,
   Due,
   IssuedVisitorPass,
   ResidentHousehold,
@@ -32,6 +33,12 @@ export const estateResidentService = {
 
   async listMyViolations(): Promise<ApiResponse<Violation[]>> {
     return safeCall(() => authFetch('/estate/resident/violations'));
+  },
+
+  async listMyDeliveries(
+    query: PageQuery & { status?: string } = {}
+  ): Promise<ApiResponse<Paginated<DeliveryLog>>> {
+    return safeCall(() => authFetch(`/estate/resident/deliveries${toQuery(query)}`));
   },
 
   async listMyVisitorPasses(

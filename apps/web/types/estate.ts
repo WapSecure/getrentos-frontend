@@ -92,6 +92,22 @@ export interface StaffMember {
   addedAt: string;
 }
 
+export type DeliveryLogStatus = 'received' | 'collected';
+
+export interface DeliveryLog {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  courier?: string;
+  recipientName?: string;
+  status: DeliveryLogStatus;
+  photoUrl?: string;
+  receivedAt: string;
+  collectedAt?: string;
+  createdAt: string;
+}
+
 export type VehicleLogPurpose = 'visitor' | 'resident' | 'delivery' | 'staff' | 'other';
 
 export interface VehicleLog {

@@ -3,7 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Receipt, KeyRound, Megaphone, TriangleAlert } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Receipt,
+  KeyRound,
+  Megaphone,
+  TriangleAlert,
+  Package,
+} from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface NavItem {
@@ -17,6 +24,7 @@ export const residentNavItems: NavItem[] = [
   { label: 'Announcements', href: ROUTES.RESIDENT_ANNOUNCEMENTS, icon: Megaphone },
   { label: 'Dues', href: ROUTES.RESIDENT_DUES, icon: Receipt },
   { label: 'Visitor Passes', href: ROUTES.RESIDENT_VISITOR_PASSES, icon: KeyRound },
+  { label: 'Deliveries', href: ROUTES.RESIDENT_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.RESIDENT_VIOLATIONS, icon: TriangleAlert },
 ];
 

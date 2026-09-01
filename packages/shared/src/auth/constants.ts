@@ -227,13 +227,16 @@ export const ROUTES = {
   ESTATE_VIOLATIONS: '/estate/violations',
   ESTATE_GOVERNANCE: '/estate/governance',
   ESTATE_VEHICLES: '/estate/vehicles',
+  ESTATE_DELIVERIES: '/estate/deliveries',
   GATEMAN_DASHBOARD: '/gateman/verify',
   GATEMAN_VEHICLES: '/gateman/vehicles',
+  GATEMAN_DELIVERIES: '/gateman/deliveries',
   RESIDENT_DASHBOARD: '/resident/dashboard',
   RESIDENT_DUES: '/resident/dues',
   RESIDENT_ANNOUNCEMENTS: '/resident/announcements',
   RESIDENT_VISITOR_PASSES: '/resident/visitor-passes',
   RESIDENT_VIOLATIONS: '/resident/violations',
+  RESIDENT_DELIVERIES: '/resident/deliveries',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',

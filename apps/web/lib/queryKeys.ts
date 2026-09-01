@@ -269,6 +269,8 @@ export const estateKeys = {
     ['estate', estateId, 'governanceRecords', type ?? 'all'] as const,
   vehicleLogs: (estateId: string, filter?: string) =>
     ['estate', estateId, 'vehicleLogs', filter ?? 'all'] as const,
+  deliveries: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'deliveries', filter ?? 'all'] as const,
 };
 
 export const estateResidentKeys = {
@@ -278,4 +280,5 @@ export const estateResidentKeys = {
   violations: ['estate', 'resident', 'violations'] as const,
   visitorPasses: (status?: string) =>
     ['estate', 'resident', 'visitorPasses', status ?? 'all'] as const,
+  deliveries: (status?: string) => ['estate', 'resident', 'deliveries', status ?? 'all'] as const,
 };

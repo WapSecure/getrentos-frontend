@@ -13,6 +13,8 @@ import type {
   GovernanceRecord,
   VehicleLog,
   VehicleLogPurpose,
+  DeliveryLog,
+  DeliveryLogStatus,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -201,6 +203,33 @@ export const estateService = {
   async markVehicleExited(estateId: string, logId: string): Promise<ApiResponse<VehicleLog>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/vehicle-logs/${logId}/exit`, { method: 'PATCH' })
+    );
+  },
+
+  async logDelivery(
+    estateId: string,
+    data: { householdId: string; courier?: string; recipientName?: string; photo?: File }
+  ): Promise<ApiResponse<DeliveryLog>> {
+    const formData = new FormData();
+    formData.append('householdId', data.householdId);
+    if (data.courier) formData.append('courier', data.courier);
+    if (data.recipientName) formData.append('recipientName', data.recipientName);
+    if (data.photo) formData.append('file', data.photo);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/deliveries`, { method: 'POST', body: formData })
+    );
+  },
+
+  async listDeliveries(
+    estateId: string,
+    query: EstatePageQuery & { status?: DeliveryLogStatus } = {}
+  ): Promise<ApiResponse<Paginated<DeliveryLog>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/deliveries${toQuery(query)}`));
+  },
+
+  async markDeliveryCollected(estateId: string, logId: string): Promise<ApiResponse<DeliveryLog>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/deliveries/${logId}/collect`, { method: 'PATCH' })
     );
   },
 
