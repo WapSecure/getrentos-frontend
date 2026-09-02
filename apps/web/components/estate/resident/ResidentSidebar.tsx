@@ -10,6 +10,7 @@ import {
   Megaphone,
   TriangleAlert,
   Package,
+  Contact,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -26,6 +27,7 @@ export const residentNavItems: NavItem[] = [
   { label: 'Visitor Passes', href: ROUTES.RESIDENT_VISITOR_PASSES, icon: KeyRound },
   { label: 'Deliveries', href: ROUTES.RESIDENT_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.RESIDENT_VIOLATIONS, icon: TriangleAlert },
+  { label: 'Directory', href: ROUTES.RESIDENT_DIRECTORY, icon: Contact },
 ];
 
 export const ResidentSidebar = () => {

@@ -239,6 +239,7 @@ export const ROUTES = {
   RESIDENT_VISITOR_PASSES: '/resident/visitor-passes',
   RESIDENT_VIOLATIONS: '/resident/violations',
   RESIDENT_DELIVERIES: '/resident/deliveries',
+  RESIDENT_DIRECTORY: '/resident/directory',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',

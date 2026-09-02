@@ -3,6 +3,7 @@ import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type {
   Announcement,
   DeliveryLog,
+  DirectoryEntry,
   Due,
   IssuedVisitorPass,
   ResidentHousehold,
@@ -15,6 +16,19 @@ type PageQuery = { page?: number; pageSize?: number };
 export const estateResidentService = {
   async getMyHousehold(): Promise<ApiResponse<ResidentHousehold>> {
     return safeCall(() => authFetch('/estate/resident/household'));
+  },
+
+  async setDirectoryOptIn(optIn: boolean): Promise<ApiResponse<ResidentHousehold>> {
+    return safeCall(() =>
+      authFetch('/estate/resident/household/directory-opt-in', {
+        method: 'PATCH',
+        body: JSON.stringify({ optIn }),
+      })
+    );
+  },
+
+  async getDirectory(): Promise<ApiResponse<DirectoryEntry[]>> {
+    return safeCall(() => authFetch('/estate/resident/directory'));
   },
 
   async listMyDues(

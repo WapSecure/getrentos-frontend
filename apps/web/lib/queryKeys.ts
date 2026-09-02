@@ -284,4 +284,5 @@ export const estateResidentKeys = {
   visitorPasses: (status?: string) =>
     ['estate', 'resident', 'visitorPasses', status ?? 'all'] as const,
   deliveries: (status?: string) => ['estate', 'resident', 'deliveries', status ?? 'all'] as const,
+  directory: ['estate', 'resident', 'directory'] as const,
 };
