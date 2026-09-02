@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, KeyRound, Car, Package } from 'lucide-react';
+import { LogOut, KeyRound, Car, Package, Siren } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
@@ -16,6 +16,7 @@ const navItems = [
   { label: 'Check-In', href: ROUTES.GATEMAN_DASHBOARD, icon: KeyRound },
   { label: 'Vehicles', href: ROUTES.GATEMAN_VEHICLES, icon: Car },
   { label: 'Deliveries', href: ROUTES.GATEMAN_DELIVERIES, icon: Package },
+  { label: 'Incidents', href: ROUTES.GATEMAN_INCIDENTS, icon: Siren },
 ];
 
 export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
