@@ -19,6 +19,8 @@ import type {
   Incident,
   MaintenanceTicket,
   Poll,
+  Amenity,
+  AmenityBooking,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -489,6 +491,38 @@ export const estateService = {
   async closePoll(estateId: string, pollId: string): Promise<ApiResponse<Poll>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/polls/${pollId}/close`, { method: 'PATCH' })
+    );
+  },
+
+  async createAmenity(
+    estateId: string,
+    data: { name: string; description?: string }
+  ): Promise<ApiResponse<Amenity>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/amenities`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listAmenities(estateId: string): Promise<ApiResponse<Amenity[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/amenities`));
+  },
+
+  async deleteAmenity(estateId: string, amenityId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/amenities/${amenityId}`, { method: 'DELETE' })
+    );
+  },
+
+  async listAmenityBookings(estateId: string): Promise<ApiResponse<AmenityBooking[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/amenity-bookings`));
+  },
+
+  async cancelAmenityBooking(
+    estateId: string,
+    bookingId: string
+  ): Promise<ApiResponse<AmenityBooking>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/amenity-bookings/${bookingId}/cancel`, { method: 'PATCH' })
     );
   },
 
