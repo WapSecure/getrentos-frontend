@@ -285,7 +285,12 @@ export const estateService = {
 
   async createAnnouncement(
     estateId: string,
-    data: { title: string; body: string; priority?: 'NORMAL' | 'URGENT' }
+    data: {
+      title: string;
+      body: string;
+      priority?: 'NORMAL' | 'URGENT';
+      deliveryChannels?: ('SMS' | 'WHATSAPP')[];
+    }
   ): Promise<ApiResponse<Announcement>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/announcements`, { method: 'POST', body: JSON.stringify(data) })
