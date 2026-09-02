@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus, Settings2 } from 'lucide-react';
 import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -11,6 +11,7 @@ import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { LogDeliveryModal } from '@/components/estate/deliveries/LogDeliveryModal';
 import { DeliveryLogRow } from '@/components/estate/deliveries/DeliveryLogRow';
+import { ManageGatesModal } from '@/components/estate/gates/ManageGatesModal';
 import type { DeliveryLogStatus } from '@/types/estate';
 
 const statusFilters: { value: DeliveryLogStatus | 'all'; label: string }[] = [
@@ -26,6 +27,7 @@ export default function EstateDeliveriesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGatesModalOpen, setIsGatesModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<DeliveryLogStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const [householdPage, setHouseholdPage] = useState(1);
@@ -33,6 +35,12 @@ export default function EstateDeliveriesPage() {
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
+  });
+
+  const { data: gates } = useQuery({
+    queryKey: estateKeys.gates(estate?.id ?? ''),
+    queryFn: () => unwrap(estateService.listGates(estate!.id)),
+    enabled: !!estate,
   });
 
   const { data: householdsData, isLoading: isHouseholdsLoading } = useQuery({
@@ -114,17 +122,23 @@ export default function EstateDeliveriesPage() {
             {total} log{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            setHouseholdPage(1);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Log Delivery
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
+            <Settings2 className="w-4 h-4" />
+            Manage Gates
+          </Button>
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              setHouseholdPage(1);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Log Delivery
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -184,9 +198,16 @@ export default function EstateDeliveriesPage() {
         householdPageSize={HOUSEHOLD_OPTIONS_PAGE_SIZE}
         onHouseholdPageChange={setHouseholdPage}
         isHouseholdsLoading={isHouseholdsLoading}
+        gates={gates}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => logDelivery.mutate(data)}
         isSubmitting={logDelivery.isPending}
+      />
+
+      <ManageGatesModal
+        isOpen={isGatesModalOpen}
+        estateId={estate.id}
+        onClose={() => setIsGatesModalOpen(false)}
       />
     </>
   );

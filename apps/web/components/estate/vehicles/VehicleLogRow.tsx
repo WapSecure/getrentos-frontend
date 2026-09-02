@@ -36,6 +36,7 @@ export const VehicleLogRow = ({ log, onMarkExited, isMarkingExited }: VehicleLog
           {log.vehicleDescription ? `${log.vehicleDescription} · ` : ''}
           {log.driverName ? `${log.driverName} · ` : ''}
           {purposeLabels[log.purpose]} · Entered {formatDateTime(log.enteredAt)}
+          {log.gateName ? ` · ${log.gateName}` : ''}
           {log.exitedAt ? ` · Exited ${formatDateTime(log.exitedAt)}` : ''}
         </p>
       </div>

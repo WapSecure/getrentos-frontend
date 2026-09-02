@@ -25,6 +25,7 @@ export default function GatemanVehiclesPage() {
   const [vehicleDescription, setVehicleDescription] = useState('');
   const [driverName, setDriverName] = useState('');
   const [purpose, setPurpose] = useState('VISITOR');
+  const [gateId, setGateId] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +33,13 @@ export default function GatemanVehiclesPage() {
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
+
+  const { data: gates } = useQuery({
+    queryKey: estateKeys.gates(estate?.id ?? ''),
+    queryFn: () => unwrap(estateService.listGates(estate!.id)),
+    enabled: !!estate,
+  });
+  const gateOptions = (gates ?? []).map((gate) => ({ value: gate.id, label: gate.name }));
 
   const { data: insideData } = useQuery({
     queryKey: estateKeys.vehicleLogs(estate?.id ?? '', 'open'),
@@ -49,6 +57,7 @@ export default function GatemanVehiclesPage() {
           vehicleDescription: vehicleDescription.trim() || undefined,
           driverName: driverName.trim() || undefined,
           purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
+          gateId: gateId || undefined,
           photo: photo ?? undefined,
         })
       ),
@@ -57,6 +66,7 @@ export default function GatemanVehiclesPage() {
       setVehicleDescription('');
       setDriverName('');
       setPurpose('VISITOR');
+      setGateId('');
       setPhoto(null);
       setError(null);
       queryClient.invalidateQueries({ queryKey: ['estate', estate?.id, 'vehicleLogs'] });
@@ -135,6 +145,17 @@ export default function GatemanVehiclesPage() {
           <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
         </div>
 
+        {gateOptions.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
+            <Select
+              value={gateId}
+              onValueChange={setGateId}
+              options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+            />
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
             Photo <span className="text-gray-400 font-normal">(optional)</span>
@@ -176,6 +197,7 @@ export default function GatemanVehiclesPage() {
                   <p className="text-sm font-medium text-foreground truncate">{log.plateNumber}</p>
                   <p className="text-xs text-muted-foreground truncate">
                     {log.vehicleDescription || log.purpose} · entered {formatTime(log.enteredAt)}
+                    {log.gateName ? ` · ${log.gateName}` : ''}
                   </p>
                 </div>
                 <Button

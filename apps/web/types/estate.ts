@@ -103,6 +103,8 @@ export interface DeliveryLog {
   recipientName?: string;
   status: DeliveryLogStatus;
   photoUrl?: string;
+  gateId?: string;
+  gateName?: string;
   receivedAt: string;
   collectedAt?: string;
   createdAt: string;
@@ -118,8 +120,18 @@ export interface VehicleLog {
   driverName?: string;
   purpose: VehicleLogPurpose;
   photoUrl?: string;
+  gateId?: string;
+  gateName?: string;
   enteredAt: string;
   exitedAt?: string;
+  createdAt: string;
+}
+
+export interface Gate {
+  id: string;
+  estateId: string;
+  name: string;
+  location?: string;
   createdAt: string;
 }
 

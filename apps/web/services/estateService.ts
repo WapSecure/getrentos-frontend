@@ -15,6 +15,7 @@ import type {
   VehicleLogPurpose,
   DeliveryLog,
   DeliveryLogStatus,
+  Gate,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -172,6 +173,7 @@ export const estateService = {
       vehicleDescription?: string;
       driverName?: string;
       purpose?: 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER';
+      gateId?: string;
       photo?: File;
     }
   ): Promise<ApiResponse<VehicleLog>> {
@@ -180,6 +182,7 @@ export const estateService = {
     if (data.vehicleDescription) formData.append('vehicleDescription', data.vehicleDescription);
     if (data.driverName) formData.append('driverName', data.driverName);
     if (data.purpose) formData.append('purpose', data.purpose);
+    if (data.gateId) formData.append('gateId', data.gateId);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/vehicle-logs`, { method: 'POST', body: formData })
@@ -208,12 +211,19 @@ export const estateService = {
 
   async logDelivery(
     estateId: string,
-    data: { householdId: string; courier?: string; recipientName?: string; photo?: File }
+    data: {
+      householdId: string;
+      courier?: string;
+      recipientName?: string;
+      gateId?: string;
+      photo?: File;
+    }
   ): Promise<ApiResponse<DeliveryLog>> {
     const formData = new FormData();
     formData.append('householdId', data.householdId);
     if (data.courier) formData.append('courier', data.courier);
     if (data.recipientName) formData.append('recipientName', data.recipientName);
+    if (data.gateId) formData.append('gateId', data.gateId);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/deliveries`, { method: 'POST', body: formData })
@@ -253,6 +263,23 @@ export const estateService = {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/staff/${memberUserId}`, { method: 'DELETE' })
     );
+  },
+
+  async createGate(
+    estateId: string,
+    data: { name: string; location?: string }
+  ): Promise<ApiResponse<Gate>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/gates`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listGates(estateId: string): Promise<ApiResponse<Gate[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/gates`));
+  },
+
+  async deleteGate(estateId: string, gateId: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/gates/${gateId}`, { method: 'DELETE' }));
   },
 
   async createAnnouncement(

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button, LegacyInput, Select } from '@getrentos/ui';
+import type { Gate } from '@/types/estate';
 
 const purposeOptions = [
   { value: 'VISITOR', label: 'Visitor' },
@@ -15,12 +16,14 @@ const purposeOptions = [
 
 interface LogVehicleModalProps {
   isOpen: boolean;
+  gates?: Gate[];
   onClose: () => void;
   onSubmit: (data: {
     plateNumber: string;
     vehicleDescription?: string;
     driverName?: string;
     purpose?: 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER';
+    gateId?: string;
     photo?: File;
   }) => void;
   isSubmitting?: boolean;
@@ -28,6 +31,7 @@ interface LogVehicleModalProps {
 
 export const LogVehicleModal = ({
   isOpen,
+  gates,
   onClose,
   onSubmit,
   isSubmitting,
@@ -36,13 +40,16 @@ export const LogVehicleModal = ({
   const [vehicleDescription, setVehicleDescription] = useState('');
   const [driverName, setDriverName] = useState('');
   const [purpose, setPurpose] = useState('VISITOR');
+  const [gateId, setGateId] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
+  const gateOptions = (gates ?? []).map((gate) => ({ value: gate.id, label: gate.name }));
 
   const handleClose = () => {
     setPlateNumber('');
     setVehicleDescription('');
     setDriverName('');
     setPurpose('VISITOR');
+    setGateId('');
     setPhoto(null);
     onClose();
   };
@@ -110,6 +117,17 @@ export const LogVehicleModal = ({
                 <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
               </div>
 
+              {gateOptions.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
+                  <Select
+                    value={gateId}
+                    onValueChange={setGateId}
+                    options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Photo <span className="text-gray-400 font-normal">(optional)</span>
@@ -136,6 +154,7 @@ export const LogVehicleModal = ({
                     vehicleDescription: vehicleDescription.trim() || undefined,
                     driverName: driverName.trim() || undefined,
                     purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
+                    gateId: gateId || undefined,
                     photo: photo ?? undefined,
                   })
                 }

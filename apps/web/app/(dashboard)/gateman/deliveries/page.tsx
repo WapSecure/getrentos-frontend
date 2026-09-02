@@ -22,6 +22,12 @@ export default function GatemanDeliveriesPage() {
     queryFn: () => unwrap(estateService.getMyEstate()),
   });
 
+  const { data: gates } = useQuery({
+    queryKey: estateKeys.gates(estate?.id ?? ''),
+    queryFn: () => unwrap(estateService.listGates(estate!.id)),
+    enabled: !!estate,
+  });
+
   const { data: householdsData, isLoading: isHouseholdsLoading } = useQuery({
     queryKey: [
       ...estateKeys.households(estate?.id ?? ''),
@@ -137,6 +143,7 @@ export default function GatemanDeliveriesPage() {
         householdPageSize={HOUSEHOLD_OPTIONS_PAGE_SIZE}
         onHouseholdPageChange={setHouseholdPage}
         isHouseholdsLoading={isHouseholdsLoading}
+        gates={gates}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => logDelivery.mutate(data)}
         isSubmitting={logDelivery.isPending}

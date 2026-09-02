@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Car, Plus } from 'lucide-react';
+import { Car, Plus, Settings2 } from 'lucide-react';
 import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -11,6 +11,7 @@ import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { LogVehicleModal } from '@/components/estate/vehicles/LogVehicleModal';
 import { VehicleLogRow } from '@/components/estate/vehicles/VehicleLogRow';
+import { ManageGatesModal } from '@/components/estate/gates/ManageGatesModal';
 
 type StatusFilter = 'all' | 'inside' | 'exited';
 
@@ -26,12 +27,19 @@ export default function EstateVehiclesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGatesModalOpen, setIsGatesModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
+  });
+
+  const { data: gates } = useQuery({
+    queryKey: estateKeys.gates(estate?.id ?? ''),
+    queryFn: () => unwrap(estateService.listGates(estate!.id)),
+    enabled: !!estate,
   });
 
   const { data, isLoading: isLogsLoading } = useQuery({
@@ -93,10 +101,16 @@ export default function EstateVehiclesPage() {
             {total} log{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4" />
-          Log Vehicle
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
+            <Settings2 className="w-4 h-4" />
+            Manage Gates
+          </Button>
+          <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Log Vehicle
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -150,9 +164,16 @@ export default function EstateVehiclesPage() {
 
       <LogVehicleModal
         isOpen={isModalOpen}
+        gates={gates}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => logEntry.mutate(data)}
         isSubmitting={logEntry.isPending}
+      />
+
+      <ManageGatesModal
+        isOpen={isGatesModalOpen}
+        estateId={estate.id}
+        onClose={() => setIsGatesModalOpen(false)}
       />
     </>
   );
