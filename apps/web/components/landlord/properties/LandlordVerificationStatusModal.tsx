@@ -5,7 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, ShieldAlert, ShieldX, Check, FileText } from 'lucide-react';
-import { Button, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, Select } from '@getrentos/ui';
 import type { Property, VerificationStatus } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 
@@ -120,19 +120,14 @@ export const LandlordVerificationStatusModal = ({
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Upload ownership evidence
                   </label>
-                  <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-                    <LegacyInput
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.jpeg,.png,.webp"
-                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    />
-                    <FileText className="w-4 h-4 text-gray-400 shrink-0" />
-                    <span className="text-sm text-muted-foreground truncate">
-                      {file?.name || 'Click to upload'}
-                    </span>
-                    {file && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
-                  </label>
+                  <DocumentUpload
+                    value={file ? [{ id: 'file', file }] : []}
+                    onChange={(items) => setFile(items[0]?.file ?? null)}
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    multiple={false}
+                    label=""
+                    hint="PDF or image — preview before submitting"
+                  />
                   <div className="mt-3">
                     <Select
                       value={documentType}
