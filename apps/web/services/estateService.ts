@@ -18,6 +18,7 @@ import type {
   Gate,
   Incident,
   MaintenanceTicket,
+  Poll,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -469,6 +470,25 @@ export const estateService = {
         method: 'PATCH',
         body: JSON.stringify({ resolutionNotes }),
       })
+    );
+  },
+
+  async createPoll(
+    estateId: string,
+    data: { question: string; options: string[] }
+  ): Promise<ApiResponse<Poll>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/polls`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listPolls(estateId: string): Promise<ApiResponse<Poll[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/polls`));
+  },
+
+  async closePoll(estateId: string, pollId: string): Promise<ApiResponse<Poll>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/polls/${pollId}/close`, { method: 'PATCH' })
     );
   },
 

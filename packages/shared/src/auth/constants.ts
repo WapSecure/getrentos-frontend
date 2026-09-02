@@ -230,6 +230,7 @@ export const ROUTES = {
   ESTATE_DELIVERIES: '/estate/deliveries',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
+  ESTATE_POLLS: '/estate/polls',
   GATEMAN_DASHBOARD: '/gateman/verify',
   GATEMAN_VEHICLES: '/gateman/vehicles',
   GATEMAN_DELIVERIES: '/gateman/deliveries',
@@ -242,6 +243,7 @@ export const ROUTES = {
   RESIDENT_DELIVERIES: '/resident/deliveries',
   RESIDENT_DIRECTORY: '/resident/directory',
   RESIDENT_MAINTENANCE: '/resident/maintenance',
+  RESIDENT_POLLS: '/resident/polls',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',
