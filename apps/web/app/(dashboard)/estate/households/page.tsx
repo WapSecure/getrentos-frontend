@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { HouseholdCard } from '@/components/estate/households/HouseholdCard';
 import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
 import { LinkResidentModal } from '@/components/estate/households/LinkResidentModal';
@@ -24,10 +25,7 @@ export default function EstateHouseholdsPage() {
   const [linkingHousehold, setLinkingHousehold] = useState<Household | null>(null);
   const [page, setPage] = useState(1);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data, isLoading: isHouseholdsLoading } = useQuery({
     queryKey: [...estateKeys.households(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
@@ -41,6 +39,7 @@ export default function EstateHouseholdsPage() {
     if (!estate) return;
     queryClient.invalidateQueries({ queryKey: estateKeys.households(estate.id) });
     queryClient.invalidateQueries({ queryKey: estateKeys.myEstate });
+    queryClient.invalidateQueries({ queryKey: estateKeys.myEstates });
   };
 
   const addHousehold = useMutation({

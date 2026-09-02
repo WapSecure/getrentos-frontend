@@ -43,6 +43,10 @@ export const estateService = {
     return safeCall(() => authFetch('/estate/me'));
   },
 
+  async listMyEstates(): Promise<ApiResponse<Estate[]>> {
+    return safeCall(() => authFetch('/estate/mine'));
+  },
+
   async listHouseholds(
     estateId: string,
     query: EstatePageQuery & { status?: HouseholdStatus } = {}

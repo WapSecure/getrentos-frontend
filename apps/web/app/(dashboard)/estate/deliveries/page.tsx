@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { LogDeliveryModal } from '@/components/estate/deliveries/LogDeliveryModal';
 import { DeliveryLogRow } from '@/components/estate/deliveries/DeliveryLogRow';
 import { ManageGatesModal } from '@/components/estate/gates/ManageGatesModal';
@@ -32,10 +33,7 @@ export default function EstateDeliveriesPage() {
   const [page, setPage] = useState(1);
   const [householdPage, setHouseholdPage] = useState(1);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: gates } = useQuery({
     queryKey: estateKeys.gates(estate?.id ?? ''),

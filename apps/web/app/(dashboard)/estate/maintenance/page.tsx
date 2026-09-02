@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CloseMaintenanceTicketModal } from '@/components/estate/maintenance/CloseMaintenanceTicketModal';
 import { MaintenanceTicketCard } from '@/components/estate/maintenance/MaintenanceTicketCard';
 import type { MaintenanceTicketStatus } from '@/types/estate';
@@ -30,10 +31,7 @@ export default function EstateMaintenancePage() {
     action: 'resolve' | 'dismiss';
   } | null>(null);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: tickets = [], isLoading: isTicketsLoading } = useQuery({
     queryKey: estateKeys.maintenanceTickets(

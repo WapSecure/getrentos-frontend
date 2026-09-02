@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { UploadGovernanceRecordModal } from '@/components/estate/governance/UploadGovernanceRecordModal';
 import { GovernanceRecordRow } from '@/components/estate/governance/GovernanceRecordRow';
 import type { GovernanceRecordType } from '@/types/estate';
@@ -26,10 +27,7 @@ export default function EstateGovernancePage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<GovernanceRecordType | 'all'>('all');
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: records = [], isLoading: isRecordsLoading } = useQuery({
     queryKey: estateKeys.governanceRecords(

@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ReportViolationModal } from '@/components/estate/violations/ReportViolationModal';
 import { CloseViolationModal } from '@/components/estate/violations/CloseViolationModal';
 import { ViolationCard } from '@/components/estate/violations/ViolationCard';
@@ -32,10 +33,7 @@ export default function EstateViolationsPage() {
     action: 'resolve' | 'dismiss';
   } | null>(null);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: householdsData } = useQuery({
     queryKey: estateKeys.households(estate?.id ?? ''),

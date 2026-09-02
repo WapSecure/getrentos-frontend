@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { InviteGatemanModal } from '@/components/estate/staff/InviteGatemanModal';
 import { StaffMemberRow } from '@/components/estate/staff/StaffMemberRow';
 
@@ -20,10 +21,7 @@ export default function EstateStaffPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data, isLoading: isStaffLoading } = useQuery({
     queryKey: [...estateKeys.staff(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],

@@ -9,10 +9,12 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '../layout';
 
 export default function EstateSetupPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { selectEstate } = useSelectedEstate();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -30,8 +32,10 @@ export default function EstateSetupPage() {
           gateCount: gateCount ? Number(gateCount) : undefined,
         })
       ),
-    onSuccess: () => {
+    onSuccess: (newEstate) => {
       queryClient.invalidateQueries({ queryKey: estateKeys.myEstate });
+      queryClient.invalidateQueries({ queryKey: estateKeys.myEstates });
+      selectEstate(newEstate.id);
       router.push(ROUTES.ESTATE_DASHBOARD);
     },
   });
