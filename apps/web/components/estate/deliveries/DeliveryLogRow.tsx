@@ -42,6 +42,7 @@ export const DeliveryLogRow = ({
           {log.courier ? `${log.courier} · ` : ''}
           {log.recipientName ? `${log.recipientName} · ` : ''}
           Received {formatDateTime(log.receivedAt)}
+          {log.gateName ? ` · ${log.gateName}` : ''}
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">

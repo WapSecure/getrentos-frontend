@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput, Pagination } from '@getrentos/ui';
-import type { Household } from '@/types/estate';
+import { Button, LegacyInput, Pagination, Select } from '@getrentos/ui';
+import type { Gate, Household } from '@/types/estate';
 
 interface LogDeliveryModalProps {
   isOpen: boolean;
@@ -14,11 +14,13 @@ interface LogDeliveryModalProps {
   householdPageSize: number;
   onHouseholdPageChange: (page: number) => void;
   isHouseholdsLoading?: boolean;
+  gates?: Gate[];
   onClose: () => void;
   onSubmit: (data: {
     householdId: string;
     courier?: string;
     recipientName?: string;
+    gateId?: string;
     photo?: File;
   }) => void;
   isSubmitting?: boolean;
@@ -32,6 +34,7 @@ export const LogDeliveryModal = ({
   householdPageSize,
   onHouseholdPageChange,
   isHouseholdsLoading,
+  gates,
   onClose,
   onSubmit,
   isSubmitting,
@@ -39,7 +42,9 @@ export const LogDeliveryModal = ({
   const [householdId, setHouseholdId] = useState('');
   const [courier, setCourier] = useState('');
   const [recipientName, setRecipientName] = useState('');
+  const [gateId, setGateId] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
+  const gateOptions = (gates ?? []).map((gate) => ({ value: gate.id, label: gate.name }));
 
   const activeHouseholds = households.filter((h) => h.status === 'active');
 
@@ -47,6 +52,7 @@ export const LogDeliveryModal = ({
     setHouseholdId('');
     setCourier('');
     setRecipientName('');
+    setGateId('');
     setPhoto(null);
     onClose();
   };
@@ -152,6 +158,17 @@ export const LogDeliveryModal = ({
                 />
               </div>
 
+              {gateOptions.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
+                  <Select
+                    value={gateId}
+                    onValueChange={setGateId}
+                    options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Photo <span className="text-gray-400 font-normal">(optional)</span>
@@ -178,6 +195,7 @@ export const LogDeliveryModal = ({
                     householdId,
                     courier: courier.trim() || undefined,
                     recipientName: recipientName.trim() || undefined,
+                    gateId: gateId || undefined,
                     photo: photo ?? undefined,
                   })
                 }
