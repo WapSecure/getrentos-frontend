@@ -45,7 +45,7 @@ const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCard
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+      className="group relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-primary/5 to-transparent" />
 
@@ -59,7 +59,7 @@ const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCard
         <div>
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
           <p className="text-2xl font-bold text-foreground tracking-tight">{value}</p>
-          {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
         </div>
       </div>
 

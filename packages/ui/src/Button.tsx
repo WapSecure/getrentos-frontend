@@ -45,19 +45,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium tracking-[-0.01em] transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background';
+      'inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium tracking-[-0.01em] transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]';
 
     const variants = {
       primary:
-        'bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover hover:shadow-md active:shadow-sm',
       secondary:
-        'bg-secondary text-secondary-foreground border border-border/70 hover:bg-secondary-foreground/5 focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-secondary text-secondary-foreground border border-border/70 shadow-xs hover:bg-foreground/[0.05] hover:border-border',
       outline:
-        'bg-card text-foreground border border-border hover:border-foreground/25 hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed',
-      ghost:
-        'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground focus:ring-border disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-card text-foreground border border-border shadow-xs hover:border-foreground/25 hover:bg-secondary/60 hover:shadow-sm',
+      ghost: 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground',
       danger:
-        'bg-destructive text-destructive-foreground hover:opacity-90 focus:ring-destructive disabled:opacity-50 disabled:cursor-not-allowed',
+        'bg-destructive text-destructive-foreground shadow-sm hover:brightness-95 hover:shadow-md',
     };
 
     const sizes = {

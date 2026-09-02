@@ -49,11 +49,11 @@ const trustFeatures = [
 export const SignupLeftContent = () => {
   return (
     <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
-      {/* Background Pattern - Light mode */}
-      <div className="absolute inset-0 opacity-10 lg:opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64] rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/20 to-transparent rounded-full blur-3xl" />
+      {/* Background: soft radial glow + dot texture. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(75%_55%_at_30%_0%,rgba(0,113,227,0.12),transparent_62%)]" />
+        <div className="hero-dots absolute inset-0 opacity-50" />
+        <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
@@ -69,11 +69,9 @@ export const SignupLeftContent = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 mb-6">
-              <Sparkles className="w-3 h-3 text-primary" />
-              <span className="text-xs font-medium text-gray-700 dark:text-white/80">
-                TRUST-DRIVEN PLATFORM
-              </span>
+            <div className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
+              <Sparkles className="h-3 w-3" />
+              Trust-driven platform
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">

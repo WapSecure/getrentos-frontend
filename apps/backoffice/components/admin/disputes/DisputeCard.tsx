@@ -2,33 +2,18 @@
 
 import { motion } from 'framer-motion';
 import { Gavel, Clock, Search, CheckCircle2, ArrowUpCircle } from 'lucide-react';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import type { Dispute, DisputeStatus } from '@/types/admin';
 
 const statusConfig: Record<
   DisputeStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
-  open: {
-    label: 'Open',
-    icon: Clock,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  under_review: {
-    label: 'Under Review',
-    icon: Search,
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  resolved: {
-    label: 'Resolved',
-    icon: CheckCircle2,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  escalated: {
-    label: 'Escalated',
-    icon: ArrowUpCircle,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
+  open: { label: 'Open', icon: Clock, variant: 'warning' },
+  under_review: { label: 'Under Review', icon: Search, variant: 'info' },
+  resolved: { label: 'Resolved', icon: CheckCircle2, variant: 'success' },
+  escalated: { label: 'Escalated', icon: ArrowUpCircle, variant: 'danger' },
 };
 
 const priorityConfig: Record<Dispute['priority'], string> = {
@@ -53,7 +38,7 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className="cursor-pointer rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -67,24 +52,21 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
             </p>
           </div>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
-        >
-          <StatusIcon className="w-3 h-3" />
+        <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" />}>
           {status.label}
-        </span>
+        </Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Priority</p>
+          <p className="text-xs text-muted-foreground">Priority</p>
           <p className={`text-sm font-medium capitalize ${priorityConfig[dispute.priority]}`}>
             {dispute.priority}
           </p>
         </div>
         {dispute.amount !== undefined && (
           <div>
-            <p className="text-xs text-gray-400">Amount</p>
+            <p className="text-xs text-muted-foreground">Amount</p>
             <p className="text-sm font-medium text-foreground">
               {formatCurrency(dispute.amount, { compact: true })}
             </p>
@@ -92,7 +74,7 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
         )}
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
+      <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
         Opened {formatDate(dispute.createdAt)}
       </p>
     </motion.div>

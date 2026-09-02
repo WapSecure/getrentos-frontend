@@ -89,7 +89,7 @@ export const RenterRoommates = () => {
                 Send Invite
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               They&apos;ll need to accept to join your household
             </p>
           </div>
@@ -111,8 +111,8 @@ export const RenterRoommates = () => {
                 <div>
                   <p className="font-medium text-foreground">{roommate.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Mail className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">{roommate.email}</span>
+                    <Mail className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">{roommate.email}</span>
                   </div>
                 </div>
               </div>
@@ -122,7 +122,7 @@ export const RenterRoommates = () => {
                 </p>
                 <div className="flex items-center gap-1 mt-1">
                   <CheckCircle className="w-3 h-3 text-green-500" />
-                  <span className="text-xs text-gray-500">Verified</span>
+                  <span className="text-xs text-muted-foreground">Verified</span>
                 </div>
               </div>
             </motion.div>
@@ -137,7 +137,7 @@ export const RenterRoommates = () => {
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div className="h-full bg-primary rounded-full" style={{ width: `${totalShare}%` }} />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               {totalShare === 100 ? 'All rent allocated' : `${100 - totalShare}% unallocated`}
             </p>
           </div>

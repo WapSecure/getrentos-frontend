@@ -68,7 +68,7 @@ export const RenterUpcomingPayments = () => {
           >
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-gray-500" />
+                <Home className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium text-foreground text-sm">{payment.property}</span>
               </div>
               {payment.status === 'overdue' && (

@@ -12,20 +12,20 @@ interface BadgeProps {
 
 const variants: Record<BadgeVariant, string> = {
   success:
-    'text-green-700 bg-green-50 border-green-200/70 dark:text-green-400 dark:bg-green-900/20 dark:border-green-900',
+    'bg-green-50 text-green-700 border-green-200/70 ring-green-600/10 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800/60 dark:ring-green-400/10',
   warning:
-    'text-yellow-700 bg-yellow-50 border-yellow-200/70 dark:text-yellow-400 dark:bg-yellow-900/20 dark:border-yellow-900',
+    'bg-amber-50 text-amber-700 border-amber-200/70 ring-amber-600/10 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 dark:ring-amber-400/10',
   danger:
-    'text-red-700 bg-red-50 border-red-200/70 dark:text-red-400 dark:bg-red-900/20 dark:border-red-900',
-  neutral: 'text-muted-foreground bg-secondary border-border/70',
-  info: 'text-primary bg-accent border-primary/15',
+    'bg-red-50 text-red-700 border-red-200/70 ring-red-600/10 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/60 dark:ring-red-400/10',
+  neutral: 'bg-secondary text-muted-foreground border-border/70 ring-foreground/5',
+  info: 'bg-accent text-accent-foreground border-primary/15 ring-primary/10',
 };
 
 export const Badge = ({ children, variant = 'neutral', icon, className }: BadgeProps) => {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium tracking-[-0.01em] shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
+        'inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium tracking-[-0.01em] ring-1 ring-inset',
         variants[variant],
         className
       )}

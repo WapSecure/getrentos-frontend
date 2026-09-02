@@ -22,38 +22,35 @@ export default function RenterDashboardPage() {
   if (currentHour >= 18) greeting = 'evening';
 
   return (
-    <>
+    <div className="space-y-6">
       <RenterDashboardHeader greeting={greeting} firstName={firstName} />
 
       <RenterStatsCards />
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+      {/* Primary row: applications get the width, trust score rides alongside
+          and drops beneath on narrower screens. */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <RenterApplicationsList />
         </div>
-        <div>
-          <RenterTrustScoreCard />
-        </div>
+        <RenterTrustScoreCard />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      {/* Full-width when it renders; collapses cleanly when it doesn't. */}
+      <RenterRecommendedProperties />
+
+      {/* Secondary widgets share one flowing grid. Several of these hide
+          themselves when the renter has nothing to show (no lease, no
+          roommates, etc.); as direct grid children they simply drop out and
+          the remaining cards reflow — no stranded half-width cards, even gaps. */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-min items-start">
+        <RenterUpcomingPayments />
         <RenterLeaseRenewal />
         <RenterMoveInChecklist />
-      </div>
-
-      <div className="mb-6">
-        <RenterRecommendedProperties />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <RenterUpcomingPayments />
         <RenterRoommates />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
         <RenterRecentActivity />
         <RenterReviews />
       </div>
-    </>
+    </div>
   );
 }

@@ -75,12 +75,12 @@ export const StatCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.10)]"
+      className="group relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative p-4">
         <div
           className={cn(
-            'inline-flex p-2.5 rounded-xl transition-all duration-300 group-hover:scale-110 mb-3',
+            'mb-3 inline-flex rounded-xl p-2.5 shadow-sm transition-all duration-300 group-hover:scale-110',
             colors.bg
           )}
         >

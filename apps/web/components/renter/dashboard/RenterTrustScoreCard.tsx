@@ -94,7 +94,7 @@ export const RenterTrustScoreCard = () => {
                   className={`p-1 rounded ${item.verified ? 'bg-green-100 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}
                 >
                   <item.icon
-                    className={`w-3 h-3 ${item.verified ? 'text-green-600' : 'text-gray-400'}`}
+                    className={`w-3 h-3 ${item.verified ? 'text-green-600' : 'text-muted-foreground'}`}
                   />
                 </div>
                 <span className="text-sm text-foreground">{item.label}</span>
@@ -103,8 +103,8 @@ export const RenterTrustScoreCard = () => {
                 <CheckCircle className="w-4 h-4 text-green-600" />
               ) : (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-400">Pending</span>
-                  <XCircle className="w-3 h-3 text-gray-400" />
+                  <span className="text-xs text-muted-foreground">Pending</span>
+                  <XCircle className="w-3 h-3 text-muted-foreground" />
                 </div>
               )}
             </motion.div>

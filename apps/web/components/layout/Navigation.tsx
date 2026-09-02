@@ -37,14 +37,14 @@ export const Navigation = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-border'
+            ? 'border-b border-border/60 bg-white/80 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-white/65 dark:bg-background/80 dark:supports-backdrop-filter:bg-background/70'
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
             <Logo />
 
             <div className="hidden md:flex items-center gap-8">
@@ -89,7 +89,7 @@ export const Navigation = () => {
                   <ThemeToggle />
                   <Link
                     href={ROUTES.SIGNUP}
-                    className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:bg-primary-hover transition-colors"
+                    className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-medium shadow-sm transition-all hover:bg-primary-hover hover:shadow-md"
                   >
                     Get early access
                   </Link>
@@ -135,7 +135,7 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-white dark:bg-background border-b border-border md:hidden"
+            className="fixed inset-x-0 top-16 z-40 border-b border-border/60 bg-white/90 backdrop-blur-xl md:hidden dark:bg-background/90"
           >
             <div className="flex flex-col p-4 space-y-3">
               <Link
@@ -184,7 +184,7 @@ export const Navigation = () => {
                   </Link>
                   <Link
                     href={ROUTES.SIGNUP}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-center font-medium hover:bg-primary-hover transition-colors"
+                    className="bg-primary text-primary-foreground rounded-full px-4 py-2 text-center text-sm font-medium shadow-sm transition-all hover:bg-primary-hover"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Get early access

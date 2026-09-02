@@ -29,7 +29,7 @@ export const RenterReviews = () => {
     queryKey: [...renterKeys.reviewsSubmitted, { page: 1, pageSize: 5 }],
     queryFn: () => unwrap(renterService.getSubmittedReviews({ page: 1, pageSize: 5 })),
   });
-  const submitted = submittedData?.items ?? [];
+  const submitted = useMemo(() => submittedData?.items ?? [], [submittedData]);
 
   const submitMutation = useMutation({
     mutationFn: (input: {
@@ -74,6 +74,10 @@ export const RenterReviews = () => {
     });
   };
 
+  // Nothing to write and nothing written yet — reviews only become relevant
+  // after a lease ends, so keep the card off the dashboard until then.
+  if (pending.length === 0 && submitted.length === 0) return null;
+
   return (
     <>
       {toast && (
@@ -103,7 +107,7 @@ export const RenterReviews = () => {
                     />
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {submitted.length} review{submitted.length === 1 ? '' : 's'}
                 </p>
               </div>
@@ -127,7 +131,7 @@ export const RenterReviews = () => {
                       <p className="text-sm font-medium text-foreground">
                         {review.type === 'property' ? review.property : review.landlord}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {review.type === 'property' ? 'Rate this property' : 'Rate your landlord'}
                       </p>
                     </div>
@@ -138,13 +142,6 @@ export const RenterReviews = () => {
                 ))}
               </div>
             </div>
-          )}
-
-          {pending.length === 0 && submitted.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              No reviews yet. You&apos;ll be able to review your landlord and property after a lease
-              ends.
-            </p>
           )}
 
           {submitted.length > 0 && (
@@ -170,7 +167,7 @@ export const RenterReviews = () => {
                         </div>
                       </div>
                       {review.propertyTitle && (
-                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
                           <MapPin className="w-3 h-3" />
                           {review.propertyTitle}
                         </span>

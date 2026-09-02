@@ -105,10 +105,13 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-      <div className="absolute inset-0 bg-background">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64]/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Soft radial halos for an airy, premium glow. */}
+        <div className="absolute inset-0 bg-[radial-gradient(85%_60%_at_50%_-10%,rgba(0,113,227,0.14),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(45%_38%_at_85%_25%,rgba(0,113,227,0.09),transparent_62%)]" />
+        <div className="absolute bottom-0 left-1/2 h-[420px] w-[700px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+        {/* Faint dot grid for subtle texture. */}
+        <div className="hero-dots absolute inset-0 opacity-40" />
       </div>
 
       {particles.length > 0 && dimensions.width > 0 && (
@@ -143,48 +146,50 @@ export const Hero = () => {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring' }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+            initial={{ scale: 0.96, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent/80 px-4 py-1.5 shadow-sm backdrop-blur"
           >
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Trust-Driven Platform</span>
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
+              Trust-driven platform
+            </span>
           </motion.div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6">
+          <h1 className="mb-6 text-4xl font-bold tracking-[-0.03em] text-foreground sm:text-6xl lg:text-7xl">
             The trust-driven
-            <span className="block text-primary">property operating system.</span>
+            <span className="block bg-linear-to-r from-[#0071e3] via-[#0a84ff] to-[#5aa2ff] bg-clip-text text-transparent">
+              property operating system.
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
             One workspace for renters, landlords, owners, buyers, realtors and agents. Verified
             identities, verified properties, escrow-secured payments — from first search to final
             signature.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button href={ROUTES.SIGNUP} size="lg" className="group">
               Get early access
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button href="#features" variant="secondary" size="lg">
-              Watch demo
+              Explore the platform
             </Button>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 pt-8 border-t border-border">
+          <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-2.5 border-t border-border/70 pt-8">
             {trustItems.map((item, idx) => (
-              <motion.div
+              <motion.span
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="flex items-center gap-2"
+                transition={{ delay: idx * 0.08 }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
               >
-                <item.icon className="w-4 h-4 text-primary" />
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                  {item.text}
-                </span>
-              </motion.div>
+                <item.icon className="h-3.5 w-3.5 text-primary" />
+                {item.text}
+              </motion.span>
             ))}
           </div>
         </motion.div>

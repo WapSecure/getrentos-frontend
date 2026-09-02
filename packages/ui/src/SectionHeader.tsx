@@ -24,13 +24,17 @@ export const SectionHeader = ({
       className={`text-center mb-12 ${className}`}
     >
       {badge && (
-        <div className="inline-block px-3 py-1 rounded-full text-xs font-medium text-primary bg-accent border border-primary/15 mb-4">
+        <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-accent-foreground">
           {badge}
         </div>
       )}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">{title}</h2>
+      <h2 className="mx-auto max-w-3xl text-3xl font-bold tracking-[-0.02em] text-foreground md:text-4xl lg:text-5xl">
+        {title}
+      </h2>
       {description && (
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{description}</p>
+        <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
+          {description}
+        </p>
       )}
     </motion.div>
   );

@@ -20,16 +20,16 @@ export const EmptyState = ({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border bg-card p-12 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+        'rounded-xl border border-border/90 bg-card px-6 py-12 text-center shadow-sm',
         className
       )}
     >
-      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary">
-        <Icon className="h-6 w-6 text-muted-foreground" />
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/70 ring-1 ring-inset ring-primary/10">
+        <Icon className="h-6 w-6 text-primary" />
       </div>
-      <p className="font-medium tracking-[-0.01em] text-foreground">{title}</p>
-      {description && <p className="text-muted-foreground text-sm mt-1">{description}</p>}
-      {action && <div className="mt-4">{action}</div>}
+      <p className="font-semibold tracking-[-0.01em] text-foreground">{title}</p>
+      {description && <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>}
+      {action && <div className="mt-5">{action}</div>}
     </div>
   );
 };

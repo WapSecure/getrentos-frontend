@@ -42,31 +42,39 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn('bg-card border border-border rounded-lg overflow-hidden', className)}>
+    <div
+      className={cn(
+        'overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm',
+        className
+      )}
+    >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs text-muted-foreground">
+            <tr className="border-b border-border/80 bg-muted/40 text-left">
               {columns.map((column) => (
-                <th key={column.key} className="p-4 font-medium">
+                <th
+                  key={column.key}
+                  className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground/90"
+                >
                   {column.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-border/60">
             {data.map((row) => (
               <tr
                 key={getRowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
-                  'transition-colors',
-                  onRowClick && 'hover:bg-secondary cursor-pointer',
+                  'transition-colors duration-150',
+                  onRowClick && 'cursor-pointer hover:bg-secondary/60',
                   getRowClassName?.(row)
                 )}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={cn('p-4', column.className)}>
+                  <td key={column.key} className={cn('px-5 py-3.5 align-middle', column.className)}>
                     {column.render(row)}
                   </td>
                 ))}

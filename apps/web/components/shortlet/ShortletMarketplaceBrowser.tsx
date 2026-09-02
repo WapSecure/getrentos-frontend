@@ -81,9 +81,14 @@ export const ShortletMarketplaceBrowser = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Shortlet Stays</h1>
-        <p className="mt-1 text-muted-foreground">
+      <div className="mb-8 flex flex-col items-start gap-2.5 border-b border-border/60 pb-6">
+        <span className="inline-flex items-center rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
+          Short stays
+        </span>
+        <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
+          Shortlet stays
+        </h1>
+        <p className="text-muted-foreground sm:text-lg">
           Furnished apartments and homes available for short stays — book by the night or flat rate.
         </p>
       </div>

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Logo } from '@/components/ui/Logo';
-import { Heart, Twitter, Linkedin, Github, Mail, MapPin, Phone } from 'lucide-react';
+import { Twitter, Linkedin, Github, Mail, MapPin } from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const Footer = () => {
   const ref = useRef(null);
@@ -42,12 +43,12 @@ export const Footer = () => {
       initial="hidden"
       animate={controls}
       variants={containerVariants}
-      className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-muted border-t border-border"
+      className="relative overflow-hidden border-t border-border bg-linear-to-br from-white to-secondary/50 dark:from-card dark:to-muted"
     >
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-[#2e7d64]/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 left-0 w-72 h-72 rounded-full bg-linear-to-r from-primary/5 to-transparent blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-linear-to-l from-primary/5 to-transparent blur-3xl" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -85,22 +86,22 @@ export const Footer = () => {
             </div>
           </motion.div>
 
-          {/* Quick Links */}
+          {/* Product */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-              Quick Links
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Product
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {[
-                { label: 'About Us', href: '#' },
-                { label: 'Features', href: '#features' },
-                { label: 'Home Management', href: '/home-management' },
-                { label: 'Contact', href: '#' },
+                { label: 'Shortlet stays', href: ROUTES.SHORTLET_MARKETPLACE },
+                { label: 'Buy land', href: ROUTES.LAND_MARKETPLACE },
+                { label: 'Home management', href: ROUTES.HOME_MANAGEMENT },
+                { label: 'How it works', href: '#how-it-works' },
               ].map((item) => (
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200"
+                    className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
                   >
                     {item.label}
                   </Link>
@@ -109,44 +110,65 @@ export const Footer = () => {
             </ul>
           </motion.div>
 
-          {/* Support */}
+          {/* Get started */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-              Support
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Get started
             </h3>
-            <ul className="space-y-2">
-              {['Help Center', 'Safety Center', 'Community Guidelines', 'Report Issue'].map(
-                (item) => (
-                  <li key={item}>
-                    <Link
-                      href="#"
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                )
-              )}
+            <ul className="space-y-2.5">
+              <li>
+                <Link
+                  href={ROUTES.SIGNUP}
+                  className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                >
+                  Create an account
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={ROUTES.LOGIN}
+                  className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                >
+                  Sign in
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={ROUTES.ROLE_SELECTION}
+                  className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                >
+                  Browse roles
+                </Link>
+              </li>
             </ul>
           </motion.div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <motion.div variants={itemVariants}>
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-              Contact Us
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Contact
             </h3>
             <ul className="space-y-3">
-              <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Mail className="w-4 h-4 text-primary" />
-                <span>support@getrentos.com</span>
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Mail className="h-4 w-4 shrink-0 text-primary" />
+                <a
+                  href="mailto:support@getrentos.com"
+                  className="transition-colors duration-200 hover:text-foreground"
+                >
+                  support@getrentos.com
+                </a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Phone className="w-4 h-4 text-primary" />
-                <span>+1 (555) 123-4567</span>
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                <span>Lagos, Nigeria</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <MapPin className="w-4 h-4 text-primary mt-0.5" />
-                <span>123 Property Street, Real Estate City, RE 12345</span>
+              <li>
+                <a
+                  href="mailto:support@getrentos.com?subject=Help%20request"
+                  className="text-sm text-muted-foreground transition-colors duration-200 hover:text-primary"
+                >
+                  Get support
+                </a>
               </li>
             </ul>
           </motion.div>
@@ -163,66 +185,31 @@ export const Footer = () => {
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Privacy Policy
             </Link>
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Terms of Service
             </Link>
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Cookie Policy
             </Link>
             <Link
               href="#"
-              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
               GDPR Compliance
             </Link>
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-            Made with
-            <motion.span
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <Heart className="w-3 h-3 text-red-500 fill-red-500" />
-            </motion.span>
-            by GetRentos
-          </p>
-        </motion.div>
-
-        {/* Trust Badge */}
-        <motion.div
-          variants={itemVariants}
-          className="text-center mt-6 pt-4 border-t border-border"
-        >
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500 dark:text-gray-500">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              SOC2 Certified
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              GDPR Compliant
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              256-bit Encryption
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              24/7 Support
-            </span>
-          </div>
-          <p className="text-xs text-gray-400 dark:text-gray-600 mt-3">
+          <p className="text-sm text-muted-foreground">
             © {currentYear} GetRentos. All rights reserved.
           </p>
         </motion.div>

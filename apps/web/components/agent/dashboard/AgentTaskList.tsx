@@ -54,7 +54,7 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {config.label} · {task.propertyAddress}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     Due {formatDate(task.dueDate)}
                   </p>

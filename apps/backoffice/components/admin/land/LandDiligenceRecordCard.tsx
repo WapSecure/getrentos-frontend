@@ -40,7 +40,7 @@ export const LandDiligenceRecordCard = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.25 }}
-      className="flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+      className="flex h-full flex-col rounded-2xl border border-border/90 bg-card p-5 shadow-sm transition-shadow duration-300 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

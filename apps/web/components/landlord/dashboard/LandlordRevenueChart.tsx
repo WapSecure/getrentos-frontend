@@ -48,7 +48,7 @@ export const LandlordRevenueChart = () => {
   const change = previousMonth > 0 ? ((currentMonth - previousMonth) / previousMonth) * 100 : null;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-5">
+    <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold text-foreground">Rent Collection Trend</h3>

@@ -90,7 +90,7 @@ export const RenterRecommendedProperties = () => {
                     <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto">
                       <Home className="w-6 h-6 text-primary" />
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">Property Image</p>
+                    <p className="text-xs text-muted-foreground mt-2">Property Image</p>
                   </div>
                 </div>
                 {property.verified && (

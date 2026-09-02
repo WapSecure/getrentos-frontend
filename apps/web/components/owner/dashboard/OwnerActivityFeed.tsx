@@ -93,7 +93,9 @@ export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.message}</p>
-                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.timestamp)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatRelativeTime(item.timestamp)}
+                  </p>
                 </div>
               </div>
             );

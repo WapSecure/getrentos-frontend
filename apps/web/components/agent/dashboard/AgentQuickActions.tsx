@@ -13,7 +13,7 @@ const actions = [
 
 export const AgentQuickActions = () => {
   return (
-    <div className="bg-card rounded-2xl border border-border p-5">
+    <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
       <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
       <div className="grid grid-cols-2 gap-3">
         {actions.map((action) => (

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Shield, Building2, Award, Clock, HelpCircle, FileText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import type { VerificationRequest, VerificationRequestType } from '@/types/admin';
 
@@ -32,7 +32,7 @@ export const VerificationRequestCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
+      className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-shadow duration-300 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -47,16 +47,14 @@ export const VerificationRequestCard = ({
           </div>
         </div>
         {isPending && (
-          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20">
-            <Clock className="w-3 h-3" />
+          <Badge variant="warning" icon={<Clock className="h-3 w-3" />}>
             Pending
-          </span>
+          </Badge>
         )}
         {request.status === 'needs_clarification' && (
-          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20">
-            <HelpCircle className="w-3 h-3" />
+          <Badge variant="warning" icon={<HelpCircle className="h-3 w-3" />}>
             Needs Info
-          </span>
+          </Badge>
         )}
       </div>
 

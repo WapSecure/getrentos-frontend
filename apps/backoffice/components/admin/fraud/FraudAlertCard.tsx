@@ -2,24 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { formatRelativeTime } from '@getrentos/shared';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
-const severityConfig: Record<FraudAlertSeverity, { label: string; className: string }> = {
-  low: { label: 'Low', className: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-white/10' },
-  medium: {
-    label: 'Medium',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  high: {
-    label: 'High',
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
-  },
-  critical: {
-    label: 'Critical',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
+const severityConfig: Record<FraudAlertSeverity, { label: string; variant: BadgeVariant }> = {
+  low: { label: 'Low', variant: 'neutral' },
+  medium: { label: 'Medium', variant: 'warning' },
+  high: { label: 'High', variant: 'warning' },
+  critical: { label: 'Critical', variant: 'danger' },
 };
 
 const statusConfig: Record<
@@ -61,7 +52,7 @@ export const FraudAlertCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
+      className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-shadow duration-300 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -73,11 +64,7 @@ export const FraudAlertCard = ({
             <p className="text-xs text-muted-foreground truncate capitalize">{alert.subjectRole}</p>
           </div>
         </div>
-        <span
-          className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${severity.className}`}
-        >
-          {severity.label}
-        </span>
+        <Badge variant={severity.variant}>{severity.label}</Badge>
       </div>
 
       <p className="text-sm text-muted-foreground mt-3">{alert.reason}</p>
@@ -87,7 +74,9 @@ export const FraudAlertCard = ({
           <StatusIcon className="w-3.5 h-3.5" />
           {status.label}
         </span>
-        <span className="text-xs text-gray-400">{formatRelativeTime(alert.detectedAt)}</span>
+        <span className="text-xs text-muted-foreground">
+          {formatRelativeTime(alert.detectedAt)}
+        </span>
       </div>
 
       {!isDecided && (

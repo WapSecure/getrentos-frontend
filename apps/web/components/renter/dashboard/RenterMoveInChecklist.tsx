@@ -122,19 +122,19 @@ export const RenterMoveInChecklist = () => {
                 {item.completed ? (
                   <CheckCircle className="w-5 h-5 text-green-500" />
                 ) : (
-                  <Circle className="w-5 h-5 text-gray-400" />
+                  <Circle className="w-5 h-5 text-muted-foreground" />
                 )}
               </button>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <p
-                    className={`text-sm font-medium ${item.completed ? 'text-gray-500 line-through' : 'text-foreground'}`}
+                    className={`text-sm font-medium ${item.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}
                   >
                     {item.title}
                   </p>
                   {item.required && <span className="text-xs text-red-500">Required</span>}
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
               </div>
               {item.key === 'document_condition' && (
                 <Button
@@ -159,7 +159,7 @@ export const RenterMoveInChecklist = () => {
             <FileText className="w-4 h-4" />
             Generate Move-In Report
           </Button>
-          <p className="text-xs text-gray-500 text-center mt-2">
+          <p className="text-xs text-muted-foreground text-center mt-2">
             This report will be shared with your landlord
           </p>
         </div>

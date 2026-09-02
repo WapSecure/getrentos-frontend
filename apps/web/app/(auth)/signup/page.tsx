@@ -16,7 +16,6 @@ import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
 import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeField';
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
-import { AnimatedParticles } from '@getrentos/ui';
 import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
@@ -68,8 +67,12 @@ export default function SignupPage() {
   }, [step]);
 
   return (
-    <div className="min-h-screen bg-background flex relative">
-      <AnimatedParticles />
+    <div className="relative flex min-h-screen bg-background">
+      {/* Ambient canvas: soft radial glows (form side stays clean + airy). */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(70%_50%_at_100%_0%,rgba(0,113,227,0.1),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(50%_40%_at_0%_100%,rgba(0,113,227,0.05),transparent_60%)]" />
+      </div>
 
       {/* Back Button - Top Left */}
       <button
