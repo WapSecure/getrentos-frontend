@@ -237,6 +237,29 @@ export interface Poll {
   createdAt: string;
 }
 
+export interface Amenity {
+  id: string;
+  estateId: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+}
+
+export type AmenityBookingStatus = 'confirmed' | 'cancelled';
+
+export interface AmenityBooking {
+  id: string;
+  amenityId: string;
+  amenityName: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  startsAt: string;
+  endsAt: string;
+  status: AmenityBookingStatus;
+  createdAt: string;
+}
+
 export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
 
 export interface GovernanceRecord {

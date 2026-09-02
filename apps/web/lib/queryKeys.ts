@@ -277,6 +277,8 @@ export const estateKeys = {
   maintenanceTickets: (estateId: string, status?: string) =>
     ['estate', estateId, 'maintenanceTickets', status ?? 'all'] as const,
   polls: (estateId: string) => ['estate', estateId, 'polls'] as const,
+  amenities: (estateId: string) => ['estate', estateId, 'amenities'] as const,
+  amenityBookings: (estateId: string) => ['estate', estateId, 'amenityBookings'] as const,
 };
 
 export const estateResidentKeys = {
@@ -290,4 +292,6 @@ export const estateResidentKeys = {
   directory: ['estate', 'resident', 'directory'] as const,
   maintenanceTickets: ['estate', 'resident', 'maintenanceTickets'] as const,
   polls: ['estate', 'resident', 'polls'] as const,
+  amenities: ['estate', 'resident', 'amenities'] as const,
+  amenityBookings: ['estate', 'resident', 'amenityBookings'] as const,
 };

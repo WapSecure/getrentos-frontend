@@ -8,6 +8,8 @@ import type {
   IssuedVisitorPass,
   MaintenanceTicket,
   Poll,
+  Amenity,
+  AmenityBooking,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -63,6 +65,30 @@ export const estateResidentService = {
         method: 'POST',
         body: JSON.stringify({ optionId }),
       })
+    );
+  },
+
+  async listAmenities(): Promise<ApiResponse<Amenity[]>> {
+    return safeCall(() => authFetch('/estate/resident/amenities'));
+  },
+
+  async bookAmenity(data: {
+    amenityId: string;
+    startsAt: string;
+    endsAt: string;
+  }): Promise<ApiResponse<AmenityBooking>> {
+    return safeCall(() =>
+      authFetch('/estate/resident/amenities/book', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listMyAmenityBookings(): Promise<ApiResponse<AmenityBooking[]>> {
+    return safeCall(() => authFetch('/estate/resident/amenity-bookings'));
+  },
+
+  async cancelMyAmenityBooking(bookingId: string): Promise<ApiResponse<AmenityBooking>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/amenity-bookings/${bookingId}/cancel`, { method: 'PATCH' })
     );
   },
 
