@@ -114,4 +114,6 @@ export interface BuyerDocument {
   propertyTitle?: string;
   uploadedAt: string;
   sizeLabel: string;
+  /** Signed preview/download URL returned by the backend for this document. */
+  downloadUrl?: string;
 }

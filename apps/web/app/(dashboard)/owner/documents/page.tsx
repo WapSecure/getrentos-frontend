@@ -9,6 +9,7 @@ import {
   Button,
   DocumentUploadDialog,
   DocumentRowActions,
+  DocumentPreviewButton,
   type UploadedDocumentData,
 } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
@@ -195,7 +196,15 @@ export default function OwnerDocumentsPage() {
                 {doc.sharedWithBuyer && <Check className="w-3 h-3" />}
                 {doc.sharedWithBuyer ? 'Shared with Buyer' : 'Not Shared'}
               </button>
-              <DocumentRowActions onShare={() => toggleShare(doc.id)} />
+              <div className="flex items-center gap-1 shrink-0">
+                {doc.downloadUrl && (
+                  <DocumentPreviewButton
+                    file={{ url: doc.downloadUrl, name: doc.name }}
+                    title="View document"
+                  />
+                )}
+                <DocumentRowActions onShare={() => toggleShare(doc.id)} />
+              </div>
             </div>
           ))}
         </div>

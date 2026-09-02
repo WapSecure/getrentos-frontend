@@ -148,6 +148,8 @@ export interface OwnershipTransferDocument {
   uploadedAt: string;
   sizeLabel: string;
   sharedWithBuyer: boolean;
+  /** Signed preview/download URL returned by the backend for this document. */
+  downloadUrl?: string;
 }
 
 export interface InvestmentMetrics {

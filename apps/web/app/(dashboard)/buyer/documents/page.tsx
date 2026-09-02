@@ -7,6 +7,7 @@ import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button, Pagination } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
+import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { buyerService } from '@/services/buyerService';
@@ -145,7 +146,15 @@ export default function BuyerDocumentsPage() {
               <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
-              <DocumentRowActions showShare={false} />
+              <div className="flex items-center gap-1 shrink-0">
+                {doc.downloadUrl && (
+                  <DocumentPreviewButton
+                    file={{ url: doc.downloadUrl, name: doc.name }}
+                    title="View document"
+                  />
+                )}
+                <DocumentRowActions showShare={false} />
+              </div>
             </div>
           ))}
         </div>

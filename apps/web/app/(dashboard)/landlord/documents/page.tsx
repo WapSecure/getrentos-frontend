@@ -6,6 +6,7 @@ import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button, Pagination } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
+import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordService } from '@/services/landlordService';
@@ -90,6 +91,11 @@ export default function LandlordDocumentsPage() {
     }
   };
 
+  const fetchDocUrl = async (id: string): Promise<string | null> => {
+    const response = await landlordService.getDocumentDownloadUrl(id);
+    return response.success && response.data ? response.data.url : null;
+  };
+
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -160,7 +166,13 @@ export default function LandlordDocumentsPage() {
               <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
-              <DocumentRowActions showShare={false} onDownload={() => handleDownload(doc.id)} />
+              <div className="flex items-center gap-1 shrink-0">
+                <DocumentPreviewButton
+                  resolveUrl={() => fetchDocUrl(doc.id)}
+                  title="View document"
+                />
+                <DocumentRowActions showShare={false} onDownload={() => handleDownload(doc.id)} />
+              </div>
             </div>
           ))}
         </div>
