@@ -6,6 +6,7 @@ import type {
   DirectoryEntry,
   Due,
   IssuedVisitorPass,
+  MaintenanceTicket,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -29,6 +30,26 @@ export const estateResidentService = {
 
   async getDirectory(): Promise<ApiResponse<DirectoryEntry[]>> {
     return safeCall(() => authFetch('/estate/resident/directory'));
+  },
+
+  async reportMaintenanceTicket(data: {
+    description: string;
+    category?: 'PLUMBING' | 'ELECTRICAL' | 'STRUCTURAL' | 'COMMON_AREA' | 'OTHER';
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+    photo?: File;
+  }): Promise<ApiResponse<MaintenanceTicket>> {
+    const formData = new FormData();
+    formData.append('description', data.description);
+    if (data.category) formData.append('category', data.category);
+    if (data.priority) formData.append('priority', data.priority);
+    if (data.photo) formData.append('file', data.photo);
+    return safeCall(() =>
+      authFetch('/estate/resident/maintenance', { method: 'POST', body: formData })
+    );
+  },
+
+  async listMyMaintenanceTickets(): Promise<ApiResponse<MaintenanceTicket[]>> {
+    return safeCall(() => authFetch('/estate/resident/maintenance'));
   },
 
   async listMyDues(

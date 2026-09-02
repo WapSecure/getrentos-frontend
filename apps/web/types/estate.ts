@@ -194,6 +194,29 @@ export interface Incident {
   createdAt: string;
 }
 
+export type MaintenanceTicketCategory =
+  | 'plumbing'
+  | 'electrical'
+  | 'structural'
+  | 'common_area'
+  | 'other';
+export type MaintenanceTicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type MaintenanceTicketStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
+
+export interface MaintenanceTicket {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  category: MaintenanceTicketCategory;
+  priority: MaintenanceTicketPriority;
+  status: MaintenanceTicketStatus;
+  description: string;
+  photoUrl?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+}
+
 export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
 
 export interface GovernanceRecord {
