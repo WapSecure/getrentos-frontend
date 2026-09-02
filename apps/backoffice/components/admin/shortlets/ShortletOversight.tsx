@@ -11,6 +11,7 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  FilePreviewDialog,
   Input,
   NumberInput,
   Pagination,
@@ -995,6 +996,7 @@ function AdjudicateClaimModal({
   const [decision, setDecision] = useState<'APPROVED' | 'PARTIAL' | 'REJECTED'>('APPROVED');
   const [deducted, setDeducted] = useState(String(claim.amount));
   const [resolution, setResolution] = useState('');
+  const [evidenceIdx, setEvidenceIdx] = useState<number | null>(null);
 
   const submit = () => {
     onSubmit({
@@ -1013,75 +1015,111 @@ function AdjudicateClaimModal({
     !pending;
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <div className="p-5">
-          <DialogTitle className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5" /> Adjudicate deposit claim
-          </DialogTitle>
-          <DialogDescription>
-            {claim.claimedBy} claims {formatCurrency(claim.amount)} against the deposit for{' '}
-            {claim.listingTitle ?? 'this stay'} (guest: {claim.guestName}). Choosing a deduction
-            refunds the guest the remainder of their deposit.
-          </DialogDescription>
-        </div>
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
-          <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
-            <p className="font-medium text-muted-foreground">Claim reason</p>
-            <p className="mt-1">{claim.reason}</p>
-            {claim.evidence.length > 0 && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {claim.evidence.length} evidence photo{claim.evidence.length > 1 ? 's' : ''} on file
-              </p>
-            )}
+    <>
+      <Dialog open onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="sm:max-w-lg">
+          <div className="p-5">
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5" /> Adjudicate deposit claim
+            </DialogTitle>
+            <DialogDescription>
+              {claim.claimedBy} claims {formatCurrency(claim.amount)} against the deposit for{' '}
+              {claim.listingTitle ?? 'this stay'} (guest: {claim.guestName}). Choosing a deduction
+              refunds the guest the remainder of their deposit.
+            </DialogDescription>
           </div>
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
+            <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
+              <p className="font-medium text-muted-foreground">Claim reason</p>
+              <p className="mt-1">{claim.reason}</p>
+              {claim.evidenceUrls?.length ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {claim.evidenceUrls.map((url, i) => (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => setEvidenceIdx(i)}
+                      title={`View evidence photo ${i + 1}`}
+                      className="h-16 w-16 overflow-hidden rounded-md border border-border transition-transform hover:scale-105"
+                    >
+                      <img
+                        src={url}
+                        alt={`Evidence photo ${i + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                claim.evidence.length > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {claim.evidence.length} evidence photo{claim.evidence.length > 1 ? 's' : ''} on
+                    file
+                  </p>
+                )
+              )}
+            </div>
 
-          <Field label="Decision">
-            <Select
-              value={decision}
-              onValueChange={(v) => setDecision(v as 'APPROVED' | 'PARTIAL' | 'REJECTED')}
-              options={[
-                { value: 'APPROVED', label: 'Approve in full' },
-                { value: 'PARTIAL', label: 'Partially approve' },
-                { value: 'REJECTED', label: 'Reject' },
-              ]}
-            />
-          </Field>
-
-          {decision === 'PARTIAL' && (
-            <Field
-              label={`Amount to withhold from the guest refund (max ${formatCurrency(claim.amount)})`}
-            >
-              <NumberInput
-                min={1}
-                max={claim.amount}
-                value={deducted}
-                onValueChange={setDeducted}
+            <Field label="Decision">
+              <Select
+                value={decision}
+                onValueChange={(v) => setDecision(v as 'APPROVED' | 'PARTIAL' | 'REJECTED')}
+                options={[
+                  { value: 'APPROVED', label: 'Approve in full' },
+                  { value: 'PARTIAL', label: 'Partially approve' },
+                  { value: 'REJECTED', label: 'Reject' },
+                ]}
               />
             </Field>
-          )}
 
-          <Field label="Resolution note (shown to both parties)" hint="Optional but recommended.">
-            <Textarea
-              value={resolution}
-              onChange={(e) => setResolution(e.target.value)}
-              placeholder="e.g. Evidence confirms partial damage; deducted ₦10,000…"
-              rows={3}
-              maxLength={2000}
-            />
-          </Field>
+            {decision === 'PARTIAL' && (
+              <Field
+                label={`Amount to withhold from the guest refund (max ${formatCurrency(claim.amount)})`}
+              >
+                <NumberInput
+                  min={1}
+                  max={claim.amount}
+                  value={deducted}
+                  onValueChange={setDeducted}
+                />
+              </Field>
+            )}
 
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={submit} disabled={!canSubmit}>
-              {pending ? 'Processing…' : 'Confirm decision'}
-            </Button>
+            <Field label="Resolution note (shown to both parties)" hint="Optional but recommended.">
+              <Textarea
+                value={resolution}
+                onChange={(e) => setResolution(e.target.value)}
+                placeholder="e.g. Evidence confirms partial damage; deducted ₦10,000…"
+                rows={3}
+                maxLength={2000}
+              />
+            </Field>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button onClick={submit} disabled={!canSubmit}>
+                {pending ? 'Processing…' : 'Confirm decision'}
+              </Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      <FilePreviewDialog
+        open={evidenceIdx !== null}
+        onOpenChange={(open) => !open && setEvidenceIdx(null)}
+        file={
+          evidenceIdx !== null && claim.evidenceUrls?.[evidenceIdx]
+            ? {
+                url: claim.evidenceUrls[evidenceIdx],
+                name: `Evidence photo ${evidenceIdx + 1}`,
+                mimeType: 'image/png',
+              }
+            : null
+        }
+      />
+    </>
   );
 }
 

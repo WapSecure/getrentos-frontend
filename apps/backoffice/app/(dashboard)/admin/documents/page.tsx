@@ -9,6 +9,7 @@ import { Button } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
+import { DocumentPreviewButton } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
 import { formatDate } from '@getrentos/shared';
@@ -90,6 +91,11 @@ export default function AdminDocumentsPage() {
     if (response.success && response.data) {
       window.open(response.data.url, '_blank');
     }
+  };
+
+  const fetchDocUrl = async (id: string): Promise<string | null> => {
+    const response = await adminService.getDocumentDownloadUrl(id);
+    return response.success && response.data ? response.data.url : null;
   };
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
@@ -174,7 +180,13 @@ export default function AdminDocumentsPage() {
               <div className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
-              <DocumentRowActions showShare={false} onDownload={() => handleDownload(doc.id)} />
+              <div className="flex items-center gap-1 shrink-0">
+                <DocumentPreviewButton
+                  resolveUrl={() => fetchDocUrl(doc.id)}
+                  title="View document"
+                />
+                <DocumentRowActions showShare={false} onDownload={() => handleDownload(doc.id)} />
+              </div>
             </div>
           ))}
         </div>

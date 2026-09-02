@@ -112,6 +112,8 @@ export interface AdminShortletDepositClaim {
   amount: number;
   reason: string;
   evidence: string[];
+  /** Signed preview URLs of the evidence photos (returned on the admin list). */
+  evidenceUrls?: string[];
   status: AdminShortletDepositClaimStatus;
   resolution?: string;
   createdAt: string;
