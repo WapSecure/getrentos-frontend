@@ -31,6 +31,7 @@ export interface ResidentHousehold {
   contactPhone?: string;
   contactEmail?: string;
   status: HouseholdStatus;
+  directoryOptIn: boolean;
   estate: {
     id: string;
     name: string;
@@ -38,6 +39,14 @@ export interface ResidentHousehold {
     city: string;
     state: string;
   };
+}
+
+export interface DirectoryEntry {
+  id: string;
+  unitLabel: string;
+  residentName: string;
+  contactPhone?: string;
+  contactEmail?: string;
 }
 
 export type DueStatus = 'pending' | 'paid' | 'overdue' | 'processing';
