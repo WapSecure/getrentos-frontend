@@ -217,6 +217,26 @@ export interface MaintenanceTicket {
   createdAt: string;
 }
 
+export type PollStatus = 'open' | 'closed';
+
+export interface PollOptionResult {
+  id: string;
+  label: string;
+  voteCount: number;
+}
+
+export interface Poll {
+  id: string;
+  estateId: string;
+  question: string;
+  status: PollStatus;
+  closesAt?: string;
+  options: PollOptionResult[];
+  totalVotes: number;
+  myVote?: string;
+  createdAt: string;
+}
+
 export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
 
 export interface GovernanceRecord {

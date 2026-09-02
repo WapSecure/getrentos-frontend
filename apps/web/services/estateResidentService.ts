@@ -7,6 +7,7 @@ import type {
   Due,
   IssuedVisitorPass,
   MaintenanceTicket,
+  Poll,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -50,6 +51,19 @@ export const estateResidentService = {
 
   async listMyMaintenanceTickets(): Promise<ApiResponse<MaintenanceTicket[]>> {
     return safeCall(() => authFetch('/estate/resident/maintenance'));
+  },
+
+  async listMyPolls(): Promise<ApiResponse<Poll[]>> {
+    return safeCall(() => authFetch('/estate/resident/polls'));
+  },
+
+  async voteOnPoll(pollId: string, optionId: string): Promise<ApiResponse<Poll>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/polls/${pollId}/vote`, {
+        method: 'POST',
+        body: JSON.stringify({ optionId }),
+      })
+    );
   },
 
   async listMyDues(

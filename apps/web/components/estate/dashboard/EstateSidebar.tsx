@@ -16,6 +16,7 @@ import {
   Package,
   Siren,
   Hammer,
+  Vote,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -36,6 +37,7 @@ export const navItems: NavItem[] = [
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
   { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
   { label: 'Maintenance', href: ROUTES.ESTATE_MAINTENANCE, icon: Hammer },
+  { label: 'Polls', href: ROUTES.ESTATE_POLLS, icon: Vote },
   { label: 'Governance', href: ROUTES.ESTATE_GOVERNANCE, icon: BookOpen },
   { label: 'Staff', href: ROUTES.ESTATE_STAFF, icon: ShieldCheck },
 ];
