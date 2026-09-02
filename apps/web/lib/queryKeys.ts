@@ -274,6 +274,8 @@ export const estateKeys = {
   gates: (estateId: string) => ['estate', estateId, 'gates'] as const,
   incidents: (estateId: string, status?: string) =>
     ['estate', estateId, 'incidents', status ?? 'all'] as const,
+  maintenanceTickets: (estateId: string, status?: string) =>
+    ['estate', estateId, 'maintenanceTickets', status ?? 'all'] as const,
 };
 
 export const estateResidentKeys = {
@@ -285,4 +287,5 @@ export const estateResidentKeys = {
     ['estate', 'resident', 'visitorPasses', status ?? 'all'] as const,
   deliveries: (status?: string) => ['estate', 'resident', 'deliveries', status ?? 'all'] as const,
   directory: ['estate', 'resident', 'directory'] as const,
+  maintenanceTickets: ['estate', 'resident', 'maintenanceTickets'] as const,
 };

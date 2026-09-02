@@ -11,6 +11,7 @@ import {
   TriangleAlert,
   Package,
   Contact,
+  Wrench,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -28,6 +29,7 @@ export const residentNavItems: NavItem[] = [
   { label: 'Deliveries', href: ROUTES.RESIDENT_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.RESIDENT_VIOLATIONS, icon: TriangleAlert },
   { label: 'Directory', href: ROUTES.RESIDENT_DIRECTORY, icon: Contact },
+  { label: 'Maintenance', href: ROUTES.RESIDENT_MAINTENANCE, icon: Wrench },
 ];
 
 export const ResidentSidebar = () => {

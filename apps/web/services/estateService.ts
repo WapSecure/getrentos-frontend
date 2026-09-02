@@ -17,6 +17,7 @@ import type {
   DeliveryLogStatus,
   Gate,
   Incident,
+  MaintenanceTicket,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -423,6 +424,48 @@ export const estateService = {
   ): Promise<ApiResponse<Incident>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/incidents/${incidentId}/dismiss`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async listMaintenanceTickets(
+    estateId: string,
+    status?: string
+  ): Promise<ApiResponse<MaintenanceTicket[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/maintenance${toQuery({ status })}`));
+  },
+
+  async startMaintenanceTicket(
+    estateId: string,
+    ticketId: string
+  ): Promise<ApiResponse<MaintenanceTicket>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/maintenance/${ticketId}/start`, { method: 'PATCH' })
+    );
+  },
+
+  async resolveMaintenanceTicket(
+    estateId: string,
+    ticketId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<MaintenanceTicket>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/maintenance/${ticketId}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async dismissMaintenanceTicket(
+    estateId: string,
+    ticketId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<MaintenanceTicket>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/maintenance/${ticketId}/dismiss`, {
         method: 'PATCH',
         body: JSON.stringify({ resolutionNotes }),
       })
