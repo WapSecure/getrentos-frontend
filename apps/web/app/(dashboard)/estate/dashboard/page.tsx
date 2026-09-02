@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
   BookOpen,
@@ -18,10 +17,8 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { estateService } from '@/services/estateService';
-import { unwrap } from '@/lib/apiHelpers';
-import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 
 const modules = [
   {
@@ -71,10 +68,7 @@ const modules = [
 ] as const;
 
 export default function EstateDashboardPage() {
-  const { data: estate, isLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading } = useSelectedEstate();
 
   if (isLoading) {
     return (

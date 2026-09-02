@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { AmenityBookingRow } from '@/components/estate/amenities/AmenityBookingRow';
 
 export default function EstateAmenitiesPage() {
@@ -17,10 +18,7 @@ export default function EstateAmenitiesPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: amenities, isLoading: isAmenitiesLoading } = useQuery({
     queryKey: estateKeys.amenities(estate?.id ?? ''),

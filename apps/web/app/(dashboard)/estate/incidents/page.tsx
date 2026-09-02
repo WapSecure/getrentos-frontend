@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ReportIncidentModal } from '@/components/estate/incidents/ReportIncidentModal';
 import { CloseIncidentModal } from '@/components/estate/incidents/CloseIncidentModal';
 import { IncidentCard } from '@/components/estate/incidents/IncidentCard';
@@ -32,10 +33,7 @@ export default function EstateIncidentsPage() {
     action: 'resolve' | 'dismiss';
   } | null>(null);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: incidents = [], isLoading: isIncidentsLoading } = useQuery({
     queryKey: estateKeys.incidents(

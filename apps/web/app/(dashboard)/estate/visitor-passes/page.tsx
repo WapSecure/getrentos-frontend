@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { IssueVisitorPassModal } from '@/components/estate/visitor-passes/IssueVisitorPassModal';
 import { VisitorPassRow } from '@/components/estate/visitor-passes/VisitorPassRow';
 import { VisitorPinDialog } from '@/components/estate/visitor-passes/VisitorPinDialog';
@@ -34,10 +35,7 @@ export default function EstateVisitorPassesPage() {
   const [page, setPage] = useState(1);
   const [householdPage, setHouseholdPage] = useState(1);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data: householdsData, isLoading: isHouseholdsLoading } = useQuery({
     queryKey: [

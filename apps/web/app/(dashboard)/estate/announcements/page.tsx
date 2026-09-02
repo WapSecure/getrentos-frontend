@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { AnnouncementModal } from '@/components/estate/announcements/AnnouncementModal';
 import { AnnouncementCard } from '@/components/estate/announcements/AnnouncementCard';
 import type { Announcement } from '@/types/estate';
@@ -22,10 +23,7 @@ export default function EstateAnnouncementsPage() {
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [page, setPage] = useState(1);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
   const { data, isLoading: isAnnouncementsLoading } = useQuery({
     queryKey: [...estateKeys.announcements(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],

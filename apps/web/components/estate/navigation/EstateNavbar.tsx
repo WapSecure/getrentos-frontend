@@ -7,6 +7,7 @@ import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { EstateProfileDropdown } from './EstateProfileDropdown';
+import { EstateSwitcher } from './EstateSwitcher';
 import { navItems } from '../dashboard/EstateSidebar';
 
 interface EstateNavbarProps {
@@ -34,7 +35,10 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Logo size="md" />
+            <div className="flex items-center gap-4">
+              <Logo size="md" />
+              <EstateSwitcher />
+            </div>
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
