@@ -15,6 +15,8 @@ import type {
   VehicleLogPurpose,
   DeliveryLog,
   DeliveryLogStatus,
+  Gate,
+  Incident,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -172,6 +174,7 @@ export const estateService = {
       vehicleDescription?: string;
       driverName?: string;
       purpose?: 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER';
+      gateId?: string;
       photo?: File;
     }
   ): Promise<ApiResponse<VehicleLog>> {
@@ -180,6 +183,7 @@ export const estateService = {
     if (data.vehicleDescription) formData.append('vehicleDescription', data.vehicleDescription);
     if (data.driverName) formData.append('driverName', data.driverName);
     if (data.purpose) formData.append('purpose', data.purpose);
+    if (data.gateId) formData.append('gateId', data.gateId);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/vehicle-logs`, { method: 'POST', body: formData })
@@ -208,12 +212,19 @@ export const estateService = {
 
   async logDelivery(
     estateId: string,
-    data: { householdId: string; courier?: string; recipientName?: string; photo?: File }
+    data: {
+      householdId: string;
+      courier?: string;
+      recipientName?: string;
+      gateId?: string;
+      photo?: File;
+    }
   ): Promise<ApiResponse<DeliveryLog>> {
     const formData = new FormData();
     formData.append('householdId', data.householdId);
     if (data.courier) formData.append('courier', data.courier);
     if (data.recipientName) formData.append('recipientName', data.recipientName);
+    if (data.gateId) formData.append('gateId', data.gateId);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/deliveries`, { method: 'POST', body: formData })
@@ -255,9 +266,31 @@ export const estateService = {
     );
   },
 
+  async createGate(
+    estateId: string,
+    data: { name: string; location?: string }
+  ): Promise<ApiResponse<Gate>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/gates`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async listGates(estateId: string): Promise<ApiResponse<Gate[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/gates`));
+  },
+
+  async deleteGate(estateId: string, gateId: string): Promise<ApiResponse<void>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/gates/${gateId}`, { method: 'DELETE' }));
+  },
+
   async createAnnouncement(
     estateId: string,
-    data: { title: string; body: string; priority?: 'NORMAL' | 'URGENT' }
+    data: {
+      title: string;
+      body: string;
+      priority?: 'NORMAL' | 'URGENT';
+      deliveryChannels?: ('SMS' | 'WHATSAPP')[];
+    }
   ): Promise<ApiResponse<Announcement>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/announcements`, { method: 'POST', body: JSON.stringify(data) })
@@ -341,6 +374,55 @@ export const estateService = {
   ): Promise<ApiResponse<Violation>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/violations/${violationId}/dismiss`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async reportIncident(
+    estateId: string,
+    data: {
+      description: string;
+      category?: 'SECURITY' | 'MAINTENANCE' | 'SAFETY' | 'OTHER';
+      priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      photo?: File;
+    }
+  ): Promise<ApiResponse<Incident>> {
+    const formData = new FormData();
+    formData.append('description', data.description);
+    if (data.category) formData.append('category', data.category);
+    if (data.priority) formData.append('priority', data.priority);
+    if (data.photo) formData.append('file', data.photo);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/incidents`, { method: 'POST', body: formData })
+    );
+  },
+
+  async listIncidents(estateId: string, status?: string): Promise<ApiResponse<Incident[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/incidents${toQuery({ status })}`));
+  },
+
+  async resolveIncident(
+    estateId: string,
+    incidentId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<Incident>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/incidents/${incidentId}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  async dismissIncident(
+    estateId: string,
+    incidentId: string,
+    resolutionNotes?: string
+  ): Promise<ApiResponse<Incident>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/incidents/${incidentId}/dismiss`, {
         method: 'PATCH',
         body: JSON.stringify({ resolutionNotes }),
       })

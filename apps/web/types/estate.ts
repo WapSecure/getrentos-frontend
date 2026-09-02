@@ -103,6 +103,8 @@ export interface DeliveryLog {
   recipientName?: string;
   status: DeliveryLogStatus;
   photoUrl?: string;
+  gateId?: string;
+  gateName?: string;
   receivedAt: string;
   collectedAt?: string;
   createdAt: string;
@@ -118,8 +120,18 @@ export interface VehicleLog {
   driverName?: string;
   purpose: VehicleLogPurpose;
   photoUrl?: string;
+  gateId?: string;
+  gateName?: string;
   enteredAt: string;
   exitedAt?: string;
+  createdAt: string;
+}
+
+export interface Gate {
+  id: string;
+  estateId: string;
+  name: string;
+  location?: string;
   createdAt: string;
 }
 
@@ -153,6 +165,22 @@ export interface Violation {
   status: ViolationStatus;
   warningIssuedAt?: string;
   resolvedAt?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+}
+
+export type IncidentCategory = 'security' | 'maintenance' | 'safety' | 'other';
+export type IncidentPriority = 'low' | 'medium' | 'high' | 'critical';
+export type IncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
+
+export interface Incident {
+  id: string;
+  estateId: string;
+  category: IncidentCategory;
+  priority: IncidentPriority;
+  status: IncidentStatus;
+  description: string;
+  photoUrl?: string;
   resolutionNotes?: string;
   createdAt: string;
 }

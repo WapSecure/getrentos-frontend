@@ -42,7 +42,7 @@ export default function EstateAnnouncementsPage() {
   };
 
   const createAnnouncement = useMutation({
-    mutationFn: (data: { title: string; body: string; priority?: 'NORMAL' | 'URGENT' }) =>
+    mutationFn: (data: Parameters<typeof estateService.createAnnouncement>[1]) =>
       unwrap(estateService.createAnnouncement(estate!.id, data)),
     onSuccess: () => {
       invalidate();
@@ -83,7 +83,12 @@ export default function EstateAnnouncementsPage() {
     return null;
   }
 
-  const handleSubmit = (data: { title: string; body: string; priority: 'NORMAL' | 'URGENT' }) => {
+  const handleSubmit = (data: {
+    title: string;
+    body: string;
+    priority: 'NORMAL' | 'URGENT';
+    deliveryChannels?: ('SMS' | 'WHATSAPP')[];
+  }) => {
     if (editingAnnouncement) {
       updateAnnouncement.mutate({ id: editingAnnouncement.id, data });
     } else {

@@ -14,6 +14,7 @@ import {
   BookOpen,
   Car,
   Package,
+  Siren,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -32,6 +33,7 @@ export const navItems: NavItem[] = [
   { label: 'Vehicles', href: ROUTES.ESTATE_VEHICLES, icon: Car },
   { label: 'Deliveries', href: ROUTES.ESTATE_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
+  { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
   { label: 'Governance', href: ROUTES.ESTATE_GOVERNANCE, icon: BookOpen },
   { label: 'Staff', href: ROUTES.ESTATE_STAFF, icon: ShieldCheck },
 ];

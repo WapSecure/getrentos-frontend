@@ -10,7 +10,12 @@ interface AnnouncementModalProps {
   isOpen: boolean;
   announcement: Announcement | null;
   onClose: () => void;
-  onSubmit: (data: { title: string; body: string; priority: 'NORMAL' | 'URGENT' }) => void;
+  onSubmit: (data: {
+    title: string;
+    body: string;
+    priority: 'NORMAL' | 'URGENT';
+    deliveryChannels?: ('SMS' | 'WHATSAPP')[];
+  }) => void;
   isSubmitting?: boolean;
 }
 
@@ -31,8 +36,12 @@ export const AnnouncementModal = ({
   const [priority, setPriority] = useState(
     announcement ? announcement.priority.toUpperCase() : 'NORMAL'
   );
+  const [sendSms, setSendSms] = useState(false);
+  const [sendWhatsApp, setSendWhatsApp] = useState(false);
 
   const handleClose = () => {
+    setSendSms(false);
+    setSendWhatsApp(false);
     onClose();
   };
 
@@ -83,6 +92,38 @@ export const AnnouncementModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
                 <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
               </div>
+
+              {!announcement && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Also deliver via <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 text-sm text-foreground">
+                      <LegacyInput
+                        type="checkbox"
+                        checked={sendSms}
+                        onChange={(e) => setSendSms(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                      />
+                      SMS
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-foreground">
+                      <LegacyInput
+                        type="checkbox"
+                        checked={sendWhatsApp}
+                        onChange={(e) => setSendWhatsApp(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                      />
+                      WhatsApp
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Residents always get an in-app notification. These add SMS/WhatsApp to
+                    households with a phone number on file.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -93,13 +134,17 @@ export const AnnouncementModal = ({
                 variant="primary"
                 fullWidth
                 disabled={!canSubmit || isSubmitting}
-                onClick={() =>
+                onClick={() => {
+                  const deliveryChannels: ('SMS' | 'WHATSAPP')[] = [];
+                  if (sendSms) deliveryChannels.push('SMS');
+                  if (sendWhatsApp) deliveryChannels.push('WHATSAPP');
                   onSubmit({
                     title: title.trim(),
                     body: body.trim(),
                     priority: priority as 'NORMAL' | 'URGENT',
-                  })
-                }
+                    ...(deliveryChannels.length > 0 ? { deliveryChannels } : {}),
+                  });
+                }}
               >
                 {isSubmitting ? 'Saving…' : announcement ? 'Save Changes' : 'Post Announcement'}
               </Button>
