@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 
 const categoryOptions = [
   { value: 'SECURITY', label: 'Security' },
@@ -98,11 +98,12 @@ export const ReportIncidentModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Photo <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <LegacyInput
-                  type="file"
+                <DocumentUpload
+                  value={photo ? [{ id: 'photo', file: photo }] : []}
+                  onChange={(items) => setPhoto(items[0]?.file ?? null)}
                   accept="image/*"
-                  capture="environment"
-                  onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+                  multiple={false}
+                  label=""
                 />
               </div>
             </div>

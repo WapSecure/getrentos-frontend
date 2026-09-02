@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Upload, X } from 'lucide-react';
-import { Button, DatePicker, LegacyInput, Select } from '@getrentos/ui';
+import { Button, DatePicker, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 
 interface UploadGovernanceRecordModalProps {
   isOpen: boolean;
@@ -88,36 +88,14 @@ export const UploadGovernanceRecordModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">File</label>
-                <div className="border-2 border-dashed rounded-xl p-6 text-center border-border">
-                  {file ? (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-foreground">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(file.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                      <button
-                        onClick={() => setFile(null)}
-                        className="text-xs text-red-500 hover:opacity-80"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <Upload className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
-                      <label className="cursor-pointer">
-                        <span className="text-sm text-primary hover:opacity-80">Choose a file</span>
-                        <input
-                          type="file"
-                          accept=".pdf,.doc,.docx"
-                          onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])}
-                          className="hidden"
-                        />
-                      </label>
-                      <p className="text-xs text-muted-foreground/70 mt-2">PDF or DOC up to 20MB</p>
-                    </>
-                  )}
-                </div>
+                <DocumentUpload
+                  value={file ? [{ id: 'file', file }] : []}
+                  onChange={(items) => setFile(items[0]?.file ?? null)}
+                  accept=".pdf,.doc,.docx"
+                  multiple={false}
+                  label=""
+                  hint="PDF or DOC up to 20MB"
+                />
               </div>
             </div>
 

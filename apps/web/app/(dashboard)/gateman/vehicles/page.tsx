@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, LogOut as ExitIcon } from 'lucide-react';
-import { Button, LegacyInput, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -160,11 +160,12 @@ export default function GatemanVehiclesPage() {
           <label className="block text-sm font-medium text-foreground mb-1">
             Photo <span className="text-gray-400 font-normal">(optional)</span>
           </label>
-          <LegacyInput
-            type="file"
+          <DocumentUpload
+            value={photo ? [{ id: 'photo', file: photo }] : []}
+            onChange={(items) => setPhoto(items[0]?.file ?? null)}
             accept="image/*"
-            capture="environment"
-            onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+            multiple={false}
+            label=""
           />
         </div>
 
