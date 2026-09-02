@@ -7,27 +7,45 @@ import { cn } from '@getrentos/shared';
 interface FilePreviewProps {
   url: string;
   name: string;
-  mimeType?: string;
+  mimeType?: string | null;
   className?: string;
 }
 
-const isImage = (mimeType: string | undefined, name: string) =>
-  mimeType?.startsWith('image/') || /\.(avif|gif|jpe?g|png|webp)$/i.test(name);
-const isPdf = (mimeType: string | undefined, name: string) =>
-  mimeType === 'application/pdf' || /\.pdf$/i.test(name);
+const isImage = (mimeType: string | null | undefined, name: string) =>
+  mimeType?.startsWith('image/') || /\\.(avif|gif|jpe?g|png|webp)$/i.test(name);
+const isPdf = (mimeType: string | null | undefined, name: string) =>
+  mimeType === 'application/pdf' || /\\.pdf$/i.test(name);
+const isVideo = (mimeType: string | null | undefined, name: string) =>
+  mimeType?.startsWith('video/') || /\\.(mp4|webm|mov|m4v|ogg)$/i.test(name);
+const isTextCsv = (mimeType: string | null | undefined, name: string) =>
+  mimeType === 'text/csv' || mimeType === 'application/csv' || /\.csv$/i.test(name);
 /** Only directly-embeddable URLs can be previewed (http(s) or blob object URLs). */
 const isPreviewableUrl = (url: string | undefined) => !!url && /^(https?:\/\/|blob:)/i.test(url);
 
-/** Secure in-app viewer for user-provided image and PDF URLs. */
+/** Secure in-app viewer for user-provided image, PDF and video URLs. */
 export function FilePreview({ url, name, mimeType, className }: FilePreviewProps) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const image = useMemo(() => isImage(mimeType, name), [mimeType, name]);
   const pdf = useMemo(() => isPdf(mimeType, name), [mimeType, name]);
+  const video = useMemo(() => isVideo(mimeType, name), [mimeType, name]);
+  const csv = useMemo(() => isTextCsv(mimeType, name), [mimeType, name]);
 
   if (!url || !isPreviewableUrl(url)) return <UnsupportedPreview name={name} />;
 
-  if (!image && !pdf) return <UnsupportedPreview name={name} url={url} />;
+  if (!image && !pdf && !video && !csv) return <UnsupportedPreview name={name} url={url} />;
+
+  const openInNewTab = (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+      aria-label="Open preview in a new tab"
+    >
+      <Maximize2 className="h-4 w-4" />
+    </a>
+  );
 
   return (
     <div
@@ -38,6 +56,15 @@ export function FilePreview({ url, name, mimeType, className }: FilePreviewProps
         <div className="ml-3 flex shrink-0 items-center gap-1">
           {image && (
             <>
+              <PreviewButton
+                label="Reset zoom and rotation"
+                onClick={() => {
+                  setZoom(1);
+                  setRotation(0);
+                }}
+              >
+                <Maximize2 className="h-4 w-4" />
+              </PreviewButton>
               <PreviewButton
                 label="Zoom out"
                 onClick={() => setZoom((value) => Math.max(0.5, value - 0.25))}
@@ -61,15 +88,7 @@ export function FilePreview({ url, name, mimeType, className }: FilePreviewProps
               </PreviewButton>
             </>
           )}
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            aria-label="Open preview in a new tab"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </a>
+          {openInNewTab}
         </div>
       </div>
       <div className="flex min-h-72 items-center justify-center overflow-auto p-6">
@@ -80,6 +99,15 @@ export function FilePreview({ url, name, mimeType, className }: FilePreviewProps
             className="max-h-[55vh] max-w-full object-contain transition-transform duration-200"
             style={{ transform: `scale(${zoom}) rotate(${rotation}deg)` }}
           />
+        ) : video ? (
+          <video
+            src={url}
+            controls
+            playsInline
+            className="max-h-[55vh] w-full rounded-lg bg-card"
+          />
+        ) : csv ? (
+          <iframe src={url} title={name} className="h-[55vh] w-full rounded-lg bg-card" />
         ) : (
           <iframe
             src={`${url}#view=FitH`}

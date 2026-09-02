@@ -1,12 +1,14 @@
 'use client';
 
-import { Textarea } from '@getrentos/ui';
-
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Check, XCircle, HelpCircle, FileText } from 'lucide-react';
+import { Check, XCircle, HelpCircle, FileText, Download } from 'lucide-react';
+import { Textarea } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { DocumentPreviewButton } from '@getrentos/ui';
+import { formatDate, unwrap } from '@getrentos/shared';
+import { adminService } from '@/services/adminService';
 import type { VerificationRequest } from '@/types/admin';
 
 interface ReviewVerificationModalProps {
@@ -33,6 +35,15 @@ export const ReviewVerificationModal = ({
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
+
+  // Fetch the real submitted documents (signed preview URLs) for the request
+  // being reviewed so the reviewer can inspect the actual files.
+  const { data: detail } = useQuery({
+    queryKey: ['admin', 'verifications', 'detail', request?.id],
+    queryFn: () => (request ? unwrap(adminService.getVerificationDetail(request.id)) : null),
+    enabled: Boolean(request),
+  });
+  const documents = detail?.documents ?? [];
 
   const handleClose = () => {
     if (isSubmitting) return;
@@ -88,19 +99,37 @@ export const ReviewVerificationModal = ({
 
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">
-                    Submitted Documents ({request.documentCount})
+                    Submitted Documents ({documents.length || request.documentCount})
                   </p>
-                  <div className="space-y-2">
-                    {Array.from({ length: request.documentCount }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 p-2 rounded-lg border border-border text-sm text-muted-foreground"
-                      >
-                        <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                        Document {i + 1}.pdf
-                      </div>
-                    ))}
-                  </div>
+                  {documents.length === 0 ? (
+                    <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground">
+                      No document files are available to preview for this request.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {documents.map((doc) => (
+                        <div
+                          key={doc.url}
+                          className="flex items-center gap-2 p-2 rounded-lg border border-border"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                          <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                            {doc.name}
+                          </span>
+                          <DocumentPreviewButton file={doc} title="View document" />
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Download"
+                            className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-primary hover:bg-secondary"
+                          >
+                            <Download className="w-4 h-4" />
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             ) : (

@@ -112,6 +112,12 @@ export interface PlatformUser {
   lastActiveAt: string;
 }
 
+export interface VerificationDocument {
+  name: string;
+  mimeType: string | null;
+  url: string;
+}
+
 export interface VerificationRequest {
   id: string;
   applicantName: string;
@@ -122,6 +128,8 @@ export interface VerificationRequest {
   submittedAt: string;
   documentCount: number;
   rejectionReason?: string;
+  /** Real submitted documents (signed preview URLs) — present on the detail endpoint. */
+  documents?: VerificationDocument[];
 }
 
 export interface Dispute {

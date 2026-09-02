@@ -8,7 +8,7 @@ import { Button } from './Button';
 interface FilePreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  file: { url: string; name: string; mimeType?: string } | null;
+  file: { url: string; name: string; mimeType?: string | null } | null;
 }
 
 export function FilePreviewDialog({ open, onOpenChange, file }: FilePreviewDialogProps) {

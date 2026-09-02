@@ -296,6 +296,11 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/verifications/${id}/approve`, { method: 'POST' }));
   },
 
+  /** Full detail incl. the real submitted documents (signed preview URLs) for a verification request. */
+  async getVerificationDetail(id: string): Promise<ApiResponse<VerificationRequest>> {
+    return safeCall(() => authFetch(`/admin/verifications/${id}`));
+  },
+
   async rejectVerification(id: string, reason: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/admin/verifications/${id}/reject`, {
