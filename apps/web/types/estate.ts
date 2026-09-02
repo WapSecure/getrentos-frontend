@@ -169,6 +169,22 @@ export interface Violation {
   createdAt: string;
 }
 
+export type IncidentCategory = 'security' | 'maintenance' | 'safety' | 'other';
+export type IncidentPriority = 'low' | 'medium' | 'high' | 'critical';
+export type IncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
+
+export interface Incident {
+  id: string;
+  estateId: string;
+  category: IncidentCategory;
+  priority: IncidentPriority;
+  status: IncidentStatus;
+  description: string;
+  photoUrl?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+}
+
 export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
 
 export interface GovernanceRecord {
