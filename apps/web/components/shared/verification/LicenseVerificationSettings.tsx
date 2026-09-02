@@ -5,7 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle, FileText, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, DocumentUpload } from '@getrentos/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -110,19 +110,14 @@ export const LicenseVerificationSettings = () => {
             <label className="block text-sm font-medium text-foreground mb-1">
               License document <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
-            <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-              <LegacyInput
-                type="file"
-                className="hidden"
-                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                onChange={(e) => setDocument(e.target.files?.[0] ?? null)}
-              />
-              <FileText className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="text-sm text-muted-foreground truncate">
-                {document?.name || 'Click to upload'}
-              </span>
-              {document && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
-            </label>
+            <DocumentUpload
+              value={document ? [{ id: 'document', file: document }] : []}
+              onChange={(items) => setDocument(items[0]?.file ?? null)}
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              multiple={false}
+              label=""
+              hint="PDF or image — preview before submitting"
+            />
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
