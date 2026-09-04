@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FinancingEligibilityCard } from '@/components/renter/financing/FinancingEligibilityCard';
 import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancingModal';
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
-import { Toast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -16,7 +16,13 @@ export default function RenterFinancingPage() {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const { data: overview, isLoading } = useQuery({
+  const {
+    data: overview,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: renterKeys.financing,
     queryFn: () => unwrap(renterService.getFinancing()),
   });
@@ -51,10 +57,17 @@ export default function RenterFinancingPage() {
   };
 
   if (isLoading) {
+    return <PageLoadingState />;
+  }
+
+  if (isError) {
     return (
-      <div className="flex items-center justify-center py-24 text-muted-foreground">
-        Loading your GetRentos Flex status…
-      </div>
+      <PageErrorState
+        title="Financing details are unavailable"
+        description="We could not load your eligibility or active repayment plan. No payment has been attempted."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
     );
   }
 

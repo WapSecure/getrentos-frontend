@@ -13,20 +13,23 @@ import { RoommateAgreementModal } from '@/components/renter/roommates/RoommateAg
 import { renterService, type RoommateExpense as Expense } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { PageErrorState, PageLoadingState } from '@getrentos/ui';
 
 export default function RoommatesPage() {
   const queryClient = useQueryClient();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showAgreementModal, setShowAgreementModal] = useState(false);
 
-  const { data: roommates = [] } = useQuery({
+  const roommatesQuery = useQuery({
     queryKey: renterKeys.roommates,
     queryFn: () => unwrap(renterService.listRoommates()),
   });
-  const { data: expenses = [] } = useQuery({
+  const expensesQuery = useQuery({
     queryKey: renterKeys.roommateExpenses,
     queryFn: () => unwrap(renterService.listRoommateExpenses()),
   });
+  const roommates = roommatesQuery.data ?? [];
+  const expenses = expensesQuery.data ?? [];
 
   const invalidateRoommates = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.roommates });
@@ -84,6 +87,25 @@ export default function RoommatesPage() {
     addTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
   const handleCompleteTask = (roommateId: string, task: string) =>
     completeTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
+
+  if (roommatesQuery.isLoading || expensesQuery.isLoading) {
+    return <PageLoadingState />;
+  }
+
+  if (roommatesQuery.isError || expensesQuery.isError) {
+    const isRetrying = roommatesQuery.isFetching || expensesQuery.isFetching;
+    return (
+      <PageErrorState
+        title="Roommate details are unavailable"
+        description="We could not load your household tasks and shared expenses. Please try again."
+        onRetry={() => {
+          void roommatesQuery.refetch();
+          void expensesQuery.refetch();
+        }}
+        isRetrying={isRetrying}
+      />
+    );
+  }
 
   return (
     <>

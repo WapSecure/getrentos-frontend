@@ -18,7 +18,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 export default function MessagesPage() {
   const user = useRenterUser();
@@ -29,16 +29,18 @@ export default function MessagesPage() {
     ...renterKeys.conversations,
     { page, pageSize: PAGE_SIZE },
   ] as const;
-  const { data } = useQuery({
+  const conversationsQuery = useQuery({
     queryKey: conversationsQueryKey,
     queryFn: () => unwrap(renterService.listConversations({ page, pageSize: PAGE_SIZE })),
   });
+  const data = conversationsQuery.data;
   const conversations = data?.items ?? [];
   const total = data?.total ?? 0;
-  const { data: reminders = [] } = useQuery({
+  const remindersQuery = useQuery({
     queryKey: renterKeys.reminders,
     queryFn: () => unwrap(renterService.listReminders()),
   });
+  const reminders = remindersQuery.data ?? [];
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const selectedConversation =
     conversations.find((c) => c.id === selectedConversationId) ?? conversations[0] ?? null;
@@ -206,6 +208,24 @@ export default function MessagesPage() {
       count: conversations.filter((c) => getConversationLabelIds(c).includes('3')).length,
     },
   ];
+
+  if (conversationsQuery.isLoading || remindersQuery.isLoading) {
+    return <PageLoadingState />;
+  }
+
+  if (conversationsQuery.isError || remindersQuery.isError) {
+    return (
+      <PageErrorState
+        title="Messages are unavailable"
+        description="We could not load your conversations and reminders. Please try again."
+        onRetry={() => {
+          void conversationsQuery.refetch();
+          void remindersQuery.refetch();
+        }}
+        isRetrying={conversationsQuery.isFetching || remindersQuery.isFetching}
+      />
+    );
+  }
 
   return (
     <>

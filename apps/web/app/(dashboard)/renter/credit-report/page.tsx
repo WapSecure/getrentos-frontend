@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditReportingOptIn } from '@/components/renter/credit-reporting/CreditReportingOptIn';
 import { CreditReportingDashboard } from '@/components/renter/credit-reporting/CreditReportingDashboard';
-import { Toast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -14,7 +14,13 @@ export default function RenterCreditReportPage() {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<string | null>(null);
 
-  const { data: profile, isLoading } = useQuery({
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: renterKeys.creditReporting,
     queryFn: () => unwrap(renterService.getCreditReporting()),
   });
@@ -33,10 +39,17 @@ export default function RenterCreditReportPage() {
   const handleEnroll = () => enrollMutation.mutate(undefined);
 
   if (isLoading) {
+    return <PageLoadingState />;
+  }
+
+  if (isError) {
     return (
-      <div className="flex items-center justify-center py-24 text-muted-foreground">
-        Loading your credit-reporting status…
-      </div>
+      <PageErrorState
+        title="Credit reporting is unavailable"
+        description="We could not load your enrollment or reporting history. Your existing settings have not changed."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
     );
   }
 

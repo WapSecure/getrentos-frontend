@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { RenterNavbar } from '@/components/renter/navigation/RenterNavbar';
 import { RenterSidebar } from '@/components/renter/dashboard/RenterSidebar';
-import { PageLoadingState } from '@getrentos/ui';
+import { NetworkStatus, PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
   isAuthenticated,
@@ -81,6 +81,7 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
           Skip to main content
         </a>
         <RenterNavbar user={user} />
+        <NetworkStatus />
         <div className="flex">
           <RenterSidebar />
           <main

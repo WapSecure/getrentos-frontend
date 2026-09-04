@@ -12,7 +12,7 @@ import { ApplicationExport } from '@/components/renter/applications/ApplicationE
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 interface Note {
   id: string;
@@ -25,17 +25,19 @@ export default function ApplicationsPage() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
-  const { data } = useQuery({
+  const applicationsQuery = useQuery({
     queryKey: [...renterKeys.applications, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(renterService.listMyApplications({ page, pageSize: PAGE_SIZE })),
   });
+  const data = applicationsQuery.data;
   const applications = data?.items ?? [];
   const total = data?.total ?? 0;
   // Private notes are persisted server-side (ApplicationNote records).
-  const { data: allNotes = [] } = useQuery({
+  const notesQuery = useQuery({
     queryKey: renterKeys.allApplicationNotes,
     queryFn: () => unwrap(renterService.listAllApplicationNotes()),
   });
+  const allNotes = notesQuery.data ?? [];
   const [filterStatus, setFilterStatus] = useState<
     'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn'
   >('all');
@@ -99,6 +101,25 @@ export default function ApplicationsPage() {
 
   const handleWithdrawApplication = (applicationId: string, reason: string) =>
     withdrawMutation.mutateAsync({ applicationId, reason }).then(() => undefined);
+
+  if (applicationsQuery.isLoading || notesQuery.isLoading) {
+    return <PageLoadingState />;
+  }
+
+  if (applicationsQuery.isError || notesQuery.isError) {
+    const isRetrying = applicationsQuery.isFetching || notesQuery.isFetching;
+    return (
+      <PageErrorState
+        title="Applications are unavailable"
+        description="We could not load your applications and private notes. Please try again."
+        onRetry={() => {
+          void applicationsQuery.refetch();
+          void notesQuery.refetch();
+        }}
+        isRetrying={isRetrying}
+      />
+    );
+  }
 
   return (
     <>

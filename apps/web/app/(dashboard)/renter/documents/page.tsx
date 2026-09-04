@@ -12,7 +12,7 @@ import { DocumentExpiryAlerts } from '@/components/renter/documents/DocumentExpi
 import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkActions';
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
-import { Pagination, Toast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -50,14 +50,16 @@ export default function DocumentsPage() {
     sortBy,
     sortOrder: 'desc' as const,
   };
-  const { data: documentsData } = useQuery({
+  const documentsQuery = useQuery({
     queryKey: [...renterKeys.documents, documentParams],
     queryFn: () => unwrap(renterService.listDocuments(documentParams)),
   });
-  const { data: documentSummary } = useQuery({
+  const summaryQuery = useQuery({
     queryKey: renterKeys.documentSummary,
     queryFn: () => unwrap(renterService.getDocumentSummary()),
   });
+  const documentsData = documentsQuery.data;
+  const documentSummary = summaryQuery.data;
   const documents = documentsData?.items ?? [];
   const total = documentsData?.total ?? 0;
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -157,6 +159,24 @@ export default function DocumentsPage() {
     setter(value);
     setPage(1);
   };
+
+  if (documentsQuery.isLoading || summaryQuery.isLoading) {
+    return <PageLoadingState />;
+  }
+
+  if (documentsQuery.isError || summaryQuery.isError) {
+    return (
+      <PageErrorState
+        title="Documents are unavailable"
+        description="We could not load your documents and expiry summary. Your files have not been changed."
+        onRetry={() => {
+          void documentsQuery.refetch();
+          void summaryQuery.refetch();
+        }}
+        isRetrying={documentsQuery.isFetching || summaryQuery.isFetching}
+      />
+    );
+  }
 
   return (
     <>

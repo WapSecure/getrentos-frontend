@@ -16,7 +16,7 @@ import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymen
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 interface Notification {
   id: string;
@@ -37,18 +37,21 @@ export default function PaymentsPage() {
 
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
-  const { data: rawPaymentsData } = useQuery({
+  const paymentsQuery = useQuery({
     queryKey: [...renterKeys.payments, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE })),
   });
-  const { data: receiptsData } = useQuery({
+  const receiptsQuery = useQuery({
     queryKey: [...renterKeys.receipts, { page: 1, pageSize: 12 }],
     queryFn: () => unwrap(renterService.listReceipts({ page: 1, pageSize: 12 })),
   });
-  const { data: paymentMethods = [] } = useQuery({
+  const paymentMethodsQuery = useQuery({
     queryKey: renterKeys.paymentMethods,
     queryFn: () => unwrap(renterService.listPaymentMethods()),
   });
+  const rawPaymentsData = paymentsQuery.data;
+  const receiptsData = receiptsQuery.data;
+  const paymentMethods = paymentMethodsQuery.data ?? [];
   const rawPayments = rawPaymentsData?.items ?? [];
   const receipts = receiptsData?.items ?? [];
   const total = rawPaymentsData?.total ?? 0;
@@ -179,6 +182,22 @@ export default function PaymentsPage() {
   const handleAddPaymentMethod = async (data: { last4: string; expiry: string }) => {
     await addPaymentMethodMutation.mutateAsync(data);
   };
+
+  const paymentQueries = [paymentsQuery, receiptsQuery, paymentMethodsQuery];
+  if (paymentQueries.some((query) => query.isLoading)) {
+    return <PageLoadingState />;
+  }
+
+  if (paymentQueries.some((query) => query.isError)) {
+    return (
+      <PageErrorState
+        title="Payment information is unavailable"
+        description="We could not load your payments, receipts, or payment methods. No payment has been attempted."
+        onRetry={() => paymentQueries.forEach((query) => void query.refetch())}
+        isRetrying={paymentQueries.some((query) => query.isFetching)}
+      />
+    );
+  }
 
   return (
     <>
