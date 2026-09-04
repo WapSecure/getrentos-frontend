@@ -23,6 +23,7 @@ import type {
   AmenityBooking,
   CommitteeMember,
   CommitteeTitle,
+  EstateMicrositeSettings,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -586,6 +587,30 @@ export const estateService = {
   async removeCommitteeMember(estateId: string, memberId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/committee/${memberId}`, { method: 'DELETE' })
+    );
+  },
+
+  async getMicrositeSettings(estateId: string): Promise<ApiResponse<EstateMicrositeSettings>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/microsite`));
+  },
+
+  async updateMicrositeSettings(
+    estateId: string,
+    patch: Partial<Pick<EstateMicrositeSettings, 'slug' | 'bio' | 'enabled'>>
+  ): Promise<ApiResponse<EstateMicrositeSettings>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/microsite`, { method: 'PATCH', body: JSON.stringify(patch) })
+    );
+  },
+
+  async uploadMicrositeBanner(
+    estateId: string,
+    file: File
+  ): Promise<ApiResponse<EstateMicrositeSettings>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/microsite/banner`, { method: 'POST', body: formData })
     );
   },
 };
