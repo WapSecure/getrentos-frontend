@@ -37,7 +37,7 @@ export default function ApplicationsPage() {
     queryFn: () => unwrap(renterService.listAllApplicationNotes()),
   });
   const [filterStatus, setFilterStatus] = useState<
-    'all' | 'pending' | 'under_review' | 'approved' | 'rejected'
+    'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn'
   >('all');
   const [sortBy, setSortBy] = useState<'recent' | 'property' | 'status'>('recent');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
@@ -89,15 +89,16 @@ export default function ApplicationsPage() {
   };
 
   const withdrawMutation = useMutation({
-    mutationFn: (applicationId: string) => unwrap(renterService.withdrawApplication(applicationId)),
+    mutationFn: ({ applicationId, reason }: { applicationId: string; reason: string }) =>
+      unwrap(renterService.withdrawApplication(applicationId, reason)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.applications });
       queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
     },
   });
 
-  const handleWithdrawApplication = (applicationId: string) =>
-    withdrawMutation.mutate(applicationId);
+  const handleWithdrawApplication = (applicationId: string, reason: string) =>
+    withdrawMutation.mutateAsync({ applicationId, reason }).then(() => undefined);
 
   return (
     <>

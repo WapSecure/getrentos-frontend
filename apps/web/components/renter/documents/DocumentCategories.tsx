@@ -1,19 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { useState } from 'react';
-import {
-  Folder,
-  FolderOpen,
-  FileText,
-  Receipt,
-  ClipboardCheck,
-  Shield,
-  Plus,
-  X,
-} from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Folder, FolderOpen, FileText, Receipt, ClipboardCheck, Shield } from 'lucide-react';
 
 interface DocumentCategoriesProps {
   categories: Record<string, number>;
@@ -44,17 +31,7 @@ export const DocumentCategories = ({
   selectedCategory,
   onSelectCategory,
 }: DocumentCategoriesProps) => {
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
-
   const categoryList = Object.keys(categories).sort();
-
-  const handleAddCategory = () => {
-    if (!newCategory.trim()) return;
-    console.log('Adding category:', newCategory);
-    setNewCategory('');
-    setIsAddingCategory(false);
-  };
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -104,37 +81,6 @@ export const DocumentCategories = ({
             </button>
           );
         })}
-
-        {isAddingCategory ? (
-          <div className="mt-2 p-2 border-t border-border">
-            <div className="flex gap-2">
-              <LegacyInput
-                type="text"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Category name"
-                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Button size="sm" onClick={handleAddCategory} disabled={!newCategory.trim()}>
-                Add
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setIsAddingCategory(false)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            fullWidth
-            className="gap-1 mt-2"
-            onClick={() => setIsAddingCategory(true)}
-          >
-            <Plus className="w-3 h-3" />
-            New Category
-          </Button>
-        )}
       </div>
     </div>
   );

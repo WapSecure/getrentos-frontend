@@ -7,4 +7,3 @@ export { PaymentSchedule } from './PaymentSchedule';
 export { PaymentMethods } from './PaymentMethods';
 export { AutoPaySetup } from './AutoPaySetup';
 export { PaymentAnalytics } from './PaymentAnalytics';
-export { PaymentDisputeModal } from './PaymentDisputeModal';

@@ -31,7 +31,6 @@ export const RoommateTasks = ({ roommates, onAddTask, onCompleteTask }: Roommate
   );
   const panelId = useId();
   const taskInputId = useId();
-  const roommateSelectId = useId();
 
   const allTasks = roommates.flatMap((r) =>
     r.responsibilities.map((task) => ({
@@ -113,11 +112,8 @@ export const RoommateTasks = ({ roommates, onAddTask, onCompleteTask }: Roommate
               disabled={isAdding}
               className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <label htmlFor={roommateSelectId} className="sr-only">
-              Assign task to roommate
-            </label>
             <LegacySelect
-              id={roommateSelectId}
+              aria-label="Assign task to roommate"
               value={selectedRoommate || ''}
               onChange={(e) => setSelectedRoommate(e.target.value)}
               disabled={isAdding}

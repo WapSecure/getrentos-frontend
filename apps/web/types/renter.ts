@@ -1,5 +1,5 @@
 export type PeriodType = 'month' | 'year' | 'week';
-export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
+export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
 export type PaymentStatus = 'upcoming' | 'overdue' | 'paid';
 export type MaintenanceStatus = 'submitted' | 'assigned' | 'in_progress' | 'resolved';
 

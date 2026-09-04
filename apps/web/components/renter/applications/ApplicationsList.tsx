@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Application } from '@/types/renter';
 import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
+import { ApplicationWithdrawModal } from './ApplicationWithdrawModal';
 import { FileText } from 'lucide-react';
 
 interface Note {
@@ -16,10 +17,10 @@ interface Note {
 
 interface ApplicationsListProps {
   applications: Application[];
-  filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected';
+  filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
   sortBy: 'recent' | 'property' | 'status';
   viewMode: 'grid' | 'list';
-  onWithdraw?: (id: string) => void;
+  onWithdraw?: (id: string, reason: string) => Promise<void>;
   notes?: Record<string, Note[]>;
   onAddNote?: (applicationId: string, content: string) => void;
   onDeleteNote?: (applicationId: string, noteId: string) => void;
@@ -39,6 +40,7 @@ export const ApplicationsList = ({
 }: ApplicationsListProps) => {
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [withdrawApplication, setWithdrawApplication] = useState<Application | null>(null);
 
   // Filter applications
   const filteredApplications = applications.filter(
@@ -62,12 +64,6 @@ export const ApplicationsList = ({
   const handleViewDetails = (application: Application) => {
     setSelectedApplication(application);
     setShowDetailsModal(true);
-  };
-
-  const handleWithdraw = (id: string) => {
-    if (onWithdraw) {
-      onWithdraw(id);
-    }
   };
 
   if (sortedApplications.length === 0) {
@@ -107,7 +103,7 @@ export const ApplicationsList = ({
                 application={application}
                 viewMode={viewMode}
                 onViewDetails={() => handleViewDetails(application)}
-                onWithdraw={() => handleWithdraw(application.id)}
+                onWithdraw={() => setWithdrawApplication(application)}
               />
             </motion.div>
           ))}
@@ -120,11 +116,20 @@ export const ApplicationsList = ({
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
           application={selectedApplication}
-          onWithdraw={handleWithdraw}
+          onWithdraw={onWithdraw}
           notes={notes[selectedApplication.id] || []}
           onAddNote={onAddNote}
           onDeleteNote={onDeleteNote}
           onEditNote={onEditNote}
+        />
+      )}
+
+      {withdrawApplication && onWithdraw && (
+        <ApplicationWithdrawModal
+          isOpen
+          application={withdrawApplication}
+          onClose={() => setWithdrawApplication(null)}
+          onWithdraw={onWithdraw}
         />
       )}
     </>

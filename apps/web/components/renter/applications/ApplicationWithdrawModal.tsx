@@ -12,7 +12,7 @@ interface ApplicationWithdrawModalProps {
   isOpen: boolean;
   onClose: () => void;
   application: Application;
-  onWithdraw: (id: string) => void;
+  onWithdraw: (id: string, reason: string) => Promise<void>;
 }
 
 export const ApplicationWithdrawModal = ({
@@ -30,18 +30,17 @@ export const ApplicationWithdrawModal = ({
     setStep('confirm');
 
     try {
-      // In production, call API to withdraw application
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await onWithdraw(application.id, reason);
       setStep('success');
-      setTimeout(() => {
-        onWithdraw(application.id);
+      window.setTimeout(() => {
         onClose();
         setStep('confirm');
         setIsLoading(false);
-      }, 1500);
-    } catch (error) {
+        setReason('');
+      }, 1200);
+    } catch {
       setStep('error');
-      setTimeout(() => {
+      window.setTimeout(() => {
         setStep('confirm');
         setIsLoading(false);
       }, 2000);
@@ -72,11 +71,13 @@ export const ApplicationWithdrawModal = ({
                 <p className="text-xs text-gray-500 mt-0.5">{application.title}</p>
               </div>
               <button
+                type="button"
                 onClick={onClose}
+                aria-label="Close withdrawal dialog"
                 className="p-1 rounded-lg hover:bg-secondary transition-colors"
                 disabled={isLoading}
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -98,10 +99,11 @@ export const ApplicationWithdrawModal = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                  <p className="block text-sm font-medium text-foreground mb-1.5">
                     Reason for withdrawal
-                  </label>
+                  </p>
                   <LegacySelect
+                    aria-label="Reason for withdrawal"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -123,7 +125,10 @@ export const ApplicationWithdrawModal = ({
                     disabled={!reason || isLoading}
                   >
                     {isLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+                        aria-label="Withdrawing application"
+                      />
                     ) : (
                       'Confirm Withdrawal'
                     )}
@@ -136,7 +141,7 @@ export const ApplicationWithdrawModal = ({
             )}
 
             {step === 'success' && (
-              <div className="p-8 text-center">
+              <div className="p-8 text-center" role="status">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
@@ -148,7 +153,7 @@ export const ApplicationWithdrawModal = ({
             )}
 
             {step === 'error' && (
-              <div className="p-8 text-center">
+              <div className="p-8 text-center" role="alert">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
                   <XCircle className="w-8 h-8 text-red-600" />
                 </div>

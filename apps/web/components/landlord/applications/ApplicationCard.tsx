@@ -136,6 +136,10 @@ const StatusBadge = ({ status }: { status: RentalApplication['status'] }) => {
       label: 'Rejected',
       className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
     },
+    withdrawn: {
+      label: 'Withdrawn',
+      className: 'text-muted-foreground bg-secondary',
+    },
   };
   const { label, className } = config[status];
   return (

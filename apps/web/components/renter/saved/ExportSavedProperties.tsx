@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, X, Check } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, X } from 'lucide-react';
 import { Property } from '@/types/renter';
+import { downloadCsv, escapeHtml, printHtml } from '@/lib/export';
 
 interface ExportSavedPropertiesProps {
   isOpen: boolean;
@@ -17,7 +18,6 @@ export const ExportSavedProperties = ({
   properties,
 }: ExportSavedPropertiesProps) => {
   const [exporting, setExporting] = useState<'csv' | 'pdf' | null>(null);
-  const [completed, setCompleted] = useState(false);
 
   const formatPrice = (price: number, period: string) => {
     const formatter = new Intl.NumberFormat('en-NG', {
@@ -29,9 +29,13 @@ export const ExportSavedProperties = ({
     return `${formatter.format(price)}${period === 'month' ? '/mo' : period === 'year' ? '/yr' : '/wk'}`;
   };
 
-  const exportToCSV = async () => {
+  const finishExport = () => {
+    setExporting(null);
+    onClose();
+  };
+
+  const exportToCSV = () => {
     setExporting('csv');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     const headers = [
       'Title',
@@ -54,32 +58,23 @@ export const ExportSavedProperties = ({
       p.verified ? 'Yes' : 'No',
     ]);
 
-    const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `saved-properties-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    setCompleted(true);
-    setTimeout(() => {
-      setCompleted(false);
-      onClose();
-      setExporting(null);
-    }, 1500);
+    downloadCsv(`saved-properties-${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
+    finishExport();
   };
 
-  const exportToPDF = async () => {
+  const exportToPDF = () => {
     setExporting('pdf');
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setCompleted(true);
-    setTimeout(() => {
-      setCompleted(false);
-      onClose();
-      setExporting(null);
-    }, 1500);
+    const rows = properties
+      .map(
+        (property) =>
+          `<tr><td>${escapeHtml(property.title)}</td><td>${escapeHtml(property.location)}</td><td>${escapeHtml(formatPrice(property.price, property.period))}</td><td>${property.bedrooms}</td><td>${property.bathrooms}</td><td>${property.size}</td><td>${property.verified ? 'Yes' : 'No'}</td></tr>`
+      )
+      .join('');
+    printHtml(
+      'Saved Properties',
+      `<h1>Saved Properties</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${properties.length} propert${properties.length === 1 ? 'y' : 'ies'}</p><table><thead><tr><th>Property</th><th>Location</th><th>Price</th><th>Beds</th><th>Baths</th><th>Size</th><th>Verified</th></tr></thead><tbody>${rows || '<tr><td colspan="7">No saved properties</td></tr>'}</tbody></table>`
+    );
+    finishExport();
   };
 
   return (
@@ -121,8 +116,6 @@ export const ExportSavedProperties = ({
                 </div>
                 {exporting === 'csv' ? (
                   <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                ) : exporting === null && completed ? (
-                  <Check className="w-5 h-5 text-green-500" />
                 ) : (
                   <Download className="w-5 h-5 text-gray-400" />
                 )}
@@ -144,8 +137,6 @@ export const ExportSavedProperties = ({
                 </div>
                 {exporting === 'pdf' ? (
                   <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                ) : exporting === null && completed ? (
-                  <Check className="w-5 h-5 text-green-500" />
                 ) : (
                   <Download className="w-5 h-5 text-gray-400" />
                 )}

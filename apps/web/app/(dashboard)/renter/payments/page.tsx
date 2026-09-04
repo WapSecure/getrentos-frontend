@@ -97,17 +97,20 @@ export default function PaymentsPage() {
 
   const handleDownloadReceipt = (receiptId: string) => {
     const receipt = receipts.find((r) => r.id === receiptId || r.paymentId === receiptId);
+    if (!receipt?.url) {
+      pushNotification({
+        type: 'error',
+        title: 'Receipt Unavailable',
+        message: 'This receipt file is not available yet. Please try again later.',
+      });
+      return;
+    }
+    window.open(receipt.url, '_blank', 'noopener,noreferrer');
     pushNotification({
       type: 'info',
-      title: 'Receipt Downloaded',
-      message: receipt
-        ? `${receipt.fileName} has been downloaded.`
-        : 'Your receipt has been downloaded.',
+      title: 'Receipt Opened',
+      message: `${receipt.fileName} opened in a new tab, where you can save or print it.`,
     });
-  };
-
-  const handleViewReceipt = (receiptId: string) => {
-    console.log('View receipt:', receiptId);
   };
 
   const handleDispute = (paymentId: string) => {
@@ -190,11 +193,7 @@ export default function PaymentsPage() {
             onDownloadReceipt={handleDownloadReceipt}
             onDispute={handleDispute}
           />
-          <PaymentReceiptsGallery
-            receipts={receipts}
-            onDownload={handleDownloadReceipt}
-            onView={handleViewReceipt}
-          />
+          <PaymentReceiptsGallery receipts={receipts} onDownload={handleDownloadReceipt} />
         </div>
         <div className="space-y-6">
           <PaymentNotifications

@@ -11,7 +11,7 @@ interface TimelineStep {
 
 interface ApplicationTimelineProps {
   timeline: TimelineStep[];
-  currentStatus: 'pending' | 'under_review' | 'approved' | 'rejected';
+  currentStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
 }
 
 // Map status to icon components (declared outside render)
@@ -20,6 +20,7 @@ const statusIconMap: Record<string, React.ElementType> = {
   under_review: UserCheck,
   approved: CheckCircle,
   rejected: AlertCircle,
+  withdrawn: AlertCircle,
 };
 
 const statusColorMap: Record<string, string> = {
@@ -27,6 +28,7 @@ const statusColorMap: Record<string, string> = {
   under_review: 'text-blue-500',
   approved: 'text-green-500',
   rejected: 'text-red-500',
+  withdrawn: 'text-muted-foreground',
 };
 
 const getStatusLabel = (status: string): string => {
@@ -39,6 +41,8 @@ const getStatusLabel = (status: string): string => {
       return 'Approved';
     case 'rejected':
       return 'Rejected';
+    case 'withdrawn':
+      return 'Withdrawn';
     default:
       return status;
   }

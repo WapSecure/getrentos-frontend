@@ -6,13 +6,13 @@ import { Textarea } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, UserPlus } from 'lucide-react';
+import { X, Send } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface InviteRoommateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onInvite: (data: { email: string; message: string }) => void;
+  onInvite: (data: { email: string; message: string }) => Promise<void>;
 }
 
 export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommateModalProps) => {
@@ -20,16 +20,22 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
     if (!email.trim()) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      onInvite({ email, message });
+    setError(null);
+    try {
+      await onInvite({ email: email.trim(), message: message.trim() });
       setIsSubmitting(false);
       onClose();
       setEmail('');
       setMessage('');
-    }, 1500);
+    } catch {
+      setError('We could not send the invitation. Check the email and try again.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,44 +55,43 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
                   Send an invitation to join your household
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
-                <X className="w-4 h-4" />
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close invite dialog"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
+                <label
+                  htmlFor="roommate-email"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
                   Email Address <span className="text-red-500">*</span>
                 </label>
-                <div className="flex gap-2">
-                  <LegacyInput
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="roommate@example.com"
-                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1"
-                    onClick={() => {
-                      // In production, this would import from contacts
-                      console.log('Import from contacts');
-                    }}
-                  >
-                    <UserPlus className="w-3 h-3" />
-                    Contacts
-                  </Button>
-                </div>
+                <LegacyInput
+                  id="roommate-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="roommate@example.com"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
+                <label
+                  htmlFor="roommate-message"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
                   Personal Message (Optional)
                 </label>
                 <Textarea
+                  id="roommate-message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Hi! I'd like to invite you to join my household on GetRentos..."
@@ -94,6 +99,12 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
+
+              {error && (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              )}
 
               <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <p className="text-xs text-blue-700 dark:text-blue-300">

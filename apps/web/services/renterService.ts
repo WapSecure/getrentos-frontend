@@ -481,8 +481,13 @@ export const renterService = {
       authFetch<Paginated<Application>>(`/renter/applications${toQuery(params)}`)
     );
   },
-  async withdrawApplication(id: string): Promise<ApiResponse<Application>> {
-    return safeCall(() => authFetch(`/renter/applications/${id}/withdraw`, { method: 'PATCH' }));
+  async withdrawApplication(id: string, reason: string): Promise<ApiResponse<Application>> {
+    return safeCall(() =>
+      authFetch(`/renter/applications/${id}/withdraw`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
+      })
+    );
   },
 
   async listApplicationNotes(applicationId: string): Promise<ApiResponse<ApplicationNote[]>> {

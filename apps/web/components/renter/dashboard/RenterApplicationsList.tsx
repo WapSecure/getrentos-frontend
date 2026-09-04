@@ -10,7 +10,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
-type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
+type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
 type PeriodType = 'month' | 'year' | 'week';
 
 const statusConfig: Record<
@@ -35,6 +35,11 @@ const statusConfig: Record<
   rejected: {
     label: 'Rejected',
     color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+    icon: XCircle,
+  },
+  withdrawn: {
+    label: 'Withdrawn',
+    color: 'bg-secondary text-muted-foreground',
     icon: XCircle,
   },
 };

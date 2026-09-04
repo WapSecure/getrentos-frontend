@@ -74,7 +74,8 @@ export default function RoommatesPage() {
     onSuccess: invalidateRoommates,
   });
 
-  const handleInvite = (data: { email: string; message: string }) => inviteMutation.mutate(data);
+  const handleInvite = (data: { email: string; message: string }) =>
+    inviteMutation.mutateAsync(data).then(() => undefined);
   const handleRemoveRoommate = (id: string) => removeMutation.mutate(id);
   const handleUpdateShare = (id: string, percentage: number) =>
     updateShareMutation.mutate({ id, percentage });

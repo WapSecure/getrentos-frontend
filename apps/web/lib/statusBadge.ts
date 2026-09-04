@@ -66,6 +66,7 @@ export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry
   under_review: { label: 'Under Review', variant: 'info' },
   approved: { label: 'Approved', variant: 'success', icon: CheckCircle2 },
   rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
+  withdrawn: { label: 'Withdrawn', variant: 'neutral' },
 };
 
 export const offerStatusBadges: Record<OfferStatus, StatusBadgeEntry> = {

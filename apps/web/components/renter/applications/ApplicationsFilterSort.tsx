@@ -5,8 +5,10 @@ import { LegacySelect } from '@getrentos/ui';
 import { LayoutGrid, List } from 'lucide-react';
 
 interface ApplicationsFilterSortProps {
-  filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected';
-  setFilterStatus: (status: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected') => void;
+  filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
+  setFilterStatus: (
+    status: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn'
+  ) => void;
   sortBy: 'recent' | 'property' | 'status';
   setSortBy: (sort: 'recent' | 'property' | 'status') => void;
   viewMode: 'grid' | 'list';
@@ -14,7 +16,7 @@ interface ApplicationsFilterSortProps {
 }
 
 const statusOptions: {
-  value: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected';
+  value: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
   label: string;
 }[] = [
   { value: 'all', label: 'All Applications' },
@@ -22,6 +24,7 @@ const statusOptions: {
   { value: 'under_review', label: 'Under Review' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
+  { value: 'withdrawn', label: 'Withdrawn' },
 ];
 
 const sortOptions: { value: 'recent' | 'property' | 'status'; label: string }[] = [

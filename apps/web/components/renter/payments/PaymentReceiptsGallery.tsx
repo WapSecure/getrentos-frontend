@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, Eye, Search, Calendar, Filter, X } from 'lucide-react';
+import { FileText, Download, Eye, Search, X } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { FilePreviewDialog } from '@getrentos/ui';
 
@@ -21,14 +21,9 @@ interface Receipt {
 interface PaymentReceiptsGalleryProps {
   receipts: Receipt[];
   onDownload: (receiptId: string) => void;
-  onView: (receiptId: string) => void;
 }
 
-export const PaymentReceiptsGallery = ({
-  receipts,
-  onDownload,
-  onView,
-}: PaymentReceiptsGalleryProps) => {
+export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceiptsGalleryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [showPreview, setShowPreview] = useState(false);

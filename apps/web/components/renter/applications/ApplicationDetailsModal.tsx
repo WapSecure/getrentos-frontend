@@ -35,7 +35,7 @@ interface ApplicationDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   application: Application;
-  onWithdraw?: (id: string) => void;
+  onWithdraw?: (id: string, reason: string) => Promise<void>;
   onAddNote?: (applicationId: string, content: string) => void;
   onDeleteNote?: (applicationId: string, noteId: string) => void;
   onEditNote?: (applicationId: string, noteId: string, content: string) => void;
