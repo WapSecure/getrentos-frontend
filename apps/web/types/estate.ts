@@ -284,3 +284,10 @@ export interface CommitteeMember {
   title: CommitteeTitle;
   appointedAt: string;
 }
+
+export interface EstateMicrositeSettings {
+  slug: string;
+  bio?: string;
+  bannerUrl?: string;
+  enabled: boolean;
+}

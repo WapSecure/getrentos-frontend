@@ -233,6 +233,7 @@ export const ROUTES = {
   ESTATE_POLLS: '/estate/polls',
   ESTATE_AMENITIES: '/estate/amenities',
   ESTATE_COMMITTEE: '/estate/committee',
+  ESTATE_MICROSITE: '/estate/microsite',
   GATEMAN_DASHBOARD: '/gateman/verify',
   GATEMAN_VEHICLES: '/gateman/vehicles',
   GATEMAN_DELIVERIES: '/gateman/deliveries',

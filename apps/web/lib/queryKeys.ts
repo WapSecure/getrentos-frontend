@@ -281,6 +281,7 @@ export const estateKeys = {
   amenities: (estateId: string) => ['estate', estateId, 'amenities'] as const,
   amenityBookings: (estateId: string) => ['estate', estateId, 'amenityBookings'] as const,
   committee: (estateId: string) => ['estate', estateId, 'committee'] as const,
+  microsite: (estateId: string) => ['estate', estateId, 'microsite'] as const,
 };
 
 export const estateResidentKeys = {
