@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Button,
@@ -9,12 +9,14 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DocumentUpload,
   Field,
   Textarea,
   Toast,
   type ToastVariant,
+  type PendingUpload,
 } from '@getrentos/ui';
-import { Camera, ImageIcon, Loader2, ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { formatCurrency } from '@/lib/format';
@@ -36,50 +38,35 @@ export function ShortletOpenDepositClaimDialog({
   const held = booking.deposit ?? 0;
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
-  const [imageKeys, setImageKeys] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [evidence, setEvidence] = useState<PendingUpload[]>([]);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const open = useMutation({
-    mutationFn: () =>
-      unwrap(
+    // Evidence stays local until the host confirms — they can preview/zoom/rotate
+    // each photo first, and nothing is uploaded to storage until "File claim".
+    mutationFn: async () => {
+      const keys: string[] = [];
+      if (evidence.length) {
+        for (const item of evidence.slice(0, 5)) {
+          const res = await unwrap(shortletService.uploadMedia('image', item.file));
+          keys.push(res.key);
+        }
+      }
+      return unwrap(
         shortletService.openDepositClaim(booking.id, {
           amount: Number(amount),
           reason: reason.trim(),
-          imageKeys: imageKeys.length ? imageKeys : undefined,
+          imageKeys: keys.length ? keys : undefined,
         })
-      ),
+      );
+    },
     onSuccess: () => onOpened(),
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  const onUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setUploading(true);
-    try {
-      const keys: string[] = [];
-      for (const file of Array.from(files).slice(0, 5 - imageKeys.length)) {
-        const res = await unwrap(shortletService.uploadMedia('image', file));
-        keys.push(res.key);
-      }
-      setImageKeys((prev) => [...prev, ...keys]);
-      setToast({ message: `${keys.length} evidence photo(s) uploaded.`, variant: 'success' });
-    } catch (err) {
-      setToast({ message: (err as Error).message, variant: 'error' });
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
-    }
-  };
-
   const amountNum = Number(amount);
   const canSubmit =
-    amountNum > 0 &&
-    amountNum <= held &&
-    reason.trim().length >= 10 &&
-    !open.isPending &&
-    !uploading;
+    amountNum > 0 && amountNum <= held && reason.trim().length >= 10 && !open.isPending;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -119,40 +106,15 @@ export function ShortletOpenDepositClaimDialog({
             />
           </Field>
           <div>
-            <p className="mb-1.5 text-sm font-medium">Evidence photos ({imageKeys.length}/5)</p>
-            <input
-              ref={fileRef}
-              type="file"
+            <p className="mb-1.5 text-sm font-medium">Evidence photos (max 5)</p>
+            <DocumentUpload
+              value={evidence}
+              onChange={setEvidence}
               accept="image/*"
               multiple
-              hidden
-              onChange={(e) => onUpload(e.target.files)}
+              label=""
+              hint="Preview each photo before filing — nothing is uploaded until you confirm."
             />
-            <div className="flex flex-wrap gap-2">
-              {imageKeys.map((k) => (
-                <div
-                  key={k}
-                  className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs"
-                >
-                  <ImageIcon className="h-3.5 w-3.5" /> {k.split('/').pop()?.slice(0, 18)}
-                </div>
-              ))}
-              {imageKeys.length < 5 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                >
-                  {uploading ? (
-                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Camera className="mr-1.5 h-4 w-4" />
-                  )}
-                  {uploading ? 'Uploading…' : 'Add photos'}
-                </Button>
-              )}
-            </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="outline" onClick={onClose}>
