@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @source "../**/*.{ts,tsx}";
 
@@ -7,7 +7,9 @@
 :root {
   /* -apple-system resolves to San Francisco on Apple platforms. SF Pro is not
      bundled with the app, so other platforms fall back to their native UI face. */
-  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
   /* Refined, airy neutrals with a subtle cool undertone + one familiar blue. */
   --background: #f6f7f9;
   --foreground: #161b22;
@@ -123,10 +125,15 @@
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: -0.011em;
-    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1,
+      'calt' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 
   * {
@@ -145,7 +152,7 @@
      the composable controls in components/ui. The browser fields remain fully
      semantic (important for password managers and mobile keyboards), but no
      longer carry the platform's unstyled default presentation. */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
   select,
   textarea {
     border: 1px solid var(--color-border);
@@ -153,10 +160,13 @@
     background-color: var(--color-card);
     color: var(--color-foreground);
     box-shadow: 0 1px 1px rgb(0 0 0 / 0.02);
-    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      background-color 150ms ease;
   }
 
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
   select:focus,
   textarea:focus {
     border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
@@ -164,7 +174,7 @@
     outline: none;
   }
 
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):disabled,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):disabled,
   select:disabled,
   textarea:disabled {
     cursor: not-allowed;
@@ -176,14 +186,20 @@
     appearance: none;
     -webkit-appearance: none;
     padding-right: 2.5rem;
-    background-image: linear-gradient(45deg, transparent 50%, var(--color-muted-foreground) 50%), linear-gradient(135deg, var(--color-muted-foreground) 50%, transparent 50%);
-    background-position: calc(100% - 1rem) calc(50% - 2px), calc(100% - 0.7rem) calc(50% - 2px);
-    background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-muted-foreground) 50%),
+      linear-gradient(135deg, var(--color-muted-foreground) 50%, transparent 50%);
+    background-position:
+      calc(100% - 1rem) calc(50% - 2px),
+      calc(100% - 0.7rem) calc(50% - 2px);
+    background-size:
+      0.3rem 0.3rem,
+      0.3rem 0.3rem;
     background-repeat: no-repeat;
   }
 
-  input[type="checkbox"],
-  input[type="radio"] {
+  input[type='checkbox'],
+  input[type='radio'] {
     accent-color: var(--color-primary);
   }
 
@@ -327,5 +343,20 @@
     background-size: 26px 26px;
     -webkit-mask-image: radial-gradient(80% 70% at 50% 25%, black, transparent);
     mask-image: radial-gradient(80% 70% at 50% 25%, black, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
