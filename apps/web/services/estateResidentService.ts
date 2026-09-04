@@ -10,6 +10,7 @@ import type {
   Poll,
   Amenity,
   AmenityBooking,
+  CommitteeMember,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -137,5 +138,9 @@ export const estateResidentService = {
     return safeCall(() =>
       authFetch(`/estate/resident/visitor-passes/${passId}/revoke`, { method: 'PATCH' })
     );
+  },
+
+  async listMyEstateCommittee(): Promise<ApiResponse<CommitteeMember[]>> {
+    return safeCall(() => authFetch('/estate/resident/committee'));
   },
 };

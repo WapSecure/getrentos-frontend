@@ -272,3 +272,15 @@ export interface GovernanceRecord {
   url: string;
   createdAt: string;
 }
+
+export type CommitteeTitle = 'president' | 'vice_president' | 'secretary' | 'treasurer' | 'member';
+
+export interface CommitteeMember {
+  id: string;
+  estateId: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  title: CommitteeTitle;
+  appointedAt: string;
+}

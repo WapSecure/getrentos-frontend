@@ -21,6 +21,8 @@ import type {
   Poll,
   Amenity,
   AmenityBooking,
+  CommitteeMember,
+  CommitteeTitle,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -559,6 +561,31 @@ export const estateService = {
   async removeGovernanceRecord(estateId: string, recordId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/governance/${recordId}`, { method: 'DELETE' })
+    );
+  },
+
+  async appointCommitteeMember(
+    estateId: string,
+    data: { householdId: string; title?: CommitteeTitle }
+  ): Promise<ApiResponse<CommitteeMember>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/committee`, {
+        method: 'POST',
+        body: JSON.stringify({
+          householdId: data.householdId,
+          ...(data.title ? { title: data.title.toUpperCase() } : {}),
+        }),
+      })
+    );
+  },
+
+  async listCommitteeMembers(estateId: string): Promise<ApiResponse<CommitteeMember[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/committee`));
+  },
+
+  async removeCommitteeMember(estateId: string, memberId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/committee/${memberId}`, { method: 'DELETE' })
     );
   },
 };
