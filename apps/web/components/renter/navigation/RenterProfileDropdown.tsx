@@ -24,8 +24,15 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
         setIsOpen(false);
       }
     };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   const handleSignOut = async () => {
@@ -40,7 +47,11 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Open renter account menu"
+        aria-expanded={isOpen}
+        aria-controls="renter-profile-menu"
         className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
       >
         <div className="w-8 h-8 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm">
@@ -60,6 +71,7 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id="renter-profile-menu"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}

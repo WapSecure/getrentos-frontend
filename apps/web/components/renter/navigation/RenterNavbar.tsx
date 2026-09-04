@@ -2,8 +2,9 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useState, useEffect } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,7 +14,7 @@ import { ThemeToggle } from '@getrentos/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
-import { navItems } from '../dashboard/RenterSidebar';
+import { isRenterRouteActive, navGroups } from '../dashboard/RenterSidebar';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -27,9 +28,13 @@ interface RenterNavbarProps {
 export const RenterNavbar = ({ user }: RenterNavbarProps) => {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const pathname = usePathname();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   const { data } = useQuery({
     queryKey: [...renterKeys.notifications, { page: 1, pageSize: 5 }],
@@ -63,6 +68,26 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const closeOverlays = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setShowNotifications(false);
+      }
+    };
+    const closeNotifications = (event: MouseEvent) => {
+      if (!notificationsRef.current?.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('keydown', closeOverlays);
+    document.addEventListener('mousedown', closeNotifications);
+    return () => {
+      document.removeEventListener('keydown', closeOverlays);
+      document.removeEventListener('mousedown', closeNotifications);
+    };
+  }, []);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = (id: string) => {
@@ -73,9 +98,19 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
     markAllAsReadMutation.mutate();
   };
 
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    router.push(
+      query ? `${ROUTES.RENTER_DISCOVER}?q=${encodeURIComponent(query)}` : ROUTES.RENTER_DISCOVER
+    );
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
       <nav
+        aria-label="Primary navigation"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
             ? 'border-b border-border/60 bg-background/85 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/75'
@@ -104,16 +139,29 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             </div>
 
             {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <form
+              className="mx-4 hidden max-w-md flex-1 md:flex"
+              role="search"
+              onSubmit={handleSearch}
+            >
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <button
+                  type="submit"
+                  aria-label="Submit property search"
+                  className="absolute left-1 top-1/2 z-10 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <Search aria-hidden="true" className="w-4" />
+                </button>
                 <LegacyInput
                   type="text"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  aria-label="Search properties and locations"
                   placeholder={t('nav.search_placeholder')}
                   className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
-            </div>
+            </form>
 
             {/* Right Section */}
             <div className="flex items-center gap-3">
@@ -123,12 +171,18 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               <ThemeToggle />
 
               {/* Notifications */}
-              <div className="relative">
+              <div ref={notificationsRef} className="relative">
                 <button
+                  type="button"
                   onClick={() => setShowNotifications(!showNotifications)}
+                  aria-label={
+                    unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
+                  }
+                  aria-expanded={showNotifications}
+                  aria-controls="renter-notifications-menu"
                   className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
                 >
-                  <Bell className="w-5 h-5 text-muted-foreground" />
+                  <Bell className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                   )}
@@ -137,6 +191,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 <AnimatePresence>
                   {showNotifications && (
                     <motion.div
+                      id="renter-notifications-menu"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
@@ -158,9 +213,10 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                           <div className="p-4 text-center text-gray-500">No notifications</div>
                         ) : (
                           notifications.map((notification) => (
-                            <div
+                            <button
+                              type="button"
                               key={notification.id}
-                              className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
+                              className={`block w-full p-3 text-left border-b border-border hover:bg-secondary transition-colors ${
                                 !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
                               onClick={() => handleMarkAsRead(notification.id)}
@@ -178,7 +234,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                               <p className="text-xs text-muted-foreground">
                                 {notification.message}
                               </p>
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>
@@ -201,7 +257,11 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
 
               {/* Mobile Menu Button */}
               <button
+                type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="renter-mobile-menu"
                 className="lg:hidden p-2 rounded-lg hover:bg-secondary"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -210,16 +270,25 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
           </div>
 
           {/* Mobile Search Bar */}
-          <div className="md:hidden py-3">
+          <form className="py-3 md:hidden" role="search" onSubmit={handleSearch}>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <button
+                type="submit"
+                aria-label="Submit property search"
+                className="absolute left-1 top-1/2 z-10 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <Search aria-hidden="true" className="w-4" />
+              </button>
               <LegacyInput
                 type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="Search properties and locations"
                 placeholder={t('nav.search_placeholder')}
                 className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
-          </div>
+          </form>
         </div>
       </nav>
 
@@ -227,10 +296,11 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
+            id="renter-mobile-menu"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
+            className="fixed left-0 right-0 top-32 z-[60] max-h-[calc(100dvh-8rem)] overflow-y-auto border-b border-border bg-background md:top-16 md:max-h-[calc(100dvh-4rem)] lg:hidden"
           >
             <div className="flex flex-col p-4 space-y-1">
               <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
@@ -239,16 +309,30 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 </span>
                 <LanguageToggle />
               </div>
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
+              {navGroups.map((group) => (
+                <div
+                  key={group.label}
+                  className="border-t border-border/70 pt-3 first:border-0 first:pt-0"
                 >
-                  <item.icon className="w-4 h-4" />
-                  {item.labelKey ? t(item.labelKey) : item.label}
-                </Link>
+                  <p className="px-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    {group.label}
+                  </p>
+                  {group.items.map((item) => {
+                    const isActive = isRenterRouteActive(pathname, item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <item.icon className="w-4 h-4" aria-hidden="true" />
+                        {item.labelKey ? t(item.labelKey) : item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
               ))}
             </div>
           </motion.div>

@@ -74,10 +74,20 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
   return (
     <RenterUserContext.Provider value={user}>
       <div className="min-h-screen bg-background">
+        <a
+          href="#main-content"
+          className="fixed left-4 top-3 z-[100] -translate-y-20 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition-transform focus:translate-y-0"
+        >
+          Skip to main content
+        </a>
         <RenterNavbar user={user} />
         <div className="flex">
           <RenterSidebar />
-          <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="mt-32 flex-1 p-4 sm:p-6 md:mt-16 lg:ml-64 lg:p-8"
+          >
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>

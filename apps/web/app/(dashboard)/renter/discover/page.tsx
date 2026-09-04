@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DiscoverFilters } from '@/components/renter/discover/DiscoverFilters';
 import { DiscoverSearchBar } from '@/components/renter/discover/DiscoverSearchBar';
@@ -17,14 +18,18 @@ import { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
 
 export default function DiscoverPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const queryFromUrl = searchParams.get('q')?.trim() ?? '';
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [compareList, setCompareList] = useState<Property[]>([]);
   const [showCompareDrawer, setShowCompareDrawer] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const [filters, setFilters] = useState({
+  const [filterOptions, setFilterOptions] = useState({
     location: '',
     minPrice: '',
     maxPrice: '',
@@ -32,8 +37,8 @@ export default function DiscoverPage() {
     bathrooms: '',
     propertyType: '',
     verifiedOnly: false,
-    search: '',
   });
+  const filters = { ...filterOptions, search: queryFromUrl };
 
   const { data: savedListingsData } = useQuery({
     queryKey: renterKeys.savedListings,
@@ -85,11 +90,16 @@ export default function DiscoverPage() {
   };
 
   const handleApplyFilters = (newFilters: Omit<typeof filters, 'search'>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setFilterOptions((prev) => ({ ...prev, ...newFilters }));
   };
 
   const handleSearch = (query: string) => {
-    setFilters((prev) => ({ ...prev, search: query }));
+    const normalizedQuery = query.trim();
+    router.replace(
+      normalizedQuery
+        ? `${ROUTES.RENTER_DISCOVER}?q=${encodeURIComponent(normalizedQuery)}`
+        : ROUTES.RENTER_DISCOVER
+    );
   };
 
   return (
