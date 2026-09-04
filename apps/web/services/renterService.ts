@@ -626,6 +626,15 @@ export const renterService = {
     );
   },
 
+  async addRoommateTask(id: string, task: string): Promise<ApiResponse<Roommate>> {
+    return safeCall(() =>
+      authFetch(`/renter/roommates/${id}/tasks`, {
+        method: 'POST',
+        body: JSON.stringify({ task }),
+      })
+    );
+  },
+
   async listRoommateExpenses(): Promise<ApiResponse<RoommateExpense[]>> {
     return safeCall(() => authFetch('/renter/roommates/expenses'));
   },

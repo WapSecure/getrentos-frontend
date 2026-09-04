@@ -68,13 +68,21 @@ export default function RoommatesPage() {
     onSuccess: invalidateRoommates,
   });
 
+  const addTaskMutation = useMutation({
+    mutationFn: ({ roommateId, task }: { roommateId: string; task: string }) =>
+      unwrap(renterService.addRoommateTask(roommateId, task)),
+    onSuccess: invalidateRoommates,
+  });
+
   const handleInvite = (data: { email: string; message: string }) => inviteMutation.mutate(data);
   const handleRemoveRoommate = (id: string) => removeMutation.mutate(id);
   const handleUpdateShare = (id: string, percentage: number) =>
     updateShareMutation.mutate({ id, percentage });
   const handleAddExpense = (expense: Expense) => addExpenseMutation.mutate(expense);
+  const handleAddTask = (roommateId: string, task: string) =>
+    addTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
   const handleCompleteTask = (roommateId: string, task: string) =>
-    completeTaskMutation.mutate({ roommateId, task });
+    completeTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
 
   return (
     <>
@@ -101,7 +109,11 @@ export default function RoommatesPage() {
         </div>
         <div className="space-y-6">
           <RentSplitCalculator roommates={roommates} />
-          <RoommateTasks roommates={roommates} onCompleteTask={handleCompleteTask} />
+          <RoommateTasks
+            roommates={roommates}
+            onAddTask={handleAddTask}
+            onCompleteTask={handleCompleteTask}
+          />
         </div>
       </div>
 
