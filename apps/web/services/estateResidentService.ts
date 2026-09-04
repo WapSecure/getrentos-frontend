@@ -11,6 +11,7 @@ import type {
   Amenity,
   AmenityBooking,
   CommitteeMember,
+  GovernanceRecord,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -142,5 +143,21 @@ export const estateResidentService = {
 
   async listMyEstateCommittee(): Promise<ApiResponse<CommitteeMember[]>> {
     return safeCall(() => authFetch('/estate/resident/committee'));
+  },
+
+  async listMyEstateGovernanceRecords(): Promise<ApiResponse<GovernanceRecord[]>> {
+    return safeCall(() => authFetch('/estate/resident/governance'));
+  },
+
+  async signGovernanceRecord(
+    recordId: string,
+    signatureData: string
+  ): Promise<ApiResponse<GovernanceRecord>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/governance/${recordId}/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ signatureData }),
+      })
+    );
   },
 };

@@ -261,6 +261,12 @@ export interface AmenityBooking {
 }
 
 export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
+export type GovernanceRecordStatus = 'published' | 'pending_signatures' | 'approved';
+
+export interface SignatureProgress {
+  signed: number;
+  total: number;
+}
 
 export interface GovernanceRecord {
   id: string;
@@ -270,7 +276,23 @@ export interface GovernanceRecord {
   meetingDate?: string;
   size: string;
   url: string;
+  version: number;
+  rootId?: string;
+  requiresSignatures: boolean;
+  status: GovernanceRecordStatus;
+  signatureProgress?: SignatureProgress;
+  /** Resident-only: whether the caller's own committee seat has already signed this record. */
+  signedByMe?: boolean;
   createdAt: string;
+}
+
+export interface GovernanceRecordSignature {
+  id: string;
+  committeeMemberId: string;
+  unitLabel: string;
+  residentName: string;
+  title: CommitteeTitle;
+  signedAt: string;
 }
 
 export type CommitteeTitle = 'president' | 'vice_president' | 'secretary' | 'treasurer' | 'member';

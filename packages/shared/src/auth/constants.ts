@@ -249,6 +249,7 @@ export const ROUTES = {
   RESIDENT_POLLS: '/resident/polls',
   RESIDENT_AMENITIES: '/resident/amenities',
   RESIDENT_COMMITTEE: '/resident/committee',
+  RESIDENT_GOVERNANCE: '/resident/governance',
 
   // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',

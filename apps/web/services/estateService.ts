@@ -11,6 +11,7 @@ import type {
   Announcement,
   Violation,
   GovernanceRecord,
+  GovernanceRecordSignature,
   VehicleLog,
   VehicleLogPurpose,
   DeliveryLog,
@@ -540,12 +541,18 @@ export const estateService = {
       type?: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER';
       meetingDate?: string;
       file: File;
+      newVersionOfId?: string;
+      requiresSignatures?: boolean;
     }
   ): Promise<ApiResponse<GovernanceRecord>> {
     const formData = new FormData();
     formData.append('title', data.title);
     if (data.type) formData.append('type', data.type);
     if (data.meetingDate) formData.append('meetingDate', data.meetingDate);
+    if (data.newVersionOfId) formData.append('newVersionOfId', data.newVersionOfId);
+    if (data.requiresSignatures !== undefined) {
+      formData.append('requiresSignatures', String(data.requiresSignatures));
+    }
     formData.append('file', data.file);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/governance`, { method: 'POST', body: formData })
@@ -557,6 +564,20 @@ export const estateService = {
     type?: string
   ): Promise<ApiResponse<GovernanceRecord[]>> {
     return safeCall(() => authFetch(`/estate/${estateId}/governance${toQuery({ type })}`));
+  },
+
+  async listGovernanceRecordVersions(
+    estateId: string,
+    recordId: string
+  ): Promise<ApiResponse<GovernanceRecord[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/governance/${recordId}/versions`));
+  },
+
+  async listGovernanceRecordSignatures(
+    estateId: string,
+    recordId: string
+  ): Promise<ApiResponse<GovernanceRecordSignature[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/governance/${recordId}/signatures`));
   },
 
   async removeGovernanceRecord(estateId: string, recordId: string): Promise<ApiResponse<void>> {

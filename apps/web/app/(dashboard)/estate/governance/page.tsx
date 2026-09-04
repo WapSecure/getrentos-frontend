@@ -12,7 +12,9 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { UploadGovernanceRecordModal } from '@/components/estate/governance/UploadGovernanceRecordModal';
 import { GovernanceRecordRow } from '@/components/estate/governance/GovernanceRecordRow';
-import type { GovernanceRecordType } from '@/types/estate';
+import { GovernanceVersionsModal } from '@/components/estate/governance/GovernanceVersionsModal';
+import { GovernanceSignaturesModal } from '@/components/estate/governance/GovernanceSignaturesModal';
+import type { GovernanceRecord, GovernanceRecordType } from '@/types/estate';
 
 const typeFilters: { value: GovernanceRecordType | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -25,6 +27,9 @@ export default function EstateGovernancePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [newVersionOf, setNewVersionOf] = useState<GovernanceRecord | null>(null);
+  const [historyRecordId, setHistoryRecordId] = useState<string | null>(null);
+  const [signaturesRecordId, setSignaturesRecordId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<GovernanceRecordType | 'all'>('all');
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
@@ -55,6 +60,7 @@ export default function EstateGovernancePage() {
     onSuccess: () => {
       invalidate();
       setIsUploadOpen(false);
+      setNewVersionOf(null);
     },
   });
 
@@ -63,6 +69,11 @@ export default function EstateGovernancePage() {
       unwrap(estateService.removeGovernanceRecord(estate!.id, recordId)),
     onSuccess: invalidate,
   });
+
+  const closeUploadModal = () => {
+    setIsUploadOpen(false);
+    setNewVersionOf(null);
+  };
 
   if (isEstateLoading) {
     return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
@@ -82,7 +93,14 @@ export default function EstateGovernancePage() {
             {records.length} record{records.length === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
+        <Button
+          variant="primary"
+          className="gap-2"
+          onClick={() => {
+            setNewVersionOf(null);
+            setIsUploadOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4" />
           Upload Record
         </Button>
@@ -118,16 +136,44 @@ export default function EstateGovernancePage() {
               key={record.id}
               record={record}
               onRemove={() => removeRecord.mutate(record.id)}
+              onUploadNewVersion={() => {
+                setNewVersionOf(record);
+                setIsUploadOpen(true);
+              }}
+              onViewHistory={() => setHistoryRecordId(record.id)}
+              onViewSignatures={() => setSignaturesRecordId(record.id)}
             />
           ))}
         </div>
       )}
 
       <UploadGovernanceRecordModal
+        key={newVersionOf?.id ?? 'new'}
         isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
+        onClose={closeUploadModal}
         onSubmit={(data) => uploadRecord.mutate(data)}
         isSubmitting={uploadRecord.isPending}
+        newVersionOf={
+          newVersionOf
+            ? {
+                id: newVersionOf.id,
+                title: newVersionOf.title,
+                type: newVersionOf.type.toUpperCase() as never,
+              }
+            : undefined
+        }
+      />
+
+      <GovernanceVersionsModal
+        estateId={estate.id}
+        recordId={historyRecordId}
+        onClose={() => setHistoryRecordId(null)}
+      />
+
+      <GovernanceSignaturesModal
+        estateId={estate.id}
+        recordId={signaturesRecordId}
+        onClose={() => setSignaturesRecordId(null)}
       />
     </>
   );
