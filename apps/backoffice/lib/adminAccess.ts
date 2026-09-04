@@ -22,6 +22,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'staff.approve',
   'shortlet.view',
   'shortlet.moderate',
+  'rentals.view',
+  'rentals.moderate',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -48,6 +50,8 @@ export const ADMIN_ROLE_DETAILS: Record<
       'verifications.approve',
       'audit.view',
       'documents.manage',
+      'rentals.view',
+      'rentals.moderate',
     ],
   },
   fraud_analyst: {
@@ -72,6 +76,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'disputes.resolve',
       'audit.view',
       'messages.manage',
+      'rentals.view',
     ],
   },
   escrow_officer: {
@@ -98,6 +103,8 @@ export const ADMIN_ROLE_DETAILS: Record<
       'reports.view',
       'platform.configure',
       'shortlet.view',
+      'rentals.view',
+      'rentals.moderate',
     ],
   },
   support_agent: {

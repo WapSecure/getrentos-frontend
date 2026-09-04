@@ -122,4 +122,18 @@ export const adminKeys = {
     ['admin', 'staff', params?.page ?? 1, params?.pageSize ?? 20] as const,
   staffApprovalsList: (params?: { page?: number; pageSize?: number }) =>
     ['admin', 'staffApprovals', params?.page ?? 1, params?.pageSize ?? 20] as const,
+  rentalOverview: ['admin', 'rentals', 'overview'] as const,
+  rentals: (
+    resource: string,
+    params?: { search?: string; status?: string; page?: number; pageSize?: number }
+  ) =>
+    [
+      'admin',
+      'rentals',
+      resource,
+      params?.search ?? '',
+      params?.status ?? 'all',
+      params?.page ?? 1,
+      params?.pageSize ?? 20,
+    ] as const,
 };
