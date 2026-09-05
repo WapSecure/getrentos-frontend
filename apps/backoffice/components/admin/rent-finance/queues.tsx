@@ -139,6 +139,7 @@ export function PaymentsQueue() {
     payment: AdminRentPayment;
   } | null>(null);
   const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null
   );
@@ -153,7 +154,7 @@ export function PaymentsQueue() {
       if (type === 'release') {
         await unwrap(adminRentFinanceService.releasePayment(payment.id));
       } else if (type === 'flag') {
-        await unwrap(adminRentFinanceService.flagPayment(payment.id));
+        await unwrap(adminRentFinanceService.flagPayment(payment.id, reason.trim()));
       } else {
         await unwrap(adminRentFinanceService.unflagPayment(payment.id));
       }
@@ -293,11 +294,22 @@ export function PaymentsQueue() {
       <RentFinanceQueuePage config={config} />
       <ConfirmDialog
         open={pendingAction !== null}
-        onOpenChange={(open) => !open && setPendingAction(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingAction(null);
+            setReason('');
+          }
+        }}
         title={actionCopy?.title ?? 'Confirm finance action'}
         description={actionCopy?.description ?? ''}
         confirmLabel={actionCopy?.label ?? 'Confirm'}
         onConfirm={() => void executeAction()}
+        promptLabel={pendingAction?.type === 'flag' ? 'Review reason' : undefined}
+        promptPlaceholder="Describe the issue that requires manual review…"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired={pendingAction?.type === 'flag'}
+        promptMinLength={10}
       />
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />

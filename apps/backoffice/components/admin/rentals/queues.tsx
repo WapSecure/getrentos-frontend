@@ -124,13 +124,15 @@ interface RentalAction {
   description: string;
   confirmLabel: string;
   successMessage: string;
-  run: () => Promise<ApiResponse<unknown>>;
+  reasonRequired?: boolean;
+  run: (reason?: string) => Promise<ApiResponse<unknown>>;
 }
 
 function useQueueActions() {
   const queryClient = useQueryClient();
   const [pendingAction, setPendingAction] = useState<RentalAction | null>(null);
   const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null
   );
@@ -141,7 +143,7 @@ function useQueueActions() {
     setPendingAction(null);
     setProcessingKey(action.key);
     try {
-      await unwrap(action.run());
+      await unwrap(action.run(reason.trim() || undefined));
       setToast({ message: action.successMessage, variant: 'success' });
       await queryClient.invalidateQueries({ queryKey: ['admin', 'rentals'] });
     } catch (error) {
@@ -161,11 +163,22 @@ function useQueueActions() {
     <>
       <ConfirmDialog
         open={pendingAction !== null}
-        onOpenChange={(open) => !open && setPendingAction(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingAction(null);
+            setReason('');
+          }
+        }}
         title={pendingAction?.title ?? 'Confirm rental action'}
         description={pendingAction?.description ?? ''}
         confirmLabel={pendingAction?.confirmLabel ?? 'Confirm'}
         onConfirm={() => void executeAction()}
+        promptLabel={pendingAction?.reasonRequired ? 'Reason' : undefined}
+        promptPlaceholder="Explain the decision for other administrators…"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired={pendingAction?.reasonRequired}
+        promptMinLength={10}
       />
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
@@ -460,7 +473,7 @@ export function ApplicationsQueue() {
   const request = (application: AdminRentalApplication, verb: 'approve' | 'reject' | 'reopen') => {
     const calls = {
       approve: () => adminRentalService.approveApplication(application.id),
-      reject: () => adminRentalService.rejectApplication(application.id),
+      reject: (reason?: string) => adminRentalService.rejectApplication(application.id, reason),
       reopen: () => adminRentalService.reopenApplication(application.id),
     };
     const labels = {
@@ -476,6 +489,7 @@ export function ApplicationsQueue() {
       successMessage: `${application.applicantName}'s application was ${
         verb === 'reopen' ? 'reopened' : verb === 'approve' ? 'approved' : 'rejected'
       }.`,
+      reasonRequired: verb === 'reject',
       run: calls[verb],
     });
   };
