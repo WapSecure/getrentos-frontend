@@ -1,11 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Coins, Landmark, Receipt, Wallet } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrentos/ui';
+import { ApiError, unwrap } from '@getrentos/shared';
 import { adminRentFinanceService } from '@/services/adminRentFinanceService';
 import {
   RentFinanceQueuePage,
@@ -75,26 +74,21 @@ const titleCase = (value: string) =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-function useQueueActions(resource: string) {
-  const queryClient = useQueryClient();
-  return async <T,>(run: () => Promise<ApiResponse<T>>) => {
-    try {
-      await unwrap(run());
-    } catch {
-      // Surface failures silently in the console; data stays unchanged.
-      console.error(`Rent finance ${resource} action failed`);
-    } finally {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance', resource] });
-    }
-  };
-}
-
 const btn = (
   label: string,
   onClick: () => void,
-  variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' = 'outline'
+  variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' = 'outline',
+  isLoading = false,
+  disabled = false
 ) => (
-  <Button type="button" size="xs" variant={variant} onClick={onClick}>
+  <Button
+    type="button"
+    size="xs"
+    variant={variant}
+    onClick={onClick}
+    isLoading={isLoading}
+    disabled={disabled}
+  >
     {label}
   </Button>
 );
@@ -139,7 +133,69 @@ const expenseCategoryOptions: { value: ExpenseCategory; label: string }[] = [
 ];
 
 export function PaymentsQueue() {
-  const run = useQueueActions('payments');
+  const queryClient = useQueryClient();
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'release' | 'flag' | 'clear';
+    payment: AdminRentPayment;
+  } | null>(null);
+  const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
+
+  const executeAction = async () => {
+    if (!pendingAction || processingKey) return;
+    const { type, payment } = pendingAction;
+    const actionKey = `${type}:${payment.id}`;
+    setPendingAction(null);
+    setProcessingKey(actionKey);
+    try {
+      if (type === 'release') {
+        await unwrap(adminRentFinanceService.releasePayment(payment.id));
+      } else if (type === 'flag') {
+        await unwrap(adminRentFinanceService.flagPayment(payment.id));
+      } else {
+        await unwrap(adminRentFinanceService.unflagPayment(payment.id));
+      }
+      const successMessage = {
+        release: `${naira(payment.amount)} was released for ${payment.propertyTitle}.`,
+        flag: `Payment for ${payment.propertyTitle} was moved to manual review.`,
+        clear: `Manual review was cleared for ${payment.propertyTitle}.`,
+      }[type];
+      setToast({ message: successMessage, variant: 'success' });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
+    } catch (error) {
+      setToast({
+        message:
+          error instanceof ApiError
+            ? error.message
+            : 'The finance action could not be completed. Please try again.',
+        variant: 'error',
+      });
+    } finally {
+      setProcessingKey(null);
+    }
+  };
+
+  const actionCopy = pendingAction
+    ? {
+        release: {
+          title: 'Release escrow funds?',
+          description: `${naira(pendingAction.payment.amount)} for ${pendingAction.payment.propertyTitle} will be released to the landlord payout flow. This action cannot be undone here.`,
+          label: 'Release funds',
+        },
+        flag: {
+          title: 'Flag payment for review?',
+          description: `The payment for ${pendingAction.payment.propertyTitle} will be held for manual review and cannot be released until the review is cleared.`,
+          label: 'Flag payment',
+        },
+        clear: {
+          title: 'Clear manual review?',
+          description: `The review hold on the payment for ${pendingAction.payment.propertyTitle} will be removed. This does not release the funds automatically.`,
+          label: 'Clear review',
+        },
+      }[pendingAction.type]
+    : null;
   const filters: RentFinanceQueueFilter[] = [
     { key: 'status', label: 'Status', options: paymentStatusOptions },
     { key: 'escrowStatus', label: 'Escrow', options: escrowStatusOptions },
@@ -204,17 +260,50 @@ export function PaymentsQueue() {
         {p.status === 'PAID' && p.escrowStatus === 'HELD' && (
           <>
             {isDueForSettlement(p) &&
-              btn('Release', () => run(() => adminRentFinanceService.releasePayment(p.id)))}
-            {btn('Flag', () => run(() => adminRentFinanceService.flagPayment(p.id)), 'ghost')}
+              btn(
+                'Release',
+                () => setPendingAction({ type: 'release', payment: p }),
+                'outline',
+                processingKey === `release:${p.id}`,
+                processingKey !== null
+              )}
+            {btn(
+              'Flag',
+              () => setPendingAction({ type: 'flag', payment: p }),
+              'ghost',
+              processingKey === `flag:${p.id}`,
+              processingKey !== null
+            )}
           </>
         )}
         {p.status === 'PAID' &&
           p.escrowStatus === 'PENDING_REVIEW' &&
-          btn('Clear review', () => run(() => adminRentFinanceService.unflagPayment(p.id)))}
+          btn(
+            'Clear review',
+            () => setPendingAction({ type: 'clear', payment: p }),
+            'outline',
+            processingKey === `clear:${p.id}`,
+            processingKey !== null
+          )}
       </ActionGroup>
     ),
   };
-  return <RentFinanceQueuePage config={config} />;
+  return (
+    <>
+      <RentFinanceQueuePage config={config} />
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => !open && setPendingAction(null)}
+        title={actionCopy?.title ?? 'Confirm finance action'}
+        description={actionCopy?.description ?? ''}
+        confirmLabel={actionCopy?.label ?? 'Confirm'}
+        onConfirm={() => void executeAction()}
+      />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
+    </>
+  );
 }
 
 export function ArrearsQueue() {
