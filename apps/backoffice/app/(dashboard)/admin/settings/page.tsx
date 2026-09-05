@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Bell, SlidersHorizontal } from 'lucide-react';
 import { ProfileSettings } from '@/components/admin/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 import { PlatformConfigSettings } from '@/components/admin/settings/PlatformConfigSettings';
 import { cn } from '@getrentos/shared';
-import { useAdminUser } from '../layout';
+import { ConfirmDialog } from '@getrentos/ui';
 
 type SettingsTab = 'profile' | 'notifications' | 'platform';
 
@@ -17,17 +17,33 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function AdminSettingsPage() {
-  const user = useAdminUser();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const [isDirty, setIsDirty] = useState(false);
+  const [pendingTab, setPendingTab] = useState<SettingsTab | null>(null);
+
+  useEffect(() => {
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      event.preventDefault();
+    };
+    window.addEventListener('beforeunload', warnBeforeLeaving);
+    return () => window.removeEventListener('beforeunload', warnBeforeLeaving);
+  }, [isDirty]);
+
+  const selectTab = (tab: SettingsTab) => {
+    if (tab === activeTab) return;
+    if (isDirty) setPendingTab(tab);
+    else setActiveTab(tab);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileSettings user={user} />;
+        return <ProfileSettings onDirtyChange={setIsDirty} />;
       case 'notifications':
-        return <NotificationSettings />;
+        return <NotificationSettings onDirtyChange={setIsDirty} />;
       case 'platform':
-        return <PlatformConfigSettings />;
+        return <PlatformConfigSettings onDirtyChange={setIsDirty} />;
       default:
         return null;
     }
@@ -49,7 +65,9 @@ export default function AdminSettingsPage() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    type="button"
+                    onClick={() => selectTab(tab.id)}
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
                     className={cn(
                       'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                       activeTab === tab.id
@@ -57,7 +75,7 @@ export default function AdminSettingsPage() {
                         : 'text-muted-foreground hover:bg-secondary'
                     )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4" aria-hidden="true" />
                     {tab.label}
                   </button>
                 );
@@ -72,6 +90,19 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingTab !== null}
+        onOpenChange={(open) => !open && setPendingTab(null)}
+        title="Discard unsaved changes?"
+        description="Changes on this settings page have not been saved and will be lost."
+        confirmLabel="Discard changes"
+        onConfirm={() => {
+          if (pendingTab) setActiveTab(pendingTab);
+          setPendingTab(null);
+          setIsDirty(false);
+        }}
+      />
     </>
   );
 }

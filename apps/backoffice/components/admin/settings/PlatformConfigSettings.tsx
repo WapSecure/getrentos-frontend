@@ -1,11 +1,17 @@
 'use client';
 
-import { NumberInput } from '@getrentos/ui';
+import {
+  Button,
+  ConfirmDialog,
+  NumberInput,
+  PageErrorState,
+  PageLoadingState,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -20,42 +26,72 @@ const ROLE_LABELS: Record<PlatformConfigRole, string> = {
   buyer: 'Buyer',
 };
 
-const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
-  minTrustScore: 60,
-  escrowHoldDays: 3,
-  autoFlagFraud: true,
-  roleRequirements: [
-    { role: 'landlord', requiresVerification: true },
-    { role: 'owner', requiresVerification: true },
-    { role: 'realtor', requiresVerification: true },
-    { role: 'agent', requiresVerification: true },
-    { role: 'renter', requiresVerification: false },
-    { role: 'buyer', requiresVerification: false },
-  ],
-};
-
-export const PlatformConfigSettings = () => {
-  const { data: platformConfig } = useQuery({
+export const PlatformConfigSettings = ({
+  onDirtyChange,
+}: {
+  onDirtyChange: (dirty: boolean) => void;
+}) => {
+  const {
+    data: platformConfig,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: adminKeys.platformConfig,
     queryFn: () => unwrap(adminService.getPlatformConfig()),
   });
 
+  if (isLoading) return <PageLoadingState />;
+  if (isError || !platformConfig)
+    return (
+      <PageErrorState
+        title="Platform configuration unavailable"
+        description="Configuration could not be loaded. Editing is disabled to prevent overwriting live settings with defaults."
+        onRetry={() => refetch()}
+        isRetrying={isFetching}
+        className="min-h-80 border-0"
+      />
+    );
   return (
     <PlatformConfigSettingsForm
-      key={platformConfig ? 'loaded' : 'initial'}
-      initial={platformConfig ?? DEFAULT_PLATFORM_CONFIG}
+      key={JSON.stringify(platformConfig)}
+      initial={platformConfig}
+      onDirtyChange={onDirtyChange}
     />
   );
 };
 
-const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) => {
+const PlatformConfigSettingsForm = ({
+  initial,
+  onDirtyChange,
+}: {
+  initial: PlatformConfig;
+  onDirtyChange: (dirty: boolean) => void;
+}) => {
+  const [baseline, setBaseline] = useState(initial);
   const [minTrustScore, setMinTrustScore] = useState(initial.minTrustScore);
   const [escrowHoldDays, setEscrowHoldDays] = useState(initial.escrowHoldDays);
   const [autoFlagFraud, setAutoFlagFraud] = useState(initial.autoFlagFraud);
   const [roleRequirements, setRoleRequirements] = useState<RoleRequirement[]>(
     initial.roleRequirements
   );
-  const [saved, setSaved] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const current = { minTrustScore, escrowHoldDays, autoFlagFraud, roleRequirements };
+  const isDirty = JSON.stringify(current) !== JSON.stringify(baseline);
+  const isValid =
+    Number.isInteger(minTrustScore) &&
+    minTrustScore >= 0 &&
+    minTrustScore <= 100 &&
+    Number.isInteger(escrowHoldDays) &&
+    escrowHoldDays >= 0 &&
+    escrowHoldDays <= 30;
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+    return () => onDirtyChange(false);
+  }, [isDirty, onDirtyChange]);
 
   const toggleRole = (role: PlatformConfigRole) => {
     setRoleRequirements((prev) =>
@@ -75,16 +111,24 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
           roleRequirements,
         })
       ),
-    onSuccess: () => {
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 2000);
+    onSuccess: (savedConfig) => {
+      setBaseline(savedConfig);
+      setToast({ message: 'Platform configuration updated.', variant: 'success' });
     },
+    onError: (error: Error) =>
+      setToast({
+        message: error.message || 'Platform configuration could not be saved.',
+        variant: 'error',
+      }),
   });
 
   const handleSave = () => saveMutation.mutate();
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Platform Configuration</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Default thresholds and role verification rules applied platform-wide
@@ -102,6 +146,11 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
             onValueChange={(v) => setMinTrustScore(Number(v) || 0)}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          {!Number.isInteger(minTrustScore) || minTrustScore < 0 || minTrustScore > 100 ? (
+            <p className="mt-1 text-xs text-destructive" role="alert">
+              Enter a whole number from 0 to 100.
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -115,11 +164,20 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
             onValueChange={(v) => setEscrowHoldDays(Number(v) || 0)}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          {!Number.isInteger(escrowHoldDays) || escrowHoldDays < 0 || escrowHoldDays > 30 ? (
+            <p className="mt-1 text-xs text-destructive" role="alert">
+              Enter a whole number from 0 to 30 days.
+            </p>
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between p-3 rounded-lg border border-border">
           <span className="text-sm text-foreground">Auto-flag suspicious activity for review</span>
           <button
+            type="button"
+            role="switch"
+            aria-checked={autoFlagFraud}
+            aria-label="Automatically flag suspicious activity for review"
             onClick={() => setAutoFlagFraud((prev) => !prev)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
               autoFlagFraud ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
@@ -143,6 +201,10 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
               >
                 <span className="text-sm text-foreground">{ROLE_LABELS[r.role]}</span>
                 <button
+                  type="button"
+                  role="switch"
+                  aria-checked={r.requiresVerification}
+                  aria-label={`Require manual verification for ${ROLE_LABELS[r.role]}`}
                   onClick={() => toggleRole(r.role)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     r.requiresVerification ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
@@ -161,13 +223,20 @@ const PlatformConfigSettingsForm = ({ initial }: { initial: PlatformConfig }) =>
       <Button
         variant="primary"
         className="mt-6 gap-1.5"
-        onClick={handleSave}
-        disabled={saveMutation.isPending}
+        onClick={() => setConfirmOpen(true)}
+        disabled={!isDirty || !isValid || saveMutation.isPending}
         isLoading={saveMutation.isPending}
       >
-        {saved && <Check className="w-4 h-4" />}
-        {saved ? 'Saved' : 'Save Configuration'}
+        Save Configuration
       </Button>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Apply platform-wide configuration?"
+        description="These thresholds and verification requirements affect platform decisions for all users. Review the values before continuing."
+        confirmLabel="Apply configuration"
+        onConfirm={handleSave}
+      />
     </div>
   );
 };

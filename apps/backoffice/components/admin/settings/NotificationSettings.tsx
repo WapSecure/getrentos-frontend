@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Check, ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Button, PageErrorState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -37,23 +37,58 @@ const buildPreferences = (
   }));
 };
 
-export const NotificationSettings = () => {
-  const { data: fetchedPreferences } = useQuery({
+export const NotificationSettings = ({
+  onDirtyChange,
+}: {
+  onDirtyChange: (dirty: boolean) => void;
+}) => {
+  const {
+    data: fetchedPreferences,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: adminKeys.notificationPreferences,
     queryFn: () => unwrap(adminService.getNotificationPreferences()),
   });
 
+  if (isLoading) return <PageLoadingState />;
+  if (isError || !fetchedPreferences)
+    return (
+      <PageErrorState
+        title="Notification preferences unavailable"
+        description="Your saved preferences could not be loaded. Editing is disabled to avoid replacing them with defaults."
+        onRetry={() => refetch()}
+        isRetrying={isFetching}
+        className="min-h-80 border-0"
+      />
+    );
   return (
     <NotificationSettingsForm
-      key={fetchedPreferences ? 'loaded' : 'initial'}
+      key={JSON.stringify(fetchedPreferences)}
       initial={buildPreferences(fetchedPreferences)}
+      onDirtyChange={onDirtyChange}
     />
   );
 };
 
-const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference[] }) => {
+const NotificationSettingsForm = ({
+  initial,
+  onDirtyChange,
+}: {
+  initial: NotificationPreference[];
+  onDirtyChange: (dirty: boolean) => void;
+}) => {
   const [preferences, setPreferences] = useState<NotificationPreference[]>(initial);
-  const [saved, setSaved] = useState(false);
+  const [baseline, setBaseline] = useState(initial);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const isDirty = JSON.stringify(preferences) !== JSON.stringify(baseline);
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+    return () => onDirtyChange(false);
+  }, [isDirty, onDirtyChange]);
 
   const toggle = (id: string, channel: 'email' | 'push') => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
@@ -66,16 +101,26 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
           preferences.map(({ id, email, push }) => ({ id, email, push }))
         )
       ),
-    onSuccess: () => {
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 2000);
+    onSuccess: (savedPreferences) => {
+      const next = buildPreferences(savedPreferences);
+      setPreferences(next);
+      setBaseline(next);
+      setToast({ message: 'Notification preferences saved.', variant: 'success' });
     },
+    onError: (error: Error) =>
+      setToast({
+        message: error.message || 'Notification preferences could not be saved.',
+        variant: 'error',
+      }),
   });
 
   const handleSave = () => saveMutation.mutate();
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Notifications</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Choose what you want to be notified about
@@ -97,10 +142,18 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
             </div>
             <div className="flex items-center gap-8">
               <div className="w-10 flex justify-center">
-                <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                <Toggle
+                  label={`${pref.label} email notifications`}
+                  checked={pref.email}
+                  onChange={() => toggle(pref.id, 'email')}
+                />
               </div>
               <div className="w-10 flex justify-center">
-                <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                <Toggle
+                  label={`${pref.label} push notifications`}
+                  checked={pref.push}
+                  onChange={() => toggle(pref.id, 'push')}
+                />
               </div>
             </div>
           </div>
@@ -111,18 +164,29 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
         variant="primary"
         className="mt-6 gap-1.5"
         onClick={handleSave}
-        disabled={saveMutation.isPending}
+        disabled={!isDirty || saveMutation.isPending}
         isLoading={saveMutation.isPending}
       >
-        {saved && <Check className="w-4 h-4" />}
-        {saved ? 'Saved' : 'Save Preferences'}
+        Save Preferences
       </Button>
     </div>
   );
 };
 
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
+const Toggle = ({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: () => void;
+}) => (
   <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    aria-label={label}
     onClick={onChange}
     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
       checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
