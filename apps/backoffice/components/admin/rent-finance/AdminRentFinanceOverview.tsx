@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   Wallet,
 } from 'lucide-react';
-import { StatCard } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, StatCard } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentFinanceService } from '@/services/adminRentFinanceService';
@@ -78,10 +78,24 @@ const modules = [
 ] as const;
 
 export const AdminRentFinanceOverview = () => {
-  const { data } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.rentFinanceOverview,
     queryFn: () => unwrap(adminRentFinanceService.overview()),
   });
+
+  if (isLoading) return <PageLoadingState />;
+
+  if (isError) {
+    return (
+      <PageErrorState
+        title="Could not load rent finance"
+        description="Payment and settlement totals are temporarily unavailable. No financial values are being estimated."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
+    );
+  }
+
   const stats = data ?? EMPTY;
 
   return (

@@ -9,9 +9,12 @@ import {
   DataTable,
   EmptyState,
   Input,
+  PageErrorState,
   Pagination,
   Select,
+  Toast,
   type Column,
+  type ToastVariant,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
@@ -61,6 +64,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>(() =>
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
@@ -86,7 +90,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     return params;
   }, [debounced, page, filters, config.filters]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.rentFinance(config.resource, queryParams),
     queryFn: () => unwrap(config.listFn(queryParams)),
   });
@@ -113,12 +117,27 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     try {
       const blob = await config.exportFn(queryParams);
       downloadBlob(blob, config.exportFilename ?? `${config.resource}.csv`);
-    } catch (error) {
-      console.error('Rent finance CSV export failed', error);
+      setToast({ message: 'CSV export downloaded successfully.', variant: 'success' });
+    } catch {
+      setToast({
+        message: 'We could not export these records. Please try again.',
+        variant: 'error',
+      });
     } finally {
       setExporting(false);
     }
   }, [config, queryParams]);
+
+  if (isError) {
+    return (
+      <PageErrorState
+        title={`Could not load ${config.eyebrow.toLowerCase()}`}
+        description="The finance records are temporarily unavailable. Your filters have been preserved."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -191,6 +210,9 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
           <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
         }
       />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }
