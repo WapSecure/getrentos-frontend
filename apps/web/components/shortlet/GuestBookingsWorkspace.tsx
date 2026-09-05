@@ -24,6 +24,7 @@ import {
   MessageSquare,
   RotateCcw,
   ShieldAlert,
+  ShieldCheck,
   Star,
 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -85,6 +86,59 @@ function cancelDescription(b: ShortletBooking): string {
     return `No refund applies under the ${label} policy this close to check-in.`;
   }
   return 'This will cancel your booking.';
+}
+
+/**
+ * Deposit + deposit-claim facts on a booking card, rendered as one aligned
+ * stack so the withheld / refunded split reads clearly. Uses the structured
+ * refunded amount from the API (deposit minus any claim deduction).
+ */
+function DepositClaimBadges({ b }: { b: ShortletBooking }) {
+  if (b.deposit == null) return null;
+  const decided =
+    !!b.depositClaimStatus &&
+    b.depositClaimStatus !== 'PENDING' &&
+    b.depositClaimStatus !== 'REJECTED';
+  const withheld = b.depositClaimDeducted ?? (decided ? b.depositClaimAmount : undefined);
+  const refunded =
+    b.depositRefundedAmount ??
+    (b.depositStatus === 'REFUNDED' ? Math.max(0, b.deposit - (withheld ?? 0)) : undefined);
+  return (
+    <div className="mt-1 flex flex-col items-end gap-1">
+      {b.depositStatus === 'HELD' && (
+        <Badge variant="info">
+          <ShieldCheck className="mr-1 h-3 w-3" /> Deposit held {formatCurrency(b.deposit)}
+        </Badge>
+      )}
+      {b.depositClaimStatus === 'PENDING' && b.depositClaimAmount != null && (
+        <Badge variant="warning">
+          <ShieldAlert className="mr-1 h-3 w-3" /> Claim pending{' '}
+          {formatCurrency(b.depositClaimAmount)}
+        </Badge>
+      )}
+      {decided && (
+        <Badge variant="danger">
+          <ShieldAlert className="mr-1 h-3 w-3" /> Claim {b.depositClaimStatus?.toLowerCase()} ·{' '}
+          {formatCurrency(withheld ?? b.deposit)} withheld
+        </Badge>
+      )}
+      {b.depositClaimStatus === 'REJECTED' && b.depositStatus === 'REFUNDED' && (
+        <Badge variant="success">
+          <ShieldAlert className="mr-1 h-3 w-3" /> Claim rejected · deposit refunded in full
+        </Badge>
+      )}
+      {b.depositStatus === 'REFUNDED' &&
+        b.depositClaimStatus !== 'REJECTED' &&
+        refunded != null && (
+          <Badge variant="success">
+            <RotateCcw className="mr-1 h-3 w-3" /> Deposit refunded {formatCurrency(refunded)}
+          </Badge>
+        )}
+      {b.taxAmount != null && b.taxAmount > 0 && (
+        <Badge variant="neutral">Tax {formatCurrency(b.taxAmount)}</Badge>
+      )}
+    </div>
+  );
 }
 
 export const GuestBookingsWorkspace = () => {
@@ -243,40 +297,7 @@ export const GuestBookingsWorkspace = () => {
                       {formatCurrency(b.refundAmount)}
                     </Badge>
                   )}
-                  {b.deposit != null && b.depositStatus === 'HELD' && (
-                    <Badge variant="info" className="mt-1">
-                      Deposit held {formatCurrency(b.deposit)}
-                    </Badge>
-                  )}
-                  {b.deposit != null && b.depositStatus === 'REFUNDED' && (
-                    <Badge variant="success" className="mt-1">
-                      <RotateCcw className="mr-1 h-3 w-3" /> Deposit refunded{' '}
-                      {formatCurrency(b.deposit)}
-                    </Badge>
-                  )}
-                  {b.taxAmount != null && b.taxAmount > 0 && (
-                    <Badge variant="neutral" className="mt-1">
-                      Tax {formatCurrency(b.taxAmount)}
-                    </Badge>
-                  )}
-                  {b.depositClaimStatus && (
-                    <Badge
-                      variant={
-                        b.depositClaimStatus === 'PENDING'
-                          ? 'warning'
-                          : b.depositClaimStatus === 'REJECTED'
-                            ? 'success'
-                            : 'danger'
-                      }
-                      className="mt-1"
-                    >
-                      <ShieldAlert className="mr-1 h-3 w-3" /> Claim{' '}
-                      {b.depositClaimStatus.toLowerCase()}
-                      {b.depositClaimAmount != null
-                        ? ` ${formatCurrency(b.depositClaimAmount)}`
-                        : ''}
-                    </Badge>
-                  )}
+                  <DepositClaimBadges b={b} />
                   {b.status === 'COMPLETED' && b.reviewed && (
                     <Badge variant="success" className="mt-1">
                       <Star className="mr-1 h-3 w-3" /> Reviewed

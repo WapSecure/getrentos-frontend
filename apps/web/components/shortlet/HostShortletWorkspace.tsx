@@ -354,11 +354,29 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                       {b.hostNet != null ? ` · you earn ${formatCurrency(b.hostNet)}` : ''}
                     </p>
                   )}
-                  {b.depositStatus === 'HELD' && b.deposit != null && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                  {b.deposit != null && b.depositStatus === 'HELD' && (
+                    <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
                       {formatCurrency(b.deposit)} deposit held
-                      {b.depositClaimStatus ? ` · claim ${b.depositClaimStatus.toLowerCase()}` : ''}
+                      {b.depositClaimStatus === 'PENDING' && b.depositClaimAmount != null
+                        ? ` · claim pending ${formatCurrency(b.depositClaimAmount)}`
+                        : ''}
                     </p>
+                  )}
+                  {b.deposit != null && b.depositStatus === 'REFUNDED' && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Deposit refunded {formatCurrency(b.depositRefundedAmount ?? b.deposit)}
+                    </p>
+                  )}
+                  {(b.depositClaimStatus === 'APPROVED' || b.depositClaimStatus === 'PARTIAL') &&
+                    (b.depositClaimDeducted ?? 0) > 0 && (
+                      <p className="mt-0.5 text-xs text-success">
+                        Claim {b.depositClaimStatus.toLowerCase()} ·{' '}
+                        {formatCurrency(b.depositClaimDeducted ?? b.depositClaimAmount ?? 0)}{' '}
+                        withheld
+                      </p>
+                    )}
+                  {b.depositClaimStatus === 'REJECTED' && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">Claim rejected</p>
                   )}
                   {b.paymentReference && (
                     <p className="text-xs text-muted-foreground">Ref {b.paymentReference}</p>

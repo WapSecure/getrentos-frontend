@@ -115,6 +115,10 @@ export interface AdminShortletDepositClaim {
   /** Signed preview URLs of the evidence photos (returned on the admin list). */
   evidenceUrls?: string[];
   status: AdminShortletDepositClaimStatus;
+  /** Naira withheld from the guest refund by this claim (resolved claims only). */
+  deductedAmount?: number;
+  /** Naira refunded to the guest = deposit - deducted (resolved claims only). */
+  refundedAmount?: number;
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
