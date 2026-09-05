@@ -165,10 +165,14 @@ export const ReviewVerificationModal = ({
               </>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
+                <label
+                  htmlFor="verification-decision-reason"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
                   {mode === 'reject' ? 'Reason for rejection' : 'What clarification is needed?'}
                 </label>
                 <Textarea
+                  id="verification-decision-reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}

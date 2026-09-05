@@ -154,6 +154,7 @@ export default function AdminVerificationsPage() {
       <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
         {statusOptions.map((option) => (
           <button
+            type="button"
             key={option.value}
             onClick={() => {
               setStatusFilter(option.value);

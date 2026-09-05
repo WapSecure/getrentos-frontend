@@ -96,7 +96,11 @@ export const PlatformGrowthChart = () => {
           </div>
         </div>
       ) : (
-        <div className="h-56">
+        <div
+          className="h-56"
+          role="img"
+          aria-label={`New registered users over the last six months. Latest value: ${currentValue}.`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={growthData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>

@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex-1">
-          <div className="bg-card border border-border rounded-lg overflow-hidden p-6">
+          <div className="bg-card border border-border rounded-lg overflow-hidden p-4 sm:p-6">
             {renderContent()}
           </div>
         </div>

@@ -136,10 +136,14 @@ const PlatformConfigSettingsForm = ({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="minimum-trust-score"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Minimum Trust Score for Auto-Approval
           </label>
           <NumberInput
+            id="minimum-trust-score"
             min={0}
             max={100}
             value={minTrustScore}
@@ -154,10 +158,14 @@ const PlatformConfigSettingsForm = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="escrow-hold-days"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Escrow Verification Hold Period (days)
           </label>
           <NumberInput
+            id="escrow-hold-days"
             min={0}
             max={30}
             value={escrowHoldDays}

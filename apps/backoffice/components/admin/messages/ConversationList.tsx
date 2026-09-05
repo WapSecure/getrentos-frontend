@@ -35,12 +35,16 @@ export const ConversationList = ({
     <div className="w-full sm:w-80 shrink-0 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
       <div className="p-3 border-b border-border">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <LegacyInput
             type="text"
             value={searchQuery}
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Search conversations..."
+            aria-label="Search conversations"
             className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -74,17 +78,22 @@ export const ConversationList = ({
                   <p className="text-sm font-medium text-foreground truncate">
                     {conversation.participantName}
                   </p>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {conversation.lastMessageTime
                       ? formatRelativeTime(conversation.lastMessageTime)
                       : ''}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mb-0.5">{conversation.participantRole}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">
+                  {conversation.participantRole}
+                </p>
                 <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
               </div>
               {conversation.unreadCount > 0 && (
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span
+                  className="shrink-0 min-w-5 h-5 rounded-full bg-primary px-1 text-primary-foreground text-[10px] font-bold flex items-center justify-center"
+                  aria-label={`${conversation.unreadCount} unread messages`}
+                >
                   {conversation.unreadCount}
                 </span>
               )}

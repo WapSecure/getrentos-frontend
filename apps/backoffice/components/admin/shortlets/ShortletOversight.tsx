@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
@@ -1274,12 +1275,15 @@ function AdjudicateClaimModal({
                       title={`View evidence photo ${i + 1}`}
                       className="group relative h-16 w-16 overflow-hidden rounded-md border border-border transition-transform hover:scale-105"
                     >
-                      <img
+                      <Image
                         src={url}
                         alt={`Evidence photo ${i + 1}`}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="64px"
+                        unoptimized
+                        className="object-cover"
                       />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100">
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100 group-focus-visible:bg-black/40 group-focus-visible:opacity-100">
                         View
                       </span>
                     </button>

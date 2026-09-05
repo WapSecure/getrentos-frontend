@@ -70,7 +70,11 @@ export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
           </div>
         </div>
       ) : (
-        <div className="h-56">
+        <div
+          className="h-56"
+          role="img"
+          aria-label={`Platform gross merchandise value over the last six months. Latest value: ${formatCurrency(currentValue, { compact: true })}.`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>

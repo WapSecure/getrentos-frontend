@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { ConfirmDialog, PageErrorState, Pagination } from '@getrentos/ui';
+import { ConfirmDialog, PageErrorState, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { ConversationList } from '@/components/admin/messages/ConversationList';
 import { MessageThread } from '@/components/admin/messages/MessageThread';
 import { cn } from '@getrentos/shared';
@@ -20,6 +20,7 @@ export default function AdminMessagesPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [showResolveConfirm, setShowResolveConfirm] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,11 +69,24 @@ export default function AdminMessagesPage() {
       queryClient.invalidateQueries({ queryKey: adminKeys.conversationMessages(id) });
       queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] });
     },
+    onError: (error: Error) =>
+      setToast({
+        message: error.message || 'The message could not be sent. Please try again.',
+        variant: 'error',
+      }),
   });
 
   const resolveMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.resolveConversation(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] });
+      setToast({ message: 'Conversation marked as resolved.', variant: 'success' });
+    },
+    onError: (error: Error) =>
+      setToast({
+        message: error.message || 'The conversation could not be resolved.',
+        variant: 'error',
+      }),
   });
 
   const handleSelect = (id: string) => {
@@ -89,6 +103,9 @@ export default function AdminMessagesPage() {
 
   return (
     <div className="min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)]">
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Messages</h1>
         <p className="text-muted-foreground mt-1">
@@ -104,7 +121,7 @@ export default function AdminMessagesPage() {
           isRetrying={isFetching}
         />
       ) : (
-        <div className="flex min-h-[600px] gap-4 lg:h-[calc(100%-4.5rem)] lg:min-h-0">
+        <div className="flex min-h-[calc(100dvh-12rem)] gap-4 lg:h-[calc(100%-4.5rem)] lg:min-h-0">
           <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
             <div className="flex flex-col gap-2">
               <ConversationList
@@ -136,10 +153,11 @@ export default function AdminMessagesPage() {
             {activeConversation ? (
               <>
                 <button
+                  type="button"
                   onClick={() => setActiveId(null)}
                   className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                   Back to conversations
                 </button>
                 <MessageThread
