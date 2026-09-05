@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput, Skeleton } from '@getrentos/ui';
 
 import { Search } from 'lucide-react';
 import { getInitials, formatRelativeTime } from '@getrentos/shared';
@@ -20,6 +20,7 @@ interface ConversationListProps {
   searchQuery: string;
   onSearch: (value: string) => void;
   onSelect: (id: string) => void;
+  isLoading?: boolean;
 }
 
 export const ConversationList = ({
@@ -28,6 +29,7 @@ export const ConversationList = ({
   searchQuery,
   onSearch,
   onSelect,
+  isLoading = false,
 }: ConversationListProps) => {
   return (
     <div className="w-full sm:w-80 shrink-0 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
@@ -45,16 +47,24 @@ export const ConversationList = ({
       </div>
 
       <div className="flex-1 overflow-y-auto divide-y divide-border">
-        {conversations.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-2 p-3" role="status" aria-label="Loading conversations">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : conversations.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No conversations found</p>
         ) : (
           conversations.map((conversation) => (
             <button
+              type="button"
               key={conversation.id}
               onClick={() => onSelect(conversation.id)}
               className={`w-full flex items-start gap-3 p-3 text-left transition-colors ${
                 activeId === conversation.id ? 'bg-accent' : 'hover:bg-secondary'
               }`}
+              aria-current={activeId === conversation.id ? 'true' : undefined}
             >
               <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
                 {getInitials(conversation.participantName)}

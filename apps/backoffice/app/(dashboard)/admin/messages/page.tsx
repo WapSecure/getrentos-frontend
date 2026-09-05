@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { ConfirmDialog, PageErrorState, Pagination } from '@getrentos/ui';
 import { ConversationList } from '@/components/admin/messages/ConversationList';
 import { MessageThread } from '@/components/admin/messages/MessageThread';
 import { cn } from '@getrentos/shared';
@@ -19,6 +19,7 @@ export default function AdminMessagesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [showResolveConfirm, setShowResolveConfirm] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,7 +29,7 @@ export default function AdminMessagesPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.conversations({ search: debouncedSearch, page, pageSize: PAGE_SIZE }),
     queryFn: () =>
       unwrap(
@@ -43,14 +44,20 @@ export default function AdminMessagesPage() {
   const conversations = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const { data: activeMessages = [] } = useQuery({
+  const {
+    data: activeMessages = [],
+    isLoading: messagesLoading,
+    isError: messagesError,
+    isFetching: messagesFetching,
+    refetch: refetchMessages,
+  } = useQuery({
     queryKey: adminKeys.conversationMessages(activeId ?? ''),
     queryFn: () => unwrap(adminService.getConversationMessages(activeId!)),
     enabled: !!activeId,
   });
 
   const markReadMutation = useMutation({
-    mutationFn: (id: string) => adminService.markConversationRead(id),
+    mutationFn: (id: string) => unwrap(adminService.markConversationRead(id)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] }),
   });
 
@@ -81,7 +88,7 @@ export default function AdminMessagesPage() {
   const activeConversation = conversations.find((c) => c.id === activeId);
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
+    <div className="min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)]">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Messages</h1>
         <p className="text-muted-foreground mt-1">
@@ -89,56 +96,91 @@ export default function AdminMessagesPage() {
         </p>
       </div>
 
-      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
-        <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
-          <div className="flex flex-col gap-2">
-            <ConversationList
-              conversations={conversations}
-              activeId={activeId}
-              searchQuery={searchQuery}
-              onSearch={(value) => {
-                setSearchQuery(value);
-                setPage(1);
-              }}
-              onSelect={handleSelect}
-            />
-            {total > 0 && (
-              <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+      {isError ? (
+        <PageErrorState
+          title="Could not load conversations"
+          description="The support inbox is temporarily unavailable. Your search has been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : (
+        <div className="flex min-h-[600px] gap-4 lg:h-[calc(100%-4.5rem)] lg:min-h-0">
+          <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
+            <div className="flex flex-col gap-2">
+              <ConversationList
+                conversations={conversations}
+                activeId={activeId}
+                searchQuery={searchQuery}
+                onSearch={(value) => {
+                  setSearchQuery(value);
+                  setPage(1);
+                }}
+                onSelect={handleSelect}
+                isLoading={isLoading}
+              />
+              {total > 0 && (
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  total={total}
+                  onPageChange={(nextPage) => {
+                    setActiveId(null);
+                    setPage(nextPage);
+                  }}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
+            {activeConversation ? (
+              <>
+                <button
+                  onClick={() => setActiveId(null)}
+                  className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to conversations
+                </button>
+                <MessageThread
+                  contactName={activeConversation.participantName}
+                  contactRole={activeConversation.participantRole}
+                  messages={activeMessages}
+                  onSend={handleSend}
+                  status={activeConversation.status}
+                  category={activeConversation.category}
+                  source={activeConversation.source}
+                  onResolve={() => setShowResolveConfirm(true)}
+                  resolving={resolveMutation.isPending}
+                  sending={sendMutation.isPending}
+                  loading={messagesLoading}
+                  error={messagesError}
+                  retrying={messagesFetching}
+                  onRetry={() => void refetchMessages()}
+                />
+              </>
+            ) : (
+              <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">
+                  Select a conversation to start messaging
+                </p>
+              </div>
             )}
           </div>
         </div>
-
-        <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
-          {activeConversation ? (
-            <>
-              <button
-                onClick={() => setActiveId(null)}
-                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to conversations
-              </button>
-              <MessageThread
-                contactName={activeConversation.participantName}
-                contactRole={activeConversation.participantRole}
-                messages={activeMessages}
-                onSend={handleSend}
-                status={activeConversation.status}
-                category={activeConversation.category}
-                source={activeConversation.source}
-                onResolve={() => resolveMutation.mutate(activeConversation.id)}
-                resolving={resolveMutation.isPending}
-              />
-            </>
-          ) : (
-            <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Select a conversation to start messaging
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
+      <ConfirmDialog
+        open={showResolveConfirm && Boolean(activeConversation)}
+        onOpenChange={setShowResolveConfirm}
+        title="Resolve support conversation?"
+        description={
+          activeConversation
+            ? `${activeConversation.participantName}'s conversation will be closed. Sending is disabled after resolution.`
+            : ''
+        }
+        confirmLabel="Mark resolved"
+        onConfirm={() => activeConversation && resolveMutation.mutate(activeConversation.id)}
+      />
     </div>
   );
 }
