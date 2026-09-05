@@ -14,6 +14,7 @@ import {
   FilePreviewDialog,
   Input,
   NumberInput,
+  PageErrorState,
   Pagination,
   Select,
   Skeleton,
@@ -92,6 +93,24 @@ const BOOKING_STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
 
 type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes' | 'claims' | 'fees';
 
+const SectionError = ({
+  label,
+  retry,
+  retrying,
+}: {
+  label: string;
+  retry: () => void;
+  retrying: boolean;
+}) => (
+  <PageErrorState
+    title={`Could not load ${label}`}
+    description="This data is temporarily unavailable. No records are being shown as empty."
+    onRetry={retry}
+    isRetrying={retrying}
+    className="min-h-[240px] rounded-none border-0 shadow-none"
+  />
+);
+
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('listings');
@@ -117,12 +136,24 @@ export const ShortletOversight = () => {
   const [claimSearch, setClaimSearch] = useState('');
   const [activeClaim, setActiveClaim] = useState<AdminShortletDepositClaim | null>(null);
 
-  const { data: overview } = useQuery({
+  const {
+    data: overview,
+    isLoading: overviewLoading,
+    isError: overviewError,
+    isFetching: overviewFetching,
+    refetch: refetchOverview,
+  } = useQuery({
     queryKey: ['admin', 'shortlets', 'overview'],
     queryFn: () => unwrap(adminShortletService.overview()),
   });
 
-  const { data: listingsData, isLoading: listingsLoading } = useQuery({
+  const {
+    data: listingsData,
+    isLoading: listingsLoading,
+    isError: listingsError,
+    isFetching: listingsFetching,
+    refetch: refetchListings,
+  } = useQuery({
     queryKey: [
       'admin',
       'shortlets',
@@ -141,7 +172,13 @@ export const ShortletOversight = () => {
   });
   const listings = listingsData?.items ?? [];
 
-  const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
+  const {
+    data: bookingsData,
+    isLoading: bookingsLoading,
+    isError: bookingsError,
+    isFetching: bookingsFetching,
+    refetch: refetchBookings,
+  } = useQuery({
     queryKey: ['admin', 'shortlets', 'bookings', { status: bookingStatus, page: bookingsPage }],
     queryFn: () =>
       unwrap(
@@ -154,13 +191,25 @@ export const ShortletOversight = () => {
   });
   const bookings = bookingsData?.items ?? [];
 
-  const { data: payoutsData, isLoading: payoutsLoading } = useQuery({
+  const {
+    data: payoutsData,
+    isLoading: payoutsLoading,
+    isError: payoutsError,
+    isFetching: payoutsFetching,
+    refetch: refetchPayouts,
+  } = useQuery({
     queryKey: ['admin', 'shortlets', 'payouts', { page: payoutsPage }],
     queryFn: () => unwrap(adminShortletService.listPayouts({ page: payoutsPage, pageSize: 12 })),
   });
   const payouts = payoutsData?.items ?? [];
 
-  const { data: disputesData, isLoading: disputesLoading } = useQuery({
+  const {
+    data: disputesData,
+    isLoading: disputesLoading,
+    isError: disputesError,
+    isFetching: disputesFetching,
+    refetch: refetchDisputes,
+  } = useQuery({
     queryKey: ['admin', 'shortlets', 'disputes', { status: disputeStatus, page: disputesPage }],
     queryFn: () =>
       unwrap(
@@ -173,7 +222,13 @@ export const ShortletOversight = () => {
   });
   const disputes = disputesData?.items ?? [];
 
-  const { data: claimsData, isLoading: claimsLoading } = useQuery({
+  const {
+    data: claimsData,
+    isLoading: claimsLoading,
+    isError: claimsError,
+    isFetching: claimsFetching,
+    refetch: refetchClaims,
+  } = useQuery({
     queryKey: [
       'admin',
       'shortlets',
@@ -220,7 +275,12 @@ export const ShortletOversight = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  const { data: feeConfig } = useQuery({
+  const {
+    data: feeConfig,
+    isError: feesError,
+    isFetching: feesFetching,
+    refetch: refetchFees,
+  } = useQuery({
     queryKey: ['admin', 'shortlets', 'fees'],
     queryFn: () => unwrap(adminShortletService.getFeeConfig()),
   });
@@ -238,7 +298,13 @@ export const ShortletOversight = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  const { data: threadMessages = [], isLoading: threadLoading } = useQuery({
+  const {
+    data: threadMessages = [],
+    isLoading: threadLoading,
+    isError: threadError,
+    isFetching: threadFetching,
+    refetch: refetchThread,
+  } = useQuery({
     queryKey: ['admin', 'shortlets', 'disputes', activeDispute?.id, 'messages'],
     queryFn: () => unwrap(adminShortletService.disputeMessages(activeDispute!.id)),
     enabled: Boolean(activeDispute),
@@ -331,7 +397,15 @@ export const ShortletOversight = () => {
       </div>
 
       {/* Overview cards */}
-      {overview ? (
+      {overviewError ? (
+        <PageErrorState
+          title="Could not load shortlet totals"
+          description="Operational totals are temporarily unavailable. No values are being estimated."
+          onRetry={() => void refetchOverview()}
+          isRetrying={overviewFetching}
+          className="min-h-[180px]"
+        />
+      ) : overview ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           <StatCard
             icon={BedDouble}
@@ -366,40 +440,42 @@ export const ShortletOversight = () => {
             isCurrency
           />
         </div>
-      ) : (
+      ) : overviewLoading ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-24 w-full rounded-xl" />
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* Tabs */}
-      <div className="inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['listings', 'bookings', 'payouts', 'disputes', 'claims', 'fees'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            className={`rounded-md px-4 py-1.5 font-medium transition-colors ${
-              tab === t
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-secondary'
-            }`}
-          >
-            {t === 'listings'
-              ? `Listings (${listingsData?.total ?? 0})`
-              : t === 'bookings'
-                ? `Bookings (${bookingsData?.total ?? 0})`
-                : t === 'payouts'
-                  ? `Payouts (${payoutsData?.total ?? 0})`
-                  : t === 'disputes'
-                    ? `Disputes (${disputesData?.total ?? 0})`
-                    : t === 'claims'
-                      ? `Deposit claims (${claimsData?.total ?? 0})`
-                      : 'Fees & taxes'}
-          </button>
-        ))}
+      <div className="max-w-full overflow-x-auto pb-1">
+        <div className="inline-flex min-w-max rounded-lg border border-border bg-card p-1 text-sm">
+          {(['listings', 'bookings', 'payouts', 'disputes', 'claims', 'fees'] as Tab[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTab(t)}
+              className={`rounded-md px-4 py-1.5 font-medium transition-colors ${
+                tab === t
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-secondary'
+              }`}
+            >
+              {t === 'listings'
+                ? `Listings (${listingsData?.total ?? 0})`
+                : t === 'bookings'
+                  ? `Bookings (${bookingsData?.total ?? 0})`
+                  : t === 'payouts'
+                    ? `Payouts (${payoutsData?.total ?? 0})`
+                    : t === 'disputes'
+                      ? `Disputes (${disputesData?.total ?? 0})`
+                      : t === 'claims'
+                        ? `Deposit claims (${claimsData?.total ?? 0})`
+                        : 'Fees & taxes'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === 'listings' ? (
@@ -424,7 +500,13 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {listingsLoading ? (
+          {listingsError ? (
+            <SectionError
+              label="shortlet listings"
+              retry={() => void refetchListings()}
+              retrying={listingsFetching}
+            />
+          ) : listingsLoading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -468,7 +550,13 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {bookingsLoading ? (
+          {bookingsError ? (
+            <SectionError
+              label="shortlet bookings"
+              retry={() => void refetchBookings()}
+              retrying={bookingsFetching}
+            />
+          ) : bookingsLoading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -504,7 +592,13 @@ export const ShortletOversight = () => {
             </p>
           </div>
 
-          {payoutsLoading ? (
+          {payoutsError ? (
+            <SectionError
+              label="host payouts"
+              retry={() => void refetchPayouts()}
+              retrying={payoutsFetching}
+            />
+          ) : payoutsLoading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -543,7 +637,13 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {disputesLoading ? (
+          {disputesError ? (
+            <SectionError
+              label="shortlet disputes"
+              retry={() => void refetchDisputes()}
+              retrying={disputesFetching}
+            />
+          ) : disputesLoading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -592,7 +692,13 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {claimsLoading ? (
+          {claimsError ? (
+            <SectionError
+              label="deposit claims"
+              retry={() => void refetchClaims()}
+              retrying={claimsFetching}
+            />
+          ) : claimsLoading ? (
             <div className="space-y-2 p-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -617,6 +723,14 @@ export const ShortletOversight = () => {
             pageSize={12}
             total={claimsData?.total ?? 0}
             onPageChange={setClaimsPage}
+          />
+        </div>
+      ) : feesError ? (
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <SectionError
+            label="fee configuration"
+            retry={() => void refetchFees()}
+            retrying={feesFetching}
           />
         </div>
       ) : feeConfig ? (
@@ -646,6 +760,9 @@ export const ShortletOversight = () => {
           dispute={activeDispute}
           messages={threadMessages}
           loading={threadLoading}
+          error={threadError}
+          retrying={threadFetching}
+          onRetry={() => void refetchThread()}
           draft={threadDraft}
           onDraftChange={setThreadDraft}
           replying={disputeReply.isPending}
@@ -820,6 +937,9 @@ function DisputeThreadModal({
   dispute,
   messages,
   loading,
+  error,
+  retrying,
+  onRetry,
   draft,
   onDraftChange,
   replying,
@@ -831,6 +951,9 @@ function DisputeThreadModal({
   dispute: AdminShortletDispute;
   messages: AdminShortletDisputeMessage[];
   loading: boolean;
+  error: boolean;
+  retrying: boolean;
+  onRetry: () => void;
   draft: string;
   onDraftChange: (v: string) => void;
   replying: boolean;
@@ -869,7 +992,23 @@ function DisputeThreadModal({
 
           <div className="space-y-2">
             <p className="text-sm font-medium">Thread</p>
-            {loading ? (
+            {error ? (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+                <p className="text-sm text-destructive">
+                  The dispute messages could not be loaded.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={onRetry}
+                  isLoading={retrying}
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : loading ? (
               <Skeleton className="h-24 w-full rounded-lg" />
             ) : messages.length === 0 ? (
               <p className="text-sm text-muted-foreground">No messages yet.</p>
