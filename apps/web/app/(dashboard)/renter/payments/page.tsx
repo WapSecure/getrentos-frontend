@@ -16,7 +16,7 @@ import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymen
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 interface Notification {
   id: string;
@@ -34,6 +34,8 @@ export default function PaymentsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
+  const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
+  const [bulkPayingIds, setBulkPayingIds] = useState<string[]>([]);
 
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -79,23 +81,56 @@ export default function PaymentsPage() {
 
   const payments: DisplayPayment[] = rawPayments.map((p) => {
     const method = p.method ?? 'card';
-    if (payNowMutation.isPending && payNowMutation.variables?.paymentId === p.id) {
+    if (
+      bulkPayingIds.includes(p.id) ||
+      (payNowMutation.isPending && payNowMutation.variables?.paymentId === p.id)
+    ) {
       return { ...p, method, status: 'processing' };
     }
     return { ...p, method };
   });
 
   const handlePayNow = (paymentId: string) => {
+    if (bulkPayingIds.length > 0) return;
     const payment = payments.find((p) => p.id === paymentId);
     if (!payment) return;
     payNowMutation.mutate({ paymentId, method: payment.method });
   };
 
-  const handlePayAll = () => {
-    const due = payments.filter((p) => p.status !== 'paid');
-    due.forEach((payment) => {
-      payNowMutation.mutate({ paymentId: payment.id, method: payment.method });
-    });
+  const payablePayments = payments.filter(
+    (payment) => payment.status === 'pending' || payment.status === 'overdue'
+  );
+  const payableTotal = payablePayments.reduce((sum, payment) => sum + payment.amount, 0);
+
+  const handlePayAll = async () => {
+    const paymentIds = payablePayments.map((payment) => payment.id);
+    if (paymentIds.length === 0) return;
+    setBulkPayingIds(paymentIds);
+    let completedCount = 0;
+    try {
+      for (const payment of payablePayments) {
+        await unwrap(renterService.payNow(payment.id, payment.method));
+        completedCount += 1;
+      }
+      pushNotification({
+        type: 'success',
+        title: 'Payments Successful',
+        message: `${completedCount} payment${completedCount === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()} completed successfully.`,
+      });
+    } catch {
+      pushNotification({
+        type: 'error',
+        title: 'Payment Batch Stopped',
+        message:
+          completedCount > 0
+            ? `${completedCount} payment${completedCount === 1 ? '' : 's'} completed before an error occurred. Review the refreshed payment list before trying again.`
+            : 'No payment was completed. Check your payment method and try again.',
+      });
+    } finally {
+      setBulkPayingIds([]);
+      void queryClient.invalidateQueries({ queryKey: renterKeys.payments });
+      void queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
+    }
   };
 
   const handleDownloadReceipt = (receiptId: string) => {
@@ -220,7 +255,11 @@ export default function PaymentsPage() {
             onMarkAsRead={handleMarkNotificationAsRead}
             onClearAll={handleClearAllNotifications}
           />
-          <PaymentSchedule payments={payments} onPayAll={handlePayAll} />
+          <PaymentSchedule
+            payments={payments}
+            onPayAll={() => payablePayments.length > 0 && setShowPayAllConfirm(true)}
+            isPayingAll={bulkPayingIds.length > 0 || payNowMutation.isPending}
+          />
           <PaymentMethods
             methods={paymentMethods}
             onSetDefault={handleSetDefaultPaymentMethod}
@@ -242,6 +281,14 @@ export default function PaymentsPage() {
         open={!!disputingPaymentId}
         onOpenChange={(open) => !open && setDisputingPaymentId(null)}
         onSubmit={handleSubmitDispute}
+      />
+      <ConfirmDialog
+        open={showPayAllConfirm}
+        onOpenChange={setShowPayAllConfirm}
+        title="Confirm all payments"
+        description={`You are about to pay ${payablePayments.length} item${payablePayments.length === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()}. Payments will be processed one at a time and cannot be undone here.`}
+        confirmLabel={`Pay ₦${payableTotal.toLocaleString()}`}
+        onConfirm={() => void handlePayAll()}
       />
 
       {total > 0 && (

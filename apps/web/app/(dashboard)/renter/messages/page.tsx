@@ -60,6 +60,7 @@ export default function MessagesPage() {
   });
 
   const sendMessageMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({
       conversationId,
       text,

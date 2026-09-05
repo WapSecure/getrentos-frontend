@@ -48,15 +48,22 @@ export const Toast = ({ message, variant, onClose }: ToastProps) => {
 
   return (
     <motion.div
+      role={variant === 'error' ? 'alert' : 'status'}
+      aria-live={variant === 'error' ? 'assertive' : 'polite'}
       initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      className={`fixed top-20 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg ${styles.bg} ${styles.border}`}
+      className={`fixed left-4 right-4 top-36 z-[90] flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg sm:left-auto sm:max-w-md md:top-20 ${styles.bg} ${styles.border}`}
     >
-      <Icon className={`w-5 h-5 ${styles.iconColor}`} />
-      <span className={`text-sm font-medium ${styles.text}`}>{message}</span>
-      <button onClick={onClose} className={`ml-2 ${styles.text} hover:opacity-70`}>
-        <X className="w-4 h-4" />
+      <Icon aria-hidden="true" className={`h-5 w-5 shrink-0 ${styles.iconColor}`} />
+      <span className={`min-w-0 flex-1 text-sm font-medium ${styles.text}`}>{message}</span>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Dismiss notification"
+        className={`ml-2 shrink-0 rounded-md p-1 ${styles.text} hover:opacity-70`}
+      >
+        <X className="w-4 h-4" aria-hidden="true" />
       </button>
     </motion.div>
   );
