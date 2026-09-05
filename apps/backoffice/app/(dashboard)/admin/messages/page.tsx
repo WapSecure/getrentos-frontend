@@ -38,6 +38,7 @@ export default function AdminMessagesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    refetchInterval: 20_000,
   });
   const conversations = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -60,6 +61,11 @@ export default function AdminMessagesPage() {
       queryClient.invalidateQueries({ queryKey: adminKeys.conversationMessages(id) });
       queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] });
     },
+  });
+
+  const resolveMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.resolveConversation(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] }),
   });
 
   const handleSelect = (id: string) => {
@@ -117,6 +123,11 @@ export default function AdminMessagesPage() {
                 contactRole={activeConversation.participantRole}
                 messages={activeMessages}
                 onSend={handleSend}
+                status={activeConversation.status}
+                category={activeConversation.category}
+                source={activeConversation.source}
+                onResolve={() => resolveMutation.mutate(activeConversation.id)}
+                resolving={resolveMutation.isPending}
               />
             </>
           ) : (

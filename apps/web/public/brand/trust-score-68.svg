@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 92" role="img" aria-label="Trust score 68, Established">
+<rect x="1" y="1" width="298" height="90" rx="20" fill="white" stroke="#E2E8F0"/>
+<circle cx="48" cy="46" r="29" fill="none" stroke="#E2E8F0" stroke-width="7"/>
+<circle cx="48" cy="46" r="29" fill="none" stroke="#1478F2" stroke-width="7" stroke-linecap="round" stroke-dasharray="123.76 182" transform="rotate(-90 48 46)"/>
+<text x="48" y="51" text-anchor="middle" font-family="Inter,Arial" font-size="17" font-weight="800" fill="#0B1220">68</text>
+<text x="92" y="40" font-family="Inter,Arial" font-size="16" font-weight="750" fill="#0B1220">GetRentos Trust</text>
+<text x="92" y="62" font-family="Inter,Arial" font-size="13" font-weight="600" fill="#1478F2">Established</text></svg>

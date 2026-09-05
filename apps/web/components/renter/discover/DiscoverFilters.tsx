@@ -82,7 +82,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
 
       {isExpanded && (
         <div className="p-4 border-t border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="mb-4 space-y-3">
             {/* Location */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Location</label>
@@ -95,63 +95,57 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
               />
             </div>
 
-            {/* Price Range */}
+            {/* Price Range — Min and Max side by side, full card width */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
                 Price Range (₦)
               </label>
-              <div className="flex gap-2">
-                <div className="w-1/2">
-                  <CurrencyInput
-                    prefix="₦"
-                    value={filters.minPrice}
-                    onValueChange={(v) => handleChange('minPrice', v === 0 ? '' : String(v))}
-                    placeholder="Min"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div className="w-1/2">
-                  <CurrencyInput
-                    prefix="₦"
-                    value={filters.maxPrice}
-                    onValueChange={(v) => handleChange('maxPrice', v === 0 ? '' : String(v))}
-                    placeholder="Max"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+              <div className="grid grid-cols-2 gap-2">
+                <CurrencyInput
+                  prefix="₦"
+                  value={filters.minPrice}
+                  onValueChange={(v) => handleChange('minPrice', v === 0 ? '' : String(v))}
+                  placeholder="Min"
+                />
+                <CurrencyInput
+                  prefix="₦"
+                  value={filters.maxPrice}
+                  onValueChange={(v) => handleChange('maxPrice', v === 0 ? '' : String(v))}
+                  placeholder="Max"
+                />
               </div>
             </div>
 
-            {/* Bedrooms */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
-              <LegacySelect
-                value={filters.bedrooms}
-                onChange={(e) => handleChange('bedrooms', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {bedroomOptions.map((option) => (
-                  <option key={option} value={option === 'Any' ? '' : option}>
-                    {option} {option !== 'Any' && option !== '5+' ? 'bed' : ''}
-                  </option>
-                ))}
-              </LegacySelect>
-            </div>
-
-            {/* Bathrooms */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Bathrooms</label>
-              <LegacySelect
-                value={filters.bathrooms}
-                onChange={(e) => handleChange('bathrooms', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {bathroomOptions.map((option) => (
-                  <option key={option} value={option === 'Any' ? '' : option}>
-                    {option} {option !== 'Any' && option !== '4+' ? 'bath' : ''}
-                  </option>
-                ))}
-              </LegacySelect>
+            {/* Bedrooms + Bathrooms — compact pair */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
+                <LegacySelect
+                  value={filters.bedrooms}
+                  onChange={(e) => handleChange('bedrooms', e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  {bedroomOptions.map((option) => (
+                    <option key={option} value={option === 'Any' ? '' : option}>
+                      {option} {option !== 'Any' && option !== '5+' ? 'bed' : ''}
+                    </option>
+                  ))}
+                </LegacySelect>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Bathrooms</label>
+                <LegacySelect
+                  value={filters.bathrooms}
+                  onChange={(e) => handleChange('bathrooms', e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  {bathroomOptions.map((option) => (
+                    <option key={option} value={option === 'Any' ? '' : option}>
+                      {option} {option !== 'Any' && option !== '4+' ? 'bath' : ''}
+                    </option>
+                  ))}
+                </LegacySelect>
+              </div>
             </div>
 
             {/* Property Type */}
@@ -174,17 +168,15 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
             </div>
 
             {/* Verified Only Toggle */}
-            <div className="flex items-center">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <LegacyInput
-                  type="checkbox"
-                  checked={filters.verifiedOnly}
-                  onChange={(e) => handleChange('verifiedOnly', e.target.checked)}
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                />
-                <span className="text-sm text-foreground">Verified listings only</span>
-              </label>
-            </div>
+            <label className="flex cursor-pointer items-center gap-2 pt-1">
+              <LegacyInput
+                type="checkbox"
+                checked={filters.verifiedOnly}
+                onChange={(e) => handleChange('verifiedOnly', e.target.checked)}
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <span className="text-sm text-foreground">Verified listings only</span>
+            </label>
           </div>
 
           <div className="flex gap-3 pt-2">

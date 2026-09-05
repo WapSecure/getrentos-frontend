@@ -1157,19 +1157,32 @@ function DepositClaimRow({
   claim: AdminShortletDepositClaim;
   onOpen: () => void;
 }) {
+  const resolved = claim.status !== 'PENDING';
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <p className="truncate font-medium">
             {formatCurrency(claim.amount)} claim · {claim.listingTitle ?? 'Shortlet'}
           </p>
           <Badge variant={CLAIM_STATUS_VARIANT[claim.status]}>{claim.status}</Badge>
+          {resolved && claim.deductedAmount != null && claim.deductedAmount > 0 && (
+            <span className="text-xs font-medium text-foreground/70">
+              {formatCurrency(claim.deductedAmount)} withheld
+            </span>
+          )}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {claim.claimedBy} → {claim.guestName} · {formatDate(claim.createdAt, 'short')}
+        </p>
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
           {claim.evidence.length > 0 && (
-            <span className="ml-1 text-xs">· {claim.evidence.length} photo(s)</span>
+            <span>
+              {claim.evidence.length} photo{claim.evidence.length > 1 ? 's' : ''}
+            </span>
+          )}
+          {resolved && claim.refundedAmount != null && (
+            <span>· guest refunded {formatCurrency(claim.refundedAmount)}</span>
           )}
         </p>
         <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{claim.reason}</p>
@@ -1242,34 +1255,37 @@ function AdjudicateClaimModal({
           </div>
           <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
             <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
-              <p className="font-medium text-muted-foreground">Claim reason</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-medium text-muted-foreground">Claim reason</p>
+                {claim.evidence.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {claim.evidence.length} evidence photo{claim.evidence.length > 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
               <p className="mt-1">{claim.reason}</p>
               {claim.evidenceUrls?.length ? (
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="mt-2.5 flex flex-wrap gap-2">
                   {claim.evidenceUrls.map((url, i) => (
                     <button
                       key={url}
                       type="button"
                       onClick={() => setEvidenceIdx(i)}
                       title={`View evidence photo ${i + 1}`}
-                      className="h-16 w-16 overflow-hidden rounded-md border border-border transition-transform hover:scale-105"
+                      className="group relative h-16 w-16 overflow-hidden rounded-md border border-border transition-transform hover:scale-105"
                     >
                       <img
                         src={url}
                         alt={`Evidence photo ${i + 1}`}
                         className="h-full w-full object-cover"
                       />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100">
+                        View
+                      </span>
                     </button>
                   ))}
                 </div>
-              ) : (
-                claim.evidence.length > 0 && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {claim.evidence.length} evidence photo{claim.evidence.length > 1 ? 's' : ''} on
-                    file
-                  </p>
-                )
-              )}
+              ) : null}
             </div>
 
             <Field label="Decision">

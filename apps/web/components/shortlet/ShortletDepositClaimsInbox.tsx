@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge, EmptyState, Skeleton, type BadgeVariant } from '@getrentos/ui';
-import { ShieldAlert } from 'lucide-react';
+import { RotateCcw, ShieldAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { ShortletDepositClaim, ShortletDepositClaimStatus } from '@/types/shortlet';
+import type { ShortletDepositClaimStatus } from '@/types/shortlet';
 
 const STATUS_VARIANT: Record<ShortletDepositClaimStatus, BadgeVariant> = {
   PENDING: 'warning',
@@ -62,46 +62,74 @@ export function ShortletDepositClaimsInbox({ role }: { role: 'host' | 'guest' })
         />
       ) : (
         <div className="divide-y divide-border">
-          {claims.map((c) => (
-            <div key={c.id} className="py-3">
-              <button
-                type="button"
-                className="w-full text-left"
-                onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-medium">
-                    {formatCurrency(c.amount)} · {c.listingTitle ?? 'Shortlet stay'}
+          {claims.map((c) => {
+            const resolved = c.status !== 'PENDING';
+            return (
+              <div key={c.id} className="py-3">
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                    <p className="truncate text-sm font-medium">
+                      {formatCurrency(c.amount)} · {c.listingTitle ?? 'Shortlet stay'}
+                    </p>
+                    <Badge variant={STATUS_VARIANT[c.status]}>{STATUS_LABEL[c.status]}</Badge>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {role === 'host' ? `vs ${c.guestName}` : `filed by ${c.claimedBy}`} ·{' '}
+                    {formatDate(c.createdAt, 'short')}
+                    {c.evidence.length > 0 && (
+                      <>
+                        {' '}
+                        <span aria-hidden>·</span> {c.evidence.length} photo
+                        {c.evidence.length > 1 ? 's' : ''}
+                      </>
+                    )}
                   </p>
-                  <Badge variant={STATUS_VARIANT[c.status]}>{STATUS_LABEL[c.status]}</Badge>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {role === 'host' ? `vs ${c.guestName}` : `by ${c.claimedBy}`} ·{' '}
-                  {formatDate(c.createdAt, 'short')}
-                </p>
-              </button>
-              {expandedId === c.id && (
-                <div className="mt-2 rounded-lg bg-muted p-3 text-sm">
-                  <p className="text-muted-foreground">{c.reason}</p>
-                  {c.evidence.length > 0 && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {c.evidence.length} evidence photo{c.evidence.length > 1 ? 's' : ''}
-                    </p>
-                  )}
-                  {c.resolution && (
-                    <p className="mt-2 rounded bg-success/10 px-2 py-1 text-xs text-success">
-                      Resolution: {c.resolution}
-                    </p>
-                  )}
-                  {c.resolvedAt && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Resolved {formatDate(c.resolvedAt, 'short')}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                </button>
+                {expandedId === c.id && (
+                  <div className="mt-2 space-y-2 rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                    <p className="whitespace-pre-wrap text-muted-foreground">{c.reason}</p>
+                    {(resolved && c.deductedAmount != null) ||
+                    (resolved && c.refundedAmount != null) ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {c.status !== 'REJECTED' && c.deductedAmount != null && (
+                          <Badge variant="danger">
+                            <ShieldAlert className="mr-1 h-3 w-3" /> Withheld{' '}
+                            {formatCurrency(c.deductedAmount)}
+                          </Badge>
+                        )}
+                        {c.refundedAmount != null && (
+                          <Badge variant="success">
+                            <RotateCcw className="mr-1 h-3 w-3" /> Refunded{' '}
+                            {formatCurrency(c.refundedAmount)}
+                          </Badge>
+                        )}
+                        {c.resolvedAt && (
+                          <span className="text-xs text-muted-foreground">
+                            Resolved {formatDate(c.resolvedAt, 'short')}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      c.resolvedAt && (
+                        <p className="text-xs text-muted-foreground">
+                          Resolved {formatDate(c.resolvedAt, 'short')}
+                        </p>
+                      )
+                    )}
+                    {c.resolution && (
+                      <p className="rounded-md bg-success/10 px-2 py-1.5 text-xs text-success">
+                        {c.resolution}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

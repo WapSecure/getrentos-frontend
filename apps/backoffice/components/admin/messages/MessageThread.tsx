@@ -20,6 +20,11 @@ interface MessageThreadProps {
   contactRole: string;
   messages: ThreadMessage[];
   onSend: (text: string) => void;
+  status?: string;
+  category?: string | null;
+  source?: string | null;
+  onResolve?: () => void;
+  resolving?: boolean;
 }
 
 export const MessageThread = ({
@@ -27,6 +32,11 @@ export const MessageThread = ({
   contactRole,
   messages,
   onSend,
+  status,
+  category,
+  source,
+  onResolve,
+  resolving = false,
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
 
@@ -48,15 +58,44 @@ export const MessageThread = ({
     e.target.value = '';
   };
 
+  const isResolved = status === 'RESOLVED';
+
   return (
     <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs">
-          {getInitials(contactName)}
+      <div className="p-4 border-b border-border flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+            {getInitials(contactName)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{contactName}</p>
+            <p className="text-xs text-gray-400 truncate">
+              {contactRole}
+              {category ? ` · ${category}` : ''}
+              {source ? ` · ${source}` : ''}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{contactName}</p>
-          <p className="text-xs text-gray-400">{contactRole}</p>
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+              isResolved
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+            }`}
+          >
+            {isResolved ? 'Resolved' : 'Open'}
+          </span>
+          {!isResolved && onResolve && (
+            <button
+              type="button"
+              onClick={onResolve}
+              disabled={resolving}
+              className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent disabled:opacity-50"
+            >
+              {resolving ? 'Resolving…' : 'Mark resolved'}
+            </button>
+          )}
         </div>
       </div>
 

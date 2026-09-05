@@ -43,3 +43,4 @@ export * from './Textarea';
 export * from './ThemeToggle';
 export * from './TimePicker';
 export * from './Toast';
+export * from './brand';

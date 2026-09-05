@@ -82,6 +82,10 @@ export interface ShortletBooking {
   hostNet?: number;
   depositClaimStatus?: ShortletDepositClaimStatus;
   depositClaimAmount?: number;
+  /** Naira withheld from the guest deposit by the latest resolved claim. */
+  depositClaimDeducted?: number;
+  /** Naira actually returned to the guest from the deposit (after any claim deduction). */
+  depositRefundedAmount?: number;
   reviewed?: boolean;
   guestReviewed?: boolean;
   guestRatingAverage?: number;
@@ -104,6 +108,10 @@ export interface ShortletDepositClaim {
   reason: string;
   evidence: string[];
   status: ShortletDepositClaimStatus;
+  /** Naira withheld from the guest refund by this claim (resolved claims only). */
+  deductedAmount?: number;
+  /** Naira refunded to the guest = deposit - deducted (resolved claims only). */
+  refundedAmount?: number;
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;

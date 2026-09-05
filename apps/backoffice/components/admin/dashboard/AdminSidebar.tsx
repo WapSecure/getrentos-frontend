@@ -20,6 +20,7 @@ import {
   BedDouble,
   Building2,
   Wallet,
+  Wrench,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -69,6 +70,12 @@ const navItems: NavItem[] = [
     href: '/admin/rent-finance',
     icon: Wallet,
     permission: 'rentfinance.view',
+  },
+  {
+    label: 'Maintenance',
+    href: '/admin/maintenance',
+    icon: Wrench,
+    permission: 'maintenance.view',
   },
   {
     label: 'Disputes',

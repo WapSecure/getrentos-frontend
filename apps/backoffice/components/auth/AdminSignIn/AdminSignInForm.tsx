@@ -163,7 +163,16 @@ export const AdminSignInForm = () => {
 
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-          <ShieldCheck className="h-7 w-7 text-primary" />
+          <svg
+            viewBox="0 0 128 144"
+            aria-hidden="true"
+            className="aspect-[8/9] h-9 w-auto text-primary"
+          >
+            <path
+              d="M16 44 64 14 112 44 112 70 96 70 96 53 64 33 32 53 32 91 64 110 88 96 88 79 68 79 68 63 104 63 104 105 64 129 16 100Z"
+              fill="currentColor"
+            />
+          </svg>
         </div>
         <h1 className="text-2xl font-bold text-foreground">Administrator Sign In</h1>
         <p className="mt-2 text-sm text-muted-foreground">

@@ -43,7 +43,9 @@ export type AdminPermission =
   | 'rentals.view'
   | 'rentals.moderate'
   | 'rentfinance.view'
-  | 'rentfinance.approve';
+  | 'rentfinance.approve'
+  | 'maintenance.view'
+  | 'maintenance.moderate';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
@@ -92,7 +94,16 @@ export type VerificationRequestStatus =
   | 'rejected'
   | 'needs_clarification';
 export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'escalated';
-export type DisputeCategory = 'escrow' | 'lease' | 'sale' | 'service_quality' | 'payment';
+export type DisputeCategory =
+  | 'escrow'
+  | 'lease'
+  | 'sale'
+  | 'service_quality'
+  | 'payment'
+  | 'damage'
+  | 'cancellation'
+  | 'other';
+export type DisputeResolveOutcome = 'none' | 'release' | 'refund';
 export type FraudAlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type FraudAlertStatus = 'flagged' | 'investigating' | 'cleared' | 'confirmed';
 export type PlatformEscrowStatus =
@@ -147,6 +158,9 @@ export interface Dispute {
   priority: 'low' | 'medium' | 'high';
   createdAt: string;
   description: string;
+  evidence?: string[];
+  resolution?: string;
+  resolvedAt?: string;
 }
 
 export interface DisputeMessage {
@@ -158,6 +172,52 @@ export interface DisputeMessage {
   timestamp: string;
 }
 
+export interface DisputeParty {
+  id: string;
+  legalName: string;
+  email?: string;
+}
+
+export interface DisputeTimelineEvent {
+  eventType: string;
+  status: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface DisputeTransactionContext {
+  id: string;
+  escrowStatus: string;
+  amount?: number;
+  depositAmount?: number;
+  flagged?: boolean;
+  frozenReason?: string;
+  offer?: { id: string; status: string };
+  property?: { id: string; title: string };
+  buyer?: DisputeParty;
+  seller?: DisputeParty;
+  events?: DisputeTimelineEvent[];
+}
+
+export interface DisputeDetail {
+  id: string;
+  title: string;
+  category: DisputeCategory;
+  priority: 'low' | 'medium' | 'high';
+  status: DisputeStatus;
+  description: string;
+  evidence?: string[];
+  createdAt: string;
+  updatedAt: string;
+  resolution?: string;
+  resolvedAt?: string;
+  raisedBy: DisputeParty;
+  against: DisputeParty;
+  resolvedBy?: { id: string; legalName: string };
+  transaction?: DisputeTransactionContext;
+  messages?: DisputeMessage[];
+}
+
 export interface FraudAlert {
   id: string;
   subjectName: string;
@@ -167,6 +227,28 @@ export interface FraudAlert {
   status: FraudAlertStatus;
   detectedAt: string;
   relatedEntity: string;
+}
+
+export interface FraudAlertSubject {
+  id: string;
+  legalName: string;
+  email?: string;
+  phone?: string;
+  role: PlatformRole;
+  isVerified: boolean;
+}
+
+export interface FraudAlertDetail {
+  id: string;
+  subject: FraudAlertSubject;
+  reason: string;
+  severity: FraudAlertSeverity;
+  status: FraudAlertStatus;
+  detectedAt: string;
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+  resolvedBy?: { id: string; legalName: string };
+  resolvedAt?: string;
 }
 
 export interface PlatformEscrowTransaction {
@@ -205,6 +287,10 @@ export interface Conversation {
   participantRole: string;
   lastMessage?: string;
   lastMessageTime?: string;
+  status?: 'OPEN' | 'RESOLVED';
+  category?: string | null;
+  source?: string;
+  userId?: string | null;
   unreadCount: number;
 }
 

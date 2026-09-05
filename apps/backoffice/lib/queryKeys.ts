@@ -52,6 +52,7 @@ export const adminKeys = {
       params?.pageSize ?? 20,
     ] as const,
   disputeMessages: (disputeId: string) => ['admin', 'disputes', disputeId, 'messages'] as const,
+  disputeDetail: (disputeId: string) => ['admin', 'disputes', disputeId, 'detail'] as const,
   fraudAlerts: (params?: {
     search?: string;
     status?: string;
@@ -68,6 +69,7 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  fraudAlertDetail: (id: string) => ['admin', 'fraudAlerts', id] as const,
   escrowTransactions: (params?: {
     search?: string;
     status?: string;
@@ -158,6 +160,35 @@ export const adminKeys = {
       params?.escrowStatus ?? 'all',
       params?.category ?? 'all',
       params?.verified === undefined ? 'all' : String(params.verified),
+      params?.page ?? 1,
+      params?.pageSize ?? 20,
+    ] as const,
+  maintenanceOverview: ['admin', 'maintenance', 'overview'] as const,
+  maintenance: (
+    resource: string,
+    params?: {
+      search?: string;
+      status?: string;
+      priority?: string;
+      category?: string;
+      isEmergency?: boolean;
+      isActive?: boolean;
+      due?: boolean;
+      page?: number;
+      pageSize?: number;
+    }
+  ) =>
+    [
+      'admin',
+      'maintenance',
+      resource,
+      params?.search ?? '',
+      params?.status ?? 'all',
+      params?.priority ?? 'all',
+      params?.category ?? 'all',
+      params?.isEmergency === undefined ? 'all' : String(params.isEmergency),
+      params?.isActive === undefined ? 'all' : String(params.isActive),
+      params?.due === undefined ? 'all' : String(params.due),
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,

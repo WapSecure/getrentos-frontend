@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
-import { DisputeResolutionModal } from '@/components/admin/disputes/DisputeResolutionModal';
-import { ConfirmDialog, EmptyState, PageErrorState } from '@getrentos/ui';
+import { DisputeCaseModal } from '@/components/admin/disputes/DisputeCaseModal';
+import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -13,7 +13,12 @@ import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import type { Dispute, DisputeCategory, DisputeMessage, DisputeStatus } from '@/types/admin';
+import type {
+  DisputeCategory,
+  DisputeMessage,
+  DisputeResolveOutcome,
+  DisputeStatus,
+} from '@/types/admin';
 
 type StatusFilter = 'all' | DisputeStatus;
 type CategoryFilter = 'all' | DisputeCategory;
@@ -28,11 +33,6 @@ export default function AdminDisputesPage() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [page, setPage] = useState(1);
   const [activeDisputeId, setActiveDisputeId] = useState<string | null>(null);
-  const [pendingDecision, setPendingDecision] = useState<{
-    dispute: Dispute;
-    action: 'resolve' | 'escalate';
-  } | null>(null);
-  const [resolution, setResolution] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,15 +64,15 @@ export default function AdminDisputesPage() {
   const disputes = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const {
-    data: activeDisputeMessages = [],
-    isLoading: messagesLoading,
-    isError: messagesError,
-    isFetching: messagesFetching,
-    refetch: refetchMessages,
-  } = useQuery({
+  const { data: activeDisputeMessages = [] } = useQuery({
     queryKey: adminKeys.disputeMessages(activeDisputeId ?? ''),
     queryFn: () => unwrap(adminService.getDisputeMessages(activeDisputeId!)),
+    enabled: !!activeDisputeId,
+  });
+
+  const { data: activeDisputeDetail, isLoading: activeDisputeDetailLoading } = useQuery({
+    queryKey: adminKeys.disputeDetail(activeDisputeId ?? ''),
+    queryFn: () => unwrap(adminService.getDisputeDetail(activeDisputeId!)),
     enabled: !!activeDisputeId,
   });
 
@@ -82,12 +82,29 @@ export default function AdminDisputesPage() {
     queryClient.invalidateQueries({ queryKey: ['admin', 'disputes'] });
 
   const resolveMutation = useMutation({
-    mutationFn: ({ id, resolution }: { id: string; resolution: string }) =>
-      unwrap(adminService.resolveDispute(id, resolution)),
+    mutationFn: ({
+      id,
+      resolution,
+      outcome,
+    }: {
+      id: string;
+      resolution?: string;
+      outcome: DisputeResolveOutcome;
+    }) => unwrap(adminService.resolveDispute(id, resolution, outcome)),
     onSuccess: () => {
       invalidateDisputes();
       setActiveDisputeId(null);
     },
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.startDisputeReview(id)),
+    onSuccess: invalidateDisputes,
+  });
+
+  const reopenMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.reopenDispute(id)),
+    onSuccess: invalidateDisputes,
   });
 
   const escalateMutation = useMutation({
@@ -127,12 +144,14 @@ export default function AdminDisputesPage() {
       queryClient.invalidateQueries({ queryKey: adminKeys.disputeMessages(id) }),
   });
 
-  const handleResolve = () => {
-    if (activeDispute) setPendingDecision({ dispute: activeDispute, action: 'resolve' });
-  };
-  const handleEscalate = () => {
-    if (activeDispute) setPendingDecision({ dispute: activeDispute, action: 'escalate' });
-  };
+  const handleResolve = (
+    id: string,
+    resolution?: string,
+    outcome: DisputeResolveOutcome = 'none'
+  ) => resolveMutation.mutate({ id, resolution, outcome });
+  const handleStartReview = (id: string) => reviewMutation.mutate(id);
+  const handleReopen = (id: string) => reopenMutation.mutate(id);
+  const handleEscalate = (id: string) => escalateMutation.mutate(id);
   const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
 
   const { data: openDisputes, isError: openCountError } = useQuery({
@@ -161,6 +180,9 @@ export default function AdminDisputesPage() {
     { value: 'sale', label: 'Sale' },
     { value: 'service_quality', label: 'Service Quality' },
     { value: 'payment', label: 'Payment' },
+    { value: 'damage', label: 'Damage' },
+    { value: 'cancellation', label: 'Cancellation' },
+    { value: 'other', label: 'Other' },
   ];
 
   return (
@@ -254,53 +276,22 @@ export default function AdminDisputesPage() {
         />
       )}
 
-      <DisputeResolutionModal
+      <DisputeCaseModal
         dispute={activeDispute}
+        detail={activeDisputeDetail}
+        detailLoading={activeDisputeDetailLoading}
         messages={activeDisputeMessages}
         onClose={() => setActiveDisputeId(null)}
-        onResolve={handleResolve}
+        onStartReview={handleStartReview}
+        onReopen={handleReopen}
         onEscalate={handleEscalate}
+        onResolve={handleResolve}
         onSendMessage={handleSendMessage}
         isResolving={resolveMutation.isPending}
+        isReviewing={reviewMutation.isPending}
+        isReopening={reopenMutation.isPending}
         isEscalating={escalateMutation.isPending}
         isSendingMessage={sendMessageMutation.isPending}
-        messagesLoading={messagesLoading}
-        messagesError={messagesError}
-        messagesRetrying={messagesFetching}
-        onRetryMessages={() => void refetchMessages()}
-      />
-
-      <ConfirmDialog
-        open={pendingDecision !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPendingDecision(null);
-            setResolution('');
-          }
-        }}
-        title={pendingDecision?.action === 'resolve' ? 'Resolve dispute?' : 'Escalate dispute?'}
-        description={
-          pendingDecision?.action === 'resolve'
-            ? `${pendingDecision.dispute.title} will be closed with the resolution recorded for both parties.`
-            : `${pendingDecision?.dispute.title ?? 'This dispute'} will move to escalated review.`
-        }
-        confirmLabel={pendingDecision?.action === 'resolve' ? 'Resolve dispute' : 'Escalate'}
-        onConfirm={() => {
-          if (pendingDecision?.action === 'resolve') {
-            resolveMutation.mutate({
-              id: pendingDecision.dispute.id,
-              resolution: resolution.trim(),
-            });
-          } else if (pendingDecision) {
-            escalateMutation.mutate(pendingDecision.dispute.id);
-          }
-        }}
-        promptLabel={pendingDecision?.action === 'resolve' ? 'Resolution' : undefined}
-        promptPlaceholder="Explain the final decision to both parties…"
-        promptValue={resolution}
-        onPromptChange={setResolution}
-        promptRequired={pendingDecision?.action === 'resolve'}
-        promptMinLength={10}
       />
     </>
   );
