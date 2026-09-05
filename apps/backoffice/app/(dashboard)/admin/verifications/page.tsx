@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -41,7 +41,7 @@ export default function AdminVerificationsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.verifications({
       search: debouncedSearch,
       status: statusFilter,
@@ -93,7 +93,7 @@ export default function AdminVerificationsPage() {
   const handleRequestClarification = (id: string, reason: string) =>
     requestClarificationMutation.mutate({ id, reason });
 
-  const { data: pendingData } = useQuery({
+  const { data: pendingData, isError: pendingCountError } = useQuery({
     queryKey: ['admin', 'verifications', 'pending-count'],
     queryFn: () =>
       unwrap(adminService.listVerifications({ status: 'pending_review', page: 1, pageSize: 1 })),
@@ -120,7 +120,9 @@ export default function AdminVerificationsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Verification Queue</h1>
         <p className="text-muted-foreground mt-1">
-          {pendingReviewCount} request{pendingReviewCount === 1 ? '' : 's'} awaiting review
+          {pendingCountError
+            ? 'Pending-review count temporarily unavailable'
+            : `${pendingReviewCount} request${pendingReviewCount === 1 ? '' : 's'} awaiting review`}
         </p>
       </div>
 
@@ -168,7 +170,14 @@ export default function AdminVerificationsPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <PageErrorState
+          title="Could not load verification requests"
+          description="The verification queue is temporarily unavailable. Your filters have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, PageErrorState, Toast } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
@@ -43,6 +43,7 @@ export default function AdminDocumentsPage() {
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [page, setPage] = useState(1);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -52,7 +53,7 @@ export default function AdminDocumentsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.documents({
       search: debouncedSearch,
       category: filter,
@@ -89,7 +90,11 @@ export default function AdminDocumentsPage() {
   const handleDownload = async (id: string) => {
     const response = await adminService.getDocumentDownloadUrl(id);
     if (response.success && response.data) {
-      window.open(response.data.url, '_blank');
+      window.open(response.data.url, '_blank', 'noopener,noreferrer');
+    } else {
+      setDownloadError(
+        response.error ?? response.message ?? 'The document could not be downloaded.'
+      );
     }
   };
 
@@ -112,8 +117,9 @@ export default function AdminDocumentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">
-            Platform policies, compliance filings, and legal agreements, {total} file
-            {total === 1 ? '' : 's'}
+            {isError
+              ? 'Platform policies, compliance filings, and legal agreements · file count unavailable'
+              : `Platform policies, compliance filings, and legal agreements · ${total} file${total === 1 ? '' : 's'}`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setUploadOpen(true)}>
@@ -157,7 +163,14 @@ export default function AdminDocumentsPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <PageErrorState
+          title="Could not load documents"
+          description="The document register is temporarily unavailable. Your search and category filter have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
@@ -208,6 +221,9 @@ export default function AdminDocumentsPage() {
         categories={categoryOptions}
         onUpload={handleUpload}
       />
+      {downloadError && (
+        <Toast message={downloadError} variant="error" onClose={() => setDownloadError(null)} />
+      )}
     </>
   );
 }

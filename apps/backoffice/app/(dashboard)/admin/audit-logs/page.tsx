@@ -2,10 +2,10 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ScrollText } from 'lucide-react';
-import { DataTable, type Column } from '@getrentos/ui';
+import { DataTable, PageErrorState, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -28,12 +28,13 @@ const PAGE_SIZE = 10;
 
 export default function AdminAuditLogsPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.auditLogs({
-      search: searchQuery,
+      search: debouncedSearch,
       severity: severityFilter,
       page,
       pageSize: PAGE_SIZE,
@@ -41,7 +42,7 @@ export default function AdminAuditLogsPage() {
     queryFn: () =>
       unwrap(
         adminService.listAuditLogs({
-          search: searchQuery || undefined,
+          search: debouncedSearch || undefined,
           severity: severityFilter === 'all' ? undefined : severityFilter,
           page,
           pageSize: PAGE_SIZE,
@@ -57,6 +58,14 @@ export default function AdminAuditLogsPage() {
     { value: 'warning', label: 'Warning' },
     { value: 'info', label: 'Info' },
   ];
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
 
   const columns: Column<AuditLogEntry>[] = useMemo(
     () => [
@@ -154,18 +163,27 @@ export default function AdminAuditLogsPage() {
         ))}
       </div>
 
-      <DataTable
-        columns={columns}
-        data={logs}
-        isLoading={isLoading}
-        getRowKey={(log) => log.id}
-        emptyState={<EmptyState icon={ScrollText} title="No log entries match your filters" />}
-        footer={
-          total > 0 && (
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
-          )
-        }
-      />
+      {isError ? (
+        <PageErrorState
+          title="Could not load audit logs"
+          description="The sensitive-action record is temporarily unavailable. Your search and severity filter have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={logs}
+          isLoading={isLoading}
+          getRowKey={(log) => log.id}
+          emptyState={<EmptyState icon={ScrollText} title="No log entries match your filters" />}
+          footer={
+            total > 0 && (
+              <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+            )
+          }
+        />
+      )}
     </>
   );
 }

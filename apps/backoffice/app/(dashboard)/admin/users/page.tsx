@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
-import { DataTable, type Column } from '@getrentos/ui';
+import { DataTable, PageErrorState, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.users({
       search: debouncedSearch,
       status: statusFilter,
@@ -220,19 +220,28 @@ export default function AdminUsersPage() {
         </TabsList>
       </Tabs>
 
-      <DataTable
-        columns={columns}
-        data={users}
-        isLoading={isLoading}
-        getRowKey={(u) => u.id}
-        onRowClick={(u) => setActiveUser(u)}
-        emptyState={<EmptyState icon={Users} title="No users match your filters" />}
-        footer={
-          total > 0 && (
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
-          )
-        }
-      />
+      {isError ? (
+        <PageErrorState
+          title="Could not load users"
+          description="The user directory is temporarily unavailable. Your filters have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={users}
+          isLoading={isLoading}
+          getRowKey={(u) => u.id}
+          onRowClick={(u) => setActiveUser(u)}
+          emptyState={<EmptyState icon={Users} title="No users match your filters" />}
+          footer={
+            total > 0 && (
+              <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+            )
+          }
+        />
+      )}
 
       <UserDetailModal
         user={activeUser}
