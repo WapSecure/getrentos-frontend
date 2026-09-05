@@ -26,6 +26,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'rentals.moderate',
   'rentfinance.view',
   'rentfinance.approve',
+  'maintenance.view',
+  'maintenance.moderate',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -107,6 +109,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'reports.view',
       'rentfinance.view',
       'rentfinance.approve',
+      'maintenance.view',
     ],
   },
   compliance_manager: {
@@ -126,12 +129,20 @@ export const ADMIN_ROLE_DETAILS: Record<
       'rentals.view',
       'rentals.moderate',
       'rentfinance.view',
+      'maintenance.view',
+      'maintenance.moderate',
     ],
   },
   support_agent: {
     label: 'Support Agent',
     description: 'Assists users without approving or moving money.',
-    permissions: ['dashboard.view', 'users.view', 'messages.manage', 'shortlet.view'],
+    permissions: [
+      'dashboard.view',
+      'users.view',
+      'messages.manage',
+      'shortlet.view',
+      'maintenance.view',
+    ],
   },
 };
 

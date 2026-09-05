@@ -43,7 +43,9 @@ export type AdminPermission =
   | 'rentals.view'
   | 'rentals.moderate'
   | 'rentfinance.view'
-  | 'rentfinance.approve';
+  | 'rentfinance.approve'
+  | 'maintenance.view'
+  | 'maintenance.moderate';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
