@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -135,6 +136,14 @@ export const ShortletOversight = () => {
   const [claimStatus, setClaimStatus] = useState<'all' | AdminShortletDepositClaimStatus>('all');
   const [claimSearch, setClaimSearch] = useState('');
   const [activeClaim, setActiveClaim] = useState<AdminShortletDepositClaim | null>(null);
+  const [pendingModeration, setPendingModeration] = useState<{
+    listing: AdminShortletListing;
+    action: 'pause' | 'resume' | 'close' | 'flag' | 'approve';
+  } | null>(null);
+  const [pendingDisputeAction, setPendingDisputeAction] = useState<'resolve' | 'escalate' | null>(
+    null
+  );
+  const [disputeResolution, setDisputeResolution] = useState('');
 
   const {
     data: overview,
@@ -323,17 +332,17 @@ export const ShortletOversight = () => {
   });
 
   const disputeAction = useMutation({
-    mutationFn: (action: 'resolve' | 'escalate') =>
+    mutationFn: (input: { action: 'resolve' | 'escalate'; resolution?: string }) =>
       unwrap(
-        action === 'resolve'
-          ? adminShortletService.resolveDispute(activeDispute!.id)
+        input.action === 'resolve'
+          ? adminShortletService.resolveDispute(activeDispute!.id, input.resolution)
           : adminShortletService.escalateDispute(activeDispute!.id)
       ),
-    onSuccess: (_, action) => {
+    onSuccess: (_, input) => {
       setActiveDispute(null);
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'disputes'] });
       setToast({
-        message: action === 'resolve' ? 'Dispute resolved.' : 'Dispute escalated.',
+        message: input.action === 'resolve' ? 'Dispute resolved.' : 'Dispute escalated.',
         variant: 'success',
       });
     },
@@ -525,7 +534,7 @@ export const ShortletOversight = () => {
                   key={l.id}
                   listing={l}
                   busy={moderation.isPending}
-                  onModerate={(action) => moderation.mutate({ listingId: l.id, action })}
+                  onModerate={(action) => setPendingModeration({ listing: l, action })}
                 />
               ))}
             </div>
@@ -768,10 +777,73 @@ export const ShortletOversight = () => {
           replying={disputeReply.isPending}
           onReply={() => disputeReply.mutate(threadDraft)}
           actionPending={disputeAction.isPending}
-          onAction={(action) => disputeAction.mutate(action)}
+          onAction={setPendingDisputeAction}
           onClose={() => setActiveDispute(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={pendingModeration !== null}
+        onOpenChange={(open) => !open && setPendingModeration(null)}
+        title={
+          pendingModeration
+            ? `${pendingModeration.action[0].toUpperCase()}${pendingModeration.action.slice(1)} listing?`
+            : 'Confirm listing action'
+        }
+        description={
+          pendingModeration
+            ? `${pendingModeration.listing.title} will be ${
+                {
+                  pause: 'hidden from guests until resumed',
+                  resume: 'published to guests again',
+                  close: 'permanently closed and removed from active inventory',
+                  flag: 'hidden and returned to verification',
+                  approve: 'approved and published to guests',
+                }[pendingModeration.action]
+              }.`
+            : ''
+        }
+        confirmLabel={pendingModeration ? `${pendingModeration.action} listing` : 'Confirm'}
+        onConfirm={() => {
+          if (pendingModeration) {
+            moderation.mutate({
+              listingId: pendingModeration.listing.id,
+              action: pendingModeration.action,
+            });
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={pendingDisputeAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingDisputeAction(null);
+            setDisputeResolution('');
+          }
+        }}
+        title={pendingDisputeAction === 'resolve' ? 'Resolve dispute?' : 'Escalate dispute?'}
+        description={
+          pendingDisputeAction === 'resolve'
+            ? 'This closes the dispute and records the resolution for the parties and audit trail.'
+            : 'This moves the dispute to the escalated queue for higher-level review.'
+        }
+        confirmLabel={pendingDisputeAction === 'resolve' ? 'Resolve dispute' : 'Escalate'}
+        onConfirm={() => {
+          if (pendingDisputeAction) {
+            disputeAction.mutate({
+              action: pendingDisputeAction,
+              resolution: disputeResolution.trim() || undefined,
+            });
+          }
+        }}
+        promptLabel={pendingDisputeAction === 'resolve' ? 'Resolution' : undefined}
+        promptPlaceholder="Explain the final decision to both parties…"
+        promptValue={disputeResolution}
+        onPromptChange={setDisputeResolution}
+        promptRequired={pendingDisputeAction === 'resolve'}
+        promptMinLength={10}
+      />
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
@@ -1151,6 +1223,7 @@ function AdjudicateClaimModal({
 
   const canSubmit =
     (decision !== 'PARTIAL' || (Number(deducted) > 0 && Number(deducted) <= claim.amount)) &&
+    resolution.trim().length >= 10 &&
     !pending;
 
   return (
@@ -1224,12 +1297,17 @@ function AdjudicateClaimModal({
               </Field>
             )}
 
-            <Field label="Resolution note (shown to both parties)" hint="Optional but recommended.">
+            <Field
+              label="Resolution note (shown to both parties)"
+              hint="Required · At least 10 characters for the decision record."
+            >
               <Textarea
                 value={resolution}
                 onChange={(e) => setResolution(e.target.value)}
                 placeholder="e.g. Evidence confirms partial damage; deducted ₦10,000…"
                 rows={3}
+                required
+                minLength={10}
                 maxLength={2000}
               />
             </Field>
@@ -1238,7 +1316,7 @@ function AdjudicateClaimModal({
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={submit} disabled={!canSubmit}>
+              <Button onClick={submit} disabled={!canSubmit} isLoading={pending}>
                 {pending ? 'Processing…' : 'Confirm decision'}
               </Button>
             </div>
@@ -1274,71 +1352,96 @@ function FeeConfigForm({
   const [commission, setCommission] = useState(String(feeConfig.commissionPct));
   const [taxName, setTaxName] = useState(feeConfig.taxName ?? '');
   const [taxPct, setTaxPct] = useState(String(feeConfig.taxPct));
+  const [pendingInput, setPendingInput] = useState<{
+    commissionPct: number;
+    taxName?: string;
+    taxPct: number;
+  } | null>(null);
+
+  const nextInput = {
+    commissionPct: Math.min(100, Math.max(0, Number(commission) || 0)),
+    taxName: taxName.trim() || undefined,
+    taxPct: Math.min(100, Math.max(0, Number(taxPct) || 0)),
+  };
+  const isDirty =
+    nextInput.commissionPct !== feeConfig.commissionPct ||
+    (nextInput.taxName ?? '') !== (feeConfig.taxName ?? '') ||
+    nextInput.taxPct !== feeConfig.taxPct;
 
   const submit = () => {
-    onSave({
-      commissionPct: Math.min(100, Math.max(0, Number(commission) || 0)),
-      taxName: taxName.trim() || undefined,
-      taxPct: Math.min(100, Math.max(0, Number(taxPct) || 0)),
-    });
+    if (isDirty) setPendingInput(nextInput);
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="border-b border-border p-5">
-        <div className="flex items-center gap-2">
-          <Percent className="h-5 w-5" />
-          <p className="font-medium">Platform fees & taxes</p>
+    <>
+      <div className="rounded-xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border p-5">
+          <div className="flex items-center gap-2">
+            <Percent className="h-5 w-5" />
+            <p className="font-medium">Platform fees & taxes</p>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            A commission is withheld from each host payout; a tax (e.g. VAT) is added to the guest
+            charge. Both are snapshotted at booking time, so changes apply to new bookings only.
+          </p>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          A commission is withheld from each host payout; a tax (e.g. VAT) is added to the guest
-          charge. Both are snapshotted at booking time, so changes apply to new bookings only.
-        </p>
+        <div className="grid gap-5 p-5 md:grid-cols-3">
+          <Field
+            label="Platform commission (%)"
+            hint="Withheld from the host payout. Hosts see net earnings."
+          >
+            <NumberInput
+              min={0}
+              max={100}
+              value={commission}
+              onValueChange={setCommission}
+              placeholder="e.g. 10"
+            />
+          </Field>
+          <Field label="Tax label" hint="Shown at checkout, e.g. VAT. Empty clears it.">
+            <Input
+              value={taxName}
+              onChange={(e) => setTaxName(e.target.value)}
+              placeholder="e.g. VAT"
+              maxLength={60}
+            />
+          </Field>
+          <Field label="Tax (%)" hint="Added to the guest charge on top of the stay total.">
+            <NumberInput
+              integer={false}
+              min={0}
+              max={100}
+              value={taxPct}
+              onValueChange={setTaxPct}
+              placeholder="e.g. 7.5"
+            />
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border p-4">
+          <p className="text-xs text-muted-foreground">
+            Current: {feeConfig.commissionPct}% commission
+            {feeConfig.taxPct > 0
+              ? ` · ${feeConfig.taxName ?? 'Tax'} ${feeConfig.taxPct}%`
+              : ' · no tax'}{' '}
+            · updated {formatDate(feeConfig.updatedAt, 'short')}
+          </p>
+          <Button onClick={submit} disabled={saving || !isDirty} isLoading={saving}>
+            {saving ? 'Saving…' : 'Save fees & taxes'}
+          </Button>
+        </div>
       </div>
-      <div className="grid gap-5 p-5 md:grid-cols-3">
-        <Field
-          label="Platform commission (%)"
-          hint="Withheld from the host payout. Hosts see net earnings."
-        >
-          <NumberInput
-            min={0}
-            max={100}
-            value={commission}
-            onValueChange={setCommission}
-            placeholder="e.g. 10"
-          />
-        </Field>
-        <Field label="Tax label" hint="Shown at checkout, e.g. VAT. Empty clears it.">
-          <Input
-            value={taxName}
-            onChange={(e) => setTaxName(e.target.value)}
-            placeholder="e.g. VAT"
-            maxLength={60}
-          />
-        </Field>
-        <Field label="Tax (%)" hint="Added to the guest charge on top of the stay total.">
-          <NumberInput
-            integer={false}
-            min={0}
-            max={100}
-            value={taxPct}
-            onValueChange={setTaxPct}
-            placeholder="e.g. 7.5"
-          />
-        </Field>
-      </div>
-      <div className="flex items-center justify-end gap-3 border-t border-border p-4">
-        <p className="text-xs text-muted-foreground">
-          Current: {feeConfig.commissionPct}% commission
-          {feeConfig.taxPct > 0
-            ? ` · ${feeConfig.taxName ?? 'Tax'} ${feeConfig.taxPct}%`
-            : ' · no tax'}{' '}
-          · updated {formatDate(feeConfig.updatedAt, 'short')}
-        </p>
-        <Button onClick={submit} disabled={saving}>
-          {saving ? 'Saving…' : 'Save fees & taxes'}
-        </Button>
-      </div>
-    </div>
+      <ConfirmDialog
+        open={pendingInput !== null}
+        onOpenChange={(open) => !open && setPendingInput(null)}
+        title="Apply new shortlet fees?"
+        description={
+          pendingInput
+            ? `New bookings will use ${pendingInput.commissionPct}% commission and ${pendingInput.taxPct}% ${pendingInput.taxName ?? 'tax'}. Existing bookings keep their original fee snapshot.`
+            : ''
+        }
+        confirmLabel="Apply fee changes"
+        onConfirm={() => pendingInput && onSave(pendingInput)}
+      />
+    </>
   );
 }
