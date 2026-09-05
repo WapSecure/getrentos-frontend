@@ -20,7 +20,7 @@ import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { TableSkeleton } from '@getrentos/ui';
 import { Toast, type ToastVariant } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -30,11 +30,6 @@ import { adminKeys } from '@/lib/queryKeys';
 import { ADMIN_ROLE_DETAILS, creatableStaffRoles, hasAdminPermission } from '@/lib/adminAccess';
 import { formatRelativeTime, getInitials } from '@getrentos/shared';
 import type { AdminStaffMember, AdminStaffRole } from '@/types/admin';
-
-const roleOptions = Object.entries(ADMIN_ROLE_DETAILS).map(([role, details]) => ({
-  value: role,
-  label: details.label,
-}));
 
 const PAGE_SIZE = 10;
 
@@ -57,15 +52,26 @@ export default function AdminAccessPage() {
     member: AdminStaffMember;
     status: 'active' | 'suspended';
   } | null>(null);
+  const [roleTarget, setRoleTarget] = useState<{
+    member: AdminStaffMember;
+    role: AdminStaffRole;
+  } | null>(null);
   const [staffPage, setStaffPage] = useState(1);
 
-  const { data: staffData, isLoading } = useQuery({
+  const {
+    data: staffData,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: adminKeys.staffList({ page: staffPage, pageSize: PAGE_SIZE }),
     queryFn: () => unwrap(adminService.listStaff({ page: staffPage, pageSize: PAGE_SIZE })),
     enabled: canManage,
   });
   const staff = staffData?.items ?? [];
   const staffTotal = staffData?.total ?? 0;
+  const assignableRoles = useMemo(() => new Set(creatableRoles), [creatableRoles]);
 
   const updateRoleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: AdminStaffRole }) =>
@@ -73,9 +79,12 @@ export default function AdminAccessPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.staff });
       notify('Staff role updated.', 'success');
+      setRoleTarget(null);
     },
-    onError: (err) =>
-      notify(err instanceof Error ? err.message : 'Failed to update role.', 'error'),
+    onError: (err) => {
+      notify(err instanceof Error ? err.message : 'Failed to update role.', 'error');
+      setRoleTarget(null);
+    },
   });
 
   const statusMutation = useMutation({
@@ -159,6 +168,14 @@ export default function AdminAccessPage() {
 
           {isLoading ? (
             <TableSkeleton rows={4} columns={4} />
+          ) : isError ? (
+            <PageErrorState
+              title="Staff directory unavailable"
+              description="Staff accounts could not be loaded. No access changes can be made until the current records are available."
+              onRetry={() => refetch()}
+              isRetrying={isFetching}
+              className="min-h-80 border-0"
+            />
           ) : staff.length === 0 ? (
             <EmptyState
               icon={UserRoundPlus}
@@ -213,11 +230,22 @@ export default function AdminAccessPage() {
                     <Select
                       ariaLabel={`Role for ${member.legalName}`}
                       value={member.roles[0]?.role}
-                      disabled={updateRoleMutation.isPending || member.accountStatus === 'pending'}
-                      onValueChange={(role) =>
-                        updateRoleMutation.mutate({ id: member.id, role: role as AdminStaffRole })
+                      disabled={
+                        updateRoleMutation.isPending ||
+                        isSelf(member) ||
+                        member.accountStatus === 'pending'
                       }
-                      options={roleOptions}
+                      onValueChange={(role) => {
+                        if (role !== member.roles[0]?.role)
+                          setRoleTarget({ member, role: role as AdminStaffRole });
+                      }}
+                      options={Object.entries(ADMIN_ROLE_DETAILS).map(([role, details]) => ({
+                        value: role,
+                        label: details.label,
+                        disabled:
+                          !assignableRoles.has(role as AdminStaffRole) &&
+                          role !== member.roles[0]?.role,
+                      }))}
                       className="w-full sm:w-52"
                     />
                     {member.accountStatus === 'suspended' || member.accountStatus === 'banned' ? (
@@ -225,7 +253,7 @@ export default function AdminAccessPage() {
                         variant="outline"
                         size="sm"
                         className="gap-1.5"
-                        disabled={isSelf(member)}
+                        disabled={isSelf(member) || statusMutation.isPending}
                         onClick={() => setStatusTarget({ member, status: 'active' })}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" />
@@ -236,7 +264,7 @@ export default function AdminAccessPage() {
                         variant="outline"
                         size="sm"
                         className="gap-1.5"
-                        disabled={isSelf(member)}
+                        disabled={isSelf(member) || statusMutation.isPending}
                         onClick={() => setStatusTarget({ member, status: 'suspended' })}
                       >
                         <ShieldAlert className="h-3.5 w-3.5" />
@@ -247,6 +275,7 @@ export default function AdminAccessPage() {
                       variant="ghost"
                       size="sm"
                       className="gap-1.5"
+                      disabled={isSelf(member) || member.accountStatus === 'pending'}
                       onClick={() => setResetTarget(member)}
                     >
                       <KeyRound className="h-3.5 w-3.5" />
@@ -307,6 +336,21 @@ export default function AdminAccessPage() {
         onConfirm={() =>
           statusTarget &&
           statusMutation.mutate({ id: statusTarget.member.id, status: statusTarget.status })
+        }
+      />
+      <ConfirmDialog
+        open={!!roleTarget}
+        onOpenChange={(open) => !open && setRoleTarget(null)}
+        title="Change staff role?"
+        description={
+          roleTarget
+            ? `${roleTarget.member.legalName} will become ${ADMIN_ROLE_DETAILS[roleTarget.role].label}. This grants: ${ADMIN_ROLE_DETAILS[roleTarget.role].permissions.join(', ')}.`
+            : ''
+        }
+        confirmLabel="Change role"
+        onConfirm={() =>
+          roleTarget &&
+          updateRoleMutation.mutate({ id: roleTarget.member.id, role: roleTarget.role })
         }
       />
     </>

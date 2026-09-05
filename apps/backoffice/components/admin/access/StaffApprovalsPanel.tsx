@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Inbox, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, ConfirmDialog, PageErrorState } from '@getrentos/ui';
 import { Badge } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
@@ -26,9 +26,10 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
   const queryClient = useQueryClient();
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [approveTarget, setApproveTarget] = useState<AdminStaffApproval | null>(null);
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.staffApprovalsList({ page, pageSize: PAGE_SIZE }),
     queryFn: () => unwrap(adminService.listApprovals({ page, pageSize: PAGE_SIZE })),
   });
@@ -46,9 +47,12 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
       invalidate();
       setPage(1);
       notify('Staff member approved — they can now sign in.', 'success');
+      setApproveTarget(null);
     },
-    onError: (err) =>
-      notify(err instanceof Error ? err.message : 'Failed to approve this request.', 'error'),
+    onError: (err) => {
+      notify(err instanceof Error ? err.message : 'Failed to approve this request.', 'error');
+      setApproveTarget(null);
+    },
   });
 
   const rejectMutation = useMutation({
@@ -109,12 +113,17 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               autoFocus
+              disabled={rejectMutation.isPending}
             />
+            <p className="text-xs text-muted-foreground">
+              Provide at least 10 characters for the administrative audit trail.
+            </p>
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 className="flex-1"
+                disabled={rejectMutation.isPending}
                 onClick={() => {
                   setRejectingId(null);
                   setRejectReason('');
@@ -126,7 +135,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
                 variant="danger"
                 size="sm"
                 className="flex-1"
-                disabled={!rejectReason.trim()}
+                disabled={rejectReason.trim().length < 10 || rejectMutation.isPending}
                 isLoading={rejectMutation.isPending}
                 onClick={() =>
                   rejectMutation.mutate({ id: approval.id, reason: rejectReason.trim() })
@@ -157,7 +166,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
               className="gap-1.5"
               disabled={busy}
               isLoading={approveMutation.isPending}
-              onClick={() => approveMutation.mutate(approval.id)}
+              onClick={() => setApproveTarget(approval)}
             >
               <Check className="h-3.5 w-3.5" />
               Approve
@@ -182,6 +191,14 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
 
       {isLoading ? (
         <p className="p-5 text-sm text-muted-foreground">Loading approvals…</p>
+      ) : isError ? (
+        <PageErrorState
+          title="Pending approvals unavailable"
+          description="Approval requests could not be loaded. No request has been approved or rejected."
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+          className="min-h-64 border-0"
+        />
       ) : approvals.length === 0 ? (
         <EmptyState
           icon={Inbox}
@@ -198,6 +215,18 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
           <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
         </div>
       )}
+      <ConfirmDialog
+        open={!!approveTarget}
+        onOpenChange={(open) => !open && setApproveTarget(null)}
+        title="Approve staff access?"
+        description={
+          approveTarget
+            ? `${approveTarget.staffUser.legalName} will be able to sign in with the assigned ${approveTarget.staffUser.roles.map(({ role }) => ADMIN_ROLE_DETAILS[role]?.label ?? role).join(', ')} role.`
+            : ''
+        }
+        confirmLabel="Approve access"
+        onConfirm={() => approveTarget && approveMutation.mutate(approveTarget.id)}
+      />
     </section>
   );
 };
