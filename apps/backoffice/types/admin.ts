@@ -41,7 +41,9 @@ export type AdminPermission =
   | 'shortlet.view'
   | 'shortlet.moderate'
   | 'rentals.view'
-  | 'rentals.moderate';
+  | 'rentals.moderate'
+  | 'rentfinance.view'
+  | 'rentfinance.approve';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 

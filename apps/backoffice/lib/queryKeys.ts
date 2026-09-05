@@ -136,4 +136,29 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  rentFinanceOverview: ['admin', 'rentFinance', 'overview'] as const,
+  rentFinance: (
+    resource: string,
+    params?: {
+      search?: string;
+      status?: string;
+      escrowStatus?: string;
+      category?: string;
+      verified?: boolean;
+      page?: number;
+      pageSize?: number;
+    }
+  ) =>
+    [
+      'admin',
+      'rentFinance',
+      resource,
+      params?.search ?? '',
+      params?.status ?? 'all',
+      params?.escrowStatus ?? 'all',
+      params?.category ?? 'all',
+      params?.verified === undefined ? 'all' : String(params.verified),
+      params?.page ?? 1,
+      params?.pageSize ?? 20,
+    ] as const,
 };

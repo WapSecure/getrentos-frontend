@@ -19,6 +19,7 @@ import {
   MapPinned,
   BedDouble,
   Building2,
+  Wallet,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -62,6 +63,12 @@ const navItems: NavItem[] = [
     href: '/admin/rentals',
     icon: Building2,
     permission: 'rentals.view',
+  },
+  {
+    label: 'Rent Finance',
+    href: '/admin/rent-finance',
+    icon: Wallet,
+    permission: 'rentfinance.view',
   },
   {
     label: 'Disputes',

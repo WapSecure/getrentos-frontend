@@ -24,6 +24,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'shortlet.moderate',
   'rentals.view',
   'rentals.moderate',
+  'rentfinance.view',
+  'rentfinance.approve',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -64,6 +66,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'fraud.freeze',
       'audit.view',
       'reports.view',
+      'rentfinance.view',
     ],
   },
   dispute_officer: {
@@ -82,12 +85,29 @@ export const ADMIN_ROLE_DETAILS: Record<
   escrow_officer: {
     label: 'Escrow Officer',
     description: 'Reviews escrow milestones and exceptions.',
-    permissions: ['dashboard.view', 'users.view', 'escrow.view', 'audit.view', 'documents.manage'],
+    permissions: [
+      'dashboard.view',
+      'users.view',
+      'escrow.view',
+      'escrow.approve',
+      'audit.view',
+      'documents.manage',
+      'rentfinance.view',
+      'rentfinance.approve',
+    ],
   },
   finance_approver: {
     label: 'Finance Approver',
     description: 'Approves financial decisions within policy thresholds.',
-    permissions: ['dashboard.view', 'escrow.view', 'escrow.approve', 'audit.view', 'reports.view'],
+    permissions: [
+      'dashboard.view',
+      'escrow.view',
+      'escrow.approve',
+      'audit.view',
+      'reports.view',
+      'rentfinance.view',
+      'rentfinance.approve',
+    ],
   },
   compliance_manager: {
     label: 'Compliance Manager',
@@ -105,6 +125,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'shortlet.view',
       'rentals.view',
       'rentals.moderate',
+      'rentfinance.view',
     ],
   },
   support_agent: {
