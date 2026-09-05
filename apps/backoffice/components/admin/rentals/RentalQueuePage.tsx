@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { DataTable, type Column } from '@getrentos/ui';
-import { EmptyState, Input, Pagination, Select } from '@getrentos/ui';
+import { EmptyState, Input, PageErrorState, Pagination, Select } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -43,7 +43,7 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.rentals(config.resource, {
       search: debounced,
       status,
@@ -81,6 +81,17 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
     () => [{ value: 'all', label: 'All statuses' }, ...config.statusOptions],
     [config.statusOptions]
   );
+
+  if (isError) {
+    return (
+      <PageErrorState
+        title={`Could not load ${config.eyebrow.toLowerCase()}`}
+        description="The rental records are temporarily unavailable. Your search and status filter have been preserved."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

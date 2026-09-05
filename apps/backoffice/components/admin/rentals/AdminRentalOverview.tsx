@@ -13,7 +13,7 @@ import {
   Gavel,
   Landmark,
 } from 'lucide-react';
-import { StatCard } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, StatCard } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentalService } from '@/services/adminRentalService';
@@ -70,10 +70,24 @@ const modules = [
 ] as const;
 
 export const AdminRentalsOverview = () => {
-  const { data } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.rentalOverview,
     queryFn: () => unwrap(adminRentalService.overview()),
   });
+
+  if (isLoading) return <PageLoadingState />;
+
+  if (isError) {
+    return (
+      <PageErrorState
+        title="Could not load rental oversight"
+        description="Listing and lease totals are temporarily unavailable. No operational totals are being estimated."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
+    );
+  }
+
   const stats = data ?? EMPTY;
 
   return (
