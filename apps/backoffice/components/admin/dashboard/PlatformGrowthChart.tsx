@@ -10,11 +10,12 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import { RefreshCcw, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { Button } from '@getrentos/ui';
 
 interface GrowthPoint {
   month: string;
@@ -32,12 +33,12 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export const PlatformGrowthChart = () => {
-  const { data = [] } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.userGrowth,
     queryFn: () => unwrap(adminService.getUserGrowth()),
   });
 
-  const growthData: GrowthPoint[] = data.map((p) => ({ month: p.label, users: p.value }));
+  const growthData: GrowthPoint[] = (data ?? []).map((p) => ({ month: p.label, users: p.value }));
   const hasData = growthData.some((p) => p.users > 0);
 
   const currentValue = growthData[growthData.length - 1]?.users ?? 0;
@@ -62,7 +63,30 @@ export const PlatformGrowthChart = () => {
         )}
       </div>
 
-      {!hasData ? (
+      {isLoading ? (
+        <div
+          className="h-56 animate-pulse rounded-lg bg-secondary/50"
+          aria-label="Loading platform growth chart"
+        />
+      ) : isError ? (
+        <div className="h-56 flex flex-col items-center justify-center text-center" role="alert">
+          <p className="text-sm font-medium text-foreground">Growth data could not be loaded</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Try again without reloading the dashboard.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            isLoading={isFetching}
+          >
+            <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" /> Try again
+          </Button>
+        </div>
+      ) : !hasData ? (
         <div className="h-56 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">

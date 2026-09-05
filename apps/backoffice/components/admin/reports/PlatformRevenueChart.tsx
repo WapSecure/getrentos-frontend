@@ -37,7 +37,7 @@ interface PlatformRevenueChartProps {
 export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
   const currentValue = data.length > 0 ? data[data.length - 1].gmv : 0;
   const previousValue = data.length > 1 ? data[data.length - 2].gmv : 0;
-  const change = previousValue === 0 ? 0 : ((currentValue - previousValue) / previousValue) * 100;
+  const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : null;
 
   return (
     <div className="bg-card border border-border rounded-lg p-5">
@@ -48,55 +48,73 @@ export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
             Gross merchandise value, last 6 months
           </p>
         </div>
-        <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-          <TrendingUp className="w-3 h-3" />+{change.toFixed(1)}%
-        </div>
+        {change !== null && (
+          <div
+            className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${change >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}
+          >
+            <TrendingUp
+              className={`h-3 w-3 ${change < 0 ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+            {change >= 0 ? '+' : ''}
+            {change.toFixed(1)}%
+          </div>
+        )}
       </div>
 
-      <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              vertical={false}
-              stroke="currentColor"
-              className="text-muted-foreground/20"
-            />
-            <XAxis
-              dataKey="month"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-muted-foreground"
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-muted-foreground"
-              width={48}
-              tickFormatter={(value: number) => formatCurrency(value, { compact: true })}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ stroke: 'var(--primary)', strokeWidth: 1, strokeDasharray: '4 4' }}
-            />
-            <Area
-              type="monotone"
-              dataKey="gmv"
-              stroke="var(--primary)"
-              strokeWidth={2}
-              fill="url(#revenueFill)"
-              activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {data.length === 0 ? (
+        <div className="flex h-56 items-center justify-center text-center">
+          <div>
+            <TrendingUp className="mx-auto mb-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <p className="text-sm text-muted-foreground">No GMV data is available yet</p>
+          </div>
+        </div>
+      ) : (
+        <div className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
+                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                vertical={false}
+                stroke="currentColor"
+                className="text-muted-foreground/20"
+              />
+              <XAxis
+                dataKey="month"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: 'currentColor' }}
+                className="text-muted-foreground"
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: 'currentColor' }}
+                className="text-muted-foreground"
+                width={48}
+                tickFormatter={(value: number) => formatCurrency(value, { compact: true })}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: 'var(--primary)', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="gmv"
+                stroke="var(--primary)"
+                strokeWidth={2}
+                fill="url(#revenueFill)"
+                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };
