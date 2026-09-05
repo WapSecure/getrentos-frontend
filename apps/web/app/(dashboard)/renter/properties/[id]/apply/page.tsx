@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, Search } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, PageErrorState, PageLoadingState } from '@getrentos/ui';
 import {
   ApplicationWizard,
   type ApplicationFormData,
@@ -53,10 +52,11 @@ export default function PropertyApplyPage() {
   const user = useRenterUser();
   const [submitted, setSubmitted] = useState(false);
 
-  const { data: property = null, isLoading } = useQuery({
+  const propertyQuery = useQuery({
     queryKey: renterKeys.listing(params.id),
     queryFn: () => unwrap(renterService.getListing(params.id)),
   });
+  const property = propertyQuery.data ?? null;
 
   const submitMutation = useMutation({
     mutationFn: (data: ApplicationFormData) =>
@@ -72,11 +72,16 @@ export default function PropertyApplyPage() {
     await submitMutation.mutateAsync(data);
   };
 
-  if (isLoading) {
+  if (propertyQuery.isLoading) return <PageLoadingState />;
+
+  if (propertyQuery.isError) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
+      <PageErrorState
+        title="Application form is unavailable"
+        description="We could not load the property required for this application. No application has been submitted."
+        onRetry={() => void propertyQuery.refetch()}
+        isRetrying={propertyQuery.isFetching}
+      />
     );
   }
 

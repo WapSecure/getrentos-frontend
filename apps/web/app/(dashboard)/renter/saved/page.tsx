@@ -11,7 +11,7 @@ import { RecentlyViewed } from '@/components/renter/saved/RecentlyViewed';
 import { SavedRecommendations } from '@/components/renter/saved/SavedRecommendations';
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
-import { Pagination, Toast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -37,20 +37,23 @@ export default function SavedPage() {
     status: filterStatus === 'all' ? undefined : filterStatus,
     sortBy,
   };
-  const { data } = useQuery({
+  const savedListingsQuery = useQuery({
     queryKey: [...renterKeys.savedListings, savedListingParams],
     queryFn: () => unwrap(renterService.listSavedListings(savedListingParams)),
   });
+  const data = savedListingsQuery.data;
   const savedProperties = data?.items ?? [];
   const total = data?.total ?? 0;
-  const { data: dashboardStats } = useQuery({
+  const dashboardStatsQuery = useQuery({
     queryKey: renterKeys.dashboardStats,
     queryFn: () => unwrap(renterService.getDashboardStats()),
   });
-  const { data: wishlists = [] } = useQuery({
+  const wishlistsQuery = useQuery({
     queryKey: renterKeys.wishlists,
     queryFn: () => unwrap(renterService.listWishlists()),
   });
+  const dashboardStats = dashboardStatsQuery.data;
+  const wishlists = wishlistsQuery.data ?? [];
   const selectedProperties = Object.keys(selectedSavedListings);
 
   const invalidateSaved = () => {
@@ -160,6 +163,19 @@ export default function SavedPage() {
       return next;
     });
   };
+
+  const savedQueries = [savedListingsQuery, dashboardStatsQuery, wishlistsQuery];
+  if (savedQueries.some((query) => query.isLoading)) return <PageLoadingState />;
+  if (savedQueries.some((query) => query.isError)) {
+    return (
+      <PageErrorState
+        title="Saved properties are unavailable"
+        description="We could not load your saved homes and wishlists. Your saved items have not been changed."
+        onRetry={() => savedQueries.forEach((query) => void query.refetch())}
+        isRetrying={savedQueries.some((query) => query.isFetching)}
+      />
+    );
+  }
 
   return (
     <>

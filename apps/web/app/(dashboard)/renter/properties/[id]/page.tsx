@@ -19,9 +19,14 @@ import {
   Zap,
   Lock,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  PageErrorState,
+  PageLoadingState,
+  Toast,
+  ToastVariant,
+} from '@getrentos/ui';
 import { VirtualTourViewerModal } from '@/components/renter/discover/features/VirtualTourViewerModal';
 import { PropertyGallery } from '@/components/renter/property-detail/PropertyGallery';
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';
@@ -51,7 +56,7 @@ export default function PropertyDetailPage() {
   const [tourMode, setTourMode] = useState<TourModalMode>('tour');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data: property = null, isLoading } = useQuery({
+  const propertyQuery = useQuery({
     queryKey: renterKeys.listing(params.id),
     queryFn: async () => {
       const data = await unwrap(renterService.getListing(params.id));
@@ -59,6 +64,7 @@ export default function PropertyDetailPage() {
       return data;
     },
   });
+  const property = propertyQuery.data ?? null;
 
   const { data: savedListingsData } = useQuery({
     queryKey: renterKeys.savedListings,
@@ -90,11 +96,16 @@ export default function PropertyDetailPage() {
     },
   });
 
-  if (isLoading) {
+  if (propertyQuery.isLoading) return <PageLoadingState />;
+
+  if (propertyQuery.isError) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
+      <PageErrorState
+        title="Property details are unavailable"
+        description="We could not load this listing. It may be a temporary connection problem."
+        onRetry={() => void propertyQuery.refetch()}
+        isRetrying={propertyQuery.isFetching}
+      />
     );
   }
 

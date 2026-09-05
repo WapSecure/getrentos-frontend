@@ -21,7 +21,7 @@ import {
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, PageErrorState, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Card } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
@@ -169,6 +169,17 @@ export default function RenterHomePage() {
     );
   }
 
+  if (leaseQuery.isError) {
+    return (
+      <PageErrorState
+        title="Home details are unavailable"
+        description="We could not confirm whether you have an active lease. Please retry before taking any tenancy action."
+        onRetry={() => void leaseQuery.refetch()}
+        isRetrying={leaseQuery.isFetching}
+      />
+    );
+  }
+
   if (!lease) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
@@ -237,11 +248,26 @@ export default function RenterHomePage() {
       </section>
 
       {hasDataError && (
-        <div className="flex gap-3 rounded-2xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm text-foreground">
+        <div
+          role="alert"
+          className="flex flex-wrap items-start gap-3 rounded-2xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm text-foreground"
+        >
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-          <p>
+          <p className="min-w-0 flex-1">
             Some home information could not be refreshed. Your available records are still shown.
           </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (maintenanceQuery.isError) void maintenanceQuery.refetch();
+              if (documentsQuery.isError) void documentsQuery.refetch();
+              if (remindersQuery.isError) void remindersQuery.refetch();
+            }}
+          >
+            Retry missing data
+          </Button>
         </div>
       )}
 

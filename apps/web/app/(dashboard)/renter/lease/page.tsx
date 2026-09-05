@@ -15,7 +15,7 @@ import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaym
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
 import { PendingLeaseCard } from '@/components/renter/lease/PendingLeaseCard';
 import { FileText } from 'lucide-react';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -25,27 +25,32 @@ export default function LeasePage() {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data: lease = null } = useQuery({
+  const leaseQuery = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
   });
-  const { data: pendingLease = null } = useQuery({
+  const lease = leaseQuery.data ?? null;
+  const pendingLeaseQuery = useQuery({
     queryKey: renterKeys.pendingLease,
     queryFn: () => unwrap(renterService.getPendingLease()),
     enabled: !lease,
   });
-  const { data: renewalOffer = null } = useQuery({
+  const renewalOfferQuery = useQuery({
     queryKey: renterKeys.renewalOffer,
     queryFn: () => unwrap(renterService.getRenewalOffer()),
   });
-  const { data: rentIncreases = [] } = useQuery({
+  const rentIncreasesQuery = useQuery({
     queryKey: renterKeys.rentIncreases,
     queryFn: () => unwrap(renterService.getRentIncreases()),
   });
-  const { data: paymentReminders = [] } = useQuery({
+  const paymentRemindersQuery = useQuery({
     queryKey: renterKeys.upcomingPaymentReminders,
     queryFn: () => unwrap(renterService.getUpcomingPaymentReminders()),
   });
+  const pendingLease = pendingLeaseQuery.data ?? null;
+  const renewalOffer = renewalOfferQuery.data ?? null;
+  const rentIncreases = rentIncreasesQuery.data ?? [];
+  const paymentReminders = paymentRemindersQuery.data ?? [];
 
   const respondToOfferMutation = useMutation({
     mutationFn: ({ offerId, action }: { offerId: string; action: 'accept' | 'decline' }) =>
@@ -90,6 +95,25 @@ export default function LeasePage() {
 
   const handleSignLease = (id: string, signatureData: string) =>
     signLeaseMutation.mutate({ id, signatureData });
+
+  const leaseQueries = [
+    leaseQuery,
+    pendingLeaseQuery,
+    renewalOfferQuery,
+    rentIncreasesQuery,
+    paymentRemindersQuery,
+  ];
+  if (leaseQueries.some((query) => query.isLoading)) return <PageLoadingState />;
+  if (leaseQueries.some((query) => query.isError)) {
+    return (
+      <PageErrorState
+        title="Lease information is unavailable"
+        description="We could not load your lease, renewal, or payment schedule. Please try again."
+        onRetry={() => leaseQueries.forEach((query) => void query.refetch())}
+        isRetrying={leaseQueries.some((query) => query.isFetching)}
+      />
+    );
+  }
 
   if (!lease) {
     return (

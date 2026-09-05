@@ -12,13 +12,15 @@ import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/t
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { PageErrorState, PageLoadingState } from '@getrentos/ui';
 
 export default function CalendarPage() {
   const queryClient = useQueryClient();
-  const { data: events = [] } = useQuery({
+  const eventsQuery = useQuery({
     queryKey: renterKeys.calendarEvents,
     queryFn: () => unwrap(renterService.listCalendarEvents()),
   });
+  const events = eventsQuery.data ?? [];
   const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -71,6 +73,18 @@ export default function CalendarPage() {
       await createEventMutation.mutateAsync(formData);
     }
   };
+
+  if (eventsQuery.isLoading) return <PageLoadingState />;
+  if (eventsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Calendar is unavailable"
+        description="We could not load your viewings, payments, and personal events."
+        onRetry={() => void eventsQuery.refetch()}
+        isRetrying={eventsQuery.isFetching}
+      />
+    );
+  }
 
   return (
     <>

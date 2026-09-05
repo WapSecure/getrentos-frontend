@@ -18,17 +18,31 @@ import { ScoreNotifications } from '@/components/renter/trust-score/ScoreNotific
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { PageErrorState, PageLoadingState } from '@getrentos/ui';
 
 export default function TrustScorePage() {
-  const { data } = useQuery({
+  const trustScoreQuery = useQuery({
     queryKey: renterKeys.trustScore,
     queryFn: () => unwrap(renterService.getTrustScore()),
   });
+  const data = trustScoreQuery.data;
   const trustScore = data?.trustScore ?? 0;
   const averageScore = data?.averageScore ?? 0;
   const verifications = data?.verifications ?? [];
   const history = data?.history ?? [];
   const badges = data?.badges ?? [];
+
+  if (trustScoreQuery.isLoading) return <PageLoadingState />;
+  if (trustScoreQuery.isError) {
+    return (
+      <PageErrorState
+        title="Trust score is unavailable"
+        description="We could not load your score, verification history, or recommendations."
+        onRetry={() => void trustScoreQuery.refetch()}
+        isRetrying={trustScoreQuery.isFetching}
+      />
+    );
+  }
 
   return (
     <>

@@ -15,16 +15,17 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
-  const { data } = useQuery({
+  const notificationsQuery = useQuery({
     queryKey: [...renterKeys.notifications, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(renterService.listNotifications({ page, pageSize: PAGE_SIZE })),
   });
+  const data = notificationsQuery.data;
   const notifications = data?.items ?? [];
   const total = data?.total ?? 0;
   const [filterType, setFilterType] = useState<string>('all');
@@ -77,6 +78,17 @@ export default function NotificationsPage() {
   });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  if (notificationsQuery.isLoading) return <PageLoadingState />;
+  if (notificationsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Notifications are unavailable"
+        onRetry={() => void notificationsQuery.refetch()}
+        isRetrying={notificationsQuery.isFetching}
+      />
+    );
+  }
 
   return (
     <>

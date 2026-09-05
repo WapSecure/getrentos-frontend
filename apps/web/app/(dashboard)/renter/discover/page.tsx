@@ -13,7 +13,7 @@ import { DiscoverApplicationAssistant } from '@/components/renter/discover/Disco
 import { RecentlyViewed } from '@/components/renter/discover/features/RecentlyViewed';
 import { DocumentChecklist } from '@/components/renter/discover/features/DocumentChecklist';
 import { SavedSearchAlert } from '@/components/renter/discover/features/SavedSearchAlert';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Toast, ToastVariant } from '@getrentos/ui';
 import { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -40,10 +40,11 @@ export default function DiscoverPage() {
   });
   const filters = { ...filterOptions, search: queryFromUrl };
 
-  const { data: savedListingsData } = useQuery({
+  const savedListingsQuery = useQuery({
     queryKey: renterKeys.savedListings,
     queryFn: () => unwrap(renterService.listSavedListings({ page: 1, pageSize: 100 })),
   });
+  const savedListingsData = savedListingsQuery.data;
   const savedListings = savedListingsData?.items ?? [];
   const savedProperties = savedListings.map((p) => p.id);
 
@@ -101,6 +102,18 @@ export default function DiscoverPage() {
         : ROUTES.RENTER_DISCOVER
     );
   };
+
+  if (savedListingsQuery.isLoading) return <PageLoadingState />;
+  if (savedListingsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Property discovery is unavailable"
+        description="We could not load your saved-property state safely. Please retry before browsing."
+        onRetry={() => void savedListingsQuery.refetch()}
+        isRetrying={savedListingsQuery.isFetching}
+      />
+    );
+  }
 
   return (
     <>
