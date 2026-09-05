@@ -506,6 +506,14 @@ export const adminService = {
     );
   },
 
+  async resolveConversation(
+    conversationId: string
+  ): Promise<ApiResponse<{ id: string; status: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/messages/conversations/${conversationId}/resolve`, { method: 'POST' })
+    );
+  },
+
   // ---- Reports ----
   async getReportsStats(): Promise<
     ApiResponse<{

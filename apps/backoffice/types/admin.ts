@@ -207,6 +207,10 @@ export interface Conversation {
   participantRole: string;
   lastMessage?: string;
   lastMessageTime?: string;
+  status?: 'OPEN' | 'RESOLVED';
+  category?: string | null;
+  source?: string;
+  userId?: string | null;
   unreadCount: number;
 }
 
