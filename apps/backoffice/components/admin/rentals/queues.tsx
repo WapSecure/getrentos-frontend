@@ -3,8 +3,16 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { Badge, type BadgeVariant, Button, Select, type SelectOption } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import {
+  Badge,
+  type BadgeVariant,
+  Button,
+  ConfirmDialog,
+  Select,
+  Toast,
+  type SelectOption,
+} from '@getrentos/ui';
+import { ApiError, unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -110,18 +118,62 @@ const titleCase = (value: string) =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-function useQueueActions(resource: string) {
+interface RentalAction {
+  key: string;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  successMessage: string;
+  run: () => Promise<ApiResponse<unknown>>;
+}
+
+function useQueueActions() {
   const queryClient = useQueryClient();
-  return async <T,>(run: () => Promise<ApiResponse<T>>) => {
+  const [pendingAction, setPendingAction] = useState<RentalAction | null>(null);
+  const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
+
+  const executeAction = async () => {
+    if (!pendingAction || processingKey) return;
+    const action = pendingAction;
+    setPendingAction(null);
+    setProcessingKey(action.key);
     try {
-      await unwrap(run());
-    } catch {
-      // Surface failures silently in the console; data stays unchanged.
-      console.error(`Rental ${resource} action failed`);
+      await unwrap(action.run());
+      setToast({ message: action.successMessage, variant: 'success' });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'rentals'] });
+    } catch (error) {
+      setToast({
+        message:
+          error instanceof ApiError
+            ? error.message
+            : 'The rental action could not be completed. Please try again.',
+        variant: 'error',
+      });
     } finally {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'rentals', resource] });
+      setProcessingKey(null);
     }
   };
+
+  const feedback = (
+    <>
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => !open && setPendingAction(null)}
+        title={pendingAction?.title ?? 'Confirm rental action'}
+        description={pendingAction?.description ?? ''}
+        confirmLabel={pendingAction?.confirmLabel ?? 'Confirm'}
+        onConfirm={() => void executeAction()}
+      />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
+    </>
+  );
+
+  return { request: setPendingAction, processingKey, feedback };
 }
 
 /** Inline status editor used for lease and eviction lifecycle correction. */
@@ -129,20 +181,37 @@ function StatusCell({
   current,
   options,
   onSave,
+  isLoading,
+  disabled,
 }: {
   current: string;
   options: { value: string; label: string }[];
   onSave: (status: string) => void;
+  isLoading?: boolean;
+  disabled?: boolean;
 }) {
   const [value, setValue] = useState(current);
   const selectOptions: SelectOption[] = options.map((o) => ({ value: o.value, label: o.label }));
   return (
     <div className="flex items-center gap-2">
       <div className="w-40">
-        <Select value={value} onValueChange={setValue} options={selectOptions} ariaLabel="Status" />
+        <Select
+          value={value}
+          onValueChange={setValue}
+          options={selectOptions}
+          ariaLabel="Status"
+          disabled={disabled}
+        />
       </div>
       {value !== current && (
-        <Button type="button" size="sm" variant="secondary" onClick={() => onSave(value)}>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => onSave(value)}
+          isLoading={isLoading}
+          disabled={disabled}
+        >
           Save
         </Button>
       )}
@@ -196,9 +265,18 @@ const evictionStatusOptions = [
 const btn = (
   label: string,
   onClick: () => void,
-  variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' = 'outline'
+  variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' = 'outline',
+  isLoading = false,
+  disabled = false
 ) => (
-  <Button type="button" size="xs" variant={variant} onClick={onClick}>
+  <Button
+    type="button"
+    size="xs"
+    variant={variant}
+    onClick={onClick}
+    isLoading={isLoading}
+    disabled={disabled}
+  >
     {label}
   </Button>
 );
@@ -210,7 +288,59 @@ function ActionGroup({ children }: { children: ReactNode }) {
 }
 
 export function ListingsQueue() {
-  const run = useQueueActions('listings');
+  const actions = useQueueActions();
+  const request = (
+    listing: AdminRentalListing,
+    verb: 'pause' | 'flag' | 'resume' | 'close' | 'approve'
+  ) => {
+    const copy = {
+      pause: [
+        'Pause listing?',
+        'The listing will be hidden from renters until it is resumed.',
+        'Pause',
+        'Listing paused.',
+      ],
+      flag: [
+        'Flag listing for review?',
+        'The listing will be removed from publication and returned to verification.',
+        'Flag listing',
+        'Listing moved to verification.',
+      ],
+      resume: [
+        'Resume listing?',
+        'The listing will become visible to renters again.',
+        'Resume',
+        'Listing resumed.',
+      ],
+      close: [
+        'Close listing?',
+        'The listing will be permanently closed and removed from active inventory.',
+        'Close listing',
+        'Listing closed.',
+      ],
+      approve: [
+        'Approve listing?',
+        'The listing will be published and become visible to renters.',
+        'Approve',
+        'Listing approved and published.',
+      ],
+    }[verb];
+    const calls = {
+      pause: () => adminRentalService.pauseListing(listing.id),
+      flag: () => adminRentalService.flagListing(listing.id),
+      resume: () => adminRentalService.resumeListing(listing.id),
+      close: () => adminRentalService.closeListing(listing.id),
+      approve: () => adminRentalService.approveListing(listing.id),
+    };
+    actions.request({
+      key: `${verb}:${listing.id}`,
+      title: copy[0],
+      description: `${listing.title}: ${copy[1]}`,
+      confirmLabel: copy[2],
+      successMessage: `${listing.title}: ${copy[3]}`,
+      run: calls[verb],
+    });
+  };
   const config: RentalQueueConfig<AdminRentalListing> = {
     resource: 'listings',
     eyebrow: 'Rental Listings',
@@ -259,27 +389,96 @@ export function ListingsQueue() {
     actions: (l) => (
       <ActionGroup>
         {l.status === 'PUBLISHED' &&
-          btn('Pause', () => run(() => adminRentalService.pauseListing(l.id)))}
+          btn(
+            'Pause',
+            () => request(l, 'pause'),
+            'outline',
+            actions.processingKey === `pause:${l.id}`,
+            actions.processingKey !== null
+          )}
         {l.status === 'PUBLISHED' &&
-          btn('Flag', () => run(() => adminRentalService.flagListing(l.id)), 'ghost')}
+          btn(
+            'Flag',
+            () => request(l, 'flag'),
+            'ghost',
+            actions.processingKey === `flag:${l.id}`,
+            actions.processingKey !== null
+          )}
         {l.status === 'PAUSED' &&
-          btn('Resume', () => run(() => adminRentalService.resumeListing(l.id)))}
+          btn(
+            'Resume',
+            () => request(l, 'resume'),
+            'outline',
+            actions.processingKey === `resume:${l.id}`,
+            actions.processingKey !== null
+          )}
         {l.status === 'PAUSED' &&
-          btn('Close', () => run(() => adminRentalService.closeListing(l.id)), 'danger')}
+          btn(
+            'Close',
+            () => request(l, 'close'),
+            'danger',
+            actions.processingKey === `close:${l.id}`,
+            actions.processingKey !== null
+          )}
         {l.status === 'PENDING_VERIFICATION' &&
-          btn('Approve', () => run(() => adminRentalService.approveListing(l.id)))}
+          btn(
+            'Approve',
+            () => request(l, 'approve'),
+            'outline',
+            actions.processingKey === `approve:${l.id}`,
+            actions.processingKey !== null
+          )}
         {l.status === 'PENDING_VERIFICATION' &&
-          btn('Close', () => run(() => adminRentalService.closeListing(l.id)), 'danger')}
+          btn(
+            'Close',
+            () => request(l, 'close'),
+            'danger',
+            actions.processingKey === `close:${l.id}`,
+            actions.processingKey !== null
+          )}
         {l.status === 'DRAFT' &&
-          btn('Close', () => run(() => adminRentalService.closeListing(l.id)), 'danger')}
+          btn(
+            'Close',
+            () => request(l, 'close'),
+            'danger',
+            actions.processingKey === `close:${l.id}`,
+            actions.processingKey !== null
+          )}
       </ActionGroup>
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function ApplicationsQueue() {
-  const run = useQueueActions('applications');
+  const actions = useQueueActions();
+  const request = (application: AdminRentalApplication, verb: 'approve' | 'reject' | 'reopen') => {
+    const calls = {
+      approve: () => adminRentalService.approveApplication(application.id),
+      reject: () => adminRentalService.rejectApplication(application.id),
+      reopen: () => adminRentalService.reopenApplication(application.id),
+    };
+    const labels = {
+      approve: 'Approve application',
+      reject: 'Reject application',
+      reopen: 'Reopen application',
+    };
+    actions.request({
+      key: `${verb}:${application.id}`,
+      title: `${labels[verb]}?`,
+      description: `${application.applicantName}'s application for ${application.propertyTitle} will be marked ${verb === 'reopen' ? 'under review' : verb === 'approve' ? 'approved' : 'rejected'}.`,
+      confirmLabel: labels[verb],
+      successMessage: `${application.applicantName}'s application was ${
+        verb === 'reopen' ? 'reopened' : verb === 'approve' ? 'approved' : 'rejected'
+      }.`,
+      run: calls[verb],
+    });
+  };
   const config: RentalQueueConfig<AdminRentalApplication> = {
     resource: 'applications',
     eyebrow: 'Rental Applications',
@@ -331,20 +530,58 @@ export function ApplicationsQueue() {
       <ActionGroup>
         {(a.status === 'PENDING' || a.status === 'UNDER_REVIEW') && (
           <>
-            {btn('Approve', () => run(() => adminRentalService.approveApplication(a.id)))}
-            {btn('Reject', () => run(() => adminRentalService.rejectApplication(a.id)), 'danger')}
+            {btn(
+              'Approve',
+              () => request(a, 'approve'),
+              'outline',
+              actions.processingKey === `approve:${a.id}`,
+              actions.processingKey !== null
+            )}
+            {btn(
+              'Reject',
+              () => request(a, 'reject'),
+              'danger',
+              actions.processingKey === `reject:${a.id}`,
+              actions.processingKey !== null
+            )}
           </>
         )}
         {(a.status === 'APPROVED' || a.status === 'REJECTED') &&
-          btn('Reopen', () => run(() => adminRentalService.reopenApplication(a.id)))}
+          btn(
+            'Reopen',
+            () => request(a, 'reopen'),
+            'outline',
+            actions.processingKey === `reopen:${a.id}`,
+            actions.processingKey !== null
+          )}
       </ActionGroup>
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function ViewingsQueue() {
-  const run = useQueueActions('viewings');
+  const actions = useQueueActions();
+  const request = (viewing: AdminRentalViewing, verb: 'confirm' | 'complete' | 'cancel') => {
+    const calls = {
+      confirm: () => adminRentalService.confirmViewing(viewing.id),
+      complete: () => adminRentalService.completeViewing(viewing.id),
+      cancel: () => adminRentalService.cancelViewing(viewing.id),
+    };
+    actions.request({
+      key: `${verb}:${viewing.id}`,
+      title: `${titleCase(verb)} viewing?`,
+      description: `The viewing for ${viewing.propertyTitle} with ${viewing.renterName} will be marked ${verb === 'confirm' ? 'confirmed' : verb === 'complete' ? 'completed' : 'cancelled'}.`,
+      confirmLabel: `${titleCase(verb)} viewing`,
+      successMessage: `Viewing for ${viewing.propertyTitle} was ${verb === 'confirm' ? 'confirmed' : verb === 'complete' ? 'completed' : 'cancelled'}.`,
+      run: calls[verb],
+    });
+  };
   const config: RentalQueueConfig<AdminRentalViewing> = {
     resource: 'viewings',
     eyebrow: 'Viewing Requests',
@@ -388,20 +625,43 @@ export function ViewingsQueue() {
     actions: (v) => (
       <ActionGroup>
         {v.status === 'REQUESTED' &&
-          btn('Confirm', () => run(() => adminRentalService.confirmViewing(v.id)))}
+          btn(
+            'Confirm',
+            () => request(v, 'confirm'),
+            'outline',
+            actions.processingKey === `confirm:${v.id}`,
+            actions.processingKey !== null
+          )}
         {v.status === 'CONFIRMED' &&
-          btn('Complete', () => run(() => adminRentalService.completeViewing(v.id)))}
+          btn(
+            'Complete',
+            () => request(v, 'complete'),
+            'outline',
+            actions.processingKey === `complete:${v.id}`,
+            actions.processingKey !== null
+          )}
         {(v.status === 'REQUESTED' || v.status === 'CONFIRMED') &&
-          btn('Cancel', () => run(() => adminRentalService.cancelViewing(v.id)), 'danger')}
+          btn(
+            'Cancel',
+            () => request(v, 'cancel'),
+            'danger',
+            actions.processingKey === `cancel:${v.id}`,
+            actions.processingKey !== null
+          )}
         {(v.status === 'COMPLETED' || v.status === 'CANCELLED') && noRowActions()}
       </ActionGroup>
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function LeasesQueue() {
-  const run = useQueueActions('leases');
+  const actions = useQueueActions();
   const config: RentalQueueConfig<AdminRentalLease> = {
     resource: 'leases',
     eyebrow: 'Leases',
@@ -450,19 +710,46 @@ export function LeasesQueue() {
     ],
     actions: (l) => (
       <StatusCell
+        key={`${l.id}:${l.status}`}
         current={l.status}
         options={leaseStatusOptions}
         onSave={(status) =>
-          run(() => adminRentalService.updateLeaseStatus(l.id, status as RentalLeaseStatus))
+          actions.request({
+            key: `status:${l.id}`,
+            title: 'Change lease status?',
+            description: `${l.propertyTitle} for ${l.tenantName ?? 'the tenant'} will change from ${titleCase(l.status)} to ${titleCase(status)}. This administrative correction is audited.`,
+            confirmLabel: 'Change status',
+            successMessage: `Lease status changed to ${titleCase(status)}.`,
+            run: () => adminRentalService.updateLeaseStatus(l.id, status as RentalLeaseStatus),
+          })
         }
+        isLoading={actions.processingKey === `status:${l.id}`}
+        disabled={actions.processingKey !== null}
       />
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function RenewalsQueue() {
-  const run = useQueueActions('renewals');
+  const actions = useQueueActions();
+  const request = (renewal: AdminRentalRenewal, verb: 'accept' | 'decline') =>
+    actions.request({
+      key: `${verb}:${renewal.id}`,
+      title: `${titleCase(verb)} renewal?`,
+      description: `The renewal for ${renewal.propertyTitle} at ${naira(renewal.newRentAmount)} will be marked ${verb === 'accept' ? 'accepted' : 'declined'}.`,
+      confirmLabel: `${titleCase(verb)} renewal`,
+      successMessage: `Renewal for ${renewal.propertyTitle} was ${verb === 'accept' ? 'accepted' : 'declined'}.`,
+      run: () =>
+        verb === 'accept'
+          ? adminRentalService.acceptRenewal(renewal.id)
+          : adminRentalService.declineRenewal(renewal.id),
+    });
   const config: RentalQueueConfig<AdminRentalRenewal> = {
     resource: 'renewals',
     eyebrow: 'Renewal Offers',
@@ -503,19 +790,48 @@ export function RenewalsQueue() {
       <ActionGroup>
         {r.status === 'PENDING' && (
           <>
-            {btn('Accept', () => run(() => adminRentalService.acceptRenewal(r.id)))}
-            {btn('Decline', () => run(() => adminRentalService.declineRenewal(r.id)), 'danger')}
+            {btn(
+              'Accept',
+              () => request(r, 'accept'),
+              'outline',
+              actions.processingKey === `accept:${r.id}`,
+              actions.processingKey !== null
+            )}
+            {btn(
+              'Decline',
+              () => request(r, 'decline'),
+              'danger',
+              actions.processingKey === `decline:${r.id}`,
+              actions.processingKey !== null
+            )}
           </>
         )}
         {r.status !== 'PENDING' && noRowActions()}
       </ActionGroup>
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function TerminationsQueue() {
-  const run = useQueueActions('terminations');
+  const actions = useQueueActions();
+  const request = (termination: AdminRentalTermination, verb: 'approve' | 'reject') =>
+    actions.request({
+      key: `${verb}:${termination.id}`,
+      title: `${titleCase(verb)} termination?`,
+      description: `The termination request for ${termination.propertyTitle} involving ${termination.tenantName ?? 'the tenant'} will be marked ${verb === 'approve' ? 'approved' : 'rejected'}.`,
+      confirmLabel: `${titleCase(verb)} termination`,
+      successMessage: `Termination request for ${termination.propertyTitle} was ${verb === 'approve' ? 'approved' : 'rejected'}.`,
+      run: () =>
+        verb === 'approve'
+          ? adminRentalService.approveTermination(termination.id)
+          : adminRentalService.rejectTermination(termination.id),
+    });
   const config: RentalQueueConfig<AdminRentalTermination> = {
     resource: 'terminations',
     eyebrow: 'Termination Requests',
@@ -560,19 +876,36 @@ export function TerminationsQueue() {
       <ActionGroup>
         {t.status === 'PENDING' && (
           <>
-            {btn('Approve', () => run(() => adminRentalService.approveTermination(t.id)))}
-            {btn('Reject', () => run(() => adminRentalService.rejectTermination(t.id)), 'danger')}
+            {btn(
+              'Approve',
+              () => request(t, 'approve'),
+              'outline',
+              actions.processingKey === `approve:${t.id}`,
+              actions.processingKey !== null
+            )}
+            {btn(
+              'Reject',
+              () => request(t, 'reject'),
+              'danger',
+              actions.processingKey === `reject:${t.id}`,
+              actions.processingKey !== null
+            )}
           </>
         )}
         {t.status !== 'PENDING' && noRowActions()}
       </ActionGroup>
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function EvictionsQueue() {
-  const run = useQueueActions('evictions');
+  const actions = useQueueActions();
   const config: RentalQueueConfig<AdminRentalEviction> = {
     resource: 'evictions',
     eyebrow: 'Eviction Cases',
@@ -612,15 +945,31 @@ export function EvictionsQueue() {
     ],
     actions: (e) => (
       <StatusCell
+        key={`${e.id}:${e.status}`}
         current={e.status}
         options={evictionStatusOptions}
         onSave={(status) =>
-          run(() => adminRentalService.updateEvictionStatus(e.id, status as RentalEvictionStatus))
+          actions.request({
+            key: `status:${e.id}`,
+            title: 'Change eviction status?',
+            description: `The case for ${e.propertyTitle} involving ${e.tenantName ?? 'the tenant'} will change from ${titleCase(e.status)} to ${titleCase(status)}. This legal-lifecycle correction is audited.`,
+            confirmLabel: 'Change status',
+            successMessage: `Eviction case status changed to ${titleCase(status)}.`,
+            run: () =>
+              adminRentalService.updateEvictionStatus(e.id, status as RentalEvictionStatus),
+          })
         }
+        isLoading={actions.processingKey === `status:${e.id}`}
+        disabled={actions.processingKey !== null}
       />
     ),
   };
-  return <RentalQueuePage config={config} />;
+  return (
+    <>
+      <RentalQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 /** Icons exported for the overview module grid. */
