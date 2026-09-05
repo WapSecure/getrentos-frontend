@@ -33,6 +33,8 @@ interface FraudAlertCardProps {
   onInvestigate: () => void;
   onClear: () => void;
   onConfirm: () => void;
+  pendingStatus?: FraudAlertStatus | null;
+  actionsDisabled?: boolean;
 }
 
 export const FraudAlertCard = ({
@@ -41,6 +43,8 @@ export const FraudAlertCard = ({
   onInvestigate,
   onClear,
   onConfirm,
+  pendingStatus = null,
+  actionsDisabled = false,
 }: FraudAlertCardProps) => {
   const severity = severityConfig[alert.severity];
   const status = statusConfig[alert.status];
@@ -82,7 +86,14 @@ export const FraudAlertCard = ({
       {!isDecided && (
         <div className="flex gap-2 mt-3">
           {alert.status === 'flagged' && (
-            <Button variant="outline" size="sm" className="flex-1" onClick={onInvestigate}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={onInvestigate}
+              isLoading={pendingStatus === 'investigating'}
+              disabled={actionsDisabled}
+            >
               Investigate
             </Button>
           )}
@@ -91,6 +102,8 @@ export const FraudAlertCard = ({
             size="sm"
             className="flex-1 text-green-600 dark:text-green-400"
             onClick={onClear}
+            isLoading={pendingStatus === 'cleared'}
+            disabled={actionsDisabled}
           >
             Clear
           </Button>
@@ -99,6 +112,8 @@ export const FraudAlertCard = ({
             size="sm"
             className="flex-1 text-red-600 dark:text-red-400"
             onClick={onConfirm}
+            isLoading={pendingStatus === 'confirmed'}
+            disabled={actionsDisabled}
           >
             Confirm
           </Button>

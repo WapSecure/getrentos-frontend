@@ -20,6 +20,10 @@ interface DisputeResolutionModalProps {
   isResolving?: boolean;
   isEscalating?: boolean;
   isSendingMessage?: boolean;
+  messagesLoading?: boolean;
+  messagesError?: boolean;
+  messagesRetrying?: boolean;
+  onRetryMessages?: () => void;
 }
 
 export const DisputeResolutionModal = ({
@@ -32,6 +36,10 @@ export const DisputeResolutionModal = ({
   isResolving = false,
   isEscalating = false,
   isSendingMessage = false,
+  messagesLoading = false,
+  messagesError = false,
+  messagesRetrying = false,
+  onRetryMessages,
 }: DisputeResolutionModalProps) => {
   const [messageText, setMessageText] = useState('');
 
@@ -64,7 +72,29 @@ export const DisputeResolutionModal = ({
           </div>
 
           <div className="p-4 space-y-3 overflow-y-auto flex-1">
-            {messages.length === 0 ? (
+            {messagesError ? (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+                <p className="text-sm text-destructive">
+                  The dispute messages could not be loaded.
+                </p>
+                {onRetryMessages && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={onRetryMessages}
+                    isLoading={messagesRetrying}
+                  >
+                    Try again
+                  </Button>
+                )}
+              </div>
+            ) : messagesLoading ? (
+              <p className="py-6 text-center text-sm text-muted-foreground" role="status">
+                Loading messages…
+              </p>
+            ) : messages.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-6">
                 No messages yet in this dispute thread
               </p>
@@ -127,12 +157,15 @@ export const DisputeResolutionModal = ({
                 onChange={(e) => setMessageText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Send a message to both parties..."
+                disabled={messagesLoading || messagesError}
                 className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <Button
                 variant="secondary"
                 onClick={handleSend}
-                disabled={!messageText.trim() || isSendingMessage}
+                disabled={
+                  !messageText.trim() || isSendingMessage || messagesLoading || messagesError
+                }
               >
                 <Send className="w-4 h-4" />
               </Button>

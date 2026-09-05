@@ -5,7 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Landmark, Flag } from 'lucide-react';
-import { DataTable, type Column } from '@getrentos/ui';
+import { ConfirmDialog, DataTable, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -35,6 +35,7 @@ export default function AdminEscrowPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
+  const [pendingFlag, setPendingFlag] = useState<PlatformEscrowTransaction | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -76,12 +77,6 @@ export default function AdminEscrowPage() {
       unwrap(adminService.toggleEscrowFlag(id, flagged)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'escrow'] }),
   });
-
-  const toggleFlag = (id: string) => {
-    const current = transactions.find((t: PlatformEscrowTransaction) => t.id === id);
-    if (!current) return;
-    toggleFlagMutation.mutate({ id, flagged: !current.flagged });
-  };
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -137,10 +132,13 @@ export default function AdminEscrowPage() {
       header: '',
       render: (t) => (
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
-            toggleFlag(t.id);
+            if (!toggleFlagMutation.isPending) setPendingFlag(t);
           }}
+          disabled={toggleFlagMutation.isPending}
+          aria-label={t.flagged ? 'Remove transaction review flag' : 'Flag transaction for review'}
           className={cn(
             'p-1.5 rounded-lg transition-colors',
             t.flagged
@@ -224,6 +222,23 @@ export default function AdminEscrowPage() {
           }
         />
       )}
+
+      <ConfirmDialog
+        open={pendingFlag !== null}
+        onOpenChange={(open) => !open && setPendingFlag(null)}
+        title={pendingFlag?.flagged ? 'Remove review flag?' : 'Flag escrow transaction?'}
+        description={
+          pendingFlag
+            ? `${pendingFlag.propertyTitle} (${formatCurrency(pendingFlag.amount, { compact: true })}) will be ${pendingFlag.flagged ? 'removed from' : 'added to'} the manual review queue.`
+            : ''
+        }
+        confirmLabel={pendingFlag?.flagged ? 'Remove flag' : 'Flag for review'}
+        onConfirm={() => {
+          if (pendingFlag) {
+            toggleFlagMutation.mutate({ id: pendingFlag.id, flagged: !pendingFlag.flagged });
+          }
+        }}
+      />
     </>
   );
 }
