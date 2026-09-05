@@ -17,7 +17,15 @@ import {
   ShieldAlert,
   Wrench,
 } from 'lucide-react';
-import { Button, StatCard } from '@getrentos/ui';
+import {
+  Button,
+  ConfirmDialog,
+  PageErrorState,
+  PageLoadingState,
+  StatCard,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
@@ -76,7 +84,7 @@ const modules = [
 ] as const;
 
 export const AdminMaintenanceOverview = () => {
-  const { data } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.maintenanceOverview,
     queryFn: () => unwrap(adminMaintenanceService.overview()),
   });
@@ -84,20 +92,37 @@ export const AdminMaintenanceOverview = () => {
   const user = useAdminUser();
   const canScan = hasAdminPermission(user?.roles, 'maintenance.moderate');
   const queryClient = useQueryClient();
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [showScanConfirm, setShowScanConfirm] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const scan = useMutation({
     mutationFn: () => unwrap(adminMaintenanceService.runSlaScan()),
     onSuccess: (result) => {
-      setScanResult(
-        result.notified > 0
-          ? `Scan complete — ${result.notified} work order(s) notified of SLA breaches.`
-          : 'Scan complete — no new SLA breaches to notify.'
-      );
+      setToast({
+        message:
+          result.notified > 0
+            ? `Scan complete — ${result.notified} work order(s) notified of SLA breaches.`
+            : 'Scan complete — no new SLA breaches to notify.',
+        variant: 'success',
+      });
       queryClient.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
     },
-    onError: () => setScanResult('Scan failed. Please try again.'),
+    onError: (error: Error) =>
+      setToast({ message: error.message || 'Scan failed. Please try again.', variant: 'error' }),
   });
+
+  if (isLoading) return <PageLoadingState />;
+
+  if (isError) {
+    return (
+      <PageErrorState
+        title="Could not load maintenance oversight"
+        description="Work-order and SLA totals are temporarily unavailable. No operational values are being estimated."
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -115,20 +140,17 @@ export const AdminMaintenanceOverview = () => {
           </p>
         </div>
         {canScan && (
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-stretch gap-1 sm:items-end">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => scan.mutate()}
+              onClick={() => setShowScanConfirm(true)}
               disabled={scan.isPending}
             >
               <RefreshCw className={`mr-1.5 h-4 w-4 ${scan.isPending ? 'animate-spin' : ''}`} />
               {scan.isPending ? 'Scanning…' : 'Run SLA scan'}
             </Button>
-            {scanResult && (
-              <p className="max-w-xs text-right text-xs text-muted-foreground">{scanResult}</p>
-            )}
           </div>
         )}
       </div>
@@ -217,6 +239,17 @@ export const AdminMaintenanceOverview = () => {
           ))}
         </div>
       </section>
+      <ConfirmDialog
+        open={showScanConfirm}
+        onOpenChange={setShowScanConfirm}
+        title="Run platform-wide SLA scan?"
+        description="All open maintenance work orders will be checked now. Newly detected breaches may notify the responsible stakeholders."
+        confirmLabel="Run SLA scan"
+        onConfirm={() => scan.mutate()}
+      />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };
