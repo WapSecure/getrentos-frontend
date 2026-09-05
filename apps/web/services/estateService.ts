@@ -4,6 +4,7 @@ import type {
   Estate,
   Household,
   HouseholdStatus,
+  ImportHouseholdsResult,
   Due,
   VisitorPass,
   IssuedVisitorPass,
@@ -64,6 +65,17 @@ export const estateService = {
   ): Promise<ApiResponse<Household>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/households`, { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async importHouseholds(
+    estateId: string,
+    file: File
+  ): Promise<ApiResponse<ImportHouseholdsResult>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/households/import`, { method: 'POST', body: formData })
     );
   },
 

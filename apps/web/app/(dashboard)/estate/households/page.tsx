@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Users, Plus } from 'lucide-react';
+import { Users, Plus, Upload } from 'lucide-react';
 import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -13,7 +13,8 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { HouseholdCard } from '@/components/estate/households/HouseholdCard';
 import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
 import { LinkResidentModal } from '@/components/estate/households/LinkResidentModal';
-import type { Household } from '@/types/estate';
+import { ImportHouseholdsModal } from '@/components/estate/households/ImportHouseholdsModal';
+import type { Household, ImportHouseholdsResult } from '@/types/estate';
 
 const PAGE_SIZE = 10;
 
@@ -23,6 +24,8 @@ export default function EstateHouseholdsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<Household | null>(null);
   const [linkingHousehold, setLinkingHousehold] = useState<Household | null>(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importResult, setImportResult] = useState<ImportHouseholdsResult | null>(null);
   const [page, setPage] = useState(1);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
@@ -98,6 +101,17 @@ export default function EstateHouseholdsPage() {
     onSuccess: invalidate,
   });
 
+  const importHouseholds = useMutation({
+    mutationFn: (file: File) => unwrap(estateService.importHouseholds(estate!.id, file)),
+    onSuccess: (result) => {
+      setImportResult(result);
+      if (result.created > 0) {
+        invalidate();
+        setPage(1);
+      }
+    },
+  });
+
   if (isEstateLoading) {
     return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
   }
@@ -129,17 +143,23 @@ export default function EstateHouseholdsPage() {
             {total} household{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            setEditingHousehold(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Add Household
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
+            <Upload className="w-4 h-4" />
+            Import CSV
+          </Button>
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              setEditingHousehold(null);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Household
+          </Button>
+        </div>
       </div>
 
       {isHouseholdsLoading ? (
@@ -198,6 +218,17 @@ export default function EstateHouseholdsPage() {
         onSubmit={(email) => linkResident.mutate(email)}
         isSubmitting={linkResident.isPending}
         error={linkResident.isError ? linkResident.error.message : null}
+      />
+
+      <ImportHouseholdsModal
+        isOpen={isImportOpen}
+        onClose={() => {
+          setIsImportOpen(false);
+          setImportResult(null);
+        }}
+        onSubmit={(file) => importHouseholds.mutate(file)}
+        isSubmitting={importHouseholds.isPending}
+        result={importResult}
       />
     </>
   );

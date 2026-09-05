@@ -24,6 +24,18 @@ export interface Household {
   createdAt: string;
 }
 
+export interface ImportHouseholdError {
+  row: number;
+  unitLabel?: string;
+  message: string;
+}
+
+export interface ImportHouseholdsResult {
+  created: number;
+  failed: number;
+  errors: ImportHouseholdError[];
+}
+
 export interface ResidentHousehold {
   id: string;
   unitLabel: string;
