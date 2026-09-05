@@ -1,14 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0071e3" />
-  <text
-    x="32"
-    y="45"
-    text-anchor="middle"
-    font-family="Arial, Helvetica, sans-serif"
-    font-size="40"
-    font-weight="800"
-    fill="#ffffff"
-  >
-    G
-  </text>
+  <rect width="64" height="64" rx="15" fill="#0071e3" />
+  <g transform="translate(13 11) scale(0.29)" fill="#ffffff">
+    <path d="M16 44 64 14 112 44 112 70 96 70 96 53 64 33 32 53 32 91 64 110 88 96 88 79 68 79 68 63 104 63 104 105 64 129 16 100Z"/>
+  </g>
 </svg>
