@@ -52,6 +52,7 @@ export const adminKeys = {
       params?.pageSize ?? 20,
     ] as const,
   disputeMessages: (disputeId: string) => ['admin', 'disputes', disputeId, 'messages'] as const,
+  disputeDetail: (disputeId: string) => ['admin', 'disputes', disputeId, 'detail'] as const,
   fraudAlerts: (params?: {
     search?: string;
     status?: string;
@@ -68,6 +69,7 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  fraudAlertDetail: (id: string) => ['admin', 'fraudAlerts', id] as const,
   escrowTransactions: (params?: {
     search?: string;
     status?: string;

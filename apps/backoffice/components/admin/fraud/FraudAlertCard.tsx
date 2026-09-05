@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
-import { formatRelativeTime } from '@getrentos/shared';
+import { cn, formatRelativeTime } from '@getrentos/shared';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
 const severityConfig: Record<FraudAlertSeverity, { label: string; variant: BadgeVariant }> = {
@@ -30,6 +30,7 @@ const statusConfig: Record<
 interface FraudAlertCardProps {
   alert: FraudAlert;
   delay?: number;
+  onOpen?: () => void;
   onInvestigate: () => void;
   onClear: () => void;
   onConfirm: () => void;
@@ -38,6 +39,7 @@ interface FraudAlertCardProps {
 export const FraudAlertCard = ({
   alert,
   delay = 0,
+  onOpen,
   onInvestigate,
   onClear,
   onConfirm,
@@ -52,7 +54,12 @@ export const FraudAlertCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-shadow duration-300 hover:shadow-md"
+      onClick={onOpen}
+      role={onOpen ? 'button' : undefined}
+      className={cn(
+        'rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-shadow duration-300',
+        onOpen ? 'cursor-pointer hover:shadow-md' : ''
+      )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -82,7 +89,15 @@ export const FraudAlertCard = ({
       {!isDecided && (
         <div className="flex gap-2 mt-3">
           {alert.status === 'flagged' && (
-            <Button variant="outline" size="sm" className="flex-1" onClick={onInvestigate}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInvestigate();
+              }}
+            >
               Investigate
             </Button>
           )}
@@ -90,7 +105,10 @@ export const FraudAlertCard = ({
             variant="ghost"
             size="sm"
             className="flex-1 text-green-600 dark:text-green-400"
-            onClick={onClear}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
           >
             Clear
           </Button>
@@ -98,7 +116,10 @@ export const FraudAlertCard = ({
             variant="outline"
             size="sm"
             className="flex-1 text-red-600 dark:text-red-400"
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.stopPropagation();
+              onConfirm();
+            }}
           >
             Confirm
           </Button>

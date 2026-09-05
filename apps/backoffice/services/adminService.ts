@@ -5,8 +5,12 @@ import type {
   UserAccountStatus,
   VerificationRequest,
   Dispute,
+  DisputeDetail,
   DisputeMessage,
+  DisputeResolveOutcome,
   FraudAlert,
+  FraudAlertDetail,
+  FraudAlertSeverity,
   FraudAlertStatus,
   PlatformEscrowTransaction,
   AuditLogEntry,
@@ -352,13 +356,31 @@ export const adminService = {
     );
   },
 
-  async resolveDispute(disputeId: string, resolution?: string): Promise<ApiResponse<Dispute>> {
+  async resolveDispute(
+    disputeId: string,
+    resolution?: string,
+    outcome: DisputeResolveOutcome = 'none'
+  ): Promise<ApiResponse<Dispute>> {
     return safeCall(() =>
       authFetch(`/admin/disputes/${disputeId}/resolve`, {
         method: 'POST',
-        body: JSON.stringify({ resolution }),
+        body: JSON.stringify({ resolution, outcome }),
       })
     );
+  },
+
+  async getDisputeDetail(disputeId: string): Promise<ApiResponse<DisputeDetail>> {
+    return safeCall(() => authFetch(`/admin/disputes/${disputeId}`));
+  },
+
+  async startDisputeReview(disputeId: string): Promise<ApiResponse<Dispute>> {
+    return safeCall(() =>
+      authFetch(`/admin/disputes/${disputeId}/start-review`, { method: 'POST' })
+    );
+  },
+
+  async reopenDispute(disputeId: string): Promise<ApiResponse<Dispute>> {
+    return safeCall(() => authFetch(`/admin/disputes/${disputeId}/reopen`, { method: 'POST' }));
   },
 
   async escalateDispute(disputeId: string): Promise<ApiResponse<Dispute>> {
@@ -395,6 +417,41 @@ export const adminService = {
         body: JSON.stringify({ status }),
       })
     );
+  },
+
+  async createFraudAlert(params: {
+    subjectUserId: string;
+    reason: string;
+    severity?: FraudAlertSeverity;
+    relatedEntityType?: string;
+    relatedEntityId?: string;
+  }): Promise<ApiResponse<FraudAlert>> {
+    return safeCall(() =>
+      authFetch(`/admin/fraud-alerts`, {
+        method: 'POST',
+        body: JSON.stringify(params),
+      })
+    );
+  },
+
+  async getFraudAlertDetail(id: string): Promise<ApiResponse<FraudAlertDetail>> {
+    return safeCall(() => authFetch(`/admin/fraud-alerts/${id}`));
+  },
+
+  async updateFraudAlertSeverity(
+    id: string,
+    severity: FraudAlertSeverity
+  ): Promise<ApiResponse<FraudAlert>> {
+    return safeCall(() =>
+      authFetch(`/admin/fraud-alerts/${id}/severity`, {
+        method: 'PATCH',
+        body: JSON.stringify({ severity }),
+      })
+    );
+  },
+
+  async reopenFraudAlert(id: string): Promise<ApiResponse<FraudAlert>> {
+    return safeCall(() => authFetch(`/admin/fraud-alerts/${id}/reopen`, { method: 'POST' }));
   },
 
   // ---- Escrow oversight ----

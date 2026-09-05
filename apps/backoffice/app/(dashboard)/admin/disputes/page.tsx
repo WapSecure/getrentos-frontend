@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
-import { DisputeResolutionModal } from '@/components/admin/disputes/DisputeResolutionModal';
+import { DisputeCaseModal } from '@/components/admin/disputes/DisputeCaseModal';
 import { EmptyState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -13,7 +13,12 @@ import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import type { DisputeCategory, DisputeMessage, DisputeStatus } from '@/types/admin';
+import type {
+  DisputeCategory,
+  DisputeMessage,
+  DisputeResolveOutcome,
+  DisputeStatus,
+} from '@/types/admin';
 
 type StatusFilter = 'all' | DisputeStatus;
 type CategoryFilter = 'all' | DisputeCategory;
@@ -65,13 +70,40 @@ export default function AdminDisputesPage() {
     enabled: !!activeDisputeId,
   });
 
+  const { data: activeDisputeDetail, isLoading: activeDisputeDetailLoading } = useQuery({
+    queryKey: adminKeys.disputeDetail(activeDisputeId ?? ''),
+    queryFn: () => unwrap(adminService.getDisputeDetail(activeDisputeId!)),
+    enabled: !!activeDisputeId,
+  });
+
   const activeDispute = disputes.find((d) => d.id === activeDisputeId) || null;
 
   const invalidateDisputes = () =>
     queryClient.invalidateQueries({ queryKey: ['admin', 'disputes'] });
 
   const resolveMutation = useMutation({
-    mutationFn: (id: string) => unwrap(adminService.resolveDispute(id)),
+    mutationFn: ({
+      id,
+      resolution,
+      outcome,
+    }: {
+      id: string;
+      resolution?: string;
+      outcome: DisputeResolveOutcome;
+    }) => unwrap(adminService.resolveDispute(id, resolution, outcome)),
+    onSuccess: () => {
+      invalidateDisputes();
+      setActiveDisputeId(null);
+    },
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.startDisputeReview(id)),
+    onSuccess: invalidateDisputes,
+  });
+
+  const reopenMutation = useMutation({
+    mutationFn: (id: string) => unwrap(adminService.reopenDispute(id)),
     onSuccess: invalidateDisputes,
   });
 
@@ -111,7 +143,13 @@ export default function AdminDisputesPage() {
       queryClient.invalidateQueries({ queryKey: adminKeys.disputeMessages(id) }),
   });
 
-  const handleResolve = (id: string) => resolveMutation.mutate(id);
+  const handleResolve = (
+    id: string,
+    resolution?: string,
+    outcome: DisputeResolveOutcome = 'none'
+  ) => resolveMutation.mutate({ id, resolution, outcome });
+  const handleStartReview = (id: string) => reviewMutation.mutate(id);
+  const handleReopen = (id: string) => reopenMutation.mutate(id);
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
   const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
 
@@ -141,6 +179,9 @@ export default function AdminDisputesPage() {
     { value: 'sale', label: 'Sale' },
     { value: 'service_quality', label: 'Service Quality' },
     { value: 'payment', label: 'Payment' },
+    { value: 'damage', label: 'Damage' },
+    { value: 'cancellation', label: 'Cancellation' },
+    { value: 'other', label: 'Other' },
   ];
 
   return (
@@ -226,14 +267,20 @@ export default function AdminDisputesPage() {
         />
       )}
 
-      <DisputeResolutionModal
+      <DisputeCaseModal
         dispute={activeDispute}
+        detail={activeDisputeDetail}
+        detailLoading={activeDisputeDetailLoading}
         messages={activeDisputeMessages}
         onClose={() => setActiveDisputeId(null)}
-        onResolve={handleResolve}
+        onStartReview={handleStartReview}
+        onReopen={handleReopen}
         onEscalate={handleEscalate}
+        onResolve={handleResolve}
         onSendMessage={handleSendMessage}
         isResolving={resolveMutation.isPending}
+        isReviewing={reviewMutation.isPending}
+        isReopening={reopenMutation.isPending}
         isEscalating={escalateMutation.isPending}
         isSendingMessage={sendMessageMutation.isPending}
       />
