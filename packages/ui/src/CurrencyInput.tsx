@@ -46,8 +46,10 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
           placeholder={placeholder}
           className={cn(
             'w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
-            prefix && 'pl-8',
-            className
+            className,
+            // Gutter for the prefix symbol — applied LAST so callers passing
+            // their own px-*/pl-* can never make the typed text overlap the ₦.
+            prefix && 'pl-8'
           )}
           {...props}
         />

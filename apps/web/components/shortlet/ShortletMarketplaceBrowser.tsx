@@ -94,8 +94,8 @@ export const ShortletMarketplaceBrowser = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-7">
-        <div className="col-span-2 md:col-span-1">
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
+        <div className="col-span-2 md:col-span-2 xl:col-span-1">
           <Select
             value={city}
             onValueChange={(value) => updateFilter(setCity, value)}
