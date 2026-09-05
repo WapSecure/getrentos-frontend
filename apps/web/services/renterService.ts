@@ -11,6 +11,7 @@ import type { ApplicationFormData } from '@/components/renter/property-apply/App
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
 import type { Conversation, Reminder } from '@/types/messages';
+import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
@@ -798,10 +799,51 @@ export const renterService = {
     files: File[] = []
   ): Promise<ApiResponse<Conversation>> {
     const formData = new FormData();
+
     formData.append('text', text);
     files.forEach((file) => formData.append('files', file));
     return safeCall(() =>
       authFetch(`/renter/messages/${conversationId}/messages`, { method: 'POST', body: formData })
+    );
+  },
+
+  // ---- Support threads ----
+  async listSupportThreads(): Promise<ApiResponse<SupportThread[]>> {
+    return safeCall(() => authFetch<SupportThread[]>('/renter/support/threads'));
+  },
+
+  async createSupportThread(input: {
+    subject: string;
+    category?: string;
+  }): Promise<ApiResponse<SupportThread>> {
+    return safeCall(() =>
+      authFetch<SupportThread>('/renter/support/threads', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  async getSupportThreadMessages(threadId: string): Promise<ApiResponse<SupportMessage[]>> {
+    return safeCall(() =>
+      authFetch<SupportMessage[]>(`/renter/support/threads/${threadId}/messages`)
+    );
+  },
+
+  async sendSupportMessage(threadId: string, text: string): Promise<ApiResponse<SupportMessage>> {
+    return safeCall(() =>
+      authFetch<SupportMessage>(`/renter/support/threads/${threadId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+    );
+  },
+
+  async resolveSupportThread(threadId: string): Promise<ApiResponse<SupportThread>> {
+    return safeCall(() =>
+      authFetch<SupportThread>(`/renter/support/threads/${threadId}/resolve`, {
+        method: 'POST',
+      })
     );
   },
 

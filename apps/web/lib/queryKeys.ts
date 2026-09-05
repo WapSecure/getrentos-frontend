@@ -79,6 +79,8 @@ export const renterKeys = {
   documents: ['renter', 'documents'] as const,
   documentSummary: ['renter', 'documents', 'summary'] as const,
   conversations: ['renter', 'conversations'] as const,
+  supportThreads: ['renter', 'support', 'threads'] as const,
+  supportMessages: (id: string) => ['renter', 'support', 'threads', id, 'messages'] as const,
   reminders: ['renter', 'reminders'] as const,
   messageTemplates: ['renter', 'messageTemplates'] as const,
   quickReplies: ['renter', 'quickReplies'] as const,

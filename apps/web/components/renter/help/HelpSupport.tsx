@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle, Mail, Clock, ArrowRight } from 'lucide-react';
+import { MessageCircle, Mail, Clock, ArrowRight, LifeBuoy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
@@ -30,6 +30,29 @@ export const HelpSupport = () => {
               onClick={() => router.push(ROUTES.RENTER_MESSAGES)}
             >
               Start Chat
+              <ArrowRight className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+          <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+            <LifeBuoy className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+              Support tickets
+            </p>
+            <p className="text-xs text-emerald-700 dark:text-emerald-400">
+              Start or track a conversation with the team
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="mt-2"
+              onClick={() => router.push('/renter/support')}
+            >
+              Open Support
               <ArrowRight className="w-3 h-3" />
             </Button>
           </div>
