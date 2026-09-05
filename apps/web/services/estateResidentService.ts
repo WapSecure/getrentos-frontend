@@ -10,6 +10,8 @@ import type {
   Poll,
   Amenity,
   AmenityBooking,
+  CommitteeMember,
+  GovernanceRecord,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -136,6 +138,26 @@ export const estateResidentService = {
   async revokeMyVisitorPass(passId: string): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/resident/visitor-passes/${passId}/revoke`, { method: 'PATCH' })
+    );
+  },
+
+  async listMyEstateCommittee(): Promise<ApiResponse<CommitteeMember[]>> {
+    return safeCall(() => authFetch('/estate/resident/committee'));
+  },
+
+  async listMyEstateGovernanceRecords(): Promise<ApiResponse<GovernanceRecord[]>> {
+    return safeCall(() => authFetch('/estate/resident/governance'));
+  },
+
+  async signGovernanceRecord(
+    recordId: string,
+    signatureData: string
+  ): Promise<ApiResponse<GovernanceRecord>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/governance/${recordId}/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ signatureData }),
+      })
     );
   },
 };

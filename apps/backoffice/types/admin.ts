@@ -39,7 +39,11 @@ export type AdminPermission =
   | 'staff.create'
   | 'staff.approve'
   | 'shortlet.view'
-  | 'shortlet.moderate';
+  | 'shortlet.moderate'
+  | 'rentals.view'
+  | 'rentals.moderate'
+  | 'rentfinance.view'
+  | 'rentfinance.approve';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 

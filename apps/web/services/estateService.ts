@@ -11,6 +11,7 @@ import type {
   Announcement,
   Violation,
   GovernanceRecord,
+  GovernanceRecordSignature,
   VehicleLog,
   VehicleLogPurpose,
   DeliveryLog,
@@ -21,6 +22,9 @@ import type {
   Poll,
   Amenity,
   AmenityBooking,
+  CommitteeMember,
+  CommitteeTitle,
+  EstateMicrositeSettings,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -537,12 +541,18 @@ export const estateService = {
       type?: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER';
       meetingDate?: string;
       file: File;
+      newVersionOfId?: string;
+      requiresSignatures?: boolean;
     }
   ): Promise<ApiResponse<GovernanceRecord>> {
     const formData = new FormData();
     formData.append('title', data.title);
     if (data.type) formData.append('type', data.type);
     if (data.meetingDate) formData.append('meetingDate', data.meetingDate);
+    if (data.newVersionOfId) formData.append('newVersionOfId', data.newVersionOfId);
+    if (data.requiresSignatures !== undefined) {
+      formData.append('requiresSignatures', String(data.requiresSignatures));
+    }
     formData.append('file', data.file);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/governance`, { method: 'POST', body: formData })
@@ -556,9 +566,72 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/governance${toQuery({ type })}`));
   },
 
+  async listGovernanceRecordVersions(
+    estateId: string,
+    recordId: string
+  ): Promise<ApiResponse<GovernanceRecord[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/governance/${recordId}/versions`));
+  },
+
+  async listGovernanceRecordSignatures(
+    estateId: string,
+    recordId: string
+  ): Promise<ApiResponse<GovernanceRecordSignature[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/governance/${recordId}/signatures`));
+  },
+
   async removeGovernanceRecord(estateId: string, recordId: string): Promise<ApiResponse<void>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/governance/${recordId}`, { method: 'DELETE' })
+    );
+  },
+
+  async appointCommitteeMember(
+    estateId: string,
+    data: { householdId: string; title?: CommitteeTitle }
+  ): Promise<ApiResponse<CommitteeMember>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/committee`, {
+        method: 'POST',
+        body: JSON.stringify({
+          householdId: data.householdId,
+          ...(data.title ? { title: data.title.toUpperCase() } : {}),
+        }),
+      })
+    );
+  },
+
+  async listCommitteeMembers(estateId: string): Promise<ApiResponse<CommitteeMember[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/committee`));
+  },
+
+  async removeCommitteeMember(estateId: string, memberId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/committee/${memberId}`, { method: 'DELETE' })
+    );
+  },
+
+  async getMicrositeSettings(estateId: string): Promise<ApiResponse<EstateMicrositeSettings>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/microsite`));
+  },
+
+  async updateMicrositeSettings(
+    estateId: string,
+    patch: Partial<Pick<EstateMicrositeSettings, 'slug' | 'bio' | 'enabled'>>
+  ): Promise<ApiResponse<EstateMicrositeSettings>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/microsite`, { method: 'PATCH', body: JSON.stringify(patch) })
+    );
+  },
+
+  async uploadMicrositeBanner(
+    estateId: string,
+    file: File
+  ): Promise<ApiResponse<EstateMicrositeSettings>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/microsite/banner`, { method: 'POST', body: formData })
     );
   },
 };

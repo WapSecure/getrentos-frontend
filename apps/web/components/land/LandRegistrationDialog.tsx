@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DocumentUpload,
   Field,
   Input,
   NumberInput,
@@ -281,7 +282,7 @@ export const LandRegistrationDialog = ({
               Uploading evidence now starts ownership verification. You can add further files after
               registration.
             </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 space-y-3">
               <Select
                 value={proofType}
                 onValueChange={(value) =>
@@ -290,16 +291,14 @@ export const LandRegistrationDialog = ({
                 options={ownershipProofOptions}
                 ariaLabel="Ownership proof type"
               />
-              <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 text-sm text-foreground transition-colors hover:border-primary">
-                <Upload className="h-4 w-4 text-primary" />
-                <span className="max-w-[13rem] truncate">{proof?.name || 'Choose evidence'}</span>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.webp"
-                  className="sr-only"
-                  onChange={(event) => setProof(event.target.files?.[0] ?? null)}
-                />
-              </label>
+              <DocumentUpload
+                value={proof ? [{ id: 'proof', file: proof }] : []}
+                onChange={(items) => setProof(items[0]?.file ?? null)}
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                multiple={false}
+                label=""
+                hint="Ownership evidence (PDF or image) — preview before submitting"
+              />
             </div>
           </div>
 

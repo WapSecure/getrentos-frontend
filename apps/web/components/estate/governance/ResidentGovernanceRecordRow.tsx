@@ -1,7 +1,7 @@
 'use client';
 
-import { Download, Trash2, FileText, History, FilePlus2 } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Download, FileText, PenLine } from 'lucide-react';
+import { Badge, Button } from '@getrentos/ui';
 import type { GovernanceRecord } from '@/types/estate';
 
 const typeVariant: Record<GovernanceRecord['type'], 'info' | 'neutral'> = {
@@ -21,21 +21,17 @@ const formatDate = (value: string) =>
     new Date(value)
   );
 
-interface GovernanceRecordRowProps {
+interface ResidentGovernanceRecordRowProps {
   record: GovernanceRecord;
-  onRemove: () => void;
-  onUploadNewVersion?: () => void;
-  onViewHistory?: () => void;
-  onViewSignatures?: () => void;
+  onSign?: () => void;
 }
 
-export const GovernanceRecordRow = ({
+export const ResidentGovernanceRecordRow = ({
   record,
-  onRemove,
-  onUploadNewVersion,
-  onViewHistory,
-  onViewSignatures,
-}: GovernanceRecordRowProps) => {
+  onSign,
+}: ResidentGovernanceRecordRowProps) => {
+  const needsMySignature = record.requiresSignatures && record.signedByMe === false;
+
   return (
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
@@ -46,15 +42,12 @@ export const GovernanceRecordRow = ({
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-medium text-foreground truncate">{record.title}</p>
             <Badge variant={typeVariant[record.type]}>{typeLabels[record.type]}</Badge>
-            {record.version > 1 && <Badge variant="neutral">v{record.version}</Badge>}
             {record.requiresSignatures && record.signatureProgress && (
-              <button onClick={onViewSignatures} className="cursor-pointer">
-                <Badge variant={record.status === 'approved' ? 'success' : 'warning'}>
-                  {record.status === 'approved'
-                    ? 'Fully signed'
-                    : `${record.signatureProgress.signed} of ${record.signatureProgress.total} signed`}
-                </Badge>
-              </button>
+              <Badge variant={record.status === 'approved' ? 'success' : 'warning'}>
+                {record.status === 'approved'
+                  ? 'Fully signed'
+                  : `${record.signatureProgress.signed} of ${record.signatureProgress.total} signed`}
+              </Badge>
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -63,24 +56,12 @@ export const GovernanceRecordRow = ({
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-1 shrink-0">
-        {record.version > 1 && onViewHistory && (
-          <button
-            onClick={onViewHistory}
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-            aria-label="View version history"
-          >
-            <History className="w-4 h-4" />
-          </button>
-        )}
-        {onUploadNewVersion && (
-          <button
-            onClick={onUploadNewVersion}
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-            aria-label="Upload new version"
-          >
-            <FilePlus2 className="w-4 h-4" />
-          </button>
+      <div className="flex items-center gap-2 shrink-0">
+        {needsMySignature && onSign && (
+          <Button variant="primary" size="sm" className="gap-1.5" onClick={onSign}>
+            <PenLine className="w-3.5 h-3.5" />
+            Sign
+          </Button>
         )}
         <a
           href={record.url}
@@ -90,12 +71,6 @@ export const GovernanceRecordRow = ({
         >
           <Download className="w-4 h-4" />
         </a>
-        <button
-          onClick={onRemove}
-          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );

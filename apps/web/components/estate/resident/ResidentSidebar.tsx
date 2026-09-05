@@ -14,6 +14,8 @@ import {
   Wrench,
   Vote,
   CalendarCheck,
+  Landmark,
+  BookOpen,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -34,6 +36,8 @@ export const residentNavItems: NavItem[] = [
   { label: 'Maintenance', href: ROUTES.RESIDENT_MAINTENANCE, icon: Wrench },
   { label: 'Polls', href: ROUTES.RESIDENT_POLLS, icon: Vote },
   { label: 'Amenities', href: ROUTES.RESIDENT_AMENITIES, icon: CalendarCheck },
+  { label: 'Committee', href: ROUTES.RESIDENT_COMMITTEE, icon: Landmark },
+  { label: 'Governance', href: ROUTES.RESIDENT_GOVERNANCE, icon: BookOpen },
 ];
 
 export const ResidentSidebar = () => {

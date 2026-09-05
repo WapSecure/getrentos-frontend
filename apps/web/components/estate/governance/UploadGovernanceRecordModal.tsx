@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Upload, X } from 'lucide-react';
-import { Button, DatePicker, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import { X } from 'lucide-react';
+import { Button, Checkbox, DatePicker, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 
 interface UploadGovernanceRecordModalProps {
   isOpen: boolean;
@@ -13,8 +13,12 @@ interface UploadGovernanceRecordModalProps {
     type: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER';
     meetingDate?: string;
     file: File;
+    newVersionOfId?: string;
+    requiresSignatures?: boolean;
   }) => void;
   isSubmitting?: boolean;
+  /** Set when uploading a new version of an existing record — pre-fills the title and type. */
+  newVersionOf?: { id: string; title: string; type: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER' };
 }
 
 const typeOptions = [
@@ -28,17 +32,20 @@ export const UploadGovernanceRecordModal = ({
   onClose,
   onSubmit,
   isSubmitting,
+  newVersionOf,
 }: UploadGovernanceRecordModalProps) => {
-  const [title, setTitle] = useState('');
-  const [type, setType] = useState('BYLAWS');
+  const [title, setTitle] = useState(newVersionOf?.title ?? '');
+  const [type, setType] = useState<string>(newVersionOf?.type ?? 'BYLAWS');
   const [meetingDate, setMeetingDate] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [requiresSignatures, setRequiresSignatures] = useState(false);
 
   const handleClose = () => {
-    setTitle('');
-    setType('BYLAWS');
+    setTitle(newVersionOf?.title ?? '');
+    setType(newVersionOf?.type ?? 'BYLAWS');
     setMeetingDate('');
     setFile(null);
+    setRequiresSignatures(false);
     onClose();
   };
 
@@ -55,13 +62,22 @@ export const UploadGovernanceRecordModal = ({
             className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">Upload Governance Record</h3>
+              <h3 className="font-semibold text-foreground">
+                {newVersionOf ? 'Upload New Version' : 'Upload Governance Record'}
+              </h3>
               <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
+              {newVersionOf && (
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Replaces the current version of “{newVersionOf.title}”. The old version stays
+                  available in its history.
+                </p>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Title</label>
                 <LegacyInput
@@ -97,6 +113,11 @@ export const UploadGovernanceRecordModal = ({
                   hint="PDF or DOC up to 20MB"
                 />
               </div>
+
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <Checkbox checked={requiresSignatures} onCheckedChange={setRequiresSignatures} />
+                Require every committee member to sign before it&apos;s approved
+              </label>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -114,6 +135,8 @@ export const UploadGovernanceRecordModal = ({
                     type: type as 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER',
                     meetingDate: meetingDate || undefined,
                     file,
+                    newVersionOfId: newVersionOf?.id,
+                    requiresSignatures,
                   })
                 }
               >
