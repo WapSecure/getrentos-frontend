@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Landmark, Flag } from 'lucide-react';
 import { DataTable, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
 import { formatCurrency, formatDate } from '@getrentos/shared';
@@ -44,7 +44,7 @@ export default function AdminEscrowPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.escrowTransactions({
       search: debouncedSearch,
       status: statusFilter,
@@ -64,7 +64,7 @@ export default function AdminEscrowPage() {
   const transactions = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const { data: flaggedData } = useQuery({
+  const { data: flaggedData, isError: flaggedCountError } = useQuery({
     queryKey: ['admin', 'escrow', 'flagged-count'],
     queryFn: () =>
       unwrap(adminService.listEscrowTransactions({ flagged: true, page: 1, pageSize: 1 })),
@@ -161,7 +161,8 @@ export default function AdminEscrowPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Escrow Oversight</h1>
         <p className="text-muted-foreground mt-1">
-          Platform-wide monitoring of escrow transactions · {flaggedCount} flagged for review
+          Platform-wide monitoring of escrow transactions ·{' '}
+          {flaggedCountError ? 'flagged count unavailable' : `${flaggedCount} flagged for review`}
         </p>
       </div>
 
@@ -201,19 +202,28 @@ export default function AdminEscrowPage() {
         ))}
       </div>
 
-      <DataTable
-        columns={columns}
-        data={transactions}
-        isLoading={isLoading}
-        getRowKey={(t) => t.id}
-        getRowClassName={(t) => (t.flagged ? 'bg-red-50/50 dark:bg-red-900/10' : undefined)}
-        emptyState={<EmptyState icon={Landmark} title="No transactions match your filters" />}
-        footer={
-          total > 0 && (
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
-          )
-        }
-      />
+      {isError ? (
+        <PageErrorState
+          title="Could not load escrow transactions"
+          description="Escrow records are temporarily unavailable. Your search and status filter have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={transactions}
+          isLoading={isLoading}
+          getRowKey={(t) => t.id}
+          getRowClassName={(t) => (t.flagged ? 'bg-red-50/50 dark:bg-red-900/10' : undefined)}
+          emptyState={<EmptyState icon={Landmark} title="No transactions match your filters" />}
+          footer={
+            total > 0 && (
+              <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+            )
+          }
+        />
+      )}
     </>
   );
 }

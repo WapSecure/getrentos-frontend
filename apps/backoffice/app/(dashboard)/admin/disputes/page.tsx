@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
 import { DisputeResolutionModal } from '@/components/admin/disputes/DisputeResolutionModal';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -37,7 +37,7 @@ export default function AdminDisputesPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.disputes({
       search: debouncedSearch,
       status: statusFilter,
@@ -84,6 +84,7 @@ export default function AdminDisputesPage() {
   });
 
   const sendMessageMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({ id, text }: { id: string; text: string }) =>
       unwrap(adminService.sendDisputeMessage(id, text)),
     onMutate: async ({ id, text }) => {
@@ -115,11 +116,11 @@ export default function AdminDisputesPage() {
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
   const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
 
-  const { data: openDisputes } = useQuery({
+  const { data: openDisputes, isError: openCountError } = useQuery({
     queryKey: ['admin', 'disputes', 'count', 'open'],
     queryFn: () => unwrap(adminService.listDisputes({ status: 'open', page: 1, pageSize: 1 })),
   });
-  const { data: underReviewDisputes } = useQuery({
+  const { data: underReviewDisputes, isError: reviewCountError } = useQuery({
     queryKey: ['admin', 'disputes', 'count', 'under_review'],
     queryFn: () =>
       unwrap(adminService.listDisputes({ status: 'under_review', page: 1, pageSize: 1 })),
@@ -148,8 +149,9 @@ export default function AdminDisputesPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Dispute &amp; Arbitration</h1>
         <p className="text-muted-foreground mt-1">
-          {activeDisputeCount} active dispute{activeDisputeCount === 1 ? '' : 's'} requiring
-          attention
+          {openCountError || reviewCountError
+            ? 'Active dispute count temporarily unavailable'
+            : `${activeDisputeCount} active dispute${activeDisputeCount === 1 ? '' : 's'} requiring attention`}
         </p>
       </div>
 
@@ -197,7 +199,14 @@ export default function AdminDisputesPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <PageErrorState
+          title="Could not load disputes"
+          description="The dispute queue is temporarily unavailable. Your filters have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>

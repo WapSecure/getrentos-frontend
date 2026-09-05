@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldAlert } from 'lucide-react';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -35,7 +35,7 @@ export default function AdminFraudPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.fraudAlerts({
       search: debouncedSearch,
       status: statusFilter,
@@ -68,7 +68,7 @@ export default function AdminFraudPage() {
     updateStatusMutation.mutate({ id, status });
   };
 
-  const { data: flaggedData } = useQuery({
+  const { data: flaggedData, isError: flaggedCountError } = useQuery({
     queryKey: ['admin', 'fraudAlerts', 'count', 'flagged'],
     queryFn: () =>
       unwrap(adminService.listFraudAlerts({ status: 'flagged', page: 1, pageSize: 1 })),
@@ -96,7 +96,9 @@ export default function AdminFraudPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Fraud &amp; Risk Review</h1>
         <p className="text-muted-foreground mt-1">
-          {flaggedCount} alert{flaggedCount === 1 ? '' : 's'} awaiting triage
+          {flaggedCountError
+            ? 'Flagged-alert count temporarily unavailable'
+            : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
         </p>
       </div>
 
@@ -144,7 +146,14 @@ export default function AdminFraudPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <PageErrorState
+          title="Could not load fraud alerts"
+          description="The risk-review queue is temporarily unavailable. Your filters have been preserved."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
