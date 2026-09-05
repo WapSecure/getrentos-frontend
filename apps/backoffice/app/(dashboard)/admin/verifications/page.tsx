@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
-import { EmptyState, PageErrorState } from '@getrentos/ui';
+import { ConfirmDialog, EmptyState, PageErrorState } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -32,6 +32,7 @@ export default function AdminVerificationsPage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [page, setPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -88,7 +89,7 @@ export default function AdminVerificationsPage() {
     onSuccess: closeModalAndRefresh,
   });
 
-  const handleApprove = (id: string) => approveMutation.mutate(id);
+  const handleApprove = () => setShowApproveConfirm(true);
   const handleReject = (id: string, reason: string) => rejectMutation.mutate({ id, reason });
   const handleRequestClarification = (id: string, reason: string) =>
     requestClarificationMutation.mutate({ id, reason });
@@ -207,14 +208,30 @@ export default function AdminVerificationsPage() {
       )}
 
       <ReviewVerificationModal
+        key={activeRequest?.id ?? 'closed'}
         request={activeRequest}
-        onClose={() => setActiveRequest(null)}
+        onClose={() => {
+          setShowApproveConfirm(false);
+          setActiveRequest(null);
+        }}
         onApprove={handleApprove}
         onReject={handleReject}
         onRequestClarification={handleRequestClarification}
         isApproving={approveMutation.isPending}
         isRejecting={rejectMutation.isPending}
         isRequestingClarification={requestClarificationMutation.isPending}
+      />
+      <ConfirmDialog
+        open={showApproveConfirm && activeRequest !== null}
+        onOpenChange={setShowApproveConfirm}
+        title="Approve verification?"
+        description={
+          activeRequest
+            ? `${activeRequest.applicantName}'s ${activeRequest.subjectLabel} verification will be approved and may unlock trusted platform actions.`
+            : ''
+        }
+        confirmLabel="Approve verification"
+        onConfirm={() => activeRequest && approveMutation.mutate(activeRequest.id)}
       />
     </>
   );

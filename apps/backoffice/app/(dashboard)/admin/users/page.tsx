@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
-import { DataTable, PageErrorState, type Column } from '@getrentos/ui';
+import { ConfirmDialog, DataTable, PageErrorState, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -50,6 +50,10 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [activeUser, setActiveUser] = useState<PlatformUser | null>(null);
   const [page, setPage] = useState(1);
+  const [pendingStatus, setPendingStatus] = useState<{
+    user: PlatformUser;
+    status: Exclude<UserAccountStatus, 'pending'>;
+  } | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,8 +95,9 @@ export default function AdminUsersPage() {
   });
 
   const handleChangeStatus = (userId: string, status: UserAccountStatus) => {
-    if (status === 'pending') return;
-    changeStatusMutation.mutate({ userId, status });
+    if (status === 'pending' || changeStatusMutation.isPending) return;
+    const user = users.find((item) => item.id === userId) ?? activeUser;
+    if (user) setPendingStatus({ user, status });
   };
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
@@ -247,6 +252,44 @@ export default function AdminUsersPage() {
         user={activeUser}
         onClose={() => setActiveUser(null)}
         onChangeStatus={handleChangeStatus}
+        isChangingStatus={changeStatusMutation.isPending}
+        pendingStatus={changeStatusMutation.variables?.status}
+      />
+
+      <ConfirmDialog
+        open={pendingStatus !== null}
+        onOpenChange={(open) => !open && setPendingStatus(null)}
+        title={
+          pendingStatus?.status === 'banned'
+            ? 'Ban this account?'
+            : pendingStatus?.status === 'suspended'
+              ? 'Suspend this account?'
+              : 'Reactivate this account?'
+        }
+        description={
+          pendingStatus
+            ? `${pendingStatus.user.fullName} will be marked ${pendingStatus.status}. ${
+                pendingStatus.status === 'active'
+                  ? 'They will regain access to the platform.'
+                  : 'Their platform access will be restricted immediately.'
+              }`
+            : ''
+        }
+        confirmLabel={
+          pendingStatus?.status === 'banned'
+            ? 'Ban account'
+            : pendingStatus?.status === 'suspended'
+              ? 'Suspend account'
+              : 'Reactivate account'
+        }
+        onConfirm={() => {
+          if (pendingStatus) {
+            changeStatusMutation.mutate({
+              userId: pendingStatus.user.id,
+              status: pendingStatus.status,
+            });
+          }
+        }}
       />
     </>
   );

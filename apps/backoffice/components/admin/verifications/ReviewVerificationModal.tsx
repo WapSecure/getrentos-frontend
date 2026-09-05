@@ -38,12 +38,19 @@ export const ReviewVerificationModal = ({
 
   // Fetch the real submitted documents (signed preview URLs) for the request
   // being reviewed so the reviewer can inspect the actual files.
-  const { data: detail } = useQuery({
+  const {
+    data: detail,
+    isLoading: detailLoading,
+    isError: detailError,
+    isFetching: detailFetching,
+    refetch: refetchDetail,
+  } = useQuery({
     queryKey: ['admin', 'verifications', 'detail', request?.id],
     queryFn: () => (request ? unwrap(adminService.getVerificationDetail(request.id)) : null),
     enabled: Boolean(request),
   });
   const documents = detail?.documents ?? [];
+  const detailUnavailable = detailLoading || detailError;
 
   const handleClose = () => {
     if (isSubmitting) return;
@@ -101,7 +108,31 @@ export const ReviewVerificationModal = ({
                   <p className="text-xs font-medium text-muted-foreground mb-2">
                     Submitted Documents ({documents.length || request.documentCount})
                   </p>
-                  {documents.length === 0 ? (
+                  {detailError ? (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-center">
+                      <p className="text-xs text-destructive">
+                        The submitted documents could not be loaded. Do not decide this request
+                        without reviewing them.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => void refetchDetail()}
+                        isLoading={detailFetching}
+                      >
+                        Try again
+                      </Button>
+                    </div>
+                  ) : detailLoading ? (
+                    <div
+                      className="rounded-lg border border-border p-3 text-xs text-muted-foreground"
+                      role="status"
+                    >
+                      Loading submitted documents…
+                    </div>
+                  ) : documents.length === 0 ? (
                     <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground">
                       No document files are available to preview for this request.
                     </div>
@@ -141,6 +172,8 @@ export const ReviewVerificationModal = ({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
+                  required
+                  minLength={10}
                   placeholder={
                     mode === 'reject'
                       ? 'e.g. Document is illegible or expired'
@@ -148,6 +181,9 @@ export const ReviewVerificationModal = ({
                   }
                   className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Required · At least 10 characters for the review record.
+                </p>
               </div>
             )}
           </div>
@@ -159,7 +195,7 @@ export const ReviewVerificationModal = ({
                   variant="ghost"
                   className="flex-1 gap-1.5"
                   onClick={() => setMode('clarify')}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || detailUnavailable}
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
                   Need Info
@@ -168,7 +204,7 @@ export const ReviewVerificationModal = ({
                   variant="outline"
                   className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
                   onClick={() => setMode('reject')}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || detailUnavailable}
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   Reject
@@ -178,7 +214,7 @@ export const ReviewVerificationModal = ({
                   className="flex-1 gap-1.5"
                   onClick={handleApprove}
                   isLoading={isApproving}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || detailUnavailable}
                 >
                   <Check className="w-3.5 h-3.5" />
                   Approve
@@ -199,7 +235,7 @@ export const ReviewVerificationModal = ({
                   className="flex-1"
                   onClick={handleSubmitReason}
                   isLoading={mode === 'reject' ? isRejecting : isRequestingClarification}
-                  disabled={!reason.trim() || isSubmitting}
+                  disabled={reason.trim().length < 10 || isSubmitting}
                 >
                   Submit
                 </Button>

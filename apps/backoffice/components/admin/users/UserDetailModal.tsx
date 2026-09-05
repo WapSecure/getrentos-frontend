@@ -10,6 +10,8 @@ interface UserDetailModalProps {
   user: PlatformUser | null;
   onClose: () => void;
   onChangeStatus: (userId: string, status: UserAccountStatus) => void;
+  isChangingStatus?: boolean;
+  pendingStatus?: UserAccountStatus;
 }
 
 const roleLabels: Record<string, string> = {
@@ -22,7 +24,13 @@ const roleLabels: Record<string, string> = {
   admin: 'Admin',
 };
 
-export const UserDetailModal = ({ user, onClose, onChangeStatus }: UserDetailModalProps) => {
+export const UserDetailModal = ({
+  user,
+  onClose,
+  onChangeStatus,
+  isChangingStatus = false,
+  pendingStatus,
+}: UserDetailModalProps) => {
   return (
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
       {user && (
@@ -73,7 +81,12 @@ export const UserDetailModal = ({ user, onClose, onChangeStatus }: UserDetailMod
           </div>
 
           <div className="p-4 border-t border-border flex gap-2">
-            <Button variant="ghost" className="flex-1" onClick={onClose}>
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={onClose}
+              disabled={isChangingStatus}
+            >
               Close
             </Button>
             {user.status !== 'suspended' ? (
@@ -81,6 +94,8 @@ export const UserDetailModal = ({ user, onClose, onChangeStatus }: UserDetailMod
                 variant="outline"
                 className="flex-1 gap-1.5"
                 onClick={() => onChangeStatus(user.id, 'suspended')}
+                isLoading={pendingStatus === 'suspended'}
+                disabled={isChangingStatus}
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Suspend
@@ -90,6 +105,8 @@ export const UserDetailModal = ({ user, onClose, onChangeStatus }: UserDetailMod
                 variant="outline"
                 className="flex-1 gap-1.5"
                 onClick={() => onChangeStatus(user.id, 'active')}
+                isLoading={pendingStatus === 'active'}
+                disabled={isChangingStatus}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Reactivate
@@ -100,6 +117,8 @@ export const UserDetailModal = ({ user, onClose, onChangeStatus }: UserDetailMod
                 variant="ghost"
                 className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
                 onClick={() => onChangeStatus(user.id, 'banned')}
+                isLoading={pendingStatus === 'banned'}
+                disabled={isChangingStatus}
               >
                 <Ban className="w-3.5 h-3.5" />
                 Ban
