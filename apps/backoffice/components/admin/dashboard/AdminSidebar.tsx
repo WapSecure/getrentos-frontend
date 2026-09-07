@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   ShieldCheck,
+  Fingerprint,
   Gavel,
   AlertTriangle,
   Landmark,
@@ -45,6 +46,12 @@ const navItems: NavItem[] = [
     label: 'Verifications',
     href: ROUTES.ADMIN_VERIFICATIONS,
     icon: ShieldCheck,
+    permission: 'verifications.review',
+  },
+  {
+    label: 'Trust Reviews',
+    href: '/admin/trust/review-cases',
+    icon: Fingerprint,
     permission: 'verifications.review',
   },
   {

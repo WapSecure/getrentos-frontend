@@ -192,4 +192,20 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  reviewCases: (params?: {
+    status?: string;
+    priority?: string;
+    page?: number;
+    pageSize?: number;
+  }) =>
+    [
+      'admin',
+      'trust',
+      'review-cases',
+      params?.status ?? 'all',
+      params?.priority ?? 'all',
+      params?.page ?? 1,
+      params?.pageSize ?? 20,
+    ] as const,
+  reviewCaseDetail: (id: string) => ['admin', 'trust', 'review-cases', id] as const,
 };
