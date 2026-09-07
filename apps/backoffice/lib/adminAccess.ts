@@ -22,6 +22,7 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'staff.approve',
   'shortlet.view',
   'shortlet.moderate',
+  'shortlet.payout',
   'rentals.view',
   'rentals.moderate',
   'rentfinance.view',
@@ -96,6 +97,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'documents.manage',
       'rentfinance.view',
       'rentfinance.approve',
+      'shortlet.payout',
     ],
   },
   finance_approver: {
@@ -109,6 +111,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'reports.view',
       'rentfinance.view',
       'rentfinance.approve',
+      'shortlet.payout',
       'maintenance.view',
     ],
   },

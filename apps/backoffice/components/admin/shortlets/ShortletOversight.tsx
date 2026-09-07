@@ -28,7 +28,10 @@ import {
 } from '@getrentos/ui';
 import {
   BedDouble,
+  Ban,
+  Banknote,
   CalendarCheck,
+  CheckCircle2,
   CircleDollarSign,
   Clock3,
   Gavel,
@@ -36,12 +39,19 @@ import {
   Pause,
   Percent,
   Play,
+  RotateCcw,
   Send,
   ShieldAlert,
   ShieldCheck,
+  Star,
+  Trash2,
+  Wallet,
+  XCircle,
 } from 'lucide-react';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
+import { useAdminUser } from '@/app/(dashboard)/admin/layout';
+import { hasAdminPermission } from '@/lib/adminAccess';
 import type {
   AdminShortletBooking,
   AdminShortletDepositClaim,
@@ -50,8 +60,12 @@ import type {
   AdminShortletDisputeMessage,
   AdminShortletDisputeStatus,
   AdminShortletFeeConfig,
+  AdminShortletGuestReview,
   AdminShortletListing,
   AdminShortletPayout,
+  AdminShortletPayoutAccount,
+  AdminShortletPayoutDetail,
+  AdminShortletReview,
   ShortletBookingStatus,
   ShortletListingStatus,
 } from '@/types/shortlet';
@@ -93,7 +107,33 @@ const BOOKING_STATUS_VARIANT: Record<ShortletBookingStatus, BadgeVariant> = {
   COMPLETED: 'neutral',
 };
 
-type Tab = 'listings' | 'bookings' | 'payouts' | 'disputes' | 'claims' | 'fees';
+const PAYMENT_STATUS_VARIANT: Record<AdminShortletBooking['paymentStatus'], BadgeVariant> = {
+  UNPAID: 'neutral',
+  PROCESSING: 'info',
+  PAID: 'success',
+  REFUNDED: 'warning',
+};
+
+type Tab =
+  | 'listings'
+  | 'bookings'
+  | 'payouts'
+  | 'payout-accounts'
+  | 'reviews'
+  | 'disputes'
+  | 'claims'
+  | 'fees';
+
+const REVIEW_RATING_VALUES: { value: 'all' | number; label: string }[] = [
+  { value: 'all', label: 'All ratings' },
+  { value: 5, label: '5 stars' },
+  { value: 4, label: '4 stars' },
+  { value: 3, label: '3 stars' },
+  { value: 2, label: '2 stars' },
+  { value: 1, label: '1 star' },
+];
+
+export type BookingIntervention = 'decline' | 'cancel' | 'refund' | 'complete';
 
 const SectionError = ({
   label,
@@ -145,6 +185,36 @@ export const ShortletOversight = () => {
     null
   );
   const [disputeResolution, setDisputeResolution] = useState('');
+
+  // Payout accounts register
+  const [payoutAccountsSearch, setPayoutAccountsSearch] = useState('');
+  const [payoutAccountsPage, setPayoutAccountsPage] = useState(1);
+  const [activePayout, setActivePayout] = useState<AdminShortletPayout | null>(null);
+  const [pendingRetry, setPendingRetry] = useState<AdminShortletPayout | null>(null);
+  const [pendingHostPayout, setPendingHostPayout] = useState<AdminShortletPayoutAccount | null>(
+    null
+  );
+
+  // Booking interventions (decline/cancel/refund/complete)
+  const [pendingIntervention, setPendingIntervention] = useState<{
+    booking: AdminShortletBooking;
+    action: BookingIntervention;
+  } | null>(null);
+
+  // Review moderation queues (guest reviews of stays + host reviews of guests)
+  const [reviewKind, setReviewKind] = useState<'guest' | 'host'>('guest');
+  const [reviewsSearch, setReviewsSearch] = useState('');
+  const [reviewsRating, setReviewsRating] = useState<'all' | number>('all');
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [pendingRemoval, setPendingRemoval] = useState<
+    | { kind: 'guest'; review: AdminShortletReview }
+    | { kind: 'host'; review: AdminShortletGuestReview }
+    | null
+  >(null);
+
+  const adminUser = useAdminUser();
+  const canPayout = hasAdminPermission(adminUser?.roles, 'shortlet.payout');
+  const canModerate = hasAdminPermission(adminUser?.roles, 'shortlet.moderate');
 
   const {
     data: overview,
@@ -212,6 +282,145 @@ export const ShortletOversight = () => {
     queryFn: () => unwrap(adminShortletService.listPayouts({ page: payoutsPage, pageSize: 12 })),
   });
   const payouts = payoutsData?.items ?? [];
+
+  const {
+    data: payoutAccountsData,
+    isLoading: payoutAccountsLoading,
+    isError: payoutAccountsError,
+    isFetching: payoutAccountsFetching,
+    refetch: refetchPayoutAccounts,
+  } = useQuery({
+    queryKey: [
+      'admin',
+      'shortlets',
+      'payout-accounts',
+      { search: payoutAccountsSearch, page: payoutAccountsPage },
+    ],
+    queryFn: () =>
+      unwrap(
+        adminShortletService.listPayoutAccounts({
+          search: payoutAccountsSearch.trim() || undefined,
+          page: payoutAccountsPage,
+          pageSize: 12,
+        })
+      ),
+    enabled: canPayout || canModerate,
+  });
+  const payoutAccounts = payoutAccountsData?.items ?? [];
+
+  const {
+    data: payoutDetail,
+    isLoading: payoutDetailLoading,
+    isError: payoutDetailError,
+    isFetching: payoutDetailFetching,
+    refetch: refetchPayoutDetail,
+  } = useQuery({
+    queryKey: ['admin', 'shortlets', 'payouts', activePayout?.id, 'detail'],
+    queryFn: () => unwrap(adminShortletService.payoutDetail(activePayout!.id)),
+    enabled: Boolean(activePayout),
+  });
+
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    isError: reviewsError,
+    isFetching: reviewsFetching,
+    refetch: refetchReviews,
+  } = useQuery({
+    queryKey: [
+      'admin',
+      'shortlets',
+      reviewKind === 'guest' ? 'reviews' : 'guest-reviews',
+      { search: reviewsSearch, rating: reviewsRating, page: reviewsPage },
+    ],
+    queryFn: () =>
+      unwrap(
+        reviewKind === 'guest'
+          ? adminShortletService.listReviews({
+              search: reviewsSearch.trim() || undefined,
+              rating: reviewsRating === 'all' ? undefined : reviewsRating,
+              page: reviewsPage,
+              pageSize: 12,
+            })
+          : adminShortletService.listGuestReviews({
+              search: reviewsSearch.trim() || undefined,
+              rating: reviewsRating === 'all' ? undefined : reviewsRating,
+              page: reviewsPage,
+              pageSize: 12,
+            })
+      ),
+    enabled: canModerate || canPayout,
+  });
+  const reviews = reviewsData?.items ?? [];
+
+  const retryPayout = useMutation({
+    mutationFn: (payoutId: string) => unwrap(adminShortletService.retryPayout(payoutId)),
+    onSuccess: () => {
+      setPendingRetry(null);
+      setActivePayout(null);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payouts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payout-accounts'] });
+      setToast({ message: 'Payout retried successfully.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const requestHostPayout = useMutation({
+    mutationFn: (hostId: string) => unwrap(adminShortletService.requestHostPayout(hostId)),
+    onSuccess: () => {
+      setPendingHostPayout(null);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payouts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payout-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'bookings'] });
+      setToast({ message: 'Host payout initiated.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const interveneBooking = useMutation({
+    mutationFn: (input: { bookingId: string; action: BookingIntervention }) =>
+      unwrap(
+        input.action === 'decline'
+          ? adminShortletService.declineBooking(input.bookingId)
+          : input.action === 'cancel'
+            ? adminShortletService.cancelBooking(input.bookingId)
+            : input.action === 'refund'
+              ? adminShortletService.refundBooking(input.bookingId)
+              : adminShortletService.completeBooking(input.bookingId)
+      ),
+    onSuccess: (_, input) => {
+      setPendingIntervention(null);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'bookings'] });
+      const msg: Record<BookingIntervention, string> = {
+        decline: 'Booking declined.',
+        cancel: 'Booking cancelled and refund processed per policy.',
+        refund: 'Booking fully refunded.',
+        complete: 'Booking completed and deposit released.',
+      };
+      setToast({ message: msg[input.action], variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
+  const removeReview = useMutation({
+    mutationFn: (input: { kind: 'guest' | 'host'; id: string }) =>
+      unwrap(
+        input.kind === 'guest'
+          ? adminShortletService.removeReview(input.id)
+          : adminShortletService.removeGuestReview(input.id)
+      ),
+    onSuccess: (_, input) => {
+      setPendingRemoval(null);
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'shortlets', input.kind === 'guest' ? 'reviews' : 'guest-reviews'],
+      });
+      setToast({
+        message: input.kind === 'guest' ? 'Guest review removed.' : 'Host review removed.',
+        variant: 'success',
+      });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
 
   const {
     data: disputesData,
@@ -461,7 +670,18 @@ export const ShortletOversight = () => {
       {/* Tabs */}
       <div className="max-w-full overflow-x-auto pb-1">
         <div className="inline-flex min-w-max rounded-lg border border-border bg-card p-1 text-sm">
-          {(['listings', 'bookings', 'payouts', 'disputes', 'claims', 'fees'] as Tab[]).map((t) => (
+          {(
+            [
+              'listings',
+              'bookings',
+              'payouts',
+              'payout-accounts',
+              'reviews',
+              'disputes',
+              'claims',
+              'fees',
+            ] as Tab[]
+          ).map((t) => (
             <button
               key={t}
               type="button"
@@ -478,11 +698,15 @@ export const ShortletOversight = () => {
                   ? `Bookings (${bookingsData?.total ?? 0})`
                   : t === 'payouts'
                     ? `Payouts (${payoutsData?.total ?? 0})`
-                    : t === 'disputes'
-                      ? `Disputes (${disputesData?.total ?? 0})`
-                      : t === 'claims'
-                        ? `Deposit claims (${claimsData?.total ?? 0})`
-                        : 'Fees & taxes'}
+                    : t === 'payout-accounts'
+                      ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
+                      : t === 'reviews'
+                        ? `Reviews (${reviewsData?.total ?? 0})`
+                        : t === 'disputes'
+                          ? `Disputes (${disputesData?.total ?? 0})`
+                          : t === 'claims'
+                            ? `Deposit claims (${claimsData?.total ?? 0})`
+                            : 'Fees & taxes'}
             </button>
           ))}
         </div>
@@ -581,7 +805,14 @@ export const ShortletOversight = () => {
           ) : (
             <div className="divide-y divide-border">
               {bookings.map((b) => (
-                <BookingRow key={b.id} booking={b} />
+                <BookingRow
+                  key={b.id}
+                  booking={b}
+                  canModerate={canModerate}
+                  canPayout={canPayout}
+                  busy={interveneBooking.isPending}
+                  onIntervene={(action) => setPendingIntervention({ booking: b, action })}
+                />
               ))}
             </div>
           )}
@@ -623,7 +854,7 @@ export const ShortletOversight = () => {
           ) : (
             <div className="divide-y divide-border">
               {payouts.map((p) => (
-                <PayoutRow key={p.id} payout={p} />
+                <PayoutRow key={p.id} payout={p} onOpen={() => setActivePayout(p)} />
               ))}
             </div>
           )}
@@ -633,6 +864,152 @@ export const ShortletOversight = () => {
             pageSize={12}
             total={payoutsData?.total ?? 0}
             onPageChange={setPayoutsPage}
+          />
+        </div>
+      ) : tab === 'payout-accounts' ? (
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
+            <div className="min-w-[220px] flex-1">
+              <Input
+                placeholder="Search hosts by name"
+                value={payoutAccountsSearch}
+                onChange={(e) => {
+                  setPayoutAccountsSearch(e.target.value);
+                  setPayoutAccountsPage(1);
+                }}
+              />
+            </div>
+          </div>
+
+          {payoutAccountsError ? (
+            <SectionError
+              label="payout accounts"
+              retry={() => void refetchPayoutAccounts()}
+              retrying={payoutAccountsFetching}
+            />
+          ) : payoutAccountsLoading ? (
+            <div className="space-y-2 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : payoutAccounts.length === 0 ? (
+            <EmptyState
+              icon={Wallet}
+              title="No payout accounts"
+              description="Hosts must add a payout bank account before they can be paid."
+            />
+          ) : (
+            <div className="divide-y divide-border">
+              {payoutAccounts.map((a) => (
+                <PayoutAccountRow
+                  key={a.id}
+                  account={a}
+                  canPayout={canPayout}
+                  busy={requestHostPayout.isPending}
+                  onPayout={() => setPendingHostPayout(a)}
+                />
+              ))}
+            </div>
+          )}
+
+          <Pagination
+            page={payoutAccountsPage}
+            pageSize={12}
+            total={payoutAccountsData?.total ?? 0}
+            onPageChange={setPayoutAccountsPage}
+          />
+        </div>
+      ) : tab === 'reviews' ? (
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
+            <div className="flex rounded-lg border border-border p-0.5 text-sm">
+              {(
+                [
+                  { value: 'guest', label: 'Guest reviews' },
+                  { value: 'host', label: 'Host reviews' },
+                ] as const
+              ).map((k) => (
+                <button
+                  key={k.value}
+                  type="button"
+                  onClick={() => {
+                    setReviewKind(k.value);
+                    setReviewsPage(1);
+                  }}
+                  className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                    reviewKind === k.value
+                      ? 'bg-secondary text-foreground'
+                      : 'text-muted-foreground hover:bg-secondary/50'
+                  }`}
+                >
+                  {k.label}
+                </button>
+              ))}
+            </div>
+            <div className="min-w-[180px] flex-1">
+              <Input
+                placeholder="Search comment, name, or listing"
+                value={reviewsSearch}
+                onChange={(e) => {
+                  setReviewsSearch(e.target.value);
+                  setReviewsPage(1);
+                }}
+              />
+            </div>
+            <div className="w-40">
+              <Select
+                value={String(reviewsRating)}
+                onValueChange={(v) => {
+                  setReviewsRating(v === 'all' ? 'all' : Number(v));
+                  setReviewsPage(1);
+                }}
+                options={REVIEW_RATING_VALUES.map((r) => ({
+                  value: String(r.value),
+                  label: r.label,
+                }))}
+              />
+            </div>
+          </div>
+
+          {reviewsError ? (
+            <SectionError
+              label={reviewKind === 'guest' ? 'guest reviews' : 'host reviews'}
+              retry={() => void refetchReviews()}
+              retrying={reviewsFetching}
+            />
+          ) : reviewsLoading ? (
+            <div className="space-y-2 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : reviews.length === 0 ? (
+            <EmptyState icon={Star} title="No reviews yet" description="Try adjusting filters." />
+          ) : (
+            <div className="divide-y divide-border">
+              {reviews.map((r) => (
+                <ReviewRow
+                  key={r.id}
+                  review={r}
+                  canRemove={canModerate}
+                  busy={removeReview.isPending}
+                  onRemove={() =>
+                    setPendingRemoval({
+                      kind: reviewKind,
+                      review: r as AdminShortletReview,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          <Pagination
+            page={reviewsPage}
+            pageSize={12}
+            total={reviewsData?.total ?? 0}
+            onPageChange={setReviewsPage}
           />
         </div>
       ) : tab === 'disputes' ? (
@@ -846,6 +1223,114 @@ export const ShortletOversight = () => {
         promptMinLength={10}
       />
 
+      {activePayout && (
+        <PayoutDetailModal
+          payout={activePayout}
+          detail={payoutDetail}
+          loading={payoutDetailLoading}
+          error={payoutDetailError}
+          retrying={payoutDetailFetching}
+          onRetry={() => void refetchPayoutDetail()}
+          canRetry={canPayout && activePayout.status === 'FAILED'}
+          retryPending={retryPayout.isPending}
+          onRetryPayout={() => setPendingRetry(activePayout)}
+          onClose={() => setActivePayout(null)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={pendingRetry !== null}
+        onOpenChange={(open) => !open && setPendingRetry(null)}
+        title="Retry this payout?"
+        description={
+          pendingRetry
+            ? `A new transfer will be attempted for ${formatCurrency(pendingRetry.amount)} to ${
+                pendingRetry.hostName ?? 'the host'
+              }. Covered bookings will be marked paid out on success.`
+            : ''
+        }
+        confirmLabel="Retry payout"
+        onConfirm={() => pendingRetry && retryPayout.mutate(pendingRetry.id)}
+      />
+
+      <ConfirmDialog
+        open={pendingHostPayout !== null}
+        onOpenChange={(open) => !open && setPendingHostPayout(null)}
+        title="Initiate host payout?"
+        description={
+          pendingHostPayout
+            ? `${pendingHostPayout.hostName}'s full available shortlet earnings will be transferred to ${pendingHostPayout.bankName} ••• ${pendingHostPayout.accountNumber}.`
+            : ''
+        }
+        confirmLabel="Initiate payout"
+        onConfirm={() => pendingHostPayout && requestHostPayout.mutate(pendingHostPayout.hostId)}
+      />
+
+      <ConfirmDialog
+        open={pendingIntervention !== null}
+        onOpenChange={(open) => !open && setPendingIntervention(null)}
+        title={
+          pendingIntervention
+            ? {
+                decline: 'Decline this booking?',
+                cancel: 'Cancel this booking?',
+                refund: 'Refund this booking?',
+                complete: 'Complete this booking?',
+              }[pendingIntervention.action]
+            : 'Confirm booking action'
+        }
+        description={
+          pendingIntervention
+            ? {
+                decline: 'The guest will be notified and the request closed.',
+                cancel:
+                  'The guest will be refunded per the cancellation policy and the held deposit returned.',
+                refund: 'The full stay payment and held deposit will be returned to the guest.',
+                complete:
+                  'The stay is marked completed and the held deposit released to the guest.',
+              }[pendingIntervention.action]
+            : ''
+        }
+        confirmLabel={
+          pendingIntervention
+            ? {
+                decline: 'Decline booking',
+                cancel: 'Cancel & refund',
+                refund: 'Refund in full',
+                complete: 'Complete booking',
+              }[pendingIntervention.action]
+            : 'Confirm'
+        }
+        onConfirm={() => {
+          if (pendingIntervention) {
+            interveneBooking.mutate({
+              bookingId: pendingIntervention.booking.id,
+              action: pendingIntervention.action,
+            });
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={pendingRemoval !== null}
+        onOpenChange={(open) => !open && setPendingRemoval(null)}
+        title="Remove this review?"
+        description={
+          pendingRemoval
+            ? `This ${pendingRemoval.kind === 'guest' ? 'guest review of the stay' : 'host review of the guest'} will be permanently removed and its rating pulled from the aggregate.`
+            : ''
+        }
+        confirmLabel="Remove review"
+        onConfirm={() => {
+          if (pendingRemoval) {
+            removeReview.mutate({
+              kind: pendingRemoval.kind,
+              id: pendingRemoval.review.id,
+            });
+          }
+        }}
+      />
+
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
@@ -911,26 +1396,104 @@ function ListingRow({
   );
 }
 
-function BookingRow({ booking }: { booking: AdminShortletBooking }) {
+function BookingRow({
+  booking,
+  canModerate,
+  canPayout,
+  busy,
+  onIntervene,
+}: {
+  booking: AdminShortletBooking;
+  canModerate: boolean;
+  canPayout: boolean;
+  busy: boolean;
+  onIntervene: (action: BookingIntervention) => void;
+}) {
+  const canDecline = booking.status === 'REQUESTED';
+  const canCancel =
+    (booking.status === 'REQUESTED' || booking.status === 'CONFIRMED') &&
+    booking.paymentStatus !== 'PROCESSING';
+  const canRefund =
+    booking.status === 'CONFIRMED' && booking.paymentStatus === 'PAID' && !booking.paidOut;
+  const canComplete = booking.status === 'CONFIRMED';
+  const showActions =
+    (canModerate && (canDecline || canComplete)) || (canPayout && (canCancel || canRefund));
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <p className="truncate font-medium">{booking.propertyTitle}</p>
           <Badge variant={BOOKING_STATUS_VARIANT[booking.status]}>{booking.status}</Badge>
+          <Badge variant={PAYMENT_STATUS_VARIANT[booking.paymentStatus]}>
+            {booking.paymentStatus}
+          </Badge>
+          {booking.paidOut && <Badge variant="neutral">Paid out</Badge>}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {booking.guestName} → {booking.hostName} · {formatDate(booking.checkIn, 'short')} →{' '}
           {formatDate(booking.checkOut, 'short')} · {booking.nights} night
           {booking.nights > 1 ? 's' : ''}
         </p>
-        {booking.paymentReference && (
-          <p className="mt-0.5 text-xs text-muted-foreground">Ref {booking.paymentReference}</p>
-        )}
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+          {booking.paymentReference && <span>Ref {booking.paymentReference}</span>}
+          {booking.depositStatus === 'HELD' && booking.deposit != null && (
+            <span>· Deposit held {formatCurrency(booking.deposit)}</span>
+          )}
+          {booking.paymentStatus === 'REFUNDED' && booking.refundAmount != null && (
+            <span>· Refunded {formatCurrency(booking.refundAmount)}</span>
+          )}
+        </p>
       </div>
-      <div className="text-right">
-        <p className="font-semibold">{formatCurrency(booking.total)}</p>
-        <p className="text-xs text-muted-foreground">{booking.city}</p>
+      <div className="flex flex-col items-end gap-2">
+        <div className="text-right">
+          <p className="font-semibold">{formatCurrency(booking.total)}</p>
+          <p className="text-xs text-muted-foreground">{booking.city}</p>
+        </div>
+        {showActions && (
+          <div className="flex flex-wrap justify-end gap-1.5">
+            {canModerate && canDecline && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onIntervene('decline')}
+                disabled={busy}
+              >
+                <XCircle className="mr-1 h-3.5 w-3.5" /> Decline
+              </Button>
+            )}
+            {canModerate && canComplete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onIntervene('complete')}
+                disabled={busy}
+              >
+                <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Complete
+              </Button>
+            )}
+            {canPayout && canCancel && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onIntervene('cancel')}
+                disabled={busy}
+              >
+                <Ban className="mr-1 h-3.5 w-3.5" /> Cancel
+              </Button>
+            )}
+            {canPayout && canRefund && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onIntervene('refund')}
+                disabled={busy}
+              >
+                <Banknote className="mr-1 h-3.5 w-3.5" /> Refund
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -942,7 +1505,7 @@ const PAYOUT_STATUS_VARIANT: Record<AdminShortletPayout['status'], BadgeVariant>
   FAILED: 'danger',
 };
 
-function PayoutRow({ payout }: { payout: AdminShortletPayout }) {
+function PayoutRow({ payout, onOpen }: { payout: AdminShortletPayout; onOpen: () => void }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
@@ -956,13 +1519,235 @@ function PayoutRow({ payout }: { payout: AdminShortletPayout }) {
           {payout.transferRef && <span className="ml-1 text-xs">· Ref {payout.transferRef}</span>}
         </p>
       </div>
-      <div className="text-right">
-        <p className="font-semibold">{formatCurrency(payout.amount)}</p>
-        {payout.paidAt && (
-          <p className="text-xs text-muted-foreground">Paid {formatDate(payout.paidAt, 'short')}</p>
-        )}
+      <div className="flex items-center gap-2">
+        <div className="text-right">
+          <p className="font-semibold">{formatCurrency(payout.amount)}</p>
+          {payout.paidAt && (
+            <p className="text-xs text-muted-foreground">
+              Paid {formatDate(payout.paidAt, 'short')}
+            </p>
+          )}
+        </div>
+        <Button variant="outline" size="sm" onClick={onOpen}>
+          Details
+        </Button>
       </div>
     </div>
+  );
+}
+
+function PayoutAccountRow({
+  account,
+  canPayout,
+  busy,
+  onPayout,
+}: {
+  account: AdminShortletPayoutAccount;
+  canPayout: boolean;
+  busy: boolean;
+  onPayout: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium">{account.hostName}</p>
+          <Badge variant={account.recipientReady ? 'success' : 'warning'}>
+            {account.recipientReady ? 'Payable' : 'Not ready'}
+          </Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {account.bankName} ·•• {account.accountNumber} · {account.accountName}
+        </p>
+        {account.hostEmail && (
+          <p className="mt-0.5 text-xs text-muted-foreground">{account.hostEmail}</p>
+        )}
+      </div>
+      {canPayout && account.recipientReady && (
+        <Button variant="outline" size="sm" onClick={onPayout} disabled={busy}>
+          <Banknote className="mr-1.5 h-4 w-4" /> Initiate payout
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function ReviewRow({
+  review,
+  canRemove,
+  busy,
+  onRemove,
+}: {
+  review: AdminShortletReview;
+  canRemove: boolean;
+  busy: boolean;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium">
+            <span className="text-amber-500" aria-hidden>
+              {'★'.repeat(review.rating)}
+            </span>
+            <span
+              className="ml-1.5 text-sm text-muted-foreground"
+              aria-label={`${review.rating} stars`}
+            >
+              {review.rating}/5
+            </span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {review.guestName} → {review.hostName}
+          </p>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {review.listingTitle ?? 'Shortlet'} · {formatDate(review.createdAt, 'short')}
+        </p>
+        {review.comment && (
+          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{review.comment}</p>
+        )}
+      </div>
+      {canRemove && (
+        <Button variant="ghost" size="sm" onClick={onRemove} disabled={busy}>
+          <Trash2 className="mr-1.5 h-4 w-4" /> Remove
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function PayoutDetailModal({
+  payout,
+  detail,
+  loading,
+  error,
+  retrying,
+  onRetry,
+  canRetry,
+  retryPending,
+  onRetryPayout,
+  onClose,
+}: {
+  payout: AdminShortletPayout;
+  detail?: AdminShortletPayoutDetail;
+  loading: boolean;
+  error: boolean;
+  retrying: boolean;
+  onRetry: () => void;
+  canRetry: boolean;
+  retryPending: boolean;
+  onRetryPayout: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-2xl">
+        <div className="p-5">
+          <DialogTitle>Payout detail</DialogTitle>
+          <DialogDescription>
+            <span className="flex flex-wrap items-center gap-2">
+              <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>{payout.status}</Badge>
+              <span className="text-sm text-muted-foreground">
+                {payout.hostName ?? 'Host'} · {formatDate(payout.createdAt, 'short')}
+                {payout.transferRef ? ` · Ref ${payout.transferRef}` : ''}
+              </span>
+            </span>
+          </DialogDescription>
+        </div>
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto border-t border-border p-5">
+          <div className="grid gap-3 rounded-lg border border-border bg-secondary/40 p-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Amount
+              </p>
+              <p className="text-lg font-semibold">
+                {detail ? formatCurrency(detail.amount) : formatCurrency(payout.amount)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Bookings covered
+              </p>
+              <p className="text-lg font-semibold">
+                {detail ? detail.bookingCount : payout.bookingCount}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Paid to
+              </p>
+              <p className="text-sm font-medium">{payout.hostName ?? 'Host'}</p>
+              {detail?.hostEmail && (
+                <p className="text-xs text-muted-foreground">{detail.hostEmail}</p>
+              )}
+            </div>
+            {detail?.account && (
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Account
+                </p>
+                <p className="text-sm font-medium">
+                  {detail.account.bankName} ·•• {detail.account.accountNumber}
+                </p>
+                <p className="text-xs text-muted-foreground">{detail.account.accountName}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Covered bookings</p>
+            {error ? (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+                <p className="text-sm text-destructive">The payout detail could not be loaded.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={onRetry}
+                  isLoading={retrying}
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : loading ? (
+              <Skeleton className="h-24 w-full rounded-lg" />
+            ) : detail?.bookings && detail.bookings.length > 0 ? (
+              <div className="divide-y divide-border rounded-lg border border-border">
+                {detail.bookings.map((b) => (
+                  <div key={b.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">
+                        {b.listingTitle ?? 'Shortlet stay'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(b.checkIn, 'short')} → {formatDate(b.checkOut, 'short')} ·{' '}
+                        {formatDate(b.createdAt, 'short')}
+                      </p>
+                    </div>
+                    <p className="text-sm font-semibold">{formatCurrency(b.total)}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No bookings covered by this payout.</p>
+            )}
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 border-t border-border p-4">
+          {canRetry && (
+            <Button variant="outline" onClick={onRetryPayout} isLoading={retryPending}>
+              <RotateCcw className="mr-1.5 h-4 w-4" /> Retry payout
+            </Button>
+          )}
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
