@@ -1,8 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
   Building2,
@@ -24,6 +21,7 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
+import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
   labelKey: TranslationKey;
@@ -50,37 +48,24 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
 ];
 
-export const OwnerSidebar = () => {
-  const pathname = usePathname();
-  const { t } = useLanguage();
+export const navGroups = [
+  { label: 'Overview', items: navItems.slice(0, 1) },
+  { label: 'Portfolio and listings', items: navItems.slice(1, 5) },
+  { label: 'Sales and investment', items: navItems.slice(5, 10) },
+  { label: 'Communication', items: navItems.slice(10, 13) },
+  { label: 'Trust and account', items: navItems.slice(13) },
+];
 
+export const OwnerSidebar = () => {
+  const { t } = useLanguage();
   return (
-    <aside className="fixed left-0 top-16 bottom-0 z-30 hidden w-64 overflow-y-auto border-r border-border/70 bg-card/55 backdrop-blur-xl supports-backdrop-filter:bg-card/65 lg:block">
-      <nav className="p-4 space-y-1">
-        {navItems.map((item, index) => {
-          const isActive = pathname === item.href;
-          return (
-            <motion.div
-              key={item.href}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.02, duration: 0.3 }}
-            >
-              <Link
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-accent text-primary shadow-sm'
-                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {t(item.labelKey)}
-              </Link>
-            </motion.div>
-          );
-        })}
-      </nav>
-    </aside>
+    <GroupedSidebar
+      ariaLabel="Property owner navigation"
+      dashboardHref={ROUTES.OWNER_DASHBOARD}
+      groups={navGroups.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({ ...item, label: t(item.labelKey) })),
+      }))}
+    />
   );
 };

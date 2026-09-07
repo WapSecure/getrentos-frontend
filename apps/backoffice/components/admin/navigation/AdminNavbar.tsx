@@ -12,9 +12,10 @@ import { AdminProfileDropdown } from './AdminProfileDropdown';
 import { formatRelativeTime, ROUTES, unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
+import { AdminMobileNavigation } from '@/components/admin/dashboard/AdminSidebar';
 
 interface AdminNavbarProps {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; roles?: string[] } | null;
 }
 
 export const AdminNavbar = ({ user }: AdminNavbarProps) => {
@@ -166,15 +167,18 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
               <AdminProfileDropdown user={user} />
 
               <button
+                type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-secondary"
+                aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={isMobileMenuOpen}
+                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
-          <div className="md:hidden py-3">
+          <div className="lg:hidden py-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <LegacyInput
@@ -193,24 +197,12 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background border-b border-border md:hidden"
+            className="fixed top-16 left-0 right-0 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border bg-background lg:hidden"
           >
-            <div className="flex flex-col p-4 space-y-2">
-              <Link
-                href={ROUTES.ADMIN_DASHBOARD}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href={ROUTES.ADMIN_USERS}
-                className="px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Users
-              </Link>
-            </div>
+            <AdminMobileNavigation
+              roles={user?.roles}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
           </motion.div>
         )}
       </AnimatePresence>

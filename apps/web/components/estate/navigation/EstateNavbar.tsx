@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { EstateProfileDropdown } from './EstateProfileDropdown';
 import { EstateSwitcher } from './EstateSwitcher';
-import { navItems } from '../dashboard/EstateSidebar';
+import { navGroups } from '../dashboard/EstateSidebar';
+import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface EstateNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -63,19 +64,12 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+            <GroupedMobileNavigation
+              ariaLabel="Estate administration navigation"
+              dashboardHref={ROUTES.ESTATE_DASHBOARD}
+              groups={navGroups}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
           </motion.div>
         )}
       </AnimatePresence>

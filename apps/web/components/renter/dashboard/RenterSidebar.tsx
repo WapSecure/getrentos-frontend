@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Search,
@@ -29,6 +27,7 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
+import { GroupedSidebar, isSidebarRouteActive } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
   labelKey?: TranslationKey;
@@ -93,44 +92,21 @@ export const navGroups: NavGroup[] = [
 ];
 
 export const isRenterRouteActive = (pathname: string, href: string) =>
-  pathname === href || (href !== ROUTES.RENTER_DASHBOARD && pathname.startsWith(`${href}/`));
+  isSidebarRouteActive(pathname, href, ROUTES.RENTER_DASHBOARD);
 
 export const RenterSidebar = () => {
-  const pathname = usePathname();
   const { t } = useLanguage();
-
   return (
-    <aside className="fixed left-0 top-16 bottom-0 z-30 hidden w-64 overflow-y-auto border-r border-border/70 bg-card/55 backdrop-blur-xl supports-backdrop-filter:bg-card/65 lg:block">
-      <nav className="space-y-5 p-4" aria-label="Renter navigation">
-        {navGroups.map((group) => (
-          <div key={group.label}>
-            <h2 className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75">
-              {group.label}
-            </h2>
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive = isRenterRouteActive(pathname, item.href);
-                return (
-                  <div key={item.href}>
-                    <Link
-                      href={item.href}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        isActive
-                          ? 'bg-accent text-primary shadow-sm'
-                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                      }`}
-                    >
-                      <item.icon className="w-4 h-4" aria-hidden="true" />
-                      {item.labelKey ? t(item.labelKey) : item.label}
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-    </aside>
+    <GroupedSidebar
+      ariaLabel="Renter navigation"
+      dashboardHref={ROUTES.RENTER_DASHBOARD}
+      groups={navGroups.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          ...item,
+          label: item.labelKey ? t(item.labelKey) : item.label,
+        })),
+      }))}
+    />
   );
 };

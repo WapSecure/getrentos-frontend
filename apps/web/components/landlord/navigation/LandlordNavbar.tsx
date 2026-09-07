@@ -11,7 +11,8 @@ import { Search, Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { LandlordProfileDropdown } from './LandlordProfileDropdown';
-import { navItems } from '../dashboard/LandlordSidebar';
+import { navGroups } from '../dashboard/LandlordSidebar';
+import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -222,19 +223,15 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {t(item.labelKey)}
-                </Link>
-              ))}
-            </div>
+            <GroupedMobileNavigation
+              ariaLabel="Landlord navigation"
+              dashboardHref={ROUTES.LANDLORD_DASHBOARD}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+              groups={navGroups.map((group) => ({
+                ...group,
+                items: group.items.map((item) => ({ ...item, label: t(item.labelKey) })),
+              }))}
+            />
           </motion.div>
         )}
       </AnimatePresence>

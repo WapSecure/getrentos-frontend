@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { ResidentProfileDropdown } from './ResidentProfileDropdown';
-import { residentNavItems } from './ResidentSidebar';
+import { residentNavGroups } from './ResidentSidebar';
+import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface ResidentNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -59,19 +60,12 @@ export const ResidentNavbar = ({ user }: ResidentNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 space-y-1">
-              {residentNavItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+            <GroupedMobileNavigation
+              ariaLabel="Resident navigation"
+              dashboardHref={ROUTES.RESIDENT_DASHBOARD}
+              groups={residentNavGroups}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
           </motion.div>
         )}
       </AnimatePresence>

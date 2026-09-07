@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
   Users,
@@ -140,6 +139,15 @@ const navItems: NavItem[] = [
   },
 ];
 
+const navGroups = [
+  { label: 'Overview', items: navItems.slice(0, 1) },
+  { label: 'People and trust', items: navItems.slice(1, 5) },
+  { label: 'Marketplace operations', items: navItems.slice(5, 9) },
+  { label: 'Risk and finance', items: navItems.slice(9, 13) },
+  { label: 'Support and insights', items: navItems.slice(13, 16) },
+  { label: 'Platform administration', items: navItems.slice(16) },
+];
+
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
   item.href === ROUTES.ADMIN_ACCESS
     ? hasStaffAccess(roles)
@@ -150,33 +158,89 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 z-30 hidden w-64 overflow-y-auto border-r border-border/70 bg-card/55 backdrop-blur-xl supports-backdrop-filter:bg-card/65 lg:block">
-      <nav className="p-4 space-y-1">
-        {navItems
-          .filter((item) => hasAccess(roles, item))
-          .map((item, index) => {
-            const isActive = pathname === item.href;
-            return (
-              <motion.div
-                key={item.href}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.02, duration: 0.3 }}
+      <nav className="space-y-5 p-4" aria-label="Administration navigation">
+        {navGroups.map((group) => {
+          const visibleItems = group.items.filter((item) => hasAccess(roles, item));
+          if (visibleItems.length === 0) return null;
+          const headingId = `admin-sidebar-${group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+          return (
+            <section key={group.label} aria-labelledby={headingId}>
+              <h2
+                id={headingId}
+                className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75"
               >
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isActive
-                      ? 'bg-accent text-primary shadow-sm'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              </motion.div>
-            );
-          })}
+                {group.label}
+              </h2>
+              <div className="space-y-1">
+                {visibleItems.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-accent text-primary shadow-sm'
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      }`}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </nav>
     </aside>
+  );
+};
+
+export const AdminMobileNavigation = ({
+  roles,
+  onNavigate,
+}: {
+  roles?: string[];
+  onNavigate: () => void;
+}) => {
+  const pathname = usePathname();
+  return (
+    <nav className="space-y-5 p-4" aria-label="Administration mobile navigation">
+      {navGroups.map((group) => {
+        const visibleItems = group.items.filter((item) => hasAccess(roles, item));
+        if (visibleItems.length === 0) return null;
+        return (
+          <div key={group.label}>
+            <h2 className="mb-1.5 px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75">
+              {group.label}
+            </h2>
+            <div className="space-y-1">
+              {visibleItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={onNavigate}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'}`}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </nav>
   );
 };
