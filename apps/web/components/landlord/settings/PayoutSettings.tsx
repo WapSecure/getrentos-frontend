@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react';
 import { Landmark, CheckCircle2 } from 'lucide-react';
 import { SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import { ROUTES } from '@/lib/constants/auth';
 
 export const PayoutSettings = () => {
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
   const [verified, setVerified] = useState(false);
+  const [submitError, setSubmitError] = useState<unknown>(null);
 
   useEffect(() => {
     const fetchPayoutAccount = async () => {
@@ -26,6 +29,7 @@ export const PayoutSettings = () => {
   }, []);
 
   const handleSave = async () => {
+    setSubmitError(null);
     const response = await landlordService.updatePayoutAccount({
       bankName,
       accountNumber,
@@ -33,6 +37,8 @@ export const PayoutSettings = () => {
     });
     if (response.success && response.data) {
       setVerified(response.data.verified);
+    } else {
+      setSubmitError(response);
     }
   };
 
@@ -85,7 +91,14 @@ export const PayoutSettings = () => {
         </div>
       </div>
 
-      <SaveButton label="Update Payout Account" className="mt-6" onClick={handleSave} />
+      <div className="mt-6 space-y-3">
+        <VerificationRequiredNotice
+          error={submitError}
+          href={ROUTES.LANDLORD_SETTINGS}
+          verificationHref={ROUTES.LANDLORD_VERIFICATION}
+        />
+        <SaveButton label="Update Payout Account" onClick={handleSave} />
+      </div>
     </div>
   );
 };

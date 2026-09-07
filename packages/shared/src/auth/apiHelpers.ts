@@ -1,11 +1,16 @@
 import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
 import { getAuthToken } from './authStorage';
 
-/** Machine-readable reasons the backend attaches to a 403 when an action requires verification. */
+/**
+ * Machine-readable codes the backend attaches to a 403 when an action is gated
+ * on verification or trust — the ActionVerificationGuard codes plus the trust
+ * guard's TRUST_TIER_REQUIRED (which carries required + current tier).
+ */
 export const VERIFICATION_REASONS = [
   'IDENTITY_REQUIRED',
   'LICENSE_REQUIRED',
   'OWNERSHIP_PROOF_REQUIRED',
+  'TRUST_TIER_REQUIRED',
 ] as const;
 export type VerificationReason = (typeof VERIFICATION_REASONS)[number];
 
@@ -16,17 +21,34 @@ export interface ApiResponse<T = unknown> {
   message?: string;
   status?: number;
   requestId?: string;
-  /** Set when a 403 was rejected by ActionVerificationGuard — see VERIFICATION_REASONS. */
+  /** Set when a 403 was rejected by a verification/trust guard — see VERIFICATION_REASONS. */
   reason?: VerificationReason;
+  /** TRUST_TIER_REQUIRED only: the minimum tier the action requires (backend `required`). */
+  tierRequired?: number;
+  /** TRUST_TIER_REQUIRED only: the caller's current trust tier (backend `tier`). */
+  currentTier?: number;
 }
 
-/** Thrown by unwrap() when a request 403s because an action-level verification requirement wasn't met. */
+export interface TrustTierMeta {
+  tierRequired?: number;
+  currentTier?: number;
+}
+
+/**
+ * Thrown by unwrap() when a request 403s because an action-level verification
+ * or trust-tier requirement wasn't met. Carries the tier numbers for
+ * TRUST_TIER_REQUIRED so the UI can upsell to the Verification Center.
+ */
 export class VerificationRequiredError extends Error {
   reason: VerificationReason;
-  constructor(message: string, reason: VerificationReason) {
+  tierRequired?: number;
+  currentTier?: number;
+  constructor(message: string, reason: VerificationReason, meta?: TrustTierMeta) {
     super(message);
     this.name = 'VerificationRequiredError';
     this.reason = reason;
+    this.tierRequired = meta?.tierRequired;
+    this.currentTier = meta?.currentTier;
   }
 }
 
@@ -37,19 +59,29 @@ function extractReason(details: unknown): VerificationReason | undefined {
     : undefined;
 }
 
+/** Reads the tier numbers off a TRUST_TIER_REQUIRED 403 body. */
+function extractTierMeta(details: unknown): TrustTierMeta {
+  const body = (details ?? {}) as { required?: number; tier?: number };
+  return { tierRequired: body.required, currentTier: body.tier };
+}
+
 export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>> {
   try {
     const data = await fn();
     return { success: true, data };
   } catch (err) {
     if (err instanceof ApiError) {
+      const reason = err.status === 403 ? extractReason(err.details) : undefined;
+      const tier = reason === 'TRUST_TIER_REQUIRED' ? extractTierMeta(err.details) : undefined;
       return {
         success: false,
         error: err.message,
         message: err.message,
         status: err.status,
         requestId: err.requestId,
-        reason: err.status === 403 ? extractReason(err.details) : undefined,
+        reason,
+        tierRequired: tier?.tierRequired,
+        currentTier: tier?.currentTier,
       };
     }
     return {
@@ -116,7 +148,11 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   const response = await promise;
   if (!response.success) {
     const message = response.message || response.error || 'Request failed';
-    if (response.reason) throw new VerificationRequiredError(message, response.reason);
+    if (response.reason)
+      throw new VerificationRequiredError(message, response.reason, {
+        tierRequired: response.tierRequired,
+        currentTier: response.currentTier,
+      });
     throw new ApiError(response.status ?? 0, message, {
       error: response.error,
       requestId: response.requestId,
