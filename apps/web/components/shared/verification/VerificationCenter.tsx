@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   FileCheck2,
   Fingerprint,
+  Landmark,
   ShieldAlert,
   ShieldCheck,
   Smartphone,
@@ -97,6 +98,13 @@ const STEP_LABEL: Record<string, string> = {
 const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
 const IDENTITY_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
 const BIO_STEP_TYPES = ['SELFIE_CAPTURE', 'LIVENESS_CHECK', 'FACE_MATCH'];
+/** Purposes whose onboarding policy includes the BANK_ACCOUNT_CHECK step (hosts/agents). */
+const HOST_ONBOARD_PURPOSES: TrustPurpose[] = [
+  'LANDLORD_ONBOARDING',
+  'PROPERTY_OWNER_ONBOARDING',
+  'AGENT_ONBOARDING',
+  'PROPERTY_MANAGER_ONBOARDING',
+];
 
 interface VerificationCenterProps {
   subjectId: string;
@@ -119,6 +127,9 @@ export const VerificationCenter = ({
   const [phoneRef, setPhoneRef] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState('');
   const [selfie, setSelfie] = useState<File | null>(null);
+  const [accountNumber, setAccountNumber] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [bankCode, setBankCode] = useState('');
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const autoStarted = useRef(false);
 
@@ -142,6 +153,7 @@ export const VerificationCenter = ({
   });
   const idCheckConsent = consents?.find((c) => c.consentType === 'ID_CHECK');
   const bioConsent = consents?.find((c) => c.consentType === 'BIOMETRIC');
+  const bankConsent = consents?.find((c) => c.consentType === 'BANK_ACCOUNT_CHECK');
 
   const startMutation = useMutation({
     mutationFn: () => unwrap(trustService.startVerification({ subjectId, purpose, country: 'NG' })),
@@ -192,6 +204,23 @@ export const VerificationCenter = ({
         trustService.grantConsent({
           consentType: 'BIOMETRIC',
           purpose: 'Biometric verification',
+          expiresInDays: 365,
+        })
+      ),
+    onSuccess: () => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
+  });
+
+  const grantBankMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        trustService.grantConsent({
+          consentType: 'BANK_ACCOUNT_CHECK',
+          purpose: 'Financial verification',
           expiresInDays: 365,
         })
       ),
@@ -269,6 +298,29 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to run the biometric check.'),
   });
 
+  const bankMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        trustService.submitBankAccount(verificationId!, {
+          accountNumber: accountNumber.trim(),
+          accountName: accountName.trim() || undefined,
+          bankCode: bankCode.trim() || undefined,
+          country: 'NG',
+        })
+      ),
+    onSuccess: () => {
+      setAccountNumber('');
+      setAccountName('');
+      setBankCode('');
+      setError(null);
+      invalidateVerification();
+      // Bank completion can lift the account to tier 3 — refresh the chip.
+      queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to run the bank check.'),
+  });
+
   const isVerified = Boolean(kyc?.isVerified) || kyc?.verificationStatus === 'APPROVED';
   const kycMeta =
     KYC_STATUS_META[kyc?.verificationStatus ?? 'PENDING_REVIEW'] ?? KYC_STATUS_META.PENDING_REVIEW;
@@ -282,6 +334,14 @@ export const VerificationCenter = ({
   const runnableBio = steps.find(
     (s) => BIO_STEP_TYPES.includes(s.stepType) && actionable(s.status)
   );
+  // Bank step only applies to host/agent onboardings (renter policies skip it).
+  const bankRequired =
+    verification !== undefined
+      ? steps.some((s) => s.stepType === 'BANK_ACCOUNT_CHECK')
+      : HOST_ONBOARD_PURPOSES.includes(purpose);
+  const runnableBank = bankRequired
+    ? steps.find((s) => s.stepType === 'BANK_ACCOUNT_CHECK' && actionable(s.status))
+    : undefined;
 
   const identityEnabled =
     Boolean(runnableIdentity) &&
@@ -292,6 +352,12 @@ export const VerificationCenter = ({
   const otpVerifyEnabled =
     Boolean(phoneRef) && otpCode.length === 6 && !verifyOtpMutation.isPending;
   const bioEnabled = Boolean(selfie) && Boolean(bioConsent) && !bioMutation.isPending;
+  const bankEnabled =
+    Boolean(runnableBank) &&
+    Boolean(verificationId) &&
+    accountNumber.trim().length > 0 &&
+    Boolean(bankConsent) &&
+    !bankMutation.isPending;
 
   const renderConsentRow = (opts: {
     consent?: { id: string; revokedAt?: string; grantedAt: string };
@@ -409,6 +475,20 @@ export const VerificationCenter = ({
           granting: grantBioMutation.isPending,
           revoking: revokeConsentMutation.isPending,
         })}
+        {bankRequired && (
+          <>
+            <div className="border-t border-border" />
+            {renderConsentRow({
+              consent: bankConsent,
+              icon: Landmark,
+              title: 'Bank-account consent',
+              body: 'We check the account is yours via a name enquiry. Completing this lifts you to Trust Tier 3 (financially verified).',
+              onGrant: () => grantBankMutation.mutate(),
+              granting: grantBankMutation.isPending,
+              revoking: revokeConsentMutation.isPending,
+            })}
+          </>
+        )}
       </div>
 
       {error && (
@@ -443,9 +523,12 @@ export const VerificationCenter = ({
                   bg: 'bg-secondary',
                 };
                 const runnable =
-                  [...IDENTITY_STEP_TYPES, ...BIO_STEP_TYPES, 'PHONE_OTP'].includes(
-                    step.stepType
-                  ) && actionable(step.status);
+                  [
+                    ...IDENTITY_STEP_TYPES,
+                    ...BIO_STEP_TYPES,
+                    'PHONE_OTP',
+                    'BANK_ACCOUNT_CHECK',
+                  ].includes(step.stepType) && actionable(step.status);
                 return (
                   <div
                     key={step.id}
@@ -621,6 +704,69 @@ export const VerificationCenter = ({
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   Runs selfie capture, liveness and face-match in one step.
+                </p>
+              </div>
+            )}
+
+            {/* Bank account runner */}
+            {runnableBank && (
+              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Complete: Bank account check
+                </p>
+                {!bankConsent && (
+                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                    Grant bank-account consent above before running this check.
+                  </p>
+                )}
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Account number (10 digits)
+                    </label>
+                    <Input
+                      value={accountNumber}
+                      onChange={(e) =>
+                        setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 10))
+                      }
+                      placeholder="0123456789"
+                      className="w-full"
+                      inputMode="numeric"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Bank code (optional)
+                    </label>
+                    <Input
+                      value={bankCode}
+                      onChange={(e) => setBankCode(e.target.value)}
+                      placeholder="e.g. 058"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Account holder name (optional — compared for a match)
+                    </label>
+                    <Input
+                      value={accountName}
+                      onChange={(e) => setAccountName(e.target.value)}
+                      placeholder="e.g. ACCT HOLDER 6789"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <Button
+                  className="mt-4"
+                  size="sm"
+                  disabled={!bankEnabled}
+                  onClick={() => bankMutation.mutate()}
+                >
+                  {bankMutation.isPending ? 'Checking…' : 'Run bank check'}
+                </Button>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Passing this step marks you financially verified (Trust Tier 3).
                 </p>
               </div>
             )}
