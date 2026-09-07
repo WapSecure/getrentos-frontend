@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle, FileText, Check } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
 import { Button, DocumentUpload } from '@getrentos/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';

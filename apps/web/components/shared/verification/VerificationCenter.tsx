@@ -94,11 +94,6 @@ const STEP_LABEL: Record<string, string> = {
 
 const RUNNABLE_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
 
-const RUNNABLE_ID_TYPE: Partial<Record<string, TrustIdType>> = {
-  NIN_CHECK: 'NIN',
-  BVN_CHECK: 'BVN',
-};
-
 interface VerificationCenterProps {
   /** The signed-in user's database id (the PERSON subject of the verification). */
   subjectId: string;
