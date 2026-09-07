@@ -23,6 +23,7 @@ import {
   Scale,
   BedDouble,
   Gift,
+  ShieldCheck,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -80,6 +81,7 @@ export const navGroups: NavGroup[] = [
   {
     label: 'Trust and support',
     items: [
+      { label: 'Verification', href: '/renter/verification', icon: ShieldCheck },
       { labelKey: 'sidebar.trust_score', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
       { labelKey: 'sidebar.credit_report', href: ROUTES.RENTER_CREDIT_REPORT, icon: TrendingUp },
       { labelKey: 'sidebar.legal_resources', href: ROUTES.RENTER_LEGAL_RESOURCES, icon: Scale },
