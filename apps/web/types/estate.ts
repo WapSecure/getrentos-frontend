@@ -36,6 +36,20 @@ export interface ImportHouseholdsResult {
   errors: ImportHouseholdError[];
 }
 
+export interface EstateDashboardStats {
+  totalHouseholds: number;
+  duesCollectedThisMonth: number;
+  duesOutstanding: number;
+  openIncidents: number;
+  openMaintenanceTickets: number;
+  pendingViolations: number;
+}
+
+export interface EstateDuesPoint {
+  label: string;
+  value: number;
+}
+
 export interface ResidentHousehold {
   id: string;
   unitLabel: string;
