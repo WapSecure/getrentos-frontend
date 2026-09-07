@@ -15,7 +15,7 @@ import { getInitials, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import type { PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
+import type { PlanTier, PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
 
 const statusConfig: Record<
   UserAccountStatus,
@@ -100,6 +100,15 @@ export default function AdminUsersPage() {
     if (user) setPendingStatus({ user, status });
   };
 
+  const changeSubscriptionMutation = useMutation({
+    mutationFn: ({ userId, tier }: { userId: string; tier: PlanTier }) =>
+      unwrap(adminService.updateUserSubscription(userId, tier)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      setActiveUser(updated);
+    },
+  });
+
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'active', label: 'Active' },
@@ -165,6 +174,16 @@ export default function AdminUsersPage() {
           </Badge>
         );
       },
+      className: 'whitespace-nowrap',
+    },
+    {
+      key: 'planTier',
+      header: 'Plan',
+      render: (u) => (
+        <Badge variant={u.planTier === 'PRO' ? 'info' : 'neutral'}>
+          {u.planTier === 'PRO' ? 'Pro' : 'Free'}
+        </Badge>
+      ),
       className: 'whitespace-nowrap',
     },
     {
@@ -254,6 +273,8 @@ export default function AdminUsersPage() {
         onChangeStatus={handleChangeStatus}
         isChangingStatus={changeStatusMutation.isPending}
         pendingStatus={changeStatusMutation.variables?.status}
+        onChangeSubscription={(userId, tier) => changeSubscriptionMutation.mutate({ userId, tier })}
+        isChangingSubscription={changeSubscriptionMutation.isPending}
       />
 
       <ConfirmDialog

@@ -1,10 +1,10 @@
 'use client';
 
-import { Ban, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Ban, CheckCircle2, ShieldAlert, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@getrentos/shared';
-import type { PlatformUser, UserAccountStatus } from '@/types/admin';
+import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 
 interface UserDetailModalProps {
   user: PlatformUser | null;
@@ -12,6 +12,8 @@ interface UserDetailModalProps {
   onChangeStatus: (userId: string, status: UserAccountStatus) => void;
   isChangingStatus?: boolean;
   pendingStatus?: UserAccountStatus;
+  onChangeSubscription: (userId: string, tier: PlanTier) => void;
+  isChangingSubscription?: boolean;
 }
 
 const roleLabels: Record<string, string> = {
@@ -30,6 +32,8 @@ export const UserDetailModal = ({
   onChangeStatus,
   isChangingStatus = false,
   pendingStatus,
+  onChangeSubscription,
+  isChangingSubscription = false,
 }: UserDetailModalProps) => {
   return (
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
@@ -63,6 +67,26 @@ export const UserDetailModal = ({
             </div>
 
             <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Plan</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant={user.planTier === 'PRO' ? 'info' : 'neutral'}>
+                    {user.planTier === 'PRO' ? 'Pro' : 'Free'}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1 h-6 px-2 text-xs"
+                    isLoading={isChangingSubscription}
+                    onClick={() =>
+                      onChangeSubscription(user.id, user.planTier === 'PRO' ? 'FREE' : 'PRO')
+                    }
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    {user.planTier === 'PRO' ? 'Move to Free' : 'Upgrade to Pro'}
+                  </Button>
+                </div>
+              </div>
               <div className="flex items-center justify-between px-3 py-2 text-sm">
                 <span className="text-muted-foreground">Trust Score</span>
                 <span className="text-foreground font-medium">{user.trustScore}</span>

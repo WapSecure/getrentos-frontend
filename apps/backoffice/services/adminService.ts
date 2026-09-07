@@ -2,6 +2,7 @@ import { authDownload, authFetch, safeCall, toQuery } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import type {
   PlatformUser,
+  PlanTier,
   UserAccountStatus,
   VerificationRequest,
   Dispute,
@@ -272,6 +273,15 @@ export const adminService = {
       authFetch(`/admin/users/${userId}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
+      })
+    );
+  },
+
+  async updateUserSubscription(userId: string, tier: PlanTier): Promise<ApiResponse<PlatformUser>> {
+    return safeCall(() =>
+      authFetch(`/admin/users/${userId}/subscription`, {
+        method: 'PATCH',
+        body: JSON.stringify({ tier }),
       })
     );
   },
