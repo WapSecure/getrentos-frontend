@@ -8,9 +8,17 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f6f7f9"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.getrentos.app"
+      "bundleIdentifier": "com.getrentos.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.getrentos.app",
@@ -28,13 +36,37 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
       [
-        "expo-secure-store",
+        "expo-local-authentication",
         {
-          "configureAndroidBackup": true,
-          "faceIDPermission": "Allow GetRentos to use Face ID to sign in securely."
+          "faceIDPermission": "Allow GetRentos to use Face ID to unlock the app."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#f6f7f9",
+          "image": "./assets/icon.png",
+          "imageWidth": 160,
+          "dark": { "backgroundColor": "#0a0c11" }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0071E3"
         }
       ]
-    ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      }
+    }
   }
 }
