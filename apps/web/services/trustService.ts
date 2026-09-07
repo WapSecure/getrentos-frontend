@@ -149,4 +149,40 @@ export const trustService = {
       authFetch<TrustConsentDto>(`/trust/consents/${id}/revoke`, { method: 'POST' })
     );
   },
+
+  /** Sends a phone OTP for the PHONE_OTP step; returns the challenge reference. */
+  async sendPhoneOtp(verificationId: string): Promise<ApiResponse<{ reference: string }>> {
+    return safeCall(() =>
+      authFetch<{ reference: string }>(`/trust/verifications/${verificationId}/phone-otp/send`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  async verifyPhoneOtp(
+    verificationId: string,
+    input: { reference: string; code: string }
+  ): Promise<ApiResponse<TrustVerificationDto>> {
+    return safeCall(() =>
+      authFetch<TrustVerificationDto>(`/trust/verifications/${verificationId}/phone-otp/verify`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  /** Submits a selfie (multipart) to run selfie/liveness/face-match steps. */
+  async submitBiometrics(
+    verificationId: string,
+    selfie: File
+  ): Promise<ApiResponse<TrustVerificationDto>> {
+    return safeCall(async () => {
+      const form = new FormData();
+      form.append('selfie', selfie);
+      return authFetch<TrustVerificationDto>(`/trust/verifications/${verificationId}/biometrics`, {
+        method: 'POST',
+        body: form,
+      });
+    });
+  },
 };

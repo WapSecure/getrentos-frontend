@@ -3,13 +3,18 @@ import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminShortletBooking,
+  AdminShortletBookingDetail,
   AdminShortletDepositClaim,
   AdminShortletDispute,
   AdminShortletDisputeMessage,
   AdminShortletFeeConfig,
+  AdminShortletGuestReview,
   AdminShortletListing,
   AdminShortletOverview,
   AdminShortletPayout,
+  AdminShortletPayoutAccount,
+  AdminShortletPayoutDetail,
+  AdminShortletReview,
   ShortletBookingStatus,
   ShortletListingStatus,
 } from '@/types/shortlet';
@@ -26,6 +31,16 @@ export interface ListShortletBookingsParams {
   listingId?: string;
   dateFrom?: string;
   dateTo?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ListShortletReviewsParams {
+  rating?: number;
+  listingId?: string;
+  guestId?: string;
+  hostId?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }
@@ -112,6 +127,121 @@ export const adminShortletService = {
     const query = toQuery({ page: params.page, pageSize: params.pageSize });
     return safeCall(() =>
       authFetch<Paginated<AdminShortletPayout>>(`/admin/shortlets/payouts${query}`)
+    );
+  },
+
+  listPayoutAccounts(
+    params: { search?: string; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminShortletPayoutAccount>>> {
+    const query = toQuery({
+      search: params.search,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() =>
+      authFetch<Paginated<AdminShortletPayoutAccount>>(`/admin/shortlets/payout-accounts${query}`)
+    );
+  },
+
+  payoutDetail(payoutId: string): Promise<ApiResponse<AdminShortletPayoutDetail>> {
+    return safeCall(() =>
+      authFetch<AdminShortletPayoutDetail>(`/admin/shortlets/payouts/${payoutId}`)
+    );
+  },
+
+  retryPayout(payoutId: string): Promise<ApiResponse<AdminShortletPayout>> {
+    return safeCall(() =>
+      authFetch<AdminShortletPayout>(`/admin/shortlets/payouts/${payoutId}/retry`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  requestHostPayout(hostId: string): Promise<ApiResponse<AdminShortletPayout>> {
+    return safeCall(() =>
+      authFetch<AdminShortletPayout>(`/admin/shortlets/hosts/${hostId}/payouts`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  declineBooking(bookingId: string): Promise<ApiResponse<AdminShortletBookingDetail>> {
+    return safeCall(() =>
+      authFetch<AdminShortletBookingDetail>(`/admin/shortlets/bookings/${bookingId}/decline`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  cancelBooking(bookingId: string): Promise<ApiResponse<AdminShortletBookingDetail>> {
+    return safeCall(() =>
+      authFetch<AdminShortletBookingDetail>(`/admin/shortlets/bookings/${bookingId}/cancel`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  refundBooking(bookingId: string): Promise<ApiResponse<AdminShortletBookingDetail>> {
+    return safeCall(() =>
+      authFetch<AdminShortletBookingDetail>(`/admin/shortlets/bookings/${bookingId}/refund`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  completeBooking(bookingId: string): Promise<ApiResponse<AdminShortletBookingDetail>> {
+    return safeCall(() =>
+      authFetch<AdminShortletBookingDetail>(`/admin/shortlets/bookings/${bookingId}/complete`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  listReviews(
+    params: ListShortletReviewsParams = {}
+  ): Promise<ApiResponse<Paginated<AdminShortletReview>>> {
+    const query = toQuery({
+      rating: params.rating,
+      listingId: params.listingId,
+      guestId: params.guestId,
+      hostId: params.hostId,
+      search: params.search,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() =>
+      authFetch<Paginated<AdminShortletReview>>(`/admin/shortlets/reviews${query}`)
+    );
+  },
+
+  listGuestReviews(
+    params: ListShortletReviewsParams = {}
+  ): Promise<ApiResponse<Paginated<AdminShortletGuestReview>>> {
+    const query = toQuery({
+      rating: params.rating,
+      listingId: params.listingId,
+      guestId: params.guestId,
+      hostId: params.hostId,
+      search: params.search,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() =>
+      authFetch<Paginated<AdminShortletGuestReview>>(`/admin/shortlets/guest-reviews${query}`)
+    );
+  },
+
+  removeReview(reviewId: string): Promise<ApiResponse<AdminShortletReview>> {
+    return safeCall(() =>
+      authFetch<AdminShortletReview>(`/admin/shortlets/reviews/${reviewId}`, { method: 'DELETE' })
+    );
+  },
+
+  removeGuestReview(reviewId: string): Promise<ApiResponse<AdminShortletGuestReview>> {
+    return safeCall(() =>
+      authFetch<AdminShortletGuestReview>(`/admin/shortlets/guest-reviews/${reviewId}`, {
+        method: 'DELETE',
+      })
     );
   },
 

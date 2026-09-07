@@ -262,6 +262,7 @@ export const ROUTES = {
   RENTER_MESSAGES: '/renter/messages',
   RENTER_DOCUMENTS: '/renter/documents',
   RENTER_SETTINGS: '/renter/settings',
+  RENTER_VERIFICATION: '/renter/verification',
   RENTER_TRUST_SCORE: '/renter/trust-score',
   RENTER_CREDIT_REPORT: '/renter/credit-report',
   RENTER_USSD_ACCESS: '/renter/ussd-access',
@@ -296,6 +297,7 @@ export const ROUTES = {
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SHORTLETS: '/landlord/shortlets',
   LANDLORD_SETTINGS: '/landlord/settings',
+  LANDLORD_VERIFICATION: '/landlord/verification',
   LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',
   LANDLORD_HOME_MANAGEMENT: '/landlord/home-management',
@@ -312,6 +314,7 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_SETTINGS: '/owner/settings',
+  OWNER_VERIFICATION: '/owner/verification',
   OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
   OWNER_HOME_MANAGEMENT: '/owner/home-management',
@@ -357,6 +360,7 @@ export const ROUTES = {
   AGENT_REVIEWS: '/agent/reviews',
   AGENT_TRUST_PROFILE: '/agent/trust-profile',
   AGENT_SETTINGS: '/agent/settings',
+  AGENT_VERIFICATION: '/agent/verification',
   AGENT_HELP: '/agent/help',
 
   // Admin / BackOffice specific routes

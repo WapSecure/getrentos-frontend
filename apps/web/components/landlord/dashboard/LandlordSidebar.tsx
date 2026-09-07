@@ -31,7 +31,8 @@ import { ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
-  labelKey: TranslationKey;
+  labelKey?: TranslationKey;
+  label?: string;
   href: string;
   icon: React.ElementType;
 }
@@ -65,6 +66,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.realtor_access', href: ROUTES.LANDLORD_REALTORS, icon: UserRoundCheck },
   { labelKey: 'sidebar.reviews', href: ROUTES.LANDLORD_REVIEWS, icon: Star },
   { labelKey: 'sidebar.settings', href: ROUTES.LANDLORD_SETTINGS, icon: Settings },
+  { label: 'Verification', href: '/landlord/verification', icon: FileCheck },
 ];
 
 export const navGroups = [
@@ -83,7 +85,10 @@ export const LandlordSidebar = () => {
       dashboardHref={ROUTES.LANDLORD_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
-        items: group.items.map((item) => ({ ...item, label: t(item.labelKey) })),
+        items: group.items.map((item) => ({
+          ...item,
+          label: item.labelKey ? t(item.labelKey) : item.label,
+        })),
       }))}
     />
   );

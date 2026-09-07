@@ -293,7 +293,11 @@ export const CreateListingModal = ({
 
             {vacantUnits.length > 0 && (
               <div className="p-4 border-t border-border space-y-3 shrink-0">
-                <VerificationRequiredNotice error={submitError} href={ROUTES.LANDLORD_PROPERTIES} />
+                <VerificationRequiredNotice
+                  error={submitError}
+                  href={ROUTES.LANDLORD_PROPERTIES}
+                  verificationHref={ROUTES.LANDLORD_VERIFICATION}
+                />
                 <div className="flex gap-3">
                   <Button variant="primary" fullWidth onClick={handlePublish} disabled={!isValid}>
                     Publish Listing

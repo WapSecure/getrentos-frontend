@@ -11,6 +11,9 @@ export type ShortletBookingStatus =
   | 'DECLINED'
   | 'CANCELLED'
   | 'COMPLETED';
+export type ShortletPaymentStatus = 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
+export type ShortletDepositStatus = 'UNPAID' | 'HELD' | 'REFUNDED';
+export type ShortletCancellationPolicy = 'FLEXIBLE' | 'MODERATE' | 'STRICT';
 
 export interface AdminShortletListing {
   id: string;
@@ -41,6 +44,12 @@ export interface AdminShortletBooking {
   nights: number;
   total: number;
   status: ShortletBookingStatus;
+  paymentStatus: ShortletPaymentStatus;
+  paidAt?: string;
+  paidOut?: boolean;
+  depositStatus: ShortletDepositStatus;
+  deposit?: number;
+  refundAmount?: number;
   paymentReference?: string;
   createdAt: string;
 }
@@ -65,6 +74,79 @@ export interface AdminShortletPayout {
   bookingCount: number;
   createdAt: string;
 }
+
+/** A host payout bank account on the admin register (account number masked). */
+export interface AdminShortletPayoutAccount {
+  id: string;
+  hostId: string;
+  hostName: string;
+  hostEmail?: string;
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  recipientReady: boolean;
+  createdAt: string;
+}
+
+/** A booking covered by a payout (payout detail view). */
+export interface AdminShortletPayoutBooking {
+  id: string;
+  listingTitle?: string;
+  total: number;
+  status: string;
+  checkIn: string;
+  checkOut: string;
+  createdAt: string;
+}
+
+/** Full payout detail: host + account + the bookings it covered. */
+export interface AdminShortletPayoutDetail extends AdminShortletPayout {
+  hostEmail?: string;
+  account?: AdminShortletPayoutAccount;
+  bookings?: AdminShortletPayoutBooking[];
+}
+
+/** Result of a booking intervention (decline/cancel/refund/complete). */
+export interface AdminShortletBookingDetail {
+  id: string;
+  listingId: string;
+  propertyTitle: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  total: number;
+  status: ShortletBookingStatus;
+  paymentStatus: ShortletPaymentStatus;
+  paidAt?: string;
+  cancellationPolicy?: ShortletCancellationPolicy;
+  refundAmount?: number;
+  refundedAt?: string;
+  deposit?: number;
+  depositStatus: ShortletDepositStatus;
+  depositRefundedAt?: string;
+  hostName: string;
+  guestName?: string;
+  createdAt: string;
+}
+
+/** Admin review-moderation row for a guest's review of a stay. */
+export interface AdminShortletReview {
+  id: string;
+  bookingId: string;
+  listingId: string;
+  listingTitle?: string;
+  guestId: string;
+  guestName: string;
+  hostId: string;
+  hostName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+/** Admin review-moderation row for a host's review of a guest. */
+export type AdminShortletGuestReview = AdminShortletReview;
 
 export type AdminShortletDisputeCategory =
   | 'SERVICE_QUALITY'

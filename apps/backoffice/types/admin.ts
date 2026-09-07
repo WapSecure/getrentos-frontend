@@ -40,6 +40,7 @@ export type AdminPermission =
   | 'staff.approve'
   | 'shortlet.view'
   | 'shortlet.moderate'
+  | 'shortlet.payout'
   | 'rentals.view'
   | 'rentals.moderate'
   | 'rentfinance.view'

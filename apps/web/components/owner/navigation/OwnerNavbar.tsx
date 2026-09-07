@@ -232,7 +232,10 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
               onNavigate={() => setIsMobileMenuOpen(false)}
               groups={navGroups.map((group) => ({
                 ...group,
-                items: group.items.map((item) => ({ ...item, label: t(item.labelKey) })),
+                items: group.items.map((item) => ({
+                  ...item,
+                  label: item.labelKey ? t(item.labelKey) : item.label,
+                })),
               }))}
             />
           </motion.div>
