@@ -30,6 +30,8 @@ export interface KycStatus {
   isVerified: boolean;
   verificationStatus: string;
   trustScore: number;
+  /** 0-5 trust tier derived from verification state + score (mirrors backend). */
+  tier?: number;
   identity?: IdentityKyc;
   license?: LicenseKyc;
   ownershipProofs?: OwnershipProofKyc[];

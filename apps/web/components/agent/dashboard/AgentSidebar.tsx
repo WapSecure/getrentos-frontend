@@ -18,7 +18,8 @@ import { ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
-  labelKey: TranslationKey;
+  labelKey?: TranslationKey;
+  label?: string;
   href: string;
   icon: React.ElementType;
 }
@@ -34,6 +35,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.reviews', href: ROUTES.AGENT_REVIEWS, icon: Star },
   { labelKey: 'sidebar.trust_profile', href: ROUTES.AGENT_TRUST_PROFILE, icon: BadgeCheck },
   { labelKey: 'sidebar.settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
+  { label: 'Verification', href: '/agent/verification', icon: BadgeCheck },
 ];
 
 export const navGroups = [
@@ -51,7 +53,10 @@ export const AgentSidebar = () => {
       dashboardHref={ROUTES.AGENT_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
-        items: group.items.map((item) => ({ ...item, label: t(item.labelKey) })),
+        items: group.items.map((item) => ({
+          ...item,
+          label: item.labelKey ? t(item.labelKey) : item.label,
+        })),
       }))}
     />
   );

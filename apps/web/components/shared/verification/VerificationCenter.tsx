@@ -372,6 +372,11 @@ export const VerificationCenter = ({
                 Trust score {kyc.trustScore}
               </span>
             )}
+            {kyc?.tier !== undefined && (
+              <span className="rounded-full border border-primary/40 px-3 py-1 text-xs font-semibold text-primary">
+                Tier {kyc.tier}
+              </span>
+            )}
           </div>
         </div>
 
