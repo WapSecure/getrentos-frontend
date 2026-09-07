@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BadgeCheck,
+  Camera,
   CheckCircle2,
-  Fingerprint,
   FileCheck2,
+  Fingerprint,
   ShieldAlert,
   ShieldCheck,
+  Smartphone,
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -92,18 +94,13 @@ const STEP_LABEL: Record<string, string> = {
   AML_CHECK: 'AML screening',
 };
 
-const RUNNABLE_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
-
-const RUNNABLE_ID_TYPE: Partial<Record<string, TrustIdType>> = {
-  NIN_CHECK: 'NIN',
-  BVN_CHECK: 'BVN',
-};
+const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
+const IDENTITY_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
+const BIO_STEP_TYPES = ['SELFIE_CAPTURE', 'LIVENESS_CHECK', 'FACE_MATCH'];
 
 interface VerificationCenterProps {
-  /** The signed-in user's database id (the PERSON subject of the verification). */
   subjectId: string;
   purpose: TrustPurpose;
-  /** Human context line, e.g. why verification matters for this role. */
   description?: string;
 }
 
@@ -119,7 +116,14 @@ export const VerificationCenter = ({
   const [idNumber, setIdNumber] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phoneRef, setPhoneRef] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState('');
+  const [selfie, setSelfie] = useState<File | null>(null);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
   const autoStarted = useRef(false);
+
+  const invalidateVerification = () =>
+    queryClient.invalidateQueries({ queryKey: ['trust-verification', verificationId] });
 
   const { data: kyc } = useQuery({
     queryKey: ['kyc-status'],
@@ -137,11 +141,12 @@ export const VerificationCenter = ({
     queryFn: () => unwrap(trustService.listConsents()),
   });
   const idCheckConsent = consents?.find((c) => c.consentType === 'ID_CHECK');
+  const bioConsent = consents?.find((c) => c.consentType === 'BIOMETRIC');
 
   const startMutation = useMutation({
     mutationFn: () => unwrap(trustService.startVerification({ subjectId, purpose, country: 'NG' })),
-    onSuccess: (verification) => {
-      setVerificationId(verification.id);
+    onSuccess: (v) => {
+      setVerificationId(v.id);
       setError(null);
     },
     onError: (reason) =>
@@ -149,8 +154,7 @@ export const VerificationCenter = ({
   });
 
   // Idempotently start/resume the orchestrated verification once (start is
-  // safe: it resumes an existing open verification or creates one for the
-  // signed-in user). Skipped only when the account is already APPROVED.
+  // safe: resumes an open verification or creates one for the signed-in user).
   useEffect(() => {
     if (
       subjectId &&
@@ -165,12 +169,29 @@ export const VerificationCenter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId, kyc?.verificationStatus]);
 
-  const grantConsentMutation = useMutation({
+  const grantIdMutation = useMutation({
     mutationFn: () =>
       unwrap(
         trustService.grantConsent({
           consentType: 'ID_CHECK',
           purpose: 'Identity verification',
+          expiresInDays: 365,
+        })
+      ),
+    onSuccess: () => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
+  });
+
+  const grantBioMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        trustService.grantConsent({
+          consentType: 'BIOMETRIC',
+          purpose: 'Biometric verification',
           expiresInDays: 365,
         })
       ),
@@ -208,27 +229,113 @@ export const VerificationCenter = ({
       setFirstName('');
       setLastName('');
       setError(null);
-      queryClient.invalidateQueries({ queryKey: ['trust-verification', verificationId] });
+      invalidateVerification();
     },
     onError: (reason) =>
       setError(reason instanceof Error ? reason.message : 'Unable to run that check.'),
   });
 
+  const sendOtpMutation = useMutation({
+    mutationFn: () => unwrap(trustService.sendPhoneOtp(verificationId!)),
+    onSuccess: (data) => {
+      setPhoneRef(data.reference);
+      setError(null);
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to send the code.'),
+  });
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: () =>
+      unwrap(trustService.verifyPhoneOtp(verificationId!, { reference: phoneRef!, code: otpCode })),
+    onSuccess: () => {
+      setPhoneRef(null);
+      setOtpCode('');
+      setError(null);
+      invalidateVerification();
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to verify the code.'),
+  });
+
+  const bioMutation = useMutation({
+    mutationFn: () => unwrap(trustService.submitBiometrics(verificationId!, selfie!)),
+    onSuccess: () => {
+      setSelfie(null);
+      setError(null);
+      invalidateVerification();
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to run the biometric check.'),
+  });
+
   const isVerified = Boolean(kyc?.isVerified) || kyc?.verificationStatus === 'APPROVED';
   const kycMeta =
     KYC_STATUS_META[kyc?.verificationStatus ?? 'PENDING_REVIEW'] ?? KYC_STATUS_META.PENDING_REVIEW;
-  const runnableStep = verification?.steps.find(
-    (step) =>
-      RUNNABLE_STEP_TYPES.includes(step.stepType) &&
-      ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'].includes(step.status)
+
+  const steps = verification?.steps ?? [];
+  const actionable = (status: string) => ACTIONABLE.includes(status);
+  const runnableIdentity = steps.find(
+    (s) => IDENTITY_STEP_TYPES.includes(s.stepType) && actionable(s.status)
+  );
+  const runnablePhone = steps.find((s) => s.stepType === 'PHONE_OTP' && actionable(s.status));
+  const runnableBio = steps.find(
+    (s) => BIO_STEP_TYPES.includes(s.stepType) && actionable(s.status)
   );
 
-  const submitEnabled =
-    Boolean(runnableStep) &&
+  const identityEnabled =
+    Boolean(runnableIdentity) &&
     Boolean(verificationId) &&
     idNumber.trim().length > 0 &&
     Boolean(idCheckConsent) &&
     !identityMutation.isPending;
+  const otpVerifyEnabled =
+    Boolean(phoneRef) && otpCode.length === 6 && !verifyOtpMutation.isPending;
+  const bioEnabled = Boolean(selfie) && Boolean(bioConsent) && !bioMutation.isPending;
+
+  const renderConsentRow = (opts: {
+    consent?: { id: string; revokedAt?: string; grantedAt: string };
+    icon: React.ElementType;
+    title: string;
+    body: string;
+    onGrant: () => void;
+    granting: boolean;
+    revoking: boolean;
+  }) => {
+    const consent = opts.consent;
+    const active = Boolean(consent && !consent.revokedAt);
+    const Icon = opts.icon;
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-primary" />
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">{opts.title}</h3>
+            <p className="text-xs text-muted-foreground">{opts.body}</p>
+          </div>
+        </div>
+        {active && consent ? (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={opts.revoking}
+            onClick={() => revokeConsentMutation.mutate(consent.id)}
+          >
+            {opts.revoking ? 'Revoking…' : 'Revoke consent'}
+          </Button>
+        ) : (
+          <Button size="sm" disabled={opts.granting} onClick={opts.onGrant}>
+            {opts.granting ? 'Recording…' : 'Grant consent'}
+          </Button>
+        )}
+        {active && consent && (
+          <p className="w-full text-xs text-green-700 dark:text-green-400">
+            Active · granted {new Date(consent.grantedAt).toLocaleDateString()}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-5">
@@ -276,43 +383,27 @@ export const VerificationCenter = ({
         )}
       </div>
 
-      {/* Consent */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5 text-primary" />
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Identity-check consent</h3>
-              <p className="text-xs text-muted-foreground">
-                We check your NIN/BVN against official records. Your number is never shown to other
-                users.
-              </p>
-            </div>
-          </div>
-          {idCheckConsent && !idCheckConsent.revokedAt ? (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={revokeConsentMutation.isPending}
-              onClick={() => revokeConsentMutation.mutate(idCheckConsent.id)}
-            >
-              {revokeConsentMutation.isPending ? 'Revoking…' : 'Revoke consent'}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              disabled={grantConsentMutation.isPending}
-              onClick={() => grantConsentMutation.mutate()}
-            >
-              {grantConsentMutation.isPending ? 'Recording…' : 'Grant consent'}
-            </Button>
-          )}
-        </div>
-        {idCheckConsent && !idCheckConsent.revokedAt && (
-          <p className="mt-2 text-xs text-green-700 dark:text-green-400">
-            Active · granted {new Date(idCheckConsent.grantedAt).toLocaleDateString()}
-          </p>
-        )}
+      {/* Consents */}
+      <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
+        {renderConsentRow({
+          consent: idCheckConsent,
+          icon: Fingerprint,
+          title: 'Identity-check consent',
+          body: 'We check your NIN/BVN against official records. Your number is never shown to other users.',
+          onGrant: () => grantIdMutation.mutate(),
+          granting: grantIdMutation.isPending,
+          revoking: revokeConsentMutation.isPending,
+        })}
+        <div className="border-t border-border" />
+        {renderConsentRow({
+          consent: bioConsent,
+          icon: Camera,
+          title: 'Biometric consent',
+          body: 'We capture a selfie and run liveness + face checks. Used only for this verification.',
+          onGrant: () => grantBioMutation.mutate(),
+          granting: grantBioMutation.isPending,
+          revoking: revokeConsentMutation.isPending,
+        })}
       </div>
 
       {error && (
@@ -340,15 +431,16 @@ export const VerificationCenter = ({
         ) : verification ? (
           <>
             <div className="space-y-2">
-              {verification.steps.map((step) => {
+              {steps.map((step) => {
                 const meta = STEP_STATUS_META[step.status] ?? {
                   label: step.status,
                   color: 'text-muted-foreground',
                   bg: 'bg-secondary',
                 };
                 const runnable =
-                  RUNNABLE_STEP_TYPES.includes(step.stepType) &&
-                  ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'].includes(step.status);
+                  [...IDENTITY_STEP_TYPES, ...BIO_STEP_TYPES, 'PHONE_OTP'].includes(
+                    step.stepType
+                  ) && actionable(step.status);
                 return (
                   <div
                     key={step.id}
@@ -360,10 +452,8 @@ export const VerificationCenter = ({
                     <div className="flex items-center gap-3">
                       {step.status === 'PASSED' ? (
                         <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      ) : runnable ? (
-                        <Fingerprint className="h-5 w-5 text-primary" />
                       ) : (
-                        <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+                        <Fingerprint className="h-5 w-5 text-primary" />
                       )}
                       <div>
                         <p className="text-sm font-medium text-foreground">
@@ -388,14 +478,14 @@ export const VerificationCenter = ({
               })}
             </div>
 
-            {runnableStep && (
+            {/* Identity (NIN/BVN) runner */}
+            {runnableIdentity && (
               <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
                 <p className="text-sm font-semibold text-foreground">
-                  Complete: {STEP_LABEL[runnableStep.stepType]}
+                  Complete: {STEP_LABEL[runnableIdentity.stepType]}
                 </p>
                 {!idCheckConsent && (
-                  <p className="mt-1 flex items-start gap-1.5 text-xs text-orange-600 dark:text-orange-400">
-                    <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
                     Grant identity-check consent above before running this check.
                   </p>
                 )}
@@ -443,11 +533,90 @@ export const VerificationCenter = ({
                 <Button
                   className="mt-4"
                   size="sm"
-                  disabled={!submitEnabled}
+                  disabled={!identityEnabled}
                   onClick={() => identityMutation.mutate()}
                 >
                   {identityMutation.isPending ? 'Checking…' : 'Run identity check'}
                 </Button>
+              </div>
+            )}
+
+            {/* Phone OTP runner */}
+            {runnablePhone && (
+              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Complete: Phone verification
+                </p>
+                {!phoneRef ? (
+                  <Button
+                    className="mt-3"
+                    size="sm"
+                    disabled={sendOtpMutation.isPending}
+                    onClick={() => sendOtpMutation.mutate()}
+                  >
+                    <Smartphone className="mr-2 h-4 w-4" />
+                    {sendOtpMutation.isPending ? 'Sending…' : 'Send code to my phone'}
+                  </Button>
+                ) : (
+                  <>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Code sent — in development it is printed to the backend log.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <Input
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="6-digit code"
+                        className="w-40"
+                        inputMode="numeric"
+                      />
+                      <Button
+                        size="sm"
+                        disabled={!otpVerifyEnabled}
+                        onClick={() => verifyOtpMutation.mutate()}
+                      >
+                        {verifyOtpMutation.isPending ? 'Verifying…' : 'Verify code'}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Biometrics runner */}
+            {runnableBio && (
+              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Complete: Selfie + biometric check
+                </p>
+                {!bioConsent && (
+                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                    Grant biometric consent above before running this check.
+                  </p>
+                )}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <input
+                    ref={selfieInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => setSelfie(e.target.files?.[0] ?? null)}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => selfieInputRef.current?.click()}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    {selfie ? selfie.name.slice(0, 30) : 'Choose a selfie'}
+                  </Button>
+                  <Button size="sm" disabled={!bioEnabled} onClick={() => bioMutation.mutate()}>
+                    {bioMutation.isPending ? 'Running…' : 'Run biometric check'}
+                  </Button>
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Runs selfie capture, liveness and face-match in one step.
+                </p>
               </div>
             )}
 
