@@ -5,6 +5,8 @@ import type {
   Household,
   HouseholdStatus,
   ImportHouseholdsResult,
+  EstateDashboardStats,
+  EstateDuesPoint,
   Due,
   VisitorPass,
   IssuedVisitorPass,
@@ -50,6 +52,14 @@ export const estateService = {
 
   async listMyEstates(): Promise<ApiResponse<Estate[]>> {
     return safeCall(() => authFetch('/estate/mine'));
+  },
+
+  async getDashboardStats(estateId: string): Promise<ApiResponse<EstateDashboardStats>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dashboard/stats`));
+  },
+
+  async getDuesCollectedTrend(estateId: string): Promise<ApiResponse<EstateDuesPoint[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dashboard/dues-trend`));
   },
 
   async listHouseholds(
