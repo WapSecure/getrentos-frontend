@@ -1,46 +1,58 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { AuthProvider, useAuth } from '@/lib/auth';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
+import { persister, queryClient } from '@/lib/query/client';
+import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 
-/**
- * Root navigator. Shows a launch loader while the stored session is restored,
- * then presents the auth group (signed out) or the tabs (signed in). Each
- * group re-checks auth and redirects, so this stays in sync on sign-in/out.
- */
-function RootNavigator() {
-  const { isLoading } = useAuth();
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-  if (isLoading) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#0071E3" />
-      </View>
-    );
-  }
+function Gate() {
+  const { status } = useAuth();
+  const { colors, scheme } = useTheme();
+
+  useEffect(() => {
+    if (status !== 'loading') SplashScreen.hideAsync().catch(() => undefined);
+  }, [status]);
+
+  if (status === 'loading') return null;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+          animation: 'fade',
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(app)" />
+      </Stack>
+    </>
   );
 }
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <StatusBar style="auto" />
-      <RootNavigator />
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+          <ThemeProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <Gate />
+              </AuthProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </PersistQueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  loader: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f7',
-  },
-});

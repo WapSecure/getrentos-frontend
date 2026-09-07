@@ -1,14 +1,9 @@
 import { Redirect, Stack } from 'expo-router';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
-/** Signed-out group. Redirects straight to the app once a session exists. */
 export default function AuthLayout() {
-  const { user } = useAuth();
-  if (user) return <Redirect href="/" />;
+  const { status } = useAuth();
+  if (status === 'authenticated') return <Redirect href="/(app)" />;
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="sign-in" />
-    </Stack>
-  );
+  return <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }} />;
 }
