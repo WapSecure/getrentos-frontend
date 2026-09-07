@@ -10,6 +10,8 @@ import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiatio
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { OfferStatus, OfferMessage } from '@/types/owner';
 
 type StatusFilter = 'all' | OfferStatus;
@@ -188,6 +190,17 @@ export default function OwnerOffersPage() {
             : `${total} offer${total === 1 ? '' : 's'} across your sale listings`}
         </p>
       </div>
+
+      {/* Accepting an offer opens an escrow/payout obligation — financially verified (tier 3) owners only. */}
+      {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (
+        <div className="mb-6">
+          <VerificationRequiredNotice
+            error={acceptMutation.error || rejectMutation.error || counterMutation.error}
+            href={ROUTES.OWNER_OFFERS}
+            verificationHref={ROUTES.OWNER_VERIFICATION}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
