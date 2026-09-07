@@ -44,14 +44,14 @@ export function ThemeProvider({
   children: ReactNode;
   initialPreference?: ThemePreference;
 }) {
-  const detectedScheme = useColorScheme();
-  const system: ColorScheme = detectedScheme === 'dark' ? 'dark' : 'light';
+  const rawScheme = useColorScheme();
+  const system: ColorScheme = rawScheme === 'dark' ? 'dark' : 'light';
   const [preference, setPreference] = useState<ThemePreference>(initialPreference);
   const scheme: ColorScheme = preference === 'system' ? system : preference;
 
   const value = useMemo<ThemeContextValue>(
     () => ({ ...buildTheme(scheme), preference, setPreference }),
-    [scheme, preference],
+    [scheme, preference]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
