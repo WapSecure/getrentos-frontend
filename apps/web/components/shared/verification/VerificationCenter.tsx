@@ -148,15 +148,22 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to load your verification.'),
   });
 
-  // Idempotently start/resume the orchestrated verification once the user is
-  // not yet verified, so the center reflects their current trust state.
+  // Idempotently start/resume the orchestrated verification once (start is
+  // safe: it resumes an existing open verification or creates one for the
+  // signed-in user). Skipped only when the account is already APPROVED.
   useEffect(() => {
-    if (subjectId && kyc && !kyc.isVerified && !autoStarted.current && !startMutation.isPending) {
+    if (
+      subjectId &&
+      kyc &&
+      kyc.verificationStatus !== 'APPROVED' &&
+      !autoStarted.current &&
+      !startMutation.isPending
+    ) {
       autoStarted.current = true;
       startMutation.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectId, kyc?.isVerified]);
+  }, [subjectId, kyc?.verificationStatus]);
 
   const grantConsentMutation = useMutation({
     mutationFn: () =>
