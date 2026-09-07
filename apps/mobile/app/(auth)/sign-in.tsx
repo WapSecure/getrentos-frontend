@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import * as Haptics from 'expo-haptics';
+import { haptics } from '@/lib/haptics';
 import { Button, Screen, Text, TextField, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -16,7 +16,7 @@ const schema = z.object({
     .min(1, 'Enter your email or phone number')
     .refine(
       (v) => /^\S+@\S+\.\S+$/.test(v) || /^[0-9+][0-9\s-]{6,}$/.test(v),
-      'Enter a valid email or phone number',
+      'Enter a valid email or phone number'
     ),
   password: z.string().min(1, 'Enter your password'),
 });
@@ -42,17 +42,17 @@ export default function SignInScreen() {
     setFormError(null);
     try {
       const { requiresTwoFactor } = await signIn(identifier, password);
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await haptics.success();
       if (requiresTwoFactor) router.push('/(auth)/two-factor');
       // else: the (auth) layout redirects to (app) once status flips.
     } catch (err) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      await haptics.error();
       setFormError(
         err instanceof ApiError
           ? err.isNetwork
             ? 'Can’t reach GetRentos. Check your connection and try again.'
             : err.message
-          : 'Sign-in failed. Please try again.',
+          : 'Sign-in failed. Please try again.'
       );
     }
   });

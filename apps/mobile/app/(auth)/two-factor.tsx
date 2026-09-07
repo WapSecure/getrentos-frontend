@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
+import { haptics } from '@/lib/haptics';
 import { Button, Screen, Text, TextField, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -24,9 +24,9 @@ export default function TwoFactorScreen() {
     setError(null);
     try {
       await completeTwoFactor(code);
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await haptics.success();
     } catch (err) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      await haptics.error();
       setCode('');
       setError(err instanceof ApiError ? err.message : 'That code didn’t work. Try again.');
     } finally {

@@ -5,7 +5,7 @@ import { Home, Search, FileText, MessageCircle, User } from 'lucide-react-native
 import { useTheme } from '@getrentos/ui-native';
 
 export default function RenterTabsLayout() {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -22,15 +22,19 @@ export default function RenterTabsLayout() {
           paddingBottom: insets.bottom,
         },
         tabBarLabelStyle: {
-          fontSize: typography.caption.fontSize,
+          fontSize: 10,
           fontWeight: '600',
         },
+        tabBarItemStyle: { paddingVertical: 2 },
         tabBarHideOnKeyboard: Platform.OS === 'android',
       }}
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Home', tabBarIcon: ({ color, size }) => <Home color={color} size={size} /> }}
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="discover"
