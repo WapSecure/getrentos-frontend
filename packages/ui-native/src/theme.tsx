@@ -44,7 +44,8 @@ export function ThemeProvider({
   children: ReactNode;
   initialPreference?: ThemePreference;
 }) {
-  const system = useColorScheme() ?? 'light';
+  const detectedScheme = useColorScheme();
+  const system: ColorScheme = detectedScheme === 'dark' ? 'dark' : 'light';
   const [preference, setPreference] = useState<ThemePreference>(initialPreference);
   const scheme: ColorScheme = preference === 'system' ? system : preference;
 
