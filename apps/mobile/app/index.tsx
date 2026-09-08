@@ -1,9 +1,7 @@
-import { Redirect } from 'expo-router';
-import { useAuth } from '@/lib/auth/AuthProvider';
-
-/** Entry point: send to the app or the sign-in flow based on the session. */
+/**
+ * Entry route. Routing is handled centrally by `useProtectedRoute` in the root
+ * layout — this screen just holds the frame until that effect redirects.
+ */
 export default function Index() {
-  const { status } = useAuth();
-  if (status === 'loading') return null;
-  return <Redirect href={status === 'authenticated' ? '/(app)/(renter)' : '/(auth)/welcome'} />;
+  return null;
 }

@@ -8,13 +8,15 @@ import { useAuth } from './AuthProvider';
  * Catches an incoming magic-link deep link — `getrentos://magic-link?token=…`
  * (or a universal link with the same query) — and exchanges it for a session.
  *
- * Backend note: `/auth/magic-link/send` must be told to build the link with the
- * `getrentos://` scheme (a `redirectTo` param) for this to fire on device.
+ * The listener is registered exactly once; the handler reads the latest
+ * callbacks through a ref so this effect never re-subscribes on re-render.
  */
 export function useMagicLink() {
-  const { signInWithMagicLink, status } = useAuth();
+  const { signInWithMagicLink } = useAuth();
   const toast = useToast();
   const handled = useRef<Set<string>>(new Set());
+  const deps = useRef({ signInWithMagicLink, toast });
+  deps.current = { signInWithMagicLink, toast };
 
   useEffect(() => {
     const handle = async (url: string | null) => {
@@ -26,20 +28,18 @@ export function useMagicLink() {
       handled.current.add(token);
 
       try {
-        await signInWithMagicLink(token);
-        toast.show('Signed in.', 'success');
+        await deps.current.signInWithMagicLink(token);
+        deps.current.toast.show('Signed in.', 'success');
       } catch (err) {
-        toast.show(
+        deps.current.toast.show(
           err instanceof ApiError ? err.message : 'That sign-in link is invalid or expired.',
           'error'
         );
       }
     };
 
-    // Cold start: the app was opened by the link.
     Linking.getInitialURL().then(handle);
-    // Warm: link arrived while the app was running.
     const sub = Linking.addEventListener('url', ({ url }) => handle(url));
     return () => sub.remove();
-  }, [signInWithMagicLink, status, toast]);
+  }, []);
 }

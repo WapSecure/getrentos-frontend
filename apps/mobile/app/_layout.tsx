@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { useEffect, useMemo, useRef } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -9,32 +9,72 @@ import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
+import { IMPLEMENTED_PORTALS } from '@/lib/roles';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
+/**
+ * The single source of navigation truth. One effect, one `router.replace` per
+ * transition — never `<Redirect>` scattered across nested layouts (two of them
+ * firing at once trips React's update counter on the native stack).
+ */
+function useProtectedRoute() {
+  const { status, portal } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+  const lastTarget = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    const root = segments[0]; // '(auth)' | '(app)' | undefined (index)
+    const inApp = root === '(app)';
+    const portalReady = !!portal && IMPLEMENTED_PORTALS.includes(portal);
+
+    let target: string | null = null;
+    if (status === 'unauthenticated') {
+      if (inApp || root === undefined) target = '/(auth)/welcome';
+    } else {
+      // authenticated
+      if (!inApp) target = portalReady ? '/(app)/(renter)' : '/(app)/portal-unavailable';
+      else if (!portalReady && segments[1] !== 'portal-unavailable') {
+        target = '/(app)/portal-unavailable';
+      }
+    }
+
+    if (target && lastTarget.current !== target) {
+      lastTarget.current = target;
+      router.replace(target as never);
+    }
+    if (!target) lastTarget.current = null;
+  }, [status, portal, segments, router]);
+}
+
+const STACK_SCREEN_OPTIONS = { headerShown: false, animation: 'fade' } as const;
+
 function Gate() {
   const { status } = useAuth();
   const { colors, scheme } = useTheme();
   useMagicLink();
+  useProtectedRoute();
 
   useEffect(() => {
     if (status !== 'loading') SplashScreen.hideAsync().catch(() => undefined);
   }, [status]);
+
+  const screenOptions = useMemo(
+    () => ({ ...STACK_SCREEN_OPTIONS, contentStyle: { backgroundColor: colors.background } }),
+    [colors.background]
+  );
 
   if (status === 'loading') return null;
 
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-          animation: 'fade',
-        }}
-      >
+      <Stack screenOptions={screenOptions}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
