@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Users, Plus, Upload } from 'lucide-react';
+import { Users, Plus, Upload, Lock } from 'lucide-react';
 import { Button, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -15,6 +15,9 @@ import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
 import { LinkResidentModal } from '@/components/estate/households/LinkResidentModal';
 import { ImportHouseholdsModal } from '@/components/estate/households/ImportHouseholdsModal';
 import type { Household, ImportHouseholdsResult } from '@/types/estate';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
+import { usePlanTier } from '@/hooks/usePlanTier';
 
 const PAGE_SIZE = 10;
 
@@ -29,6 +32,8 @@ export default function EstateHouseholdsPage() {
   const [page, setPage] = useState(1);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
+  const planGate = usePlanGateModal();
+  const { isPro } = usePlanTier();
 
   const { data, isLoading: isHouseholdsLoading } = useQuery({
     queryKey: [...estateKeys.households(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
@@ -56,6 +61,9 @@ export default function EstateHouseholdsPage() {
       invalidate();
       setPage(1);
       setIsModalOpen(false);
+    },
+    onError: (error: Error) => {
+      if (planGate.handleError(error)) setIsModalOpen(false);
     },
   });
 
@@ -110,6 +118,9 @@ export default function EstateHouseholdsPage() {
         setPage(1);
       }
     },
+    onError: (error: Error) => {
+      if (planGate.handleError(error)) setIsImportOpen(false);
+    },
   });
 
   if (isEstateLoading) {
@@ -147,6 +158,12 @@ export default function EstateHouseholdsPage() {
           <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
             <Upload className="w-4 h-4" />
             Import CSV
+            {!isPro && (
+              <Lock
+                className="h-3.5 w-3.5 text-muted-foreground/70"
+                aria-label="Pro plan feature"
+              />
+            )}
           </Button>
           <Button
             variant="primary"
@@ -229,6 +246,12 @@ export default function EstateHouseholdsPage() {
         onSubmit={(file) => importHouseholds.mutate(file)}
         isSubmitting={importHouseholds.isPending}
         result={importResult}
+      />
+
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
       />
     </>
   );

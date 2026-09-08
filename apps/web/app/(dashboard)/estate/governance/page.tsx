@@ -15,6 +15,8 @@ import { GovernanceRecordRow } from '@/components/estate/governance/GovernanceRe
 import { GovernanceVersionsModal } from '@/components/estate/governance/GovernanceVersionsModal';
 import { GovernanceSignaturesModal } from '@/components/estate/governance/GovernanceSignaturesModal';
 import type { GovernanceRecord, GovernanceRecordType } from '@/types/estate';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 const typeFilters: { value: GovernanceRecordType | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -31,6 +33,7 @@ export default function EstateGovernancePage() {
   const [historyRecordId, setHistoryRecordId] = useState<string | null>(null);
   const [signaturesRecordId, setSignaturesRecordId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<GovernanceRecordType | 'all'>('all');
+  const planGate = usePlanGateModal();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -61,6 +64,12 @@ export default function EstateGovernancePage() {
       invalidate();
       setIsUploadOpen(false);
       setNewVersionOf(null);
+    },
+    onError: (error: Error) => {
+      if (planGate.handleError(error)) {
+        setIsUploadOpen(false);
+        setNewVersionOf(null);
+      }
     },
   });
 
@@ -174,6 +183,12 @@ export default function EstateGovernancePage() {
         estateId={estate.id}
         recordId={signaturesRecordId}
         onClose={() => setSignaturesRecordId(null)}
+      />
+
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
       />
     </>
   );

@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Lock, X } from 'lucide-react';
 import { Button, Checkbox, DatePicker, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface UploadGovernanceRecordModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export const UploadGovernanceRecordModal = ({
   const [meetingDate, setMeetingDate] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [requiresSignatures, setRequiresSignatures] = useState(false);
+  const { isPro } = usePlanTier();
 
   const handleClose = () => {
     setTitle(newVersionOf?.title ?? '');
@@ -117,6 +119,12 @@ export const UploadGovernanceRecordModal = ({
               <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
                 <Checkbox checked={requiresSignatures} onCheckedChange={setRequiresSignatures} />
                 Require every committee member to sign before it&apos;s approved
+                {!isPro && (
+                  <Lock
+                    className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
+                    aria-label="Pro plan feature"
+                  />
+                )}
               </label>
             </div>
 
