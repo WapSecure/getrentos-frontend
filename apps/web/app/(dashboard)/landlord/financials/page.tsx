@@ -13,6 +13,8 @@ import {
 } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { usePlanTier } from '@/hooks/usePlanTier';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 // recharts is heavy — load it only when the financials tab is rendered.
 const FinancialChart = dynamic(
@@ -41,15 +43,18 @@ const EMPTY_STATS: FinancialStatsData = {
 export default function LandlordFinancialsPage() {
   const [period, setPeriod] = useState<ReportPeriod>('monthly');
   const [exported, setExported] = useState(false);
+  const { isPro } = usePlanTier();
 
   const { data: stats = EMPTY_STATS } = useQuery({
     queryKey: landlordKeys.financialStats(period),
     queryFn: () => unwrap(landlordService.getFinancialStats(period)),
+    enabled: isPro,
   });
 
   const { data: chartData = [] } = useQuery({
     queryKey: landlordKeys.financialChart,
     queryFn: () => unwrap(landlordService.getFinancialChart()),
+    enabled: isPro,
   });
 
   const { data: propertiesData } = useQuery({
@@ -77,49 +82,56 @@ export default function LandlordFinancialsPage() {
           <h1 className="text-2xl font-bold text-foreground">Financials</h1>
           <p className="text-muted-foreground mt-1">Track income, expenses, and profitability</p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="primary"
-            size="sm"
-            className="gap-1.5"
-            onClick={handleExport}
-            disabled={exportMutation.isPending}
-            isLoading={exportMutation.isPending}
-          >
-            {exported ? (
-              <Check className="w-3.5 h-3.5" />
-            ) : (
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-            )}
-            {exported ? 'Exported' : 'Export CSV'}
-          </Button>
+        {isPro && (
+          <div className="flex gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleExport}
+              disabled={exportMutation.isPending}
+              isLoading={exportMutation.isPending}
+            >
+              {exported ? (
+                <Check className="w-3.5 h-3.5" />
+              ) : (
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+              )}
+              {exported ? 'Exported' : 'Export CSV'}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <ProFeatureGate
+        title="Financial analytics is a Pro feature"
+        description="Upgrade to Pro to see income, expenses, profitability trends, and export your data as CSV."
+      >
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6">
+          {periodOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setPeriod(option.value)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                period === option.value
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
-      </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6">
-        {periodOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => setPeriod(option.value)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              period === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+        <FinancialStats
+          rentalIncome={rentalIncome}
+          outstandingRent={outstandingRent}
+          maintenanceCosts={maintenanceCosts}
+          netProfit={netProfit}
+        />
 
-      <FinancialStats
-        rentalIncome={rentalIncome}
-        outstandingRent={outstandingRent}
-        maintenanceCosts={maintenanceCosts}
-        netProfit={netProfit}
-      />
-
-      <FinancialChart data={chartData} />
+        <FinancialChart data={chartData} />
+      </ProFeatureGate>
 
       <ExpensesPanel properties={properties} />
     </>

@@ -14,6 +14,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { LandlordLead, LeadStage } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 type StageFilter = 'all' | LeadStage;
 
@@ -45,6 +47,7 @@ export default function LandlordLeadsPage() {
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [showBulkNudge, setShowBulkNudge] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const planGate = usePlanGateModal();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -125,6 +128,10 @@ export default function LandlordLeadsPage() {
       setShowBulkNudge(false);
     },
     onError: (error: Error) => {
+      if (planGate.handleError(error)) {
+        setShowBulkNudge(false);
+        return;
+      }
       setToast({ message: error.message || 'Unable to send these nudges.', variant: 'error' });
     },
   });
@@ -302,6 +309,11 @@ export default function LandlordLeadsPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </>
   );
 }

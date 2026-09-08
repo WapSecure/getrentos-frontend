@@ -22,6 +22,10 @@ import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type OwnerStatement } from '@/services/landlordService';
+import { usePlanTier } from '@/hooks/usePlanTier';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 type GenerateForm = { propertyId: string; periodStart: string; periodEnd: string };
 const initialForm: GenerateForm = { propertyId: '', periodStart: '', periodEnd: '' };
@@ -35,10 +39,13 @@ export default function LandlordOwnerStatementsPage() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<GenerateForm>(initialForm);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const { isPro } = usePlanTier();
+  const planGate = usePlanGateModal();
 
   const { data } = useQuery({
     queryKey: [...landlordKeys.ownerStatements, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listOwnerStatements({ page, pageSize: PAGE_SIZE })),
+    enabled: isPro,
   });
   const statements = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -53,7 +60,7 @@ export default function LandlordOwnerStatementsPage() {
   const { data: detail } = useQuery({
     queryKey: landlordKeys.ownerStatement(detailId ?? ''),
     queryFn: () => unwrap(landlordService.getOwnerStatement(detailId as string)),
-    enabled: !!detailId,
+    enabled: !!detailId && isPro,
   });
 
   const invalidate = () =>
@@ -69,6 +76,7 @@ export default function LandlordOwnerStatementsPage() {
       setToast({ message: 'Statement generated as a draft.', variant: 'success' });
     },
     onError: (error: Error) => {
+      if (planGate.handleError(error)) return;
       setToast({
         message: error.message || 'Unable to generate this statement.',
         variant: 'error',
@@ -84,6 +92,7 @@ export default function LandlordOwnerStatementsPage() {
       setToast({ message: 'Statement issued.', variant: 'success' });
     },
     onError: (error: Error) => {
+      if (planGate.handleError(error)) return;
       setToast({ message: error.message || 'Unable to issue this statement.', variant: 'error' });
     },
   });
@@ -109,58 +118,65 @@ export default function LandlordOwnerStatementsPage() {
             Generate a per-period statement from real rent income, expenses, and management fees
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsGenerateOpen(true)}>
-          <Plus className="w-4 h-4" />
-          Generate statement
-        </Button>
+        {isPro && (
+          <Button variant="primary" className="gap-2" onClick={() => setIsGenerateOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Generate statement
+          </Button>
+        )}
       </div>
 
-      {statements.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={FileBarChart}
-            title="No statements yet"
-            description="Generate your first statement to see a real income/expense/fee breakdown for a period."
-          />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {statements.map((statement: OwnerStatement) => (
-            <button
-              key={statement.id}
-              onClick={() => setDetailId(statement.id)}
-              className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">
-                  {formatDate(statement.periodStart)} — {formatDate(statement.periodEnd)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Generated {formatDate(statement.generatedAt)}
-                </p>
-              </div>
-              <div className="flex items-center gap-4 shrink-0">
-                <span className="text-sm font-semibold text-foreground">
-                  {formatCurrency(statement.netPayout)}
-                </span>
-                <Badge variant={statement.status === 'ISSUED' ? 'success' : 'neutral'}>
-                  {statement.status === 'ISSUED' ? 'Issued' : 'Draft'}
-                </Badge>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+      <ProFeatureGate
+        title="Owner statements is a Pro feature"
+        description="Upgrade to Pro to generate per-period income, expense, and management-fee breakdowns to share with property owners."
+      >
+        {statements.length === 0 ? (
+          <div className="bg-card rounded-2xl border border-border p-12">
+            <EmptyState
+              icon={FileBarChart}
+              title="No statements yet"
+              description="Generate your first statement to see a real income/expense/fee breakdown for a period."
+            />
+          </div>
+        ) : (
+          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+            {statements.map((statement: OwnerStatement) => (
+              <button
+                key={statement.id}
+                onClick={() => setDetailId(statement.id)}
+                className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    {formatDate(statement.periodStart)} — {formatDate(statement.periodEnd)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Generated {formatDate(statement.generatedAt)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <span className="text-sm font-semibold text-foreground">
+                    {formatCurrency(statement.netPayout)}
+                  </span>
+                  <Badge variant={statement.status === 'ISSUED' ? 'success' : 'neutral'}>
+                    {statement.status === 'ISSUED' ? 'Issued' : 'Draft'}
+                  </Badge>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
 
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+        {total > 0 && (
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            total={total}
+            onPageChange={setPage}
+            className="mt-6"
+          />
+        )}
+      </ProFeatureGate>
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
         <DialogContent className="max-w-lg">
@@ -289,6 +305,11 @@ export default function LandlordOwnerStatementsPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </>
   );
 }

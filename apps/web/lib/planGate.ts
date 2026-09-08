@@ -1,12 +1,9 @@
-import { ApiError } from '@/lib/apiHelpers';
+import { PlanGateError, PLAN_GATE_REASONS, type PlanGateReason } from '@/lib/apiHelpers';
 
-/** Machine-readable reasons the backend attaches to a 403 when a route/limit is Pro-gated. */
-export const PLAN_GATE_REASONS = ['PLAN_UPGRADE_REQUIRED', 'PLAN_LIMIT_REACHED'] as const;
-export type PlanGateReason = (typeof PLAN_GATE_REASONS)[number];
+export { PLAN_GATE_REASONS };
+export type { PlanGateReason };
 
-/** True when `err` is the ApiError thrown by unwrap() for a Pro-gated route or a Free-tier cap. */
-export function isPlanGateError(err: unknown): err is ApiError & { code: PlanGateReason } {
-  return (
-    err instanceof ApiError && (PLAN_GATE_REASONS as readonly string[]).includes(err.code ?? '')
-  );
+/** True when `err` is the PlanGateError thrown by unwrap() for a Pro-gated route or a Free-tier cap. */
+export function isPlanGateError(err: unknown): err is PlanGateError {
+  return err instanceof PlanGateError;
 }

@@ -19,6 +19,8 @@ import { landlordKeys } from '@/lib/queryKeys';
 import type { Property } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { ROUTES } from '@/lib/constants/auth';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
 
@@ -80,6 +82,7 @@ export default function LandlordPropertiesPage() {
 
   const invalidateProperties = () =>
     queryClient.invalidateQueries({ queryKey: landlordKeys.properties });
+  const planGate = usePlanGateModal();
 
   const publishMutation = useMutation({
     mutationFn: (data: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>) => {
@@ -98,6 +101,9 @@ export default function LandlordPropertiesPage() {
       );
     },
     onSuccess: invalidateProperties,
+    onError: (error: Error) => {
+      planGate.handleError(error);
+    },
   });
 
   const editMutation = useMutation({
@@ -264,6 +270,12 @@ export default function LandlordPropertiesPage() {
         title="Delete this property?"
         description="This will permanently remove the property and all of its unit records. This cannot be undone."
         onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
+      />
+
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
       />
     </>
   );

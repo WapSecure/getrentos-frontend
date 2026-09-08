@@ -2,12 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Lock } from 'lucide-react';
 import type { ElementType, ReactNode } from 'react';
 
 export interface GroupedSidebarItem {
   label: ReactNode;
   href: string;
   icon: ElementType;
+  /** Shows a small lock badge — the page itself still opens, and prompts to upgrade. */
+  locked?: boolean;
 }
 
 export interface GroupedSidebarGroup {
@@ -61,7 +64,13 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
                     }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span className="min-w-0 truncate">{item.label}</span>
+                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                    {item.locked && (
+                      <Lock
+                        className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
+                        aria-label="Pro plan feature"
+                      />
+                    )}
                   </Link>
                 );
               })}
@@ -100,7 +109,13 @@ export function GroupedMobileNavigation({
                   className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'}`}
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0 truncate">{item.label}</span>
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.locked && (
+                    <Lock
+                      className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
+                      aria-label="Pro plan feature"
+                    />
+                  )}
                 </Link>
               );
             })}
