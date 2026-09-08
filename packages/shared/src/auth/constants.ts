@@ -234,6 +234,7 @@ export const ROUTES = {
   ESTATE_AMENITIES: '/estate/amenities',
   ESTATE_COMMITTEE: '/estate/committee',
   ESTATE_MICROSITE: '/estate/microsite',
+  ESTATE_FINANCIALS: '/estate/financials',
   ESTATE_BILLING: '/estate/billing',
   GATEMAN_DASHBOARD: '/gateman/verify',
   GATEMAN_VEHICLES: '/gateman/vehicles',

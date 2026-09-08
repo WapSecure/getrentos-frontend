@@ -18,6 +18,7 @@ import {
   Landmark,
   Globe,
   Sparkles,
+  PieChart,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
@@ -32,7 +33,7 @@ interface NavItem {
 /** Nav items whose destination is entirely Pro-gated (see Batch 7c). Dashboard,
  * Governance, and Households are only *partially* gated (one section/action
  * each), so they deliberately stay unlocked here. */
-const PRO_GATED_ROUTES = new Set<string>([ROUTES.ESTATE_MICROSITE]);
+const PRO_GATED_ROUTES = new Set<string>([ROUTES.ESTATE_MICROSITE, ROUTES.ESTATE_FINANCIALS]);
 
 export const navItems: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.ESTATE_DASHBOARD, icon: LayoutDashboard },
@@ -50,6 +51,7 @@ export const navItems: NavItem[] = [
   { label: 'Governance', href: ROUTES.ESTATE_GOVERNANCE, icon: BookOpen },
   { label: 'Committee', href: ROUTES.ESTATE_COMMITTEE, icon: Landmark },
   { label: 'Microsite', href: ROUTES.ESTATE_MICROSITE, icon: Globe },
+  { label: 'Financials', href: ROUTES.ESTATE_FINANCIALS, icon: PieChart },
   { label: 'Staff', href: ROUTES.ESTATE_STAFF, icon: ShieldCheck },
   { label: 'Billing', href: ROUTES.ESTATE_BILLING, icon: Sparkles },
 ];

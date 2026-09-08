@@ -5,6 +5,7 @@ export interface Estate {
   city: string;
   state: string;
   gateCount: number | null;
+  lateFeeAmount: number;
   householdCount: number;
   createdAt: string;
 }
@@ -88,6 +89,7 @@ export interface Due {
   dueDate: string;
   paidDate?: string;
   status: DueStatus;
+  lateFeeApplied: number;
   category: DueCategory;
   billingCycle: BillingCycle;
   description?: string;
@@ -96,6 +98,13 @@ export interface Due {
   /** Only set when payMyDue started a real Paystack checkout (Paystack configured). */
   authorizationUrl?: string;
   reference?: string;
+}
+
+export interface EstateFinancialStats {
+  duesCollected: number;
+  duesOutstanding: number;
+  lateFeesCollected: number;
+  householdsBilled: number;
 }
 
 export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';

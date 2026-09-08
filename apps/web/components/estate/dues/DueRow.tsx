@@ -55,7 +55,16 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className="text-sm font-semibold text-foreground">{formatCurrency(due.amount)}</span>
+        <div className="text-right">
+          <span className="text-sm font-semibold text-foreground">
+            {formatCurrency(due.amount)}
+          </span>
+          {due.lateFeeApplied > 0 && (
+            <p className="text-[11px] text-red-600 dark:text-red-400">
+              incl. {formatCurrency(due.lateFeeApplied)} late fee
+            </p>
+          )}
+        </div>
         <Badge variant={statusVariant[due.status]}>
           {due.status.charAt(0).toUpperCase() + due.status.slice(1)}
         </Badge>
