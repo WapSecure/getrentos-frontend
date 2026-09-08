@@ -18,10 +18,9 @@ import {
   Heart,
   Star,
   ArrowRight,
-  BadgeCheck,
   MapPin,
 } from 'lucide-react-native';
-import { Button, Card, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import { BrandLogo, Button, Card, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 
 const AScrollView = Animated.ScrollView;
 
@@ -133,23 +132,7 @@ export default function Welcome() {
           justifyContent: 'space-between',
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-          <View
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 8,
-              backgroundColor: colors.primary,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <BadgeCheck size={16} color={colors.primaryForeground} />
-          </View>
-          <Text variant="subheading" style={{ fontWeight: '800' }}>
-            GetRentos
-          </Text>
-        </View>
+        <BrandLogo size={24} />
         <ThemeToggle />
       </View>
 
