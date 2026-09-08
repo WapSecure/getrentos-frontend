@@ -8,7 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -49,10 +49,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   const borderColor = error ? colors.destructive : focused ? colors.primary : 'transparent';
 
   return (
-    <Animated.View
-      layout={LinearTransition.springify().damping(18)}
-      style={[styles.container, containerStyle]}
-    >
+    <View style={[styles.container, containerStyle]}>
       {label ? (
         <Text variant="callout" color="mutedForeground" style={styles.label}>
           {label}
@@ -117,7 +114,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           {hint}
         </Text>
       ) : null}
-    </Animated.View>
+    </View>
   );
 });
 

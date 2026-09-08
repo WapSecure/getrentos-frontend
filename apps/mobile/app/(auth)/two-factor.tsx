@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -15,10 +15,11 @@ export default function TwoFactor() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!pendingTwoFactor) {
-    router.replace('/(auth)/sign-in');
-    return null;
-  }
+  useEffect(() => {
+    if (!pendingTwoFactor) router.replace('/(auth)/sign-in');
+  }, [pendingTwoFactor]);
+
+  if (!pendingTwoFactor) return null;
 
   const submit = async (value = code) => {
     if (value.length !== 6 || submitting) return;

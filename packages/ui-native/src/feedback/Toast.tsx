@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle2, Info, XCircle, AlertTriangle } from 'lucide-react-native';
@@ -37,8 +46,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => (timer.current ? clearTimeout(timer.current) : undefined), []);
 
+  const value = useMemo(() => ({ show }), [show]);
+
   return (
-    <ToastContext.Provider value={{ show }}>
+    <ToastContext.Provider value={value}>
       {children}
       {toast ? <ToastView key={toast.id} toast={toast} onDismiss={() => setToast(null)} /> : null}
     </ToastContext.Provider>
@@ -68,10 +79,7 @@ function ToastView({ toast, onDismiss }: { toast: ToastState; onDismiss: () => v
   return (
     <Animated.View
       pointerEvents="box-none"
-      style={[
-        styles.wrap,
-        { top: insets.top + 8, opacity, transform: [{ translateY: y }] },
-      ]}
+      style={[styles.wrap, { top: insets.top + 8, opacity, transform: [{ translateY: y }] }]}
     >
       <Pressable
         onPress={onDismiss}
