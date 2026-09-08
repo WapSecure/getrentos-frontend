@@ -10,6 +10,7 @@ import { persister, queryClient } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
 import { IMPLEMENTED_PORTALS } from '@/lib/roles';
+import { useStoredThemePreference } from '@/lib/theme/preference';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -84,11 +85,15 @@ function Gate() {
 }
 
 export default function RootLayout() {
+  const { initial, ready, persist } = useStoredThemePreference();
+
+  if (!ready) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-          <ThemeProvider>
+          <ThemeProvider initialPreference={initial} onPreferenceChange={persist}>
             <ToastProvider>
               <AuthProvider>
                 <Gate />
