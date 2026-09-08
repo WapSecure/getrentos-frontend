@@ -19,6 +19,7 @@ import { Banknote, CircleDollarSign, Wallet } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { formatCurrency, formatDate } from '@/lib/format';
 
 const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
@@ -27,7 +28,14 @@ const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
   FAILED: 'danger',
 };
 
-export function ShortletPayoutsDialog({ onClose }: { onClose: () => void }) {
+export function ShortletPayoutsDialog({
+  onClose,
+  verificationHref,
+}: {
+  onClose: () => void;
+  /** Where the 'Verify now' upsell link goes (the persona's Verification Center). */
+  verificationHref: string;
+}) {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
@@ -84,6 +92,14 @@ export function ShortletPayoutsDialog({ onClose }: { onClose: () => void }) {
           </DialogDescription>
         </div>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
+          {/* Saving a payout account needs identity (tier 2); withdrawing needs financial verification (tier 3). */}
+          {(withdraw.error || saveAccount.error) && (
+            <VerificationRequiredNotice
+              error={withdraw.error || saveAccount.error}
+              href={verificationHref}
+              verificationHref={verificationHref}
+            />
+          )}
           {/* Balance */}
           <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2">
