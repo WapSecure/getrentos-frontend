@@ -23,6 +23,8 @@ export { Screen } from './primitives/Screen';
 export type { ScreenProps } from './primitives/Screen';
 export { ThemeToggle } from './primitives/ThemeToggle';
 export type { ThemeToggleProps } from './primitives/ThemeToggle';
+export { BrandLogo, BrandMark } from './primitives/BrandLogo';
+export type { BrandLogoProps } from './primitives/BrandLogo';
 export { Divider, Badge, Avatar, Skeleton, EmptyState } from './primitives/misc';
 export type { BadgeTone } from './primitives/misc';
 export { ToastProvider, useToast } from './feedback/Toast';
