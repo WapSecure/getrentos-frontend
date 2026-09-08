@@ -322,6 +322,7 @@ export const ROUTES = {
   OWNER_HOME_MANAGEMENT: '/owner/home-management',
   OWNER_LAND: '/owner/land',
   OWNER_SHORTLETS: '/owner/shortlets',
+  OWNER_BILLING: '/owner/billing',
 
   // Buyer specific routes
   BUYER_DISCOVER: '/buyer/discover',
@@ -350,6 +351,7 @@ export const ROUTES = {
   REALTOR_REVIEWS: '/realtor/reviews',
   REALTOR_TRUST_PROFILE: '/realtor/trust-profile',
   REALTOR_SETTINGS: '/realtor/settings',
+  REALTOR_BILLING: '/realtor/billing',
   REALTOR_HELP: '/realtor/help',
 
   // Agent specific routes

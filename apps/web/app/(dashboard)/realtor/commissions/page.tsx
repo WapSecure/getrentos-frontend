@@ -9,6 +9,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import type { CommissionStatus } from '@/types/realtor';
+import { usePlanTier } from '@/hooks/usePlanTier';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const PAGE_SIZE = 10;
 
@@ -35,13 +37,16 @@ const statusConfig: Record<
 
 export default function RealtorCommissionsPage() {
   const [page, setPage] = useState(1);
+  const { isPro, isLoading: isPlanLoading } = usePlanTier();
   const { data, isLoading } = useQuery({
     queryKey: [...realtorKeys.commissions, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(realtorService.getCommissions({ page, pageSize: PAGE_SIZE })),
+    enabled: isPro,
   });
   const { data: summary } = useQuery({
     queryKey: [...realtorKeys.commissions, 'summary'],
     queryFn: () => unwrap(realtorService.getCommissionsSummary()),
+    enabled: isPro,
   });
   const commissions = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -120,7 +125,7 @@ export default function RealtorCommissionsPage() {
     },
   } as const;
 
-  if (isLoading) {
+  if (isPlanLoading || (isPro && isLoading)) {
     return <div className="p-10 text-center text-muted-foreground">Loading commissions…</div>;
   }
 
@@ -131,103 +136,110 @@ export default function RealtorCommissionsPage() {
           <h1 className="text-2xl font-bold text-foreground">Commissions</h1>
           <p className="text-muted-foreground mt-1">Track earnings from closed deals</p>
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExport}>
-          {exported ? (
-            <Check className="w-3.5 h-3.5 text-green-500" />
-          ) : (
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-          )}
-          {exported ? 'Exported' : 'Export current page'}
-        </Button>
+        {isPro && (
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExport}>
+            {exported ? (
+              <Check className="w-3.5 h-3.5 text-green-500" />
+            ) : (
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+            )}
+            {exported ? 'Exported' : 'Export current page'}
+          </Button>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat) => {
-          const colors = colorClasses[stat.color as keyof typeof colorClasses];
-          return (
-            <div key={stat.label} className="rounded-2xl bg-card border border-border p-4">
-              <div className={`inline-flex p-2.5 rounded-xl ${colors.bg} mb-3`}>
-                <stat.icon className={`w-5 h-5 ${colors.icon}`} />
+      <ProFeatureGate
+        title="Commission tracking is a Pro feature"
+        description="Upgrade to Pro to track earnings from closed deals, see totals by status, and export your commission report."
+      >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {stats.map((stat) => {
+            const colors = colorClasses[stat.color as keyof typeof colorClasses];
+            return (
+              <div key={stat.label} className="rounded-2xl bg-card border border-border p-4">
+                <div className={`inline-flex p-2.5 rounded-xl ${colors.bg} mb-3`}>
+                  <stat.icon className={`w-5 h-5 ${colors.icon}`} />
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+                <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-              <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="p-4 font-medium">Listing</th>
-                <th className="p-4 font-medium">Client</th>
-                <th className="p-4 font-medium">Deal Value</th>
-                <th className="p-4 font-medium">Rate</th>
-                <th className="p-4 font-medium">Commission</th>
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 font-medium">Closed</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {commissions.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-10 text-center text-sm text-muted-foreground">
-                    No closed deals yet. Commissions appear here once offers on your listings are
-                    accepted.
-                  </td>
-                </tr>
-              ) : (
-                commissions.map((c) => {
-                  const status = statusConfig[c.status];
-                  const StatusIcon = status.icon;
-                  return (
-                    <tr key={c.id} className="hover:bg-secondary transition-colors">
-                      <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                        {c.listingTitle}
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {c.clientName}
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {formatCurrency(c.dealValue, { compact: true })}
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {c.commissionRate}%
-                      </td>
-                      <td className="p-4 font-bold text-primary whitespace-nowrap">
-                        {formatCurrency(c.commissionAmount, { compact: true })}
-                      </td>
-                      <td className="p-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${status.className}`}
-                        >
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
-                        </span>
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {formatDate(c.closedDate)}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+            );
+          })}
         </div>
-      </div>
 
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                  <th className="p-4 font-medium">Listing</th>
+                  <th className="p-4 font-medium">Client</th>
+                  <th className="p-4 font-medium">Deal Value</th>
+                  <th className="p-4 font-medium">Rate</th>
+                  <th className="p-4 font-medium">Commission</th>
+                  <th className="p-4 font-medium">Status</th>
+                  <th className="p-4 font-medium">Closed</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {commissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-10 text-center text-sm text-muted-foreground">
+                      No closed deals yet. Commissions appear here once offers on your listings are
+                      accepted.
+                    </td>
+                  </tr>
+                ) : (
+                  commissions.map((c) => {
+                    const status = statusConfig[c.status];
+                    const StatusIcon = status.icon;
+                    return (
+                      <tr key={c.id} className="hover:bg-secondary transition-colors">
+                        <td className="p-4 font-medium text-foreground whitespace-nowrap">
+                          {c.listingTitle}
+                        </td>
+                        <td className="p-4 text-muted-foreground whitespace-nowrap">
+                          {c.clientName}
+                        </td>
+                        <td className="p-4 text-muted-foreground whitespace-nowrap">
+                          {formatCurrency(c.dealValue, { compact: true })}
+                        </td>
+                        <td className="p-4 text-muted-foreground whitespace-nowrap">
+                          {c.commissionRate}%
+                        </td>
+                        <td className="p-4 font-bold text-primary whitespace-nowrap">
+                          {formatCurrency(c.commissionAmount, { compact: true })}
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${status.className}`}
+                          >
+                            <StatusIcon className="w-3 h-3" />
+                            {status.label}
+                          </span>
+                        </td>
+                        <td className="p-4 text-muted-foreground whitespace-nowrap">
+                          {formatDate(c.closedDate)}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {total > 0 && (
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            total={total}
+            onPageChange={setPage}
+            className="mt-6"
+          />
+        )}
+      </ProFeatureGate>
     </>
   );
 }
