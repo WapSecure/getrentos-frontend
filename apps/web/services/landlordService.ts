@@ -236,10 +236,39 @@ export const landlordService = {
       | 'verificationStatus'
       | 'archived'
       | 'totalUnits'
-    > & { totalUnits?: number }
+    > & {
+      totalUnits?: number;
+      coverImageKey?: string;
+      galleryImageKeys?: string[];
+      videoTourKey?: string;
+    }
   ): Promise<ApiResponse<Property>> {
     return safeCall(() =>
       authFetch('/landlord/properties', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async uploadPropertyMedia(
+    kind: 'image' | 'video',
+    file: File
+  ): Promise<ApiResponse<{ key: string; kind: 'image' | 'video' }>> {
+    const form = new FormData();
+    form.append('kind', kind);
+    form.append('file', file);
+    return safeCall(() =>
+      authFetch<{ key: string; kind: 'image' | 'video' }>('/landlord/properties/media/upload', {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+
+  async removeUploadedPropertyMedia(key: string): Promise<ApiResponse<{ deleted: boolean }>> {
+    return safeCall(() =>
+      authFetch<{ deleted: boolean }>('/landlord/properties/media/upload', {
+        method: 'DELETE',
+        body: JSON.stringify({ key }),
+      })
     );
   },
 

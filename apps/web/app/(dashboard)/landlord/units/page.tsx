@@ -12,7 +12,7 @@ import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
 import { BulkPricingModal } from '@/components/landlord/units/BulkPricingModal';
-import { Button, Pagination } from '@getrentos/ui';
+import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -40,6 +40,7 @@ function LandlordUnitsPageContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkChargeOpen, setIsBulkChargeOpen] = useState(false);
   const [isBulkPricingOpen, setIsBulkPricingOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   // Debounce the search input; reset to page 1 inside the timer callback.
   useEffect(() => {
@@ -94,13 +95,21 @@ function LandlordUnitsPageContent() {
 
   const markVacantMutation = useMutation({
     mutationFn: (unitId: string) => unwrap(landlordService.markUnitVacant(unitId)),
-    onSuccess: invalidateUnits,
+    onSuccess: () => {
+      invalidateUnits();
+      setToast({ message: 'Tenant removed and unit marked vacant.', variant: 'success' });
+    },
+    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
   });
 
   const assignTenantMutation = useMutation({
     mutationFn: ({ unitId, tenantName }: { unitId: string; tenantName: string }) =>
       unwrap(landlordService.assignUnitTenant(unitId, tenantName)),
-    onSuccess: invalidateUnits,
+    onSuccess: () => {
+      invalidateUnits();
+      setToast({ message: 'Tenant assigned to the unit.', variant: 'success' });
+    },
+    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
   });
 
   const addUnitMutation = useMutation({
@@ -110,13 +119,18 @@ function LandlordUnitsPageContent() {
         landlordService.createUnit({ propertyId, unitName, bedrooms, bathrooms, monthlyRent })
       );
     },
-    onSuccess: invalidateUnits,
+    onSuccess: () => {
+      invalidateUnits();
+      setToast({ message: 'Unit added.', variant: 'success' });
+    },
+    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
   });
 
-  const handleMarkVacant = (unitId: string) => markVacantMutation.mutate(unitId);
+  const handleMarkVacant = (unitId: string) =>
+    markVacantMutation.mutateAsync(unitId).then(() => undefined);
 
   const handleAssignTenant = (unitId: string, tenantName: string) =>
-    assignTenantMutation.mutate({ unitId, tenantName });
+    assignTenantMutation.mutateAsync({ unitId, tenantName }).then(() => undefined);
 
   const handleAddUnit = (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) =>
     addUnitMutation.mutate(data);
@@ -194,6 +208,13 @@ function LandlordUnitsPageContent() {
         units={units}
         onMarkVacant={handleMarkVacant}
         onAssignTenant={handleAssignTenant}
+        pendingUnitId={
+          markVacantMutation.isPending
+            ? markVacantMutation.variables
+            : assignTenantMutation.isPending
+              ? assignTenantMutation.variables?.unitId
+              : undefined
+        }
       />
 
       {total > 0 && (
@@ -225,6 +246,9 @@ function LandlordUnitsPageContent() {
         onClose={() => setIsBulkPricingOpen(false)}
         properties={properties}
       />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

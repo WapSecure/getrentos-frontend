@@ -3,6 +3,7 @@
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
+import { ConfirmDialog } from '@getrentos/ui';
 import { Bed, Bath, UserPlus, DoorClosed, MoreVertical } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import type { Unit, UnitOccupancyStatus } from '@/types/landlord';
@@ -24,20 +25,33 @@ const statusConfig: Record<UnitOccupancyStatus, { label: string; className: stri
 
 interface UnitsTableProps {
   units: Unit[];
-  onMarkVacant: (unitId: string) => void;
-  onAssignTenant: (unitId: string, tenantName: string) => void;
+  onMarkVacant: (unitId: string) => Promise<void>;
+  onAssignTenant: (unitId: string, tenantName: string) => Promise<void>;
+  pendingUnitId?: string;
 }
 
-export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTableProps) => {
+export const UnitsTable = ({
+  units,
+  onMarkVacant,
+  onAssignTenant,
+  pendingUnitId,
+}: UnitsTableProps) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [assigningUnitId, setAssigningUnitId] = useState<string | null>(null);
   const [tenantNameInput, setTenantNameInput] = useState('');
+  const [vacatingUnit, setVacatingUnit] = useState<Unit | null>(null);
+  const [assignError, setAssignError] = useState<string | null>(null);
 
-  const handleAssignSubmit = (unitId: string) => {
+  const handleAssignSubmit = async (unitId: string) => {
     if (!tenantNameInput.trim()) return;
-    onAssignTenant(unitId, tenantNameInput.trim());
-    setAssigningUnitId(null);
-    setTenantNameInput('');
+    setAssignError(null);
+    try {
+      await onAssignTenant(unitId, tenantNameInput.trim());
+      setAssigningUnitId(null);
+      setTenantNameInput('');
+    } catch (error) {
+      setAssignError(error instanceof Error ? error.message : 'Unable to assign tenant.');
+    }
   };
 
   if (units.length === 0) {
@@ -100,6 +114,9 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                   </td>
                   <td className="px-4 py-3 relative">
                     <button
+                      type="button"
+                      aria-label={`Actions for ${unit.unitName}`}
+                      disabled={pendingUnitId === unit.id}
                       onClick={() => setOpenMenuId(openMenuId === unit.id ? null : unit.id)}
                       className="p-1.5 rounded-lg hover:bg-secondary"
                     >
@@ -122,7 +139,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                         ) : (
                           <button
                             onClick={() => {
-                              onMarkVacant(unit.id);
+                              setVacatingUnit(unit);
                               setOpenMenuId(null);
                             }}
                             className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
@@ -151,6 +168,7 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => handleAssignSubmit(unit.id)}
+                            disabled={pendingUnitId === unit.id || !tenantNameInput.trim()}
                             className="flex-1 text-xs font-medium text-primary-foreground bg-primary rounded-md py-1.5 hover:bg-primary-hover"
                           >
                             Assign
@@ -165,6 +183,11 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
                             Cancel
                           </button>
                         </div>
+                        {assignError && (
+                          <p className="mt-2 text-xs text-destructive" role="alert">
+                            {assignError}
+                          </p>
+                        )}
                       </div>
                     )}
                   </td>
@@ -174,6 +197,23 @@ export const UnitsTable = ({ units, onMarkVacant, onAssignTenant }: UnitsTablePr
           </tbody>
         </table>
       </div>
+      <ConfirmDialog
+        open={Boolean(vacatingUnit)}
+        onOpenChange={(open) => !open && setVacatingUnit(null)}
+        title="Remove this tenant?"
+        description={`This removes ${vacatingUnit?.tenantName ?? 'the tenant'} from ${vacatingUnit?.unitName ?? 'this unit'} and marks it vacant. Historical records are retained; an active signed lease must be terminated first.`}
+        confirmLabel="Remove tenant"
+        isLoading={Boolean(vacatingUnit && pendingUnitId === vacatingUnit.id)}
+        onConfirm={async () => {
+          if (!vacatingUnit) return;
+          try {
+            await onMarkVacant(vacatingUnit.id);
+            setVacatingUnit(null);
+          } catch {
+            // The page mutation presents the API error; keep the dialog open for retry.
+          }
+        }}
+      />
     </div>
   );
 };

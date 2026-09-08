@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, LifeBuoy, MessageCircle, Send } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Select } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
@@ -183,17 +183,13 @@ export const RenterSupportPage = () => {
               <div className="mt-4 space-y-4">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Category</label>
-                  <select
+                  <Select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onValueChange={setCategory}
+                    ariaLabel="Support category"
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={CATEGORIES}
+                  />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Message</label>

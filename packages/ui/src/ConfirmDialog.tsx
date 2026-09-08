@@ -12,7 +12,8 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
-  onConfirm: () => void;
+  onConfirm: () => unknown | Promise<unknown>;
+  isLoading?: boolean;
   promptLabel?: string;
   promptPlaceholder?: string;
   promptValue?: string;
@@ -28,6 +29,7 @@ export const ConfirmDialog = ({
   description,
   confirmLabel = 'Delete',
   onConfirm,
+  isLoading = false,
   promptLabel,
   promptPlaceholder,
   promptValue = '',
@@ -75,15 +77,21 @@ export const ConfirmDialog = ({
           )}
 
           <div className="flex gap-2 mt-5">
-            <Button variant="ghost" className="flex-1" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="ghost"
+              className="flex-1"
+              disabled={isLoading}
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button
               variant="danger"
               className="flex-1"
-              disabled={promptInvalid}
-              onClick={() => {
-                onConfirm();
+              disabled={promptInvalid || isLoading}
+              isLoading={isLoading}
+              onClick={async () => {
+                await onConfirm();
                 onOpenChange(false);
               }}
             >

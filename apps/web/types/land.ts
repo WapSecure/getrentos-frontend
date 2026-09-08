@@ -32,6 +32,7 @@ export type LandOwnershipDocumentType =
   | 'LAND_USE_PERMIT'
   | 'SURVEY_PLAN'
   | 'UTILITY_BILL'
+  | 'MANAGEMENT_AUTHORIZATION'
   | 'OTHER';
 
 export interface LandDiligence {

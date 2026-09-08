@@ -7,10 +7,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
-import { AddPropertyModal } from '@/components/landlord/properties/AddPropertyModal';
+import {
+  AddPropertyModal,
+  type LandlordPropertySubmission,
+} from '@/components/landlord/properties/AddPropertyModal';
 import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
 import { LandlordVerificationStatusModal } from '@/components/landlord/properties/LandlordVerificationStatusModal';
-import { Button, Pagination } from '@getrentos/ui';
+import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { landService } from '@/services/landService';
@@ -54,6 +57,7 @@ export default function LandlordPropertiesPage() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
   const [verifyingProperty, setVerifyingProperty] = useState<Property | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data } = useQuery({
     queryKey: [
@@ -82,22 +86,51 @@ export default function LandlordPropertiesPage() {
     queryClient.invalidateQueries({ queryKey: landlordKeys.properties });
 
   const publishMutation = useMutation({
-    mutationFn: (data: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>) => {
-      const { name, type, address, city, state, country, description, totalUnits } = data;
-      return unwrap(
-        landlordService.createProperty({
-          name,
-          type,
-          address,
-          city,
-          state,
-          country,
-          description,
-          totalUnits,
-        })
+    mutationFn: async (submission: LandlordPropertySubmission) => {
+      const uploadedKeys: string[] = [];
+      let created: Property;
+      try {
+        const upload = async (kind: 'image' | 'video', file: File) => {
+          const result = await unwrap(landlordService.uploadPropertyMedia(kind, file));
+          uploadedKeys.push(result.key);
+          return result;
+        };
+        const [cover, gallery, video] = await Promise.all([
+          upload('image', submission.coverImage),
+          Promise.all(submission.galleryImages.map((file) => upload('image', file))),
+          submission.videoTour ? upload('video', submission.videoTour) : Promise.resolve(null),
+        ]);
+        created = await unwrap(
+          landlordService.createProperty({
+            ...submission.property,
+            coverImageKey: cover.key,
+            galleryImageKeys: gallery.map((item) => item.key),
+            videoTourKey: video?.key,
+          })
+        );
+      } catch (error) {
+        await Promise.allSettled(
+          uploadedKeys.map((key) => unwrap(landlordService.removeUploadedPropertyMedia(key)))
+        );
+        throw error;
+      }
+      const proofResults = await Promise.allSettled(
+        submission.ownershipProofs.map((proof) =>
+          unwrap(landService.submitOwnershipProof(created.id, proof))
+        )
       );
+      const failedProofs = proofResults.filter((result) => result.status === 'rejected').length;
+      return { created, failedProofs };
     },
-    onSuccess: invalidateProperties,
+    onSuccess: ({ failedProofs }) => {
+      invalidateProperties();
+      setToast({
+        variant: failedProofs ? 'warning' : 'success',
+        message: failedProofs
+          ? `Property created, but ${failedProofs} verification document${failedProofs === 1 ? '' : 's'} must be retried from Verification Status.`
+          : 'Property media and verification documents uploaded successfully.',
+      });
+    },
   });
 
   const editMutation = useMutation({
@@ -121,9 +154,8 @@ export default function LandlordPropertiesPage() {
     onSuccess: invalidateProperties,
   });
 
-  const handlePublish = (
-    data: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>
-  ) => publishMutation.mutate(data);
+  const handlePublish = (submission: LandlordPropertySubmission) =>
+    publishMutation.mutateAsync(submission).then(() => undefined);
 
   const handleEditSave = (
     id: string,
@@ -244,6 +276,7 @@ export default function LandlordPropertiesPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onPublish={handlePublish}
+        isSubmitting={publishMutation.isPending}
       />
 
       <EditPropertyModal
@@ -265,6 +298,9 @@ export default function LandlordPropertiesPage() {
         description="This will permanently remove the property and all of its unit records. This cannot be undone."
         onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

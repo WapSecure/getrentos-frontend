@@ -27,6 +27,8 @@ export interface Property {
   galleryImages?: string[];
   coverImageKey?: string;
   galleryImageKeys?: string[];
+  videoTourUrl?: string;
+  videoTourKey?: string;
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;

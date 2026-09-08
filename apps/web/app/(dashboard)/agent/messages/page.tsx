@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Pagination, Select } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/agent/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/agent/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -118,24 +118,19 @@ export default function AgentMessagesPage() {
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-foreground">Messages</h1>
           <div className="flex flex-col items-end gap-2">
-            <select
+            <Select
               className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-              defaultValue=""
-              onChange={(event) => {
-                if (event.target.value) startConversation.mutate(event.target.value);
-                event.currentTarget.value = '';
+              value=""
+              ariaLabel="Start a new conversation"
+              placeholder="New conversation"
+              onValueChange={(value) => {
+                if (value) startConversation.mutate(value);
               }}
               disabled={startConversation.isPending}
-            >
-              <option value="">New conversation</option>
-              {clients
+              options={clients
                 .filter((item) => item.client)
-                .map((item) => (
-                  <option key={item.id} value={item.client!.id}>
-                    {item.client!.legalName}
-                  </option>
-                ))}
-            </select>
+                .map((item) => ({ value: item.client!.id, label: item.client!.legalName }))}
+            />
             {clientTotal > CLIENT_PAGE_SIZE && (
               <Pagination
                 page={clientPage}

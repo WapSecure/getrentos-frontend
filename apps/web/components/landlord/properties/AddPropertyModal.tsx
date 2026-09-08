@@ -6,19 +6,40 @@ import { Textarea } from '@getrentos/ui';
 
 import { LegacySelect } from '@getrentos/ui';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Upload, FileText, Image as ImageIcon, Video, ShieldCheck } from 'lucide-react';
+import {
+  X,
+  Check,
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  Video,
+  ShieldCheck,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { Property, PropertyType } from '@/types/landlord';
+import type { LandOwnershipProofInput } from '@/types/land';
+
+export interface LandlordPropertySubmission {
+  property: Pick<
+    Property,
+    'name' | 'type' | 'address' | 'city' | 'state' | 'country' | 'description' | 'totalUnits'
+  >;
+  coverImage: File;
+  galleryImages: File[];
+  videoTour: File | null;
+  ownershipProofs: LandOwnershipProofInput[];
+  publishRequested: boolean;
+}
 
 interface AddPropertyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPublish: (
-    property: Omit<Property, 'id' | 'occupiedUnits' | 'monthlyRevenue' | 'createdAt'>
-  ) => void;
+  onPublish: (submission: LandlordPropertySubmission) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 const propertyTypes: { value: PropertyType; label: string }[] = [
@@ -40,12 +61,12 @@ interface FormState {
   country: string;
   description: string;
   totalUnits: string;
-  coverImageName: string;
-  galleryCount: number;
-  hasVideoTour: boolean;
-  titleDeedName: string;
-  certificateOfOccupancyName: string;
-  managementAuthorizationName: string;
+  coverImage: File | null;
+  galleryImages: File[];
+  videoTour: File | null;
+  titleDeed: File | null;
+  certificateOfOccupancy: File | null;
+  managementAuthorization: File | null;
 }
 
 const initialFormState: FormState = {
@@ -57,50 +78,80 @@ const initialFormState: FormState = {
   country: 'Nigeria',
   description: '',
   totalUnits: '1',
-  coverImageName: '',
-  galleryCount: 0,
-  hasVideoTour: false,
-  titleDeedName: '',
-  certificateOfOccupancyName: '',
-  managementAuthorizationName: '',
+  coverImage: null,
+  galleryImages: [],
+  videoTour: null,
+  titleDeed: null,
+  certificateOfOccupancy: null,
+  managementAuthorization: null,
 };
 
-export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModalProps) => {
+export const AddPropertyModal = ({
+  isOpen,
+  onClose,
+  onPublish,
+  isSubmitting = false,
+}: AddPropertyModalProps) => {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialFormState);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setStep(0);
     setForm(initialFormState);
+    setSubmitError(null);
     onClose();
   };
 
   const canProceedFromStep1 =
     form.name.trim() && form.address.trim() && form.city.trim() && form.state.trim();
-  const canProceedFromStep2 = form.coverImageName.trim().length > 0;
+  const canProceedFromStep2 = Boolean(form.coverImage);
 
-  const handlePublish = (verificationStatus: Property['verificationStatus']) => {
-    onPublish({
-      name: form.name,
-      type: form.type,
-      address: form.address,
-      city: form.city,
-      state: form.state,
-      country: form.country,
-      description: form.description || undefined,
-      coverImage: form.coverImageName ? `/uploads/${form.coverImageName}` : '',
-      verificationStatus,
-      totalUnits: Number(form.totalUnits) || 1,
-    });
-    handleClose();
+  const handlePublish = async (publishRequested: boolean) => {
+    if (!form.coverImage) return;
+    const ownershipProofs: LandOwnershipProofInput[] = [];
+    if (form.titleDeed) ownershipProofs.push({ documentType: 'DEED', file: form.titleDeed });
+    if (form.certificateOfOccupancy) {
+      ownershipProofs.push({ documentType: 'C_OF_O', file: form.certificateOfOccupancy });
+    }
+    if (form.managementAuthorization) {
+      ownershipProofs.push({
+        documentType: 'MANAGEMENT_AUTHORIZATION',
+        file: form.managementAuthorization,
+      });
+    }
+    setSubmitError(null);
+    try {
+      await onPublish({
+        property: {
+          name: form.name,
+          type: form.type,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          country: form.country,
+          description: form.description || undefined,
+          totalUnits: Number(form.totalUnits) || 1,
+        },
+        coverImage: form.coverImage,
+        galleryImages: form.galleryImages,
+        videoTour: form.videoTour,
+        ownershipProofs,
+        publishRequested,
+      });
+      handleClose();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to create the property.');
+    }
   };
 
   const hasAnyVerificationDoc =
-    form.titleDeedName || form.certificateOfOccupancyName || form.managementAuthorizationName;
+    form.titleDeed || form.certificateOfOccupancy || form.managementAuthorization;
 
   return (
     <AnimatePresence>
@@ -119,7 +170,12 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                   Step {step + 1} of {steps.length}: {steps[step]}
                 </p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                onClick={handleClose}
+                disabled={isSubmitting}
+                aria-label="Close add property"
+                className="p-1 rounded-lg hover:bg-secondary disabled:opacity-50"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -226,34 +282,54 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                     label="Cover Image"
                     required
                     icon={ImageIcon}
-                    fileName={form.coverImageName}
-                    onSelect={(name) => update('coverImageName', name)}
+                    file={form.coverImage}
+                    accept="image/jpeg,image/png,image/webp"
+                    onSelect={(file) => update('coverImage', file)}
                   />
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Gallery Images <span className="text-gray-400 font-normal">(optional)</span>
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => update('galleryCount', form.galleryCount + 1)}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                    >
+                    <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                      <LegacyInput
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(event) =>
+                          update(
+                            'galleryImages',
+                            [...form.galleryImages, ...Array.from(event.target.files ?? [])].slice(
+                              0,
+                              12
+                            )
+                          )
+                        }
+                      />
                       <Upload className="w-4 h-4" />
-                      {form.galleryCount > 0
-                        ? `${form.galleryCount} image(s) added — add more`
+                      {form.galleryImages.length > 0
+                        ? `${form.galleryImages.length} image(s) selected — add more`
                         : 'Add gallery images'}
-                    </button>
+                    </label>
+                    {form.galleryImages.length > 0 && (
+                      <FileList
+                        files={form.galleryImages}
+                        onRemove={(index) =>
+                          update(
+                            'galleryImages',
+                            form.galleryImages.filter((_, itemIndex) => itemIndex !== index)
+                          )
+                        }
+                      />
+                    )}
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={form.hasVideoTour}
-                      onChange={(e) => update('hasVideoTour', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
-                    />
-                    <Video className="w-4 h-4" />
-                    Include video tour
-                  </label>
+                  <UploadField
+                    label="Video Tour"
+                    icon={Video}
+                    file={form.videoTour}
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onSelect={(file) => update('videoTour', file)}
+                  />
                 </>
               )}
 
@@ -270,20 +346,23 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                   <UploadField
                     label="Title Deed"
                     icon={FileText}
-                    fileName={form.titleDeedName}
-                    onSelect={(name) => update('titleDeedName', name)}
+                    file={form.titleDeed}
+                    accept=".pdf,image/jpeg,image/png,image/webp"
+                    onSelect={(file) => update('titleDeed', file)}
                   />
                   <UploadField
                     label="Certificate of Occupancy"
                     icon={FileText}
-                    fileName={form.certificateOfOccupancyName}
-                    onSelect={(name) => update('certificateOfOccupancyName', name)}
+                    file={form.certificateOfOccupancy}
+                    accept=".pdf,image/jpeg,image/png,image/webp"
+                    onSelect={(file) => update('certificateOfOccupancy', file)}
                   />
                   <UploadField
                     label="Management Authorization"
                     icon={FileText}
-                    fileName={form.managementAuthorizationName}
-                    onSelect={(name) => update('managementAuthorizationName', name)}
+                    file={form.managementAuthorization}
+                    accept=".pdf,image/jpeg,image/png,image/webp"
+                    onSelect={(file) => update('managementAuthorization', file)}
                   />
                 </>
               )}
@@ -301,16 +380,29 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
                       value={`${form.address}, ${form.city}, ${form.state}`}
                     />
                     <SummaryRow label="Units" value={form.totalUnits} />
-                    <SummaryRow label="Cover Image" value={form.coverImageName || 'Not uploaded'} />
+                    <SummaryRow
+                      label="Cover Image"
+                      value={form.coverImage?.name || 'Not selected'}
+                    />
+                    <SummaryRow label="Gallery" value={`${form.galleryImages.length} image(s)`} />
+                    <SummaryRow label="Video Tour" value={form.videoTour?.name || 'Not selected'} />
                     <SummaryRow
                       label="Verification Docs"
                       value={hasAnyVerificationDoc ? 'Submitted' : 'None uploaded'}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Publishing makes this property searchable. You can also save it as a draft and
-                    publish later.
+                    This creates the property in your portfolio. Public listing remains locked until
+                    identity and ownership verification are approved.
                   </p>
+                  {submitError && (
+                    <p
+                      role="alert"
+                      className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
+                    >
+                      {submitError}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -335,16 +427,22 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
               )}
               {step === steps.length - 1 && (
                 <>
-                  <Button variant="outline" onClick={() => handlePublish('unverified')}>
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePublish(false)}
+                    disabled={isSubmitting}
+                  >
                     Save Draft
                   </Button>
                   <Button
                     variant="primary"
                     className="gap-2"
-                    onClick={() => handlePublish(hasAnyVerificationDoc ? 'pending' : 'unverified')}
+                    onClick={() => handlePublish(true)}
+                    disabled={isSubmitting || !hasAnyVerificationDoc}
+                    isLoading={isSubmitting}
                   >
                     <Check className="w-4 h-4" />
-                    Publish
+                    {isSubmitting ? 'Uploading…' : 'Submit for publishing'}
                   </Button>
                 </>
               )}
@@ -359,15 +457,17 @@ export const AddPropertyModal = ({ isOpen, onClose, onPublish }: AddPropertyModa
 const UploadField = ({
   label,
   icon: Icon,
-  fileName,
+  file,
   onSelect,
   required,
+  accept,
 }: {
   label: string;
   icon: React.ElementType;
-  fileName: string;
-  onSelect: (name: string) => void;
+  file: File | null;
+  onSelect: (file: File | null) => void;
   required?: boolean;
+  accept: string;
 }) => {
   return (
     <div>
@@ -378,17 +478,68 @@ const UploadField = ({
         <LegacyInput
           type="file"
           className="hidden"
-          onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}
+          accept={accept}
+          onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
         <Icon className="w-4 h-4 text-gray-400 shrink-0" />
         <span className="text-sm text-muted-foreground truncate">
-          {fileName || 'Click to upload'}
+          {file?.name || 'Click to select'}
         </span>
-        {fileName && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
+        {file && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
       </label>
+      {file && (file.type.startsWith('image/') || file.type.startsWith('video/')) && (
+        <MediaPreview key={`${file.name}-${file.lastModified}`} file={file} />
+      )}
     </div>
   );
 };
+
+const MediaPreview = ({ file }: { file: File }) => {
+  const [url] = useState(() => URL.createObjectURL(file));
+  useEffect(() => {
+    return () => URL.revokeObjectURL(url);
+  }, [url]);
+  return file.type.startsWith('video/') ? (
+    <video
+      className="mt-2 max-h-44 w-full rounded-lg bg-black object-contain"
+      controls
+      preload="metadata"
+      src={url}
+    >
+      <track kind="captions" />
+    </video>
+  ) : (
+    // Blob previews are local and cannot use Next Image optimization.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={url}
+      alt={`Preview of ${file.name}`}
+      className="mt-2 h-36 w-full rounded-lg object-cover"
+    />
+  );
+};
+
+const FileList = ({ files, onRemove }: { files: File[]; onRemove: (index: number) => void }) => (
+  <ul className="mt-2 space-y-1" aria-label="Selected gallery images">
+    {files.map((file, index) => (
+      <li
+        key={`${file.name}-${file.lastModified}-${index}`}
+        className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-xs"
+      >
+        <ImageIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span className="min-w-0 flex-1 truncate">{file.name}</span>
+        <button
+          type="button"
+          aria-label={`Remove ${file.name}`}
+          onClick={() => onRemove(index)}
+          className="rounded p-1 text-muted-foreground hover:bg-card hover:text-destructive"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </li>
+    ))}
+  </ul>
+);
 
 const SummaryRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between px-3 py-2 text-sm">
