@@ -27,6 +27,8 @@ import {
   type ChargeCategory,
 } from '@/services/landlordService';
 import type { Property } from '@/types/landlord';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 const categoryOptions: { value: ChargeCategory; label: string }[] = [
   { value: 'RENT', label: 'Rent' },
@@ -59,6 +61,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('MONTHLY');
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const planGate = usePlanGateModal();
 
   const { data: unitsData } = useQuery({
     queryKey: [
@@ -125,6 +128,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
       if (result.created > 0) handleClose();
     },
     onError: (error: Error) => {
+      if (planGate.handleError(error)) return;
       setToast({ message: error.message || 'Unable to create these charges.', variant: 'error' });
     },
   });
@@ -300,6 +304,11 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </>
   );
 }

@@ -1,39 +1,35 @@
 import { useMemo } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  View,
-  type PressableProps,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTheme } from '../theme';
 import { Text } from './Text';
+import { PressableScale, type PressableScaleProps } from './PressableScale';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-export interface ButtonProps extends Omit<PressableProps, 'style' | 'children'> {
+export interface ButtonProps extends Omit<PressableScaleProps, 'style' | 'children'> {
   label: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
   fullWidth?: boolean;
-  /** Rendered before the label (e.g. a lucide icon). */
   icon?: React.ReactNode;
+  iconRight?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 }
 
-const HEIGHT: Record<ButtonSize, number> = { sm: 40, md: 48, lg: 54 };
+const HEIGHT: Record<ButtonSize, number> = { sm: 42, md: 50, lg: 56 };
 
 export function Button({
   label,
   variant = 'primary',
   size = 'md',
   loading = false,
-  fullWidth = false,
+  fullWidth = true,
   icon,
+  iconRight,
   disabled,
   style,
   ...rest
@@ -56,48 +52,67 @@ export function Button({
     }
   }, [variant, colors]);
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isDisabled, busy: loading }}
-      disabled={isDisabled}
-      hitSlop={8}
-      style={({ pressed }) => [
-        styles.base,
-        {
-          height: HEIGHT[size],
-          paddingHorizontal: size === 'sm' ? 14 : 20,
-          borderRadius: radius.md,
-          backgroundColor: palette.bg,
-          borderColor: palette.border,
-          borderWidth: variant === 'outline' ? StyleSheet.hairlineWidth * 2 : 0,
-          alignSelf: fullWidth ? 'stretch' : 'flex-start',
-          opacity: isDisabled ? 0.45 : pressed ? 0.85 : 1,
-        },
-        style,
-      ]}
-      {...rest}
-    >
+  const body = (
+    <View style={styles.content}>
       {loading ? (
         <ActivityIndicator color={palette.fg} />
       ) : (
-        <View style={styles.content}>
-          {icon ? <View style={styles.icon}>{icon}</View> : null}
+        <Animated.View entering={FadeIn.duration(120)} style={styles.content}>
+          {icon}
           <Text
             variant={size === 'sm' ? 'callout' : 'bodyStrong'}
-            style={{ color: palette.fg }}
+            style={{ color: palette.fg, fontWeight: '700' }}
             numberOfLines={1}
           >
             {label}
           </Text>
-        </View>
+          {iconRight}
+        </Animated.View>
       )}
-    </Pressable>
+    </View>
+  );
+
+  const frame: StyleProp<ViewStyle> = [
+    styles.base,
+    {
+      height: HEIGHT[size],
+      paddingHorizontal: size === 'sm' ? 16 : 22,
+      borderRadius: radius.lg,
+      alignSelf: fullWidth ? 'stretch' : 'flex-start',
+      borderColor: palette.border,
+      borderWidth: variant === 'outline' ? StyleSheet.hairlineWidth * 2 : 0,
+    },
+    variant !== 'primary' && variant !== 'destructive' && { backgroundColor: palette.bg },
+    isDisabled && { opacity: 0.5 },
+    style,
+  ];
+
+  return (
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      disabled={isDisabled}
+      hitSlop={6}
+      haptic={variant === 'primary' || variant === 'destructive'}
+      style={frame}
+      {...rest}
+    >
+      {variant === 'primary' ? (
+        <LinearGradient
+          colors={[colors.primary, colors.primaryHover]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : variant === 'destructive' ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.destructive }]} />
+      ) : null}
+      {body}
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
-  base: { alignItems: 'center', justifyContent: 'center' },
-  content: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  icon: { marginRight: 2 },
+  base: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  content: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
 });

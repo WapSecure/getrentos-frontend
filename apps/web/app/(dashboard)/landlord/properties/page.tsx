@@ -22,6 +22,8 @@ import { landlordKeys } from '@/lib/queryKeys';
 import type { Property } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { ROUTES } from '@/lib/constants/auth';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 type VerificationFilter = 'all' | Property['verificationStatus'];
 
@@ -84,6 +86,7 @@ export default function LandlordPropertiesPage() {
 
   const invalidateProperties = () =>
     queryClient.invalidateQueries({ queryKey: landlordKeys.properties });
+  const planGate = usePlanGateModal();
 
   const publishMutation = useMutation({
     mutationFn: async (submission: LandlordPropertySubmission) => {
@@ -130,6 +133,9 @@ export default function LandlordPropertiesPage() {
           ? `Property created, but ${failedProofs} verification document${failedProofs === 1 ? '' : 's'} must be retried from Verification Status.`
           : 'Property media and verification documents uploaded successfully.',
       });
+    },
+    onError: (error: Error) => {
+      planGate.handleError(error);
     },
   });
 
@@ -301,6 +307,12 @@ export default function LandlordPropertiesPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </>
   );
 }

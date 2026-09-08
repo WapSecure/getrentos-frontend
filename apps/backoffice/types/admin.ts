@@ -46,7 +46,8 @@ export type AdminPermission =
   | 'rentfinance.view'
   | 'rentfinance.approve'
   | 'maintenance.view'
-  | 'maintenance.moderate';
+  | 'maintenance.moderate'
+  | 'sales.view';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
@@ -117,6 +118,8 @@ export type PlatformEscrowStatus =
 export type AuditSeverity = 'info' | 'warning' | 'critical';
 export type AdminDocumentCategory = 'policy' | 'compliance_filing' | 'legal_agreement' | 'report';
 
+export type PlanTier = 'FREE' | 'PRO';
+
 export interface PlatformUser {
   id: string;
   fullName: string;
@@ -124,6 +127,7 @@ export interface PlatformUser {
   roles: PlatformRole[];
   status: UserAccountStatus;
   trustScore: number;
+  planTier: PlanTier;
   joinedDate: string;
   lastActiveAt: string;
 }

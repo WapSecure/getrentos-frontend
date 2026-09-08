@@ -23,6 +23,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import type { Property } from '@/types/landlord';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 interface BulkPricingModalProps {
   isOpen: boolean;
@@ -39,6 +41,7 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
   const [monthlyRent, setMonthlyRent] = useState('');
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const planGate = usePlanGateModal();
 
   const { data: unitsData } = useQuery({
     queryKey: [
@@ -89,6 +92,7 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
       handleClose();
     },
     onError: (error: Error) => {
+      if (planGate.handleError(error)) return;
       setToast({ message: error.message || 'Unable to update pricing.', variant: 'error' });
     },
   });
@@ -247,6 +251,11 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </>
   );
 }

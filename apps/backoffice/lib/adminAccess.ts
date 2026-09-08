@@ -29,6 +29,7 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'rentfinance.approve',
   'maintenance.view',
   'maintenance.moderate',
+  'sales.view',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -70,6 +71,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'audit.view',
       'reports.view',
       'rentfinance.view',
+      'sales.view',
     ],
   },
   dispute_officer: {
@@ -83,6 +85,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'audit.view',
       'messages.manage',
       'rentals.view',
+      'sales.view',
     ],
   },
   escrow_officer: {
@@ -98,6 +101,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'rentfinance.view',
       'rentfinance.approve',
       'shortlet.payout',
+      'sales.view',
     ],
   },
   finance_approver: {
@@ -113,6 +117,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'rentfinance.approve',
       'shortlet.payout',
       'maintenance.view',
+      'sales.view',
     ],
   },
   compliance_manager: {
@@ -134,6 +139,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'rentfinance.view',
       'maintenance.view',
       'maintenance.moderate',
+      'sales.view',
     ],
   },
   support_agent: {

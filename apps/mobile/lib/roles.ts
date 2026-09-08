@@ -27,7 +27,6 @@ const BACKEND_ROLE_TO_PORTAL: Record<string, Portal> = {
   SUPER_ADMIN: 'admin',
 };
 
-/** Order used to pick a primary portal when an account holds several roles. */
 const PORTAL_PRIORITY: Portal[] = [
   'admin',
   'estate',
@@ -54,7 +53,57 @@ export function primaryPortal(roles: BackendRole[]): Portal {
   return portalsForRoles(roles)[0] ?? 'renter';
 }
 
-/** Portals with a real mobile implementation. Others show a holding screen. */
 export const IMPLEMENTED_PORTALS: readonly Portal[] = ['renter'];
-
 export const portalHref = (p: Portal) => `/(app)/(${p})` as const;
+
+/* --------------------- signup role catalogue --------------------------- */
+
+/** Roles a user can self-select at signup (admin / gateman / resident are provisioned out of band). */
+export type SignupRoleId = 'renter' | 'landlord' | 'owner' | 'buyer' | 'realtor' | 'agent';
+
+export interface SignupRole {
+  id: SignupRoleId;
+  name: string;
+  tagline: string;
+  /** lucide-react-native icon name */
+  icon: 'Home' | 'Building2' | 'TrendingUp' | 'Search' | 'Users' | 'UserCheck';
+}
+
+export const SIGNUP_ROLES: SignupRole[] = [
+  {
+    id: 'renter',
+    name: 'Renter',
+    tagline: 'Find verified homes, apply digitally, pay rent securely.',
+    icon: 'Home',
+  },
+  {
+    id: 'landlord',
+    name: 'Landlord',
+    tagline: 'List properties, vet tenants, collect rent through escrow.',
+    icon: 'Building2',
+  },
+  {
+    id: 'owner',
+    name: 'Property owner',
+    tagline: 'List for sale, accept offers, track property value.',
+    icon: 'TrendingUp',
+  },
+  {
+    id: 'buyer',
+    name: 'Property buyer',
+    tagline: 'Save, compare, tour homes, make offers securely.',
+    icon: 'Search',
+  },
+  {
+    id: 'realtor',
+    name: 'Realtor',
+    tagline: 'Bring listings, schedule tours, negotiate on behalf.',
+    icon: 'Users',
+  },
+  {
+    id: 'agent',
+    name: 'Agent',
+    tagline: 'Operate on behalf with scoped, delegated permissions.',
+    icon: 'UserCheck',
+  },
+];

@@ -48,6 +48,29 @@ const STEP_TYPE_LABEL: Record<string, string> = {
   BANK_ACCOUNT_CHECK: 'Bank account',
 };
 
+const DECISION_META: Record<string, { label: string; text: string; bg: string }> = {
+  PASS: {
+    label: 'Pass',
+    text: 'text-green-700 dark:text-green-400',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+  },
+  REVIEW: {
+    label: 'Review',
+    text: 'text-yellow-700 dark:text-yellow-400',
+    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+  },
+  REJECT: {
+    label: 'Reject',
+    text: 'text-red-700 dark:text-red-400',
+    bg: 'bg-red-100 dark:bg-red-900/30',
+  },
+  RESTRICT: {
+    label: 'Restrict',
+    text: 'text-orange-700 dark:text-orange-400',
+    bg: 'bg-orange-100 dark:bg-orange-900/30',
+  },
+};
+
 const shortId = (id?: string | null) => (id ? `${id.slice(0, 8)}…` : '—');
 
 interface ReviewCaseModalProps {
@@ -246,29 +269,90 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                           text: 'text-muted-foreground',
                           bg: 'bg-secondary',
                         };
+                        let resultText: string | null = null;
+                        if (step.result && typeof step.result === 'object') {
+                          try {
+                            resultText = JSON.stringify(step.result);
+                          } catch {
+                            resultText = null;
+                          }
+                        }
+                        return (
+                          <div key={step.id} className="rounded-lg border border-border px-3 py-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-foreground">
+                                  {STEP_TYPE_LABEL[step.stepType] ?? step.stepType}
+                                </p>
+                                <p className="text-[11px] text-muted-foreground">
+                                  {step.provider ? `${step.provider} · ` : ''}
+                                  {step.attempts} attempt{step.attempts === 1 ? '' : 's'}
+                                </p>
+                              </div>
+                              <span
+                                className={cn(
+                                  'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                                  meta.bg,
+                                  meta.text
+                                )}
+                              >
+                                {meta.label}
+                              </span>
+                            </div>
+                            {resultText && (
+                              <pre className="mt-1.5 max-h-24 overflow-auto rounded-md bg-muted/60 px-2 py-1 font-mono text-[10px] leading-snug text-muted-foreground">
+                                {resultText}
+                              </pre>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Decision history */}
+                <div className="rounded-xl border border-border p-4">
+                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Verification decisions
+                  </p>
+                  {detail.verification.decisions.length === 0 ? (
+                    <p className="mt-2 text-sm text-muted-foreground">No decisions recorded yet.</p>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      {detail.verification.decisions.map((d) => {
+                        const m = DECISION_META[d.decision] ?? DECISION_META.REVIEW;
                         return (
                           <div
-                            key={step.id}
-                            className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
+                            key={d.id}
+                            className="flex items-start justify-between gap-3 rounded-lg border border-border px-3 py-2"
                           >
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-foreground">
-                                {STEP_TYPE_LABEL[step.stepType] ?? step.stepType}
+                              <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
+                                <span
+                                  className={cn(
+                                    'rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                                    m.bg,
+                                    m.text
+                                  )}
+                                >
+                                  {m.label}
+                                </span>
+                                {d.decidedBy && (
+                                  <span className="text-xs font-normal text-muted-foreground">
+                                    by {shortId(d.decidedBy)}
+                                  </span>
+                                )}
                               </p>
+                              {d.reasonCodes.length > 0 && (
+                                <p className="mt-1 text-[11px] text-muted-foreground">
+                                  {d.reasonCodes.join(', ')}
+                                </p>
+                              )}
                               <p className="text-[11px] text-muted-foreground">
-                                {step.provider ? `${step.provider} · ` : ''}
-                                {step.attempts} attempt{step.attempts === 1 ? '' : 's'}
+                                {formatDate(d.createdAt)}
                               </p>
                             </div>
-                            <span
-                              className={cn(
-                                'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                                meta.bg,
-                                meta.text
-                              )}
-                            >
-                              {meta.label}
-                            </span>
                           </div>
                         );
                       })}

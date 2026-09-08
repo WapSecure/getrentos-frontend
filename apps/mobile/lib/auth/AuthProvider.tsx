@@ -27,6 +27,9 @@ interface AuthContextValue {
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
+  signInWithMagicLink: (token: string) => Promise<void>;
+  /** Adopt a session obtained elsewhere (signup, OAuth). */
+  applyExternalSession: (session: AuthSession) => void;
   signOut: () => Promise<void>;
 }
 
@@ -149,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       applySession(result);
       return { requiresTwoFactor: false };
     },
-    [applySession],
+    [applySession]
   );
 
   const completeTwoFactor = useCallback(
@@ -159,7 +162,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPendingTwoFactor(null);
       applySession(session);
     },
-    [pendingTwoFactor, applySession],
+    [pendingTwoFactor, applySession]
+  );
+
+  const signInWithMagicLink = useCallback(
+    async (token: string) => {
+      const session = await authApi.verifyMagicLink(token);
+      applySession(session);
+    },
+    [applySession]
   );
 
   const signOut = useCallback(async () => {
@@ -183,9 +194,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       completeTwoFactor,
       cancelTwoFactor: () => setPendingTwoFactor(null),
+      signInWithMagicLink,
+      applyExternalSession: applySession,
       signOut,
     }),
-    [status, profile, pendingTwoFactor, signIn, completeTwoFactor, signOut],
+    [
+      status,
+      profile,
+      pendingTwoFactor,
+      signIn,
+      completeTwoFactor,
+      signInWithMagicLink,
+      applySession,
+      signOut,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

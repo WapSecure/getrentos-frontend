@@ -74,6 +74,14 @@ export interface TrustIdentityStepOutcome {
   match?: { name: string; dob: string };
 }
 
+export interface TrustBankAccountStepOutcome {
+  verificationId: string;
+  stepType: string;
+  status: string;
+  provider?: string | null;
+  match?: { accountName: string };
+}
+
 export interface TrustConsentDto {
   id: string;
   consentType: string;
@@ -184,5 +192,23 @@ export const trustService = {
         body: form,
       });
     });
+  },
+
+  /** Runs a bank-account name-enquiry check (BANK_ACCOUNT_CHECK step). */
+  async submitBankAccount(
+    verificationId: string,
+    input: {
+      accountNumber: string;
+      accountName?: string;
+      bankCode?: string;
+      country?: string;
+    }
+  ): Promise<ApiResponse<TrustBankAccountStepOutcome>> {
+    return safeCall(() =>
+      authFetch<TrustBankAccountStepOutcome>(`/trust/verifications/${verificationId}/bank`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
   },
 };

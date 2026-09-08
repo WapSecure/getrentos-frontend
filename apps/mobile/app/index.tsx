@@ -5,5 +5,5 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 export default function Index() {
   const { status } = useAuth();
   if (status === 'loading') return null;
-  return <Redirect href={status === 'authenticated' ? '/(app)' : '/(auth)/sign-in'} />;
+  return <Redirect href={status === 'authenticated' ? '/(app)/(renter)' : '/(auth)/welcome'} />;
 }

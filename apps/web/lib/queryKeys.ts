@@ -308,3 +308,8 @@ export const estateResidentKeys = {
   committee: ['estate', 'resident', 'committee'] as const,
   governance: ['estate', 'resident', 'governance'] as const,
 };
+
+/** Not persona-scoped — every signed-in user has at most one subscription. */
+export const subscriptionKeys = {
+  mine: ['subscription', 'mine'] as const,
+};

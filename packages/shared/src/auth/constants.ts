@@ -297,6 +297,7 @@ export const ROUTES = {
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SHORTLETS: '/landlord/shortlets',
   LANDLORD_SETTINGS: '/landlord/settings',
+  LANDLORD_BILLING: '/landlord/billing',
   LANDLORD_VERIFICATION: '/landlord/verification',
   LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',

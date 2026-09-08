@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { BellRing, AlertOctagon, FileText, CalendarClock } from 'lucide-react';
 import { landlordService, type LandlordAutomationSettings } from '@/services/landlordService';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
+import type { PlanGateReason } from '@/lib/planGate';
 
 interface AutomationToggle {
   id: keyof LandlordAutomationSettings;
@@ -47,6 +49,7 @@ const DEFAULT_SETTINGS: LandlordAutomationSettings = {
 
 export const AutomationSettings = () => {
   const [settings, setSettings] = useState<LandlordAutomationSettings>(DEFAULT_SETTINGS);
+  const [upgradeReason, setUpgradeReason] = useState<PlanGateReason | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -57,10 +60,15 @@ export const AutomationSettings = () => {
     fetchSettings();
   }, []);
 
-  const toggle = (id: keyof LandlordAutomationSettings) => {
+  const toggle = async (id: keyof LandlordAutomationSettings) => {
+    const previous = settings;
     const next = { ...settings, [id]: !settings[id] };
     setSettings(next);
-    landlordService.updateAutomationSettings(next);
+    const response = await landlordService.updateAutomationSettings(next);
+    if (!response.success) {
+      setSettings(previous);
+      if (response.planGateReason) setUpgradeReason(response.planGateReason);
+    }
   };
 
   return (
@@ -98,6 +106,12 @@ export const AutomationSettings = () => {
           </div>
         ))}
       </div>
+
+      <UpgradeToProModal
+        isOpen={upgradeReason !== null}
+        onClose={() => setUpgradeReason(null)}
+        reason={upgradeReason ?? undefined}
+      />
     </div>
   );
 };

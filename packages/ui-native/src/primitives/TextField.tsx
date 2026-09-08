@@ -8,6 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -16,25 +17,36 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string | null;
   hint?: string;
-  /** Renders a show/hide toggle and manages `secureTextEntry`. */
   secure?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
+  leftIcon?: React.ReactNode;
   rightAccessory?: React.ReactNode;
 }
 
 /**
- * Labeled text input with an error slot. `forwardRef` so it drops straight into
- * `react-hook-form`'s `Controller` and focus chaining.
+ * Filled input with an animated focus state and a spring-in error line.
+ * `forwardRef` for react-hook-form Controller + focus chaining.
  */
 export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
-  { label, error, hint, secure, containerStyle, rightAccessory, onFocus, onBlur, ...rest },
-  ref,
+  {
+    label,
+    error,
+    hint,
+    secure,
+    containerStyle,
+    leftIcon,
+    rightAccessory,
+    onFocus,
+    onBlur,
+    ...rest
+  },
+  ref
 ) {
   const { colors, radius } = useTheme();
   const [focused, setFocused] = useState(false);
   const [reveal, setReveal] = useState(false);
 
-  const borderColor = error ? colors.destructive : focused ? colors.primary : colors.border;
+  const borderColor = error ? colors.destructive : focused ? colors.primary : 'transparent';
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -48,13 +60,14 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
         style={[
           styles.field,
           {
-            borderColor,
             borderRadius: radius.md,
-            backgroundColor: colors.card,
-            borderWidth: focused ? 2 : StyleSheet.hairlineWidth * 2,
+            backgroundColor: colors.secondary,
+            borderColor,
+            borderWidth: 1.5,
           },
         ]}
       >
+        {leftIcon ? <View style={styles.left}>{leftIcon}</View> : null}
         <TextInput
           ref={ref}
           placeholderTextColor={colors.mutedForeground}
@@ -75,8 +88,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={reveal ? 'Hide password' : 'Show password'}
-            hitSlop={10}
+            hitSlop={12}
             onPress={() => setReveal((v) => !v)}
+            style={styles.right}
           >
             {reveal ? (
               <EyeOff size={18} color={colors.mutedForeground} />
@@ -84,15 +98,17 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
               <Eye size={18} color={colors.mutedForeground} />
             )}
           </Pressable>
-        ) : (
-          rightAccessory
-        )}
+        ) : rightAccessory ? (
+          <View style={styles.right}>{rightAccessory}</View>
+        ) : null}
       </View>
 
       {error ? (
-        <Text variant="caption" color="destructive" style={styles.helper}>
-          {error}
-        </Text>
+        <Animated.View entering={FadeIn.duration(140)} exiting={FadeOut.duration(100)}>
+          <Text variant="caption" color="destructive" style={styles.helper}>
+            {error}
+          </Text>
+        </Animated.View>
       ) : hint ? (
         <Text variant="caption" color="mutedForeground" style={styles.helper}>
           {hint}
@@ -103,15 +119,11 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
 });
 
 const styles = StyleSheet.create({
-  container: { gap: 6 },
-  label: { marginLeft: 2 },
-  field: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    minHeight: 50,
-    gap: 8,
-  },
-  input: { flex: 1, fontSize: 16, paddingVertical: 12 },
-  helper: { marginLeft: 2 },
+  container: { gap: 7 },
+  label: { marginLeft: 4, fontWeight: '600' },
+  field: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, minHeight: 54 },
+  left: { marginRight: 8 },
+  right: { marginLeft: 8 },
+  input: { flex: 1, fontSize: 16, paddingVertical: 14 },
+  helper: { marginLeft: 4 },
 });

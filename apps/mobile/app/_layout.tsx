@@ -8,12 +8,16 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
+import { useMagicLink } from '@/lib/auth/useMagicLink';
+
+export { ErrorBoundary } from '@/components/ErrorBoundary';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function Gate() {
   const { status } = useAuth();
   const { colors, scheme } = useTheme();
+  useMagicLink();
 
   useEffect(() => {
     if (status !== 'loading') SplashScreen.hideAsync().catch(() => undefined);

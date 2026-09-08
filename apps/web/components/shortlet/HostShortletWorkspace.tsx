@@ -36,6 +36,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
+import { ROUTES } from '@/lib/constants/auth';
 import { ownerService } from '@/services/ownerService';
 import { landlordService } from '@/services/landlordService';
 import { shortletService } from '@/services/shortletService';
@@ -470,7 +471,14 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           <ShortletMessagesInbox role="host" />
         </DialogContent>
       </Dialog>
-      {payoutsOpen && <ShortletPayoutsDialog onClose={() => setPayoutsOpen(false)} />}
+      {payoutsOpen && (
+        <ShortletPayoutsDialog
+          onClose={() => setPayoutsOpen(false)}
+          verificationHref={
+            role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION
+          }
+        />
+      )}
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
         <DialogContent className="sm:max-w-3xl">
           <ShortletDisputesInbox />

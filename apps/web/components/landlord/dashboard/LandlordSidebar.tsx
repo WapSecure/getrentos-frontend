@@ -24,11 +24,22 @@ import {
   BedDouble,
   Globe,
   Gift,
+  Sparkles,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { usePlanTier } from '@/hooks/usePlanTier';
+
+/** Nav items whose destination page is gated behind the Pro plan (see Batch 7b). */
+const PRO_GATED_ROUTES = new Set<string>([
+  ROUTES.LANDLORD_SHORTLETS,
+  ROUTES.LANDLORD_MICROSITE,
+  ROUTES.LANDLORD_HOME_MANAGEMENT,
+  ROUTES.LANDLORD_FINANCIALS,
+  ROUTES.LANDLORD_OWNER_STATEMENTS,
+]);
 
 interface NavItem {
   labelKey?: TranslationKey;
@@ -66,6 +77,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.realtor_access', href: ROUTES.LANDLORD_REALTORS, icon: UserRoundCheck },
   { labelKey: 'sidebar.reviews', href: ROUTES.LANDLORD_REVIEWS, icon: Star },
   { labelKey: 'sidebar.settings', href: ROUTES.LANDLORD_SETTINGS, icon: Settings },
+  { label: 'Billing', href: ROUTES.LANDLORD_BILLING, icon: Sparkles },
   { label: 'Verification', href: '/landlord/verification', icon: FileCheck },
 ];
 
@@ -79,6 +91,7 @@ export const navGroups = [
 
 export const LandlordSidebar = () => {
   const { t } = useLanguage();
+  const { isPro } = usePlanTier();
   return (
     <GroupedSidebar
       ariaLabel="Landlord navigation"
@@ -88,6 +101,7 @@ export const LandlordSidebar = () => {
         items: group.items.map((item) => ({
           ...item,
           label: item.labelKey ? t(item.labelKey) : item.label,
+          locked: !isPro && PRO_GATED_ROUTES.has(item.href),
         })),
       }))}
     />
