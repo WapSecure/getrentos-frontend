@@ -24,6 +24,7 @@ import {
   Store,
   Briefcase,
   ClipboardList,
+  Warehouse,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -105,6 +106,12 @@ const navItems: NavItem[] = [
     permission: 'sales.view',
   },
   {
+    label: 'Estates',
+    href: '/admin/estates',
+    icon: Warehouse,
+    permission: 'estate.view',
+  },
+  {
     label: 'Disputes',
     href: ROUTES.ADMIN_DISPUTES,
     icon: Gavel,
@@ -163,10 +170,10 @@ const navItems: NavItem[] = [
 const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'People and trust', items: navItems.slice(1, 5) },
-  { label: 'Marketplace operations', items: navItems.slice(5, 12) },
-  { label: 'Risk and finance', items: navItems.slice(12, 16) },
-  { label: 'Support and insights', items: navItems.slice(16, 19) },
-  { label: 'Platform administration', items: navItems.slice(19) },
+  { label: 'Marketplace operations', items: navItems.slice(5, 13) },
+  { label: 'Risk and finance', items: navItems.slice(13, 17) },
+  { label: 'Support and insights', items: navItems.slice(17, 20) },
+  { label: 'Platform administration', items: navItems.slice(20) },
 ];
 
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>

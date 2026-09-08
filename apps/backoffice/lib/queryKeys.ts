@@ -192,6 +192,45 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  estateOverview: ['admin', 'estates', 'overview'] as const,
+  estates: (
+    resource: string,
+    params?: {
+      search?: string;
+      status?: string;
+      category?: string;
+      priority?: string;
+      state?: string;
+      city?: string;
+      orgRole?: string;
+      workspaceRole?: string;
+      organizationId?: string;
+      residentLinked?: 'true' | 'false';
+      estateId?: string;
+      type?: string;
+      page?: number;
+      pageSize?: number;
+    }
+  ) =>
+    [
+      'admin',
+      'estates',
+      resource,
+      params?.search ?? '',
+      params?.status ?? 'all',
+      params?.category ?? 'all',
+      params?.priority ?? 'all',
+      params?.state ?? 'all',
+      params?.city ?? 'all',
+      params?.orgRole ?? 'all',
+      params?.workspaceRole ?? 'all',
+      params?.organizationId ?? 'all',
+      params?.residentLinked ?? 'all',
+      params?.estateId ?? 'all',
+      params?.type ?? 'all',
+      params?.page ?? 1,
+      params?.pageSize ?? 20,
+    ] as const,
   reviewCases: (params?: {
     status?: string;
     priority?: string;
