@@ -16,7 +16,7 @@ export function usePlanGateModal() {
     close: () => setReason(null),
     handleError: (err: unknown): boolean => {
       if (isPlanGateError(err)) {
-        setReason(err.code);
+        setReason(err.reason);
         return true;
       }
       return false;

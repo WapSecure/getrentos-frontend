@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
 import { Button, Switch, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
+import { usePlanTier } from '@/hooks/usePlanTier';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -19,8 +21,10 @@ export default function LandlordMicrositePage() {
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isPro, isLoading: isPlanLoading } = usePlanTier();
 
   useEffect(() => {
+    if (isPlanLoading || !isPro) return;
     const fetchSettings = async () => {
       const response = await landlordService.getMicrositeSettings();
       if (response.success && response.data) {
@@ -32,7 +36,7 @@ export default function LandlordMicrositePage() {
       setIsLoading(false);
     };
     fetchSettings();
-  }, []);
+  }, [isPlanLoading, isPro]);
 
   const publicUrl =
     typeof window !== 'undefined' ? `${window.location.origin}/l/${slug}` : `/l/${slug}`;
@@ -77,7 +81,7 @@ export default function LandlordMicrositePage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (isLoading) {
+  if (isPlanLoading || (isPro && isLoading)) {
     return <div className="text-sm text-muted-foreground">Loading…</div>;
   }
 
@@ -90,118 +94,128 @@ export default function LandlordMicrositePage() {
         </p>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">Publish microsite</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {enabled
-                ? 'Live — visible to anyone with the link'
-                : 'Draft — not publicly visible yet'}
-            </p>
-          </div>
-          <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Publish microsite" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Banner image</label>
-          <div className="flex items-center gap-4">
-            {bannerUrl ? (
-              <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-border">
-                <Image
-                  src={bannerUrl}
-                  alt="Microsite banner"
-                  fill
-                  sizes="128px"
-                  className="object-cover"
-                  loading="lazy"
-                />
-              </div>
-            ) : (
-              <div className="w-32 h-20 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
-                <Globe className="w-6 h-6" />
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleBannerChange}
-              className="hidden"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploadingBanner}
-              isLoading={isUploadingBanner}
-            >
-              {bannerUrl ? 'Change banner' : 'Upload banner'}
-            </Button>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Link</label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{`${typeof window !== 'undefined' ? window.location.origin : ''}/l/`}</span>
-            <input
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value.toLowerCase())}
-              className="flex-1 min-w-0 p-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="your-agency-name"
-            />
-          </div>
-          {!slugIsValid && slug.length > 0 && (
-            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-              Lowercase letters, numbers, and hyphens only.
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">About</label>
-          <Textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            rows={4}
-            maxLength={500}
-            placeholder="Tell prospective renters about your agency..."
-          />
-        </div>
-
-        <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="flex-1 min-w-0 p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-muted-foreground truncate">
-              {publicUrl}
+      <ProFeatureGate
+        title="Microsite is a Pro feature"
+        description="Upgrade to Pro to get a public page showcasing your listings — one link to share instead of the whole app."
+      >
+        <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Publish microsite</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {enabled
+                  ? 'Live — visible to anyone with the link'
+                  : 'Draft — not publicly visible yet'}
+              </p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-2 shrink-0">
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? 'Copied!' : 'Copy'}
-            </Button>
-            {enabled && (
-              <a href={publicUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="sm" className="gap-2 shrink-0">
-                  <ExternalLink className="w-4 h-4" />
-                  View
-                </Button>
-              </a>
+            <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Publish microsite" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Banner image</label>
+            <div className="flex items-center gap-4">
+              {bannerUrl ? (
+                <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-border">
+                  <Image
+                    src={bannerUrl}
+                    alt="Microsite banner"
+                    fill
+                    sizes="128px"
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <div className="w-32 h-20 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
+                  <Globe className="w-6 h-6" />
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBannerChange}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingBanner}
+                isLoading={isUploadingBanner}
+              >
+                {bannerUrl ? 'Change banner' : 'Upload banner'}
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Link</label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{`${typeof window !== 'undefined' ? window.location.origin : ''}/l/`}</span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase())}
+                className="flex-1 min-w-0 p-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="your-agency-name"
+              />
+            </div>
+            {!slugIsValid && slug.length > 0 && (
+              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                Lowercase letters, numbers, and hyphens only.
+              </p>
             )}
           </div>
-        </div>
 
-        <div className="flex justify-end">
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            isLoading={isSaving}
-            disabled={!slugIsValid}
-          >
-            Save Changes
-          </Button>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">About</label>
+            <Textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={4}
+              maxLength={500}
+              placeholder="Tell prospective renters about your agency..."
+            />
+          </div>
+
+          <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex-1 min-w-0 p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-muted-foreground truncate">
+                {publicUrl}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyLink}
+                className="gap-2 shrink-0"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Copied!' : 'Copy'}
+              </Button>
+              {enabled && (
+                <a href={publicUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="sm" className="gap-2 shrink-0">
+                    <ExternalLink className="w-4 h-4" />
+                    View
+                  </Button>
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              isLoading={isSaving}
+              disabled={!slugIsValid}
+            >
+              Save Changes
+            </Button>
+          </div>
         </div>
-      </div>
+      </ProFeatureGate>
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
