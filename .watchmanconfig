@@ -1,0 +1,9 @@
+{
+  "ignore_dirs": [
+    ".git",
+    ".next",
+    ".turbo",
+    ".expo",
+    "coverage"
+  ]
+}
