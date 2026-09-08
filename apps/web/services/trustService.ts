@@ -211,4 +211,30 @@ export const trustService = {
       })
     );
   },
+
+  /** Runs a professional/authority document check (DOCUMENT_CHECK step). */
+  async submitDocument(
+    verificationId: string,
+    input: {
+      documentType: string;
+      documentNumber: string;
+      holderName?: string;
+      country?: string;
+    }
+  ): Promise<ApiResponse<TrustDocumentStepOutcome>> {
+    return safeCall(() =>
+      authFetch<TrustDocumentStepOutcome>(`/trust/verifications/${verificationId}/document`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
 };
+
+export interface TrustDocumentStepOutcome {
+  verificationId: string;
+  stepType: string;
+  status: string;
+  provider?: string | null;
+  match?: { holderName: string };
+}

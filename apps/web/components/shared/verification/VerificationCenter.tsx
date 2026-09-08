@@ -136,6 +136,9 @@ export const VerificationCenter = ({
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
   const [bankCode, setBankCode] = useState('');
+  const [documentType, setDocumentType] = useState('AGENT_LICENSE');
+  const [documentNumber, setDocumentNumber] = useState('');
+  const [documentHolder, setDocumentHolder] = useState('');
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const autoStarted = useRef(false);
 
@@ -160,6 +163,7 @@ export const VerificationCenter = ({
   const idCheckConsent = consents?.find((c) => c.consentType === 'ID_CHECK');
   const bioConsent = consents?.find((c) => c.consentType === 'BIOMETRIC');
   const bankConsent = consents?.find((c) => c.consentType === 'BANK_ACCOUNT_CHECK');
+  const docConsent = consents?.find((c) => c.consentType === 'DOCUMENT_PROCESSING');
 
   const startMutation = useMutation({
     mutationFn: () => unwrap(trustService.startVerification({ subjectId, purpose, country: 'NG' })),
@@ -227,6 +231,23 @@ export const VerificationCenter = ({
         trustService.grantConsent({
           consentType: 'BANK_ACCOUNT_CHECK',
           purpose: 'Financial verification',
+          expiresInDays: 365,
+        })
+      ),
+    onSuccess: () => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
+  });
+
+  const grantDocumentMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        trustService.grantConsent({
+          consentType: 'DOCUMENT_PROCESSING',
+          purpose: 'Document verification',
           expiresInDays: 365,
         })
       ),
@@ -327,6 +348,27 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to run the bank check.'),
   });
 
+  const documentMutation = useMutation({
+    mutationFn: () =>
+      unwrap(
+        trustService.submitDocument(verificationId!, {
+          documentType: documentType.trim(),
+          documentNumber: documentNumber.trim(),
+          holderName: documentHolder.trim() || undefined,
+          country: 'NG',
+        })
+      ),
+    onSuccess: () => {
+      setDocumentNumber('');
+      setDocumentHolder('');
+      setError(null);
+      invalidateVerification();
+      queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
+    },
+    onError: (reason) =>
+      setError(reason instanceof Error ? reason.message : 'Unable to run the document check.'),
+  });
+
   const isVerified = Boolean(kyc?.isVerified) || kyc?.verificationStatus === 'APPROVED';
   const kycMeta =
     KYC_STATUS_META[kyc?.verificationStatus ?? 'PENDING_REVIEW'] ?? KYC_STATUS_META.PENDING_REVIEW;
@@ -348,6 +390,14 @@ export const VerificationCenter = ({
   const runnableBank = bankRequired
     ? steps.find((s) => s.stepType === 'BANK_ACCOUNT_CHECK' && actionable(s.status))
     : undefined;
+  // Document step only applies to agent onboarding (professional/authority docs).
+  const documentRequired =
+    verification !== undefined
+      ? steps.some((s) => s.stepType === 'DOCUMENT_CHECK')
+      : purpose === 'AGENT_ONBOARDING';
+  const runnableDocument = documentRequired
+    ? steps.find((s) => s.stepType === 'DOCUMENT_CHECK' && actionable(s.status))
+    : undefined;
 
   const identityEnabled =
     Boolean(runnableIdentity) &&
@@ -364,6 +414,12 @@ export const VerificationCenter = ({
     accountNumber.trim().length > 0 &&
     Boolean(bankConsent) &&
     !bankMutation.isPending;
+  const documentEnabled =
+    Boolean(runnableDocument) &&
+    Boolean(verificationId) &&
+    documentNumber.trim().length > 0 &&
+    Boolean(docConsent) &&
+    !documentMutation.isPending;
 
   const renderConsentRow = (opts: {
     consent?: { id: string; revokedAt?: string; grantedAt: string };
@@ -495,6 +551,20 @@ export const VerificationCenter = ({
             })}
           </>
         )}
+        {documentRequired && (
+          <>
+            <div className="border-t border-border" />
+            {renderConsentRow({
+              consent: docConsent,
+              icon: FileCheck2,
+              title: 'Document-processing consent',
+              body: 'We verify your professional/authority documents (e.g. agent licence). Required to finish agent onboarding.',
+              onGrant: () => grantDocumentMutation.mutate(),
+              granting: grantDocumentMutation.isPending,
+              revoking: revokeConsentMutation.isPending,
+            })}
+          </>
+        )}
       </div>
 
       {error && (
@@ -534,6 +604,7 @@ export const VerificationCenter = ({
                     ...BIO_STEP_TYPES,
                     'PHONE_OTP',
                     'BANK_ACCOUNT_CHECK',
+                    'DOCUMENT_CHECK',
                   ].includes(step.stepType) && actionable(step.status);
                 return (
                   <div
@@ -774,6 +845,66 @@ export const VerificationCenter = ({
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   Passing this step marks you financially verified (Trust Tier 3).
                 </p>
+              </div>
+            )}
+
+            {/* Document runner */}
+            {runnableDocument && (
+              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
+                <p className="text-sm font-semibold text-foreground">Complete: Document check</p>
+                {!docConsent && (
+                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                    Grant document-processing consent above before running this check.
+                  </p>
+                )}
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Document type
+                    </label>
+                    <Select
+                      value={documentType}
+                      onValueChange={(value) => setDocumentType(value)}
+                      options={[
+                        'AGENT_LICENSE',
+                        'CERTIFICATE',
+                        'LETTER_OF_AUTHORITY',
+                        'PROFESSIONAL_ID',
+                      ].map((t) => ({ value: t, label: t.replace(/_/g, ' ') }))}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Document number
+                    </label>
+                    <Input
+                      value={documentNumber}
+                      onChange={(e) => setDocumentNumber(e.target.value)}
+                      placeholder="e.g. GR-2026-00123"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Holder name (optional — compared for a match)
+                    </label>
+                    <Input
+                      value={documentHolder}
+                      onChange={(e) => setDocumentHolder(e.target.value)}
+                      placeholder="e.g. HOLDER 0123"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <Button
+                  className="mt-4"
+                  size="sm"
+                  disabled={!documentEnabled}
+                  onClick={() => documentMutation.mutate()}
+                >
+                  {documentMutation.isPending ? 'Checking…' : 'Run document check'}
+                </Button>
               </div>
             )}
 
