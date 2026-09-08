@@ -353,6 +353,7 @@ export const ROUTES = {
   REALTOR_SETTINGS: '/realtor/settings',
   REALTOR_BILLING: '/realtor/billing',
   REALTOR_HELP: '/realtor/help',
+  REALTOR_VERIFICATION: '/realtor/verification',
 
   // Agent specific routes
   AGENT_TASKS: '/agent/tasks',
