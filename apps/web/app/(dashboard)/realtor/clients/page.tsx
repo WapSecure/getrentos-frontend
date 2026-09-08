@@ -14,6 +14,8 @@ import { ROUTES } from '@/lib/constants/auth';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorClient, realtorService } from '@/services/realtorService';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 type RoleFilter = 'all' | ClientRole;
 
@@ -27,6 +29,7 @@ export default function RealtorClientsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const queryClient = useQueryClient();
+  const planGate = usePlanGateModal();
   const clientRole =
     filter === 'owner' ? 'PROPERTY_OWNER' : filter === 'landlord' ? 'LANDLORD' : undefined;
   const { data, isLoading } = useQuery({
@@ -57,6 +60,10 @@ export default function RealtorClientsPage() {
       setToast({ message: 'Client invitation sent.', variant: 'success' });
     },
     onError: (error) => {
+      if (planGate.handleError(error)) {
+        setIsAddModalOpen(false);
+        return;
+      }
       setToast({
         message: error.message || 'Unable to add this client. Please try again.',
         variant: 'error',
@@ -181,6 +188,11 @@ export default function RealtorClientsPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </>
   );
 }

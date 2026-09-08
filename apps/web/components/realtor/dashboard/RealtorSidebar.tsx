@@ -13,17 +13,23 @@ import {
   Star,
   BadgeCheck,
   Settings,
+  Sparkles,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface NavItem {
-  labelKey: TranslationKey;
+  labelKey?: TranslationKey;
+  label?: string;
   href: string;
   icon: React.ElementType;
 }
+
+/** Nav items whose destination is entirely Pro-gated (see the Realtor/Owner gating extension). */
+const PRO_GATED_ROUTES = new Set<string>([ROUTES.REALTOR_COMMISSIONS]);
 
 export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.REALTOR_DASHBOARD, icon: LayoutDashboard },
@@ -38,6 +44,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.reviews', href: ROUTES.REALTOR_REVIEWS, icon: Star },
   { labelKey: 'sidebar.trust_profile', href: ROUTES.REALTOR_TRUST_PROFILE, icon: BadgeCheck },
   { labelKey: 'sidebar.settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
+  { label: 'Billing', href: ROUTES.REALTOR_BILLING, icon: Sparkles },
 ];
 
 export const navGroups = [
@@ -50,13 +57,18 @@ export const navGroups = [
 
 export const RealtorSidebar = () => {
   const { t } = useLanguage();
+  const { isPro } = usePlanTier();
   return (
     <GroupedSidebar
       ariaLabel="Realtor navigation"
       dashboardHref={ROUTES.REALTOR_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
-        items: group.items.map((item) => ({ ...item, label: t(item.labelKey) })),
+        items: group.items.map((item) => ({
+          ...item,
+          label: item.labelKey ? t(item.labelKey) : item.label,
+          locked: !isPro && PRO_GATED_ROUTES.has(item.href),
+        })),
       }))}
     />
   );

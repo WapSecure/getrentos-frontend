@@ -1,5 +1,15 @@
+'use client';
+
 import { HostShortletWorkspace } from '@/components/shortlet/HostShortletWorkspace';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 export default function OwnerShortletsPage() {
-  return <HostShortletWorkspace role="owner" />;
+  return (
+    <ProFeatureGate
+      title="Shortlet hosting is a Pro feature"
+      description="Upgrade to Pro to list, manage bookings, and receive payouts for short-stay units."
+    >
+      <HostShortletWorkspace role="owner" />
+    </ProFeatureGate>
+  );
 }

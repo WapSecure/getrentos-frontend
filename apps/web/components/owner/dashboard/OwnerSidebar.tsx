@@ -17,11 +17,13 @@ import {
   Settings,
   MapPinned,
   BedDouble,
+  Sparkles,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface NavItem {
   labelKey?: TranslationKey;
@@ -29,6 +31,19 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
 }
+
+/**
+ * Nav items whose destination is entirely Pro-gated. Home Management and
+ * Shortlets were already backend-gated in Batch 7b (their controllers allow
+ * both LANDLORD and PROPERTY_OWNER, and PlanTierGuard checks the caller's
+ * own subscription regardless of role) but never got the lock-icon treatment
+ * on this sidebar — fixed here alongside the new Analytics gate.
+ */
+const PRO_GATED_ROUTES = new Set<string>([
+  ROUTES.OWNER_ANALYTICS,
+  ROUTES.OWNER_HOME_MANAGEMENT,
+  ROUTES.OWNER_SHORTLETS,
+]);
 
 export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
@@ -47,6 +62,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
   { labelKey: 'sidebar.trust_profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
   { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
+  { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: Sparkles },
   { label: 'Verification', href: '/owner/verification', icon: ShieldCheck },
 ];
 
@@ -60,6 +76,7 @@ export const navGroups = [
 
 export const OwnerSidebar = () => {
   const { t } = useLanguage();
+  const { isPro } = usePlanTier();
   return (
     <GroupedSidebar
       ariaLabel="Property owner navigation"
@@ -69,6 +86,7 @@ export const OwnerSidebar = () => {
         items: group.items.map((item) => ({
           ...item,
           label: item.labelKey ? t(item.labelKey) : item.label,
+          locked: !isPro && PRO_GATED_ROUTES.has(item.href),
         })),
       }))}
     />
