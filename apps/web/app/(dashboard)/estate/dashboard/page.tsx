@@ -27,6 +27,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import { EstateDuesTrendChart } from '@/components/estate/dashboard/EstateDuesTrendChart';
+import { usePlanTier } from '@/hooks/usePlanTier';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const modules = [
   {
@@ -77,11 +79,12 @@ const modules = [
 
 export default function EstateDashboardPage() {
   const { estate, isLoading } = useSelectedEstate();
+  const { isPro } = usePlanTier();
 
   const { data: stats } = useQuery({
     queryKey: estateKeys.dashboardStats(estate?.id ?? ''),
     queryFn: () => unwrap(estateService.getDashboardStats(estate!.id)),
-    enabled: !!estate,
+    enabled: !!estate && isPro,
   });
 
   if (isLoading) {
@@ -127,55 +130,60 @@ export default function EstateDashboardPage() {
         </p>
       </section>
 
-      <section className="grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted-foreground">Households</p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-            {stats?.totalHouseholds ?? '—'}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted-foreground">Collected this month</p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-            {stats ? formatCurrency(stats.duesCollectedThisMonth, { compact: true }) : '—'}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted-foreground">Dues outstanding</p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-            {stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—'}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Siren className="h-3.5 w-3.5" />
-            Open incidents
-          </p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-            {stats?.openIncidents ?? '—'}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Hammer className="h-3.5 w-3.5" />
-            Open maintenance
-          </p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-            {stats?.openMaintenanceTickets ?? '—'}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <TriangleAlert className="h-3.5 w-3.5" />
-            Pending violations
-          </p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-            {stats?.pendingViolations ?? '—'}
-          </p>
-        </div>
-      </section>
+      <ProFeatureGate
+        title="Analytics is a Pro feature"
+        description="Upgrade to Pro to see collection stats and a 6-month dues trend for this estate."
+      >
+        <section className="grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
+            <p className="text-xs text-muted-foreground">Households</p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {stats?.totalHouseholds ?? '—'}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
+            <p className="text-xs text-muted-foreground">Collected this month</p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {stats ? formatCurrency(stats.duesCollectedThisMonth, { compact: true }) : '—'}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
+            <p className="text-xs text-muted-foreground">Dues outstanding</p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—'}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Siren className="h-3.5 w-3.5" />
+              Open incidents
+            </p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {stats?.openIncidents ?? '—'}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Hammer className="h-3.5 w-3.5" />
+              Open maintenance
+            </p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {stats?.openMaintenanceTickets ?? '—'}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <TriangleAlert className="h-3.5 w-3.5" />
+              Pending violations
+            </p>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {stats?.pendingViolations ?? '—'}
+            </p>
+          </div>
+        </section>
 
-      <EstateDuesTrendChart estateId={estate.id} />
+        <EstateDuesTrendChart estateId={estate.id} />
+      </ProFeatureGate>
 
       <section className="grid gap-4 sm:grid-cols-2">
         <Link

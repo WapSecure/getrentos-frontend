@@ -10,6 +10,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '../layout';
+import { usePlanGateModal } from '@/hooks/usePlanGateModal';
+import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 
 export default function EstateSetupPage() {
   const router = useRouter();
@@ -20,6 +22,8 @@ export default function EstateSetupPage() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [gateCount, setGateCount] = useState('1');
+  const [genericError, setGenericError] = useState(false);
+  const planGate = usePlanGateModal();
 
   const createEstate = useMutation({
     mutationFn: () =>
@@ -37,6 +41,10 @@ export default function EstateSetupPage() {
       queryClient.invalidateQueries({ queryKey: estateKeys.myEstates });
       selectEstate(newEstate.id);
       router.push(ROUTES.ESTATE_DASHBOARD);
+    },
+    onError: (error: Error) => {
+      if (planGate.handleError(error)) return;
+      setGenericError(true);
     },
   });
 
@@ -93,7 +101,7 @@ export default function EstateSetupPage() {
           <NumberInput value={gateCount} onValueChange={setGateCount} min={1} max={50} />
         </div>
 
-        {createEstate.isError && (
+        {genericError && (
           <p className="text-sm text-red-600" role="alert">
             Unable to create your estate. Please try again.
           </p>
@@ -108,6 +116,12 @@ export default function EstateSetupPage() {
           {createEstate.isPending ? 'Creating…' : 'Create Estate'}
         </Button>
       </div>
+
+      <UpgradeToProModal
+        isOpen={planGate.isOpen}
+        onClose={planGate.close}
+        reason={planGate.reason}
+      />
     </div>
   );
 }
