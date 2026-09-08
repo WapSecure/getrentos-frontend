@@ -4,8 +4,8 @@
   "main": "expo-router/entry",
   "private": true,
   "scripts": {
-    "start": "expo start --offline",
-    "go": "expo start --go --offline",
+    "start": "expo start --go",
+    "go": "expo start --go",
     "dev-client": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -13,7 +13,9 @@
     "preview": "expo start --web --port 8081",
     "prebuild": "expo prebuild",
     "lint": "eslint .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "go:offline": "expo start --go --offline",
+    "go:tunnel": "expo start --go --tunnel"
   },
   "dependencies": {
     "@getrentos/shared": "workspace:*",
