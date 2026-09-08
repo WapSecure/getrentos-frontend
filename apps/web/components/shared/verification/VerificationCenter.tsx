@@ -110,12 +110,18 @@ interface VerificationCenterProps {
   subjectId: string;
   purpose: TrustPurpose;
   description?: string;
+  /** Persona's identity-document route for the footer tile (renter default if omitted). */
+  documentsHref?: string;
+  /** Persona's trust-score route for the footer tile (omitted to hide the tile). */
+  trustScoreHref?: string;
 }
 
 export const VerificationCenter = ({
   subjectId,
   purpose,
   description,
+  documentsHref,
+  trustScoreHref,
 }: VerificationCenterProps) => {
   const queryClient = useQueryClient();
   const [verificationId, setVerificationId] = useState<string | null>(null);
@@ -786,33 +792,43 @@ export const VerificationCenter = ({
         )}
       </div>
 
-      {/* Document path + trust score links */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Link
-          href="/renter/settings?tab=verification"
-          className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
-        >
-          <FileCheck2 className="h-5 w-5 text-primary" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Upload an identity document</p>
-            <p className="text-xs text-muted-foreground">
-              Scan your national ID or passport for a human-reviewed verification.
-            </p>
-          </div>
-          <span className="text-primary transition-transform group-hover:translate-x-0.5">→</span>
-        </Link>
-        <Link
-          href="/renter/trust-score"
-          className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
-        >
-          <ShieldCheck className="h-5 w-5 text-primary" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Your trust score</p>
-            <p className="text-xs text-muted-foreground">See how your score grows over time.</p>
-          </div>
-          <span className="text-primary transition-transform group-hover:translate-x-0.5">→</span>
-        </Link>
-      </div>
+      {/* Document path + trust score links — role-aware per mounting page */}
+      {(documentsHref || trustScoreHref) && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {documentsHref && (
+            <Link
+              href={documentsHref}
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
+            >
+              <FileCheck2 className="h-5 w-5 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground">Upload an identity document</p>
+                <p className="text-xs text-muted-foreground">
+                  Scan your national ID or passport for a human-reviewed verification.
+                </p>
+              </div>
+              <span className="text-primary transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
+          )}
+          {trustScoreHref && (
+            <Link
+              href={trustScoreHref}
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
+            >
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground">Your trust score</p>
+                <p className="text-xs text-muted-foreground">See how your score grows over time.</p>
+              </div>
+              <span className="text-primary transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 };

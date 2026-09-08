@@ -2,6 +2,7 @@
 
 import { useRenterUser } from '../layout';
 import { getStoredUser } from '@/lib/authStorage';
+import { ROUTES } from '@/lib/constants/auth';
 import { VerificationCenter } from '@/components/shared/verification/VerificationCenter';
 
 export default function RenterVerificationPage() {
@@ -15,6 +16,8 @@ export default function RenterVerificationPage() {
       subjectId={subjectId}
       purpose="RENTER_ONBOARDING"
       description="Verify your identity to submit rental applications, sign leases and access higher trust limits."
+      documentsHref="/renter/settings?tab=verification"
+      trustScoreHref={ROUTES.RENTER_TRUST_SCORE}
     />
   );
 }
