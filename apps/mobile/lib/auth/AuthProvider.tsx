@@ -28,6 +28,8 @@ interface AuthContextValue {
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
   signInWithMagicLink: (token: string) => Promise<void>;
+  /** Adopt a session obtained elsewhere (signup, OAuth). */
+  applyExternalSession: (session: AuthSession) => void;
   signOut: () => Promise<void>;
 }
 
@@ -193,9 +195,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       completeTwoFactor,
       cancelTwoFactor: () => setPendingTwoFactor(null),
       signInWithMagicLink,
+      applyExternalSession: applySession,
       signOut,
     }),
-    [status, profile, pendingTwoFactor, signIn, completeTwoFactor, signInWithMagicLink, signOut]
+    [
+      status,
+      profile,
+      pendingTwoFactor,
+      signIn,
+      completeTwoFactor,
+      signInWithMagicLink,
+      applySession,
+      signOut,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

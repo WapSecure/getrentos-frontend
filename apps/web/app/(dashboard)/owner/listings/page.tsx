@@ -12,6 +12,8 @@ import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
 
 type StatusFilter = 'all' | SaleListingStatus;
@@ -116,6 +118,17 @@ export default function OwnerListingsPage() {
           New Listing
         </Button>
       </div>
+
+      {/* Publishing a for-sale listing needs an identity-verified account (tier 2). */}
+      {createMutation.error && (
+        <div className="mb-6">
+          <VerificationRequiredNotice
+            error={createMutation.error}
+            href={ROUTES.OWNER_LISTINGS}
+            verificationHref={ROUTES.OWNER_VERIFICATION}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">

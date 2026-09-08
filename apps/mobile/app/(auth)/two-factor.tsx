@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { haptics } from '@/lib/haptics';
-import { Button, Screen, Text, TextField, useTheme } from '@getrentos/ui-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { ShieldCheck } from 'lucide-react-native';
+import { AuthScaffold, Button, OtpInput, Text, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { haptics } from '@/lib/haptics';
 
-export default function TwoFactorScreen() {
+export default function TwoFactor() {
   const { pendingTwoFactor, completeTwoFactor, cancelTwoFactor } = useAuth();
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -18,12 +20,12 @@ export default function TwoFactorScreen() {
     return null;
   }
 
-  const submit = async () => {
-    if (code.length !== 6) return;
+  const submit = async (value = code) => {
+    if (value.length !== 6 || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      await completeTwoFactor(code);
+      await completeTwoFactor(value);
       await haptics.success();
     } catch (err) {
       await haptics.error();
@@ -35,46 +37,49 @@ export default function TwoFactorScreen() {
   };
 
   return (
-    <Screen>
-      <View style={{ gap: spacing.xs, marginTop: spacing['4xl'], marginBottom: spacing.xl }}>
-        <Text variant="label" color="primary" uppercase>
-          Two-factor authentication
-        </Text>
-        <Text variant="title">Enter your code</Text>
-        <Text variant="body" color="mutedForeground">
-          Open your authenticator app and enter the 6-digit code for GetRentos.
-        </Text>
+    <AuthScaffold
+      kicker="Two-factor authentication"
+      title="Enter your code"
+      subtitle="Open your authenticator app and enter the 6-digit code for GetRentos."
+      onBack={() => {
+        cancelTwoFactor();
+        router.replace('/(auth)/sign-in');
+      }}
+      footer={
+        <Button
+          label="Verify & sign in"
+          disabled={code.length !== 6}
+          loading={submitting}
+          onPress={() => submit()}
+        />
+      }
+    >
+      <View style={{ gap: spacing['2xl'], alignItems: 'center' }}>
+        <View
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 18,
+            backgroundColor: colors.accent,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ShieldCheck size={26} color={colors.primary} />
+        </View>
+
+        <View style={{ alignSelf: 'stretch' }}>
+          <OtpInput value={code} onChange={setCode} onComplete={submit} autoFocus />
+        </View>
+
+        {error ? (
+          <Animated.View entering={FadeIn.duration(160)}>
+            <Text variant="callout" color="destructive" center>
+              {error}
+            </Text>
+          </Animated.View>
+        ) : null}
       </View>
-
-      <TextField
-        label="Authentication code"
-        placeholder="123456"
-        keyboardType="number-pad"
-        maxLength={6}
-        autoFocus
-        value={code}
-        onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 6))}
-        onSubmitEditing={submit}
-        error={error}
-      />
-
-      <Button
-        label="Verify & sign in"
-        fullWidth
-        disabled={code.length !== 6}
-        loading={submitting}
-        onPress={submit}
-        style={{ marginTop: spacing.md }}
-      />
-      <Button
-        label="Back to sign in"
-        variant="ghost"
-        fullWidth
-        onPress={() => {
-          cancelTwoFactor();
-          router.replace('/(auth)/sign-in');
-        }}
-      />
-    </Screen>
+    </AuthScaffold>
   );
 }

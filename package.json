@@ -22,5 +22,10 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "pnpm": {
+    "overrides": {
+      "react-native-worklets": "0.8.3"
+    }
   }
 }
