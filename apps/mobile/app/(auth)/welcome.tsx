@@ -19,6 +19,7 @@ import {
   Star,
   ArrowRight,
   BadgeCheck,
+  MapPin,
 } from 'lucide-react-native';
 import { Button, Card, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 
@@ -35,10 +36,13 @@ const TRUST_CHIPS = [
 
 const STATS = [
   { value: '50k+', label: 'Members' },
-  { value: '$500M+', label: 'Moved safely' },
+  { value: '₦800B+', label: 'Moved safely' },
   { value: '150+', label: 'Cities' },
   { value: '99.9%', label: 'Secure' },
 ];
+
+// Faux skyline for the hero card — heights as a fraction of the strip.
+const SKYLINE = [0.42, 0.68, 0.5, 0.82, 0.6, 0.95, 0.55, 0.72, 0.46, 0.6];
 
 const FEATURES = [
   {
@@ -181,13 +185,42 @@ export default function Welcome() {
           style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}
         >
           <Card elevated padding="none">
-            <View style={{ height: 148 }}>
+            <View style={{ height: 168, overflow: 'hidden' }}>
               <LinearGradient
-                colors={[colors.primary, colors.primaryHover]}
+                colors={['#1f74e6', '#0a4fb0']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
+              {/* diagonal sheen */}
+              <LinearGradient
+                colors={['rgba(255,255,255,0.18)', 'rgba(255,255,255,0)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0.9, y: 0.7 }}
+                style={StyleSheet.absoluteFill}
+              />
+              {/* faux skyline */}
+              <View style={styles.skyline} pointerEvents="none">
+                {SKYLINE.map((h, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      flex: 1,
+                      marginHorizontal: 1.5,
+                      height: `${h * 100}%`,
+                      backgroundColor: 'rgba(255,255,255,0.14)',
+                      borderTopLeftRadius: 3,
+                      borderTopRightRadius: 3,
+                    }}
+                  />
+                ))}
+              </View>
+              {/* bottom scrim for legibility */}
+              <LinearGradient
+                colors={['rgba(6,32,72,0)', 'rgba(6,32,72,0.55)']}
+                style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 80 }}
+              />
+
               <View style={styles.heroCardTop}>
                 <View style={[styles.pill, { backgroundColor: 'rgba(255,255,255,0.22)' }]}>
                   <ShieldCheck size={13} color="#fff" />
@@ -198,6 +231,12 @@ export default function Welcome() {
                 <View style={styles.heartBtn}>
                   <Heart size={15} color="#fff" />
                 </View>
+              </View>
+              <View style={styles.heroCardLoc}>
+                <MapPin size={12} color="rgba(255,255,255,0.9)" />
+                <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
+                  Lekki Phase 1, Lagos
+                </Text>
               </View>
             </View>
 
@@ -349,41 +388,50 @@ export default function Welcome() {
 
         {/* how it works */}
         <Section title="How it works" delay={320} spacing={spacing}>
-          <View style={{ gap: spacing.lg }}>
-            {STEPS.map((s, i) => (
-              <View key={s.n} style={{ flexDirection: 'row', gap: spacing.md }}>
-                <View style={{ alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 17,
-                      borderWidth: 1.5,
-                      borderColor: colors.primary,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Text variant="caption" style={{ color: colors.primary, fontWeight: '800' }}>
-                      {s.n}
+          <View>
+            {STEPS.map((s, i) => {
+              const last = i === STEPS.length - 1;
+              return (
+                <View key={s.n} style={{ flexDirection: 'row', gap: spacing.md }}>
+                  <View style={{ alignItems: 'center', width: 36 }}>
+                    <View
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 18,
+                        borderWidth: 1.5,
+                        borderColor: colors.primary,
+                        backgroundColor: colors.accent,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text variant="caption" style={{ color: colors.primary, fontWeight: '800' }}>
+                        {s.n}
+                      </Text>
+                    </View>
+                    {!last ? (
+                      <View
+                        style={{
+                          flex: 1,
+                          width: 2,
+                          backgroundColor: colors.border,
+                          marginVertical: 4,
+                        }}
+                      />
+                    ) : null}
+                  </View>
+                  <View style={{ flex: 1, paddingBottom: last ? 0 : spacing.xl }}>
+                    <Text variant="bodyStrong" style={{ marginTop: 6 }}>
+                      {s.title}
+                    </Text>
+                    <Text variant="callout" color="mutedForeground" style={{ marginTop: 3 }}>
+                      {s.body}
                     </Text>
                   </View>
-                  {i < STEPS.length - 1 ? (
-                    <View
-                      style={{ flex: 1, width: 1.5, backgroundColor: colors.border, marginTop: 4 }}
-                    />
-                  ) : null}
                 </View>
-                <View
-                  style={{ flex: 1, paddingBottom: i < STEPS.length - 1 ? spacing.xs : 0, gap: 3 }}
-                >
-                  <Text variant="bodyStrong">{s.title}</Text>
-                  <Text variant="callout" color="mutedForeground">
-                    {s.body}
-                  </Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </Section>
 
@@ -496,11 +544,31 @@ function Section({
 
 const styles = StyleSheet.create({
   heroCardTop: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     padding: 12,
+  },
+  heroCardLoc: {
+    position: 'absolute',
+    left: 14,
+    bottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  skyline: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    bottom: 0,
+    height: 70,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
   },
   pill: {
     flexDirection: 'row',
