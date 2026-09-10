@@ -24,14 +24,18 @@ export const CreditReportingDashboard = ({ profile }: CreditReportingDashboardPr
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="w-4 h-4 text-primary" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  Credit Reporting Active
+                  Building Your Record
                 </span>
               </div>
               <h1 className="text-xl font-bold text-foreground">Building your credit history</h1>
+              <p className="text-xs text-muted-foreground mt-1 max-w-md">
+                Live bureau reporting hasn&apos;t launched yet — this history will be submitted as
+                soon as it does.
+              </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Enrolled since {profile.enrolledAt ? formatDate(profile.enrolledAt) : '—'}
+              Tracking since {profile.enrolledAt ? formatDate(profile.enrolledAt) : '—'}
             </div>
           </div>
         </div>
@@ -45,18 +49,18 @@ export const CreditReportingDashboard = ({ profile }: CreditReportingDashboardPr
             />
             <Stat
               icon={CheckCircle2}
-              label="Payments Reported"
+              label="Payments Tracked"
               value={String(profile.totalPaymentsReported)}
             />
             <Stat
               icon={Calendar}
-              label="Next Report Date"
+              label="Next Check-In"
               value={formatDate(profile.nextReportDate)}
             />
           </div>
 
           <div className="rounded-xl border border-border p-4 mb-6">
-            <p className="text-xs font-medium text-foreground mb-3">Reporting to</p>
+            <p className="text-xs font-medium text-foreground mb-3">Ready to report to</p>
             <div className="flex flex-wrap gap-2">
               {bureaus.map((bureau) => (
                 <span
@@ -68,14 +72,18 @@ export const CreditReportingDashboard = ({ profile }: CreditReportingDashboardPr
                 </span>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Nothing has been sent to these bureaus yet — your history moves the moment live
+              reporting launches.
+            </p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-foreground mb-3">Reporting History</p>
+            <p className="text-sm font-medium text-foreground mb-3">Payment History</p>
             {profile.reportedPayments.length === 0 ? (
               <div className="rounded-xl border border-border p-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Your first payment will be reported after your next rent cycle.
+                  Your first payment will be tracked after your next rent cycle.
                 </p>
               </div>
             ) : (
@@ -85,7 +93,7 @@ export const CreditReportingDashboard = ({ profile }: CreditReportingDashboardPr
                     <div>
                       <p className="text-sm font-medium text-foreground">{payment.month}</p>
                       <p className="text-xs text-muted-foreground">
-                        Reported {formatDate(payment.reportedDate)}
+                        Tracked {formatDate(payment.reportedDate)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">

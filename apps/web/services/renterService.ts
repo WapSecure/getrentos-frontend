@@ -160,6 +160,10 @@ export interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'held' | 'released' | 'pending';
+  /** Present when the payment is initialized with a real gateway (redirect here to complete checkout). */
+  authorizationUrl?: string;
+  /** Gateway reference for the payment currently being processed. */
+  reference?: string;
 }
 
 export interface Receipt {

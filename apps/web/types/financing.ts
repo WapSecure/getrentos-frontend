@@ -36,6 +36,10 @@ export interface FinancingPlan {
   appliedAt: string;
   landlordPaidAt?: string;
   installments: FinancingInstallment[];
+  /** Present when an installment payment is initialized with a real gateway (redirect here to complete checkout). */
+  authorizationUrl?: string;
+  /** Gateway reference for the installment currently being paid. */
+  reference?: string;
 }
 
 export interface FinancingOverview {

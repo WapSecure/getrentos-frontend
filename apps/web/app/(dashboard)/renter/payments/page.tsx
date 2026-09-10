@@ -18,6 +18,12 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
+/** Real gateway checkout redirect — pulled out of component scope so it reads as an
+ *  ordinary side effect rather than a render-path mutation. */
+function redirectToCheckout(url: string) {
+  window.location.href = url;
+}
+
 interface Notification {
   id: string;
   type: 'success' | 'error' | 'info' | 'warning';
@@ -69,6 +75,12 @@ export default function PaymentsPage() {
     mutationFn: ({ paymentId, method }: { paymentId: string; method?: string }) =>
       unwrap(renterService.payNow(paymentId, method)),
     onSuccess: (updated) => {
+      if (updated.authorizationUrl) {
+        // Real gateway flow — the payment is PROCESSING until checkout
+        // completes, so redirect instead of claiming success.
+        redirectToCheckout(updated.authorizationUrl);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
       pushNotification({
@@ -109,7 +121,13 @@ export default function PaymentsPage() {
     let completedCount = 0;
     try {
       for (const payment of payablePayments) {
-        await unwrap(renterService.payNow(payment.id, payment.method));
+        const updated = await unwrap(renterService.payNow(payment.id, payment.method));
+        if (updated.authorizationUrl) {
+          // Real gateway flow — only one checkout can be completed at a
+          // time, so redirect to this one now; the rest stay payable.
+          redirectToCheckout(updated.authorizationUrl);
+          return;
+        }
         completedCount += 1;
       }
       pushNotification({

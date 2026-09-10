@@ -42,7 +42,13 @@ export default function RenterFinancingPage() {
   const payInstallmentMutation = useMutation({
     mutationFn: (installmentId: string) =>
       unwrap(renterService.payFinancingInstallment(installmentId)),
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      if (updated.authorizationUrl) {
+        // Real gateway flow — the installment is PROCESSING until the
+        // renter completes checkout, so redirect instead of claiming success.
+        window.location.href = updated.authorizationUrl;
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: renterKeys.financing });
       setToast('Installment paid.');
     },

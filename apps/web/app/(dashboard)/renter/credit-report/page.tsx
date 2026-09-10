@@ -31,7 +31,7 @@ export default function RenterCreditReportPage() {
       queryClient.invalidateQueries({ queryKey: renterKeys.creditReporting });
       const count = updated?.reportedPayments?.length ?? 0;
       setToast(
-        `You are enrolled — ${count} month${count === 1 ? '' : 's'} of on-time rent history will be reported.`
+        `You're now tracking your credit record — ${count} month${count === 1 ? '' : 's'} of on-time rent history so far.`
       );
     },
   });

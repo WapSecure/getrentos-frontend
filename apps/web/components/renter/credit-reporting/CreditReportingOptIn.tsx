@@ -22,17 +22,19 @@ const benefits = [
   {
     icon: TrendingUp,
     title: 'Rent counts toward your credit history',
-    description: 'Most renters get zero credit for years of on-time rent. We change that.',
+    description: 'Most renters get zero credit for years of on-time rent. We aim to change that.',
   },
   {
     icon: Building2,
-    title: 'Reported to all three bureaus',
-    description: 'Your payment history is shared with every licensed credit bureau in Nigeria.',
+    title: 'Built for Nigeria’s credit bureaus',
+    description:
+      'We’re integrating with licensed bureaus so your record is ready to submit the moment reporting goes live.',
   },
   {
     icon: ShieldCheck,
-    title: 'Only positive history is shared',
-    description: 'We report your on-time payment streak — this never lowers your existing score.',
+    title: 'Only positive history, ever',
+    description:
+      'Only your on-time payment streak is tracked — this can never lower an existing score.',
   },
 ];
 
@@ -46,7 +48,7 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-primary" />
             <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Credit Building
+              Credit Building · Coming Soon
             </span>
           </div>
           <h1 className="text-2xl font-bold text-foreground">
@@ -54,8 +56,8 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-lg">
             Paying rent on time is proof you pay your bills — but it has never counted toward your
-            credit score. GetRentos reports your on-time rent payments to Nigeria&apos;s credit
-            bureaus so it finally does.
+            credit score. Start tracking your on-time rent payments now, and we&apos;ll submit that
+            history to Nigeria&apos;s credit bureaus as soon as reporting goes live.
           </p>
         </div>
 
@@ -73,7 +75,9 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
           </div>
 
           <div className="rounded-xl border border-border p-4 mb-4">
-            <p className="text-xs font-medium text-foreground mb-3">Reporting to</p>
+            <p className="text-xs font-medium text-foreground mb-3">
+              Bureau partners we&apos;re integrating with
+            </p>
             <div className="flex flex-wrap gap-2">
               {bureaus.map((bureau) => (
                 <span
@@ -85,6 +89,10 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
                 </span>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Live reporting to these bureaus hasn&apos;t launched yet — turning this on today only
+              starts building your track record inside GetRentos.
+            </p>
           </div>
 
           <label className="flex items-start gap-2 cursor-pointer mb-4">
@@ -95,9 +103,9 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
               className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
             />
             <span className="text-xs text-muted-foreground">
-              I consent to GetRentos reporting my monthly rent and Flex installment payment history
-              to CRC Credit Bureau, FirstCentral Credit Bureau, and XDS Credit Bureau on an ongoing
-              basis.
+              I&apos;d like GetRentos to start tracking my on-time rent and Flex installment
+              payments now, so my history is ready to submit to Nigeria&apos;s credit bureaus the
+              moment that reporting goes live.
             </span>
           </label>
 
@@ -108,11 +116,11 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
             disabled={!agreed || isEnrolling}
           >
             {isEnrolling ? (
-              'Enrolling...'
+              'Starting...'
             ) : (
               <>
                 <Check className="w-4 h-4" />
-                Start Reporting My Rent
+                Start Building My Credit Record
               </>
             )}
           </Button>

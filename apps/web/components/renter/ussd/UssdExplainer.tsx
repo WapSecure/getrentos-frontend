@@ -28,14 +28,15 @@ export const UssdExplainer = () => {
         <div className="flex items-center gap-2 mb-2">
           <Smartphone className="w-5 h-5 text-primary" />
           <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-            USSD Access
+            USSD Access · Coming Soon
           </span>
         </div>
         <h1 className="text-2xl font-bold text-foreground">GetRentos without a smartphone</h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-lg">
-          Dial <span className="font-semibold text-foreground">{USSD_CODE}</span> from any phone to
-          check your rent balance, pay, view your Trust Score, or report a maintenance issue — no
-          app, no data plan.
+          We&apos;re building dial-in access on{' '}
+          <span className="font-semibold text-foreground">{USSD_CODE}</span> so you can check your
+          rent balance, pay, view your Trust Score, or report a maintenance issue from any phone —
+          no app, no data plan. Try the preview below to see how it&apos;ll work.
         </p>
       </div>
 
