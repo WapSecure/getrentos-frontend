@@ -317,3 +317,8 @@ export const subscriptionKeys = {
   mine: ['subscription', 'mine'] as const,
   pricing: ['subscription', 'pricing'] as const,
 };
+
+/** Billing lifecycle state (status, trial/period end, cancellation). */
+export const billingKeys = {
+  mine: ['billing', 'mine'] as const,
+};

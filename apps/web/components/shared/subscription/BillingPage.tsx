@@ -3,6 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
+import { useProCheckout } from '@/hooks/useProCheckout';
 import { PlanBadge } from '@/components/shared/subscription/PlanBadge';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
@@ -12,15 +13,15 @@ import type { BillingCycle, PlanPersona } from '@/services/subscriptionService';
  * Shared billing & plan page for every persona. Price and the Free-vs-Pro
  * matrix are read from the backend pricing catalog (single source of truth),
  * so the offer is described identically everywhere and always matches what we
- * charge. `onUpgrade` (wired to the Pro checkout) is optional — without it the
- * CTA falls back to contact-us.
+ * charge. Checkout starts a real Pro trial; pass `onUpgrade` only to override
+ * that (tests/storybook).
  */
 export function BillingPage({
   persona,
   title = 'Billing & plan',
   description = "See what's included on Free and what Pro unlocks.",
   onUpgrade,
-  upgrading = false,
+  upgrading,
 }: {
   persona: PlanPersona;
   title?: string;
@@ -30,7 +31,11 @@ export function BillingPage({
 }) {
   const { isPro } = usePlanTier();
   const { pricing, entitlementsFor, isLoading } = usePlanPricing();
+  const checkout = useProCheckout();
   const rows = entitlementsFor(persona);
+
+  const upgrade = onUpgrade ?? checkout.startCheckout;
+  const isUpgrading = upgrading ?? checkout.upgrading;
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -54,7 +59,19 @@ export function BillingPage({
       </div>
 
       {!isPro && (
-        <ProPriceCard pricing={pricing} isPro={isPro} onUpgrade={onUpgrade} upgrading={upgrading} />
+        <>
+          <ProPriceCard
+            pricing={pricing}
+            isPro={isPro}
+            onUpgrade={upgrade}
+            upgrading={isUpgrading}
+          />
+          {checkout.error && !onUpgrade && (
+            <p className="text-sm text-destructive" role="alert">
+              {checkout.error}
+            </p>
+          )}
+        </>
       )}
 
       {isLoading && rows.length === 0 ? (
