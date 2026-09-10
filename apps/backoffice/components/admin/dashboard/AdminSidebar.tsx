@@ -176,10 +176,10 @@ const navItems: NavItem[] = [
 const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'People and trust', items: navItems.slice(1, 5) },
-  { label: 'Marketplace operations', items: navItems.slice(5, 13) },
-  { label: 'Risk and finance', items: navItems.slice(13, 17) },
-  { label: 'Support and insights', items: navItems.slice(17, 20) },
-  { label: 'Platform administration', items: navItems.slice(20) },
+  { label: 'Marketplace operations', items: navItems.slice(5, 14) },
+  { label: 'Risk and finance', items: navItems.slice(14, 18) },
+  { label: 'Support and insights', items: navItems.slice(18, 21) },
+  { label: 'Platform administration', items: navItems.slice(21) },
 ];
 
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
