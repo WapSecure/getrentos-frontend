@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 import { Button, Input, Select } from '@getrentos/ui';
 import { cn, unwrap } from '@/lib/apiHelpers';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { kycService } from '@/services/kycService';
 import {
   trustService,
@@ -144,6 +145,13 @@ export const VerificationCenter = ({
 
   const invalidateVerification = () =>
     queryClient.invalidateQueries({ queryKey: ['trust-verification', verificationId] });
+
+  // Live update: when the orchestrator decides (auto or reviewer), refresh the
+  // status chip + tier without a manual reload.
+  useRealtimeEvent('verification:decided', () => {
+    queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
+    queryClient.invalidateQueries({ queryKey: ['trust-verification'] });
+  });
 
   const { data: kyc } = useQuery({
     queryKey: ['kyc-status'],

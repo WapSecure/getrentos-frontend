@@ -339,6 +339,7 @@ export const ROUTES = {
   BUYER_HELP: '/buyer/help',
   BUYER_LAND: '/buyer/land',
   BUYER_BOOKINGS: '/buyer/bookings',
+  BUYER_VERIFICATION: '/buyer/verification',
 
   // Realtor specific routes
   REALTOR_CLIENTS: '/realtor/clients',
