@@ -81,6 +81,17 @@ export const adminShortletService = {
     );
   },
 
+  listingPublishingEligibility(listingId: string): Promise<ApiResponse<{
+    eligible: boolean;
+    reasons: string[];
+    identityVerified: boolean;
+    ownershipVerified: boolean;
+    trustTier: number;
+    propertyArchived: boolean;
+  }>> {
+    return safeCall(() => authFetch(`/admin/shortlets/listings/${listingId}/publishing-eligibility`));
+  },
+
   pauseListing(listingId: string): Promise<ApiResponse<AdminShortletListing>> {
     return safeCall(() =>
       authFetch<AdminShortletListing>(`/admin/shortlets/listings/${listingId}/pause`, {

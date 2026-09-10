@@ -302,7 +302,7 @@ function ActionGroup({ children }: { children: ReactNode }) {
 
 export function ListingsQueue() {
   const actions = useQueueActions();
-  const request = (
+  const request = async (
     listing: AdminRentalListing,
     verb: 'pause' | 'flag' | 'resume' | 'close' | 'approve'
   ) => {
@@ -345,10 +345,22 @@ export function ListingsQueue() {
       close: () => adminRentalService.closeListing(listing.id),
       approve: () => adminRentalService.approveListing(listing.id),
     };
+    let eligibilityNote = '';
+    if (verb === 'resume' || verb === 'approve') {
+      try {
+        const detail = await unwrap(adminRentalService.listingDetail(listing.id));
+        const eligibility = detail.publishingEligibility;
+        eligibilityNote = eligibility?.eligible
+          ? ' Publishing checks passed: owner identity and ownership proof are approved.'
+          : ` Publishing is currently blocked: ${eligibility?.reasons.join('; ') || 'eligibility requirements are incomplete'}.`;
+      } catch {
+        eligibilityNote = ' Publishing eligibility will be rechecked by the server before this action completes.';
+      }
+    }
     actions.request({
       key: `${verb}:${listing.id}`,
       title: copy[0],
-      description: `${listing.title}: ${copy[1]}`,
+      description: `${listing.title}: ${copy[1]}${eligibilityNote}`,
       confirmLabel: copy[2],
       successMessage: `${listing.title}: ${copy[3]}`,
       run: calls[verb],

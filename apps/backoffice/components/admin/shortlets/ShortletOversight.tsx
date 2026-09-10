@@ -181,6 +181,12 @@ export const ShortletOversight = () => {
     listing: AdminShortletListing;
     action: 'pause' | 'resume' | 'close' | 'flag' | 'approve';
   } | null>(null);
+  const publishingAction = pendingModeration?.action === 'resume' || pendingModeration?.action === 'approve';
+  const publishingEligibility = useQuery({
+    queryKey: ['admin', 'shortlets', 'listings', pendingModeration?.listing.id, 'publishing-eligibility'],
+    queryFn: () => unwrap(adminShortletService.listingPublishingEligibility(pendingModeration!.listing.id)),
+    enabled: Boolean(pendingModeration && publishingAction),
+  });
   const [pendingDisputeAction, setPendingDisputeAction] = useState<'resolve' | 'escalate' | null>(
     null
   );
@@ -1178,12 +1184,28 @@ export const ShortletOversight = () => {
                   flag: 'hidden and returned to verification',
                   approve: 'approved and published to guests',
                 }[pendingModeration.action]
-              }.`
+              }.${publishingAction
+                ? publishingEligibility.isLoading
+                  ? ' Checking identity and ownership requirements…'
+                  : publishingEligibility.isError
+                    ? ' Eligibility could not be preloaded; the server will still enforce every requirement.'
+                    : publishingEligibility.data?.eligible
+                      ? ' Publishing checks passed: identity and ownership are approved.'
+                      : ` Publishing is blocked: ${publishingEligibility.data?.reasons.join('; ') || 'requirements are incomplete'}.`
+                : ''}`
             : ''
         }
         confirmLabel={pendingModeration ? `${pendingModeration.action} listing` : 'Confirm'}
+        isLoading={moderation.isPending || (publishingAction && publishingEligibility.isLoading)}
         onConfirm={() => {
           if (pendingModeration) {
+            if (publishingAction && publishingEligibility.data && !publishingEligibility.data.eligible) {
+              setToast({
+                message: `Publishing blocked: ${publishingEligibility.data.reasons.join('; ')}`,
+                variant: 'error',
+              });
+              return;
+            }
             moderation.mutate({
               listingId: pendingModeration.listing.id,
               action: pendingModeration.action,

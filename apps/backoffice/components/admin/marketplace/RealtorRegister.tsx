@@ -22,6 +22,7 @@ import {
   PageErrorState,
   Pagination,
   LegacyInput,
+  Select,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
@@ -95,20 +96,22 @@ export const RealtorRegister = () => {
               className="w-full pl-9"
             />
           </div>
-          <select
+          <Select
             value={license}
-            onChange={(e) => {
-              setLicense(e.target.value as LicenseFilter);
+            ariaLabel="Filter by license status"
+            onValueChange={(value) => {
+              setLicense(value as LicenseFilter);
               setPage(1);
             }}
             className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="all">All licenses</option>
-            <option value="APPROVED">Licensed</option>
-            <option value="PENDING_REVIEW">Pending review</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="NONE">No license</option>
-          </select>
+            options={[
+              { value: 'all', label: 'All licenses' },
+              { value: 'APPROVED', label: 'Licensed' },
+              { value: 'PENDING_REVIEW', label: 'Pending review' },
+              { value: 'REJECTED', label: 'Rejected' },
+              { value: 'NONE', label: 'No license' },
+            ]}
+          />
         </div>
 
         {isError ? (

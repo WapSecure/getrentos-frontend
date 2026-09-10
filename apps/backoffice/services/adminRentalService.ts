@@ -6,10 +6,12 @@ import type {
   AdminRentalEviction,
   AdminRentalLease,
   AdminRentalListing,
+  AdminRentalListingDetail,
   AdminRentalOverview,
   AdminRentalRenewal,
   AdminRentalTermination,
   AdminRentalViewing,
+  AdminRentalUnit,
   RentalEvictionStatus,
   RentalLeaseStatus,
 } from '@/types/rental';
@@ -19,6 +21,11 @@ export interface RentalListParams {
   status?: string;
   page?: number;
   pageSize?: number;
+}
+
+export interface UnitListParams extends RentalListParams {
+  propertyId?: string;
+  occupancyStatus?: string;
 }
 
 const listResource = <T>(
@@ -48,8 +55,34 @@ export const adminRentalService = {
     return safeCall(() => authFetch<AdminRentalOverview>('/admin/rentals/overview'));
   },
 
+  listUnits(params: UnitListParams = {}): Promise<ApiResponse<Paginated<AdminRentalUnit>>> {
+    const query = toQuery({
+      search: params.search,
+      propertyId: params.propertyId,
+      occupancyStatus: params.occupancyStatus,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() => authFetch<Paginated<AdminRentalUnit>>(`/admin/rentals/units${query}`));
+  },
+  assignUnitTenant(id: string, tenantName: string): Promise<ApiResponse<void>> {
+    return post<void>(`units/${id}/tenant`, { tenantName });
+  },
+  removeUnitTenant(id: string): Promise<ApiResponse<void>> {
+    return post<void>(`units/${id}/remove-tenant`);
+  },
+  bulkUnitPricing(unitIds: string[], monthlyRent: number): Promise<ApiResponse<{ requestedCount: number; updatedCount: number }>> {
+    return post('units/bulk-pricing', { unitIds, monthlyRent });
+  },
+  bulkUnitCharges(input: { unitIds: string[]; amount: number; dueDate: string; category: string; billingCycle: string }): Promise<ApiResponse<{ requestedCount: number; createdCount: number; skippedUnitIds: string[] }>> {
+    return post('units/bulk-charges', input);
+  },
+
   listListings(params: RentalListParams = {}): Promise<ApiResponse<Paginated<AdminRentalListing>>> {
     return listResource<AdminRentalListing>('listings', params);
+  },
+  listingDetail(listingId: string): Promise<ApiResponse<AdminRentalListingDetail>> {
+    return safeCall(() => authFetch<AdminRentalListingDetail>(`/admin/rentals/listings/${listingId}`));
   },
   pauseListing(listingId: string): Promise<ApiResponse<AdminRentalListing>> {
     return post<AdminRentalListing>(`listings/${listingId}/pause`);

@@ -31,6 +31,12 @@ const EMPTY: AdminRentalOverview = {
 
 const modules = [
   {
+    label: 'Units & tenants',
+    description: 'Occupancy, pricing and bulk charges',
+    href: '/admin/rentals/units',
+    icon: Landmark,
+  },
+  {
     label: 'Listings',
     description: 'Long-term RENT/SALE listings',
     href: '/admin/rentals/listings',

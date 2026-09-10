@@ -5,6 +5,7 @@ import type {
   AdminAgent,
   AdminAgentDetail,
   AdminMarketplaceListing,
+  AdminMarketplaceListingDetail,
   AdminMarketplaceOffer,
   AdminMarketplaceOfferDetail,
   AdminMarketplaceOverview,
@@ -60,6 +61,12 @@ export const adminMarketplaceService = {
     });
     return safeCall(() =>
       authFetch<Paginated<AdminMarketplaceListing>>(`/admin/marketplace/listings${query}`)
+    );
+  },
+
+  listingDetail(listingId: string): Promise<ApiResponse<AdminMarketplaceListingDetail>> {
+    return safeCall(() =>
+      authFetch<AdminMarketplaceListingDetail>(`/admin/marketplace/listings/${listingId}`)
     );
   },
 

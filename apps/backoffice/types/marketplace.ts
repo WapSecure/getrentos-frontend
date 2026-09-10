@@ -51,6 +51,20 @@ export interface AdminMarketplaceListing {
   publishedAt?: string;
 }
 
+export interface PublishingEligibility {
+  eligible: boolean;
+  reasons: string[];
+  identityVerified: boolean;
+  ownershipVerified: boolean;
+  trustTier: number;
+  propertyArchived: boolean;
+}
+
+export interface AdminMarketplaceListingDetail extends AdminMarketplaceListing {
+  media: Array<{ name: string; mimeType: string | null; url: string }>;
+  publishingEligibility: PublishingEligibility;
+}
+
 export interface AdminMarketplaceOffer {
   id: string;
   listingId: string;

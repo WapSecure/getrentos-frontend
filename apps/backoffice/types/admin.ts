@@ -150,6 +150,8 @@ export interface VerificationRequest {
   rejectionReason?: string;
   /** Real submitted documents (signed preview URLs) — present on the detail endpoint. */
   documents?: VerificationDocument[];
+  /** Property cover, gallery, and video-tour previews on property requests. */
+  media?: VerificationDocument[];
 }
 
 export interface Dispute {

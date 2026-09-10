@@ -22,6 +22,23 @@ export interface AdminRentalOverview {
   activeLeases: number;
 }
 
+export type UnitOccupancyStatus = 'VACANT' | 'OCCUPIED' | 'NOTICE_GIVEN';
+
+export interface AdminRentalUnit {
+  id: string;
+  propertyId: string;
+  propertyTitle: string;
+  ownerId: string;
+  ownerName: string;
+  unitName: string;
+  monthlyRent: number;
+  occupancyStatus: UnitOccupancyStatus;
+  tenantId: string | null;
+  tenantName: string | null;
+  activeLease: boolean;
+  pendingChargeCount: number;
+}
+
 export interface AdminRentalListing {
   id: string;
   listingType: RentalListingType;
@@ -40,6 +57,17 @@ export interface AdminRentalListing {
   bedrooms: number | null;
   bathrooms: number | null;
   createdAt: string;
+}
+
+export interface AdminRentalListingDetail extends AdminRentalListing {
+  publishingEligibility?: {
+    eligible: boolean;
+    reasons: string[];
+    identityVerified: boolean;
+    ownershipVerified: boolean;
+    trustTier: number;
+    propertyArchived: boolean;
+  };
 }
 
 export interface AdminRentalApplication {

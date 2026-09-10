@@ -50,6 +50,7 @@ export const ReviewVerificationModal = ({
     enabled: Boolean(request),
   });
   const documents = detail?.documents ?? [];
+  const media = detail?.media ?? [];
   const detailUnavailable = detailLoading || detailError;
 
   const handleClose = () => {
@@ -162,6 +163,28 @@ export const ReviewVerificationModal = ({
                     </div>
                   )}
                 </div>
+                {request.type === 'property' && (
+                  <div>
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Property Media ({media.length})
+                    </p>
+                    {detailLoading ? (
+                      <p className="rounded-lg border border-border p-3 text-xs text-muted-foreground">Loading property media…</p>
+                    ) : media.length === 0 ? (
+                      <p className="rounded-lg border border-warning/30 bg-warning/5 p-3 text-xs text-foreground">No property media is available. Confirm whether media is required before approval.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {media.map((file) => (
+                          <div key={file.url} className="flex items-center gap-2 rounded-lg border border-border p-2">
+                            <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            <span className="min-w-0 flex-1 truncate text-sm">{file.name}</span>
+                            <DocumentPreviewButton file={file} title={`View ${file.name}`} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div>

@@ -24,6 +24,8 @@ import {
   Pagination,
   StatCard,
   LegacyInput,
+  Select,
+  DocumentPreviewButton,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
@@ -31,6 +33,7 @@ import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import type {
   AdminMarketplaceOffer,
+  AdminMarketplaceListing,
   AdminMarketplaceOfferDetail,
   SaleListingStatus,
   SaleOfferStatus,
@@ -275,6 +278,7 @@ function SaleListingsPanel() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<ListingStatusFilter>('all');
   const [page, setPage] = useState(1);
+  const [activeListing, setActiveListing] = useState<AdminMarketplaceListing | null>(null);
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'marketplace', 'listings', { search, status, page }],
@@ -305,21 +309,23 @@ function SaleListingsPanel() {
             className="w-full pl-9"
           />
         </div>
-        <select
+        <Select
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value as ListingStatusFilter);
+          ariaLabel="Filter listings by status"
+          onValueChange={(value) => {
+            setStatus(value as ListingStatusFilter);
             setPage(1);
           }}
           className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-        >
-          <option value="all">All statuses</option>
-          <option value="PUBLISHED">Published</option>
-          <option value="PENDING_VERIFICATION">Pending review</option>
-          <option value="PAUSED">Paused</option>
-          <option value="CLOSED">Closed</option>
-          <option value="DRAFT">Draft</option>
-        </select>
+          options={[
+            { value: 'all', label: 'All statuses' },
+            { value: 'PUBLISHED', label: 'Published' },
+            { value: 'PENDING_VERIFICATION', label: 'Pending review' },
+            { value: 'PAUSED', label: 'Paused' },
+            { value: 'CLOSED', label: 'Closed' },
+            { value: 'DRAFT', label: 'Draft' },
+          ]}
+        />
       </div>
 
       {isError ? (
@@ -343,7 +349,12 @@ function SaleListingsPanel() {
           {items.map((l) => {
             const seller = l.sellerName;
             return (
-              <div key={l.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => setActiveListing(l)}
+                className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+              >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium">{l.title}</p>
@@ -367,7 +378,7 @@ function SaleListingsPanel() {
                     Listed {formatDate(l.createdAt, 'short')}
                   </p>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -379,6 +390,74 @@ function SaleListingsPanel() {
         total={data?.total ?? 0}
         onPageChange={setPage}
       />
+      {activeListing && (
+        <ListingDetailDialog listingId={activeListing.id} onClose={() => setActiveListing(null)} />
+      )}
+    </div>
+  );
+}
+
+function ListingDetailDialog({ listingId, onClose }: { listingId: string; onClose: () => void }) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['admin', 'marketplace', 'listings', listingId, 'detail'],
+    queryFn: () => unwrap(adminMarketplaceService.listingDetail(listingId)),
+  });
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="listing-detail-title"
+        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="listing-detail-title" className="text-lg font-semibold">Listing inspection</h2>
+            {data && <p className="text-sm text-muted-foreground">{data.title}</p>}
+          </div>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </div>
+        {isLoading ? (
+          <div className="mt-5 h-40 animate-pulse rounded-xl bg-secondary" />
+        ) : isError || !data ? (
+          <PageErrorState title="Could not load listing detail" description="Media and publishing checks are unavailable." className="mt-5 min-h-[180px]" />
+        ) : (
+          <div className="mt-5 space-y-5">
+            <section className={`rounded-xl border p-4 ${data.publishingEligibility.eligible ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
+              <h3 className="font-medium">Publishing eligibility</h3>
+              <p className="mt-1 text-sm">
+                {data.publishingEligibility.eligible
+                  ? 'Eligible to publish: identity and ownership requirements are satisfied.'
+                  : 'Publishing is blocked until every requirement below is resolved.'}
+              </p>
+              {!data.publishingEligibility.eligible && (
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-destructive">
+                  {data.publishingEligibility.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+                </ul>
+              )}
+              <p className="mt-2 text-xs text-muted-foreground">
+                Trust tier {data.publishingEligibility.trustTier} · Identity {data.publishingEligibility.identityVerified ? 'approved' : 'not approved'} · Ownership {data.publishingEligibility.ownershipVerified ? 'approved' : 'not approved'}
+              </p>
+            </section>
+            <section>
+              <h3 className="font-medium">Property media</h3>
+              {data.media.length === 0 ? (
+                <p className="mt-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">No cover image, gallery image, or video tour has been uploaded.</p>
+              ) : (
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {data.media.map((file) => (
+                    <div key={`${file.name}-${file.url}`} className="flex items-center justify-between gap-2 rounded-lg border p-3">
+                      <span className="truncate text-sm">{file.name}</span>
+                      <DocumentPreviewButton file={file} title={`Preview ${file.name}`} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -418,21 +497,22 @@ function OfferQueuePanel() {
             className="w-full pl-9"
           />
         </div>
-        <select
+        <Select
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value as OfferStatusFilter);
+          ariaLabel="Filter offers by status"
+          onValueChange={(value) => {
+            setStatus(value as OfferStatusFilter);
             setPage(1);
           }}
           className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-        >
-          <option value="all">All statuses</option>
-          {(Object.keys(OFFER_STATUS_LABEL) as SaleOfferStatus[]).map((s) => (
-            <option key={s} value={s}>
-              {OFFER_STATUS_LABEL[s]}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: 'all', label: 'All statuses' },
+            ...(Object.keys(OFFER_STATUS_LABEL) as SaleOfferStatus[]).map((value) => ({
+              value,
+              label: OFFER_STATUS_LABEL[value],
+            })),
+          ]}
+        />
       </div>
 
       {isError ? (
