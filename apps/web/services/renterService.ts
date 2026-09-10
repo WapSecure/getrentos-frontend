@@ -611,6 +611,21 @@ export const renterService = {
     );
   },
 
+  /** Pending roommate invites addressed to the current user (they're the invitee). */
+  async listMyRoommateInvites(): Promise<ApiResponse<Roommate[]>> {
+    return safeCall(() => authFetch('/renter/roommates/invites'));
+  },
+
+  async acceptRoommateInvite(id: string): Promise<ApiResponse<Roommate>> {
+    return safeCall(() => authFetch(`/renter/roommates/invites/${id}/accept`, { method: 'PATCH' }));
+  },
+
+  async declineRoommateInvite(id: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/renter/roommates/invites/${id}/decline`, { method: 'PATCH' })
+    );
+  },
+
   async removeRoommate(id: string): Promise<ApiResponse<void>> {
     return safeCall(() => authFetch(`/renter/roommates/${id}`, { method: 'DELETE' }));
   },
@@ -1101,11 +1116,20 @@ export const renterService = {
   },
 
   async createMaintenanceRequest(
-    data: CreateMaintenanceRequestInput
+    data: CreateMaintenanceRequestInput,
+    photos: File[] = []
   ): Promise<ApiResponse<MaintenanceRequest>> {
-    return safeCall(() =>
-      authFetch('/renter/maintenance', { method: 'POST', body: JSON.stringify(data) })
-    );
+    if (photos.length === 0) {
+      return safeCall(() =>
+        authFetch('/renter/maintenance', { method: 'POST', body: JSON.stringify(data) })
+      );
+    }
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) formData.append(key, String(value));
+    });
+    photos.forEach((photo) => formData.append('files', photo));
+    return safeCall(() => authFetch('/renter/maintenance', { method: 'POST', body: formData }));
   },
 
   async cancelMaintenanceRequest(id: string): Promise<ApiResponse<MaintenanceRequest>> {

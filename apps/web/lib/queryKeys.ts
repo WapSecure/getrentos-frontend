@@ -70,6 +70,7 @@ export const renterKeys = {
   applicationNotes: (applicationId: string) =>
     ['renter', 'applications', applicationId, 'notes'] as const,
   roommates: ['renter', 'roommates'] as const,
+  roommateInvites: ['renter', 'roommateInvites'] as const,
   roommateExpenses: ['renter', 'roommateExpenses'] as const,
   calendarEvents: ['renter', 'calendarEvents'] as const,
   trustScore: ['renter', 'trustScore'] as const,
