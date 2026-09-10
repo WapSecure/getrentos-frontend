@@ -55,4 +55,17 @@ export const billingService = {
   async getMine(): Promise<ApiResponse<MyBilling>> {
     return safeCall(() => authFetch<MyBilling>('/billing'));
   },
+
+  /**
+   * Stops the plan renewing. Access continues to the end of the period already
+   * paid for — cancelling never cuts a customer off early.
+   */
+  async cancel(): Promise<ApiResponse<MyBilling>> {
+    return safeCall(() => authFetch<MyBilling>('/billing/cancel', { method: 'POST' }));
+  },
+
+  /** Undoes a scheduled cancellation. */
+  async reactivate(): Promise<ApiResponse<MyBilling>> {
+    return safeCall(() => authFetch<MyBilling>('/billing/reactivate', { method: 'POST' }));
+  },
 };
