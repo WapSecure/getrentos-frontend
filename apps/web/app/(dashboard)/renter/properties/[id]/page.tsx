@@ -308,7 +308,7 @@ export default function PropertyDetailPage() {
                     size="sm"
                     fullWidth
                     className="gap-2"
-                    onClick={() => router.push(ROUTES.RENTER_FINANCING)}
+                    onClick={() => router.push(`${ROUTES.RENTER_PAYMENTS}?tab=financing`)}
                   >
                     <Zap className="w-4 h-4" />
                     See Monthly Payment Plans

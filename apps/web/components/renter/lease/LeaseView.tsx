@@ -21,7 +21,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
-export default function LeasePage() {
+export const LeaseView = () => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
@@ -175,4 +175,4 @@ export default function LeasePage() {
       </div>
     </>
   );
-}
+};

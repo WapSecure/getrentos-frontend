@@ -102,7 +102,7 @@ export const RenterLeaseRenewal = () => {
           variant="outline"
           fullWidth
           className="gap-2"
-          onClick={() => router.push(ROUTES.RENTER_LEASE)}
+          onClick={() => router.push(`${ROUTES.RENTER_HOME}?tab=lease`)}
         >
           <FileText className="w-4 h-4" />
           Review Lease Terms

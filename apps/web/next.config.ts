@@ -42,6 +42,36 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: imageRemotePatterns(),
   },
+  async redirects() {
+    // Several former standalone renter pages were merged into tabbed hubs to
+    // trim the sidebar. Old URLs (bookmarks, deep links, in-app references)
+    // keep working by landing on the right tab of the merged destination.
+    return [
+      { source: '/renter/lease', destination: '/renter/home?tab=lease', permanent: true },
+      { source: '/renter/documents', destination: '/renter/home?tab=documents', permanent: true },
+      {
+        source: '/renter/financing',
+        destination: '/renter/payments?tab=financing',
+        permanent: true,
+      },
+      {
+        source: '/renter/verification',
+        destination: '/renter/trust-score?tab=verification',
+        permanent: true,
+      },
+      {
+        source: '/renter/credit-report',
+        destination: '/renter/trust-score?tab=credit',
+        permanent: true,
+      },
+      {
+        source: '/renter/legal-resources',
+        destination: '/renter/help?tab=legal',
+        permanent: true,
+      },
+      { source: '/renter/ussd-access', destination: '/renter/settings?tab=ussd', permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

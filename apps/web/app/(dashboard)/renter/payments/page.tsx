@@ -13,10 +13,18 @@ import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentRece
 import { PaymentNotifications } from '@/components/renter/payments/PaymentNotifications';
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
 import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
+import { CreditCard, Zap } from 'lucide-react';
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import { FinancingView } from '@/components/renter/financing/FinancingView';
+import { HubTabs, useHubTab, type HubTab } from '@/components/renter/shared/HubTabs';
+
+const TABS: HubTab[] = [
+  { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'financing', label: 'Flex Financing', icon: Zap },
+];
 
 /** Real gateway checkout redirect — pulled out of component scope so it reads as an
  *  ordinary side effect rather than a render-path mutation. */
@@ -37,6 +45,7 @@ type DisplayPayment = Omit<Payment, 'method'> & { method: 'card' | 'bank_transfe
 
 export default function PaymentsPage() {
   const queryClient = useQueryClient();
+  const [activeTab, setTab] = useHubTab('payments', ['payments', 'financing']);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
@@ -236,24 +245,44 @@ export default function PaymentsPage() {
     await addPaymentMethodMutation.mutateAsync(data);
   };
 
+  const tabNav = <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />;
+
+  if (activeTab === 'financing') {
+    return (
+      <>
+        {tabNav}
+        <FinancingView />
+      </>
+    );
+  }
+
   const paymentQueries = [paymentsQuery, receiptsQuery, paymentMethodsQuery];
   if (paymentQueries.some((query) => query.isLoading)) {
-    return <PageLoadingState />;
+    return (
+      <>
+        {tabNav}
+        <PageLoadingState />
+      </>
+    );
   }
 
   if (paymentQueries.some((query) => query.isError)) {
     return (
-      <PageErrorState
-        title="Payment information is unavailable"
-        description="We could not load your payments, receipts, or payment methods. No payment has been attempted."
-        onRetry={() => paymentQueries.forEach((query) => void query.refetch())}
-        isRetrying={paymentQueries.some((query) => query.isFetching)}
-      />
+      <>
+        {tabNav}
+        <PageErrorState
+          title="Payment information is unavailable"
+          description="We could not load your payments, receipts, or payment methods. No payment has been attempted."
+          onRetry={() => paymentQueries.forEach((query) => void query.refetch())}
+          isRetrying={paymentQueries.some((query) => query.isFetching)}
+        />
+      </>
     );
   }
 
   return (
     <>
+      {tabNav}
       <PaymentsHeader onExport={() => setShowExportModal(true)} />
       <PaymentsStats payments={payments} />
 

@@ -7,23 +7,15 @@ import {
   FileText,
   CreditCard,
   MessageCircle,
-  Home,
   House,
   Wrench,
   Settings,
   HelpCircle,
-  FileCheck,
   Users,
   Star,
-  Bell,
   Calendar,
-  Zap,
-  TrendingUp,
-  Smartphone,
-  Scale,
   BedDouble,
   Gift,
-  ShieldCheck,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -61,10 +53,10 @@ export const navGroups: NavGroup[] = [
   {
     label: 'Your tenancy',
     items: [
-      { labelKey: 'sidebar.my_lease', href: ROUTES.RENTER_LEASE, icon: FileCheck },
-      { labelKey: 'sidebar.payments', href: ROUTES.RENTER_PAYMENTS, icon: CreditCard },
-      { labelKey: 'sidebar.flex_financing', href: ROUTES.RENTER_FINANCING, icon: Zap },
+      // "My Home" is now a hub: Overview / Lease / Documents / Inspections tabs.
       { labelKey: 'sidebar.my_home', href: ROUTES.RENTER_HOME, icon: House },
+      // "Payments" now carries a Flex Financing tab.
+      { labelKey: 'sidebar.payments', href: ROUTES.RENTER_PAYMENTS, icon: CreditCard },
       { labelKey: 'sidebar.maintenance', href: ROUTES.RENTER_MAINTENANCE, icon: Wrench },
       { labelKey: 'sidebar.roommates', href: ROUTES.RENTER_ROOMMATES, icon: Users },
     ],
@@ -73,21 +65,17 @@ export const navGroups: NavGroup[] = [
     label: 'Communication',
     items: [
       { labelKey: 'sidebar.messages', href: ROUTES.RENTER_MESSAGES, icon: MessageCircle },
-      { labelKey: 'sidebar.documents', href: ROUTES.RENTER_DOCUMENTS, icon: Home },
       { labelKey: 'sidebar.calendar', href: ROUTES.RENTER_CALENDAR, icon: Calendar },
-      { labelKey: 'sidebar.notifications', href: ROUTES.RENTER_NOTIFICATIONS, icon: Bell },
     ],
   },
   {
     label: 'Trust and support',
     items: [
-      { label: 'Verification', href: '/renter/verification', icon: ShieldCheck },
-      { labelKey: 'sidebar.trust_score', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
-      { labelKey: 'sidebar.credit_report', href: ROUTES.RENTER_CREDIT_REPORT, icon: TrendingUp },
-      { labelKey: 'sidebar.legal_resources', href: ROUTES.RENTER_LEGAL_RESOURCES, icon: Scale },
+      // "Trust & Credit" hub: Trust Score / Verification / Credit Report tabs.
+      { label: 'Trust & Credit', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
       { labelKey: 'sidebar.referrals', href: ROUTES.RENTER_REFERRALS, icon: Gift },
-      { labelKey: 'sidebar.ussd_access', href: ROUTES.RENTER_USSD_ACCESS, icon: Smartphone },
       { labelKey: 'sidebar.settings', href: ROUTES.RENTER_SETTINGS, icon: Settings },
+      // "Help" now carries a Legal Resources tab.
       { labelKey: 'sidebar.help', href: ROUTES.RENTER_HELP, icon: HelpCircle },
     ],
   },
