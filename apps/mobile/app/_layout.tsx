@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
@@ -88,16 +89,18 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-          <ThemeProvider onPreferenceChange={persistThemePreference}>
-            <HydrateThemePreference />
-            <ToastProvider>
-              <AuthProvider>
-                <Gate />
-              </AuthProvider>
-            </ToastProvider>
-          </ThemeProvider>
-        </PersistQueryClientProvider>
+        <BottomSheetModalProvider>
+          <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+            <ThemeProvider onPreferenceChange={persistThemePreference}>
+              <HydrateThemePreference />
+              <ToastProvider>
+                <AuthProvider>
+                  <Gate />
+                </AuthProvider>
+              </ToastProvider>
+            </ThemeProvider>
+          </PersistQueryClientProvider>
+        </BottomSheetModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

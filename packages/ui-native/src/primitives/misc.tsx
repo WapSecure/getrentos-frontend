@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, type ViewProps } from 'react-native';
+import { Animated, Pressable, StyleSheet, View, type ViewProps } from 'react-native';
+import { RotateCw } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 
@@ -73,7 +74,15 @@ export function Avatar({ name, size = 40 }: { name?: string | null; size?: numbe
 
 /* ------------------------------- Skeleton ------------------------------- */
 
-export function Skeleton({ height = 16, width = '100%', radius: r }: { height?: number; width?: number | `${number}%` | '100%'; radius?: number }) {
+export function Skeleton({
+  height = 16,
+  width = '100%',
+  radius: r,
+}: {
+  height?: number;
+  width?: number | `${number}%` | '100%';
+  radius?: number;
+}) {
   const { colors, radius } = useTheme();
   const pulse = useRef(new Animated.Value(0.5)).current;
 
@@ -82,7 +91,7 @@ export function Skeleton({ height = 16, width = '100%', radius: r }: { height?: 
       Animated.sequence([
         Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
         Animated.timing(pulse, { toValue: 0.5, duration: 700, useNativeDriver: true }),
-      ]),
+      ])
     );
     loop.start();
     return () => loop.stop();
@@ -127,6 +136,61 @@ export function EmptyState({
         </Text>
       ) : null}
       {action ? <View style={{ marginTop: spacing.md }}>{action}</View> : null}
+    </View>
+  );
+}
+
+/* ------------------------------ ErrorState ----------------------------- */
+
+export function ErrorState({
+  title = 'Something went wrong',
+  description = 'Pull to refresh, or try again in a moment.',
+  onRetry,
+}: {
+  title?: string;
+  description?: string;
+  onRetry?: () => void;
+}) {
+  const { colors, spacing, radius } = useTheme();
+  return (
+    <View style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}>
+      <View
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.destructive + '1f',
+        }}
+      >
+        <RotateCw size={20} color={colors.destructive} />
+      </View>
+      <Text variant="heading" center>
+        {title}
+      </Text>
+      <Text variant="body" color="mutedForeground" center style={{ maxWidth: 300 }}>
+        {description}
+      </Text>
+      {onRetry ? (
+        <Pressable
+          onPress={onRetry}
+          accessibilityRole="button"
+          hitSlop={8}
+          style={{
+            marginTop: spacing.sm,
+            paddingVertical: 9,
+            paddingHorizontal: 18,
+            borderRadius: radius.full,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}
+        >
+          <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
+            Try again
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
