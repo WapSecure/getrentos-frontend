@@ -1,12 +1,15 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { authApi } from '../api/auth';
+import { authApi, type OtpMethod } from '../api/auth';
 import type { SignupRoleId } from '../roles';
 import { useAuth } from './AuthProvider';
 
+/** How the account is created. */
 type Method = 'email' | 'phone';
 
 interface Draft {
   method: Method;
+  /** How the verification code is delivered — `whatsapp` still creates a phone account. */
+  otpMethod: OtpMethod;
   fullName: string;
   email?: string;
   phone?: string;
@@ -47,7 +50,7 @@ export function SignupProvider({ children }: { children: ReactNode }) {
 
   const startVerification = useCallback(async (next: Draft) => {
     const identifier = next.method === 'email' ? next.email! : next.phone!;
-    const { reference } = await authApi.sendOtp(identifier, next.method, 'signup');
+    const { reference } = await authApi.sendOtp(identifier, next.otpMethod, 'signup');
     setDraft(next);
     setOtpReference(reference);
     setSelectedRoles(['renter']);

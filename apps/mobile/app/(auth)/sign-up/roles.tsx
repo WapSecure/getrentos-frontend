@@ -9,6 +9,7 @@ import {
   Search,
   Users,
   UserCheck,
+  Briefcase,
   Check,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -16,7 +17,7 @@ import { AuthScaffold, Button, PressableScale, Text, useTheme } from '@getrentos
 import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
-import { SIGNUP_ROLES, type SignupRoleId } from '@/lib/roles';
+import { SIGNUP_ROLES, VERIFICATION_LABEL, type SignupRoleId } from '@/lib/roles';
 
 const ICONS: Record<string, LucideIcon> = {
   Home,
@@ -25,11 +26,13 @@ const ICONS: Record<string, LucideIcon> = {
   Search,
   Users,
   UserCheck,
+  Briefcase,
 };
 
 export default function SignUpRoles() {
   const { colors, spacing, radius } = useTheme();
-  const { draft, selectedRoles, multiRole, toggleRole, setMultiRole, createAccount } = useSignup();
+  const { draft, selectedRoles, multiRole, toggleRole, setMultiRole, createAccount, reset } =
+    useSignup();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,6 +108,18 @@ export default function SignUpRoles() {
               {error}
             </Text>
           ) : null}
+          <PressableScale
+            haptic={false}
+            onPress={() => {
+              reset();
+              router.replace('/(auth)/sign-up');
+            }}
+            style={{ alignItems: 'center', paddingVertical: 6 }}
+          >
+            <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
+              Start over
+            </Text>
+          </PressableScale>
         </>
       }
     >
@@ -142,11 +157,28 @@ export default function SignUpRoles() {
                     color={selected ? colors.primaryForeground : colors.mutedForeground}
                   />
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, gap: 5 }}>
                   <Text variant="bodyStrong">{role.name}</Text>
                   <Text variant="caption" color="mutedForeground">
                     {role.tagline}
                   </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                    {role.requires.map((req) => (
+                      <View
+                        key={req}
+                        style={{
+                          paddingVertical: 2,
+                          paddingHorizontal: 7,
+                          borderRadius: radius.full,
+                          backgroundColor: colors.secondary,
+                        }}
+                      >
+                        <Text variant="caption" color="mutedForeground" style={{ fontSize: 10.5 }}>
+                          {VERIFICATION_LABEL[req]}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
                 <View
                   style={{
