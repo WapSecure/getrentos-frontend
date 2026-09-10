@@ -4,9 +4,11 @@ import { Sparkles } from 'lucide-react';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { useProCheckout } from '@/hooks/useProCheckout';
+import { useBilling } from '@/hooks/useBilling';
 import { PlanBadge } from '@/components/shared/subscription/PlanBadge';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
+import { ManageSubscriptionCard } from '@/components/shared/subscription/ManageSubscriptionCard';
 import type { BillingCycle, PlanPersona } from '@/services/subscriptionService';
 
 /**
@@ -31,6 +33,7 @@ export function BillingPage({
 }) {
   const { isPro } = usePlanTier();
   const { pricing, entitlementsFor, isLoading } = usePlanPricing();
+  const { billing } = useBilling();
   const checkout = useProCheckout();
   const rows = entitlementsFor(persona);
 
@@ -57,6 +60,8 @@ export function BillingPage({
           </div>
         </div>
       </div>
+
+      {isPro && <ManageSubscriptionCard billing={billing} />}
 
       {!isPro && (
         <>
