@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Chrome } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -13,13 +13,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
  * mimic the provider's consent step; the button "signs in" with a fake
  * Google code so the full OAuth journey is still exercised end-to-end.
  */
-export default function GoogleOAuthDevConsent() {
+function GoogleOAuthDevConsentInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
 
   const handleConsent = () => {
     setSubmitting(true);
-    router.push(`${API_BASE_URL}/auth/oauth/google/callback?code=dev-google-code`);
+    // Forward the CSRF/native-redirect state so the backend can finish the
+    // flow at the mobile deep link when the request originated there.
+    const state = searchParams.get('state');
+    const params = new URLSearchParams({ code: 'dev-google-code' });
+    if (state) params.set('state', state);
+    router.push(`${API_BASE_URL}/auth/oauth/google/callback?${params.toString()}`);
   };
 
   return (
@@ -56,5 +62,13 @@ export default function GoogleOAuthDevConsent() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GoogleOAuthDevConsent() {
+  return (
+    <Suspense fallback={null}>
+      <GoogleOAuthDevConsentInner />
+    </Suspense>
   );
 }

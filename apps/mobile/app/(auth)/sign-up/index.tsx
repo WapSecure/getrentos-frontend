@@ -1,10 +1,20 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, View, type TextInput } from 'react-native';
 import { router } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, Phone, User, Check, ChevronDown, Gift } from 'lucide-react-native';
+import {
+  AtSign,
+  Phone,
+  MessageCircle,
+  User,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  Gift,
+} from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
@@ -25,7 +35,7 @@ import {
   type PhoneSignupValues,
 } from '@/lib/validation';
 
-type Method = 'email' | 'phone';
+type Method = 'email' | 'phone' | 'whatsapp';
 
 export default function SignUpStart() {
   const { colors, spacing, radius } = useTheme();
@@ -34,6 +44,24 @@ export default function SignUpStart() {
   const [formError, setFormError] = useState<string | null>(null);
   const [showReferral, setShowReferral] = useState(false);
   const [referral, setReferral] = useState('');
+
+  // Pre-fill a referral code carried on the deep link (getrentos://sign-up?ref=CODE).
+  useEffect(() => {
+    let alive = true;
+    Linking.getInitialURL()
+      .then((url) => {
+        if (!alive || !url) return;
+        const ref = Linking.parse(url).queryParams?.ref;
+        if (typeof ref === 'string' && ref.trim()) {
+          setReferral(ref.trim().toUpperCase());
+          setShowReferral(true);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return method === 'email' ? (
     <EmailForm
@@ -104,6 +132,11 @@ function MethodSwitch({
           value: 'phone',
           label: 'Phone',
           icon: <Phone size={15} color={colors.mutedForeground} />,
+        },
+        {
+          value: 'whatsapp',
+          label: 'WhatsApp',
+          icon: <MessageCircle size={15} color={colors.mutedForeground} />,
         },
       ]}
     />
@@ -219,6 +252,7 @@ function EmailForm(props: Shared) {
     try {
       await startVerification({
         method: 'email',
+        otpMethod: 'email',
         fullName: v.fullName.trim(),
         email: v.email.trim(),
         password: v.password,
@@ -331,6 +365,9 @@ function EmailForm(props: Shared) {
                 onBlur={onBlur}
                 onSubmitEditing={submit}
                 error={errors.confirmPassword?.message}
+                hint={
+                  value.length > 0 && value === watch('password') ? 'Passwords match' : undefined
+                }
               />
             )}
           />
@@ -367,6 +404,7 @@ function PhoneForm(props: Shared) {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PhoneSignupValues>({
     resolver: zodResolver(phoneSignupSchema),
@@ -385,6 +423,7 @@ function PhoneForm(props: Shared) {
     try {
       await startVerification({
         method: 'phone',
+        otpMethod: props.method === 'whatsapp' ? 'whatsapp' : 'phone',
         fullName: v.fullName.trim(),
         phone: v.phone.trim(),
         password: v.password,
@@ -473,6 +512,9 @@ function PhoneForm(props: Shared) {
                 onBlur={onBlur}
                 onSubmitEditing={submit}
                 error={errors.confirmPassword?.message}
+                hint={
+                  value.length > 0 && value === watch('password') ? 'Passwords match' : undefined
+                }
               />
             )}
           />

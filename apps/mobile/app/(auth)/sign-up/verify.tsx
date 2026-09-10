@@ -3,7 +3,15 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { MailCheck } from 'lucide-react-native';
-import { AuthScaffold, Button, OtpInput, Text, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  AuthScaffold,
+  Button,
+  OtpInput,
+  PressableScale,
+  Text,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
@@ -13,7 +21,7 @@ const RESEND_SECONDS = 60;
 export default function SignUpVerify() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
-  const { draft, verify, resend } = useSignup();
+  const { draft, verify, resend, reset } = useSignup();
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,17 +79,33 @@ export default function SignUpVerify() {
   return (
     <AuthScaffold
       kicker="Verify"
-      title={`Confirm your ${draft?.method === 'phone' ? 'phone' : 'email'}`}
+      title={`Confirm your ${
+        draft?.otpMethod === 'whatsapp' ? 'WhatsApp' : draft?.method === 'phone' ? 'phone' : 'email'
+      }`}
       subtitle={`Enter the 6-digit code we sent to ${target ?? 'you'}.`}
       progress={2 / 3}
       onBack={() => router.back()}
       footer={
-        <Button
-          label="Verify & continue"
-          loading={busy}
-          disabled={code.length !== 6}
-          onPress={() => submit()}
-        />
+        <>
+          <Button
+            label="Verify & continue"
+            loading={busy}
+            disabled={code.length !== 6}
+            onPress={() => submit()}
+          />
+          <PressableScale
+            haptic={false}
+            onPress={() => {
+              reset();
+              router.replace('/(auth)/sign-up');
+            }}
+            style={{ alignItems: 'center', paddingVertical: 6 }}
+          >
+            <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
+              Start over
+            </Text>
+          </PressableScale>
+        </>
       }
     >
       <View style={{ gap: spacing['2xl'], alignItems: 'center' }}>

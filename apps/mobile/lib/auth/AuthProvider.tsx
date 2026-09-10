@@ -13,6 +13,8 @@ import { ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
 import { primaryPortal, type Portal } from '../roles';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
+import { markSessionExpired } from './sessionExpiry';
+import { startOAuth } from './oauth';
 
 interface PendingTwoFactor {
   challengeToken: string;
@@ -28,7 +30,9 @@ interface AuthContextValue {
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
   signInWithMagicLink: (token: string) => Promise<void>;
-  /** Adopt a session obtained elsewhere (signup, OAuth). */
+  /** Provider sign-in (system browser). Throws `OAuthCancelled` if dismissed. */
+  signInWithProvider: (provider: 'google') => Promise<void>;
+  /** Adopt a session obtained elsewhere (signup). */
   applyExternalSession: (session: AuthSession) => void;
   signOut: () => Promise<void>;
 }
@@ -88,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         return res.accessToken;
       } catch {
+        markSessionExpired();
         await teardown();
         return null;
       } finally {
@@ -173,6 +178,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession]
   );
 
+  const signInWithProvider = useCallback(async (provider: 'google') => {
+    const { accessToken, refreshToken } = await startOAuth(provider);
+    accessTokenRef.current = accessToken;
+    refreshTokenRef.current = refreshToken;
+    await writeTokens({ accessToken, refreshToken });
+    // OAuth hands back tokens only; pull the full profile like the web callback.
+    const prof = await authApi.me();
+    setProfile(prof);
+    setStatus('authenticated');
+  }, []);
+
   const signOut = useCallback(async () => {
     const rt = refreshTokenRef.current;
     if (rt) {
@@ -195,6 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       completeTwoFactor,
       cancelTwoFactor: () => setPendingTwoFactor(null),
       signInWithMagicLink,
+      signInWithProvider,
       applyExternalSession: applySession,
       signOut,
     }),
@@ -205,6 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       completeTwoFactor,
       signInWithMagicLink,
+      signInWithProvider,
       applySession,
       signOut,
     ]
