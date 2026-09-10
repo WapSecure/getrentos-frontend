@@ -96,8 +96,11 @@ export default function MaintenancePage() {
     loadLandlordContact();
   }, [page, showToast]);
 
-  const handleReportIssue = async (data: CreateMaintenanceRequestInput): Promise<boolean> => {
-    const res = await renterService.createMaintenanceRequest(data);
+  const handleReportIssue = async (
+    data: CreateMaintenanceRequestInput,
+    photos: File[] = []
+  ): Promise<boolean> => {
+    const res = await renterService.createMaintenanceRequest(data, photos);
     if (res.success && res.data) {
       const created = res.data;
       setRequests((prev) => [created, ...prev]);

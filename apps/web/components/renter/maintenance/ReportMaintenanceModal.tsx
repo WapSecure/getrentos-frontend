@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, AlertTriangle, FileText } from 'lucide-react';
 import { Button } from '@getrentos/ui';
@@ -21,10 +21,13 @@ type ReportFormData = Omit<CreateMaintenanceRequestInput, 'category' | 'priority
 
 type ReportField = 'title' | 'category' | 'priority' | 'description';
 
+const MAX_PHOTOS = 5;
+const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024; // 10MB — matches the backend's per-file limit
+
 interface ReportMaintenanceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateMaintenanceRequestInput) => Promise<boolean>;
+  onSubmit: (data: CreateMaintenanceRequestInput, photos: File[]) => Promise<boolean>;
 }
 
 const categories: { value: MaintenanceCategory; label: string; icon: string }[] = [
@@ -60,6 +63,19 @@ export const ReportMaintenanceModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<ReportField, string>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Object URLs are created once per photo set and revoked whenever it
+  // changes (or the modal unmounts) so previews don't leak memory.
+  const photoPreviewUrls = useMemo(
+    () => photos.map((photo) => URL.createObjectURL(photo)),
+    [photos]
+  );
+  useEffect(() => {
+    return () => photoPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [photoPreviewUrls]);
 
   const handleChange = <Field extends ReportField>(field: Field, value: ReportFormData[Field]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -96,6 +112,34 @@ export const ReportMaintenanceModal = ({
     setFormData(createEmptyForm());
     setErrors({});
     setSubmitError(null);
+    setPhotos([]);
+    setPhotoError(null);
+  };
+
+  const handlePhotosSelected = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    setPhotoError(null);
+
+    const incoming = Array.from(fileList);
+    const oversized = incoming.find((file) => file.size > MAX_PHOTO_SIZE_BYTES);
+    if (oversized) {
+      setPhotoError(`${oversized.name} is over 10MB. Choose a smaller photo.`);
+      return;
+    }
+
+    setPhotos((prev) => {
+      const combined = [...prev, ...incoming];
+      if (combined.length > MAX_PHOTOS) {
+        setPhotoError(`You can attach up to ${MAX_PHOTOS} photos.`);
+        return combined.slice(0, MAX_PHOTOS);
+      }
+      return combined;
+    });
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoError(null);
   };
 
   const handleClose = () => {
@@ -111,13 +155,16 @@ export const ReportMaintenanceModal = ({
     setSubmitError(null);
 
     try {
-      const wasSubmitted = await onSubmit({
-        title: formData.title.trim(),
-        category: formData.category as MaintenanceCategory,
-        priority: formData.isEmergency ? 'urgent' : (formData.priority as MaintenancePriority),
-        description: formData.description.trim(),
-        ...(formData.isEmergency ? { isEmergency: true } : {}),
-      });
+      const wasSubmitted = await onSubmit(
+        {
+          title: formData.title.trim(),
+          category: formData.category as MaintenanceCategory,
+          priority: formData.isEmergency ? 'urgent' : (formData.priority as MaintenancePriority),
+          description: formData.description.trim(),
+          ...(formData.isEmergency ? { isEmergency: true } : {}),
+        },
+        photos
+      );
 
       if (wasSubmitted) {
         resetForm();
@@ -326,11 +373,57 @@ export const ReportMaintenanceModal = ({
                 <label className="mb-1 block text-sm font-medium text-foreground">
                   Photos (Optional)
                 </label>
-                <div className="cursor-pointer rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  disabled={isSubmitting || photos.length >= MAX_PHOTOS}
+                  onChange={(event) => {
+                    handlePhotosSelected(event.target.files);
+                    event.target.value = '';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isSubmitting || photos.length >= MAX_PHOTOS}
+                  className="w-full cursor-pointer rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+                >
                   <Camera className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click or drag to upload photos</p>
-                  <p className="mt-1 text-xs text-muted-foreground">PNG, JPG up to 5MB</p>
-                </div>
+                  <p className="text-sm text-muted-foreground">Click to upload photos</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    PNG, JPG up to 10MB — up to {MAX_PHOTOS} photos
+                  </p>
+                </button>
+                {photoError && <p className="mt-1 text-xs text-red-500">{photoError}</p>}
+                {photos.length > 0 && (
+                  <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {photos.map((photo, index) => (
+                      <li
+                        key={`${photo.name}-${photo.lastModified}-${index}`}
+                        className="group relative aspect-square overflow-hidden rounded-lg border border-border"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, not a remote/optimizable image */}
+                        <img
+                          src={photoPreviewUrls[index]}
+                          alt={photo.name}
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          disabled={isSubmitting}
+                          aria-label={`Remove ${photo.name}`}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               {submitError && (

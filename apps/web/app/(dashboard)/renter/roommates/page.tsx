@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RoommatesHeader } from '@/components/renter/roommates/RoommatesHeader';
+import { RoommateInvitesCard } from '@/components/renter/roommates/RoommateInvitesCard';
 import { RoommatesStats } from '@/components/renter/roommates/RoommatesStats';
 import { RoommatesList } from '@/components/renter/roommates/RoommatesList';
 import { RentSplitCalculator } from '@/components/renter/roommates/RentSplitCalculator';
@@ -24,15 +25,35 @@ export default function RoommatesPage() {
     queryKey: renterKeys.roommates,
     queryFn: () => unwrap(renterService.listRoommates()),
   });
+  const invitesQuery = useQuery({
+    queryKey: renterKeys.roommateInvites,
+    queryFn: () => unwrap(renterService.listMyRoommateInvites()),
+  });
   const expensesQuery = useQuery({
     queryKey: renterKeys.roommateExpenses,
     queryFn: () => unwrap(renterService.listRoommateExpenses()),
   });
   const roommates = roommatesQuery.data ?? [];
+  const invites = invitesQuery.data ?? [];
   const expenses = expensesQuery.data ?? [];
 
   const invalidateRoommates = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.roommates });
+  const invalidateInvites = () =>
+    queryClient.invalidateQueries({ queryKey: renterKeys.roommateInvites });
+
+  const acceptInviteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.acceptRoommateInvite(id)),
+    onSuccess: () => {
+      invalidateInvites();
+      invalidateRoommates();
+    },
+  });
+
+  const declineInviteMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.declineRoommateInvite(id)),
+    onSuccess: invalidateInvites,
+  });
 
   const inviteMutation = useMutation({
     mutationFn: (data: { email: string; message: string }) =>
@@ -87,6 +108,8 @@ export default function RoommatesPage() {
     addTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
   const handleCompleteTask = (roommateId: string, task: string) =>
     completeTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
+  const handleAcceptInvite = (id: string) => acceptInviteMutation.mutateAsync(id);
+  const handleDeclineInvite = (id: string) => declineInviteMutation.mutateAsync(id);
 
   if (roommatesQuery.isLoading || expensesQuery.isLoading) {
     return <PageLoadingState />;
@@ -113,6 +136,12 @@ export default function RoommatesPage() {
         roommateCount={roommates.length}
         onInvite={() => setShowInviteModal(true)}
         onAgreement={() => setShowAgreementModal(true)}
+      />
+
+      <RoommateInvitesCard
+        invites={invites}
+        onAccept={handleAcceptInvite}
+        onDecline={handleDeclineInvite}
       />
 
       <RoommatesStats roommates={roommates} />
