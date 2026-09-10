@@ -16,4 +16,10 @@ export const qk = {
       ['renter', 'notifications', { page, pageSize }] as const,
     recommended: ['renter', 'recommended'] as const,
   },
+  listings: {
+    /** Infinite list keyed by the active filter set. */
+    search: (filters: Record<string, unknown>) => ['listings', 'search', filters] as const,
+    detail: (id: string) => ['listings', 'detail', id] as const,
+    saved: ['listings', 'saved'] as const,
+  },
 } as const;
