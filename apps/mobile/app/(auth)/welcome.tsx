@@ -3,47 +3,13 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, {
-  FadeInDown,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
-import {
-  ShieldCheck,
-  FileCheck2,
-  Lock,
-  Eye,
-  HandCoins,
-  Heart,
-  Star,
-  ArrowRight,
-  MapPin,
-} from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { ShieldCheck, FileCheck2, HandCoins, ArrowRight, MapPin, Check } from 'lucide-react-native';
 import { BrandLogo, Button, Card, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
-
-const AScrollView = Animated.ScrollView;
 
 /* ----------------------------- content ---------------------------------- */
 
-const TRUST_CHIPS = [
-  { icon: ShieldCheck, label: 'BVN + NIN identity' },
-  { icon: Lock, label: 'Bank-grade escrow' },
-  { icon: FileCheck2, label: 'Title-deed verified' },
-  { icon: Eye, label: 'AML monitoring' },
-];
-
-const STATS = [
-  { value: '50k+', label: 'Members' },
-  { value: '₦800B+', label: 'Moved safely' },
-  { value: '150+', label: 'Cities' },
-  { value: '99.9%', label: 'Secure' },
-];
-
-// Faux skyline for the hero card — heights as a fraction of the strip.
-const SKYLINE = [0.42, 0.68, 0.5, 0.82, 0.6, 0.95, 0.55, 0.72, 0.46, 0.6];
-
-const FEATURES = [
+const VALUES = [
   {
     icon: ShieldCheck,
     title: 'Every listing verified',
@@ -61,66 +27,15 @@ const FEATURES = [
   },
 ];
 
-const STEPS = [
-  { n: '01', title: 'Verify once', body: 'Confirm your identity a single time.' },
-  { n: '02', title: 'Match', body: 'Find verified homes, or vetted tenants and buyers.' },
-  { n: '03', title: 'Move', body: 'Sign digitally and pay through protected escrow.' },
-];
-
-const ROLES = ['Renter', 'Landlord', 'Owner', 'Buyer', 'Realtor', 'Agent'];
-
 /* ------------------------------ screen --------------------------------- */
 
 export default function Welcome() {
   const { colors, spacing, radius, scheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const scrollY = useSharedValue(0);
-
-  const onScroll = useAnimatedScrollHandler((e) => {
-    scrollY.value = e.contentOffset.y;
-  });
-
-  const glowStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: scrollY.value * -0.15 }, { scale: 1 + scrollY.value * 0.0004 }],
-    opacity: Math.max(0, 1 - scrollY.value / 420),
-  }));
-
   const footerPad = insets.bottom + 96;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* ambient glow, parallaxed */}
-      <Animated.View
-        pointerEvents="none"
-        style={[StyleSheet.absoluteFill, { alignItems: 'center' }, glowStyle]}
-      >
-        <LinearGradient
-          colors={[colors.primary, 'transparent']}
-          style={{
-            position: 'absolute',
-            top: -140,
-            width: 520,
-            height: 520,
-            borderRadius: 260,
-            opacity: 0.16,
-          }}
-        />
-        <LinearGradient
-          colors={[colors.purple, 'transparent']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            position: 'absolute',
-            top: 60,
-            right: -120,
-            width: 320,
-            height: 320,
-            borderRadius: 160,
-            opacity: 0.1,
-          }}
-        />
-      </Animated.View>
-
       {/* header */}
       <View
         style={{
@@ -136,23 +51,21 @@ export default function Welcome() {
         <ThemeToggle />
       </View>
 
-      <AScrollView
-        onScroll={onScroll}
-        scrollEventThrottle={16}
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: footerPad }}
       >
         {/* hero */}
         <Animated.View
-          entering={FadeInDown.duration(500)}
-          style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg }}
+          entering={FadeInDown.duration(460)}
+          style={{ paddingHorizontal: spacing.xl, paddingTop: spacing['2xl'] }}
         >
           <Text variant="label" color="primary" uppercase>
-            Trust-driven property OS
+            Trust-driven property platform
           </Text>
           <Text
             variant="display"
-            style={{ fontSize: 38, lineHeight: 42, marginTop: spacing.sm, letterSpacing: -0.8 }}
+            style={{ fontSize: 36, lineHeight: 41, marginTop: spacing.md, letterSpacing: -0.8 }}
           >
             The safer way to rent, buy and manage property.
           </Text>
@@ -162,60 +75,33 @@ export default function Welcome() {
           </Text>
         </Animated.View>
 
-        {/* hero visual — a composed verified-listing card */}
+        {/* hero visual — a single, calm verified-listing card */}
         <Animated.View
-          entering={FadeInDown.duration(500).delay(80)}
-          style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}
+          entering={FadeInDown.duration(460).delay(90)}
+          style={{ paddingHorizontal: spacing.xl, marginTop: spacing['2xl'] }}
         >
           <Card elevated padding="none">
-            <View style={{ height: 168, overflow: 'hidden' }}>
+            <View style={{ height: 176, overflow: 'hidden' }}>
               <LinearGradient
                 colors={['#1f74e6', '#0a4fb0']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              {/* diagonal sheen */}
-              <LinearGradient
-                colors={['rgba(255,255,255,0.18)', 'rgba(255,255,255,0)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0.9, y: 0.7 }}
-                style={StyleSheet.absoluteFill}
-              />
-              {/* faux skyline */}
-              <View style={styles.skyline} pointerEvents="none">
-                {SKYLINE.map((h, i) => (
-                  <View
-                    key={i}
-                    style={{
-                      flex: 1,
-                      marginHorizontal: 1.5,
-                      height: `${h * 100}%`,
-                      backgroundColor: 'rgba(255,255,255,0.14)',
-                      borderTopLeftRadius: 3,
-                      borderTopRightRadius: 3,
-                    }}
-                  />
-                ))}
-              </View>
               {/* bottom scrim for legibility */}
               <LinearGradient
-                colors={['rgba(6,32,72,0)', 'rgba(6,32,72,0.55)']}
-                style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 80 }}
+                colors={['rgba(6,32,72,0)', 'rgba(6,32,72,0.5)']}
+                style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 88 }}
               />
-
-              <View style={styles.heroCardTop}>
-                <View style={[styles.pill, { backgroundColor: 'rgba(255,255,255,0.22)' }]}>
+              <View style={styles.heroTop}>
+                <View style={styles.pill}>
                   <ShieldCheck size={13} color="#fff" />
                   <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }}>
-                    Verified
+                    Verified listing
                   </Text>
                 </View>
-                <View style={styles.heartBtn}>
-                  <Heart size={15} color="#fff" />
-                </View>
               </View>
-              <View style={styles.heroCardLoc}>
+              <View style={styles.heroLoc}>
                 <MapPin size={12} color="rgba(255,255,255,0.9)" />
                 <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
                   Lekki Phase 1, Lagos
@@ -223,242 +109,54 @@ export default function Welcome() {
               </View>
             </View>
 
-            <View style={{ padding: spacing.lg, gap: spacing.sm }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="bodyStrong">2-Bed Apartment · Lekki</Text>
-                  <Text variant="callout" color="mutedForeground">
-                    ₦2,400,000 / year
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 21,
-                    borderWidth: 2,
-                    borderColor: colors.success,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Text variant="caption" style={{ color: colors.success, fontWeight: '800' }}>
-                    92
-                  </Text>
-                </View>
-              </View>
-              <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                {['ID checked', 'Escrow', 'Title verified'].map((t) => (
-                  <View key={t} style={[styles.pill, { backgroundColor: colors.secondary }]}>
-                    <Text variant="caption" color="mutedForeground">
-                      {t}
-                    </Text>
-                  </View>
-                ))}
+            <View style={{ padding: spacing.lg, gap: 6 }}>
+              <Text variant="bodyStrong">2-Bed Apartment · Lekki</Text>
+              <Text variant="callout" color="mutedForeground">
+                ₦2,400,000 / year
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <Check size={14} color={colors.success} />
+                <Text variant="caption" color="mutedForeground">
+                  Identity, ownership &amp; escrow checked
+                </Text>
               </View>
             </View>
           </Card>
         </Animated.View>
 
-        {/* trust chips */}
+        {/* values */}
         <Animated.View
-          entering={FadeInDown.duration(500).delay(140)}
+          entering={FadeInDown.duration(460).delay(170)}
           style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 8,
             paddingHorizontal: spacing.xl,
-            marginTop: spacing.xl,
+            marginTop: spacing['4xl'],
+            gap: spacing['2xl'],
           }}
         >
-          {TRUST_CHIPS.map(({ icon: Icon, label }) => (
-            <View
-              key={label}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                borderRadius: radius.full,
-                borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: colors.card,
-              }}
-            >
-              <Icon size={14} color={colors.primary} />
-              <Text variant="caption" style={{ fontWeight: '600' }}>
-                {label}
-              </Text>
+          {VALUES.map(({ icon: Icon, title, body }) => (
+            <View key={title} style={{ flexDirection: 'row', gap: spacing.md }}>
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: radius.md,
+                  backgroundColor: colors.accent,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Icon size={19} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text variant="bodyStrong">{title}</Text>
+                <Text variant="callout" color="mutedForeground">
+                  {body}
+                </Text>
+              </View>
             </View>
           ))}
         </Animated.View>
-
-        {/* stats */}
-        <Animated.View
-          entering={FadeInDown.duration(500).delay(200)}
-          style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}
-        >
-          <Card elevated>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {STATS.map((s, i) => (
-                <View
-                  key={s.label}
-                  style={{
-                    width: '50%',
-                    paddingVertical: spacing.md,
-                    paddingHorizontal: spacing.xs,
-                    borderTopWidth: i > 1 ? StyleSheet.hairlineWidth : 0,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <Text variant="title" style={{ fontSize: 24, lineHeight: 28 }}>
-                    {s.value}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground" style={{ marginTop: 2 }}>
-                    {s.label}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </Card>
-        </Animated.View>
-
-        {/* features */}
-        <Section title="Built for trust at every step" delay={260} spacing={spacing}>
-          <Card elevated padding="none">
-            {FEATURES.map(({ icon: Icon, title, body }, i) => (
-              <View key={title}>
-                {i > 0 ? (
-                  <View
-                    style={{
-                      height: StyleSheet.hairlineWidth,
-                      backgroundColor: colors.border,
-                      marginLeft: 64,
-                    }}
-                  />
-                ) : null}
-                <View style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.lg }}>
-                  <View
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      backgroundColor: colors.accent,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Icon size={20} color={colors.primary} />
-                  </View>
-                  <View style={{ flex: 1, gap: 3 }}>
-                    <Text variant="bodyStrong">{title}</Text>
-                    <Text variant="callout" color="mutedForeground">
-                      {body}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </Card>
-        </Section>
-
-        {/* how it works */}
-        <Section title="How it works" delay={320} spacing={spacing}>
-          <View>
-            {STEPS.map((s, i) => {
-              const last = i === STEPS.length - 1;
-              return (
-                <View key={s.n} style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <View style={{ alignItems: 'center', width: 36 }}>
-                    <View
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 18,
-                        borderWidth: 1.5,
-                        borderColor: colors.primary,
-                        backgroundColor: colors.accent,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Text variant="caption" style={{ color: colors.primary, fontWeight: '800' }}>
-                        {s.n}
-                      </Text>
-                    </View>
-                    {!last ? (
-                      <View
-                        style={{
-                          flex: 1,
-                          width: 2,
-                          backgroundColor: colors.border,
-                          marginVertical: 4,
-                        }}
-                      />
-                    ) : null}
-                  </View>
-                  <View style={{ flex: 1, paddingBottom: last ? 0 : spacing.xl }}>
-                    <Text variant="bodyStrong" style={{ marginTop: 6 }}>
-                      {s.title}
-                    </Text>
-                    <Text variant="callout" color="mutedForeground" style={{ marginTop: 3 }}>
-                      {s.body}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        </Section>
-
-        {/* testimonial */}
-        <Section delay={380} spacing={spacing}>
-          <Card elevated>
-            <View style={{ flexDirection: 'row', gap: 3, marginBottom: spacing.sm }}>
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Star key={i} size={14} color={colors.warning} fill={colors.warning} />
-              ))}
-            </View>
-            <Text variant="subheading" style={{ letterSpacing: -0.2 }}>
-              “Found my apartment in 3 days. The verification process is top-notch.”
-            </Text>
-            <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-              Michael Adeyemi · Renter, Lagos
-            </Text>
-          </Card>
-        </Section>
-
-        {/* roles */}
-        <Section title="One account, every role" delay={440} spacing={spacing}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {ROLES.map((r) => (
-              <View
-                key={r}
-                style={{
-                  paddingVertical: 9,
-                  paddingHorizontal: 14,
-                  borderRadius: radius.full,
-                  backgroundColor: colors.secondary,
-                }}
-              >
-                <Text variant="callout" style={{ fontWeight: '600' }}>
-                  {r}
-                </Text>
-              </View>
-            ))}
-          </View>
-          <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.md }}>
-            Add more roles later — each unlocks with its own quick checks.
-          </Text>
-        </Section>
-      </AScrollView>
+      </Animated.ScrollView>
 
       {/* sticky footer CTA */}
       <BlurView
@@ -497,61 +195,24 @@ export default function Welcome() {
   );
 }
 
-/* ---------------------------- sub-components --------------------------- */
-
-function Section({
-  title,
-  delay,
-  spacing,
-  children,
-}: {
-  title?: string;
-  delay: number;
-  spacing: ReturnType<typeof useTheme>['spacing'];
-  children: React.ReactNode;
-}) {
-  return (
-    <Animated.View
-      entering={FadeInDown.duration(500).delay(delay)}
-      style={{ paddingHorizontal: spacing.xl, marginTop: spacing['3xl'] }}
-    >
-      {title ? (
-        <Text variant="heading" style={{ marginBottom: spacing.md }}>
-          {title}
-        </Text>
-      ) : null}
-      {children}
-    </Animated.View>
-  );
-}
+/* ------------------------------ styles -------------------------------- */
 
 const styles = StyleSheet.create({
-  heroCardTop: {
+  heroTop: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     padding: 12,
   },
-  heroCardLoc: {
+  heroLoc: {
     position: 'absolute',
     left: 14,
     bottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  skyline: {
-    position: 'absolute',
-    left: 10,
-    right: 10,
-    bottom: 0,
-    height: 70,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
   },
   pill: {
     flexDirection: 'row',
@@ -560,13 +221,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 999,
-  },
-  heartBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
     backgroundColor: 'rgba(255,255,255,0.22)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
