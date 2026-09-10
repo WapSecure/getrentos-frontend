@@ -315,4 +315,5 @@ export const estateResidentKeys = {
 /** Not persona-scoped — every signed-in user has at most one subscription. */
 export const subscriptionKeys = {
   mine: ['subscription', 'mine'] as const,
+  pricing: ['subscription', 'pricing'] as const,
 };
