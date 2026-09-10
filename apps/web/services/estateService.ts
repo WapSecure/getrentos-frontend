@@ -1,4 +1,4 @@
-import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
+import { authDownload, authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type {
   Estate,
@@ -7,6 +7,7 @@ import type {
   ImportHouseholdsResult,
   EstateDashboardStats,
   EstateDuesPoint,
+  EstateFinancialStats,
   Due,
   VisitorPass,
   IssuedVisitorPass,
@@ -60,6 +61,40 @@ export const estateService = {
 
   async getDuesCollectedTrend(estateId: string): Promise<ApiResponse<EstateDuesPoint[]>> {
     return safeCall(() => authFetch(`/estate/${estateId}/dashboard/dues-trend`));
+  },
+
+  async updateDueSettings(
+    estateId: string,
+    data: { lateFeeAmount: number }
+  ): Promise<ApiResponse<Estate>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/due-settings`, { method: 'PATCH', body: JSON.stringify(data) })
+    );
+  },
+
+  async getFinancialStats(
+    estateId: string,
+    period: 'monthly' | 'quarterly' | 'yearly' = 'monthly'
+  ): Promise<ApiResponse<EstateFinancialStats>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/financials/stats?period=${period}`));
+  },
+
+  async getFinancialChartSeries(estateId: string): Promise<ApiResponse<EstateDuesPoint[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/financials/chart`));
+  },
+
+  async exportFinancialsCsv(estateId: string): Promise<ApiResponse<void>> {
+    return safeCall(async () => {
+      const blob = await authDownload(`/estate/${estateId}/financials/export`);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'getrentos-estate-financials.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    });
   },
 
   async listHouseholds(

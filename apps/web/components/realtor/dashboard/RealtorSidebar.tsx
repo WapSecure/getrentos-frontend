@@ -45,6 +45,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.trust_profile', href: ROUTES.REALTOR_TRUST_PROFILE, icon: BadgeCheck },
   { labelKey: 'sidebar.settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
   { label: 'Billing', href: ROUTES.REALTOR_BILLING, icon: Sparkles },
+  { label: 'Verification', href: ROUTES.REALTOR_VERIFICATION, icon: BadgeCheck },
 ];
 
 export const navGroups = [

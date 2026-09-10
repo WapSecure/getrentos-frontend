@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Receipt, Plus } from 'lucide-react';
-import { Button, EmptyState, Pagination } from '@getrentos/ui';
+import { Receipt, Plus, Settings } from 'lucide-react';
+import { Button, EmptyState, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -12,6 +12,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CreateDuesModal } from '@/components/estate/dues/CreateDuesModal';
 import { DueRow } from '@/components/estate/dues/DueRow';
+import { DueSettingsModal } from '@/components/estate/dues/DueSettingsModal';
 import type { DueStatus } from '@/types/estate';
 
 const statusFilters: { value: DueStatus | 'all'; label: string }[] = [
@@ -29,9 +30,11 @@ export default function EstateDuesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<DueStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const [householdPage, setHouseholdPage] = useState(1);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -99,6 +102,20 @@ export default function EstateDuesPage() {
     },
   });
 
+  const updateDueSettings = useMutation({
+    mutationFn: (data: { lateFeeAmount: number }) =>
+      unwrap(estateService.updateDueSettings(estate!.id, data)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: estateKeys.myEstates });
+      queryClient.invalidateQueries({ queryKey: estateKeys.myEstate });
+      setIsSettingsOpen(false);
+      setToast({ message: 'Due settings saved.', variant: 'success' });
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to save these settings.', variant: 'error' });
+    },
+  });
+
   if (isEstateLoading) {
     return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
   }
@@ -117,17 +134,23 @@ export default function EstateDuesPage() {
             {total} due{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            setHouseholdPage(1);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Charge Dues
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
+            <Settings className="w-4 h-4" />
+            Late Fee Settings
+          </Button>
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              setHouseholdPage(1);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Charge Dues
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -191,6 +214,18 @@ export default function EstateDuesPage() {
         onSubmit={(data) => createDues.mutate(data)}
         isSubmitting={createDues.isPending}
       />
+
+      <DueSettingsModal
+        isOpen={isSettingsOpen}
+        currentLateFeeAmount={estate.lateFeeAmount}
+        onClose={() => setIsSettingsOpen(false)}
+        onSubmit={(data) => updateDueSettings.mutate(data)}
+        isSubmitting={updateDueSettings.isPending}
+      />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

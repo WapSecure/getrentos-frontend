@@ -9,7 +9,9 @@ import { X, Check } from 'lucide-react';
 import { Button, CurrencyInput } from '@getrentos/ui';
 import type { ListingCategory } from '@/types/realtor';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { unwrap } from '@/lib/apiHelpers';
+import { ROUTES } from '@/lib/constants/auth';
 import { realtorKeys } from '@/lib/queryKeys';
 import {
   realtorService,
@@ -28,11 +30,18 @@ interface CreateListingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (listing: CreateRealtorListingInput) => void;
+  /** Caught error from the parent's create mutation — renders a trust upsell when it's a verification/tier gate. */
+  error?: unknown;
 }
 
 const SELECTOR_PAGE_SIZE = 10;
 
-export const CreateListingModal = ({ isOpen, onClose, onSubmit }: CreateListingModalProps) => {
+export const CreateListingModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  error,
+}: CreateListingModalProps) => {
   const [clientId, setClientId] = useState('');
   const [propertyId, setPropertyId] = useState('');
   const [clientSearch, setClientSearch] = useState('');
@@ -121,13 +130,14 @@ export const CreateListingModal = ({ isOpen, onClose, onSubmit }: CreateListingM
 
   const handleSubmit = () => {
     if (!selectedClient || !selectedProperty) return;
+    // Do NOT close here: keep the modal open on failure so a trust/tier gate can
+    // surface its upsell notice. The parent closes us on success (isOpen=false).
     onSubmit({
       propertyId,
       title,
       category,
       price: Number(price) || 0,
     });
-    handleClose();
   };
 
   return (
@@ -267,17 +277,28 @@ export const CreateListingModal = ({ isOpen, onClose, onSubmit }: CreateListingM
               </>
             </div>
 
-            {((clientsPage?.total ?? 0) > 0 || isClientsLoading) && (
-              <div className="p-4 border-t border-border flex justify-end shrink-0">
-                <Button
-                  variant="primary"
-                  className="gap-1.5"
-                  onClick={handleSubmit}
-                  disabled={!selectedClient || !selectedProperty || !title || !(Number(price) >= 1)}
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  Create draft
-                </Button>
+            {((clientsPage?.total ?? 0) > 0 || isClientsLoading || !!error) && (
+              <div className="p-4 border-t border-border space-y-3 shrink-0">
+                {error ? (
+                  <VerificationRequiredNotice
+                    error={error}
+                    href={ROUTES.REALTOR_LISTINGS}
+                    verificationHref={ROUTES.REALTOR_VERIFICATION}
+                  />
+                ) : null}
+                <div className="flex justify-end">
+                  <Button
+                    variant="primary"
+                    className="gap-1.5"
+                    onClick={handleSubmit}
+                    disabled={
+                      !selectedClient || !selectedProperty || !title || !(Number(price) >= 1)
+                    }
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    Create draft
+                  </Button>
+                </div>
               </div>
             )}
           </motion.div>

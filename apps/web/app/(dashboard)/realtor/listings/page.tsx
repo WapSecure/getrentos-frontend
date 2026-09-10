@@ -11,7 +11,7 @@ import { RealtorListingPreviewModal } from '@/components/realtor/listings/Realto
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
 import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorListing, realtorService } from '@/services/realtorService';
 import type { CreateRealtorListingInput } from '@/components/realtor/listings/CreateListingModal';
@@ -69,11 +69,14 @@ export default function RealtorListingsPage() {
       setPage(1);
       setIsCreateModalOpen(false);
     },
-    onError: (error) =>
+    onError: (error) => {
+      // Verification/tier gates surface as an inline upsell inside the modal, not a toast.
+      if (error instanceof VerificationRequiredError) return;
       setToast({
         message: error.message || 'Unable to create this listing. Please try again.',
         variant: 'error',
-      }),
+      });
+    },
   });
 
   useEffect(() => {
@@ -86,6 +89,11 @@ export default function RealtorListingsPage() {
   }, [searchParams]);
 
   const handleCreate = (data: CreateRealtorListingInput) => createListing.mutate(data);
+
+  const openCreateModal = () => {
+    createListing.reset();
+    setIsCreateModalOpen(true);
+  };
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -105,7 +113,7 @@ export default function RealtorListingsPage() {
             {total} listing{total === 1 ? '' : 's'} across your clients
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
+        <Button variant="primary" className="gap-2" onClick={openCreateModal}>
           <Plus className="w-4 h-4" />
           Add Listing
         </Button>
@@ -163,7 +171,7 @@ export default function RealtorListingsPage() {
               : 'Try adjusting your search or filter.'}
           </p>
           {total === 0 && (
-            <Button variant="primary" className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
+            <Button variant="primary" className="mt-6" onClick={openCreateModal}>
               Add Your First Listing
             </Button>
           )}
@@ -192,9 +200,11 @@ export default function RealtorListingsPage() {
       )}
 
       <CreateListingModal
+        key={isCreateModalOpen ? 'open' : 'closed'}
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreate}
+        error={createListing.error}
       />
 
       <RealtorListingPreviewModal

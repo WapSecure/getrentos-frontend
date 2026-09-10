@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Moon, Sun, SunMoon, LogOut, ShieldCheck, type LucideIcon } from 'lucide-react-native';
+import { LogOut, ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -7,20 +7,14 @@ import {
   Divider,
   Screen,
   Text,
+  ThemeToggle,
   useTheme,
-  type ThemePreference,
 } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; Icon: LucideIcon }[] = [
-  { value: 'system', label: 'System', Icon: SunMoon },
-  { value: 'light', label: 'Light', Icon: Sun },
-  { value: 'dark', label: 'Dark', Icon: Moon },
-];
-
 export default function Account() {
   const { profile, signOut } = useAuth();
-  const { colors, spacing, radius, preference, setPreference } = useTheme();
+  const { colors, spacing } = useTheme();
 
   return (
     <Screen>
@@ -48,31 +42,8 @@ export default function Account() {
           </Text>
         </View>
         <Divider />
-        <View style={{ flexDirection: 'row', padding: spacing.md, gap: spacing.sm }}>
-          {THEME_OPTIONS.map(({ value, label, Icon }) => {
-            const active = preference === value;
-            return (
-              <View
-                key={value}
-                style={{
-                  flex: 1,
-                  alignItems: 'center',
-                  gap: 6,
-                  paddingVertical: spacing.md,
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  borderColor: active ? colors.primary : colors.border,
-                  backgroundColor: active ? colors.accent : 'transparent',
-                }}
-                onTouchEnd={() => setPreference(value)}
-              >
-                <Icon size={18} color={active ? colors.primary : colors.mutedForeground} />
-                <Text variant="caption" style={{ color: active ? colors.primary : colors.foreground }}>
-                  {label}
-                </Text>
-              </View>
-            );
-          })}
+        <View style={{ padding: spacing.md }}>
+          <ThemeToggle variant="segmented" />
         </View>
       </Card>
 

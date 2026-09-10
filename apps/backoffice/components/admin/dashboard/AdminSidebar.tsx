@@ -24,6 +24,7 @@ import {
   Store,
   Briefcase,
   ClipboardList,
+  Warehouse,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -109,6 +110,12 @@ const navItems: NavItem[] = [
     href: '/admin/agents',
     icon: ClipboardList,
     permission: 'sales.view',
+  },
+  {
+    label: 'Estates',
+    href: '/admin/estates',
+    icon: Warehouse,
+    permission: 'estate.view',
   },
   {
     label: 'Disputes',

@@ -290,6 +290,9 @@ export const estateKeys = {
     ['estate', estateId, 'governanceSignatures', recordId] as const,
   dashboardStats: (estateId: string) => ['estate', estateId, 'dashboardStats'] as const,
   duesTrend: (estateId: string) => ['estate', estateId, 'duesTrend'] as const,
+  financialStats: (estateId: string, period: string) =>
+    ['estate', estateId, 'financialStats', period] as const,
+  financialChart: (estateId: string) => ['estate', estateId, 'financialChart'] as const,
 };
 
 export const estateResidentKeys = {

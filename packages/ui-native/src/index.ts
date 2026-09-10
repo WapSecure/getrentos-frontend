@@ -21,6 +21,8 @@ export { Card } from './primitives/Card';
 export type { CardProps } from './primitives/Card';
 export { Screen } from './primitives/Screen';
 export type { ScreenProps } from './primitives/Screen';
+export { ThemeToggle } from './primitives/ThemeToggle';
+export type { ThemeToggleProps } from './primitives/ThemeToggle';
 export { Divider, Badge, Avatar, Skeleton, EmptyState } from './primitives/misc';
 export type { BadgeTone } from './primitives/misc';
 export { ToastProvider, useToast } from './feedback/Toast';
