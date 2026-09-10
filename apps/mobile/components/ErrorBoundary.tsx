@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import type { ErrorBoundaryProps } from 'expo-router';
+import { report } from '@/lib/analytics';
 
 /**
  * Branded fallback for uncaught render errors, wired via expo-router's
@@ -10,6 +12,10 @@ import type { ErrorBoundaryProps } from 'expo-router';
  */
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const isDev = Constants.executionEnvironment !== 'standalone' && __DEV__;
+
+  useEffect(() => {
+    report(error, { boundary: 'root' });
+  }, [error]);
 
   return (
     <View style={styles.container}>

@@ -15,6 +15,7 @@ import { primaryPortal, type Portal } from '../roles';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
+import { identify, reset as resetAnalytics } from '../analytics';
 
 interface PendingTwoFactor {
   challengeToken: string;
@@ -107,6 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     configureApi({ getAccessToken: () => accessTokenRef.current, refresh });
   }, [refresh]);
+
+  // Keep the analytics identity in step with the session.
+  useEffect(() => {
+    if (profile?.id) identify(profile.id);
+    else resetAnalytics();
+  }, [profile?.id]);
 
   // Restore the session on cold start.
   useEffect(() => {
