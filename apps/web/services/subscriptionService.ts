@@ -19,6 +19,11 @@ export interface PlanPricing {
   currency: string;
   vatInclusive: boolean;
   trialDays: number;
+  /**
+   * Small amount taken at trial checkout purely to put a card on file, then
+   * refunded. Shown to the customer so the trial is never a surprise charge.
+   */
+  trialTokenizeKobo?: number;
   monthlyKobo: number;
   annualKobo: number;
   annualSavingPercent: number;
