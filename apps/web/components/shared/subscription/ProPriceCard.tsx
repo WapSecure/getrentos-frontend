@@ -32,6 +32,8 @@ export function ProPriceCard({
   }
 
   const amount = cycle === 'ANNUAL' ? pricing.annualKobo : pricing.monthlyKobo;
+  // What we take purely to prove the card works; refunded immediately.
+  const capture = pricing.trialTokenizeKobo ? naira(pricing.trialTokenizeKobo) : null;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
@@ -107,8 +109,15 @@ export function ProPriceCard({
               Contact us to upgrade
             </Button>
           )}
-          <p className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground">
-            <Check className="h-3 w-3" /> Card required, charged after the trial
+          <p className="mt-2 flex items-start justify-center gap-1.5 text-center text-xs text-muted-foreground">
+            <Check className="mt-0.5 h-3 w-3 shrink-0" />
+            <span>
+              {capture
+                ? `We take ${capture} now just to verify your card, refund it straight away, and ${naira(
+                    amount
+                  )} only starts when your trial ends.`
+                : `Card required — ${naira(amount)} starts when your trial ends.`}
+            </span>
           </p>
         </div>
       )}
