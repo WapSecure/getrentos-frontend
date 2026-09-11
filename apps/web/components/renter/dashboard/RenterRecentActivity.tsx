@@ -43,7 +43,7 @@ const activityRoutes: Record<ActivityType, string> = {
   message: ROUTES.RENTER_MESSAGES,
   payment: ROUTES.RENTER_PAYMENTS,
   maintenance: ROUTES.RENTER_MAINTENANCE,
-  lease: ROUTES.RENTER_LEASE,
+  lease: `${ROUTES.RENTER_HOME}?tab=lease`,
   system: ROUTES.RENTER_NOTIFICATIONS,
 };
 

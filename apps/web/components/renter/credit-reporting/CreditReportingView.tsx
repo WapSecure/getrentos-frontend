@@ -10,7 +10,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { CreditBureau } from '@/types/credit-reporting';
 
-export default function RenterCreditReportPage() {
+export const CreditReportingView = () => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<string | null>(null);
 
@@ -64,4 +64,4 @@ export default function RenterCreditReportPage() {
       )}
     </>
   );
-}
+};

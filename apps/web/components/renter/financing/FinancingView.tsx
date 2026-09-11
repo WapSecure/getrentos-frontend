@@ -11,7 +11,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { FinancingPlanLength } from '@/types/financing';
 
-export default function RenterFinancingPage() {
+export const FinancingView = () => {
   const queryClient = useQueryClient();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -104,4 +104,4 @@ export default function RenterFinancingPage() {
       />
     </>
   );
-}
+};

@@ -30,7 +30,7 @@ interface UploadData {
   tags: string[];
 }
 
-export default function DocumentsPage() {
+export const DocumentsView = () => {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 12;
   const [page, setPage] = useState(1);
@@ -277,4 +277,4 @@ export default function DocumentsPage() {
       )}
     </>
   );
-}
+};

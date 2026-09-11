@@ -217,6 +217,7 @@ function BuyerOffersPageContent() {
           <VerificationRequiredNotice
             error={createMutation.error}
             href={`${ROUTES.BUYER_SETTINGS}?tab=verification`}
+            verificationHref={ROUTES.BUYER_VERIFICATION}
           />
         </div>
       )}

@@ -3,7 +3,7 @@
 import { Scale } from 'lucide-react';
 import { LegalResourceList } from '@/components/renter/legal/LegalResourceList';
 
-export default function RenterLegalResourcesPage() {
+export const LegalResourcesView = () => {
   return (
     <>
       <div className="mb-6 flex items-start gap-3">
@@ -28,4 +28,4 @@ export default function RenterLegalResourcesPage() {
       <LegalResourceList />
     </>
   );
-}
+};

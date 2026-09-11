@@ -15,6 +15,8 @@ import { LanguageSettings } from '@/components/renter/settings/LanguageSettings'
 import { DataExport } from '@/components/renter/settings/DataExport';
 import { AccountDeletion } from '@/components/renter/settings/AccountDeletion';
 import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
+import { UssdExplainer } from '@/components/renter/ussd/UssdExplainer';
+import { UssdSimulator } from '@/components/renter/ussd/UssdSimulator';
 import {
   Settings,
   User,
@@ -28,6 +30,7 @@ import {
   Download,
   Trash2,
   MessageCircle,
+  Smartphone,
 } from 'lucide-react';
 
 type SettingsTab =
@@ -39,6 +42,7 @@ type SettingsTab =
   | 'privacy'
   | 'security'
   | 'payments'
+  | 'ussd'
   | 'theme'
   | 'language'
   | 'export'
@@ -53,6 +57,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'privacy', label: 'Privacy', icon: Shield },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'ussd', label: 'USSD Access', icon: Smartphone },
   { id: 'theme', label: 'Theme', icon: Palette },
   { id: 'language', label: 'Language', icon: Globe },
   { id: 'export', label: 'Data Export', icon: Download },
@@ -85,6 +90,17 @@ export default function SettingsPage() {
         return <SecuritySettings />;
       case 'payments':
         return <PaymentSettings />;
+      case 'ussd':
+        return (
+          <div className="grid gap-6 lg:grid-cols-3 items-start">
+            <div className="lg:col-span-2">
+              <UssdExplainer />
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <UssdSimulator />
+            </div>
+          </div>
+        );
       case 'theme':
         return <ThemeSettings />;
       case 'language':
