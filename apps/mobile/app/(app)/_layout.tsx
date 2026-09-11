@@ -13,11 +13,17 @@ export default function AppLayout() {
   return (
     <Stack screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="(renter)" />
+      <Stack.Screen name="(resident)" />
       <Stack.Screen name="property/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="property/[id]/apply" options={DETAIL_OPTIONS} />
       <Stack.Screen name="application/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="saved" options={DETAIL_OPTIONS} />
       <Stack.Screen name="verify-identity" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="violations" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="deliveries" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="directory" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="polls" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="committee" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>
   );

@@ -22,4 +22,15 @@ export const qk = {
     detail: (id: string) => ['listings', 'detail', id] as const,
     saved: ['listings', 'saved'] as const,
   },
+  resident: {
+    household: ['resident', 'household'] as const,
+    directory: ['resident', 'directory'] as const,
+    announcements: (page = 1, pageSize = 20) =>
+      ['resident', 'announcements', { page, pageSize }] as const,
+    violations: ['resident', 'violations'] as const,
+    deliveries: (page = 1, pageSize = 20) =>
+      ['resident', 'deliveries', { page, pageSize }] as const,
+    committee: ['resident', 'committee'] as const,
+    polls: ['resident', 'polls'] as const,
+  },
 } as const;
