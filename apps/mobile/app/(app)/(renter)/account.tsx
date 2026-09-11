@@ -1,5 +1,6 @@
-import { View } from 'react-native';
-import { LogOut, ShieldCheck } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
+import { router } from 'expo-router';
+import { ChevronRight, LogOut, ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -35,6 +36,25 @@ export default function Account() {
       </View>
 
       <Card elevated padding="none">
+        <Pressable
+          onPress={() => router.push('/(app)/verify-identity')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            padding: spacing.lg,
+          }}
+        >
+          <ShieldCheck size={18} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">Identity verification</Text>
+            <Text variant="caption" color="mutedForeground">
+              {profile?.isVerified ? 'Verified' : 'Required for applications and offers'}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.mutedForeground} />
+        </Pressable>
+        <Divider />
         <View style={{ padding: spacing.lg, gap: spacing.xs }}>
           <Text variant="bodyStrong">Appearance</Text>
           <Text variant="caption" color="mutedForeground">

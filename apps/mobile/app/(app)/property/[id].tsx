@@ -22,7 +22,6 @@ import {
   Skeleton,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
@@ -33,7 +32,6 @@ export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const toast = useToast();
   const { savedIds, toggle } = useSavedListings();
 
   const query = useQuery({
@@ -201,7 +199,7 @@ export default function PropertyDetail() {
           <View style={{ flex: 1 }}>
             <Button
               label="Apply to rent"
-              onPress={() => toast.show('Digital applications arrive in the next update.', 'info')}
+              onPress={() => router.push(`/(app)/property/${id}/apply`)}
             />
           </View>
         </View>
