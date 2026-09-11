@@ -14,6 +14,7 @@ export default function AppLayout() {
     <Stack screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="(renter)" />
       <Stack.Screen name="property/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="saved" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>
   );

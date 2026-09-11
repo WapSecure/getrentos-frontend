@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { ROUTES } from '@getrentos/shared';
 import { SITE_URL } from '@/lib/site';
 
 /**
@@ -14,6 +15,9 @@ const publicRoutes: Array<{
   { path: '/shortlets', priority: 0.9, changeFrequency: 'daily' },
   { path: '/land', priority: 0.9, changeFrequency: 'daily' },
   { path: '/home-management', priority: 0.7, changeFrequency: 'weekly' },
+  // Pricing is a public landing page for prospective customers, so it is
+  // advertised rather than left to be stumbled upon.
+  { path: ROUTES.PRICING, priority: 0.8, changeFrequency: 'monthly' },
   { path: '/role-selection', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/signup', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/login', priority: 0.5, changeFrequency: 'monthly' },

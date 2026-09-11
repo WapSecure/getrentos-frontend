@@ -3,8 +3,9 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from '
 import { router } from 'expo-router';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { Search, SlidersHorizontal, X } from 'lucide-react-native';
+import { Heart, Search, SlidersHorizontal, X } from 'lucide-react-native';
 import {
+  Chip,
   EmptyState,
   ErrorState,
   PropertyCard,
@@ -18,8 +19,11 @@ import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import {
   propertiesApi,
+  LISTING_SORTS,
+  LISTING_SORT_LABEL,
   PROPERTY_TYPE_LABEL,
   type ListingFilters,
+  type ListingSort,
   type RenterProperty,
 } from '@/lib/api/properties';
 import { track } from '@/lib/analytics';
@@ -30,6 +34,7 @@ export default function Discover() {
   const { colors, spacing } = useTheme();
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState<ListingFilters>({});
+  const [sortBy, setSortBy] = useState<ListingSort>('recent');
   const [sheetOpen, setSheetOpen] = useState(false);
   const { savedIds, toggle } = useSavedListings();
 
@@ -46,8 +51,8 @@ export default function Discover() {
   }, [searchText]);
 
   const query = useInfiniteQuery({
-    queryKey: qk.listings.search(filters as Record<string, unknown>),
-    queryFn: ({ pageParam }) => propertiesApi.list(filters, pageParam, PAGE_SIZE),
+    queryKey: qk.listings.search({ ...filters, sortBy } as Record<string, unknown>),
+    queryFn: ({ pageParam }) => propertiesApi.list({ ...filters, sortBy }, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
@@ -79,7 +84,31 @@ export default function Discover() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* sticky search + filter bar */}
       <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.sm }}>
-        <Text variant="title">Discover</Text>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <Text variant="title">Discover</Text>
+          <Pressable
+            onPress={() => router.push('/(app)/saved')}
+            accessibilityRole="button"
+            accessibilityLabel="Saved homes"
+            hitSlop={10}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: savedIds.size ? colors.accent : 'transparent',
+            }}
+          >
+            <Heart
+              size={19}
+              color={savedIds.size ? colors.primary : colors.foreground}
+              fill={savedIds.size ? colors.primary : 'transparent'}
+            />
+          </Pressable>
+        </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
             <TextField
@@ -94,6 +123,25 @@ export default function Discover() {
           </View>
           <FilterButton count={chips.length} onPress={() => setSheetOpen(true)} />
         </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginHorizontal: -spacing.xl }}
+          contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: 8 }}
+        >
+          {LISTING_SORTS.map((s) => (
+            <Chip
+              key={s}
+              label={LISTING_SORT_LABEL[s]}
+              selected={sortBy === s}
+              onPress={() => {
+                setSortBy(s);
+                track('sort_changed', { sortBy: s });
+              }}
+            />
+          ))}
+        </ScrollView>
 
         {chips.length > 0 ? (
           <ScrollView

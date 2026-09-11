@@ -20,6 +20,7 @@ export type AnalyticsEvent =
   | 'listing_unsaved'
   | 'search_performed'
   | 'filters_applied'
+  | 'sort_changed'
   | 'application_started'
   | 'application_submitted'
   | 'viewing_requested'

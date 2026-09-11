@@ -70,6 +70,17 @@ export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
   SHARED_APARTMENT: 'Shared',
 };
 
+/** Mirrors the backend's `RENTER_LISTING_SORTS`. */
+export const LISTING_SORTS = ['recent', 'price-low', 'price-high', 'trust-score'] as const;
+export type ListingSort = (typeof LISTING_SORTS)[number];
+
+export const LISTING_SORT_LABEL: Record<ListingSort, string> = {
+  recent: 'Newest',
+  'price-low': 'Price: low to high',
+  'price-high': 'Price: high to low',
+  'trust-score': 'Top rated',
+};
+
 /** Listing filters. `undefined` fields are omitted from the request. */
 export interface ListingFilters {
   search?: string;
@@ -80,6 +91,7 @@ export interface ListingFilters {
   bathrooms?: number;
   propertyType?: PropertyType;
   verifiedOnly?: boolean;
+  sortBy?: ListingSort;
 }
 
 function toQuery(params: Record<string, string | number | boolean | undefined>): string {
