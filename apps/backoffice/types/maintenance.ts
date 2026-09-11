@@ -108,6 +108,7 @@ export interface AdminVendor {
   phone: string;
   rating: number;
   jobsCompleted: number;
+  isActive: boolean;
   workOrderCount: number;
   quoteCount: number;
   invoiceCount: number;

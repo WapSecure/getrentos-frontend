@@ -38,6 +38,7 @@ export interface MaintenanceQueueConfig<T> {
   getRowKey: (row: T) => string;
   columns: Column<T>[];
   actions?: (row: T) => ReactNode;
+  headerAction?: ReactNode;
 }
 
 const PAGE_SIZE = 10;
@@ -130,6 +131,7 @@ export function MaintenanceQueuePage<T>({ config }: { config: MaintenanceQueueCo
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {config.headerAction}
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}

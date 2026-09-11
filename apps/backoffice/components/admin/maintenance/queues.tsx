@@ -7,6 +7,9 @@ import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrent
 import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 import { MaintenanceQueuePage, type MaintenanceQueueConfig } from './MaintenanceQueuePage';
+import { AssignVendorDialog } from './AssignVendorDialog';
+import { MaintenanceEditorDialog } from './MaintenanceEditorDialog';
+import { MaintenanceCreateDialog } from './MaintenanceCreateDialog';
 import type {
   AdminPreventivePlan,
   AdminSlaPolicy,
@@ -146,25 +149,59 @@ const yesNoOptions = [
   { value: 'false', label: 'No' },
 ];
 
-type MaintenanceAction = { title: string; description: string; label: string; reasonRequired: boolean; run: (reason: string) => Promise<unknown> };
+type MaintenanceAction = {
+  title: string;
+  description: string;
+  label: string;
+  reasonRequired: boolean;
+  run: (reason: string) => Promise<unknown>;
+};
 function useMaintenanceActions() {
   const client = useQueryClient();
   const [action, setAction] = useState<MaintenanceAction | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
   const mutation = useMutation({
     mutationFn: async () => action?.run(reason.trim()),
-    onSuccess: async () => { setAction(null); setReason(''); setToast({ message: 'Maintenance action completed and audited.', variant: 'success' }); await client.invalidateQueries({ queryKey: ['admin', 'maintenance'] }); },
+    onSuccess: async () => {
+      setAction(null);
+      setReason('');
+      setToast({ message: 'Maintenance action completed and audited.', variant: 'success' });
+      await client.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
+    },
     onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
   });
   return {
     request: setAction,
-    feedback: <><ConfirmDialog open={Boolean(action)} onOpenChange={(open) => !open && setAction(null)} title={action?.title ?? 'Confirm action'} description={action?.description ?? ''} confirmLabel={action?.label} isLoading={mutation.isPending} promptLabel={action?.reasonRequired ? 'Administrative reason' : undefined} promptValue={reason} onPromptChange={setReason} promptRequired={action?.reasonRequired} promptMinLength={10} onConfirm={() => mutation.mutate()} />{toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}</>,
+    feedback: (
+      <>
+        <ConfirmDialog
+          open={Boolean(action)}
+          onOpenChange={(open) => !open && setAction(null)}
+          title={action?.title ?? 'Confirm action'}
+          description={action?.description ?? ''}
+          confirmLabel={action?.label}
+          isLoading={mutation.isPending}
+          promptLabel={action?.reasonRequired ? 'Administrative reason' : undefined}
+          promptValue={reason}
+          onPromptChange={setReason}
+          promptRequired={action?.reasonRequired}
+          promptMinLength={10}
+          onConfirm={() => mutation.mutate()}
+        />
+        {toast && (
+          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+        )}
+      </>
+    ),
   };
 }
 
 export function WorkOrdersQueue() {
   const actions = useMaintenanceActions();
+  const [assignment, setAssignment] = useState<AdminWorkOrder | null>(null);
   const config: MaintenanceQueueConfig<AdminWorkOrder> = {
     resource: 'work-orders',
     eyebrow: 'Work Orders',
@@ -246,18 +283,98 @@ export function WorkOrdersQueue() {
         ),
       },
     ],
-    actions: (order) => <div className="flex justify-end gap-1">{order.status === 'ASSIGNED' && <Button size="xs" onClick={() => actions.request({ title: 'Start work order?', description: `${order.issueTitle} will move into progress.`, label: 'Start work', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.updateWorkOrderStatus(order.id, 'IN_PROGRESS', reason)) })}>Start</Button>}{order.status === 'IN_PROGRESS' && <Button size="xs" onClick={() => actions.request({ title: 'Resolve work order?', description: 'This records completion and closes the operational work.', label: 'Resolve', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.updateWorkOrderStatus(order.id, 'RESOLVED', reason)) })}>Resolve</Button>}{!['RESOLVED', 'CANCELLED'].includes(order.status) && <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Cancel work order?', description: 'Cancellation is audited and cannot be silently reversed.', label: 'Cancel', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.updateWorkOrderStatus(order.id, 'CANCELLED', reason)) })}>Cancel</Button>}</div>,
+    actions: (order) => (
+      <div className="flex justify-end gap-1">
+        {['SUBMITTED', 'ASSIGNED'].includes(order.status) && (
+          <Button size="xs" variant="outline" onClick={() => setAssignment(order)}>
+            {order.assignedVendorId ? 'Reassign' : 'Assign'}
+          </Button>
+        )}
+        {order.status === 'ASSIGNED' && (
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Start work order?',
+                description: `${order.issueTitle} will move into progress.`,
+                label: 'Start work',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(
+                    adminMaintenanceService.updateWorkOrderStatus(order.id, 'IN_PROGRESS', reason)
+                  ),
+              })
+            }
+          >
+            Start
+          </Button>
+        )}
+        {order.status === 'IN_PROGRESS' && (
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Resolve work order?',
+                description: 'This records completion and closes the operational work.',
+                label: 'Resolve',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(
+                    adminMaintenanceService.updateWorkOrderStatus(order.id, 'RESOLVED', reason)
+                  ),
+              })
+            }
+          >
+            Resolve
+          </Button>
+        )}
+        {!['RESOLVED', 'CANCELLED'].includes(order.status) && (
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Cancel work order?',
+                description: 'Cancellation is audited and cannot be silently reversed.',
+                label: 'Cancel',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(
+                    adminMaintenanceService.updateWorkOrderStatus(order.id, 'CANCELLED', reason)
+                  ),
+              })
+            }
+          >
+            Cancel
+          </Button>
+        )}
+      </div>
+    ),
   };
-  return <><MaintenanceQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <MaintenanceQueuePage config={config} />
+      {actions.feedback}
+      <AssignVendorDialog
+        key={assignment?.id ?? 'closed'}
+        order={assignment}
+        onClose={() => setAssignment(null)}
+      />
+    </>
+  );
 }
 
 export function SlaPoliciesQueue() {
+  const actions = useMaintenanceActions();
+  const [editor, setEditor] = useState<AdminSlaPolicy | null>(null);
+  const [creating, setCreating] = useState(false);
   const config: MaintenanceQueueConfig<AdminSlaPolicy> = {
     resource: 'sla-policies',
     eyebrow: 'SLA Policies',
     title: 'Service-level agreements',
     description: 'Property-scoped response / resolution / escalation targets by priority.',
     icon: Clock3,
+    headerAction: <Button onClick={() => setCreating(true)}>Create policy</Button>,
     filters: [
       { key: 'priority', label: 'Priority', options: priorityOptions },
       { key: 'isActive', label: 'State', options: yesNoOptions },
@@ -311,17 +428,62 @@ export function SlaPoliciesQueue() {
         render: (s) => <span className="text-muted-foreground">{date(s.updatedAt)}</span>,
       },
     ],
+    actions: (policy) => (
+      <div className="flex justify-end gap-1">
+        <Button size="xs" variant="outline" onClick={() => setEditor(policy)}>
+          Edit
+        </Button>
+        <Button
+          size="xs"
+          variant="outline"
+          onClick={() =>
+            actions.request({
+              title: `${policy.isActive ? 'Disable' : 'Enable'} SLA policy?`,
+              description: policy.isActive
+                ? 'New work orders will no longer use this service-level policy.'
+                : 'This policy will become available for matching work orders.',
+              label: policy.isActive ? 'Disable' : 'Enable',
+              reasonRequired: true,
+              run: (reason) =>
+                unwrap(
+                  adminMaintenanceService.updateSlaPolicy(policy.id, {
+                    isActive: !policy.isActive,
+                    reason,
+                  })
+                ),
+            })
+          }
+        >
+          {policy.isActive ? 'Disable' : 'Enable'}
+        </Button>
+      </div>
+    ),
   };
-  return <MaintenanceQueuePage config={config} />;
+  return (
+    <>
+      <MaintenanceQueuePage config={config} />
+      {actions.feedback}
+      <MaintenanceEditorDialog
+        key={editor?.id ?? 'closed'}
+        editor={editor ? { kind: 'sla', value: editor } : null}
+        onClose={() => setEditor(null)}
+      />
+      <MaintenanceCreateDialog kind="sla" open={creating} onClose={() => setCreating(false)} />
+    </>
+  );
 }
 
 export function PreventivePlansQueue() {
+  const actions = useMaintenanceActions();
+  const [editor, setEditor] = useState<AdminPreventivePlan | null>(null);
+  const [creating, setCreating] = useState(false);
   const config: MaintenanceQueueConfig<AdminPreventivePlan> = {
     resource: 'preventive-plans',
     eyebrow: 'Preventive Plans',
     title: 'Preventive maintenance plans',
     description: 'Scheduled maintenance across assets and units, with due detection.',
     icon: CalendarClock,
+    headerAction: <Button onClick={() => setCreating(true)}>Create plan</Button>,
     filters: [
       { key: 'status', label: 'Status', options: planStatusOptions },
       { key: 'category', label: 'Category', options: categoryOptions },
@@ -375,20 +537,92 @@ export function PreventivePlansQueue() {
         ),
       },
     ],
+    actions: (plan) => (
+      <div className="flex justify-end gap-1">
+        <Button size="xs" variant="outline" onClick={() => setEditor(plan)}>
+          Edit
+        </Button>
+        {plan.status !== 'COMPLETED' && (
+          <Button
+            size="xs"
+            variant="outline"
+            onClick={() =>
+              actions.request({
+                title: `${plan.status === 'PAUSED' ? 'Resume' : 'Pause'} preventive plan?`,
+                description: 'The plan schedule and status change will be audited.',
+                label: plan.status === 'PAUSED' ? 'Resume' : 'Pause',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(
+                    adminMaintenanceService.updatePreventivePlan(plan.id, {
+                      status: plan.status === 'PAUSED' ? 'ACTIVE' : 'PAUSED',
+                      reason,
+                    })
+                  ),
+              })
+            }
+          >
+            {plan.status === 'PAUSED' ? 'Resume' : 'Pause'}
+          </Button>
+        )}
+        {plan.status === 'ACTIVE' && (
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Record preventive service?',
+                description: `Completion will be recorded and the next service date calculated from the ${plan.frequencyDays}-day interval.`,
+                label: 'Complete service',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(adminMaintenanceService.completePreventivePlan(plan.id, reason)),
+              })
+            }
+          >
+            Complete
+          </Button>
+        )}
+      </div>
+    ),
   };
-  return <MaintenanceQueuePage config={config} />;
+  return (
+    <>
+      <MaintenanceQueuePage config={config} />
+      {actions.feedback}
+      <MaintenanceEditorDialog
+        key={editor?.id ?? 'closed'}
+        editor={editor ? { kind: 'plan', value: editor } : null}
+        onClose={() => setEditor(null)}
+      />
+      <MaintenanceCreateDialog kind="plan" open={creating} onClose={() => setCreating(false)} />
+    </>
+  );
 }
 
 export function VendorsQueue() {
+  const actions = useMaintenanceActions();
+  const [editor, setEditor] = useState<AdminVendor | null>(null);
+  const [creating, setCreating] = useState(false);
   const config: MaintenanceQueueConfig<AdminVendor> = {
     resource: 'vendors',
     eyebrow: 'Vendors',
     title: 'Vendor directory',
     description: 'Service providers across landlord workspaces, ranked by jobs completed.',
     icon: Hammer,
+    headerAction: <Button onClick={() => setCreating(true)}>Add vendor</Button>,
     listFn: (params) => adminMaintenanceService.listVendors(params),
     getRowKey: (v) => v.id,
     columns: [
+      {
+        key: 'status',
+        header: 'Status',
+        render: (v) => (
+          <Pill
+            label={v.isActive ? 'Active' : 'Disabled'}
+            variant={v.isActive ? 'success' : 'neutral'}
+          />
+        ),
+      },
       {
         key: 'vendor',
         header: 'Vendor',
@@ -427,8 +661,49 @@ export function VendorsQueue() {
         ),
       },
     ],
+    actions: (vendor) => (
+      <div className="flex justify-end gap-1">
+        <Button size="xs" variant="outline" onClick={() => setEditor(vendor)}>
+          Edit
+        </Button>
+        <Button
+          size="xs"
+          variant={vendor.isActive ? 'danger' : 'outline'}
+          onClick={() =>
+            actions.request({
+              title: `${vendor.isActive ? 'Disable' : 'Enable'} vendor?`,
+              description: vendor.isActive
+                ? 'The vendor can no longer receive new work orders. Active work must be reassigned first.'
+                : 'The vendor will become selectable for work orders and preventive plans.',
+              label: vendor.isActive ? 'Disable' : 'Enable',
+              reasonRequired: true,
+              run: (reason) =>
+                unwrap(
+                  adminMaintenanceService.updateVendor(vendor.id, {
+                    isActive: !vendor.isActive,
+                    reason,
+                  })
+                ),
+            })
+          }
+        >
+          {vendor.isActive ? 'Disable' : 'Enable'}
+        </Button>
+      </div>
+    ),
   };
-  return <MaintenanceQueuePage config={config} />;
+  return (
+    <>
+      <MaintenanceQueuePage config={config} />
+      {actions.feedback}
+      <MaintenanceEditorDialog
+        key={editor?.id ?? 'closed'}
+        editor={editor ? { kind: 'vendor', value: editor } : null}
+        onClose={() => setEditor(null)}
+      />
+      <MaintenanceCreateDialog kind="vendor" open={creating} onClose={() => setCreating(false)} />
+    </>
+  );
 }
 
 export function QuotesQueue() {
@@ -476,9 +751,48 @@ export function QuotesQueue() {
         render: (q) => <Cell primary={date(q.submittedAt)} secondary={q.submittedByName} />,
       },
     ],
-    actions: (quote) => quote.status === 'SUBMITTED' ? <div className="flex justify-end gap-1"><Button size="xs" onClick={() => actions.request({ title: 'Approve quote?', description: `${naira(quote.amount)} will become the accepted maintenance quote.`, label: 'Approve', reasonRequired: false, run: () => unwrap(adminMaintenanceService.decideQuote(quote.id, 'APPROVED')) })}>Approve</Button><Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Reject quote?', description: 'The submitting operator will see the recorded reason.', label: 'Reject', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideQuote(quote.id, 'REJECTED', reason)) })}>Reject</Button></div> : null,
+    actions: (quote) =>
+      quote.status === 'SUBMITTED' ? (
+        <div className="flex justify-end gap-1">
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Approve quote?',
+                description: `${naira(quote.amount)} will become the accepted maintenance quote.`,
+                label: 'Approve',
+                reasonRequired: false,
+                run: () => unwrap(adminMaintenanceService.decideQuote(quote.id, 'APPROVED')),
+              })
+            }
+          >
+            Approve
+          </Button>
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Reject quote?',
+                description: 'The submitting operator will see the recorded reason.',
+                label: 'Reject',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(adminMaintenanceService.decideQuote(quote.id, 'REJECTED', reason)),
+              })
+            }
+          >
+            Reject
+          </Button>
+        </div>
+      ) : null,
   };
-  return <><MaintenanceQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <MaintenanceQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function InvoicesQueue() {
@@ -533,7 +847,64 @@ export function InvoicesQueue() {
         ),
       },
     ],
-    actions: (invoice) => invoice.status === 'SUBMITTED' ? <div className="flex justify-end gap-1"><Button size="xs" onClick={() => actions.request({ title: 'Approve invoice?', description: 'Approval marks this invoice finance-ready; it does not mark it paid.', label: 'Approve', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'APPROVED', reason)) })}>Approve</Button><Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Reject invoice?', description: 'The rejection reason is retained in the audit trail.', label: 'Reject', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'REJECTED', reason)) })}>Reject</Button></div> : invoice.status === 'APPROVED' ? <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Void approved invoice?', description: 'Void this finance-ready record with an explicit reason.', label: 'Void', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'VOID', reason)) })}>Void</Button> : null,
+    actions: (invoice) =>
+      invoice.status === 'SUBMITTED' ? (
+        <div className="flex justify-end gap-1">
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Approve invoice?',
+                description: 'Approval marks this invoice finance-ready; it does not mark it paid.',
+                label: 'Approve',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'APPROVED', reason)),
+              })
+            }
+          >
+            Approve
+          </Button>
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Reject invoice?',
+                description: 'The rejection reason is retained in the audit trail.',
+                label: 'Reject',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'REJECTED', reason)),
+              })
+            }
+          >
+            Reject
+          </Button>
+        </div>
+      ) : invoice.status === 'APPROVED' ? (
+        <Button
+          size="xs"
+          variant="danger"
+          onClick={() =>
+            actions.request({
+              title: 'Void approved invoice?',
+              description: 'Void this finance-ready record with an explicit reason.',
+              label: 'Void',
+              reasonRequired: true,
+              run: (reason) =>
+                unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'VOID', reason)),
+            })
+          }
+        >
+          Void
+        </Button>
+      ) : null,
   };
-  return <><MaintenanceQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <MaintenanceQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }

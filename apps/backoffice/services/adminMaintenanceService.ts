@@ -9,6 +9,7 @@ import type {
   AdminVendorInvoice,
   AdminVendorQuote,
   AdminWorkOrder,
+  PreventivePlanStatus,
 } from '@/types/maintenance';
 
 export interface MaintenanceQuery {
@@ -21,6 +22,19 @@ export interface MaintenanceQuery {
   due?: boolean;
   page?: number;
   pageSize?: number;
+}
+
+export interface MaintenanceConfigurationOptions {
+  landlords: { id: string; legalName: string; email: string }[];
+  properties: {
+    id: string;
+    title: string;
+    city: string;
+    state: string;
+    units: { id: string; unitName: string }[];
+    homeAssets: { id: string; name: string }[];
+  }[];
+  vendors: { id: string; name: string; serviceType: string; phone: string }[];
 }
 
 const listResource = <T>(
@@ -49,12 +63,19 @@ const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
     })
   );
 const patch = <T>(path: string, body: unknown): Promise<ApiResponse<T>> =>
-  safeCall(() => authFetch<T>(`/admin/maintenance/${path}`, { method: 'PATCH', body: JSON.stringify(body) }));
+  safeCall(() =>
+    authFetch<T>(`/admin/maintenance/${path}`, { method: 'PATCH', body: JSON.stringify(body) })
+  );
 
 /** Backoffice maintenance/vendor/SLA oversight (work orders → invoices). */
 export const adminMaintenanceService = {
   overview(): Promise<ApiResponse<AdminMaintenanceOverview>> {
     return safeCall(() => authFetch<AdminMaintenanceOverview>('/admin/maintenance/overview'));
+  },
+  configurationOptions(): Promise<ApiResponse<MaintenanceConfigurationOptions>> {
+    return safeCall(() =>
+      authFetch<MaintenanceConfigurationOptions>('/admin/maintenance/configuration-options')
+    );
   },
 
   listWorkOrders(params: MaintenanceQuery = {}): Promise<ApiResponse<Paginated<AdminWorkOrder>>> {
@@ -90,16 +111,99 @@ export const adminMaintenanceService = {
   runSlaScan(): Promise<ApiResponse<{ notified: number }>> {
     return post<{ notified: number }>('sla/scan');
   },
-  assignWorkOrder(id: string, vendorId: string, reason?: string): Promise<ApiResponse<AdminWorkOrder>> {
+  assignWorkOrder(
+    id: string,
+    vendorId: string,
+    reason?: string
+  ): Promise<ApiResponse<AdminWorkOrder>> {
     return patch(`work-orders/${id}/assignment`, { vendorId, reason });
   },
-  updateWorkOrderStatus(id: string, status: string, reason: string): Promise<ApiResponse<AdminWorkOrder>> {
+  updateWorkOrderStatus(
+    id: string,
+    status: string,
+    reason: string
+  ): Promise<ApiResponse<AdminWorkOrder>> {
     return patch(`work-orders/${id}/status`, { status, reason });
   },
-  decideQuote(id: string, status: 'APPROVED' | 'REJECTED', reason?: string): Promise<ApiResponse<AdminVendorQuote>> {
+  decideQuote(
+    id: string,
+    status: 'APPROVED' | 'REJECTED',
+    reason?: string
+  ): Promise<ApiResponse<AdminVendorQuote>> {
     return post(`quotes/${id}/decision`, { status, reason });
   },
-  decideInvoice(id: string, status: 'APPROVED' | 'REJECTED' | 'VOID', reason: string): Promise<ApiResponse<AdminVendorInvoice>> {
+  decideInvoice(
+    id: string,
+    status: 'APPROVED' | 'REJECTED' | 'VOID',
+    reason: string
+  ): Promise<ApiResponse<AdminVendorInvoice>> {
     return post(`invoices/${id}/decision`, { status, reason });
+  },
+  createVendor(input: { landlordId: string; name: string; serviceType: string; phone: string }) {
+    return post<AdminVendor>('vendors', input);
+  },
+  updateVendor(
+    id: string,
+    input: {
+      name?: string;
+      serviceType?: string;
+      phone?: string;
+      isActive?: boolean;
+      reason: string;
+    }
+  ) {
+    return patch<AdminVendor>(`vendors/${id}`, input);
+  },
+  createSlaPolicy(input: {
+    propertyId: string;
+    priority: string;
+    responseTargetMinutes: number;
+    resolutionTargetMinutes: number;
+    escalationTargetMinutes: number;
+    emergencyRoutingEnabled: boolean;
+  }) {
+    return post<AdminSlaPolicy>('sla-policies', input);
+  },
+  updateSlaPolicy(
+    id: string,
+    input: {
+      responseTargetMinutes?: number;
+      resolutionTargetMinutes?: number;
+      escalationTargetMinutes?: number;
+      emergencyRoutingEnabled?: boolean;
+      isActive?: boolean;
+      reason: string;
+    }
+  ) {
+    return patch<AdminSlaPolicy>(`sla-policies/${id}`, input);
+  },
+  updatePreventivePlan(
+    id: string,
+    input: {
+      assignedVendorId?: string;
+      title?: string;
+      category?: string;
+      frequencyDays?: number;
+      nextDueAt?: string;
+      status?: PreventivePlanStatus;
+      reason: string;
+    }
+  ) {
+    return patch<AdminPreventivePlan>(`preventive-plans/${id}`, input);
+  },
+  createPreventivePlan(input: {
+    propertyId: string;
+    unitId?: string;
+    assetId?: string;
+    assignedVendorId?: string;
+    title: string;
+    category: string;
+    frequencyDays: number;
+    nextDueAt: string;
+  }) {
+    return post<AdminPreventivePlan>('preventive-plans', input);
+  },
+  completePreventivePlan(id: string, reason: string, nextDueAt?: string) {
+    return post<AdminPreventivePlan>(`preventive-plans/${id}/complete`, { reason, nextDueAt });
   },
 };
