@@ -7,11 +7,24 @@ import { Textarea } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { Check, Upload, FileText, User, Briefcase, ClipboardCheck } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import {
+  Check,
+  Upload,
+  FileText,
+  Loader2,
+  Eye,
+  X,
+  User,
+  Briefcase,
+  ClipboardCheck,
+} from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
+import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
 
 export interface ApplicationFormData {
   fullName: string;
@@ -64,14 +77,31 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleDocument = (name: string) => {
+  const setDocument = (name: string, patch: Partial<ApplicationDocument>) => {
     setData((prev) => ({
       ...prev,
-      documents: prev.documents.map((doc) =>
-        doc.name === name ? { ...doc, uploaded: !doc.uploaded } : doc
-      ),
+      documents: prev.documents.map((doc) => (doc.name === name ? { ...doc, ...patch } : doc)),
     }));
   };
+
+  const [docError, setDocError] = useState<string | null>(null);
+  const uploadMutation = useMutation({
+    mutationFn: ({ doc, file }: { doc: ApplicationDocument; file: File }) =>
+      unwrap(
+        renterService.uploadDocument(file, doc.name, 'other', 'Rental application', ['application'])
+      ),
+    onMutate: () => setDocError(null),
+    onSuccess: (uploaded, { doc }) => {
+      setDocument(doc.name, { uploaded: true, documentId: uploaded.id, url: uploaded.url });
+    },
+    onError: (err) =>
+      setDocError(
+        err instanceof Error ? err.message : 'Could not upload the file. Please try again.'
+      ),
+  });
+
+  const removeDocument = (name: string) =>
+    setDocument(name, { uploaded: false, documentId: undefined, url: undefined });
 
   const canAdvance = () => {
     if (stepIndex === 0) return data.fullName.trim() && data.email.trim() && data.phone.trim();
@@ -282,36 +312,77 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
             <p className="text-sm text-muted-foreground mb-2">
               Upload the documents your landlord requires to review your application.
             </p>
-            {data.documents.map((doc) => (
-              <div
-                key={doc.name}
-                className="flex items-center justify-between p-3 rounded-lg bg-secondary"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-foreground">{doc.name}</span>
-                  {doc.required && <span className="text-xs text-red-500">Required</span>}
-                </div>
-                <Button
-                  size="sm"
-                  variant={doc.uploaded ? 'outline' : 'primary'}
-                  className="gap-1.5"
-                  onClick={() => toggleDocument(doc.name)}
+            {data.documents.map((doc) => {
+              const isUploading =
+                uploadMutation.isPending && uploadMutation.variables?.doc.name === doc.name;
+              return (
+                <div
+                  key={doc.name}
+                  className="flex items-center justify-between gap-3 p-3 rounded-lg bg-secondary"
                 >
-                  {doc.uploaded ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      Uploaded
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-3.5 h-3.5" />
-                      Upload
-                    </>
-                  )}
-                </Button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-foreground truncate">{doc.name}</span>
+                    {doc.required && !doc.uploaded && (
+                      <span className="text-xs text-red-500 shrink-0">Required</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {doc.uploaded ? (
+                      <>
+                        {doc.url && (
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View uploaded file"
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:bg-card transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <Check className="w-3.5 h-3.5 text-green-600" />
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeDocument(doc.name)}
+                          title="Remove"
+                          className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-card transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <label
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+                          isUploading
+                            ? 'bg-secondary text-muted-foreground cursor-wait'
+                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        }`}
+                      >
+                        {isUploading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5" />
+                        )}
+                        {isUploading ? 'Uploading…' : 'Upload'}
+                        <input
+                          type="file"
+                          className="hidden"
+                          disabled={isUploading}
+                          accept=".pdf,.jpg,.jpeg,.png,.webp"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = '';
+                            if (file) uploadMutation.mutate({ doc, file });
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {docError && <p className="text-xs text-destructive">{docError}</p>}
             <Field label="Additional notes for the landlord (optional)">
               <Textarea
                 value={data.notes}

@@ -23,6 +23,7 @@ export type AnalyticsEvent =
   | 'sort_changed'
   | 'application_started'
   | 'application_submitted'
+  | 'application_withdrawn'
   | 'viewing_requested'
   | 'message_sent'
   | 'rent_payment_started';

@@ -42,46 +42,27 @@ export function configureApi(next: Hooks) {
 }
 
 const REQUEST_TIMEOUT_MS = 20_000;
+/** Uploads get more room — they're bigger and slower than a JSON round-trip. */
+const UPLOAD_TIMEOUT_MS = 60_000;
 
-export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promise<T> {
-  const { body, headers, anonymous, _retry, ...init } = options;
-
-  const token = anonymous ? null : hooks.getAccessToken();
+async function send(path: string, init: RequestInit, timeoutMs: number): Promise<Response> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  let res: Response;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    res = await fetch(`${env.apiUrl}${path}`, {
-      ...init,
-      signal: controller.signal,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'x-client-app': env.clientApp,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...headers,
-      },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    return await fetch(`${env.apiUrl}${path}`, { ...init, signal: controller.signal });
   } catch (err) {
-    clearTimeout(timeout);
     const aborted = err instanceof Error && err.name === 'AbortError';
     throw new ApiError(
       aborted ? 'The request timed out. Check your connection.' : 'Network request failed.',
-      0,
+      0
     );
+  } finally {
+    clearTimeout(timeout);
   }
-  clearTimeout(timeout);
+}
 
-  // One transparent retry after a silent token refresh.
-  if (res.status === 401 && !anonymous && !_retry) {
-    const fresh = await hooks.refresh();
-    if (fresh) {
-      return apiFetch<T>(path, { ...options, _retry: true });
-    }
-  }
-
+/** Parses a JSON envelope, throwing `ApiError` for a non-2xx response. */
+async function readJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     let code: string | undefined;
@@ -94,7 +75,64 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
     }
     throw new ApiError(message, res.status, code);
   }
-
   if (res.status === 204 || res.status === 205) return undefined as T;
   return (await res.json()) as T;
+}
+
+export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promise<T> {
+  const { body, headers, anonymous, _retry, ...init } = options;
+  const token = anonymous ? null : hooks.getAccessToken();
+
+  const res = await send(
+    path,
+    {
+      ...init,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'x-client-app': env.clientApp,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    },
+    REQUEST_TIMEOUT_MS
+  );
+
+  // One transparent retry after a silent token refresh.
+  if (res.status === 401 && !anonymous && !_retry) {
+    const fresh = await hooks.refresh();
+    if (fresh) return apiFetch<T>(path, { ...options, _retry: true });
+  }
+
+  return readJson<T>(res);
+}
+
+/**
+ * Multipart upload. Native `fetch` sets the `multipart/form-data` boundary
+ * itself from a `FormData` body — never set `Content-Type` by hand here.
+ */
+export async function apiUpload<T>(path: string, form: FormData, _retry = false): Promise<T> {
+  const token = hooks.getAccessToken();
+
+  const res = await send(
+    path,
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'x-client-app': env.clientApp,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: form,
+    },
+    UPLOAD_TIMEOUT_MS
+  );
+
+  if (res.status === 401 && !_retry) {
+    const fresh = await hooks.refresh();
+    if (fresh) return apiUpload<T>(path, form, true);
+  }
+
+  return readJson<T>(res);
 }

@@ -108,6 +108,10 @@ export interface Document {
   name: string;
   uploaded: boolean;
   required: boolean;
+  /** Id of the file in the renter's document library, once uploaded. */
+  documentId?: string;
+  /** Short-lived signed download URL for the uploaded file. */
+  url?: string;
 }
 
 export interface LandlordInfo {

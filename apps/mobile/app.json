@@ -38,6 +38,14 @@
       "expo-router",
       "expo-secure-store",
       "expo-web-browser",
+      "expo-document-picker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "GetRentos needs access to your photos to attach identity and application documents.",
+          "cameraPermission": "GetRentos needs camera access to take a selfie for identity verification."
+        }
+      ],
       [
         "expo-splash-screen",
         {
