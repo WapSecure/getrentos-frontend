@@ -1,8 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalendarClock, Clock3, Hammer, Receipt, Scroll, Wrench } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrentos/ui';
+import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 import { MaintenanceQueuePage, type MaintenanceQueueConfig } from './MaintenanceQueuePage';
 import type {
@@ -144,7 +146,25 @@ const yesNoOptions = [
   { value: 'false', label: 'No' },
 ];
 
+type MaintenanceAction = { title: string; description: string; label: string; reasonRequired: boolean; run: (reason: string) => Promise<unknown> };
+function useMaintenanceActions() {
+  const client = useQueryClient();
+  const [action, setAction] = useState<MaintenanceAction | null>(null);
+  const [reason, setReason] = useState('');
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null);
+  const mutation = useMutation({
+    mutationFn: async () => action?.run(reason.trim()),
+    onSuccess: async () => { setAction(null); setReason(''); setToast({ message: 'Maintenance action completed and audited.', variant: 'success' }); await client.invalidateQueries({ queryKey: ['admin', 'maintenance'] }); },
+    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+  });
+  return {
+    request: setAction,
+    feedback: <><ConfirmDialog open={Boolean(action)} onOpenChange={(open) => !open && setAction(null)} title={action?.title ?? 'Confirm action'} description={action?.description ?? ''} confirmLabel={action?.label} isLoading={mutation.isPending} promptLabel={action?.reasonRequired ? 'Administrative reason' : undefined} promptValue={reason} onPromptChange={setReason} promptRequired={action?.reasonRequired} promptMinLength={10} onConfirm={() => mutation.mutate()} />{toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}</>,
+  };
+}
+
 export function WorkOrdersQueue() {
+  const actions = useMaintenanceActions();
   const config: MaintenanceQueueConfig<AdminWorkOrder> = {
     resource: 'work-orders',
     eyebrow: 'Work Orders',
@@ -226,8 +246,9 @@ export function WorkOrdersQueue() {
         ),
       },
     ],
+    actions: (order) => <div className="flex justify-end gap-1">{order.status === 'ASSIGNED' && <Button size="xs" onClick={() => actions.request({ title: 'Start work order?', description: `${order.issueTitle} will move into progress.`, label: 'Start work', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.updateWorkOrderStatus(order.id, 'IN_PROGRESS', reason)) })}>Start</Button>}{order.status === 'IN_PROGRESS' && <Button size="xs" onClick={() => actions.request({ title: 'Resolve work order?', description: 'This records completion and closes the operational work.', label: 'Resolve', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.updateWorkOrderStatus(order.id, 'RESOLVED', reason)) })}>Resolve</Button>}{!['RESOLVED', 'CANCELLED'].includes(order.status) && <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Cancel work order?', description: 'Cancellation is audited and cannot be silently reversed.', label: 'Cancel', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.updateWorkOrderStatus(order.id, 'CANCELLED', reason)) })}>Cancel</Button>}</div>,
   };
-  return <MaintenanceQueuePage config={config} />;
+  return <><MaintenanceQueuePage config={config} />{actions.feedback}</>;
 }
 
 export function SlaPoliciesQueue() {
@@ -411,6 +432,7 @@ export function VendorsQueue() {
 }
 
 export function QuotesQueue() {
+  const actions = useMaintenanceActions();
   const config: MaintenanceQueueConfig<AdminVendorQuote> = {
     resource: 'quotes',
     eyebrow: 'Vendor Quotes',
@@ -454,11 +476,13 @@ export function QuotesQueue() {
         render: (q) => <Cell primary={date(q.submittedAt)} secondary={q.submittedByName} />,
       },
     ],
+    actions: (quote) => quote.status === 'SUBMITTED' ? <div className="flex justify-end gap-1"><Button size="xs" onClick={() => actions.request({ title: 'Approve quote?', description: `${naira(quote.amount)} will become the accepted maintenance quote.`, label: 'Approve', reasonRequired: false, run: () => unwrap(adminMaintenanceService.decideQuote(quote.id, 'APPROVED')) })}>Approve</Button><Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Reject quote?', description: 'The submitting operator will see the recorded reason.', label: 'Reject', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideQuote(quote.id, 'REJECTED', reason)) })}>Reject</Button></div> : null,
   };
-  return <MaintenanceQueuePage config={config} />;
+  return <><MaintenanceQueuePage config={config} />{actions.feedback}</>;
 }
 
 export function InvoicesQueue() {
+  const actions = useMaintenanceActions();
   const config: MaintenanceQueueConfig<AdminVendorInvoice> = {
     resource: 'invoices',
     eyebrow: 'Vendor Invoices',
@@ -509,6 +533,7 @@ export function InvoicesQueue() {
         ),
       },
     ],
+    actions: (invoice) => invoice.status === 'SUBMITTED' ? <div className="flex justify-end gap-1"><Button size="xs" onClick={() => actions.request({ title: 'Approve invoice?', description: 'Approval marks this invoice finance-ready; it does not mark it paid.', label: 'Approve', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'APPROVED', reason)) })}>Approve</Button><Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Reject invoice?', description: 'The rejection reason is retained in the audit trail.', label: 'Reject', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'REJECTED', reason)) })}>Reject</Button></div> : invoice.status === 'APPROVED' ? <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Void approved invoice?', description: 'Void this finance-ready record with an explicit reason.', label: 'Void', reasonRequired: true, run: (reason) => unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'VOID', reason)) })}>Void</Button> : null,
   };
-  return <MaintenanceQueuePage config={config} />;
+  return <><MaintenanceQueuePage config={config} />{actions.feedback}</>;
 }

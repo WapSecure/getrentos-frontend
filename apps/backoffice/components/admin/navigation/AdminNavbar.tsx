@@ -2,8 +2,9 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
@@ -19,10 +20,28 @@ interface AdminNavbarProps {
 }
 
 export const AdminNavbar = ({ user }: AdminNavbarProps) => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [search, setSearch] = useState('');
+  const destinations = useMemo(() => [
+    ['Dashboard', '/admin/dashboard'], ['Users', '/admin/users'], ['Verifications', '/admin/verifications'],
+    ['Trust reviews', '/admin/trust/review-cases'], ['Land diligence', '/admin/land/diligence'],
+    ['Shortlets', '/admin/shortlets'], ['Rentals', '/admin/rentals'], ['Units and tenants', '/admin/rentals/units'],
+    ['Rent finance', '/admin/rent-finance'], ['Maintenance', '/admin/maintenance'], ['Marketplace', '/admin/marketplace'],
+    ['Realtors', '/admin/realtors'], ['Agents', '/admin/agents'], ['Estates', '/admin/estates'],
+    ['Disputes', '/admin/disputes'], ['Fraud and risk', '/admin/fraud'], ['Escrow oversight', '/admin/escrow'],
+    ['Audit logs', '/admin/audit-logs'], ['Documents', '/admin/documents'], ['Messages', '/admin/messages'],
+    ['Reports', '/admin/reports'], ['Settings', '/admin/settings'], ['Access and roles', '/admin/access'],
+  ].filter(([label]) => label.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 8), [search]);
+
+  const submitSearch = () => {
+    if (!search.trim() || !destinations[0]) return;
+    router.push(destinations[0][1]);
+    setSearch('');
+  };
   const { data: notifications = [] } = useQuery({
     queryKey: adminKeys.notifications,
     queryFn: () => unwrap(adminService.getNotifications()),
@@ -87,8 +106,19 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
                 <LegacyInput
                   type="text"
                   placeholder="Search users, disputes, transactions..."
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  onKeyDown={(event) => { if (event.key === 'Enter') submitSearch(); }}
+                  aria-label="Search backoffice modules"
                   className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
+                {search.trim() && (
+                  <div className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-card shadow-xl" role="listbox" aria-label="Matching backoffice modules">
+                    {destinations.length ? destinations.map(([label, href]) => (
+                      <button key={href} type="button" className="block w-full px-4 py-2.5 text-left text-sm hover:bg-secondary focus:bg-secondary focus:outline-none" onClick={() => { router.push(href); setSearch(''); }}>{label}</button>
+                    )) : <p className="px-4 py-3 text-sm text-muted-foreground">No matching module. Open a register to search its records.</p>}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -152,7 +182,7 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
                       </div>
                       <div className="p-2 border-t border-border">
                         <Link
-                          href={ROUTES.ADMIN_DASHBOARD}
+                          href="/admin/notifications"
                           className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
                           onClick={() => setShowNotifications(false)}
                         >
@@ -184,8 +214,17 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
               <LegacyInput
                 type="text"
                 placeholder="Search users, disputes, transactions..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') submitSearch(); }}
+                aria-label="Search backoffice modules"
                 className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+              {search.trim() && (
+                <div className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-card shadow-xl">
+                  {destinations.length ? destinations.map(([label, href]) => <button key={href} type="button" className="block w-full px-4 py-2.5 text-left text-sm hover:bg-secondary" onClick={() => { router.push(href); setSearch(''); }}>{label}</button>) : <p className="px-4 py-3 text-sm text-muted-foreground">No matching module.</p>}
+                </div>
+              )}
             </div>
           </div>
         </div>

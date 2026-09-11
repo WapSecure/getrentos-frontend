@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Home,
   Wallet,
@@ -15,7 +15,7 @@ import {
   BadgeCheck,
   Eye,
 } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { EstateQueuePage, type EstateQueueConfig } from './EstateQueuePage';
@@ -78,6 +78,53 @@ const titleCase = (value: string) =>
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+type EstateAction = {
+  title: string;
+  description: string;
+  label: string;
+  run: (reason: string) => Promise<unknown>;
+};
+
+function useEstateActions() {
+  const client = useQueryClient();
+  const [action, setAction] = useState<EstateAction | null>(null);
+  const [reason, setReason] = useState('');
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null);
+  const mutation = useMutation({
+    mutationFn: async () => action?.run(reason.trim()),
+    onSuccess: async () => {
+      setAction(null);
+      setReason('');
+      setToast({ message: 'Estate action completed and audited.', variant: 'success' });
+      await client.invalidateQueries({ queryKey: ['admin', 'estates'] });
+    },
+    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+  });
+
+  return {
+    request: setAction,
+    feedback: (
+      <>
+        <ConfirmDialog
+          open={Boolean(action)}
+          onOpenChange={(open) => !open && setAction(null)}
+          title={action?.title ?? 'Confirm action'}
+          description={action?.description ?? ''}
+          confirmLabel={action?.label}
+          isLoading={mutation.isPending}
+          promptLabel="Administrative reason"
+          promptValue={reason}
+          onPromptChange={setReason}
+          promptRequired
+          promptMinLength={10}
+          onConfirm={() => mutation.mutate()}
+        />
+        {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
+      </>
+    ),
+  };
+}
 
 const householdStatusVariant = (status: HouseholdStatus): BadgeVariant =>
   status === 'ACTIVE' ? 'success' : 'neutral';
@@ -366,6 +413,7 @@ export function DuesQueue() {
 }
 
 export function IncidentsQueue() {
+  const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstateIncidentQueue> = {
     resource: 'incidents',
     eyebrow: 'Incidents',
@@ -410,11 +458,24 @@ export function IncidentsQueue() {
         ),
       },
     ],
+    actions: (incident) => {
+      if (incident.status === 'RESOLVED' || incident.status === 'DISMISSED') return null;
+      return (
+        <div className="flex justify-end gap-1">
+          {incident.status === 'OPEN' && (
+            <Button size="xs" variant="outline" onClick={() => actions.request({ title: 'Start incident response?', description: 'The incident will be marked in progress and the reason retained in the audit trail.', label: 'Start response', run: (reason) => unwrap(adminEstateService.updateIncidentStatus(incident.id, 'IN_PROGRESS', reason)) })}>Start</Button>
+          )}
+          <Button size="xs" onClick={() => actions.request({ title: 'Resolve incident?', description: 'Confirm that the incident has been investigated and resolved.', label: 'Resolve', run: (reason) => unwrap(adminEstateService.updateIncidentStatus(incident.id, 'RESOLVED', reason)) })}>Resolve</Button>
+          <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Dismiss incident?', description: 'Dismissal is terminal and requires a clear administrative reason.', label: 'Dismiss', run: (reason) => unwrap(adminEstateService.updateIncidentStatus(incident.id, 'DISMISSED', reason)) })}>Dismiss</Button>
+        </div>
+      );
+    },
   };
-  return <EstateQueuePage config={config} />;
+  return <><EstateQueuePage config={config} />{actions.feedback}</>;
 }
 
 export function EstateMaintenanceQueue() {
+  const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstateMaintenanceQueue> = {
     resource: 'maintenance',
     eyebrow: 'Maintenance',
@@ -464,11 +525,22 @@ export function EstateMaintenanceQueue() {
         render: (m) => <span className="text-muted-foreground">{date(m.createdAt)}</span>,
       },
     ],
+    actions: (ticket) => {
+      if (ticket.status === 'RESOLVED' || ticket.status === 'DISMISSED') return null;
+      return (
+        <div className="flex justify-end gap-1">
+          {ticket.status === 'OPEN' && <Button size="xs" variant="outline" onClick={() => actions.request({ title: 'Start maintenance response?', description: 'The estate ticket will be marked in progress.', label: 'Start work', run: (reason) => unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'IN_PROGRESS', reason)) })}>Start</Button>}
+          <Button size="xs" onClick={() => actions.request({ title: 'Resolve maintenance ticket?', description: 'Confirm the reported estate issue has been resolved.', label: 'Resolve', run: (reason) => unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'RESOLVED', reason)) })}>Resolve</Button>
+          <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Dismiss maintenance ticket?', description: 'Dismissal is terminal and requires a clear administrative reason.', label: 'Dismiss', run: (reason) => unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'DISMISSED', reason)) })}>Dismiss</Button>
+        </div>
+      );
+    },
   };
-  return <EstateQueuePage config={config} />;
+  return <><EstateQueuePage config={config} />{actions.feedback}</>;
 }
 
 export function PollsQueue() {
+  const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstatePollQueue> = {
     resource: 'polls',
     eyebrow: 'Polls',
@@ -509,11 +581,13 @@ export function PollsQueue() {
         render: (p) => <Pill label={titleCase(p.status)} variant={pollStatusVariant(p.status)} />,
       },
     ],
+    actions: (poll) => poll.status === 'OPEN' ? <Button size="xs" variant="outline" onClick={() => actions.request({ title: 'Close poll?', description: 'Voting will stop immediately. Existing votes remain available for reporting.', label: 'Close poll', run: (reason) => unwrap(adminEstateService.closePoll(poll.id, reason)) })}>Close</Button> : null,
   };
-  return <EstateQueuePage config={config} />;
+  return <><EstateQueuePage config={config} />{actions.feedback}</>;
 }
 
 export function AnnouncementsQueue() {
+  const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstateAnnouncementQueue> = {
     resource: 'announcements',
     eyebrow: 'Announcements',
@@ -550,8 +624,9 @@ export function AnnouncementsQueue() {
           ),
       },
     ],
+    actions: (announcement) => <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Remove announcement?', description: 'The notice will be removed from the estate feed. The reason remains in the audit log.', label: 'Remove', run: (reason) => unwrap(adminEstateService.removeAnnouncement(announcement.id, reason)) })}>Remove</Button>,
   };
-  return <EstateQueuePage config={config} />;
+  return <><EstateQueuePage config={config} />{actions.feedback}</>;
 }
 
 export function StaffQueue() {

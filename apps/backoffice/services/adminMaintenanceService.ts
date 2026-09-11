@@ -48,6 +48,8 @@ const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     })
   );
+const patch = <T>(path: string, body: unknown): Promise<ApiResponse<T>> =>
+  safeCall(() => authFetch<T>(`/admin/maintenance/${path}`, { method: 'PATCH', body: JSON.stringify(body) }));
 
 /** Backoffice maintenance/vendor/SLA oversight (work orders → invoices). */
 export const adminMaintenanceService = {
@@ -87,5 +89,17 @@ export const adminMaintenanceService = {
 
   runSlaScan(): Promise<ApiResponse<{ notified: number }>> {
     return post<{ notified: number }>('sla/scan');
+  },
+  assignWorkOrder(id: string, vendorId: string, reason?: string): Promise<ApiResponse<AdminWorkOrder>> {
+    return patch(`work-orders/${id}/assignment`, { vendorId, reason });
+  },
+  updateWorkOrderStatus(id: string, status: string, reason: string): Promise<ApiResponse<AdminWorkOrder>> {
+    return patch(`work-orders/${id}/status`, { status, reason });
+  },
+  decideQuote(id: string, status: 'APPROVED' | 'REJECTED', reason?: string): Promise<ApiResponse<AdminVendorQuote>> {
+    return post(`quotes/${id}/decision`, { status, reason });
+  },
+  decideInvoice(id: string, status: 'APPROVED' | 'REJECTED' | 'VOID', reason: string): Promise<ApiResponse<AdminVendorInvoice>> {
+    return post(`invoices/${id}/decision`, { status, reason });
   },
 };

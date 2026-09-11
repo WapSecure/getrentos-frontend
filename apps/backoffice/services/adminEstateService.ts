@@ -15,6 +15,8 @@ import type {
   AdminEstateOverview,
   AdminEstatePollQueue,
   AdminEstateStaffMember,
+  EstateIncidentStatus,
+  EstateMaintenanceStatus,
 } from '@/types/estate';
 
 export interface EstateQuery {
@@ -61,6 +63,18 @@ const post = <T>(path: string): Promise<ApiResponse<T>> =>
   safeCall(() =>
     authFetch<T>(`/admin/estates/${path}`, {
       method: 'POST',
+    })
+  );
+
+const mutate = <T>(
+  path: string,
+  method: 'PATCH' | 'POST' | 'DELETE',
+  body: Record<string, unknown>
+): Promise<ApiResponse<T>> =>
+  safeCall(() =>
+    authFetch<T>(`/admin/estates/${path}`, {
+      method,
+      body: JSON.stringify(body),
     })
   );
 
@@ -139,5 +153,24 @@ export const adminEstateService = {
 
   runDueScan(): Promise<ApiResponse<AdminEstateDueScanResult>> {
     return post<AdminEstateDueScanResult>('dues/scan');
+  },
+
+  updateIncidentStatus(id: string, status: EstateIncidentStatus, reason: string) {
+    return mutate<AdminEstateIncidentQueue>(`incidents/${id}/status`, 'PATCH', { status, reason });
+  },
+
+  updateMaintenanceStatus(id: string, status: EstateMaintenanceStatus, reason: string) {
+    return mutate<AdminEstateMaintenanceQueue>(`maintenance/${id}/status`, 'PATCH', {
+      status,
+      reason,
+    });
+  },
+
+  closePoll(id: string, reason: string) {
+    return mutate<AdminEstatePollQueue>(`polls/${id}/close`, 'POST', { reason });
+  },
+
+  removeAnnouncement(id: string, reason: string) {
+    return mutate<void>(`announcements/${id}`, 'DELETE', { reason });
   },
 };
