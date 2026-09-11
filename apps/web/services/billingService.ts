@@ -9,9 +9,12 @@ export interface CheckoutSession {
   reference: string;
   /** Null when no gateway is configured (dev) — confirm with `verifyCheckout`. */
   authorizationUrl: string | null;
+  /** The Pro price the customer will pay from the trial end. */
   amountKobo: number;
   cycle: BillingCycle;
   trialDays: number;
+  /** Small refundable amount taken now to put a card on file. Never the price. */
+  tokenizeKobo?: number;
   simulated: boolean;
 }
 
