@@ -78,6 +78,12 @@ export const Navigation = () => {
               >
                 Shortlets
               </Link>
+              <Link
+                href={ROUTES.PRICING}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Pricing
+              </Link>
               {!isSignedIn ? (
                 <>
                   <Link
@@ -172,6 +178,13 @@ export const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Shortlets
+              </Link>
+              <Link
+                href={ROUTES.PRICING}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Pricing
               </Link>
               {!isSignedIn ? (
                 <>

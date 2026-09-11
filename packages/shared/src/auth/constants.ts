@@ -205,6 +205,7 @@ export const ROUTES = {
   HOME_MANAGEMENT: '/home-management',
   LAND_MARKETPLACE: '/land',
   SHORTLET_MARKETPLACE: '/shortlets',
+  PRICING: '/pricing',
 
   // Dashboard base routes
   DASHBOARD: '/dashboard',

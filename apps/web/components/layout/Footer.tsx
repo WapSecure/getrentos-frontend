@@ -96,6 +96,7 @@ export const Footer = () => {
                 { label: 'Shortlet stays', href: ROUTES.SHORTLET_MARKETPLACE },
                 { label: 'Buy land', href: ROUTES.LAND_MARKETPLACE },
                 { label: 'Home management', href: ROUTES.HOME_MANAGEMENT },
+                { label: 'Pricing', href: ROUTES.PRICING },
                 { label: 'How it works', href: '#how-it-works' },
               ].map((item) => (
                 <li key={item.label}>
