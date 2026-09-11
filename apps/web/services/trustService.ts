@@ -229,7 +229,73 @@ export const trustService = {
       })
     );
   },
+
+  /** Starts (or idempotently resumes) a PROPERTY_LISTING verification you own. */
+  async startPropertyVerification(
+    propertyId: string,
+    purpose: 'PROPERTY_LISTING' | 'OWNERSHIP_CLAIM' = 'PROPERTY_LISTING',
+    country = 'NG'
+  ): Promise<ApiResponse<TrustVerificationDto>> {
+    return safeCall(() =>
+      authFetch<TrustVerificationDto>('/trust/verifications', {
+        method: 'POST',
+        body: JSON.stringify({ subjectType: 'PROPERTY', subjectId: propertyId, purpose, country }),
+      })
+    );
+  },
+
+  /** PROPERTY_ADDRESS_CHECK — normalises/validates the property address. */
+  async submitPropertyAddress(
+    verificationId: string,
+    input: { address: string; city?: string; state?: string; country?: string }
+  ): Promise<ApiResponse<TrustPropertyStepOutcome>> {
+    return safeCall(() =>
+      authFetch<TrustPropertyStepOutcome>(
+        `/trust/verifications/${verificationId}/property/address`,
+        { method: 'POST', body: JSON.stringify(input) }
+      )
+    );
+  },
+
+  /** PROPERTY_DOCUMENT_CHECK — title/ownership document (needs DOCUMENT_PROCESSING consent). */
+  async submitPropertyDocument(
+    verificationId: string,
+    input: {
+      documentType: string;
+      documentNumber?: string;
+      ownerName?: string;
+      country?: string;
+    }
+  ): Promise<ApiResponse<TrustPropertyStepOutcome>> {
+    return safeCall(() =>
+      authFetch<TrustPropertyStepOutcome>(
+        `/trust/verifications/${verificationId}/property/document`,
+        { method: 'POST', body: JSON.stringify(input) }
+      )
+    );
+  },
+
+  /** OWNERSHIP_CHECK — both sides are resolved server-side. */
+  async submitOwnershipCheck(
+    verificationId: string,
+    country = 'NG'
+  ): Promise<ApiResponse<TrustPropertyStepOutcome>> {
+    return safeCall(() =>
+      authFetch<TrustPropertyStepOutcome>(
+        `/trust/verifications/${verificationId}/property/ownership`,
+        { method: 'POST', body: JSON.stringify({ country }) }
+      )
+    );
+  },
 };
+
+export interface TrustPropertyStepOutcome {
+  verificationId: string;
+  stepType: string;
+  status: string;
+  provider?: string | null;
+  match?: Record<string, string>;
+}
 
 export interface TrustDocumentStepOutcome {
   verificationId: string;

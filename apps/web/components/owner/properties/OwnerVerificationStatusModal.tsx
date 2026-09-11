@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
 import { Button, DocumentUpload, Select } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { trustService } from '@/services/trustService';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 import type { LandOwnershipProofInput } from '@/types/land';
 
@@ -14,6 +16,8 @@ interface OwnerVerificationStatusModalProps {
   property: OwnerProperty | null;
   onClose: () => void;
   onResubmit: (propertyId: string, proof: LandOwnershipProofInput) => Promise<void>;
+  /** Called after the automated verification verifies the property, so the list refreshes. */
+  onVerified?: () => void;
 }
 
 const statusConfig: Record<
@@ -57,12 +61,20 @@ export const OwnerVerificationStatusModal = ({
   property,
   onClose,
   onResubmit,
+  onVerified,
 }: OwnerVerificationStatusModalProps) => {
   const [resubmitFile, setResubmitFile] = useState<File | null>(null);
   const [documentType, setDocumentType] =
     useState<LandOwnershipProofInput['documentType']>('C_OF_O');
   const [isResubmitting, setIsResubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Automated (orchestrated) verification state.
+  const [titleDocumentType, setTitleDocumentType] = useState('C_OF_O');
+  const [titleDocumentNumber, setTitleDocumentNumber] = useState('');
+  const [documentOwnerName, setDocumentOwnerName] = useState('');
+  const [isRunning, setIsRunning] = useState(false);
+  const [trustError, setTrustError] = useState<string | null>(null);
+  const [trustMessage, setTrustMessage] = useState<string | null>(null);
 
   if (!property) return null;
 
@@ -71,6 +83,56 @@ export const OwnerVerificationStatusModal = ({
   // Pending properties may need supplemental evidence too. This also gives an
   // owner a safe retry path if one document upload failed after registration.
   const canResubmit = property.verificationStatus !== 'verified';
+
+  /**
+   * Runs the orchestrated property verification: address -> title document ->
+   * ownership. All three must pass for the property to be verified.
+   */
+  const handleRunTrustVerification = async () => {
+    if (!property) return;
+    setIsRunning(true);
+    setTrustError(null);
+    setTrustMessage(null);
+    try {
+      // A title document is sensitive evidence: grant the processing consent first.
+      await unwrap(trustService.grantConsent({ consentType: 'DOCUMENT_PROCESSING' }));
+      const verification = await unwrap(trustService.startPropertyVerification(property.id));
+
+      await unwrap(
+        trustService.submitPropertyAddress(verification.id, {
+          address: property.address,
+          city: property.city,
+          state: property.state,
+          country: property.country,
+        })
+      );
+      await unwrap(
+        trustService.submitPropertyDocument(verification.id, {
+          documentType: titleDocumentType,
+          documentNumber: titleDocumentNumber.trim(),
+          ownerName: (documentOwnerName.trim() || property.ownerName).trim(),
+        })
+      );
+      const ownership = await unwrap(trustService.submitOwnershipCheck(verification.id));
+      const detail = await unwrap(trustService.getVerification(verification.id));
+
+      if (detail.decision === 'PASS') {
+        setTrustMessage('Property verified — address, title document and ownership all passed.');
+        onVerified?.();
+      } else {
+        setTrustError(
+          `Ownership check ${ownership.status.toLowerCase()}. ` +
+            (detail.decision === 'REVIEW'
+              ? 'The verification was sent for manual review.'
+              : 'The name printed on the document must match the owner on record.')
+        );
+      }
+    } catch (reason) {
+      setTrustError(reason instanceof Error ? reason.message : 'Unable to run verification.');
+    } finally {
+      setIsRunning(false);
+    }
+  };
 
   const handleResubmit = async () => {
     if (!resubmitFile) return;
@@ -196,6 +258,64 @@ export const OwnerVerificationStatusModal = ({
               )}
 
               {error && <p className="text-sm text-destructive">{error}</p>}
+
+              {/* Orchestrated verification: address -> title document -> ownership. */}
+              <div className="rounded-lg border border-border p-3 space-y-3">
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Automated verification</p>
+                    <p className="text-xs text-muted-foreground">
+                      Runs the address, title-document and ownership checks. Passing all three
+                      verifies this property immediately.
+                    </p>
+                  </div>
+                </div>
+
+                <Select
+                  value={titleDocumentType}
+                  onValueChange={setTitleDocumentType}
+                  options={[
+                    { value: 'C_OF_O', label: 'Certificate of Occupancy (C of O)' },
+                    { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
+                    { value: 'GOVERNORS_CONSENT', label: "Governor's Consent" },
+                    { value: 'SURVEY_PLAN', label: 'Survey plan' },
+                    { value: 'RECEIPT', label: 'Government receipt' },
+                  ]}
+                  ariaLabel="Title document type"
+                />
+
+                <LegacyInput
+                  type="text"
+                  value={titleDocumentNumber}
+                  onChange={(e) => setTitleDocumentNumber(e.target.value)}
+                  placeholder="Document number, e.g. C-OF-O/2026/00123"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+
+                <LegacyInput
+                  type="text"
+                  value={documentOwnerName}
+                  onChange={(e) => setDocumentOwnerName(e.target.value)}
+                  placeholder={`Name printed on the document (e.g. ${property.ownerName})`}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+
+                {trustMessage && (
+                  <p className="text-sm text-green-600 dark:text-green-400">{trustMessage}</p>
+                )}
+                {trustError && <p className="text-sm text-destructive">{trustError}</p>}
+
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={handleRunTrustVerification}
+                  disabled={isRunning || titleDocumentNumber.trim().length < 6}
+                  isLoading={isRunning}
+                >
+                  Run verification
+                </Button>
+              </div>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">

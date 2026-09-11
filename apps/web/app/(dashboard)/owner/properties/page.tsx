@@ -263,6 +263,7 @@ export default function OwnerPropertiesPage() {
         property={statusModalProperty}
         onClose={() => setStatusModalProperty(null)}
         onResubmit={handleResubmit}
+        onVerified={invalidate}
       />
 
       <EditOwnerPropertyModal
