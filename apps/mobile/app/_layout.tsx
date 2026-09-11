@@ -9,7 +9,7 @@ import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
-import { IMPLEMENTED_PORTALS } from '@/lib/roles';
+import { IMPLEMENTED_PORTALS, portalHref } from '@/lib/roles';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -39,9 +39,20 @@ function useProtectedRoute() {
       if (inApp || root === undefined) target = '/(auth)/welcome';
     } else {
       // authenticated
-      if (!inApp) target = portalReady ? '/(app)/(renter)' : '/(app)/portal-unavailable';
-      else if (!portalReady && segments[1] !== 'portal-unavailable') {
-        target = '/(app)/portal-unavailable';
+      const group = (segments as string[])[1];
+      if (!inApp) {
+        target = portal && portalReady ? portalHref(portal) : '/(app)/portal-unavailable';
+      } else if (!portalReady) {
+        if (group !== 'portal-unavailable') target = '/(app)/portal-unavailable';
+      } else if (portal && group?.startsWith('(') && group !== `(${portal})`) {
+        // Two portals' tab groups can share a leaf name (e.g. both define
+        // "account"), and group segments are invisible in the URL, so a
+        // deep link or stale bookmark can resolve into the WRONG portal's
+        // screen. Only re-route when the matched segment is itself a
+        // portal group marker — top-level pushed screens outside any
+        // group (e.g. "violations", "saved") are unambiguous by name and
+        // must stay untouched here.
+        target = portalHref(portal);
       }
     }
 
