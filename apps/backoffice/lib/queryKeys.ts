@@ -247,4 +247,14 @@ export const adminKeys = {
       params?.pageSize ?? 20,
     ] as const,
   reviewCaseDetail: (id: string) => ['admin', 'trust', 'review-cases', id] as const,
+  tierGrants: (params?: { userId?: string; state?: string; page?: number; pageSize?: number }) =>
+    [
+      'admin',
+      'trust',
+      'tier-grants',
+      params?.userId ?? 'all',
+      params?.state ?? 'all',
+      params?.page ?? 1,
+      params?.pageSize ?? 20,
+    ] as const,
 };
