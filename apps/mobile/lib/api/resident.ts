@@ -112,6 +112,51 @@ export interface Poll {
   createdAt: string;
 }
 
+export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
+
+export interface VisitorPass {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  visitorName: string;
+  visitorPhone?: string;
+  purpose?: string;
+  status: VisitorPassStatus;
+  expiresAt: string;
+  checkedInAt?: string;
+  createdAt: string;
+}
+
+export interface IssuedVisitorPass extends VisitorPass {
+  pin: string;
+  /** The pin encoded as a scannable QR code (data:image/png;base64,...). */
+  qrDataUrl: string;
+}
+
+export interface Amenity {
+  id: string;
+  estateId: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+}
+
+export type AmenityBookingStatus = 'confirmed' | 'cancelled';
+
+export interface AmenityBooking {
+  id: string;
+  amenityId: string;
+  amenityName: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  startsAt: string;
+  endsAt: string;
+  status: AmenityBookingStatus;
+  createdAt: string;
+}
+
 export interface Paginated<T> {
   items: T[];
   total: number;
@@ -157,4 +202,32 @@ export const residentApi = {
 
   voteOnPoll: (pollId: string, optionId: string) =>
     apiFetch<Poll>(`/estate/resident/polls/${pollId}/vote`, { method: 'POST', body: { optionId } }),
+
+  listVisitorPasses: (page = 1, pageSize = 50) =>
+    apiFetch<Paginated<VisitorPass>>(
+      `/estate/resident/visitor-passes${toQuery({ page, pageSize })}`
+    ),
+
+  issueVisitorPass: (data: {
+    visitorName: string;
+    visitorPhone?: string;
+    purpose?: string;
+    expiresAt?: string;
+  }) =>
+    apiFetch<IssuedVisitorPass>('/estate/resident/visitor-passes', { method: 'POST', body: data }),
+
+  revokeVisitorPass: (passId: string) =>
+    apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/revoke`, { method: 'PATCH' }),
+
+  listAmenities: () => apiFetch<Amenity[]>('/estate/resident/amenities'),
+
+  bookAmenity: (data: { amenityId: string; startsAt: string; endsAt: string }) =>
+    apiFetch<AmenityBooking>('/estate/resident/amenities/book', { method: 'POST', body: data }),
+
+  listAmenityBookings: () => apiFetch<AmenityBooking[]>('/estate/resident/amenity-bookings'),
+
+  cancelAmenityBooking: (bookingId: string) =>
+    apiFetch<AmenityBooking>(`/estate/resident/amenity-bookings/${bookingId}/cancel`, {
+      method: 'PATCH',
+    }),
 };

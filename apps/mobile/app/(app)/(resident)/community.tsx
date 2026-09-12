@@ -1,9 +1,30 @@
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import { ChevronRight, Contact, Landmark, Package, TriangleAlert, Vote } from 'lucide-react-native';
+import {
+  CalendarCheck,
+  ChevronRight,
+  Contact,
+  KeyRound,
+  Landmark,
+  Package,
+  TriangleAlert,
+  Vote,
+} from 'lucide-react-native';
 import { Card, Divider, Screen, Text, useTheme } from '@getrentos/ui-native';
 
 const ROWS = [
+  {
+    href: '/(app)/visitor-passes',
+    label: 'Visitor Passes',
+    description: 'Issue a gate pass for your guests',
+    icon: KeyRound,
+  },
+  {
+    href: '/(app)/amenities',
+    label: 'Amenities',
+    description: 'Book shared facilities in your estate',
+    icon: CalendarCheck,
+  },
   {
     href: '/(app)/violations',
     label: 'Violations',
