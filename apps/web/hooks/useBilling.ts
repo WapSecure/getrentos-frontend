@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { billingService } from '@/services/billingService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -41,4 +42,30 @@ export function useManageSubscription() {
   });
 
   return { cancel, reactivate, pending: cancel.isPending || reactivate.isPending };
+}
+
+/**
+ * Opens the provider's hosted card-update page.
+ *
+ * Redirecting out is deliberate: Paystack tokenizes the replacement card and
+ * refunds the verification charge it takes, which we are better off not
+ * reimplementing — and it keeps card details away from us entirely.
+ */
+export function useCardUpdateLink() {
+  const [opening, setOpening] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const openCardUpdate = useCallback(async () => {
+    setOpening(true);
+    setError(null);
+    try {
+      const { url } = await unwrap(billingService.getCardUpdateLink());
+      window.location.href = url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not open the card update page.');
+      setOpening(false);
+    }
+  }, []);
+
+  return { openCardUpdate, opening, error };
 }

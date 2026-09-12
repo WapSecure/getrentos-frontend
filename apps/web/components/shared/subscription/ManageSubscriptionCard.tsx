@@ -5,7 +5,7 @@ import { AlertTriangle, CalendarClock, Sparkles } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import type { MyBilling } from '@/services/billingService';
-import { useManageSubscription } from '@/hooks/useBilling';
+import { useCardUpdateLink, useManageSubscription } from '@/hooks/useBilling';
 
 const naira = (kobo: number | null | undefined) =>
   kobo == null ? null : formatCurrency(kobo / 100);
@@ -28,6 +28,7 @@ const asDate = (iso: string | null | undefined) =>
  */
 export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
   const { cancel, reactivate, pending } = useManageSubscription();
+  const cardUpdate = useCardUpdateLink();
   const [confirming, setConfirming] = useState(false);
 
   if (!billing?.isActive) return null;
@@ -38,7 +39,7 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
   const periodEnd = asDate(billing.currentPeriodEnd);
   const isTrialing = billing.status === 'TRIALING';
   const isPastDue = billing.status === 'PAST_DUE';
-  const error = cancel.error ?? reactivate.error;
+  const error = cancel.error ?? reactivate.error ?? cardUpdate.error;
 
   // A trial always shows its trial date; the cancelled state is carried by the
   // detail line, which must stop promising a charge that will not happen.
@@ -96,6 +97,16 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
       )}
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
+        {isPastDue && !billing.cancelAtPeriodEnd && (
+          <Button
+            variant="primary"
+            disabled={cardUpdate.opening}
+            onClick={cardUpdate.openCardUpdate}
+          >
+            {cardUpdate.opening ? 'Opening…' : 'Update card'}
+          </Button>
+        )}
+
         {billing.cancelAtPeriodEnd ? (
           <Button variant="primary" disabled={pending} onClick={() => reactivate.mutate()}>
             {pending ? 'Resuming…' : 'Resume plan'}
