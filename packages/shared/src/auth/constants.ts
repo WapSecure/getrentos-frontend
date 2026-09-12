@@ -373,6 +373,7 @@ export const ROUTES = {
 
   // Admin / BackOffice specific routes
   ADMIN_USERS: '/admin/users',
+  ADMIN_SUBSCRIPTIONS: '/admin/subscriptions',
   ADMIN_VERIFICATIONS: '/admin/verifications',
   ADMIN_DISPUTES: '/admin/disputes',
   ADMIN_FRAUD: '/admin/fraud',
