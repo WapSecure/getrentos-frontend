@@ -28,6 +28,13 @@ export interface UnitListParams extends RentalListParams {
   occupancyStatus?: string;
 }
 
+export interface AdminTenantCandidate {
+  id: string;
+  legalName: string;
+  email: string | null;
+  phone: string | null;
+}
+
 const listResource = <T>(
   resource: string,
   params: RentalListParams = {}
@@ -65,8 +72,11 @@ export const adminRentalService = {
     });
     return safeCall(() => authFetch<Paginated<AdminRentalUnit>>(`/admin/rentals/units${query}`));
   },
-  assignUnitTenant(id: string, tenantName: string): Promise<ApiResponse<void>> {
-    return post<void>(`units/${id}/tenant`, { tenantName });
+  searchTenantCandidates(search: string): Promise<ApiResponse<AdminTenantCandidate[]>> {
+    return safeCall(() => authFetch<AdminTenantCandidate[]>(`/admin/rentals/units/tenant-candidates${toQuery({ search })}`));
+  },
+  assignUnitTenant(id: string, tenant: { tenantId: string } | { tenantName: string }): Promise<ApiResponse<void>> {
+    return post<void>(`units/${id}/tenant`, tenant);
   },
   removeUnitTenant(id: string): Promise<ApiResponse<void>> {
     return post<void>(`units/${id}/remove-tenant`);

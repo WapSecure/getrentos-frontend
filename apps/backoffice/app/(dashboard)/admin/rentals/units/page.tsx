@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building2, Search } from 'lucide-react';
 import {
@@ -17,11 +17,12 @@ import {
 import { ApiError, unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminRentalService } from '@/services/adminRentalService';
+import type { AdminTenantCandidate } from '@/services/adminRentalService';
 import type { AdminRentalUnit, UnitOccupancyStatus } from '@/types/rental';
 
 const PAGE_SIZE = 20;
 type Editor =
-  | { kind: 'assign'; unit: AdminRentalUnit; value: string }
+  | { kind: 'assign'; unit: AdminRentalUnit; mode: 'registered' | 'manual'; search: string; candidate: AdminTenantCandidate | null; value: string }
   | { kind: 'pricing'; value: string }
   | { kind: 'charge'; amount: string; dueDate: string; category: string; billingCycle: string };
 type OperationResult =
@@ -67,10 +68,17 @@ export default function AdminRentalUnitsPage() {
   const runEditor = () => {
     if (!editor) return;
     if (editor.kind === 'assign') {
+      if (editor.mode === 'registered') {
+        if (!editor.candidate) return setToast({ message: 'Select a registered renter first.', variant: 'error' });
+        mutation.mutate(() => adminRentalService.assignUnitTenant(editor.unit.id, { tenantId: editor.candidate!.id }), {
+          onSuccess: () => setToast({ message: 'Registered renter linked to the unit.', variant: 'success' }),
+        });
+        return;
+      }
       const name = editor.value.trim();
       if (name.length < 2) return setToast({ message: 'Enter the tenant’s full name.', variant: 'error' });
-      mutation.mutate(() => adminRentalService.assignUnitTenant(editor.unit.id, name), {
-        onSuccess: () => setToast({ message: 'Tenant assigned and audit trail recorded.', variant: 'success' }),
+      mutation.mutate(() => adminRentalService.assignUnitTenant(editor.unit.id, { tenantName: name }), {
+        onSuccess: () => setToast({ message: 'Manual tenant name recorded. No renter account was linked.', variant: 'success' }),
       });
       return;
     }
@@ -144,11 +152,11 @@ export default function AdminRentalUnitsPage() {
                   <td className="p-3"><input type="checkbox" aria-label={`Select ${unit.unitName}`} checked={selected.includes(unit.id)} onChange={(event) => setSelected((current) => event.target.checked ? [...new Set([...current, unit.id])] : current.filter((id) => id !== unit.id))} /></td>
                   <td className="p-3"><p className="font-medium">{unit.unitName}</p><p className="text-xs text-muted-foreground">{unit.propertyTitle}</p></td>
                   <td className="p-3">{unit.ownerName}</td>
-                  <td className="p-3"><p>{unit.tenantName ?? 'Unassigned'}</p><Badge variant={unit.occupancyStatus === 'VACANT' ? 'neutral' : unit.occupancyStatus === 'OCCUPIED' ? 'success' : 'warning'}>{unit.occupancyStatus.replaceAll('_', ' ')}</Badge></td>
+                  <td className="p-3"><p>{unit.tenantName ?? 'Unassigned'}</p>{unit.tenantName && <p className="text-xs text-muted-foreground">{unit.tenantId ? 'Registered renter' : 'Manual record'}</p>}<Badge variant={unit.occupancyStatus === 'VACANT' ? 'neutral' : unit.occupancyStatus === 'OCCUPIED' ? 'success' : 'warning'}>{unit.occupancyStatus.replaceAll('_', ' ')}</Badge></td>
                   <td className="p-3">₦{unit.monthlyRent.toLocaleString()}</td>
                   <td className="p-3"><p>{unit.activeLease ? 'Signed lease' : 'No signed lease'}</p><p className="text-xs text-muted-foreground">{unit.pendingChargeCount} pending charge(s)</p></td>
                   <td className="p-3"><div className="flex justify-end gap-2">
-                    {unit.occupancyStatus === 'VACANT' ? <Button size="sm" variant="outline" onClick={() => setEditor({ kind: 'assign', unit, value: '' })}>Assign tenant</Button> : <Button size="sm" variant="outline" disabled={unit.activeLease} title={unit.activeLease ? 'End or expire the signed lease before removing this tenant' : undefined} onClick={() => setRemoveUnit(unit)}>Remove tenant</Button>}
+                    {unit.occupancyStatus === 'VACANT' ? <Button size="sm" variant="outline" onClick={() => setEditor({ kind: 'assign', unit, mode: 'registered', search: '', candidate: null, value: '' })}>Assign tenant</Button> : <Button size="sm" variant="outline" disabled={unit.activeLease} title={unit.activeLease ? 'End or expire the signed lease before removing this tenant' : undefined} onClick={() => setRemoveUnit(unit)}>Remove tenant</Button>}
                   </div></td>
                 </tr>)}
               </tbody>
@@ -166,13 +174,36 @@ export default function AdminRentalUnitsPage() {
 }
 
 function OperationDialog({ editor, selectedCount, pending, onChange, onClose, onConfirm }: { editor: Editor; selectedCount: number; pending: boolean; onChange: (editor: Editor) => void; onClose: () => void; onConfirm: () => void }) {
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const tenantSearch = editor.kind === 'assign' && editor.mode === 'registered' ? editor.search.trim() : '';
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(tenantSearch), 300);
+    return () => clearTimeout(timeout);
+  }, [tenantSearch]);
+  const candidates = useQuery({
+    queryKey: ['admin', 'rentals', 'tenant-candidates', debouncedSearch],
+    queryFn: () => unwrap(adminRentalService.searchTenantCandidates(debouncedSearch)),
+    enabled: debouncedSearch.length >= 2 && editor.kind === 'assign' && editor.mode === 'registered',
+  });
   const title = editor.kind === 'assign' ? 'Assign tenant' : editor.kind === 'pricing' ? 'Update unit pricing' : 'Create lease charges';
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-    <div role="dialog" aria-modal="true" aria-labelledby="unit-operation-title" className="w-full max-w-lg rounded-2xl border bg-card p-5 shadow-xl" onClick={(event) => event.stopPropagation()}>
+  const invalidAssignment = editor.kind === 'assign' && (editor.mode === 'registered' ? !editor.candidate : editor.value.trim().length < 2);
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => { if (!pending) onClose(); }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="unit-operation-title" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border bg-card p-5 shadow-xl" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === 'Escape' && !pending) onClose(); }}>
       <h2 id="unit-operation-title" className="text-lg font-semibold">{title}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{editor.kind === 'assign' ? `Assign a manual tenant to ${editor.unit.unitName}.` : `This affects ${selectedCount} selected unit(s) and will be recorded in the audit trail.`}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{editor.kind === 'assign' ? `Assign a tenant to ${editor.unit.unitName}. Registered renters are linked to their account; manual names are occupancy records only.` : `This affects ${selectedCount} selected unit(s) and will be recorded in the audit trail.`}</p>
       <div className="mt-4 space-y-3">
-        {editor.kind === 'assign' && <LegacyInput autoFocus aria-label="Tenant full name" placeholder="Tenant full name" value={editor.value} onChange={(event) => onChange({ ...editor, value: event.target.value })} />}
+        {editor.kind === 'assign' && <>
+          <div className="flex gap-2" role="group" aria-label="Tenant assignment type">
+            <Button type="button" size="sm" variant={editor.mode === 'registered' ? 'primary' : 'outline'} aria-pressed={editor.mode === 'registered'} disabled={pending} onClick={() => onChange({ ...editor, mode: 'registered' })}>Registered renter</Button>
+            <Button type="button" size="sm" variant={editor.mode === 'manual' ? 'primary' : 'outline'} aria-pressed={editor.mode === 'manual'} disabled={pending} onClick={() => onChange({ ...editor, mode: 'manual' })}>Manual name</Button>
+          </div>
+          {editor.mode === 'registered' ? <>
+            <LegacyInput autoFocus aria-label="Search registered renters" placeholder="Search name, email or phone (2+ characters)" value={editor.search} disabled={pending} onChange={(event) => onChange({ ...editor, search: event.target.value, candidate: null })} />
+            {editor.candidate && <p className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm" aria-live="polite">Selected: <strong>{editor.candidate.legalName}</strong> · {editor.candidate.email}</p>}
+            {tenantSearch.length < 2 ? <p className="text-sm text-muted-foreground">Enter at least two characters to find eligible renters.</p> : debouncedSearch !== tenantSearch || candidates.isFetching ? <p className="text-sm text-muted-foreground" role="status">Searching renters…</p> : candidates.isError ? <div className="text-sm text-destructive" role="alert">Could not search renters. <Button type="button" size="sm" variant="outline" onClick={() => void candidates.refetch()}>Retry</Button></div> : candidates.data?.length ? <div className="max-h-48 overflow-y-auto rounded-md border" aria-label="Eligible renters">{candidates.data.map((candidate) => <button key={candidate.id} type="button" className="block w-full border-b px-3 py-2 text-left text-sm last:border-b-0 hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-primary" aria-pressed={editor.candidate?.id === candidate.id} onClick={() => onChange({ ...editor, candidate })}><span className="block font-medium">{candidate.legalName}</span><span className="block text-muted-foreground">{candidate.email}{candidate.phone ? ` · ${candidate.phone}` : ''}</span></button>)}</div> : <p className="text-sm text-muted-foreground">No eligible registered renters found. Try another search or use a manual name if no account exists.</p>}
+            <p className="text-xs text-muted-foreground">Only active renter accounts without another occupied unit or signed lease appear.</p>
+          </> : <><LegacyInput autoFocus aria-label="Manual tenant full name" placeholder="Tenant full name" value={editor.value} disabled={pending} onChange={(event) => onChange({ ...editor, value: event.target.value })} /><p className="text-xs text-muted-foreground">This does not link an account. Use it only when the tenant is not registered.</p></>}
+        </>}
         {editor.kind === 'pricing' && <LegacyInput autoFocus type="number" min="1" aria-label="New monthly rent" placeholder="New monthly rent (NGN)" value={editor.value} onChange={(event) => onChange({ ...editor, value: event.target.value })} />}
         {editor.kind === 'charge' && <>
           <LegacyInput autoFocus type="number" min="1" aria-label="Charge amount" placeholder="Charge amount (NGN)" value={editor.amount} onChange={(event) => onChange({ ...editor, amount: event.target.value })} />
@@ -182,7 +213,7 @@ function OperationDialog({ editor, selectedCount, pending, onChange, onClose, on
           <p className="text-xs text-muted-foreground">Charges are created only for units with signed leases. The result will identify how many selections were skipped.</p>
         </>}
       </div>
-      <div className="mt-5 flex justify-end gap-2"><Button variant="outline" disabled={pending} onClick={onClose}>Cancel</Button><Button disabled={pending} onClick={onConfirm}>{pending ? 'Processing…' : 'Confirm'}</Button></div>
+      <div className="mt-5 flex justify-end gap-2"><Button variant="outline" disabled={pending} onClick={onClose}>Cancel</Button><Button disabled={pending || invalidAssignment} onClick={onConfirm}>{pending ? 'Processing…' : 'Confirm'}</Button></div>
     </div>
   </div>;
 }
