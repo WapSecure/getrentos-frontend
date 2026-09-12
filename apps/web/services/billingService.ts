@@ -71,4 +71,12 @@ export const billingService = {
   async reactivate(): Promise<ApiResponse<MyBilling>> {
     return safeCall(() => authFetch<MyBilling>('/billing/reactivate', { method: 'POST' }));
   },
+
+  /**
+   * Provider-hosted page for replacing a failing card. We send the customer
+   * here rather than collecting card details ourselves.
+   */
+  async getCardUpdateLink(): Promise<ApiResponse<{ url: string }>> {
+    return safeCall(() => authFetch<{ url: string }>('/billing/card-update-link'));
+  },
 };
