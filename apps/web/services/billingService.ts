@@ -9,7 +9,12 @@ export interface CheckoutSession {
   reference: string;
   /** Null when no gateway is configured (dev) — confirm with `verifyCheckout`. */
   authorizationUrl: string | null;
-  /** The Pro price the customer will pay from the trial end. */
+  /**
+   * TRIAL starts the free trial; PAID charges now and starts Pro immediately,
+   * which is what a customer sees once their free trial has been used.
+   */
+  kind: 'TRIAL' | 'PAID';
+  /** The price charged. For a trial this is what they pay from the trial end. */
   amountKobo: number;
   cycle: BillingCycle;
   trialDays: number;
@@ -32,6 +37,11 @@ export interface MyBilling {
   cancelledAt: string | null;
   /** Whether Pro features are unlocked right now. */
   isActive: boolean;
+  /**
+   * False once the free trial has been used. A paying customer then sees the
+   * price rather than a second "free trial" we would not honour.
+   */
+  trialAvailable: boolean;
   latestReference: string | null;
   /** True when the backend is running without a payment gateway (dev). */
   simulated: boolean;

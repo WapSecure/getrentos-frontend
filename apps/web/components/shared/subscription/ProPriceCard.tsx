@@ -13,15 +13,22 @@ const naira = (kobo: number) => formatCurrency(kobo / 100);
  * from the backend pricing catalog so the displayed price always equals the
  * charged price. `onUpgrade` (wired to checkout) takes precedence; when absent
  * it falls back to the contact-us CTA.
+ *
+ * `trialAvailable` decides whether this is an offer for a free trial or for a
+ * straight purchase. A customer who has already used their trial is never
+ * shown "start your free trial" — offering something we would refuse is worse
+ * than showing them the real price.
  */
 export function ProPriceCard({
   pricing,
   isPro = false,
+  trialAvailable = true,
   onUpgrade,
   upgrading = false,
 }: {
   pricing?: PlanPricing;
   isPro?: boolean;
+  trialAvailable?: boolean;
   onUpgrade?: (cycle: BillingCycle) => void;
   upgrading?: boolean;
 }) {
@@ -32,6 +39,7 @@ export function ProPriceCard({
   }
 
   const amount = cycle === 'ANNUAL' ? pricing.annualKobo : pricing.monthlyKobo;
+  const per = cycle === 'ANNUAL' ? 'year' : 'month';
   // What we take purely to prove the card works; refunded immediately.
   const capture = pricing.trialTokenizeKobo ? naira(pricing.trialTokenizeKobo) : null;
 
@@ -44,7 +52,9 @@ export function ProPriceCard({
         <div>
           <p className="font-semibold text-foreground">GetRentos Pro</p>
           <p className="text-xs text-muted-foreground">
-            {pricing.trialDays}-day free trial · cancel anytime
+            {trialAvailable
+              ? `${pricing.trialDays}-day free trial · cancel anytime`
+              : `Billed ${per}ly · cancel anytime`}
           </p>
         </div>
         {isPro && (
@@ -56,9 +66,7 @@ export function ProPriceCard({
 
       <div className="mt-5 flex items-baseline gap-1">
         <span className="text-3xl font-bold tracking-tight text-foreground">{naira(amount)}</span>
-        <span className="text-sm text-muted-foreground">
-          /{cycle === 'ANNUAL' ? 'year' : 'month'}
-        </span>
+        <span className="text-sm text-muted-foreground">/{per}</span>
         {cycle === 'ANNUAL' && pricing.annualSavingPercent > 0 && (
           <span className="ml-2 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
             Save {pricing.annualSavingPercent}%
@@ -98,7 +106,11 @@ export function ProPriceCard({
               disabled={upgrading}
               onClick={() => onUpgrade(cycle)}
             >
-              {upgrading ? 'Starting checkout…' : `Start ${pricing.trialDays}-day free trial`}
+              {upgrading
+                ? 'Opening secure checkout…'
+                : trialAvailable
+                  ? `Start ${pricing.trialDays}-day free trial`
+                  : `Subscribe — ${naira(amount)}/${per}`}
             </Button>
           ) : (
             <Button
@@ -112,11 +124,15 @@ export function ProPriceCard({
           <p className="mt-2 flex items-start justify-center gap-1.5 text-center text-xs text-muted-foreground">
             <Check className="mt-0.5 h-3 w-3 shrink-0" />
             <span>
-              {capture
-                ? `We take ${capture} now just to verify your card, refund it straight away, and ${naira(
+              {!trialAvailable
+                ? `You have already used your free trial. You are charged ${naira(
                     amount
-                  )} only starts when your trial ends.`
-                : `Card required — ${naira(amount)} starts when your trial ends.`}
+                  )} today and Pro renews ${per}ly until you cancel.`
+                : capture
+                  ? `We take ${capture} now just to verify your card, refund it straight away, and ${naira(
+                      amount
+                    )} only starts when your trial ends.`
+                  : `Card required — ${naira(amount)} starts when your trial ends.`}
             </span>
           </p>
         </div>
