@@ -87,6 +87,7 @@ export interface ManagementFeeConfig {
 }
 
 export type OwnerStatementStatus = 'DRAFT' | 'ISSUED';
+export type OwnerStatementPayoutStatus = 'PENDING' | 'PAID' | 'FAILED';
 
 export interface OwnerStatementLineItem {
   id: string;
@@ -103,6 +104,9 @@ export interface OwnerStatement {
   managementFee: number;
   netPayout: number;
   status: OwnerStatementStatus;
+  payoutStatus: OwnerStatementPayoutStatus;
+  transferRef?: string;
+  paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;
   lineItems?: OwnerStatementLineItem[];
@@ -156,6 +160,7 @@ export interface LandlordProfile {
 }
 
 export interface LandlordPayoutAccount {
+  bankCode: string;
   bankName: string;
   accountNumber: string;
   accountName: string;
@@ -654,6 +659,12 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/owner-statements/${id}/issue`, { method: 'POST' }));
   },
 
+  async retryOwnerStatementPayout(id: string): Promise<ApiResponse<OwnerStatement>> {
+    return safeCall(() =>
+      authFetch(`/landlord/owner-statements/${id}/retry-payout`, { method: 'POST' })
+    );
+  },
+
   // ---- Vendors ----
   async listVendors(
     params: { page?: number; pageSize?: number } = {}
@@ -913,7 +924,7 @@ export const landlordService = {
   },
 
   async updatePayoutAccount(
-    data: Pick<LandlordPayoutAccount, 'bankName' | 'accountNumber' | 'accountName'>
+    data: Pick<LandlordPayoutAccount, 'bankCode' | 'accountNumber'>
   ): Promise<ApiResponse<LandlordPayoutAccount>> {
     return safeCall(() =>
       authFetch('/landlord/settings/payout', { method: 'PUT', body: JSON.stringify(data) })

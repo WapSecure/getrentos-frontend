@@ -93,3 +93,23 @@ export interface Paginated<T> {
   pageSize: number;
   totalPages: number;
 }
+
+/** Manual tier-3 (financial capability) grant. */
+export type TierGrantState = 'ACTIVE' | 'REVOKED' | 'EXPIRED';
+
+export interface TierGrant {
+  id: string;
+  verificationId: string;
+  userId: string;
+  userEmail?: string | null;
+  state: TierGrantState;
+  reason?: string | null;
+  grantedById?: string | null;
+  grantedAt: string;
+  expiresAt?: string | null;
+  revokedById?: string | null;
+  revokedAt?: string | null;
+  revocationReason?: string | null;
+  /** Whether this grant is the one the tier resolver currently counts. */
+  effective: boolean;
+}

@@ -1,9 +1,45 @@
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import { ChevronRight, Contact, Landmark, Package, TriangleAlert, Vote } from 'lucide-react-native';
+import {
+  BookOpen,
+  CalendarCheck,
+  ChevronRight,
+  Contact,
+  KeyRound,
+  Landmark,
+  Package,
+  Receipt,
+  TriangleAlert,
+  Vote,
+  Wrench,
+} from 'lucide-react-native';
 import { Card, Divider, Screen, Text, useTheme } from '@getrentos/ui-native';
 
 const ROWS = [
+  {
+    href: '/(app)/dues',
+    label: 'Dues',
+    description: 'View and pay dues charged to your household',
+    icon: Receipt,
+  },
+  {
+    href: '/(app)/maintenance',
+    label: 'Maintenance',
+    description: 'Report an issue with your unit',
+    icon: Wrench,
+  },
+  {
+    href: '/(app)/visitor-passes',
+    label: 'Visitor Passes',
+    description: 'Issue a gate pass for your guests',
+    icon: KeyRound,
+  },
+  {
+    href: '/(app)/amenities',
+    label: 'Amenities',
+    description: 'Book shared facilities in your estate',
+    icon: CalendarCheck,
+  },
   {
     href: '/(app)/violations',
     label: 'Violations',
@@ -28,6 +64,12 @@ const ROWS = [
     label: 'Committee',
     description: 'See who sits on the estate committee',
     icon: Landmark,
+  },
+  {
+    href: '/(app)/governance',
+    label: 'Governance',
+    description: 'Bylaws, meeting minutes, and e-signatures',
+    icon: BookOpen,
   },
 ] as const;
 

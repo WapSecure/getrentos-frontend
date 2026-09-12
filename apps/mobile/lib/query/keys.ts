@@ -32,5 +32,11 @@ export const qk = {
       ['resident', 'deliveries', { page, pageSize }] as const,
     committee: ['resident', 'committee'] as const,
     polls: ['resident', 'polls'] as const,
+    visitorPasses: ['resident', 'visitor-passes'] as const,
+    amenities: ['resident', 'amenities'] as const,
+    amenityBookings: ['resident', 'amenity-bookings'] as const,
+    maintenance: ['resident', 'maintenance'] as const,
+    dues: ['resident', 'dues'] as const,
+    governance: ['resident', 'governance'] as const,
   },
 } as const;

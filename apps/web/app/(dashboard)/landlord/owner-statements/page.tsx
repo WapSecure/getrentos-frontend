@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileBarChart, Plus, Send } from 'lucide-react';
+import { FileBarChart, Plus, RotateCcw, Send } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -31,6 +31,15 @@ type GenerateForm = { propertyId: string; periodStart: string; periodEnd: string
 const initialForm: GenerateForm = { propertyId: '', periodStart: '', periodEnd: '' };
 
 const PAGE_SIZE = 10;
+
+const PAYOUT_BADGE: Record<
+  OwnerStatement['payoutStatus'],
+  { label: string; variant: 'success' | 'warning' | 'danger' }
+> = {
+  PAID: { label: 'Paid out', variant: 'success' },
+  PENDING: { label: 'Payout pending', variant: 'warning' },
+  FAILED: { label: 'Payout failed', variant: 'danger' },
+};
 
 export default function LandlordOwnerStatementsPage() {
   const queryClient = useQueryClient();
@@ -86,14 +95,40 @@ export default function LandlordOwnerStatementsPage() {
 
   const issueStatement = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.issueOwnerStatement(id)),
-    onSuccess: (_result, id) => {
+    onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
-      setToast({ message: 'Statement issued.', variant: 'success' });
+      setToast(
+        result.payoutStatus === 'FAILED'
+          ? {
+              message: 'Statement issued, but the payout failed — retry it below.',
+              variant: 'error',
+            }
+          : { message: 'Statement issued.', variant: 'success' }
+      );
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
       setToast({ message: error.message || 'Unable to issue this statement.', variant: 'error' });
+    },
+  });
+
+  const retryPayout = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.retryOwnerStatementPayout(id)),
+    onSuccess: (result, id) => {
+      invalidate();
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
+      setToast(
+        result.payoutStatus === 'PAID'
+          ? { message: 'Payout succeeded.', variant: 'success' }
+          : {
+              message: 'The payout failed again. Check the payout account and try again.',
+              variant: 'error',
+            }
+      );
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to retry this payout.', variant: 'error' });
     },
   });
 
@@ -154,13 +189,18 @@ export default function LandlordOwnerStatementsPage() {
                     Generated {formatDate(statement.generatedAt)}
                   </p>
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(statement.netPayout)}
                   </span>
                   <Badge variant={statement.status === 'ISSUED' ? 'success' : 'neutral'}>
                     {statement.status === 'ISSUED' ? 'Issued' : 'Draft'}
                   </Badge>
+                  {statement.status === 'ISSUED' && (
+                    <Badge variant={PAYOUT_BADGE[statement.payoutStatus].variant}>
+                      {PAYOUT_BADGE[statement.payoutStatus].label}
+                    </Badge>
+                  )}
                 </div>
               </button>
             ))}
@@ -245,13 +285,20 @@ export default function LandlordOwnerStatementsPage() {
         <DialogContent className="max-w-lg">
           {detail && (
             <div className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
                   {formatDate(detail.periodStart)} — {formatDate(detail.periodEnd)}
                 </DialogTitle>
-                <Badge variant={detail.status === 'ISSUED' ? 'success' : 'neutral'}>
-                  {detail.status === 'ISSUED' ? 'Issued' : 'Draft'}
-                </Badge>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant={detail.status === 'ISSUED' ? 'success' : 'neutral'}>
+                    {detail.status === 'ISSUED' ? 'Issued' : 'Draft'}
+                  </Badge>
+                  {detail.status === 'ISSUED' && (
+                    <Badge variant={PAYOUT_BADGE[detail.payoutStatus].variant}>
+                      {PAYOUT_BADGE[detail.payoutStatus].label}
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="mt-5 space-y-2">
@@ -294,6 +341,24 @@ export default function LandlordOwnerStatementsPage() {
                   >
                     <Send className="w-4 h-4" />
                     Issue statement
+                  </Button>
+                </div>
+              )}
+
+              {detail.status === 'ISSUED' && detail.payoutStatus === 'FAILED' && (
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
+                  <p className="text-xs text-muted-foreground">
+                    The transfer to your payout account didn&apos;t go through.
+                  </p>
+                  <Button
+                    className="gap-2"
+                    variant="outline"
+                    rounded="md"
+                    isLoading={retryPayout.isPending}
+                    onClick={() => retryPayout.mutate(detail.id)}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Retry payout
                   </Button>
                 </div>
               )}
