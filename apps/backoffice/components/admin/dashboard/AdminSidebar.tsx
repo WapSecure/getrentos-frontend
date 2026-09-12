@@ -25,6 +25,7 @@ import {
   Briefcase,
   ClipboardList,
   Warehouse,
+  CreditCard,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -116,6 +117,12 @@ const navItems: NavItem[] = [
     href: '/admin/estates',
     icon: Warehouse,
     permission: 'estate.view',
+  },
+  {
+    label: 'Subscriptions',
+    href: ROUTES.ADMIN_SUBSCRIPTIONS,
+    icon: CreditCard,
+    permission: 'subscriptions.view',
   },
   {
     label: 'Disputes',
