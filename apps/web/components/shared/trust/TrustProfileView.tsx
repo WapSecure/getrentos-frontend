@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
 import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
+import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
 import { VerificationList } from '@/components/shared/trust/VerificationList';
 import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';
@@ -33,6 +34,7 @@ export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustPr
 
   const trustScore = data?.trustScore ?? 0;
   const stats = data?.stats ?? [];
+  const breakdown = data?.scoreBreakdown;
   const statIcons = [MessageCircle, Clock, ShieldCheck, Star];
 
   return (
@@ -67,6 +69,12 @@ export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustPr
         <VerificationList verifications={data?.verifications ?? []} />
         <TrustBadges badges={data?.badges ?? []} />
       </div>
+
+      {breakdown && (
+        <div className="mt-6">
+          <TrustScoreBreakdownCard breakdown={breakdown} />
+        </div>
+      )}
     </>
   );
 };

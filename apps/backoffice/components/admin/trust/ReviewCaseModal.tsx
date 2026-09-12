@@ -23,6 +23,50 @@ import {
   REVIEW_CASE_STATUS_META,
   TRUST_STEP_STATUS_META,
 } from './trustMeta';
+import { DIMENSION_LABELS, nonScoreCodes, parseScoreCodes } from './scoreCodes';
+
+/**
+ * The dimension.v1 score as it stood when this decision was taken, decoded from
+ * the decision payload's own codes. A reviewer who can see that a rejection
+ * happened at score 50 — with the financial dimension at 25/25 — reads the case
+ * very differently from one who sees only the verdict.
+ */
+const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
+  const score = parseScoreCodes(reasonCodes);
+  if (!score) return null;
+
+  return (
+    <div className="mt-2 rounded-lg bg-secondary/50 px-3 py-2">
+      <p className="text-[11px] font-medium text-foreground">
+        Trust score at decision: {score.total ?? '—'}
+        {score.version ? ` (${score.version})` : ''}
+        {score.penalty ? ` · penalty −${score.penalty}` : ''}
+      </p>
+      {score.dimensions.length > 0 && (
+        <ul className="mt-1.5 space-y-1">
+          {score.dimensions.map((dimension) => (
+            <li key={dimension.id} className="flex items-center gap-2">
+              <span className="w-32 shrink-0 text-[11px] text-muted-foreground">
+                {DIMENSION_LABELS[dimension.id] ?? dimension.id}
+              </span>
+              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
+                <span
+                  className="block h-full rounded-full bg-primary"
+                  style={{
+                    width: `${dimension.weight > 0 ? Math.round((dimension.earned / dimension.weight) * 100) : 0}%`,
+                  }}
+                />
+              </span>
+              <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                {dimension.earned}/{dimension.weight}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 const RESOLVE_OPTIONS: { value: TrustReviewDecision | ''; label: string }[] = [
   { value: '', label: 'Select a decision…' },
@@ -346,9 +390,10 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                               </p>
                               {d.reasonCodes.length > 0 && (
                                 <p className="mt-1 text-[11px] text-muted-foreground">
-                                  {d.reasonCodes.join(', ')}
+                                  {nonScoreCodes(d.reasonCodes).join(', ')}
                                 </p>
                               )}
+                              <ScoreAtDecisionCodes reasonCodes={d.reasonCodes} />
                               <p className="text-[11px] text-muted-foreground">
                                 {formatDate(d.createdAt)}
                               </p>
