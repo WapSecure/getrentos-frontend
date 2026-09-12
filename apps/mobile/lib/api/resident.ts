@@ -1,4 +1,5 @@
-import { apiFetch } from './client';
+import { apiFetch, apiUpload } from './client';
+import { appendFile, type PickedFile } from './documents';
 
 export type HouseholdStatus = 'active' | 'inactive';
 
@@ -157,6 +158,80 @@ export interface AmenityBooking {
   createdAt: string;
 }
 
+export type MaintenanceTicketCategory =
+  | 'plumbing'
+  | 'electrical'
+  | 'structural'
+  | 'common_area'
+  | 'other';
+
+export type MaintenanceTicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type MaintenanceTicketStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
+
+export interface MaintenanceTicket {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  category: MaintenanceTicketCategory;
+  priority: MaintenanceTicketPriority;
+  status: MaintenanceTicketStatus;
+  description: string;
+  photoUrl?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+}
+
+export type DueStatus = 'pending' | 'paid' | 'overdue' | 'processing';
+export type DueCategory = 'rent' | 'service_charge' | 'deposit' | 'levy';
+export type BillingCycle = 'monthly' | 'quarterly' | 'annual';
+
+export interface Due {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  amount: number;
+  dueDate: string;
+  paidDate?: string;
+  status: DueStatus;
+  lateFeeApplied: number;
+  category: DueCategory;
+  billingCycle: BillingCycle;
+  description?: string;
+  isRecurring: boolean;
+  createdAt: string;
+  /** Only set when payDue started a real Paystack checkout (Paystack configured). */
+  authorizationUrl?: string;
+  reference?: string;
+}
+
+export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
+export type GovernanceRecordStatus = 'published' | 'pending_signatures' | 'approved';
+
+export interface SignatureProgress {
+  signed: number;
+  total: number;
+}
+
+export interface GovernanceRecord {
+  id: string;
+  estateId: string;
+  type: GovernanceRecordType;
+  title: string;
+  meetingDate?: string;
+  size: string;
+  url: string;
+  version: number;
+  rootId?: string;
+  requiresSignatures: boolean;
+  status: GovernanceRecordStatus;
+  signatureProgress?: SignatureProgress;
+  /** Whether the caller's own committee seat has already signed this record. */
+  signedByMe?: boolean;
+  createdAt: string;
+}
+
 export interface Paginated<T> {
   items: T[];
   total: number;
@@ -229,5 +304,38 @@ export const residentApi = {
   cancelAmenityBooking: (bookingId: string) =>
     apiFetch<AmenityBooking>(`/estate/resident/amenity-bookings/${bookingId}/cancel`, {
       method: 'PATCH',
+    }),
+
+  listMaintenanceTickets: () => apiFetch<MaintenanceTicket[]>('/estate/resident/maintenance'),
+
+  reportMaintenanceTicket: (data: {
+    description: string;
+    category?: MaintenanceTicketCategory;
+    priority?: MaintenanceTicketPriority;
+    photo?: PickedFile;
+  }) => {
+    const form = new FormData();
+    form.append('description', data.description);
+    // The create DTO validates against the raw (UPPERCASE) Prisma enum;
+    // the read mapper lowercases it for display — same asymmetry the web
+    // frontend's reportMaintenanceTicket already accounts for.
+    if (data.category) form.append('category', data.category.toUpperCase());
+    if (data.priority) form.append('priority', data.priority.toUpperCase());
+    if (data.photo) appendFile(form, 'file', data.photo);
+    return apiUpload<MaintenanceTicket>('/estate/resident/maintenance', form);
+  },
+
+  listDues: (page = 1, pageSize = 50) =>
+    apiFetch<Paginated<Due>>(`/estate/resident/dues${toQuery({ page, pageSize })}`),
+
+  payDue: (dueId: string) =>
+    apiFetch<Due>(`/estate/resident/dues/${dueId}/pay`, { method: 'POST' }),
+
+  listGovernanceRecords: () => apiFetch<GovernanceRecord[]>('/estate/resident/governance'),
+
+  signGovernanceRecord: (recordId: string, signatureData: string) =>
+    apiFetch<GovernanceRecord>(`/estate/resident/governance/${recordId}/sign`, {
+      method: 'POST',
+      body: { signatureData },
     }),
 };

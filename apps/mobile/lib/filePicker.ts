@@ -29,3 +29,31 @@ export async function captureSelfie(): Promise<PickedFile | null> {
   const asset = result.assets[0];
   return { uri: asset.uri, name: 'selfie.jpg', mimeType: asset.mimeType ?? 'image/jpeg' };
 }
+
+/** Opens the photo library to pick an existing image (e.g. a maintenance issue photo). Returns `null` if denied or cancelled. */
+export async function pickPhoto(): Promise<PickedFile | null> {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) return null;
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 0.6,
+  });
+  if (result.canceled || !result.assets?.length) return null;
+  const asset = result.assets[0];
+  return { uri: asset.uri, name: 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg' };
+}
+
+/** Launches the back camera to take a new photo (e.g. a maintenance issue photo). Returns `null` if denied or cancelled. */
+export async function capturePhoto(): Promise<PickedFile | null> {
+  const perm = await ImagePicker.requestCameraPermissionsAsync();
+  if (!perm.granted) return null;
+
+  const result = await ImagePicker.launchCameraAsync({
+    cameraType: ImagePicker.CameraType.back,
+    quality: 0.6,
+  });
+  if (result.canceled || !result.assets?.length) return null;
+  const asset = result.assets[0];
+  return { uri: asset.uri, name: 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg' };
+}

@@ -8,16 +8,28 @@ import {
   Landmark,
   Megaphone,
   Package,
+  Receipt,
   TriangleAlert,
   Vote,
+  Wrench,
 } from 'lucide-react-native';
-import { Badge, Card, Divider, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Badge,
+  Button,
+  Card,
+  Divider,
+  Screen,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
-import { relativeTime, firstName } from '@/lib/format';
+import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 const QUICK_LINKS = [
+  { href: '/(app)/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/(app)/visitor-passes', label: 'Visitor Passes', icon: KeyRound },
   { href: '/(app)/amenities', label: 'Amenities', icon: CalendarCheck },
   { href: '/(app)/violations', label: 'Violations', icon: TriangleAlert },
@@ -39,12 +51,21 @@ export default function ResidentHome() {
     queryKey: qk.resident.announcements(1, 3),
     queryFn: () => residentApi.listAnnouncements(1, 3),
   });
+  const dues = useQuery({
+    queryKey: qk.resident.dues,
+    queryFn: () => residentApi.listDues(1, 50),
+  });
 
-  const isRefreshing = household.isRefetching || announcements.isRefetching;
+  const isRefreshing = household.isRefetching || announcements.isRefetching || dues.isRefetching;
   const onRefresh = () => {
     household.refetch();
     announcements.refetch();
+    dues.refetch();
   };
+
+  const outstanding = (dues.data?.items ?? [])
+    .filter((d) => d.status === 'pending' || d.status === 'overdue')
+    .reduce((sum, d) => sum + d.amount + d.lateFeeApplied, 0);
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>
@@ -58,6 +79,37 @@ export default function ResidentHome() {
           <Skeleton height={16} width="60%" />
         ) : null}
       </View>
+
+      {dues.isLoading ? (
+        <Skeleton height={90} radius={16} />
+      ) : (
+        <Card elevated>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Receipt size={18} color={colors.primary} />
+            <Text variant="bodyStrong">Outstanding dues</Text>
+          </View>
+          <Text variant="title" style={{ marginTop: spacing.sm }}>
+            {formatNaira(outstanding)}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
+            {outstanding > 0 ? (
+              <Button
+                label="Pay dues"
+                size="sm"
+                fullWidth={false}
+                onPress={() => router.push('/(app)/dues')}
+              />
+            ) : null}
+            <Button
+              label="View dues"
+              variant="outline"
+              size="sm"
+              fullWidth={false}
+              onPress={() => router.push('/(app)/dues')}
+            />
+          </View>
+        </Card>
+      )}
 
       <Card elevated>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
