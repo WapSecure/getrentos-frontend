@@ -32,6 +32,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'sales.view',
   'estate.view',
   'estate.moderate',
+  'subscriptions.view',
+  'subscriptions.manage',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -75,6 +77,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'rentfinance.view',
       'sales.view',
       'estate.view',
+      'subscriptions.view',
     ],
   },
   dispute_officer: {
@@ -124,6 +127,8 @@ export const ADMIN_ROLE_DETAILS: Record<
       'maintenance.view',
       'sales.view',
       'estate.view',
+      'subscriptions.view',
+      'subscriptions.manage',
     ],
   },
   compliance_manager: {
@@ -148,6 +153,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'sales.view',
       'estate.view',
       'estate.moderate',
+      'subscriptions.view',
     ],
   },
   support_agent: {
@@ -160,6 +166,9 @@ export const ADMIN_ROLE_DETAILS: Record<
       'shortlet.view',
       'maintenance.view',
       'estate.view',
+      // Support is who gets asked "I paid and I'm still on Free", so they need
+      // to see billing state — read-only.
+      'subscriptions.view',
     ],
   },
 };
