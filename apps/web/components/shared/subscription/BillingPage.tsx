@@ -68,6 +68,11 @@ export function BillingPage({
           <ProPriceCard
             pricing={pricing}
             isPro={isPro}
+            // Until billing state arrives we cannot know whether they still
+            // have a trial. Showing the trial offer by default matches what a
+            // new customer sees; the backend refuses to grant a second one
+            // either way.
+            trialAvailable={billing?.trialAvailable ?? true}
             onUpgrade={upgrade}
             upgrading={isUpgrading}
           />
