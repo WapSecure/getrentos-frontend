@@ -1,7 +1,16 @@
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { Contact, Landmark, Megaphone, Package, TriangleAlert, Vote } from 'lucide-react-native';
+import {
+  CalendarCheck,
+  Contact,
+  KeyRound,
+  Landmark,
+  Megaphone,
+  Package,
+  TriangleAlert,
+  Vote,
+} from 'lucide-react-native';
 import { Badge, Card, Divider, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
@@ -9,6 +18,8 @@ import { relativeTime, firstName } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 const QUICK_LINKS = [
+  { href: '/(app)/visitor-passes', label: 'Visitor Passes', icon: KeyRound },
+  { href: '/(app)/amenities', label: 'Amenities', icon: CalendarCheck },
   { href: '/(app)/violations', label: 'Violations', icon: TriangleAlert },
   { href: '/(app)/deliveries', label: 'Deliveries', icon: Package },
   { href: '/(app)/directory', label: 'Directory', icon: Contact },

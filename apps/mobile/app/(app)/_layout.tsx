@@ -24,6 +24,8 @@ export default function AppLayout() {
       <Stack.Screen name="directory" options={DETAIL_OPTIONS} />
       <Stack.Screen name="polls" options={DETAIL_OPTIONS} />
       <Stack.Screen name="committee" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="visitor-passes" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="amenities" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>
   );
