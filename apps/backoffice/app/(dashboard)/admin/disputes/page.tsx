@@ -28,6 +28,10 @@ const PAGE_SIZE = 12;
 export default function AdminDisputesPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    setSearchQuery(new URLSearchParams(window.location.search).get('search') ?? '');
+  }, []);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');

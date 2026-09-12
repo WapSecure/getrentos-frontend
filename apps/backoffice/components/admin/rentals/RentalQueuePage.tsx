@@ -9,6 +9,7 @@ import { EmptyState, Input, PageErrorState, Pagination, Select } from '@getrento
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';
 import type { RentalListParams } from '@/services/adminRentalService';
 
@@ -34,6 +35,10 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
   const [status, setStatus] = useState('all');
   const [page, setPage] = useState(1);
   const Icon = config.icon;
+
+  useEffect(() => {
+    setSearch(readAdminSearchParam());
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Landmark,
@@ -30,6 +30,7 @@ import { cn, unwrap } from '@getrentos/shared';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { adminKeys } from '@/lib/queryKeys';
+import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { AdminEstate, AdminEstateDetail, HouseholdStatus, DueStatus } from '@/types/estate';
 
 const PAGE_SIZE = 10;
@@ -52,6 +53,10 @@ export const EstateRegister = () => {
   const [state, setState] = useState('');
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<AdminEstate | null>(null);
+
+  useEffect(() => {
+    setSearch(readAdminSearchParam());
+  }, []);
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'estates', 'register', { search, city, state, page }],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -156,10 +156,17 @@ const SectionError = ({
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('listings');
+  const [bookingId, setBookingId] = useState('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   // Listings filters
   const [search, setSearch] = useState('');
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'bookings') setTab('bookings');
+    setBookingId(params.get('bookingId') ?? '');
+    setSearch(params.get('search') ?? '');
+  }, []);
   const [listingStatus, setListingStatus] = useState<'all' | ShortletListingStatus>('all');
   const [listingsPage, setListingsPage] = useState(1);
 
@@ -181,10 +188,18 @@ export const ShortletOversight = () => {
     listing: AdminShortletListing;
     action: 'pause' | 'resume' | 'close' | 'flag' | 'approve';
   } | null>(null);
-  const publishingAction = pendingModeration?.action === 'resume' || pendingModeration?.action === 'approve';
+  const publishingAction =
+    pendingModeration?.action === 'resume' || pendingModeration?.action === 'approve';
   const publishingEligibility = useQuery({
-    queryKey: ['admin', 'shortlets', 'listings', pendingModeration?.listing.id, 'publishing-eligibility'],
-    queryFn: () => unwrap(adminShortletService.listingPublishingEligibility(pendingModeration!.listing.id)),
+    queryKey: [
+      'admin',
+      'shortlets',
+      'listings',
+      pendingModeration?.listing.id,
+      'publishing-eligibility',
+    ],
+    queryFn: () =>
+      unwrap(adminShortletService.listingPublishingEligibility(pendingModeration!.listing.id)),
     enabled: Boolean(pendingModeration && publishingAction),
   });
   const [pendingDisputeAction, setPendingDisputeAction] = useState<'resolve' | 'escalate' | null>(
@@ -265,10 +280,16 @@ export const ShortletOversight = () => {
     isFetching: bookingsFetching,
     refetch: refetchBookings,
   } = useQuery({
-    queryKey: ['admin', 'shortlets', 'bookings', { status: bookingStatus, page: bookingsPage }],
+    queryKey: [
+      'admin',
+      'shortlets',
+      'bookings',
+      { status: bookingStatus, page: bookingsPage, bookingId },
+    ],
     queryFn: () =>
       unwrap(
         adminShortletService.listBookings({
+          bookingId: bookingId || undefined,
           status: bookingStatus === 'all' ? undefined : bookingStatus,
           page: bookingsPage,
           pageSize: BOOKINGS_PAGE_SIZE,
@@ -1184,22 +1205,28 @@ export const ShortletOversight = () => {
                   flag: 'hidden and returned to verification',
                   approve: 'approved and published to guests',
                 }[pendingModeration.action]
-              }.${publishingAction
-                ? publishingEligibility.isLoading
-                  ? ' Checking identity and ownership requirements…'
-                  : publishingEligibility.isError
-                    ? ' Eligibility could not be preloaded; the server will still enforce every requirement.'
-                    : publishingEligibility.data?.eligible
-                      ? ' Publishing checks passed: identity and ownership are approved.'
-                      : ` Publishing is blocked: ${publishingEligibility.data?.reasons.join('; ') || 'requirements are incomplete'}.`
-                : ''}`
+              }.${
+                publishingAction
+                  ? publishingEligibility.isLoading
+                    ? ' Checking identity and ownership requirements…'
+                    : publishingEligibility.isError
+                      ? ' Eligibility could not be preloaded; the server will still enforce every requirement.'
+                      : publishingEligibility.data?.eligible
+                        ? ' Publishing checks passed: identity and ownership are approved.'
+                        : ` Publishing is blocked: ${publishingEligibility.data?.reasons.join('; ') || 'requirements are incomplete'}.`
+                  : ''
+              }`
             : ''
         }
         confirmLabel={pendingModeration ? `${pendingModeration.action} listing` : 'Confirm'}
         isLoading={moderation.isPending || (publishingAction && publishingEligibility.isLoading)}
         onConfirm={() => {
           if (pendingModeration) {
-            if (publishingAction && publishingEligibility.data && !publishingEligibility.data.eligible) {
+            if (
+              publishingAction &&
+              publishingEligibility.data &&
+              !publishingEligibility.data.eligible
+            ) {
               setToast({
                 message: `Publishing blocked: ${publishingEligibility.data.reasons.join('; ')}`,
                 variant: 'error',

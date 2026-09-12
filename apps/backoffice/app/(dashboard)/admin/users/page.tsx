@@ -45,6 +45,10 @@ const PAGE_SIZE = 10;
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    setSearchQuery(new URLSearchParams(window.location.search).get('search') ?? '');
+  }, []);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');

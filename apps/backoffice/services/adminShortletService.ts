@@ -27,6 +27,7 @@ export interface ListShortletListingsParams {
 }
 
 export interface ListShortletBookingsParams {
+  bookingId?: string;
   status?: ShortletBookingStatus;
   listingId?: string;
   dateFrom?: string;
@@ -69,6 +70,7 @@ export const adminShortletService = {
     params: ListShortletBookingsParams = {}
   ): Promise<ApiResponse<Paginated<AdminShortletBooking>>> {
     const query = toQuery({
+      bookingId: params.bookingId,
       status: params.status,
       listingId: params.listingId,
       dateFrom: params.dateFrom,
@@ -81,15 +83,19 @@ export const adminShortletService = {
     );
   },
 
-  listingPublishingEligibility(listingId: string): Promise<ApiResponse<{
-    eligible: boolean;
-    reasons: string[];
-    identityVerified: boolean;
-    ownershipVerified: boolean;
-    trustTier: number;
-    propertyArchived: boolean;
-  }>> {
-    return safeCall(() => authFetch(`/admin/shortlets/listings/${listingId}/publishing-eligibility`));
+  listingPublishingEligibility(listingId: string): Promise<
+    ApiResponse<{
+      eligible: boolean;
+      reasons: string[];
+      identityVerified: boolean;
+      ownershipVerified: boolean;
+      trustTier: number;
+      propertyArchived: boolean;
+    }>
+  > {
+    return safeCall(() =>
+      authFetch(`/admin/shortlets/listings/${listingId}/publishing-eligibility`)
+    );
   },
 
   pauseListing(listingId: string): Promise<ApiResponse<AdminShortletListing>> {

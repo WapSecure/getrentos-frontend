@@ -19,6 +19,7 @@ import {
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';
 import type { RentFinanceQuery } from '@/services/adminRentFinanceService';
 
@@ -69,6 +70,10 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
   const Icon = config.icon;
+
+  useEffect(() => {
+    setSearch(readAdminSearchParam());
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
