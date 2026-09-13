@@ -55,6 +55,8 @@ export interface AdminNotification {
   createdAt: string;
 }
 
+export type AdminNotificationPage = Paginated<AdminNotification> & { unreadTotal: number };
+
 /** Standard server-side paginated envelope ({ items, total, page, pageSize, totalPages }). */
 export interface Paginated<T> {
   items: T[];
@@ -235,6 +237,10 @@ export const adminService = {
 
   async getNotifications(): Promise<ApiResponse<AdminNotification[]>> {
     return safeCall(() => authFetch('/admin/notifications'));
+  },
+
+  async getNotificationPage(page: number, pageSize = 20): Promise<ApiResponse<AdminNotificationPage>> {
+    return safeCall(() => authFetch<AdminNotificationPage>(`/admin/notifications/page${toQuery({ page, pageSize })}`));
   },
 
   async markNotificationRead(id: string): Promise<ApiResponse<{ success: boolean }>> {
