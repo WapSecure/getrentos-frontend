@@ -9,6 +9,7 @@ import { PlanBadge } from '@/components/shared/subscription/PlanBadge';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
 import { ManageSubscriptionCard } from '@/components/shared/subscription/ManageSubscriptionCard';
+import { BillingHistoryCard } from '@/components/shared/subscription/BillingHistoryCard';
 import type { BillingCycle, PlanPersona } from '@/services/subscriptionService';
 
 /**
@@ -89,6 +90,9 @@ export function BillingPage({
       ) : (
         <PlanComparisonTable rows={rows} />
       )}
+
+      {/* Outside the tier checks on purpose: receipts are not a Pro feature. */}
+      <BillingHistoryCard />
     </div>
   );
 }

@@ -37,3 +37,28 @@ export interface AdminSubscriptionOverview {
   mrrKobo: number;
   currency: string;
 }
+
+/**
+ * One Pro charge, as the customer sees it.
+ *
+ * Same shape and wording as the customer's own billing history, so support and
+ * the customer cannot be reading two different stories about the same payment.
+ */
+export interface AdminSubscriptionInvoice {
+  id: string;
+  /** Customer-facing number, quotable in a ticket. */
+  number: string;
+  kind: 'TRIAL_VERIFICATION' | 'SUBSCRIPTION' | 'RENEWAL';
+  status: 'PAID' | 'REFUNDED' | 'FAILED';
+  description: string;
+  amountKobo: number;
+  currency: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  paidAt: string | null;
+  refundedAt: string | null;
+  providerReference: string | null;
+  /** Amount we credited while reconciling, rather than a confirmed charge. */
+  inferred: boolean;
+  createdAt: string;
+}

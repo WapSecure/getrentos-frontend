@@ -1,5 +1,5 @@
 import { authFetch, safeCall } from '@/lib/apiHelpers';
-import type { ApiResponse } from '@/lib/apiHelpers';
+import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { BillingCycle, PlanTier } from './subscriptionService';
 
 export type BillingStatus = 'NONE' | 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
@@ -47,6 +47,32 @@ export interface MyBilling {
   simulated: boolean;
 }
 
+/**
+ * One Pro charge, as the customer's receipt.
+ *
+ * `amountKobo` is in minor units (kobo) like everywhere else in billing;
+ * `description` is written server-side so the customer's history and the
+ * backoffice show identical wording.
+ */
+export interface SubscriptionInvoice {
+  id: string;
+  /** Customer-facing number, quotable in a support ticket. */
+  number: string;
+  kind: 'TRIAL_VERIFICATION' | 'SUBSCRIPTION' | 'RENEWAL';
+  status: 'PAID' | 'REFUNDED' | 'FAILED';
+  description: string;
+  amountKobo: number;
+  currency: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  paidAt: string | null;
+  refundedAt: string | null;
+  providerReference: string | null;
+  /** Amount we credited while reconciling, rather than a confirmed charge. */
+  inferred: boolean;
+  createdAt: string;
+}
+
 export const billingService = {
   /** Opens a Pro checkout and returns the gateway URL (or a simulated session). */
   async startCheckout(cycle: BillingCycle): Promise<ApiResponse<CheckoutSession>> {
@@ -88,5 +114,20 @@ export const billingService = {
    */
   async getCardUpdateLink(): Promise<ApiResponse<{ url: string }>> {
     return safeCall(() => authFetch<{ url: string }>('/billing/card-update-link'));
+  },
+
+  /**
+   * Payment history. Available on Free too — a cancelled customer still needs
+   * their receipts, and that is exactly when they ask for them.
+   */
+  async listInvoices(
+    page = 1,
+    pageSize = 20
+  ): Promise<ApiResponse<Paginated<SubscriptionInvoice>>> {
+    return safeCall(() =>
+      authFetch<Paginated<SubscriptionInvoice>>(
+        `/billing/invoices?page=${page}&pageSize=${pageSize}`
+      )
+    );
   },
 };
