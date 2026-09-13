@@ -18,6 +18,22 @@ export function useBilling() {
 }
 
 /**
+ * The caller's payment history.
+ *
+ * Not persona-scoped and not gated on Pro: a customer who cancelled needs their
+ * receipts too, and that is when they ask for them.
+ */
+export function useInvoices(page = 1) {
+  const { data, isLoading } = useQuery({
+    queryKey: billingKeys.invoices(page),
+    queryFn: () => unwrap(billingService.listInvoices(page)),
+    staleTime: 60_000,
+  });
+
+  return { invoices: data, isLoading };
+}
+
+/**
  * Cancel / resume. Both refresh the billing state *and* the tier query, since
  * plan gates elsewhere in the app read the tier.
  */
