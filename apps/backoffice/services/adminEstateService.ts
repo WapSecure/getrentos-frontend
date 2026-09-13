@@ -173,4 +173,42 @@ export const adminEstateService = {
   removeAnnouncement(id: string, reason: string) {
     return mutate<void>(`announcements/${id}`, 'DELETE', { reason });
   },
+
+  archiveEstate(estateId: string, reason: string) {
+    return mutate<AdminEstate>(`${estateId}/archive`, 'PATCH', { reason });
+  },
+
+  reactivateEstate(estateId: string, reason: string) {
+    return mutate<AdminEstate>(`${estateId}/reactivate`, 'PATCH', { reason });
+  },
+
+  updateHousehold(
+    id: string,
+    dto: {
+      unitLabel?: string;
+      contactPhone?: string;
+      contactEmail?: string;
+      status?: string;
+      unlinkResident?: boolean;
+      reason: string;
+    }
+  ) {
+    return mutate<AdminEstateHouseholdQueue>(`households/${id}`, 'PATCH', dto);
+  },
+
+  waiveDue(id: string, reason: string) {
+    return mutate<AdminEstateDueQueue>(`dues/${id}/waive`, 'POST', { reason });
+  },
+
+  adjustDueAmount(id: string, amount: number, reason: string) {
+    return mutate<AdminEstateDueQueue>(`dues/${id}/amount`, 'PATCH', { amount, reason });
+  },
+
+  revokeStaff(membershipId: string, reason: string) {
+    return mutate<void>(`staff/${membershipId}`, 'DELETE', { reason });
+  },
+
+  removeGovernanceRecord(recordId: string, reason: string) {
+    return mutate<void>(`governance-records/${recordId}`, 'DELETE', { reason });
+  },
 };

@@ -19,6 +19,7 @@ import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrent
 import { unwrap } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { EstateQueuePage, type EstateQueueConfig } from './EstateQueuePage';
+import { HouseholdEditorDialog, DueAmountDialog } from './EstateAdminDialogs';
 import { adminKeys } from '@/lib/queryKeys';
 import type {
   AdminEstateAnnouncementQueue,
@@ -86,11 +87,13 @@ type EstateAction = {
   run: (reason: string) => Promise<unknown>;
 };
 
-function useEstateActions() {
+export function useEstateActions() {
   const client = useQueryClient();
   const [action, setAction] = useState<EstateAction | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
   const mutation = useMutation({
     mutationFn: async () => action?.run(reason.trim()),
     onSuccess: async () => {
@@ -120,7 +123,9 @@ function useEstateActions() {
           promptMinLength={10}
           onConfirm={() => mutation.mutate()}
         />
-        {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
+        {toast && (
+          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+        )}
       </>
     ),
   };
@@ -135,6 +140,7 @@ const dueStatusVariant = (status: DueStatus): BadgeVariant => {
     PAID: 'success',
     OVERDUE: 'danger',
     PROCESSING: 'info',
+    WAIVED: 'neutral',
   };
   return map[status] ?? 'neutral';
 };
@@ -222,6 +228,7 @@ const dueStatusOptions: { value: DueStatus; label: string }[] = [
   { value: 'PAID', label: 'Paid' },
   { value: 'OVERDUE', label: 'Overdue' },
   { value: 'PROCESSING', label: 'Processing' },
+  { value: 'WAIVED', label: 'Waived' },
 ];
 const incidentStatusOptions: { value: EstateIncidentStatus; label: string }[] = [
   { value: 'OPEN', label: 'Open' },
@@ -289,6 +296,7 @@ const governanceStatusOptions: { value: GovernanceRecordStatus; label: string }[
 ];
 
 export function HouseholdsQueue() {
+  const [editing, setEditing] = useState<AdminEstateHouseholdQueue | null>(null);
   const config: EstateQueueConfig<AdminEstateHouseholdQueue> = {
     resource: 'households',
     eyebrow: 'Households',
@@ -347,11 +355,29 @@ export function HouseholdsQueue() {
         render: (h) => <span className="text-muted-foreground">{date(h.createdAt)}</span>,
       },
     ],
+    actions: (h) => (
+      <Button size="xs" variant="outline" onClick={() => setEditing(h)}>
+        Correct
+      </Button>
+    ),
   };
-  return <EstateQueuePage config={config} />;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {editing && (
+        <HouseholdEditorDialog
+          key={editing.id}
+          household={editing}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </>
+  );
 }
 
 export function DuesQueue() {
+  const actions = useEstateActions();
+  const [adjusting, setAdjusting] = useState<AdminEstateDueQueue | null>(null);
   const config: EstateQueueConfig<AdminEstateDueQueue> = {
     resource: 'dues',
     eyebrow: 'Dues & Levies',
@@ -408,8 +434,39 @@ export function DuesQueue() {
         render: (d) => <Pill label={titleCase(d.status)} variant={dueStatusVariant(d.status)} />,
       },
     ],
+    actions: (d) =>
+      ['PENDING', 'OVERDUE'].includes(d.status) ? (
+        <div className="flex gap-2">
+          <Button size="xs" variant="outline" onClick={() => setAdjusting(d)}>
+            Adjust
+          </Button>
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Waive this due?',
+                description:
+                  'The household will owe nothing further on this levy. This cannot be undone — a waived due can only be recreated as a new charge.',
+                label: 'Waive',
+                run: (reason) => unwrap(adminEstateService.waiveDue(d.id, reason)),
+              })
+            }
+          >
+            Waive
+          </Button>
+        </div>
+      ) : null,
   };
-  return <EstateQueuePage config={config} />;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {actions.feedback}
+      {adjusting && (
+        <DueAmountDialog key={adjusting.id} due={adjusting} onClose={() => setAdjusting(null)} />
+      )}
+    </>
+  );
 }
 
 export function IncidentsQueue() {
@@ -463,15 +520,64 @@ export function IncidentsQueue() {
       return (
         <div className="flex justify-end gap-1">
           {incident.status === 'OPEN' && (
-            <Button size="xs" variant="outline" onClick={() => actions.request({ title: 'Start incident response?', description: 'The incident will be marked in progress and the reason retained in the audit trail.', label: 'Start response', run: (reason) => unwrap(adminEstateService.updateIncidentStatus(incident.id, 'IN_PROGRESS', reason)) })}>Start</Button>
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() =>
+                actions.request({
+                  title: 'Start incident response?',
+                  description:
+                    'The incident will be marked in progress and the reason retained in the audit trail.',
+                  label: 'Start response',
+                  run: (reason) =>
+                    unwrap(
+                      adminEstateService.updateIncidentStatus(incident.id, 'IN_PROGRESS', reason)
+                    ),
+                })
+              }
+            >
+              Start
+            </Button>
           )}
-          <Button size="xs" onClick={() => actions.request({ title: 'Resolve incident?', description: 'Confirm that the incident has been investigated and resolved.', label: 'Resolve', run: (reason) => unwrap(adminEstateService.updateIncidentStatus(incident.id, 'RESOLVED', reason)) })}>Resolve</Button>
-          <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Dismiss incident?', description: 'Dismissal is terminal and requires a clear administrative reason.', label: 'Dismiss', run: (reason) => unwrap(adminEstateService.updateIncidentStatus(incident.id, 'DISMISSED', reason)) })}>Dismiss</Button>
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Resolve incident?',
+                description: 'Confirm that the incident has been investigated and resolved.',
+                label: 'Resolve',
+                run: (reason) =>
+                  unwrap(adminEstateService.updateIncidentStatus(incident.id, 'RESOLVED', reason)),
+              })
+            }
+          >
+            Resolve
+          </Button>
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Dismiss incident?',
+                description: 'Dismissal is terminal and requires a clear administrative reason.',
+                label: 'Dismiss',
+                run: (reason) =>
+                  unwrap(adminEstateService.updateIncidentStatus(incident.id, 'DISMISSED', reason)),
+              })
+            }
+          >
+            Dismiss
+          </Button>
         </div>
       );
     },
   };
-  return <><EstateQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function EstateMaintenanceQueue() {
@@ -529,14 +635,66 @@ export function EstateMaintenanceQueue() {
       if (ticket.status === 'RESOLVED' || ticket.status === 'DISMISSED') return null;
       return (
         <div className="flex justify-end gap-1">
-          {ticket.status === 'OPEN' && <Button size="xs" variant="outline" onClick={() => actions.request({ title: 'Start maintenance response?', description: 'The estate ticket will be marked in progress.', label: 'Start work', run: (reason) => unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'IN_PROGRESS', reason)) })}>Start</Button>}
-          <Button size="xs" onClick={() => actions.request({ title: 'Resolve maintenance ticket?', description: 'Confirm the reported estate issue has been resolved.', label: 'Resolve', run: (reason) => unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'RESOLVED', reason)) })}>Resolve</Button>
-          <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Dismiss maintenance ticket?', description: 'Dismissal is terminal and requires a clear administrative reason.', label: 'Dismiss', run: (reason) => unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'DISMISSED', reason)) })}>Dismiss</Button>
+          {ticket.status === 'OPEN' && (
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() =>
+                actions.request({
+                  title: 'Start maintenance response?',
+                  description: 'The estate ticket will be marked in progress.',
+                  label: 'Start work',
+                  run: (reason) =>
+                    unwrap(
+                      adminEstateService.updateMaintenanceStatus(ticket.id, 'IN_PROGRESS', reason)
+                    ),
+                })
+              }
+            >
+              Start
+            </Button>
+          )}
+          <Button
+            size="xs"
+            onClick={() =>
+              actions.request({
+                title: 'Resolve maintenance ticket?',
+                description: 'Confirm the reported estate issue has been resolved.',
+                label: 'Resolve',
+                run: (reason) =>
+                  unwrap(adminEstateService.updateMaintenanceStatus(ticket.id, 'RESOLVED', reason)),
+              })
+            }
+          >
+            Resolve
+          </Button>
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Dismiss maintenance ticket?',
+                description: 'Dismissal is terminal and requires a clear administrative reason.',
+                label: 'Dismiss',
+                run: (reason) =>
+                  unwrap(
+                    adminEstateService.updateMaintenanceStatus(ticket.id, 'DISMISSED', reason)
+                  ),
+              })
+            }
+          >
+            Dismiss
+          </Button>
         </div>
       );
     },
   };
-  return <><EstateQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function PollsQueue() {
@@ -581,9 +739,31 @@ export function PollsQueue() {
         render: (p) => <Pill label={titleCase(p.status)} variant={pollStatusVariant(p.status)} />,
       },
     ],
-    actions: (poll) => poll.status === 'OPEN' ? <Button size="xs" variant="outline" onClick={() => actions.request({ title: 'Close poll?', description: 'Voting will stop immediately. Existing votes remain available for reporting.', label: 'Close poll', run: (reason) => unwrap(adminEstateService.closePoll(poll.id, reason)) })}>Close</Button> : null,
+    actions: (poll) =>
+      poll.status === 'OPEN' ? (
+        <Button
+          size="xs"
+          variant="outline"
+          onClick={() =>
+            actions.request({
+              title: 'Close poll?',
+              description:
+                'Voting will stop immediately. Existing votes remain available for reporting.',
+              label: 'Close poll',
+              run: (reason) => unwrap(adminEstateService.closePoll(poll.id, reason)),
+            })
+          }
+        >
+          Close
+        </Button>
+      ) : null,
   };
-  return <><EstateQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function AnnouncementsQueue() {
@@ -624,12 +804,34 @@ export function AnnouncementsQueue() {
           ),
       },
     ],
-    actions: (announcement) => <Button size="xs" variant="danger" onClick={() => actions.request({ title: 'Remove announcement?', description: 'The notice will be removed from the estate feed. The reason remains in the audit log.', label: 'Remove', run: (reason) => unwrap(adminEstateService.removeAnnouncement(announcement.id, reason)) })}>Remove</Button>,
+    actions: (announcement) => (
+      <Button
+        size="xs"
+        variant="danger"
+        onClick={() =>
+          actions.request({
+            title: 'Remove announcement?',
+            description:
+              'The notice will be removed from the estate feed. The reason remains in the audit log.',
+            label: 'Remove',
+            run: (reason) => unwrap(adminEstateService.removeAnnouncement(announcement.id, reason)),
+          })
+        }
+      >
+        Remove
+      </Button>
+    ),
   };
-  return <><EstateQueuePage config={config} />{actions.feedback}</>;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function StaffQueue() {
+  const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstateStaffMember> = {
     resource: 'staff',
     eyebrow: 'Staff & Access',
@@ -679,12 +881,35 @@ export function StaffQueue() {
         render: (s) => <span className="text-muted-foreground">{date(s.createdAt)}</span>,
       },
     ],
+    actions: (s) =>
+      s.orgRole !== 'OWNER' ? (
+        <Button
+          size="xs"
+          variant="danger"
+          onClick={() =>
+            actions.request({
+              title: 'Revoke access?',
+              description: `${s.legalName} will immediately lose staff access to ${s.organizationName}. This cannot be undone from here — they would need to be re-invited.`,
+              label: 'Revoke',
+              run: (reason) => unwrap(adminEstateService.revokeStaff(s.id, reason)),
+            })
+          }
+        >
+          Revoke
+        </Button>
+      ) : null,
   };
-  return <EstateQueuePage config={config} />;
+  return (
+    <>
+      <EstateQueuePage config={config} />
+      {actions.feedback}
+    </>
+  );
 }
 
 export function GovernanceQueue() {
   const [active, setActive] = useState<AdminEstateGovernanceRecord | null>(null);
+  const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstateGovernanceRecord> = {
     resource: 'governance-records',
     eyebrow: 'Governance',
@@ -736,9 +961,26 @@ export function GovernanceQueue() {
         key: 'actions',
         header: '',
         render: (g) => (
-          <Button variant="outline" size="sm" onClick={() => setActive(g)}>
-            <Eye className="mr-1 h-3.5 w-3.5" /> View
-          </Button>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setActive(g)}>
+              <Eye className="mr-1 h-3.5 w-3.5" /> View
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() =>
+                actions.request({
+                  title: 'Remove this record?',
+                  description:
+                    'The stored file and this version will be permanently removed. Use this for a wrong or defamatory upload — not to correct routine content, which the estate manager should re-version instead.',
+                  label: 'Remove',
+                  run: (reason) => unwrap(adminEstateService.removeGovernanceRecord(g.id, reason)),
+                })
+              }
+            >
+              Remove
+            </Button>
+          </div>
         ),
         className: 'text-right',
       },
@@ -749,6 +991,7 @@ export function GovernanceQueue() {
     <>
       <EstateQueuePage config={config} />
       {active && <GovernanceDetailDialog recordId={active.id} onClose={() => setActive(null)} />}
+      {actions.feedback}
     </>
   );
 }

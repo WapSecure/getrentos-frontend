@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
 import {
   VERIFICATION_REASONS,
+  TRUST_WITHHELD_REASONS,
   VerificationRequiredError,
+  type TrustWithheldReason,
   type VerificationReason,
 } from '@/lib/apiHelpers';
 
@@ -53,7 +55,22 @@ interface NoticeMeta {
   reason?: VerificationReason;
   tierRequired?: number;
   currentTier?: number;
+  withheldReason?: TrustWithheldReason;
 }
+
+/**
+ * Copy for a tier requirement that the user already satisfies on evidence but
+ * which their trust score is holding back (backend reason
+ * SCORE_BELOW_TIER3_MIN). Sending them to verification would be a loop — they
+ * are financially verified already — so the CTA points at the score itself.
+ */
+const SCORE_WITHHELD_COPY: Record<TrustWithheldReason, { message: string; cta: string }> = {
+  SCORE_BELOW_TIER3_MIN: {
+    message:
+      'Your identity and financial checks are complete, but your trust score is below the threshold this action requires. Nothing is wrong with your account — building up your trust profile restores access automatically.',
+    cta: 'See what your score needs',
+  },
+};
 
 /** Accepts either a thrown VerificationRequiredError (unwrap/mutation) or a failed safeCall ApiResponse. */
 function readMeta(error: unknown): NoticeMeta | null {
@@ -62,6 +79,7 @@ function readMeta(error: unknown): NoticeMeta | null {
       reason: error.reason,
       tierRequired: error.tierRequired,
       currentTier: error.currentTier,
+      withheldReason: error.withheldReason,
     };
   }
   const maybe = error as NoticeMeta | null | undefined;
@@ -70,6 +88,11 @@ function readMeta(error: unknown): NoticeMeta | null {
       reason: maybe.reason,
       tierRequired: maybe.tierRequired,
       currentTier: maybe.currentTier,
+      withheldReason: (TRUST_WITHHELD_REASONS as readonly string[]).includes(
+        maybe.withheldReason ?? '',
+      )
+        ? maybe.withheldReason
+        : undefined,
     };
   }
   return null;
@@ -82,6 +105,11 @@ interface VerificationRequiredNoticeProps {
   href: string;
   /** Destination for identity/license/trust-tier upsell (the persona's Verification Center). Falls back to `href`. */
   verificationHref?: string;
+  /**
+   * Destination for the score-withheld upsell (the persona's trust profile,
+   * which shows the score breakdown). Falls back to `verificationHref`.
+   */
+  scoreHref?: string;
 }
 
 /** Inline callout shown near a gated action's submit button when it 403s for lack of verification or trust tier. */
@@ -89,6 +117,7 @@ export const VerificationRequiredNotice = ({
   error,
   href,
   verificationHref,
+  scoreHref,
 }: VerificationRequiredNoticeProps) => {
   const meta = readMeta(error);
   if (!meta?.reason) return null;
@@ -96,7 +125,12 @@ export const VerificationRequiredNotice = ({
   let message: string;
   let cta: string;
   let destination: string;
-  if (meta.reason === 'TRUST_TIER_REQUIRED') {
+  if (meta.reason === 'TRUST_TIER_REQUIRED' && meta.withheldReason) {
+    const copy = SCORE_WITHHELD_COPY[meta.withheldReason];
+    message = copy.message;
+    cta = copy.cta;
+    destination = scoreHref ?? verificationHref ?? href;
+  } else if (meta.reason === 'TRUST_TIER_REQUIRED') {
     const copy = tierCopy(meta.tierRequired, meta.currentTier);
     message = copy.message;
     cta = copy.cta;
