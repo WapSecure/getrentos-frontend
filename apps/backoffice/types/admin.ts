@@ -189,12 +189,16 @@ export interface DisputeParty {
 /**
  * A piece of evidence on a case.
  *
+ * Shared by every case family that can carry attachments — a dispute is not
+ * allowed to present evidence differently from a fraud alert just because it is
+ * a dispute.
+ *
  * `STORED` files were uploaded to us, so we can show the actual content through
  * a short-lived signed URL. `EXTERNAL` entries are links recorded before uploads
  * existed — we never received those files, so the UI must label them as someone
  * else's word rather than present them as evidence we hold.
  */
-export interface DisputeEvidence {
+export interface EvidenceItem {
   id: string;
   kind: 'STORED' | 'EXTERNAL';
   name: string;
@@ -241,7 +245,7 @@ export interface DisputeDetail {
   status: DisputeStatus;
   description: string;
   /** Uploaded files first, then leftover external links from before uploads. */
-  evidence?: DisputeEvidence[];
+  evidence?: EvidenceItem[];
   createdAt: string;
   updatedAt: string;
   resolution?: string;
@@ -284,6 +288,8 @@ export interface FraudAlertDetail {
   relatedEntityId?: string;
   resolvedBy?: { id: string; legalName: string };
   resolvedAt?: string;
+  /** Files the investigator is working from — a reason is a claim, this is not. */
+  evidence?: EvidenceItem[];
 }
 
 export interface PlatformEscrowTransaction {
