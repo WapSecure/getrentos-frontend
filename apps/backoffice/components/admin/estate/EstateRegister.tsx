@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Landmark,
@@ -31,6 +31,7 @@ import { formatCurrency, formatDate } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { adminKeys } from '@/lib/queryKeys';
 import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
+import { useEstateActions } from './queues';
 import type { AdminEstate, AdminEstateDetail, HouseholdStatus, DueStatus } from '@/types/estate';
 
 const PAGE_SIZE = 10;
@@ -43,20 +44,17 @@ const dueStatusVariant = (status: DueStatus): BadgeVariant => {
     PAID: 'success',
     OVERDUE: 'danger',
     PROCESSING: 'info',
+    WAIVED: 'neutral',
   };
   return map[status] ?? 'neutral';
 };
 
 export const EstateRegister = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => readAdminSearchParam());
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<AdminEstate | null>(null);
-
-  useEffect(() => {
-    setSearch(readAdminSearchParam());
-  }, []);
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'estates', 'register', { search, city, state, page }],
@@ -152,6 +150,7 @@ export const EstateRegister = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium">{e.name}</p>
                     {e.micrositeEnabled && <Badge variant="success">Microsite live</Badge>}
+                    {e.archived && <Badge variant="danger">Suspended</Badge>}
                   </div>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5" /> {e.address} · {e.city}, {e.state}
@@ -230,6 +229,7 @@ function EstateDetailDialog({ estateId, onClose }: { estateId: string; onClose: 
 }
 
 function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose: () => void }) {
+  const actions = useEstateActions();
   const stats = [
     {
       icon: Home,
@@ -259,7 +259,14 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
             <Landmark className="h-5 w-5 text-muted-foreground" />
             {detail.name}
             {detail.microsite?.enabled && <Badge variant="success">Microsite live</Badge>}
+            {detail.archived && <Badge variant="danger">Suspended</Badge>}
           </h2>
+          {detail.archived && detail.archivedReason && (
+            <p className="mt-1 text-sm text-destructive">
+              Suspended{detail.archivedAt ? ` ${formatDate(detail.archivedAt)}` : ''}:{' '}
+              {detail.archivedReason}
+            </p>
+          )}
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" /> {detail.address} · {detail.city}, {detail.state}
             {detail.gateCount ? ` · ${detail.gateCount} gate(s)` : ''}
@@ -279,8 +286,43 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
             </p>
           )}
         </div>
-        <Badge variant="neutral">Created {formatDate(detail.createdAt)}</Badge>
+        <div className="flex shrink-0 items-center gap-2">
+          <Badge variant="neutral">Created {formatDate(detail.createdAt)}</Badge>
+          {detail.archived ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                actions.request({
+                  title: 'Reactivate this estate?',
+                  description: 'The manager and gate staff will immediately regain access.',
+                  label: 'Reactivate',
+                  run: (reason) => unwrap(adminEstateService.reactivateEstate(detail.id, reason)),
+                })
+              }
+            >
+              Reactivate
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() =>
+                actions.request({
+                  title: 'Suspend this estate?',
+                  description:
+                    'The manager and every gate-staff account will immediately lose access to every estate action — residents can still pay dues and report issues. Use this for fraud, non-payment, or a Terms-of-Service violation.',
+                  label: 'Suspend',
+                  run: (reason) => unwrap(adminEstateService.archiveEstate(detail.id, reason)),
+                })
+              }
+            >
+              Suspend
+            </Button>
+          )}
+        </div>
       </div>
+      {actions.feedback}
 
       <div className="space-y-5 p-5">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

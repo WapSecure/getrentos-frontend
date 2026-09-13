@@ -1,6 +1,6 @@
 // ---- Estate/community enums ----
 export type HouseholdStatus = 'ACTIVE' | 'INACTIVE';
-export type DueStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'PROCESSING';
+export type DueStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'PROCESSING' | 'WAIVED';
 export type EstateIncidentStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'DISMISSED';
 export type EstateIncidentCategory = 'SECURITY' | 'MAINTENANCE' | 'SAFETY' | 'OTHER';
 export type EstateIncidentPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -56,6 +56,8 @@ export interface AdminEstate {
   overdueDueCount: number;
   openIncidentCount: number;
   openMaintenanceCount: number;
+  archived: boolean;
+  archivedReason?: string;
   micrositeSlug?: string;
   micrositeEnabled: boolean;
   createdAt: string;
@@ -154,6 +156,9 @@ export interface AdminEstateDetail {
   state: string;
   gateCount: number | null;
   createdAt: string;
+  archived: boolean;
+  archivedReason?: string;
+  archivedAt?: string;
   organization?: AdminEstateOrganization;
   householdCount: number;
   residentLinkedHouseholds: number;
