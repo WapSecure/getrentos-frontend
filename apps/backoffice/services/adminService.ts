@@ -7,6 +7,7 @@ import type {
   VerificationRequest,
   Dispute,
   DisputeDetail,
+  DisputeEvidence,
   DisputeMessage,
   DisputeResolveOutcome,
   FraudAlert,
@@ -381,6 +382,24 @@ export const adminService = {
 
   async getDisputeDetail(disputeId: string): Promise<ApiResponse<DisputeDetail>> {
     return safeCall(() => authFetch(`/admin/disputes/${disputeId}`));
+  },
+
+  /**
+   * Attach an administrator's own file to a case. The backend owns the file and
+   * serves it back through a short-lived signed URL, so nothing here holds a
+   * link that outlives the case.
+   */
+  async addDisputeEvidence(
+    disputeId: string,
+    file: File,
+    note?: string
+  ): Promise<ApiResponse<DisputeEvidence>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (note?.trim()) formData.append('note', note.trim());
+    return safeCall(() =>
+      authFetch(`/admin/disputes/${disputeId}/evidence`, { method: 'POST', body: formData })
+    );
   },
 
   async startDisputeReview(disputeId: string): Promise<ApiResponse<Dispute>> {

@@ -167,7 +167,6 @@ export interface Dispute {
   priority: 'low' | 'medium' | 'high';
   createdAt: string;
   description: string;
-  evidence?: string[];
   resolution?: string;
   resolvedAt?: string;
 }
@@ -185,6 +184,32 @@ export interface DisputeParty {
   id: string;
   legalName: string;
   email?: string;
+}
+
+/**
+ * A piece of evidence on a case.
+ *
+ * `STORED` files were uploaded to us, so we can show the actual content through
+ * a short-lived signed URL. `EXTERNAL` entries are links recorded before uploads
+ * existed — we never received those files, so the UI must label them as someone
+ * else's word rather than present them as evidence we hold.
+ */
+export interface DisputeEvidence {
+  id: string;
+  kind: 'STORED' | 'EXTERNAL';
+  name: string;
+  mimeType: string | null;
+  url: string;
+  /** Where an external link actually points, so it can be judged before opening. */
+  host?: string | null;
+  sizeBytes?: number | null;
+  source: 'PARTY' | 'ADMIN';
+  /** Absent for legacy links: the old field never recorded who sent which one. */
+  uploadedBy?: DisputeParty | null;
+  note?: string | null;
+  uploadedAt: string;
+  /** How long `url` stays valid; null when the URL is not ours to expire. */
+  urlExpiresInSeconds?: number | null;
 }
 
 export interface DisputeTimelineEvent {
@@ -215,7 +240,8 @@ export interface DisputeDetail {
   priority: 'low' | 'medium' | 'high';
   status: DisputeStatus;
   description: string;
-  evidence?: string[];
+  /** Uploaded files first, then leftover external links from before uploads. */
+  evidence?: DisputeEvidence[];
   createdAt: string;
   updatedAt: string;
   resolution?: string;
