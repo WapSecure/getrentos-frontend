@@ -321,4 +321,6 @@ export const subscriptionKeys = {
 /** Billing lifecycle state (status, trial/period end, cancellation). */
 export const billingKeys = {
   mine: ['billing', 'mine'] as const,
+  /** Payment history — the customer's receipts. */
+  invoices: (page: number) => ['billing', 'invoices', page] as const,
 };
