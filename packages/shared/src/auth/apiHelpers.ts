@@ -15,6 +15,19 @@ export const VERIFICATION_REASONS = [
 export type VerificationReason = (typeof VERIFICATION_REASONS)[number];
 
 /**
+ * Why a satisfied tier requirement was still refused. Sent as `reason`
+ * alongside a TRUST_TIER_REQUIRED 403: the user DOES hold the evidence for the
+ * tier, but the trust SCORE is below the floor the platform set for it.
+ *
+ * Kept separate from VERIFICATION_REASONS on purpose — that list is the
+ * `error` code, this is the explanation. Telling someone who is already
+ * financially verified to go and get financially verified is a dead end, so
+ * the UI has to be able to tell the two apart.
+ */
+export const TRUST_WITHHELD_REASONS = ['SCORE_BELOW_TIER3_MIN'] as const;
+export type TrustWithheldReason = (typeof TRUST_WITHHELD_REASONS)[number];
+
+/**
  * Machine-readable codes the backend attaches to a 403 when an action or a
  * Free-tier usage cap requires the Pro plan — PlanTierGuard's
  * PLAN_UPGRADE_REQUIRED and assertUnderPlanLimit's PLAN_LIMIT_REACHED.
@@ -35,6 +48,11 @@ export interface ApiResponse<T = unknown> {
   tierRequired?: number;
   /** TRUST_TIER_REQUIRED only: the caller's current trust tier (backend `tier`). */
   currentTier?: number;
+  /**
+   * TRUST_TIER_REQUIRED only: set when the tier requirement is satisfied on
+   * evidence but withheld by a low trust score — see TRUST_WITHHELD_REASONS.
+   */
+  withheldReason?: TrustWithheldReason;
   /** Set when a 403 was rejected by a Pro-plan gate/limit — see PLAN_GATE_REASONS. */
   planGateReason?: PlanGateReason;
   /** PLAN_UPGRADE_REQUIRED: the tier the action requires (backend `required`). */
@@ -59,12 +77,18 @@ export class VerificationRequiredError extends Error {
   reason: VerificationReason;
   tierRequired?: number;
   currentTier?: number;
-  constructor(message: string, reason: VerificationReason, meta?: TrustTierMeta) {
+  withheldReason?: TrustWithheldReason;
+  constructor(
+    message: string,
+    reason: VerificationReason,
+    meta?: TrustTierMeta & { withheldReason?: TrustWithheldReason }
+  ) {
     super(message);
     this.name = 'VerificationRequiredError';
     this.reason = reason;
     this.tierRequired = meta?.tierRequired;
     this.currentTier = meta?.currentTier;
+    this.withheldReason = meta?.withheldReason;
   }
 }
 
@@ -106,6 +130,14 @@ function extractTierMeta(details: unknown): TrustTierMeta {
   return { tierRequired: body.required, currentTier: body.tier };
 }
 
+/** Reads the withheld-score explanation off a TRUST_TIER_REQUIRED 403 body. */
+function extractWithheldReason(details: unknown): TrustWithheldReason | undefined {
+  const code = (details as { reason?: string } | undefined)?.reason;
+  return (TRUST_WITHHELD_REASONS as readonly string[]).includes(code ?? '')
+    ? (code as TrustWithheldReason)
+    : undefined;
+}
+
 function extractPlanGateReason(details: unknown): PlanGateReason | undefined {
   const code = (details as { error?: string } | undefined)?.error;
   return (PLAN_GATE_REASONS as readonly string[]).includes(code ?? '')
@@ -131,6 +163,8 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
     if (err instanceof ApiError) {
       const reason = err.status === 403 ? extractReason(err.details) : undefined;
       const tier = reason === 'TRUST_TIER_REQUIRED' ? extractTierMeta(err.details) : undefined;
+      const withheldReason =
+        reason === 'TRUST_TIER_REQUIRED' ? extractWithheldReason(err.details) : undefined;
       const planGateReason = err.status === 403 ? extractPlanGateReason(err.details) : undefined;
       const planGateMeta = planGateReason ? extractPlanGateMeta(err.details) : undefined;
       return {
@@ -142,6 +176,7 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
         reason,
         tierRequired: tier?.tierRequired,
         currentTier: tier?.currentTier,
+        withheldReason,
         planGateReason,
         planGateRequired: planGateMeta?.required,
         planGateCurrent: planGateMeta?.current,
@@ -216,6 +251,7 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
       throw new VerificationRequiredError(message, response.reason, {
         tierRequired: response.tierRequired,
         currentTier: response.currentTier,
+        withheldReason: response.withheldReason,
       });
     if (response.planGateReason)
       throw new PlanGateError(message, response.planGateReason, {
