@@ -8,14 +8,7 @@ import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
+import { formatPrice } from '@/types/renter';
 
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
@@ -64,7 +57,7 @@ export const RecentlyViewed = () => {
                 <p className="text-xs text-muted-foreground truncate">{property.location}</p>
                 <div className="flex items-center justify-between mt-0.5">
                   <span className="text-xs font-semibold text-primary">
-                    {formatPrice(property.price)}/mo
+                    {formatPrice(property.price, property.period)}
                   </span>
                   <span className="text-xs text-gray-400">{formatTimeAgo(property.viewedAt)}</span>
                 </div>

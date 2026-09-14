@@ -93,6 +93,8 @@ export interface GeoInsights {
   travelTimes: TravelTimes | null;
   pricing: {
     price: number;
+    /** RENT listings only — null for SALE, which has no periodic-rent concept. */
+    rentPeriod: 'month' | 'year' | null;
     sizeSqm: number | null;
     pricePerSqm: number | null;
     bedrooms: number | null;
@@ -184,4 +186,17 @@ export const formatPrice = (price: number, period: PeriodType): string => {
     week: '/wk',
   };
   return `${formatter.format(price)}${periodMap[period]}`;
+};
+
+/** For an annual (or weekly) price, what that works out to per month — helps renters used to thinking in monthly terms size up a yearly-quoted rent. Returns null for a price already quoted monthly. */
+export const monthlyEquivalent = (price: number, period: PeriodType): string | null => {
+  if (period === 'month') return null;
+  const monthsPerPeriod = period === 'year' ? 12 : 12 / 52;
+  const formatter = new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return `≈${formatter.format(Math.round(price / monthsPerPeriod))}/mo`;
 };

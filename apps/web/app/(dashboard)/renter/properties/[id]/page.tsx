@@ -33,7 +33,7 @@ import { PropertyLandlordCard } from '@/components/renter/property-detail/Proper
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
 import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
-import { formatPrice } from '@/types/renter';
+import { formatPrice, monthlyEquivalent } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -177,6 +177,11 @@ export default function PropertyDetailPage() {
                 <p className="text-2xl font-bold text-primary">
                   {formatPrice(property.price, property.period)}
                 </p>
+                {monthlyEquivalent(property.price, property.period) && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {monthlyEquivalent(property.price, property.period)} equivalent
+                  </p>
+                )}
                 <div className="flex items-center justify-end gap-1 mt-1">
                   <Star className="w-4 h-4 fill-primary text-primary" />
                   <span className="text-sm text-foreground">{property.rating}</span>
@@ -274,8 +279,15 @@ export default function PropertyDetailPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Rent ({property.period}ly)</span>
-                  <span className="text-foreground font-medium">
-                    {formatPrice(property.price, property.period)}
+                  <span className="text-right">
+                    <span className="text-foreground font-medium block">
+                      {formatPrice(property.price, property.period)}
+                    </span>
+                    {monthlyEquivalent(property.price, property.period) && (
+                      <span className="text-xs text-muted-foreground">
+                        {monthlyEquivalent(property.price, property.period)}
+                      </span>
+                    )}
                   </span>
                 </div>
                 {property.additionalFees.map((fee) => (
