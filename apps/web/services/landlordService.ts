@@ -19,6 +19,7 @@ import type {
   LeadNudgeResult,
   BulkNudgeResult,
   LandlordMicrositeSettings,
+  PropertyUpdatePayload,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -277,10 +278,7 @@ export const landlordService = {
     );
   },
 
-  async updateProperty(
-    id: string,
-    updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>
-  ): Promise<ApiResponse<Property>> {
+  async updateProperty(id: string, updates: PropertyUpdatePayload): Promise<ApiResponse<Property>> {
     return safeCall(() =>
       authFetch(`/landlord/properties/${id}`, { method: 'PATCH', body: JSON.stringify(updates) })
     );

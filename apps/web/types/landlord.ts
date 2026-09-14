@@ -37,6 +37,31 @@ export interface Property {
   archived?: boolean;
 }
 
+/**
+ * Fields a landlord may change after a property exists (PATCH /landlord/properties/:id).
+ * Media is sent as storage keys; `null` clears a single key and an empty
+ * `galleryImageKeys` array clears the gallery.
+ */
+export type PropertyUpdatePayload = Partial<
+  Pick<
+    Property,
+    | 'name'
+    | 'type'
+    | 'address'
+    | 'city'
+    | 'state'
+    | 'country'
+    | 'description'
+    | 'totalUnits'
+    | 'galleryImageKeys'
+  >
+> & {
+  /** `null` clears the stored cover; omit to leave it untouched. */
+  coverImageKey?: string | null;
+  /** `null` clears the video tour; omit to leave it untouched. */
+  videoTourKey?: string | null;
+};
+
 export interface Unit {
   id: string;
   propertyId: string;
@@ -69,6 +94,10 @@ export interface Listing {
   allowPets: boolean;
   furnished: boolean;
   shortLetEnabled: boolean;
+  /** The property's media (a listing has none of its own). Signed per request. */
+  coverImage?: string;
+  galleryImages?: string[];
+  videoTourUrl?: string;
   status: ListingStatus;
   createdAt: string;
 }

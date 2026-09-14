@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Megaphone,
@@ -48,6 +49,10 @@ interface ListingCardProps {
 
 export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: ListingCardProps) => {
   const status = statusConfig[listing.status];
+  // Signed URLs expire and can fail, so fall back to the placeholder rather
+  // than showing a broken image.
+  const [coverFailed, setCoverFailed] = useState(false);
+  const showCover = Boolean(listing.coverImage) && !coverFailed;
 
   return (
     <motion.div
@@ -57,9 +62,26 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
       className="bg-card rounded-2xl border border-border overflow-hidden"
     >
       <div className="relative h-32 bg-linear-to-br from-secondary to-muted">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Megaphone className="w-10 h-10 text-gray-400 dark:text-gray-600" />
-        </div>
+        {showCover ? (
+          // Signed MinIO URLs, so plain <img> rather than next/image.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={listing.coverImage}
+            alt={listing.listingTitle}
+            loading="lazy"
+            onError={() => setCoverFailed(true)}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Megaphone className="w-10 h-10 text-gray-400 dark:text-gray-600" />
+          </div>
+        )}
+        {listing.videoTourUrl && (
+          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+            <Play className="w-3 h-3" /> Video tour
+          </span>
+        )}
         <span
           className={`absolute top-3 left-3 inline-flex px-2 py-1 rounded-full text-xs font-medium ${status.className}`}
         >
