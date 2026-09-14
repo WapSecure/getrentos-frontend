@@ -9,9 +9,20 @@ export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'reject
 export type UnitOccupancyStatus = 'occupied' | 'vacant' | 'notice_given';
 export type ListingStatus = 'draft' | 'pending_verification' | 'published' | 'paused' | 'closed';
 export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
-export type LeaseStatus = 'draft' | 'sent' | 'signed' | 'expired';
+export type LeaseStatus =
+  | 'draft'
+  | 'sent'
+  /** Tenant has signed; the lease is conditional on the first payment. */
+  | 'awaiting_payment'
+  /** Money is in escrow and the landlord owes a handover. */
+  | 'awaiting_landlord'
+  | 'signed'
+  /** First payment missed: the unit returns to the market. */
+  | 'lapsed'
+  | 'expired';
 export type RentPaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing';
-export type EscrowStatus = 'held' | 'pending_review' | 'released' | 'frozen';
+/** `not_funded` means nothing has been paid yet, so no money is held. */
+export type EscrowStatus = 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
 export type RentPeriod = 'year' | 'month';
 
 export interface Property {
@@ -133,6 +144,10 @@ export interface Lease {
   status: LeaseStatus;
   tenantSigned: boolean;
   landlordSigned: boolean;
+  /** Deadline for the tenant's first payment, while the lease is conditional. */
+  paymentDueAt?: string;
+  /** Set once the landlord confirmed handover. */
+  possessionConfirmedAt?: string;
   createdAt: string;
 }
 

@@ -7,7 +7,7 @@ interface Payment {
   id: string;
   amount: number;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
-  escrowStatus: 'held' | 'released' | 'pending';
+  escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
 }
 
 interface PaymentsStatsProps {
@@ -27,10 +27,9 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
     .filter((p) => p.status === 'overdue')
     .reduce((sum, p) => sum + p.amount, 0);
 
-  // Only money that has actually been collected can be held in escrow: an
-  // unpaid charge carries escrowStatus 'held' the moment it is raised, so
-  // filtering on escrow alone reported the outstanding balance as secured
-  // funds.
+  // Escrow holds money that has actually been received. An unpaid charge is
+  // 'not_funded', so the outstanding balance can never be reported as funds
+  // the tenant has already secured.
   const escrowAmount = payments
     .filter((p) => p.status === 'paid' && p.escrowStatus === 'held')
     .reduce((sum, p) => sum + p.amount, 0);

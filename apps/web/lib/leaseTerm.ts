@@ -1,12 +1,27 @@
 /**
- * Lease rent is stored as a single amount for the whole term, with no billing
- * cadence column (unlike Listing, which has `rentPeriod`). Labelling it "Monthly
- * rent" therefore turned an annual figure into a 12x overstatement on the very
- * document a tenant signs, so derive the wording from the term dates instead.
+ * Wording for a lease rent figure.
+ *
+ * Leases written before `Lease.rentPeriod` existed carry a single amount with no
+ * cadence, and labelling that "Monthly rent" turned an annual figure into a 12x
+ * overstatement on the very document a tenant signs. Where the cadence is
+ * recorded it is used; otherwise the term dates are the only evidence left.
  */
 /** Short suffix for inline figures, e.g. "₦2.4M/yr". */
 export const rentSuffix = (period: 'month' | 'year' | undefined): string =>
   period === 'year' ? '/yr' : period === 'month' ? '/mo' : '';
+
+/** Inline suffix for a lease rent, falling back to the term when no cadence is recorded. */
+export function leaseRentSuffix(
+  period: 'month' | 'year' | undefined,
+  leaseStart: string,
+  leaseEnd: string
+): string {
+  if (period) return rentSuffix(period);
+  const label = describeRentPeriod(leaseStart, leaseEnd);
+  if (label === 'Annual rent') return '/yr';
+  if (label === 'Monthly rent') return '/mo';
+  return '';
+}
 
 /**
  * Label for a lease rent. Prefers the cadence recorded on the lease and only

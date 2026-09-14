@@ -2,16 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Home, Calendar, DollarSign, FileText } from 'lucide-react';
-
-interface Lease {
-  id: string;
-  propertyName: string;
-  address: string;
-  startDate: string;
-  endDate: string;
-  rentAmount: number;
-  securityDeposit: number;
-}
+import { leaseRentLabel } from '@/lib/leaseTerm';
+import type { Lease } from '@/services/renterService';
 
 interface LeaseStatsProps {
   lease: Lease;
@@ -48,7 +40,7 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
     },
     {
       icon: DollarSign,
-      label: 'Monthly Rent',
+      label: leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate),
       value: formatCurrency(lease.rentAmount),
     },
     {

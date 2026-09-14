@@ -1,12 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileCheck, Download, PenLine, RefreshCcw, Send } from 'lucide-react';
+import { Clock, Download, FileCheck, PenLine, RefreshCcw, Send } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { describeRentPeriod, leaseRentLabel } from '@/lib/leaseTerm';
+import { leaseRentLabel } from '@/lib/leaseTerm';
 import { leaseStatusBadges } from '@/lib/statusBadge';
 import { landlordService } from '@/services/landlordService';
 import type { Lease } from '@/types/landlord';
@@ -87,6 +87,29 @@ export const LeaseCard = ({
         </p>
       )}
 
+      {lease.status === 'awaiting_payment' && (
+        <p className="text-xs text-amber-700 dark:text-amber-400 mt-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+          <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>
+            Tenant has signed. Rent is not in escrow yet
+            {lease.paymentDueAt
+              ? ` — due ${new Date(lease.paymentDueAt).toLocaleDateString('en-NG', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}, after which the lease lapses and the unit is re-let automatically.`
+              : '.'}
+          </span>
+        </p>
+      )}
+
+      {lease.status === 'awaiting_landlord' && (
+        <p className="text-xs text-green-700 dark:text-green-400 mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg px-2.5 py-1.5">
+          Rent is held in escrow. Countersign to confirm you have handed over — the funds are
+          released to you after the confirmation period.
+        </p>
+      )}
+
       <div className="flex gap-2 mt-4 pt-4 border-t border-border">
         {lease.status === 'draft' && (
           <Button
@@ -101,17 +124,32 @@ export const LeaseCard = ({
           </Button>
         )}
         {lease.status === 'sent' && (
+          <p className="text-xs text-muted-foreground py-2">
+            Waiting for the tenant to sign. You countersign once the rent is in escrow.
+          </p>
+        )}
+        {lease.status === 'awaiting_payment' && (
+          <p className="text-xs text-muted-foreground py-2">
+            Waiting for the tenant&apos;s payment. Your countersignature is what releases the keys
+            — it cannot happen before the money is held.
+          </p>
+        )}
+        {lease.status === 'awaiting_landlord' && (
           <Button
-            variant={lease.landlordSigned ? 'outline' : 'primary'}
+            variant="primary"
             size="sm"
             fullWidth
-            disabled={lease.landlordSigned}
             className="gap-1.5"
             onClick={() => onSignLease(lease)}
           >
             <PenLine className="w-3.5 h-3.5" />
-            {lease.landlordSigned ? 'Waiting on tenant' : 'Sign Lease'}
+            Confirm handover &amp; countersign
           </Button>
+        )}
+        {lease.status === 'lapsed' && (
+          <p className="text-xs text-muted-foreground py-2">
+            This lease lapsed unpaid and the unit is back on the market.
+          </p>
         )}
         {lease.status === 'signed' && (
           <>

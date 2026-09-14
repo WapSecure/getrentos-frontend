@@ -20,7 +20,7 @@ interface Payment {
   receiptUrl?: string;
   description: string;
   dueDate: string;
-  escrowStatus: 'held' | 'released' | 'pending';
+  escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
 }
 
 interface PaymentsListProps {

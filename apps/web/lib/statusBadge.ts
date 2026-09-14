@@ -40,7 +40,8 @@ export const paymentStatusBadges: Record<RentPaymentStatus, StatusBadgeEntry> = 
 };
 
 export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
-  held: { label: 'Held', variant: 'info', icon: Lock },
+  not_funded: { label: 'Not funded', variant: 'neutral' },
+  held: { label: 'Held in escrow', variant: 'info', icon: Lock },
   pending_review: { label: 'Pending Review', variant: 'warning', icon: Clock },
   released: { label: 'Released', variant: 'success', icon: CheckCircle2 },
   frozen: { label: 'Frozen', variant: 'danger', icon: Ban },
@@ -48,8 +49,11 @@ export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
 
 export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {
   draft: { label: 'Draft', variant: 'neutral' },
-  sent: { label: 'Sent', variant: 'info' },
+  sent: { label: 'Awaiting tenant signature', variant: 'info' },
+  awaiting_payment: { label: 'Awaiting first payment', variant: 'warning', icon: Clock },
+  awaiting_landlord: { label: 'Awaiting handover', variant: 'info', icon: Lock },
   signed: { label: 'Signed', variant: 'success' },
+  lapsed: { label: 'Lapsed unpaid', variant: 'danger', icon: XCircle },
   expired: { label: 'Expired', variant: 'danger' },
 };
 

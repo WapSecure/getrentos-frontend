@@ -103,6 +103,8 @@ export interface Lease {
   startDate: string;
   endDate: string;
   rentAmount: number;
+  /** Cadence of rentAmount; absent on leases written before it was tracked. */
+  rentPeriod?: 'month' | 'year';
   securityDeposit: number;
   renewalTerms: string;
   status: 'active' | 'expiring' | 'expired';
@@ -131,6 +133,17 @@ export interface PendingLease {
   landlord: { name: string; email: string; phone: string };
   tenantSigned: boolean;
   landlordSigned: boolean;
+  /**
+   * Where the lease is: the tenant still has to sign, then get the first
+   * payment into escrow before the landlord hands over.
+   */
+  status: 'sent' | 'awaiting_payment' | 'awaiting_landlord' | 'signed';
+  /** Amount that must reach escrow to keep the lease, once signed. */
+  amountDue?: number;
+  /** Deadline for that payment; the lease lapses and the unit is re-let after it. */
+  paymentDueAt?: string;
+  /** True once the first payment is held in escrow. */
+  paymentInEscrow: boolean;
 }
 
 export interface RentIncrease {
@@ -161,7 +174,7 @@ export interface Payment {
   receiptUrl?: string;
   description: string;
   dueDate: string;
-  escrowStatus: 'held' | 'released' | 'pending';
+  escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
   /** Present when the payment is initialized with a real gateway (redirect here to complete checkout). */
   authorizationUrl?: string;
   /** Gateway reference for the payment currently being processed. */

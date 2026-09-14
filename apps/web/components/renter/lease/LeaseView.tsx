@@ -79,9 +79,10 @@ export const LeaseView = () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.pendingLease });
       queryClient.invalidateQueries({ queryKey: renterKeys.lease });
       setToast({
-        message: updated.landlordSigned
-          ? 'Lease fully executed — welcome home!'
-          : 'Your signature was recorded. Waiting on the landlord to countersign.',
+        message:
+          updated.status === 'awaiting_payment'
+            ? 'Signature recorded. The lease now depends on your first payment into escrow.'
+            : 'Your signature was recorded.',
         variant: 'success',
       });
     },
@@ -149,6 +150,19 @@ export const LeaseView = () => {
 
   return (
     <>
+      {/* A tenant can hold an executed lease and be signing another at the same
+          time. The new one is shown first: left to the bottom of the page they
+          would never see the payment it depends on, and it would lapse. */}
+      {pendingLease && (
+        <div className="mb-6">
+          <PendingLeaseCard
+            lease={pendingLease}
+            onSign={handleSignLease}
+            isPending={signLeaseMutation.isPending}
+          />
+        </div>
+      )}
+
       <LeaseHeader lease={lease} renewalOffer={renewalOffer} />
       <LeaseStats lease={lease} />
       <LeaseSummaryCard lease={lease} />

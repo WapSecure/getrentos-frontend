@@ -26,7 +26,7 @@ interface Payment {
   receiptUrl?: string;
   description: string;
   dueDate: string;
-  escrowStatus: 'held' | 'released' | 'pending';
+  escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
 }
 
 interface PaymentCardProps {
@@ -46,9 +46,11 @@ const methodIcons: Record<Payment['method'], typeof CreditCard> = {
 /** Plain-language escrow state for collected funds. */
 const escrowLabel = (status: Payment['escrowStatus']): string =>
   ({
+    not_funded: 'not funded yet',
     held: 'held by GetRentos',
+    pending_review: 'under review',
     released: 'released to your landlord',
-    pending: 'under review',
+    frozen: 'frozen',
   })[status] ?? status;
 
 export const PaymentCard = ({

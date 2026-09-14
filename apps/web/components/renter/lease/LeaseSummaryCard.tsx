@@ -1,23 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { leaseRentSuffix } from '@/lib/leaseTerm';
 import { Home, Calendar, DollarSign, FileText, MapPin, Building2 } from 'lucide-react';
-
-interface Lease {
-  id: string;
-  propertyName: string;
-  address: string;
-  startDate: string;
-  endDate: string;
-  rentAmount: number;
-  securityDeposit: number;
-  status: 'active' | 'expiring' | 'expired';
-  landlord: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-}
+import type { Lease } from '@/services/renterService';
 
 interface LeaseSummaryCardProps {
   lease: Lease;
@@ -79,7 +65,8 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
             </div>
             <div className="text-right">
               <p className="text-sm font-bold text-primary">
-                {formatCurrency(lease.rentAmount)}/mo
+                {formatCurrency(lease.rentAmount)}
+                {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
               </p>
               <p className="text-xs text-gray-500 mt-0.5">{getDaysRemaining()} days left</p>
             </div>
