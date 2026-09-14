@@ -42,9 +42,13 @@ export default function ResidentDashboardPage() {
     queryFn: () => unwrap(estateResidentService.getMyHousehold()),
   });
 
+  // A due is outstanding until it is actually paid. Filtering the list to
+  // `pending` reported ₦0 to residents who owed money, because a due that is
+  // past its date is `overdue`, not `pending`. This shares the dues page's
+  // query, so the tile and the dues list always agree.
   const { data: duesData } = useQuery({
-    queryKey: estateResidentKeys.dues('pending'),
-    queryFn: () => unwrap(estateResidentService.listMyDues({ status: 'pending', pageSize: 50 })),
+    queryKey: estateResidentKeys.dues(),
+    queryFn: () => unwrap(estateResidentService.listMyDues({ pageSize: 50 })),
   });
 
   const { data: announcementsData } = useQuery({
@@ -52,7 +56,9 @@ export default function ResidentDashboardPage() {
     queryFn: () => unwrap(estateResidentService.listMyAnnouncements({ pageSize: 3 })),
   });
 
-  const pendingTotal = (duesData?.items ?? []).reduce((sum, due) => sum + due.amount, 0);
+  const pendingTotal = (duesData?.items ?? [])
+    .filter((due) => due.status !== 'paid')
+    .reduce((sum, due) => sum + due.amount, 0);
   const announcements = announcementsData?.items ?? [];
 
   if (isHouseholdLoading) {
