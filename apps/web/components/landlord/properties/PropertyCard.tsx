@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MapPin,
@@ -81,6 +82,11 @@ export const PropertyCard = ({
   const vacantUnits = property.totalUnits - property.occupiedUnits;
   const occupancyPct =
     property.totalUnits > 0 ? Math.round((property.occupiedUnits / property.totalUnits) * 100) : 0;
+  // Cover images are presigned MinIO URLs, so they can expire or fail to load
+  // (e.g. a long-open tab) — fall back to the placeholder rather than a broken
+  // image icon.
+  const [coverFailed, setCoverFailed] = useState(false);
+  const showCover = Boolean(property.coverImage) && !coverFailed;
 
   return (
     <motion.div
@@ -91,9 +97,19 @@ export const PropertyCard = ({
       className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
     >
       <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
-        </div>
+        {showCover ? (
+          <img
+            src={property.coverImage}
+            alt={property.name}
+            loading="lazy"
+            onError={() => setCoverFailed(true)}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          </div>
+        )}
         <button
           onClick={(e) => {
             e.stopPropagation();
