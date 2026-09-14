@@ -26,7 +26,10 @@ export const RenterLeaseRenewal = () => {
   });
   const { data: renewalOffer = null } = useQuery({
     queryKey: renterKeys.renewalOffer,
-    queryFn: () => unwrap(renterService.getRenewalOffer()),
+    // The API answers "no offer" with an empty 200 body, which the shared
+    // client turns into `undefined` — and React Query rejects that. Coalescing
+    // to null matches the declared `RenewalOffer | null`.
+    queryFn: async () => (await unwrap(renterService.getRenewalOffer())) ?? null,
   });
 
   if (!lease) return null;

@@ -37,7 +37,8 @@ export const LeaseView = () => {
   });
   const renewalOfferQuery = useQuery({
     queryKey: renterKeys.renewalOffer,
-    queryFn: () => unwrap(renterService.getRenewalOffer()),
+    // Empty 200 body from the API means "no offer"; see RenterLeaseRenewal.
+    queryFn: async () => (await unwrap(renterService.getRenewalOffer())) ?? null,
   });
   const rentIncreasesQuery = useQuery({
     queryKey: renterKeys.rentIncreases,
