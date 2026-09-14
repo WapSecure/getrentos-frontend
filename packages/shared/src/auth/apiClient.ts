@@ -89,6 +89,12 @@ function resolveFriendlyMessage(status: number, body: BackendErrorBody | undefin
   if (code && FRIENDLY_ERROR_CODES[code]) return FRIENDLY_ERROR_CODES[code];
 
   if (Array.isArray(body?.message)) {
+    // class-validator's raw field messages ("documents.0.property url should not
+    // exist") are unhelpful to users, but they are the only clue when a request
+    // shape drifts from the DTO — surface them to developers, never to users.
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[api] validation rejected the request:', body.message);
+    }
     return 'Please check the highlighted fields and try again.';
   }
 

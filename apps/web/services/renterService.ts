@@ -568,7 +568,16 @@ export const renterService = {
                 },
               ]
             : undefined,
-          documents: data.documents,
+          // The API contract is name/uploaded/required/documentId. `url` is a
+          // short-lived signed link kept for the wizard's local preview; sending
+          // it fails validation (forbidNonWhitelisted) and rejects the whole
+          // application.
+          documents: data.documents.map((doc) => ({
+            name: doc.name,
+            uploaded: doc.uploaded,
+            required: doc.required,
+            documentId: doc.documentId,
+          })),
         }),
       })
     );
