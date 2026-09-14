@@ -71,7 +71,7 @@ export const AdminStatsCards = ({
       icon: TrendingUp,
       label: 'Platform GMV',
       value: platformGmv,
-      subtitle: 'Lifetime',
+      subtitle: 'Lifetime · sales, rent & stays',
       accent: 'emerald',
       delay: 0.25,
       isCurrency: true,

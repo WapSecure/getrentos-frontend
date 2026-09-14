@@ -23,6 +23,8 @@ const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: Badge
   final_payment: { label: 'Final Payment', variant: 'info' },
   released: { label: 'Released', variant: 'success' },
   frozen: { label: 'Frozen', variant: 'danger' },
+  disputed: { label: 'Disputed', variant: 'danger' },
+  refunded: { label: 'Refunded', variant: 'warning' },
 };
 
 type StatusFilter = 'all' | PlatformEscrowStatus;
@@ -86,6 +88,8 @@ export default function AdminEscrowPage() {
     { value: 'final_payment', label: 'Final Payment' },
     { value: 'released', label: 'Released' },
     { value: 'frozen', label: 'Frozen' },
+    { value: 'disputed', label: 'Disputed' },
+    { value: 'refunded', label: 'Refunded' },
   ];
 
   const columns: Column<PlatformEscrowTransaction>[] = [

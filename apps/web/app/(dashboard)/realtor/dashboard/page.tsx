@@ -10,6 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+import { usePlanTier } from '@/hooks/usePlanTier';
+import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 // recharts is heavy — load it only when this dashboard mounts.
 const RealtorCommissionChart = dynamic(
@@ -25,13 +27,17 @@ const RealtorCommissionChart = dynamic(
 
 export default function RealtorDashboardPage() {
   const user = useRealtorUser();
+  const { isPro } = usePlanTier();
   const { data: stats } = useQuery({
     queryKey: realtorKeys.dashboard,
     queryFn: () => unwrap(realtorService.getDashboard()),
   });
+  // Commissions sit behind a class-level @RequiresPlan('PRO') controller, so a
+  // Free realtor must not fetch them — they'd 403 and log console errors.
   const { data: commissionSummary } = useQuery({
     queryKey: realtorKeys.commissions,
     queryFn: () => unwrap(realtorService.getCommissionsSummary()),
+    enabled: isPro,
   });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
@@ -50,12 +56,18 @@ export default function RealtorDashboardPage() {
         activeLeads={stats?.activeLeads ?? 0}
         upcomingViewings={stats?.upcomingViewings ?? 0}
         pendingOffers={stats?.offerCount ?? 0}
-        commissionYtd={commissionSummary?.totalEarned ?? 0}
+        commissionYtd={isPro ? (commissionSummary?.totalEarned ?? 0) : null}
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <RealtorCommissionChart />
+          <ProFeatureGate
+            title="Commission analytics is a Pro feature"
+            description="Upgrade to Pro to track what you've earned from closed deals and see your monthly commission trend."
+            upgradeHref="/realtor/billing"
+          >
+            <RealtorCommissionChart />
+          </ProFeatureGate>
           <RealtorActivityFeed />
         </div>
         <div>

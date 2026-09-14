@@ -118,7 +118,9 @@ export type PlatformEscrowStatus =
   | 'verification'
   | 'final_payment'
   | 'released'
-  | 'frozen';
+  | 'frozen'
+  | 'disputed'
+  | 'refunded';
 export type AuditSeverity = 'info' | 'warning' | 'critical';
 export type AdminDocumentCategory = 'policy' | 'compliance_filing' | 'legal_agreement' | 'report';
 

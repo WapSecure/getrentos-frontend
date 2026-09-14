@@ -83,7 +83,8 @@ interface RealtorStatsCardsProps {
   activeLeads: number;
   upcomingViewings: number;
   pendingOffers: number;
-  commissionYtd: number;
+  /** null when the realtor isn't on Pro — commissions are a Pro feature. */
+  commissionYtd: number | null;
 }
 
 export const RealtorStatsCards = ({
@@ -138,8 +139,8 @@ export const RealtorStatsCards = ({
     {
       icon: Wallet,
       label: 'Commission YTD',
-      value: commissionYtd,
-      subtitle: 'Year to date',
+      value: commissionYtd ?? 'Pro',
+      subtitle: commissionYtd === null ? 'Upgrade to unlock' : 'Year to date',
       color: 'emerald',
       delay: 0.25,
       isCurrency: true,
