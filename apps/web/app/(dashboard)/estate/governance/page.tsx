@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Plus } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, Toast } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -33,6 +33,9 @@ export default function EstateGovernancePage() {
   const [historyRecordId, setHistoryRecordId] = useState<string | null>(null);
   const [signaturesRecordId, setSignaturesRecordId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<GovernanceRecordType | 'all'>('all');
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
   const planGate = usePlanGateModal();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
@@ -69,7 +72,12 @@ export default function EstateGovernancePage() {
       if (planGate.handleError(error)) {
         setIsUploadOpen(false);
         setNewVersionOf(null);
+        return;
       }
+      setToast({
+        message: error.message || 'We could not upload this record. Please try again.',
+        variant: 'error',
+      });
     },
   });
 
@@ -77,6 +85,12 @@ export default function EstateGovernancePage() {
     mutationFn: (recordId: string) =>
       unwrap(estateService.removeGovernanceRecord(estate!.id, recordId)),
     onSuccess: invalidate,
+    onError: (error: Error) => {
+      setToast({
+        message: error.message || 'We could not remove this record. Please try again.',
+        variant: 'error',
+      });
+    },
   });
 
   const closeUploadModal = () => {
@@ -190,6 +204,10 @@ export default function EstateGovernancePage() {
         onClose={planGate.close}
         reason={planGate.reason}
       />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

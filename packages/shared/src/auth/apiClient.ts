@@ -51,11 +51,58 @@ function fallbackMessage(status: number): string {
   return 'We could not complete your request. Please try again.';
 }
 
+/**
+ * Known backend error codes that always get this exact copy, regardless of
+ * whatever `message` the body happens to carry — keeps wording consistent
+ * across every call site, including ones that don't render a dedicated
+ * upsell component for the code (see VerificationRequiredNotice/
+ * UpgradeToProModal, which read the structured `error`/`reason` fields
+ * directly and are unaffected by this — this only reshapes the plain-text
+ * fallback every other call site shows via `err.message`).
+ */
+const FRIENDLY_ERROR_CODES: Record<string, string> = {
+  PLAN_UPGRADE_REQUIRED: 'This feature requires the Pro plan. Upgrade to unlock it.',
+  PLAN_LIMIT_REACHED:
+    "You've reached the limit for your current plan. Upgrade to Pro to remove it.",
+};
+
+/**
+ * Catches raw technical text that shouldn't reach an end user even when it
+ * arrived as a normal single-string `message` (an unhandled exception's own
+ * message/name leaking through in a non-production environment, a stray
+ * Prisma error code, a JS TypeError from a bug — see http-exception.filter.ts
+ * for what's already sanitized server-side; this is the client-side backstop).
+ */
+const TECHNICAL_MESSAGE_PATTERN =
+  /Exception\b|Cannot read propert|undefined is not|is not a function|^P\d{4}\b|ECONNREFUSED|ENOTFOUND|Unexpected token|SyntaxError|null is not an object|at\s+\w+\s+\(/i;
+
+/**
+ * Resolves the single user-facing string for a failed response. Priority:
+ * a known error code's fixed copy, then a generic message for validation
+ * failures (class-validator's auto-generated messages use raw camelCase
+ * field names like "fullName should not be empty" — never join those
+ * verbatim), then the body's own message IF it doesn't look like raw
+ * technical text, then a friendly per-status fallback.
+ */
+function resolveFriendlyMessage(status: number, body: BackendErrorBody | undefined): string {
+  const code = body?.error;
+  if (code && FRIENDLY_ERROR_CODES[code]) return FRIENDLY_ERROR_CODES[code];
+
+  if (Array.isArray(body?.message)) {
+    return 'Please check the highlighted fields and try again.';
+  }
+
+  const raw = body?.message;
+  if (typeof raw === 'string' && raw.trim() && !TECHNICAL_MESSAGE_PATTERN.test(raw)) {
+    return raw;
+  }
+
+  return fallbackMessage(status);
+}
+
 async function toApiError(response: Response): Promise<ApiError> {
   const body = (await readResponseBody<never>(response)) as BackendErrorBody | undefined;
-  const message = Array.isArray(body?.message)
-    ? body.message.join(', ')
-    : body?.message || fallbackMessage(response.status);
+  const message = resolveFriendlyMessage(response.status, body);
   return new ApiError(response.status, message, {
     ...body,
     requestId: body?.requestId ?? response.headers.get('x-request-id') ?? undefined,
@@ -228,9 +275,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   if (!response.ok) {
     const errorBody = body as BackendErrorBody | undefined;
-    const message = Array.isArray(errorBody?.message)
-      ? errorBody.message.join(', ')
-      : errorBody?.message || fallbackMessage(response.status);
+    const message = resolveFriendlyMessage(response.status, errorBody);
     throw new ApiError(response.status, message, {
       ...errorBody,
       requestId: errorBody?.requestId ?? response.headers.get('x-request-id') ?? undefined,

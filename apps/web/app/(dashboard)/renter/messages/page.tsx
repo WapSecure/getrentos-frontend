@@ -18,13 +18,16 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
 
 export default function MessagesPage() {
   const user = useRenterUser();
   const queryClient = useQueryClient();
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
   const conversationsQueryKey = [
     ...renterKeys.conversations,
     { page, pageSize: PAGE_SIZE },
@@ -97,9 +100,13 @@ export default function MessagesPage() {
       );
       return { previousConversations };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error: Error, _variables, context) => {
       if (context)
         queryClient.setQueryData(renterKeys.conversations, context.previousConversations);
+      setToast({
+        message: error.message || 'Your message could not be sent. Please try again.',
+        variant: 'error',
+      });
     },
     onSettled: invalidateConversations,
   });
@@ -301,6 +308,10 @@ export default function MessagesPage() {
           onPageChange={setPage}
           className="mt-6"
         />
+      )}
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

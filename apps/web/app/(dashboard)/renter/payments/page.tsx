@@ -98,6 +98,13 @@ export default function PaymentsPage() {
         message: `Rent payment of ₦${updated.amount.toLocaleString()} for ${updated.propertyName} was successful.`,
       });
     },
+    onError: (error: Error) => {
+      pushNotification({
+        type: 'error',
+        title: 'Payment Unsuccessful',
+        message: error.message || 'We could not process this payment. Please try again.',
+      });
+    },
   });
 
   const payments: DisplayPayment[] = rawPayments.map((p) => {
@@ -193,6 +200,13 @@ export default function PaymentsPage() {
         message: `Your dispute for ${updated.propertyName} has been submitted for review: "${reason}"`,
       });
     },
+    onError: (error: Error) => {
+      pushNotification({
+        type: 'error',
+        title: 'Dispute Not Submitted',
+        message: error.message || 'We could not submit this dispute. Please try again.',
+      });
+    },
   });
 
   const handleSubmitDispute = async (reason: string) => {
@@ -212,14 +226,25 @@ export default function PaymentsPage() {
   const invalidatePaymentMethods = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.paymentMethods });
 
+  const notifyPaymentMethodError = (title: string, fallback: string) => (error: Error) =>
+    pushNotification({ type: 'error', title, message: error.message || fallback });
+
   const setDefaultPaymentMethodMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
     onSuccess: invalidatePaymentMethods,
+    onError: notifyPaymentMethodError(
+      'Default Payment Method Not Updated',
+      'We could not update your default payment method. Please try again.'
+    ),
   });
 
   const removePaymentMethodMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
     onSuccess: invalidatePaymentMethods,
+    onError: notifyPaymentMethodError(
+      'Payment Method Not Removed',
+      'We could not remove this payment method. Please try again.'
+    ),
   });
 
   const addPaymentMethodMutation = useMutation({
@@ -233,6 +258,10 @@ export default function PaymentsPage() {
         })
       ),
     onSuccess: invalidatePaymentMethods,
+    onError: notifyPaymentMethodError(
+      'Payment Method Not Added',
+      'We could not add this payment method. Please try again.'
+    ),
   });
 
   const handleSetDefaultPaymentMethod = async (id: string) => {

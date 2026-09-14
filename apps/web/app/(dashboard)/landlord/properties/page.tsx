@@ -135,7 +135,11 @@ export default function LandlordPropertiesPage() {
       });
     },
     onError: (error: Error) => {
-      planGate.handleError(error);
+      if (planGate.handleError(error)) return;
+      setToast({
+        variant: 'error',
+        message: error.message || 'We could not create this property. Please try again.',
+      });
     },
   });
 
