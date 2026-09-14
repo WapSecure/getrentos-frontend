@@ -148,6 +148,14 @@
     letter-spacing: inherit;
   }
 
+  /* Every real CTA gets a pointer cursor by default — components only need to
+     opt out (disabled/aria-disabled), never opt in. Fixes the long tail of
+     hand-rolled icon buttons and menu triggers that never set this themselves. */
+  button:not(:disabled):not([aria-disabled='true']),
+  [role='button']:not([aria-disabled='true']):not([data-disabled]) {
+    cursor: pointer;
+  }
+
   /* A single visual baseline for legacy form markup while screens are migrated to
      the composable controls in components/ui. The browser fields remain fully
      semantic (important for password managers and mobile keyboards), but no
