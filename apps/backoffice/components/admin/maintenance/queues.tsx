@@ -10,6 +10,8 @@ import { MaintenanceQueuePage, type MaintenanceQueueConfig } from './Maintenance
 import { AssignVendorDialog } from './AssignVendorDialog';
 import { MaintenanceEditorDialog } from './MaintenanceEditorDialog';
 import { MaintenanceCreateDialog } from './MaintenanceCreateDialog';
+import { MaintenanceDocumentsDialog } from './MaintenanceDocumentsDialog';
+import type { EvidenceItem } from '@/types/admin';
 import type {
   AdminPreventivePlan,
   AdminSlaPolicy,
@@ -706,8 +708,93 @@ export function VendorsQueue() {
   );
 }
 
+type OpenDocuments = {
+  kind: 'quote' | 'invoice';
+  recordLabel: string;
+  subtitle: string;
+  documents: EvidenceItem[];
+};
+
+/**
+ * Documents on a quote or an invoice, and the mutations that change them.
+ *
+ * Shared by both queues so the two records behave identically. The open
+ * record's files are held locally and updated from each mutation's result, so
+ * the dialog reflects the change immediately; the queue behind it is
+ * invalidated so the row's own copy catches up.
+ */
+function useRecordDocuments() {
+  const client = useQueryClient();
+  const [open, setOpen] = useState<(OpenDocuments & { id: string }) | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  const invalidate = () => client.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
+
+  const attach = useMutation({
+    meta: { showGlobalError: true },
+    mutationFn: ({ id, kind, file, note }: { id: string; kind: 'quote' | 'invoice'; file: File; note?: string }) =>
+      unwrap(
+        kind === 'quote'
+          ? adminMaintenanceService.addQuoteDocument(id, file, note)
+          : adminMaintenanceService.addInvoiceDocument(id, file, note)
+      ),
+    onSuccess: async (created, { kind }) => {
+      setOpen((current) =>
+        current && current.kind === kind
+          ? { ...current, documents: [...current.documents, created] }
+          : current
+      );
+      await invalidate();
+    },
+  });
+
+  const remove = useMutation({
+    meta: { showGlobalError: true },
+    mutationFn: (documentId: string) => {
+      setRemovingId(documentId);
+      return unwrap(adminMaintenanceService.removeDocument(documentId));
+    },
+    onSuccess: async (_result, documentId) => {
+      setOpen((current) =>
+        current
+          ? { ...current, documents: current.documents.filter((d) => d.id !== documentId) }
+          : current
+      );
+      await invalidate();
+    },
+    onSettled: () => setRemovingId(null),
+  });
+
+  return {
+    /** Opens the dialog for a quote or an invoice row. */
+    open: (kind: 'quote' | 'invoice', record: { id: string; label: string; subtitle: string; documents?: EvidenceItem[] }) =>
+      setOpen({
+        kind,
+        id: record.id,
+        recordLabel: record.label,
+        subtitle: record.subtitle,
+        documents: record.documents ?? [],
+      }),
+    dialog: open ? (
+      <MaintenanceDocumentsDialog
+        recordLabel={open.recordLabel}
+        subtitle={open.subtitle}
+        documents={open.documents}
+        canManage
+        isAttaching={attach.isPending}
+        removingId={removingId}
+        onAttach={(file, note) => attach.mutate({ id: open.id, kind: open.kind, file, note })}
+        onRemove={(documentId) => remove.mutate(documentId)}
+        onClose={() => setOpen(null)}
+      />
+    ) : null,
+  };
+}
+
 export function QuotesQueue() {
   const actions = useMaintenanceActions();
+  const documents = useRecordDocuments();
+
   const config: MaintenanceQueueConfig<AdminVendorQuote> = {
     resource: 'quotes',
     eyebrow: 'Vendor Quotes',
@@ -751,9 +838,24 @@ export function QuotesQueue() {
         render: (q) => <Cell primary={date(q.submittedAt)} secondary={q.submittedByName} />,
       },
     ],
-    actions: (quote) =>
-      quote.status === 'SUBMITTED' ? (
-        <div className="flex justify-end gap-1">
+    actions: (quote) => (
+      <div className="flex justify-end gap-1">
+        <Button
+          size="xs"
+          variant="outline"
+          onClick={() =>
+            documents.open('quote', {
+              id: quote.id,
+              label: 'Vendor quote',
+              subtitle: `${quote.issueTitle} · ${quote.vendorName ?? 'No vendor'} · ${naira(quote.amount)}`,
+              documents: quote.documents,
+            })
+          }
+        >
+          Documents{quote.documents?.length ? ` (${quote.documents.length})` : ''}
+        </Button>
+        {quote.status === 'SUBMITTED' ? (
+          <>
           <Button
             size="xs"
             onClick={() =>
@@ -784,19 +886,22 @@ export function QuotesQueue() {
           >
             Reject
           </Button>
-        </div>
-      ) : null,
+          </>
+        ) : null}
+      </div>
+    ),
   };
   return (
     <>
       <MaintenanceQueuePage config={config} />
       {actions.feedback}
+      {documents.dialog}
     </>
   );
 }
-
 export function InvoicesQueue() {
   const actions = useMaintenanceActions();
+  const documents = useRecordDocuments();
   const config: MaintenanceQueueConfig<AdminVendorInvoice> = {
     resource: 'invoices',
     eyebrow: 'Vendor Invoices',
@@ -847,9 +952,24 @@ export function InvoicesQueue() {
         ),
       },
     ],
-    actions: (invoice) =>
-      invoice.status === 'SUBMITTED' ? (
-        <div className="flex justify-end gap-1">
+    actions: (invoice) => (
+      <div className="flex justify-end gap-1">
+        <Button
+          size="xs"
+          variant="outline"
+          onClick={() =>
+            documents.open('invoice', {
+              id: invoice.id,
+              label: 'Vendor invoice',
+              subtitle: `${invoice.issueTitle} · ${invoice.vendorName} · ${naira(invoice.totalAmount)}`,
+              documents: invoice.documents,
+            })
+          }
+        >
+          Documents{invoice.documents?.length ? ` (${invoice.documents.length})` : ''}
+        </Button>
+        {invoice.status === 'SUBMITTED' ? (
+          <>
           <Button
             size="xs"
             onClick={() =>
@@ -881,30 +1001,34 @@ export function InvoicesQueue() {
           >
             Reject
           </Button>
-        </div>
-      ) : invoice.status === 'APPROVED' ? (
-        <Button
-          size="xs"
-          variant="danger"
-          onClick={() =>
-            actions.request({
-              title: 'Void approved invoice?',
-              description: 'Void this finance-ready record with an explicit reason.',
-              label: 'Void',
-              reasonRequired: true,
-              run: (reason) =>
-                unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'VOID', reason)),
-            })
-          }
-        >
-          Void
-        </Button>
-      ) : null,
+          </>
+        ) : null}
+        {invoice.status === 'APPROVED' ? (
+          <Button
+            size="xs"
+            variant="danger"
+            onClick={() =>
+              actions.request({
+                title: 'Void approved invoice?',
+                description: 'Void this finance-ready record with an explicit reason.',
+                label: 'Void',
+                reasonRequired: true,
+                run: (reason) =>
+                  unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'VOID', reason)),
+              })
+            }
+          >
+            Void
+          </Button>
+        ) : null}
+      </div>
+    ),
   };
   return (
     <>
       <MaintenanceQueuePage config={config} />
       {actions.feedback}
+      {documents.dialog}
     </>
   );
 }

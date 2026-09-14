@@ -9,6 +9,7 @@ import type {
   DisputeDetail,
   DisputeMessage,
   DisputeResolveOutcome,
+  EvidenceItem,
   FraudAlert,
   FraudAlertDetail,
   FraudAlertSeverity,
@@ -120,6 +121,21 @@ function normalizeApprovalRow(row: RawApprovalRow): AdminStaffApproval {
     },
   };
 }
+
+/**
+ * Evidence is attached the same way on every case family: multipart, one file,
+ * an optional note. Kept in one place so a new case cannot invent a variant.
+ */
+const postCaseEvidence = (
+  path: string,
+  file: File,
+  note?: string
+): Promise<ApiResponse<EvidenceItem>> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (note?.trim()) formData.append('note', note.trim());
+  return safeCall(() => authFetch<EvidenceItem>(path, { method: 'POST', body: formData }));
+};
 
 export const adminService = {
   // ---- Staff access ----
@@ -389,6 +405,19 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/disputes/${disputeId}`));
   },
 
+  /**
+   * Attach an administrator's own file to a case. The backend owns the file and
+   * serves it back through a short-lived signed URL, so nothing here holds a
+   * link that outlives the case.
+   */
+  async addDisputeEvidence(
+    disputeId: string,
+    file: File,
+    note?: string
+  ): Promise<ApiResponse<EvidenceItem>> {
+    return postCaseEvidence(`/admin/disputes/${disputeId}/evidence`, file, note);
+  },
+
   async startDisputeReview(disputeId: string): Promise<ApiResponse<Dispute>> {
     return safeCall(() =>
       authFetch(`/admin/disputes/${disputeId}/start-review`, { method: 'POST' })
@@ -468,6 +497,18 @@ export const adminService = {
 
   async reopenFraudAlert(id: string): Promise<ApiResponse<FraudAlert>> {
     return safeCall(() => authFetch(`/admin/fraud-alerts/${id}/reopen`, { method: 'POST' }));
+  },
+
+  /**
+   * Attach a file an investigator is working from. An alert's reason is a
+   * claim; this is what lets somebody else check it.
+   */
+  async addFraudEvidence(
+    alertId: string,
+    file: File,
+    note?: string
+  ): Promise<ApiResponse<EvidenceItem>> {
+    return postCaseEvidence(`/admin/fraud-alerts/${alertId}/evidence`, file, note);
   },
 
   // ---- Escrow oversight ----

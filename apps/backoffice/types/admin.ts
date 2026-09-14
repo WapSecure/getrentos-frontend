@@ -167,7 +167,6 @@ export interface Dispute {
   priority: 'low' | 'medium' | 'high';
   createdAt: string;
   description: string;
-  evidence?: string[];
   resolution?: string;
   resolvedAt?: string;
 }
@@ -185,6 +184,36 @@ export interface DisputeParty {
   id: string;
   legalName: string;
   email?: string;
+}
+
+/**
+ * A piece of evidence on a case.
+ *
+ * Shared by every case family that can carry attachments — a dispute is not
+ * allowed to present evidence differently from a fraud alert just because it is
+ * a dispute.
+ *
+ * `STORED` files were uploaded to us, so we can show the actual content through
+ * a short-lived signed URL. `EXTERNAL` entries are links recorded before uploads
+ * existed — we never received those files, so the UI must label them as someone
+ * else's word rather than present them as evidence we hold.
+ */
+export interface EvidenceItem {
+  id: string;
+  kind: 'STORED' | 'EXTERNAL';
+  name: string;
+  mimeType: string | null;
+  url: string;
+  /** Where an external link actually points, so it can be judged before opening. */
+  host?: string | null;
+  sizeBytes?: number | null;
+  source: 'PARTY' | 'ADMIN';
+  /** Absent for legacy links: the old field never recorded who sent which one. */
+  uploadedBy?: DisputeParty | null;
+  note?: string | null;
+  uploadedAt: string;
+  /** How long `url` stays valid; null when the URL is not ours to expire. */
+  urlExpiresInSeconds?: number | null;
 }
 
 export interface DisputeTimelineEvent {
@@ -215,7 +244,8 @@ export interface DisputeDetail {
   priority: 'low' | 'medium' | 'high';
   status: DisputeStatus;
   description: string;
-  evidence?: string[];
+  /** Uploaded files first, then leftover external links from before uploads. */
+  evidence?: EvidenceItem[];
   createdAt: string;
   updatedAt: string;
   resolution?: string;
@@ -258,6 +288,8 @@ export interface FraudAlertDetail {
   relatedEntityId?: string;
   resolvedBy?: { id: string; legalName: string };
   resolvedAt?: string;
+  /** Files the investigator is working from — a reason is a claim, this is not. */
+  evidence?: EvidenceItem[];
 }
 
 export interface PlatformEscrowTransaction {

@@ -11,6 +11,7 @@ import type {
   AdminWorkOrder,
   PreventivePlanStatus,
 } from '@/types/maintenance';
+import type { EvidenceItem } from '@/types/admin';
 
 export interface MaintenanceQuery {
   search?: string;
@@ -66,6 +67,25 @@ const patch = <T>(path: string, body: unknown): Promise<ApiResponse<T>> =>
   safeCall(() =>
     authFetch<T>(`/admin/maintenance/${path}`, { method: 'PATCH', body: JSON.stringify(body) })
   );
+const del = <T>(path: string): Promise<ApiResponse<T>> =>
+  safeCall(() => authFetch<T>(`/admin/maintenance/${path}`, { method: 'DELETE' }));
+
+/**
+ * Documents are attached the same way on every record: multipart, one file, an
+ * optional note. Kept in one place so a second record cannot invent a variant.
+ */
+const postDocument = (
+  path: string,
+  file: File,
+  note?: string
+): Promise<ApiResponse<EvidenceItem>> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (note?.trim()) formData.append('note', note.trim());
+  return safeCall(() =>
+    authFetch<EvidenceItem>(`/admin/maintenance/${path}`, { method: 'POST', body: formData })
+  );
+};
 
 /** Backoffice maintenance/vendor/SLA oversight (work orders → invoices). */
 export const adminMaintenanceService = {
@@ -110,6 +130,30 @@ export const adminMaintenanceService = {
 
   runSlaScan(): Promise<ApiResponse<{ notified: number }>> {
     return post<{ notified: number }>('sla/scan');
+  },
+
+  /**
+   * Attach the paperwork behind a quote or an invoice. The backend holds the
+   * file and serves it back through a short-lived signed URL, so nothing here
+   * keeps a link that outlives the record.
+   */
+  addQuoteDocument(
+    id: string,
+    file: File,
+    note?: string
+  ): Promise<ApiResponse<EvidenceItem>> {
+    return postDocument(`quotes/${id}/documents`, file, note);
+  },
+  addInvoiceDocument(
+    id: string,
+    file: File,
+    note?: string
+  ): Promise<ApiResponse<EvidenceItem>> {
+    return postDocument(`invoices/${id}/documents`, file, note);
+  },
+  /** Detaches a file attached to the wrong record. */
+  removeDocument(documentId: string): Promise<ApiResponse<{ id: string }>> {
+    return del<{ id: string }>(`documents/${documentId}`);
   },
   assignWorkOrder(
     id: string,

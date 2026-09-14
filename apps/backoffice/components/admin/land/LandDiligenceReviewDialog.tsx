@@ -6,6 +6,7 @@ import {
   CircleAlert,
   FileLock2,
   HelpCircle,
+  Link2,
   MapPin,
   Plus,
   ShieldCheck,
@@ -13,14 +14,28 @@ import {
   UserRound,
   XCircle,
 } from 'lucide-react';
-import { Button, Dialog, DialogContent, DialogTitle, Input, Select, Textarea } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DocumentPreviewButton,
+  DialogTitle,
+  Input,
+  LegacyInput,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
+import type { EvidenceItem } from '@/types/admin';
 import type {
   LandDiligenceChecklistItem,
   LandDiligenceChecklistStatus,
   LandDiligenceDecisionInput,
+  LandDiligenceDocument,
+  LandDiligenceDocumentLinkInput,
   LandDiligenceRecord,
 } from '@/types/land';
+import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import { LandDiligenceStatusBadge } from './LandDiligenceStatusBadge';
 
 type ReviewMode = 'view' | 'approve' | 'reject' | 'clarify';
@@ -44,6 +59,20 @@ interface LandDiligenceReviewDialogProps {
   isApproving?: boolean;
   isRejecting?: boolean;
   isRequestingClarification?: boolean;
+  /**
+   * Every document on the property, with whether the review already cites it.
+   * Fetched by the page: the dialog stays presentational.
+   */
+  documents?: LandDiligenceDocument[];
+  documentsLoading?: boolean;
+  /** Withdraws or records reliance on a document (`verifications.review`). */
+  canManageDocuments?: boolean;
+  onLinkDocument?: (input: LandDiligenceDocumentLinkInput) => void;
+  onUnlinkDocument?: (documentId: string) => void;
+  linkingDocumentId?: string | null;
+  unlinkingDocumentId?: string | null;
+  /** Re-signs a document's URL once the original link has expired. */
+  onResolveDocumentUrl?: (documentId: string) => Promise<string | null | undefined>;
 }
 
 const checklistStatuses: { value: LandDiligenceChecklistStatus; label: string }[] = [
@@ -63,8 +92,12 @@ const createChecklistItem = (): LandDiligenceChecklistItem => ({
 });
 
 /**
- * Review evidence metadata and a structured checklist without ever rendering
- * the document source. Secure evidence access remains in the Documents area.
+ * Review the documents a diligence decision rests on, and the structured
+ * checklist, before deciding.
+ *
+ * The files are the property's own documents opened through short-lived signed
+ * links, so the reviewer works from the same paperwork the owner submitted
+ * rather than a copy held somewhere else.
  */
 export const LandDiligenceReviewDialog = ({
   record,
@@ -76,6 +109,14 @@ export const LandDiligenceReviewDialog = ({
   isApproving = false,
   isRejecting = false,
   isRequestingClarification = false,
+  documents = [],
+  documentsLoading = false,
+  canManageDocuments = false,
+  onLinkDocument,
+  onUnlinkDocument,
+  linkingDocumentId = null,
+  unlinkingDocumentId = null,
+  onResolveDocumentUrl,
 }: LandDiligenceReviewDialogProps) => {
   // The dialog is keyed by record.propertyId in the page, so it remounts on
   // record change and these initializers always reflect the active record.
@@ -86,12 +127,32 @@ export const LandDiligenceReviewDialog = ({
   const [checklist, setChecklist] = useState<LandDiligenceChecklistItem[]>(
     record?.diligence.checklist ?? []
   );
+  /** Which uncited document is mid-citation, and what the reviewer is saying about it. */
+  const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
+  const [pendingChecklistKey, setPendingChecklistKey] = useState('');
+  const [pendingNote, setPendingNote] = useState('');
 
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
   const location = useMemo(
     () => [record?.city, record?.state].filter(Boolean).join(', '),
     [record?.city, record?.state]
   );
+
+  const citedDocuments = useMemo(
+    () => documents.filter((document) => document.link).map(toCitedEvidence),
+    [documents]
+  );
+  const uncitedDocuments = useMemo(() => documents.filter((document) => !document.link), [documents]);
+  /** The reviewer's own working checklist, offered when tying a document to a check. */
+  const checklistOptions = checklist
+    .filter((item) => item.key.trim())
+    .map((item) => ({ value: item.key.trim(), label: item.label.trim() || item.key.trim() }));
+
+  const closePendingCitation = () => {
+    setPendingDocumentId(null);
+    setPendingChecklistKey('');
+    setPendingNote('');
+  };
 
   const cleanChecklist = () =>
     checklist
@@ -206,15 +267,151 @@ export const LandDiligenceReviewDialog = ({
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        Evidence is kept private
+                        Documents on this property
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {record.ownershipProofCount} ownership proof
-                        {record.ownershipProofCount === 1 ? '' : 's'} on file. This queue only
-                        displays verified metadata; use the secured Documents workspace for
-                        authorised evidence access.
+                        {record.ownershipProofCount === 1 ? '' : 's'} on file. A decision should
+                        rest on these documents, opened through short-lived links.
                       </p>
                     </div>
+                  </div>
+
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                        Cited by this review
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Naming the document behind a check is what makes the verdict auditable
+                        later.
+                      </p>
+                      {citedDocuments.length === 0 ? (
+                        <p className="mt-2 rounded-xl bg-secondary/50 px-3 py-2.5 text-xs text-muted-foreground">
+                          No document has been cited yet. A citation is what makes this verdict
+                          auditable later.
+                        </p>
+                      ) : (
+                        <EvidencePanel
+                          evidence={citedDocuments}
+                          heading="Documents"
+                          canAttach={false}
+                          className="mt-2"
+                          onRemove={
+                            canManageDocuments && onUnlinkDocument
+                              ? (documentId) => onUnlinkDocument(documentId)
+                              : undefined
+                          }
+                          removingId={unlinkingDocumentId}
+                          removeTitle="Stop citing this document"
+                          onResolveUrl={onResolveDocumentUrl}
+                        />
+                      )}
+                    </div>
+
+                    {uncitedDocuments.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                          Other documents on this property
+                        </p>
+                        <ul className="mt-2 space-y-2">
+                          {uncitedDocuments.map((document) => (
+                            <li
+                              key={document.id}
+                              className="rounded-lg border border-border bg-card p-2.5"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-medium text-foreground">
+                                    {document.name}
+                                  </p>
+                                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                    {humanise(document.documentType)}
+                                    {document.uploadedBy?.legalName &&
+                                      ` · ${document.uploadedBy.legalName}`}
+                                    {` · ${formatDate(document.uploadedAt)}`}
+                                  </p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-2">
+                                  <DocumentPreview document={document} onResolveUrl={onResolveDocumentUrl} />
+                                  {canManageDocuments && onLinkDocument && (
+                                    <Button
+                                      variant="outline"
+                                      size="xs"
+                                      onClick={() =>
+                                        setPendingDocumentId(
+                                          pendingDocumentId === document.id ? null : document.id
+                                        )
+                                      }
+                                      disabled={Boolean(linkingDocumentId)}
+                                      icon={<Link2 className="h-3.5 w-3.5" />}
+                                    >
+                                      Cite
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {pendingDocumentId === document.id && onLinkDocument && (
+                                <div className="mt-2.5 grid gap-2 rounded-lg bg-secondary/45 p-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                                  <Select
+                                    value={pendingChecklistKey}
+                                    onValueChange={setPendingChecklistKey}
+                                    ariaLabel="Check this document answers"
+                                    options={[
+                                      { value: '', label: 'Not tied to a check' },
+                                      ...checklistOptions,
+                                    ]}
+                                  />
+                                  <LegacyInput
+                                    type="text"
+                                    value={pendingNote}
+                                    onChange={(event) => setPendingNote(event.target.value)}
+                                    placeholder="Why this document (optional)"
+                                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                  />
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="xs"
+                                      onClick={closePendingCitation}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      variant="primary"
+                                      size="xs"
+                                      isLoading={linkingDocumentId === document.id}
+                                      disabled={Boolean(linkingDocumentId)}
+                                      onClick={() => {
+                                        onLinkDocument({
+                                          documentId: document.id,
+                                          checklistKey: pendingChecklistKey || undefined,
+                                          note: pendingNote.trim() || undefined,
+                                        });
+                                        closePendingCitation();
+                                      }}
+                                    >
+                                      Cite document
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {documentsLoading && (
+                      <p className="text-xs text-muted-foreground">Loading documents…</p>
+                    )}
+                    {!documentsLoading && documents.length === 0 && (
+                      <p className="rounded-xl bg-secondary/50 px-3 py-2.5 text-xs text-muted-foreground">
+                        This property has no documents yet. Ask the owner for the title, survey
+                        plan, or ownership proof before deciding.
+                      </p>
+                    )}
                   </div>
                 </section>
 
@@ -378,6 +575,44 @@ const Metadata = ({ label, value }: { label: string; value: string }) => (
     <p className="text-xs font-medium text-muted-foreground">{label}</p>
     <p className="mt-0.5 text-sm text-foreground">{value}</p>
   </div>
+);
+
+/** `SURVEY_PLAN` reads as "Survey plan" wherever a document type is shown. */
+const humanise = (value: string) =>
+  value.replaceAll('_', ' ').toLowerCase().replace(/^\w/, (character) => character.toUpperCase());
+
+/**
+ * A cited document, as the shared evidence panel expects it.
+ *
+ * The panel carries the file's own provenance, so who cited it and against
+ * which check is recorded in the note — that is what a later reviewer needs to
+ * see, and it keeps one renderer for evidence across every case family.
+ */
+const toCitedEvidence = (document: LandDiligenceDocument): EvidenceItem => {
+  const link = document.link;
+  const citation = [
+    link && `Cited by ${link.linkedByName} on ${formatDate(link.linkedAt)}`,
+    link?.checklistKey ? `check: ${link.checklistKey}` : null,
+    link?.note?.trim(),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return { ...document, note: citation || undefined };
+};
+
+const DocumentPreview = ({
+  document,
+  onResolveUrl,
+}: {
+  document: LandDiligenceDocument;
+  onResolveUrl?: (documentId: string) => Promise<string | null | undefined>;
+}) => (
+  <DocumentPreviewButton
+    file={{ url: document.url, name: document.name, mimeType: document.mimeType ?? undefined }}
+    label="Preview"
+    resolveUrl={onResolveUrl ? () => onResolveUrl(document.id) : undefined}
+  />
 );
 
 interface ChecklistEditorProps {

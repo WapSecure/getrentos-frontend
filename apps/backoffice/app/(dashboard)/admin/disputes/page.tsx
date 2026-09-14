@@ -13,6 +13,8 @@ import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import { useAdminUser } from '../layout';
 import type {
   DisputeCategory,
   DisputeMessage,
@@ -27,6 +29,8 @@ const PAGE_SIZE = 12;
 
 export default function AdminDisputesPage() {
   const queryClient = useQueryClient();
+  const adminUser = useAdminUser();
+  const canAttachEvidence = hasAdminPermission(adminUser?.roles, 'disputes.resolve');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -157,6 +161,33 @@ export default function AdminDisputesPage() {
   const handleReopen = (id: string) => reopenMutation.mutate(id);
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
   const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
+
+  const attachEvidenceMutation = useMutation({
+    meta: { showGlobalError: true },
+    mutationFn: ({ id, file, note }: { id: string; file: File; note?: string }) =>
+      unwrap(adminService.addDisputeEvidence(id, file, note)),
+    onSuccess: (_created, { id }) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.disputeDetail(id) });
+      invalidateDisputes();
+      // The new file lands in the audit log with everything else on the case.
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit-log'] });
+    },
+  });
+  const handleAttachEvidence = (id: string, file: File, note?: string) =>
+    attachEvidenceMutation.mutate({ id, file, note });
+
+  /**
+   * Signed evidence links expire, so a preview that sits open past the deadline
+   * asks for a fresh one rather than failing.
+   */
+  const handleResolveEvidenceUrl = async (evidenceId: string) => {
+    if (!activeDisputeId) return null;
+    const fresh = await unwrap(adminService.getDisputeDetail(activeDisputeId));
+    const match = fresh.evidence?.find((entry) => entry.id === evidenceId);
+    if (!match || match.kind !== 'STORED') return null;
+    queryClient.setQueryData(adminKeys.disputeDetail(activeDisputeId), fresh);
+    return match.url;
+  };
 
   const { data: openDisputes, isError: openCountError } = useQuery({
     queryKey: ['admin', 'disputes', 'count', 'open'],
@@ -291,11 +322,15 @@ export default function AdminDisputesPage() {
         onEscalate={handleEscalate}
         onResolve={handleResolve}
         onSendMessage={handleSendMessage}
+        onAttachEvidence={handleAttachEvidence}
+        onResolveEvidenceUrl={handleResolveEvidenceUrl}
+        canAttachEvidence={canAttachEvidence}
         isResolving={resolveMutation.isPending}
         isReviewing={reviewMutation.isPending}
         isReopening={reopenMutation.isPending}
         isEscalating={escalateMutation.isPending}
         isSendingMessage={sendMessageMutation.isPending}
+        isAttachingEvidence={attachEvidenceMutation.isPending}
       />
     </>
   );

@@ -18,6 +18,7 @@ import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminLandService } from '@/services/adminLandService';
 import type {
   LandDiligenceDecisionInput,
+  LandDiligenceDocumentLinkInput,
   LandDiligenceRecord,
   LandDiligenceStatus,
 } from '@/types/land';
@@ -43,6 +44,7 @@ export default function AdminLandDiligencePage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canApprove = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canReviewDocuments = hasAdminPermission(user?.roles, 'verifications.review');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -76,6 +78,17 @@ export default function AdminLandDiligencePage() {
   });
   const records = data?.items ?? [];
   const total = data?.total ?? 0;
+
+  /**
+   * Documents live on the detail endpoint, not the queue: the list stays a list
+   * of metadata, and only the case actually open pulls file links down.
+   */
+  const detailQuery = useQuery({
+    queryKey: [...diligenceQueryRoot, 'detail', activeRecord?.propertyId],
+    queryFn: () => unwrap(adminLandService.getDiligenceDetail(activeRecord!.propertyId)),
+    enabled: Boolean(activeRecord),
+  });
+  const documents = detailQuery.data?.documents ?? [];
 
   const notify = (message: string, variant: ToastVariant) => setToast({ message, variant });
   const invalidate = () => queryClient.invalidateQueries({ queryKey: diligenceQueryRoot });
@@ -147,10 +160,45 @@ export default function AdminLandDiligencePage() {
       ),
   });
 
-  const errorMessage =
-    error instanceof Error ? error.message : 'Unable to load the diligence queue.';
+  const linkDocumentMutation = useMutation({
+    mutationFn: ({
+      propertyId,
+      input,
+    }: {
+      propertyId: string;
+      input: LandDiligenceDocumentLinkInput;
+    }) => unwrap(adminLandService.linkDiligenceDocument(propertyId, input)),
+    onSuccess: () => {
+      invalidate();
+      notify('Document cited: this review now records the basis for the decision.', 'success');
+    },
+    onError: (mutationError) =>
+      notify(
+        mutationError instanceof Error
+          ? mutationError.message
+          : 'Unable to cite that document for this review.',
+        'error'
+      ),
+  });
 
-  return (
+  const unlinkDocumentMutation = useMutation({
+    mutationFn: ({ propertyId, documentId }: { propertyId: string; documentId: string }) =>
+      unwrap(adminLandService.unlinkDiligenceDocument(propertyId, documentId)),
+    onSuccess: () => {
+      invalidate();
+      notify('Document is no longer cited. The owner’s file has not been removed.', 'success');
+    },
+    onError: (mutationError) =>
+      notify(
+        mutationError instanceof Error
+          ? mutationError.message
+          : 'Unable to stop citing that document.',
+        'error'
+      ),
+  });
+
+  const errorMessage =
+    error instanceof Error ? error.message : 'Unable to load the diligence queue.';  return (
     <>
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
@@ -164,8 +212,9 @@ export default function AdminLandDiligencePage() {
           <div>
             <h1 className="type-title">Land diligence</h1>
             <p className="mt-1 max-w-2xl text-muted-foreground">
-              Review land titles, survey details, and structured checks before a parcel can be
-              verified for sale. Evidence remains protected in the secure document workflow.
+              Review land titles, survey details, and the documents behind them before a parcel
+              can be verified for sale. Files open through short-lived links, and each decision
+              records the document it rests on.
             </p>
           </div>
         </div>
@@ -285,6 +334,23 @@ export default function AdminLandDiligencePage() {
         isApproving={approveMutation.isPending}
         isRejecting={rejectMutation.isPending}
         isRequestingClarification={clarificationMutation.isPending}
+        documents={documents}
+        documentsLoading={detailQuery.isLoading}
+        canManageDocuments={canReviewDocuments}
+        onLinkDocument={(input) =>
+          activeRecord &&
+          linkDocumentMutation.mutate({ propertyId: activeRecord.propertyId, input })
+        }
+        onUnlinkDocument={(documentId) =>
+          activeRecord &&
+          unlinkDocumentMutation.mutate({ propertyId: activeRecord.propertyId, documentId })
+        }
+        linkingDocumentId={linkDocumentMutation.variables?.input.documentId ?? null}
+        unlinkingDocumentId={unlinkDocumentMutation.variables?.documentId ?? null}
+        onResolveDocumentUrl={async (documentId) => {
+          const refreshed = await detailQuery.refetch();
+          return refreshed.data?.documents.find((document) => document.id === documentId)?.url ?? null;
+        }}
       />
     </>
   );
