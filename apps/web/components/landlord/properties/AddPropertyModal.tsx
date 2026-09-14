@@ -495,10 +495,19 @@ const UploadField = ({
 };
 
 const MediaPreview = ({ file }: { file: File }) => {
-  const [url] = useState(() => URL.createObjectURL(file));
+  // Created inside the effect, not a useState initialiser: under React
+  // StrictMode the effect runs, is cleaned up (revoking the URL), then runs
+  // again — an initialiser-created URL stays revoked and the preview renders
+  // as a broken image in dev.
+  const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
-    return () => URL.revokeObjectURL(url);
-  }, [url]);
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  if (!url) return null;
+
   return file.type.startsWith('video/') ? (
     <video
       className="mt-2 max-h-44 w-full rounded-lg bg-black object-contain"
