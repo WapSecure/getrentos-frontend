@@ -45,7 +45,7 @@ export default function LandlordListingsPage() {
       const {
         unitId,
         listingTitle,
-        monthlyRent,
+        askingRent,
         rentPeriod,
         allowsMonthlyPayment,
         securityDeposit,
@@ -59,7 +59,7 @@ export default function LandlordListingsPage() {
         landlordService.publishListing({
           unitId,
           listingTitle,
-          monthlyRent,
+          askingRent,
           rentPeriod,
           allowsMonthlyPayment,
           securityDeposit,

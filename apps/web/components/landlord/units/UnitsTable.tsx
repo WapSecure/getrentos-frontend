@@ -103,8 +103,8 @@ export const UnitsTable = ({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
-                    {/* Rent lives on the listing (asking) and the lease (agreed);
-                        Unit.monthlyRent is a legacy column that stays 0. */}
+                    {/* The agreed rent once let, otherwise the asking rent the
+                        advert publishes. */}
                     {unit.leaseRent !== undefined || unit.askingRent !== undefined
                       ? formatCurrency((unit.leaseRent ?? unit.askingRent)!, {
                           compact: true,

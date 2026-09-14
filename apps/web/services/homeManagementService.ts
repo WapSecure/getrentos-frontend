@@ -78,7 +78,8 @@ export type CreateHomeManagementUnitInput = {
   unitName: string;
   bedrooms?: number;
   bathrooms?: number;
-  monthlyRent?: number;
+  askingRent?: number;
+  askingRentPeriod?: 'year' | 'month';
 };
 
 export type HomeAsset = {

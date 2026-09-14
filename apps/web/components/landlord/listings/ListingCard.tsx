@@ -97,7 +97,7 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
         </p>
 
         <p className="text-lg font-bold text-primary mt-3">
-          {formatCurrency(listing.monthlyRent, { compact: true })}
+          {formatCurrency(listing.askingRent, { compact: true })}
           <span className="text-xs text-gray-400 font-normal">
             {listing.rentPeriod === 'month' ? '/mo' : '/yr'}
           </span>

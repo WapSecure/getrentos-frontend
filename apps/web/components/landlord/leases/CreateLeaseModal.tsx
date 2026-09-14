@@ -41,9 +41,9 @@ export const CreateLeaseModal = ({
   const handleUnitChange = (id: string) => {
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
-    // The asking rent from the listing, not the legacy Unit.monthlyRent column
-    // (which is 0 for units priced through a listing).
-    if (unit && !rentAmount) setRentAmount(String(unit.askingRent ?? unit.monthlyRent));
+    // The unit's asking rent: the price the landlord set and the advert
+    // publishes, so the lease starts from the same figure.
+    if (unit && !rentAmount) setRentAmount(String(unit.askingRent ?? ''));
     // An approved applicant is the tenant: prefill rather than make the
     // landlord retype a name we already hold.
     if (unit?.approvedApplicant) setTenantName(unit.approvedApplicant.name);

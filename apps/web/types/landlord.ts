@@ -43,7 +43,8 @@ export interface Property {
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
-  monthlyRevenue: number;
+  /** Contracted rent per year across let units, normalised to a year. */
+  annualRentRoll: number;
   createdAt: string;
   archived?: boolean;
 }
@@ -80,9 +81,10 @@ export interface Unit {
   unitName: string;
   bedrooms: number;
   bathrooms: number;
-  /** Legacy column; rent is advertised on the listing and fixed by the lease. */
-  monthlyRent: number;
-  /** What the unit's listing asks for, when it has one. */
+  /**
+   * This unit's asking rent and its cadence — annual unless stated. The advert
+   * publishes a snapshot of it; the lease fixes what is charged.
+   */
   askingRent?: number;
   askingRentPeriod?: 'month' | 'year';
   /** What the signed lease charges, when the unit is let. */
@@ -107,9 +109,9 @@ export interface Listing {
   propertyName: string;
   unitName: string;
   listingTitle: string;
-  /** Rent amount for whichever cadence `rentPeriod` specifies. Field name kept as `monthlyRent` for API compatibility. */
-  monthlyRent: number;
-  /** Billing cadence for `monthlyRent`. Yearly upfront is the Nigerian market default. */
+  /** The advert's asking rent, in `rentPeriod`. */
+  askingRent: number;
+  /** Cadence of `askingRent`. Yearly upfront is the Nigerian market default. */
   rentPeriod: RentPeriod;
   /** Whether the landlord will accept the tenant repaying in monthly installments via GetRentos Flex, instead of the full amount upfront. Only meaningful when rentPeriod is 'year'. */
   allowsMonthlyPayment: boolean;

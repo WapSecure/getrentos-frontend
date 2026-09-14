@@ -85,11 +85,24 @@ export default function AdminRentalUnitsPage() {
     if (selected.length === 0) return;
     if (editor.kind === 'pricing') {
       const amount = Number(editor.value);
-      if (!Number.isInteger(amount) || amount < 1) return setToast({ message: 'Enter a valid monthly rent.', variant: 'error' });
+      if (!Number.isInteger(amount) || amount < 1) {
+        return setToast({ message: 'Enter a valid rent.', variant: 'error' });
+      }
       mutation.mutate(() => adminRentalService.bulkUnitPricing(selected, amount), {
         onSuccess: (value) => {
-          const result = value as { requestedCount: number; updatedCount: number };
-          setToast({ message: `${result.updatedCount} unit price${result.updatedCount === 1 ? '' : 's'} updated.`, variant: 'success' });
+          const result = value as {
+            requestedCount: number;
+            updatedCount: number;
+            listingsUpdated: number;
+          };
+          const listings =
+            result.listingsUpdated > 0
+              ? ` ${result.listingsUpdated} live advert${result.listingsUpdated === 1 ? '' : 's'} re-priced too.`
+              : '';
+          setToast({
+            message: `${result.updatedCount} unit price${result.updatedCount === 1 ? '' : 's'} updated.${listings}`,
+            variant: 'success',
+          });
         },
       });
       return;
@@ -153,7 +166,11 @@ export default function AdminRentalUnitsPage() {
                   <td className="p-3"><p className="font-medium">{unit.unitName}</p><p className="text-xs text-muted-foreground">{unit.propertyTitle}</p></td>
                   <td className="p-3">{unit.ownerName}</td>
                   <td className="p-3"><p>{unit.tenantName ?? 'Unassigned'}</p>{unit.tenantName && <p className="text-xs text-muted-foreground">{unit.tenantId ? 'Registered renter' : 'Manual record'}</p>}<Badge variant={unit.occupancyStatus === 'VACANT' ? 'neutral' : unit.occupancyStatus === 'OCCUPIED' ? 'success' : 'warning'}>{unit.occupancyStatus.replaceAll('_', ' ')}</Badge></td>
-                  <td className="p-3">₦{unit.monthlyRent.toLocaleString()}</td>
+                  <td className="p-3">
+                    {unit.askingRent !== null
+                      ? `₦${unit.askingRent.toLocaleString()}${unit.askingRentPeriod === 'year' ? '/yr' : '/mo'}`
+                      : '—'}
+                  </td>
                   <td className="p-3"><p>{unit.activeLease ? 'Signed lease' : 'No signed lease'}</p><p className="text-xs text-muted-foreground">{unit.pendingChargeCount} pending charge(s)</p></td>
                   <td className="p-3"><div className="flex justify-end gap-2">
                     {unit.occupancyStatus === 'VACANT' ? <Button size="sm" variant="outline" onClick={() => setEditor({ kind: 'assign', unit, mode: 'registered', search: '', candidate: null, value: '' })}>Assign tenant</Button> : <Button size="sm" variant="outline" disabled={unit.activeLease} title={unit.activeLease ? 'End or expire the signed lease before removing this tenant' : undefined} onClick={() => setRemoveUnit(unit)}>Remove tenant</Button>}
@@ -204,7 +221,7 @@ function OperationDialog({ editor, selectedCount, pending, onChange, onClose, on
             <p className="text-xs text-muted-foreground">Only active renter accounts without another occupied unit or signed lease appear.</p>
           </> : <><LegacyInput autoFocus aria-label="Manual tenant full name" placeholder="Tenant full name" value={editor.value} disabled={pending} onChange={(event) => onChange({ ...editor, value: event.target.value })} /><p className="text-xs text-muted-foreground">This does not link an account. Use it only when the tenant is not registered.</p></>}
         </>}
-        {editor.kind === 'pricing' && <LegacyInput autoFocus type="number" min="1" aria-label="New monthly rent" placeholder="New monthly rent (NGN)" value={editor.value} onChange={(event) => onChange({ ...editor, value: event.target.value })} />}
+        {editor.kind === 'pricing' && <LegacyInput autoFocus type="number" min="1" aria-label="New rent" placeholder="New rent (NGN, per year)" value={editor.value} onChange={(event) => onChange({ ...editor, value: event.target.value })} />}
         {editor.kind === 'charge' && <>
           <LegacyInput autoFocus type="number" min="1" aria-label="Charge amount" placeholder="Charge amount (NGN)" value={editor.amount} onChange={(event) => onChange({ ...editor, amount: event.target.value })} />
           <LegacyInput type="date" aria-label="Charge due date" value={editor.dueDate} onChange={(event) => onChange({ ...editor, dueDate: event.target.value })} />

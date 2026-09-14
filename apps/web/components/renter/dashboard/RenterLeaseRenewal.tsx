@@ -8,6 +8,7 @@ import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
+import { leaseRentSuffix } from '@/lib/leaseTerm';
 import { renterKeys } from '@/lib/queryKeys';
 
 const formatDate = (dateString: string) => {
@@ -84,7 +85,7 @@ export const RenterLeaseRenewal = () => {
               {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
                 lease.rentAmount
               )}
-              /mo
+              {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
             </span>
           </div>
           {renewalOffer && (

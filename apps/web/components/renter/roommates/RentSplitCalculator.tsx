@@ -83,7 +83,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
       <div className="p-4 space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
-            Total Monthly Rent
+            Total rent (₦)
           </label>
           <CurrencyInput
             prefix="₦"

@@ -19,6 +19,7 @@ import {
   type ToastVariant,
 } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
+import { rentSuffix } from '@/lib/leaseTerm';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import {
@@ -267,7 +268,11 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
                         </div>
                       </div>
                       <span className="text-xs text-muted-foreground shrink-0">
-                        {formatCurrency(unit.monthlyRent, { compact: true })}/mo
+                        {/* The rent that will be charged is the agreed one; the
+                            asking rent only stands in before a lease exists. */}
+                        {unit.leaseRent !== undefined || unit.askingRent !== undefined
+                          ? `${formatCurrency((unit.leaseRent ?? unit.askingRent)!, { compact: true })}${rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}`
+                          : 'Not priced yet'}
                       </span>
                     </label>
                   ))}

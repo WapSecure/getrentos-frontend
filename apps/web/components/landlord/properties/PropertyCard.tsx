@@ -173,7 +173,7 @@ export const PropertyCard = ({
             {property.occupiedUnits}/{property.totalUnits} occupied
           </div>
           <p className="text-sm font-semibold text-primary">
-            {formatCurrency(property.monthlyRevenue, { compact: true })}/mo
+            {formatCurrency(property.annualRentRoll, { compact: true })}/yr
           </p>
         </div>
 

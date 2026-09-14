@@ -123,9 +123,16 @@ function LandlordUnitsPageContent() {
 
   const addUnitMutation = useMutation({
     mutationFn: (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => {
-      const { propertyId, unitName, bedrooms, bathrooms, monthlyRent } = data;
+      const { propertyId, unitName, bedrooms, bathrooms, askingRent, askingRentPeriod } = data;
       return unwrap(
-        landlordService.createUnit({ propertyId, unitName, bedrooms, bathrooms, monthlyRent })
+        landlordService.createUnit({
+          propertyId,
+          unitName,
+          bedrooms,
+          bathrooms,
+          askingRent,
+          askingRentPeriod,
+        })
       );
     },
     onSuccess: () => {

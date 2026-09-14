@@ -29,7 +29,7 @@ export const CreateListingModal = ({
 }: CreateListingModalProps) => {
   const [unitId, setUnitId] = useState('');
   const [listingTitle, setListingTitle] = useState('');
-  const [monthlyRent, setMonthlyRent] = useState('');
+  const [askingRent, setAskingRent] = useState('');
   const [rentPeriod, setRentPeriod] = useState<RentPeriod>('year');
   const [allowsMonthlyPayment, setAllowsMonthlyPayment] = useState(false);
   const [securityDeposit, setSecurityDeposit] = useState('');
@@ -47,14 +47,19 @@ export const CreateListingModal = ({
   const handleUnitChange = (id: string) => {
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
-    if (unit && !monthlyRent) setMonthlyRent(String(unit.monthlyRent));
+    // The unit already carries its asking rent, so the advert starts from it
+    // rather than asking the landlord to type the same figure again.
+    if (unit && !askingRent && unit.askingRent !== undefined) {
+      setAskingRent(String(unit.askingRent));
+    }
+    if (unit?.askingRentPeriod) setRentPeriod(unit.askingRentPeriod);
     if (unit && !listingTitle) setListingTitle(`${unit.propertyName} — ${unit.unitName}`);
   };
 
   const reset = () => {
     setUnitId('');
     setListingTitle('');
-    setMonthlyRent('');
+    setAskingRent('');
     setRentPeriod('year');
     setAllowsMonthlyPayment(false);
     setSecurityDeposit('');
@@ -77,7 +82,7 @@ export const CreateListingModal = ({
   };
 
   const isValid =
-    selectedUnit && listingTitle.trim() && Number(monthlyRent) > 0 && availabilityDate;
+    selectedUnit && listingTitle.trim() && Number(askingRent) > 0 && availabilityDate;
 
   const handlePublish = () => {
     if (!selectedUnit || !isValid) return;
@@ -87,7 +92,7 @@ export const CreateListingModal = ({
       propertyName: selectedUnit.propertyName,
       unitName: selectedUnit.unitName,
       listingTitle: listingTitle.trim(),
-      monthlyRent: Number(monthlyRent),
+      askingRent: Number(askingRent),
       rentPeriod,
       allowsMonthlyPayment: rentPeriod === 'year' ? allowsMonthlyPayment : false,
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
@@ -189,8 +194,8 @@ export const CreateListingModal = ({
                       </label>
                       <CurrencyInput
                         prefix="₦"
-                        value={monthlyRent}
-                        onValueChange={(v) => setMonthlyRent(v === 0 ? '' : String(v))}
+                        value={askingRent}
+                        onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>

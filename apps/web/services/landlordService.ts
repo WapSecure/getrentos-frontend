@@ -177,10 +177,15 @@ export interface LandlordAutomationSettings {
 
 export interface LandlordDashboardStats {
   totalProperties: number;
+  /** Units with an executed tenancy. */
   occupiedUnits: number;
+  /** Units off the market but not yet let: awaiting signature or payment. */
+  reservedUnits: number;
   vacantUnits: number;
-  monthlyRevenue: number;
+  /** Contracted rent per year across let units, normalised to a year. */
+  annualRentRoll: number;
   outstandingPayments: number;
+  outstandingAmount: number;
   activeMaintenanceRequests: number;
 }
 
@@ -236,7 +241,7 @@ export const landlordService = {
       Property,
       | 'id'
       | 'occupiedUnits'
-      | 'monthlyRevenue'
+      | 'annualRentRoll'
       | 'createdAt'
       | 'coverImage'
       | 'verificationStatus'
@@ -322,12 +327,13 @@ export const landlordService = {
 
   async bulkUpdateUnitPricing(
     unitIds: string[],
-    monthlyRent: number
-  ): Promise<ApiResponse<{ updated: number }>> {
+    askingRent: number,
+    askingRentPeriod: 'year' | 'month' = 'year'
+  ): Promise<ApiResponse<{ updated: number; listingsUpdated: number }>> {
     return safeCall(() =>
       authFetch('/landlord/units/bulk-price', {
         method: 'PATCH',
-        body: JSON.stringify({ unitIds, monthlyRent }),
+        body: JSON.stringify({ unitIds, askingRent, askingRentPeriod }),
       })
     );
   },
@@ -346,7 +352,7 @@ export const landlordService = {
       Listing,
       | 'unitId'
       | 'listingTitle'
-      | 'monthlyRent'
+      | 'askingRent'
       | 'rentPeriod'
       | 'allowsMonthlyPayment'
       | 'securityDeposit'

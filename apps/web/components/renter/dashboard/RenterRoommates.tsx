@@ -131,7 +131,7 @@ export const RenterRoommates = () => {
           {/* Rent Split Summary */}
           <div className="mt-4 p-3 rounded-lg bg-accent border border-primary/20">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-foreground">Monthly Rent Split</span>
+              <span className="text-sm font-medium text-foreground">Rent Split</span>
               <span className="text-sm font-medium text-foreground">{totalShare}% allocated</span>
             </div>
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">

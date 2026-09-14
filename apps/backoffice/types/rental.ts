@@ -31,7 +31,9 @@ export interface AdminRentalUnit {
   ownerId: string;
   ownerName: string;
   unitName: string;
-  monthlyRent: number;
+  /** The unit's asking rent and its cadence — annual unless stated. */
+  askingRent: number | null;
+  askingRentPeriod: 'year' | 'month';
   occupancyStatus: UnitOccupancyStatus;
   tenantId: string | null;
   tenantName: string | null;
@@ -86,7 +88,9 @@ export interface AdminRentalApplication {
   status: RentalApplicationStatus;
   verificationStatus: string;
   trustScore: number;
-  unitMonthlyRent: number | null;
+  /** The unit applied for, priced as the unit is advertised. */
+  unitAskingRent: number | null;
+  unitAskingRentPeriod: 'year' | 'month' | null;
   noteCount: number;
   createdAt: string;
 }

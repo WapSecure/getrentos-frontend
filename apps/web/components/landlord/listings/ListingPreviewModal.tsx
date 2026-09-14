@@ -117,7 +117,7 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
         </p>
 
         <p className="text-2xl font-bold text-primary mt-3">
-          {formatCurrency(listing.monthlyRent, { compact: true })}
+          {formatCurrency(listing.askingRent, { compact: true })}
           <span className="text-sm text-muted-foreground font-normal">
             {listing.rentPeriod === 'month' ? '/mo' : '/yr'}
           </span>

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Building2, DoorOpen, DoorClosed, Banknote, AlertTriangle, Wrench } from 'lucide-react';
+import { AlertTriangle, Banknote, Building2, Clock, DoorClosed, DoorOpen, Wrench } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 
 interface StatCardProps {
@@ -20,6 +20,10 @@ const colorClasses = {
   orange: {
     bg: 'bg-orange-50 dark:bg-orange-950/20',
     icon: 'text-orange-600 dark:text-orange-400',
+  },
+  amber: {
+    bg: 'bg-amber-50 dark:bg-amber-950/20',
+    icon: 'text-amber-600 dark:text-amber-400',
   },
   emerald: {
     bg: 'bg-emerald-50 dark:bg-emerald-950/20',
@@ -80,18 +84,22 @@ const StatCard = ({
 interface LandlordStatsCardsProps {
   totalProperties: number;
   occupiedUnits: number;
+  reservedUnits: number;
   vacantUnits: number;
-  monthlyRevenue: number;
+  annualRentRoll: number;
   outstandingPayments: number;
+  outstandingAmount: number;
   activeMaintenanceRequests: number;
 }
 
 export const LandlordStatsCards = ({
   totalProperties,
   occupiedUnits,
+  reservedUnits,
   vacantUnits,
-  monthlyRevenue,
+  annualRentRoll,
   outstandingPayments,
+  outstandingAmount,
   activeMaintenanceRequests,
 }: LandlordStatsCardsProps) => {
   const stats = [
@@ -107,9 +115,19 @@ export const LandlordStatsCards = ({
       icon: DoorOpen,
       label: 'Occupied Units',
       value: occupiedUnits,
-      subtitle: 'Currently rented',
+      subtitle: 'Signed and let',
       color: 'green',
       delay: 0.05,
+    },
+    {
+      icon: Clock,
+      label: 'Reserved Units',
+      value: reservedUnits,
+      // Off the market but not let: a lease is out for signature or the first
+      // payment is still due. Counting these as rented overstated the tenancy.
+      subtitle: 'Awaiting signature or payment',
+      color: 'amber',
+      delay: 0.08,
     },
     {
       icon: DoorClosed,
@@ -121,18 +139,24 @@ export const LandlordStatsCards = ({
     },
     {
       icon: Banknote,
-      label: 'Monthly Revenue',
-      value: monthlyRevenue,
-      subtitle: 'Expected this month',
+      label: 'Annual Rent Roll',
+      // Rent here is contracted and paid by the year. A "monthly revenue"
+      // figure invited the reader to expect twelve payments and understated
+      // the tenancy twelvefold.
+      value: annualRentRoll,
+      subtitle: 'Contracted across let units, per year',
       color: 'emerald',
       delay: 0.15,
       isCurrency: true,
     },
     {
       icon: AlertTriangle,
-      label: 'Outstanding Payments',
-      value: outstandingPayments,
-      subtitle: 'Unpaid rent',
+      label: 'Outstanding Rent',
+      value: outstandingAmount,
+      subtitle:
+        outstandingPayments === 1
+          ? 'Across 1 unpaid charge'
+          : `Across ${outstandingPayments} unpaid charges`,
       color: 'red',
       delay: 0.2,
       isCurrency: true,

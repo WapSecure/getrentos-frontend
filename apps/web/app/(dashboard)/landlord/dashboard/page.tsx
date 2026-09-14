@@ -29,9 +29,11 @@ const LandlordRevenueChart = dynamic(
 const EMPTY_STATS: LandlordDashboardStats = {
   totalProperties: 0,
   occupiedUnits: 0,
+  reservedUnits: 0,
   vacantUnits: 0,
-  monthlyRevenue: 0,
+  annualRentRoll: 0,
   outstandingPayments: 0,
+  outstandingAmount: 0,
   activeMaintenanceRequests: 0,
 };
 
@@ -51,9 +53,11 @@ export default function LandlordDashboardPage() {
   const {
     totalProperties,
     occupiedUnits,
+    reservedUnits,
     vacantUnits,
-    monthlyRevenue,
+    annualRentRoll,
     outstandingPayments,
+    outstandingAmount,
     activeMaintenanceRequests,
   } = stats;
 
@@ -80,9 +84,11 @@ export default function LandlordDashboardPage() {
           <LandlordStatsCards
             totalProperties={totalProperties}
             occupiedUnits={occupiedUnits}
+            reservedUnits={reservedUnits}
             vacantUnits={vacantUnits}
-            monthlyRevenue={monthlyRevenue}
+            annualRentRoll={annualRentRoll}
             outstandingPayments={outstandingPayments}
+            outstandingAmount={outstandingAmount}
             activeMaintenanceRequests={activeMaintenanceRequests}
           />
 

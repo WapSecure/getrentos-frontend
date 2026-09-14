@@ -96,7 +96,7 @@ type UnitForm = {
   unitName: string;
   bedrooms: string;
   bathrooms: string;
-  monthlyRent: string;
+  askingRent: string;
 };
 
 type WorkOrderLifecycleDialog = {
@@ -139,7 +139,7 @@ const initialUnitForm: UnitForm = {
   unitName: '',
   bedrooms: '',
   bathrooms: '',
-  monthlyRent: '',
+  askingRent: '',
 };
 
 const propertyLabel = (property: HomeManagementProperty) =>
@@ -262,7 +262,7 @@ export function HomeManagementWorkOrderQueue({
   const hasValidUnitDetails =
     isOptionalWholeNumber(unitForm.bedrooms) &&
     isOptionalWholeNumber(unitForm.bathrooms) &&
-    isOptionalWholeNumber(unitForm.monthlyRent);
+    isOptionalWholeNumber(unitForm.askingRent);
   const canCreateUnit =
     Boolean(form.propertyId) && Boolean(unitForm.unitName.trim()) && hasValidUnitDetails;
 
@@ -481,7 +481,7 @@ export function HomeManagementWorkOrderQueue({
       unitName: unitForm.unitName.trim(),
       bedrooms: toOptionalWholeNumber(unitForm.bedrooms),
       bathrooms: toOptionalWholeNumber(unitForm.bathrooms),
-      monthlyRent: toOptionalWholeNumber(unitForm.monthlyRent),
+      askingRent: toOptionalWholeNumber(unitForm.askingRent),
     });
   };
 
@@ -1405,11 +1405,11 @@ export function HomeManagementWorkOrderQueue({
 
               <Field
                 className="sm:col-span-2"
-                label="Monthly rent"
+                label="Rent (per year)"
                 htmlFor="home-work-order-unit-rent"
-                hint="Optional. Leave empty if rent is managed elsewhere."
+                hint="Optional. Rent is quoted per year here. Leave empty if it is managed elsewhere."
                 error={
-                  !isOptionalWholeNumber(unitForm.monthlyRent)
+                  !isOptionalWholeNumber(unitForm.askingRent)
                     ? 'Enter a whole amount of zero or more.'
                     : undefined
                 }
@@ -1418,14 +1418,14 @@ export function HomeManagementWorkOrderQueue({
                   id="home-work-order-unit-rent"
                   prefix="₦"
                   min={0}
-                  value={unitForm.monthlyRent}
+                  value={unitForm.askingRent}
                   onValueChange={(v) =>
                     setUnitForm((current) => ({
                       ...current,
-                      monthlyRent: v === 0 ? '' : String(v),
+                      askingRent: v === 0 ? '' : String(v),
                     }))
                   }
-                  placeholder="e.g. 350000"
+                  placeholder="e.g. 2500000"
                 />
               </Field>
             </div>

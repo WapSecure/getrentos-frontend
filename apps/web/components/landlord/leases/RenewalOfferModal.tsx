@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCcw, TriangleAlert } from 'lucide-react';
 import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
+import { leaseRentLabel } from '@/lib/leaseTerm';
 import { landlordService } from '@/services/landlordService';
 import type { Lease, RentIncreaseCheck } from '@/types/landlord';
 
@@ -80,7 +81,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  New Monthly Rent (₦)
+                  New {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)
                 </label>
                 <CurrencyInput
                   prefix="₦"

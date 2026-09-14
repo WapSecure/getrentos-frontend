@@ -19,6 +19,7 @@ import {
   type ToastVariant,
 } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
+import { rentSuffix } from '@/lib/leaseTerm';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -38,7 +39,8 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
   const queryClient = useQueryClient();
   const [propertyId, setPropertyId] = useState('');
   const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
-  const [monthlyRent, setMonthlyRent] = useState('');
+  const [askingRent, setAskingRent] = useState('');
+  const [askingRentPeriod, setAskingRentPeriod] = useState<'year' | 'month'>('year');
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const planGate = usePlanGateModal();
@@ -69,7 +71,8 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
   const reset = () => {
     setPropertyId('');
     setSelectedUnitIds([]);
-    setMonthlyRent('');
+    setAskingRent('');
+    setAskingRentPeriod('year');
     setPage(1);
   };
 
@@ -81,12 +84,23 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
   const bulkPrice = useMutation({
     mutationFn: () =>
       unwrap(
-        landlordService.bulkUpdateUnitPricing(selectedUnitIds, Math.round(Number(monthlyRent)))
+        landlordService.bulkUpdateUnitPricing(
+          selectedUnitIds,
+          Math.round(Number(askingRent)),
+          askingRentPeriod
+        )
       ),
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: landlordKeys.units() });
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.listings() });
+      // Published adverts carry the price the market sees, so say when they moved
+      // too — otherwise the landlord cannot tell what the re-price reached.
+      const listings =
+        result.listingsUpdated > 0
+          ? ` and ${result.listingsUpdated} live advert${result.listingsUpdated === 1 ? '' : 's'}`
+          : '';
       setToast({
-        message: `Updated pricing for ${result.updated} unit${result.updated === 1 ? '' : 's'}.`,
+        message: `Updated pricing for ${result.updated} unit${result.updated === 1 ? '' : 's'}${listings}.`,
         variant: 'success',
       });
       handleClose();
@@ -97,7 +111,7 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
     },
   });
 
-  const rentValue = Number(monthlyRent);
+  const rentValue = Number(askingRent);
   const isValid = selectedUnitIds.length > 0 && rentValue > 0;
 
   const toggleUnit = (unitId: string) => {
@@ -152,19 +166,35 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
                 />
               </Field>
               <Field
-                label="New monthly rent (₦)"
+                label="New rent (₦)"
                 htmlFor="bulk-price-amount"
                 required
                 className="sm:col-span-2"
               >
-                <CurrencyInput
-                  id="bulk-price-amount"
-                  prefix="₦"
-                  min="1"
-                  value={monthlyRent}
-                  onValueChange={(v) => setMonthlyRent(v === 0 ? '' : String(v))}
-                  placeholder="e.g. 200000"
-                />
+                <div className="flex gap-2">
+                  <CurrencyInput
+                    id="bulk-price-amount"
+                    prefix="₦"
+                    min="1"
+                    value={askingRent}
+                    onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
+                    placeholder={askingRentPeriod === 'year' ? 'e.g. 2500000' : 'e.g. 250000'}
+                    className="flex-1"
+                  />
+                  <select
+                    value={askingRentPeriod}
+                    onChange={(e) => setAskingRentPeriod(e.target.value as 'year' | 'month')}
+                    className="px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label="Rent period"
+                  >
+                    <option value="year">per year</option>
+                    <option value="month">per month</option>
+                  </select>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Applied to the selected units and to any live advert for them, so the price the
+                  market sees does not drift from the one you set.
+                </p>
               </Field>
             </div>
 
@@ -214,7 +244,9 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
                         </div>
                       </div>
                       <span className="text-xs text-muted-foreground shrink-0">
-                        Currently {formatCurrency(unit.monthlyRent, { compact: true })}/mo
+                        {unit.askingRent !== undefined
+                          ? `Currently ${formatCurrency(unit.askingRent, { compact: true })}${rentSuffix(unit.askingRentPeriod)}`
+                          : 'Not priced yet'}
                       </span>
                     </label>
                   ))}

@@ -81,8 +81,14 @@ export const adminRentalService = {
   removeUnitTenant(id: string): Promise<ApiResponse<void>> {
     return post<void>(`units/${id}/remove-tenant`);
   },
-  bulkUnitPricing(unitIds: string[], monthlyRent: number): Promise<ApiResponse<{ requestedCount: number; updatedCount: number }>> {
-    return post('units/bulk-pricing', { unitIds, monthlyRent });
+  bulkUnitPricing(
+    unitIds: string[],
+    askingRent: number,
+    askingRentPeriod: 'year' | 'month' = 'year'
+  ): Promise<
+    ApiResponse<{ requestedCount: number; updatedCount: number; listingsUpdated: number }>
+  > {
+    return post('units/bulk-pricing', { unitIds, askingRent, askingRentPeriod });
   },
   bulkUnitCharges(input: { unitIds: string[]; amount: number; dueDate: string; category: string; billingCycle: string }): Promise<ApiResponse<{ requestedCount: number; createdCount: number; skippedUnitIds: string[] }>> {
     return post('units/bulk-charges', input);

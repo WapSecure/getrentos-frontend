@@ -15,8 +15,7 @@ interface AddUnitModalProps {
   onClose: () => void;
   properties: Property[];
   defaultPropertyId?: string;
-  onSave: (unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => void;
-}
+  onSave: (unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => void;}
 
 export const AddUnitModal = ({
   isOpen,
@@ -29,7 +28,8 @@ export const AddUnitModal = ({
   const [unitName, setUnitName] = useState('');
   const [bedrooms, setBedrooms] = useState('1');
   const [bathrooms, setBathrooms] = useState('1');
-  const [monthlyRent, setMonthlyRent] = useState('');
+  const [askingRent, setAskingRent] = useState('');
+  const [askingRentPeriod, setAskingRentPeriod] = useState<'year' | 'month'>('year');
 
   const propertyId = properties.some((p) => p.id === selectedPropertyId)
     ? selectedPropertyId
@@ -40,25 +40,27 @@ export const AddUnitModal = ({
     setUnitName('');
     setBedrooms('1');
     setBathrooms('1');
-    setMonthlyRent('');
+    setAskingRent('');
+    setAskingRentPeriod('year');
     onClose();
   };
 
   const handleSubmit = () => {
     const property = properties.find((p) => p.id === propertyId);
-    if (!property || !unitName.trim() || !monthlyRent) return;
+    if (!property || !unitName.trim()) return;
     onSave({
       propertyId,
       propertyName: property.name,
       unitName: unitName.trim(),
       bedrooms: Number(bedrooms),
       bathrooms: Number(bathrooms),
-      monthlyRent: Number(monthlyRent),
+      askingRent: askingRent ? Number(askingRent) : undefined,
+      askingRentPeriod,
     });
     handleClose();
   };
 
-  const isValid = propertyId && unitName.trim() && Number(monthlyRent) > 0;
+  const isValid = propertyId && unitName.trim();
 
   return (
     <AnimatePresence>
@@ -138,16 +140,31 @@ export const AddUnitModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Monthly Rent (₦) <span className="text-red-500">*</span>
+                  Rent (₦)
                 </label>
-                <CurrencyInput
-                  prefix="₦"
-                  min={0}
-                  value={monthlyRent}
-                  onValueChange={(v) => setMonthlyRent(v === 0 ? '' : String(v))}
-                  placeholder="450000"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div className="flex gap-2">
+                  <CurrencyInput
+                    prefix="₦"
+                    min={0}
+                    value={askingRent}
+                    onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
+                    placeholder={askingRentPeriod === 'year' ? '2500000' : '250000'}
+                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <select
+                    value={askingRentPeriod}
+                    onChange={(e) => setAskingRentPeriod(e.target.value as 'year' | 'month')}
+                    className="px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label="Rent period"
+                  >
+                    <option value="year">per year</option>
+                    <option value="month">per month</option>
+                  </select>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what
+                  the advert will ask for.
+                </p>
               </div>
             </div>
 

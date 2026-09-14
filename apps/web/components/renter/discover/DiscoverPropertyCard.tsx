@@ -178,7 +178,13 @@ export const DiscoverPropertyCard = ({
 
         <div className="flex flex-wrap gap-3 mt-2 text-xs border-t border-gray-100 dark:border-gray-800 pt-2">
           <CommuteCalculator listingId={property.id} propertyLocation={property.location} />
-          <RentVsBuyCalculator propertyPrice={property.price} monthlyRent={property.price / 12} />
+          {/* The calculator compares against a monthly mortgage payment, so the
+              rent is normalised to a month first. Dividing an already-monthly
+              price by 12 understated it twelvefold. */}
+          <RentVsBuyCalculator
+            propertyPrice={property.price}
+            monthlyRent={property.period === 'year' ? property.price / 12 : property.price}
+          />
           <NeighborhoodCompare listingId={property.id} propertyLocation={property.location} />
         </div>
 
