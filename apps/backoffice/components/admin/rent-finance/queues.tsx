@@ -1,9 +1,20 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Coins, Landmark, Receipt, Wallet } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Input,
+  Toast,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { ApiError, unwrap } from '@getrentos/shared';
 import { adminRentFinanceService } from '@/services/adminRentFinanceService';
 import {
@@ -64,6 +75,15 @@ const escrowVariant = (status: RentEscrowStatus): BadgeVariant => {
     PENDING_REVIEW: 'warning',
     RELEASED: 'success',
     FROZEN: 'danger',
+  };
+  return map[status] ?? 'neutral';
+};
+
+const payoutStatusVariant = (status: string): BadgeVariant => {
+  const map: Record<string, BadgeVariant> = {
+    PENDING: 'neutral',
+    PAID: 'success',
+    FAILED: 'danger',
   };
   return map[status] ?? 'neutral';
 };
@@ -377,6 +397,65 @@ export function ArrearsQueue() {
 }
 
 export function StatementsQueue() {
+  const queryClient = useQueryClient();
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'issue' | 'retry';
+    statement: AdminOwnerStatement;
+  } | null>(null);
+  const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
+
+  const executeAction = async () => {
+    if (!pendingAction || processingKey) return;
+    const { type, statement } = pendingAction;
+    const actionKey = `${type}:${statement.id}`;
+    setPendingAction(null);
+    setProcessingKey(actionKey);
+    try {
+      if (type === 'issue') {
+        await unwrap(adminRentFinanceService.issueStatement(statement.id));
+      } else {
+        await unwrap(adminRentFinanceService.retryStatementPayout(statement.id));
+      }
+      setToast({
+        message:
+          type === 'issue'
+            ? `Statement for ${statement.ownerName} was issued.`
+            : `Payout retry submitted for ${statement.ownerName}.`,
+        variant: 'success',
+      });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
+    } catch (error) {
+      setToast({
+        message:
+          error instanceof ApiError
+            ? error.message
+            : 'The finance action could not be completed. Please try again.',
+        variant: 'error',
+      });
+    } finally {
+      setProcessingKey(null);
+    }
+  };
+
+  const actionCopy = pendingAction
+    ? {
+        issue: {
+          title: 'Issue this statement?',
+          description: `${pendingAction.statement.ownerName}'s statement will be issued. A positive net payout will attempt a real transfer to their verified payout account.`,
+          label: 'Issue statement',
+        },
+        retry: {
+          title: 'Retry the failed payout?',
+          description: `A new transfer attempt will be made for ${pendingAction.statement.ownerName}'s statement.`,
+          label: 'Retry payout',
+        },
+      }[pendingAction.type]
+    : null;
+
   const config: RentFinanceQueueConfig<AdminOwnerStatement> = {
     resource: 'statements',
     eyebrow: 'Owner Statements',
@@ -388,6 +467,11 @@ export function StatementsQueue() {
     exportFn: (params) => adminRentFinanceService.exportStatements(params),
     exportFilename: 'owner-statements.csv',
     getRowKey: (s) => s.id,
+    headerActions: (
+      <Button type="button" variant="outline" size="sm" onClick={() => setGenerating(true)}>
+        Generate statement
+      </Button>
+    ),
     columns: [
       {
         key: 'owner',
@@ -417,10 +501,18 @@ export function StatementsQueue() {
         key: 'status',
         header: 'Status',
         render: (s) => (
-          <Pill
-            label={titleCase(s.status)}
-            variant={s.status === 'ISSUED' ? 'success' : 'neutral'}
-          />
+          <div className="flex flex-wrap gap-1">
+            <Pill
+              label={titleCase(s.status)}
+              variant={s.status === 'ISSUED' ? 'success' : 'neutral'}
+            />
+            {s.status === 'ISSUED' && (
+              <Pill
+                label={titleCase(s.payoutStatus)}
+                variant={payoutStatusVariant(s.payoutStatus)}
+              />
+            )}
+          </div>
         ),
       },
       {
@@ -429,11 +521,185 @@ export function StatementsQueue() {
         render: (s) => <span className="text-muted-foreground">{date(s.generatedAt)}</span>,
       },
     ],
+    actions: (s) => (
+      <ActionGroup>
+        {s.status === 'DRAFT' &&
+          btn(
+            'Issue',
+            () => setPendingAction({ type: 'issue', statement: s }),
+            'outline',
+            processingKey === `issue:${s.id}`,
+            processingKey !== null
+          )}
+        {s.status === 'ISSUED' &&
+          s.payoutStatus === 'FAILED' &&
+          btn(
+            'Retry payout',
+            () => setPendingAction({ type: 'retry', statement: s }),
+            'outline',
+            processingKey === `retry:${s.id}`,
+            processingKey !== null
+          )}
+      </ActionGroup>
+    ),
   };
-  return <RentFinanceQueuePage config={config} />;
+  return (
+    <>
+      <RentFinanceQueuePage config={config} />
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => !open && setPendingAction(null)}
+        title={actionCopy?.title ?? 'Confirm finance action'}
+        description={actionCopy?.description ?? ''}
+        confirmLabel={actionCopy?.label ?? 'Confirm'}
+        onConfirm={() => void executeAction()}
+      />
+      {generating && (
+        <GenerateStatementDialog
+          onClose={() => setGenerating(false)}
+          onGenerated={(message) => setToast({ message, variant: 'success' })}
+        />
+      )}
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
+    </>
+  );
+}
+
+function GenerateStatementDialog({
+  onClose,
+  onGenerated,
+}: {
+  onClose: () => void;
+  onGenerated: (message: string) => void;
+}) {
+  const client = useQueryClient();
+  const [ownerId, setOwnerId] = useState('');
+  const [periodStart, setPeriodStart] = useState('');
+  const [periodEnd, setPeriodEnd] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!ownerId.trim()) throw new Error("Enter the owner's user ID.");
+      if (!periodStart || !periodEnd) throw new Error('Choose a period start and end date.');
+      return unwrap(
+        adminRentFinanceService.generateStatement(ownerId.trim(), {
+          periodStart: new Date(periodStart).toISOString(),
+          periodEnd: new Date(periodEnd).toISOString(),
+        })
+      );
+    },
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
+      onGenerated('Statement generated.');
+      onClose();
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogTitle className="font-semibold">Generate owner statement</DialogTitle>
+        <DialogDescription className="mt-1 text-sm text-muted-foreground">
+          Find the owner&apos;s user ID from their case-360 URL or the users register.
+        </DialogDescription>
+        <div className="mt-5 space-y-4">
+          <label className="block space-y-1.5">
+            <span className="text-sm font-medium">Owner user ID</span>
+            <Input value={ownerId} onChange={(e) => setOwnerId(e.target.value)} />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block space-y-1.5">
+              <span className="text-sm font-medium">Period start</span>
+              <Input
+                type="date"
+                value={periodStart}
+                onChange={(e) => setPeriodStart(e.target.value)}
+              />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-sm font-medium">Period end</span>
+              <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+            </label>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
+            Cancel
+          </Button>
+          <Button onClick={() => mutation.mutate()} isLoading={mutation.isPending}>
+            Generate
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function PayoutAccountsQueue() {
+  const queryClient = useQueryClient();
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'block' | 'unblock';
+    account: AdminPayoutAccount;
+  } | null>(null);
+  const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
+
+  const executeAction = async () => {
+    if (!pendingAction || processingKey) return;
+    const { type, account } = pendingAction;
+    const actionKey = `${type}:${account.id}`;
+    setPendingAction(null);
+    setProcessingKey(actionKey);
+    try {
+      if (type === 'block') {
+        await unwrap(adminRentFinanceService.blockPayoutAccount(account.id, reason.trim()));
+      } else {
+        await unwrap(adminRentFinanceService.unblockPayoutAccount(account.id, reason.trim()));
+      }
+      setToast({
+        message:
+          type === 'block'
+            ? `${account.landlordName}'s payout account was blocked.`
+            : `${account.landlordName}'s payout account was restored.`,
+        variant: 'success',
+      });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
+    } catch (error) {
+      setToast({
+        message:
+          error instanceof ApiError
+            ? error.message
+            : 'The finance action could not be completed. Please try again.',
+        variant: 'error',
+      });
+    } finally {
+      setProcessingKey(null);
+    }
+  };
+
+  const actionCopy = pendingAction
+    ? {
+        block: {
+          title: 'Block this payout account?',
+          description: `${pendingAction.account.landlordName} will not receive any statement payouts until this account is unblocked.`,
+          label: 'Block account',
+        },
+        unblock: {
+          title: 'Restore this payout account?',
+          description: `${pendingAction.account.landlordName} will be able to receive statement payouts again.`,
+          label: 'Restore account',
+        },
+      }[pendingAction.type]
+    : null;
+
   const config: RentFinanceQueueConfig<AdminPayoutAccount> = {
     resource: 'payout-accounts',
     eyebrow: 'Payout Accounts',
@@ -479,6 +745,7 @@ export function PayoutAccountsQueue() {
               label={a.complete ? 'Complete' : 'Incomplete'}
               variant={a.complete ? 'success' : 'danger'}
             />
+            {a.blocked && <Pill label="Blocked" variant="danger" />}
           </div>
         ),
       },
@@ -488,11 +755,88 @@ export function PayoutAccountsQueue() {
         render: (a) => <span className="text-muted-foreground">{date(a.updatedAt)}</span>,
       },
     ],
+    actions: (a) => (
+      <ActionGroup>
+        {a.blocked
+          ? btn(
+              'Unblock',
+              () => setPendingAction({ type: 'unblock', account: a }),
+              'outline',
+              processingKey === `unblock:${a.id}`,
+              processingKey !== null
+            )
+          : btn(
+              'Block',
+              () => setPendingAction({ type: 'block', account: a }),
+              'ghost',
+              processingKey === `block:${a.id}`,
+              processingKey !== null
+            )}
+      </ActionGroup>
+    ),
   };
-  return <RentFinanceQueuePage config={config} />;
+  return (
+    <>
+      <RentFinanceQueuePage config={config} />
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingAction(null);
+            setReason('');
+          }
+        }}
+        title={actionCopy?.title ?? 'Confirm finance action'}
+        description={actionCopy?.description ?? ''}
+        confirmLabel={actionCopy?.label ?? 'Confirm'}
+        onConfirm={() => void executeAction()}
+        promptLabel="Administrative reason"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+      />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
+    </>
+  );
 }
 
 export function ExpensesQueue() {
+  const queryClient = useQueryClient();
+  const [pendingExpense, setPendingExpense] = useState<AdminExpense | null>(null);
+  const [processingKey, setProcessingKey] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
+
+  const executeRemove = async () => {
+    if (!pendingExpense || processingKey) return;
+    const expense = pendingExpense;
+    setPendingExpense(null);
+    setProcessingKey(expense.id);
+    try {
+      await unwrap(adminRentFinanceService.removeExpense(expense.id, reason.trim()));
+      setToast({
+        message: `Expense for ${expense.propertyTitle} was removed.`,
+        variant: 'success',
+      });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
+    } catch (error) {
+      setToast({
+        message:
+          error instanceof ApiError
+            ? error.message
+            : 'The expense could not be removed. Please try again.',
+        variant: 'error',
+      });
+    } finally {
+      setProcessingKey(null);
+    }
+  };
+
   const config: RentFinanceQueueConfig<AdminExpense> = {
     resource: 'expenses',
     eyebrow: 'Expenses',
@@ -535,6 +879,46 @@ export function ExpensesQueue() {
         ),
       },
     ],
+    actions: (e) => (
+      <ActionGroup>
+        {btn(
+          'Remove',
+          () => setPendingExpense(e),
+          'ghost',
+          processingKey === e.id,
+          processingKey !== null
+        )}
+      </ActionGroup>
+    ),
   };
-  return <RentFinanceQueuePage config={config} />;
+  return (
+    <>
+      <RentFinanceQueuePage config={config} />
+      <ConfirmDialog
+        open={pendingExpense !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingExpense(null);
+            setReason('');
+          }
+        }}
+        title="Remove this expense?"
+        description={
+          pendingExpense
+            ? `${naira(pendingExpense.amount)} for ${pendingExpense.propertyTitle} will be removed from the expense ledger and excluded from future owner statements.`
+            : ''
+        }
+        confirmLabel="Remove expense"
+        onConfirm={() => void executeRemove()}
+        promptLabel="Administrative reason"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+      />
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
+    </>
+  );
 }
