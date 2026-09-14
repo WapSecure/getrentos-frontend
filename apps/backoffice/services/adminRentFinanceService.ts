@@ -84,15 +84,36 @@ export const adminRentFinanceService = {
   ): Promise<ApiResponse<Paginated<AdminOwnerStatement>>> {
     return listResource<AdminOwnerStatement>('statements', params);
   },
+  generateStatement(
+    ownerId: string,
+    dto: { propertyId?: string; periodStart: string; periodEnd: string }
+  ): Promise<ApiResponse<AdminOwnerStatement>> {
+    return post<AdminOwnerStatement>(`owners/${ownerId}/statements/generate`, dto);
+  },
+  issueStatement(statementId: string): Promise<ApiResponse<AdminOwnerStatement>> {
+    return post<AdminOwnerStatement>(`statements/${statementId}/issue`);
+  },
+  retryStatementPayout(statementId: string): Promise<ApiResponse<AdminOwnerStatement>> {
+    return post<AdminOwnerStatement>(`statements/${statementId}/retry-payout`);
+  },
 
   listPayoutAccounts(
     params: RentFinanceQuery = {}
   ): Promise<ApiResponse<Paginated<AdminPayoutAccount>>> {
     return listResource<AdminPayoutAccount>('payout-accounts', params);
   },
+  blockPayoutAccount(id: string, reason: string): Promise<ApiResponse<AdminPayoutAccount>> {
+    return post<AdminPayoutAccount>(`payout-accounts/${id}/block`, { reason });
+  },
+  unblockPayoutAccount(id: string, reason: string): Promise<ApiResponse<AdminPayoutAccount>> {
+    return post<AdminPayoutAccount>(`payout-accounts/${id}/unblock`, { reason });
+  },
 
   listExpenses(params: RentFinanceQuery = {}): Promise<ApiResponse<Paginated<AdminExpense>>> {
     return listResource<AdminExpense>('expenses', params);
+  },
+  removeExpense(id: string, reason: string): Promise<ApiResponse<void>> {
+    return post<void>(`expenses/${id}/remove`, { reason });
   },
 
   exportPayments(params: RentFinanceQuery = {}): Promise<Blob> {

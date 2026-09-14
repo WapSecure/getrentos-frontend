@@ -64,6 +64,8 @@ export interface AdminOwnerStatementLineItem {
   amount: number;
 }
 
+export type OwnerStatementPayoutStatus = 'PENDING' | 'PAID' | 'FAILED';
+
 export interface AdminOwnerStatement {
   id: string;
   ownerId: string;
@@ -78,6 +80,9 @@ export interface AdminOwnerStatement {
   managementFee: number;
   netPayout: number;
   status: OwnerStatementStatus;
+  payoutStatus: OwnerStatementPayoutStatus;
+  transferRef: string | null;
+  paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;
 }
@@ -96,6 +101,8 @@ export interface AdminPayoutAccount {
   accountName: string | null;
   verified: boolean;
   complete: boolean;
+  blocked: boolean;
+  blockedReason: string | null;
   updatedAt: string;
 }
 

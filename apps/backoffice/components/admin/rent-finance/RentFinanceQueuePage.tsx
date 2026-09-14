@@ -44,6 +44,8 @@ export interface RentFinanceQueueConfig<T> {
   getRowKey: (row: T) => string;
   columns: Column<T>[];
   actions?: (row: T) => ReactNode;
+  /** Extra control rendered in the header, before the export button (e.g. "Generate statement"). */
+  headerActions?: ReactNode;
 }
 
 const PAGE_SIZE = 10;
@@ -61,7 +63,7 @@ export function downloadBlob(blob: Blob, filename: string) {
 }
 
 export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueConfig<T> }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => readAdminSearchParam());
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
@@ -70,10 +72,6 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
   const Icon = config.icon;
-
-  useEffect(() => {
-    setSearch(readAdminSearchParam());
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -160,6 +158,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {config.headerActions}
           {config.exportFn && (
             <Button
               type="button"
