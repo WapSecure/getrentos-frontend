@@ -90,7 +90,7 @@ export const GeoInsightsPanel = ({
             latitude: insights.latitude,
             longitude: insights.longitude,
             title: insights.title,
-            priceLabel: formatPrice(insights.pricing.price, 'month'),
+            priceLabel: formatPrice(insights.pricing.price, insights.pricing.rentPeriod ?? 'month'),
             href: undefined,
           },
         ]
@@ -140,11 +140,15 @@ export const GeoInsightsPanel = ({
                 Pricing
               </div>
               <p className="mt-2 text-lg font-semibold text-foreground">
-                {formatPrice(insights.pricing.price, 'month')}
+                {formatPrice(insights.pricing.price, insights.pricing.rentPeriod ?? 'month')}
               </p>
               {insights.pricing.pricePerSqm ? (
                 <p className="text-xs text-muted-foreground">
-                  {formatPrice(insights.pricing.pricePerSqm, 'month')}/sqm
+                  {formatPrice(
+                    insights.pricing.pricePerSqm,
+                    insights.pricing.rentPeriod ?? 'month'
+                  )}
+                  /sqm
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">Price per sqm unavailable</p>

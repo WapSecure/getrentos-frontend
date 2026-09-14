@@ -8,14 +8,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { buildRoute } from '@/lib/constants/auth';
-
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
+import { formatPrice } from '@/types/renter';
 
 export const DiscoverRecommendations = () => {
   const { data: recommendations = [], isLoading } = useQuery({
@@ -61,7 +54,9 @@ export const DiscoverRecommendations = () => {
                   {rec.location}
                 </p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
-                  <span className="font-semibold text-primary">{formatPrice(rec.price)}/mo</span>
+                  <span className="font-semibold text-primary">
+                    {formatPrice(rec.price, rec.period)}
+                  </span>
                   <span className="flex items-center gap-1">
                     <Bed className="w-3 h-3" /> {rec.bedrooms} bd
                   </span>
