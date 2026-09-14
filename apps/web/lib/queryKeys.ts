@@ -71,6 +71,11 @@ export const renterKeys = {
     ['renter', 'applications', applicationId, 'notes'] as const,
   roommates: ['renter', 'roommates'] as const,
   roommateExpenses: ['renter', 'roommateExpenses'] as const,
+  /**
+   * The renter's pending roommate invitations. Restored here: the roommates page
+   * reads this key but dev no longer declared it, so the app did not typecheck.
+   */
+  roommateInvites: ['renter', 'roommateInvites'] as const,
   calendarEvents: ['renter', 'calendarEvents'] as const,
   trustScore: ['renter', 'trustScore'] as const,
   creditReporting: ['renter', 'creditReporting'] as const,
