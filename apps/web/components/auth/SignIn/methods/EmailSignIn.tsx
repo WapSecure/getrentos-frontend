@@ -170,7 +170,7 @@ export const EmailSignIn = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {pendingChallenge ? (
         /* Two-factor authentication step */
         <div className="space-y-4">

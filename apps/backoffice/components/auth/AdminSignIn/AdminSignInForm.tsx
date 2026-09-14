@@ -180,7 +180,7 @@ export const AdminSignInForm = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {pendingChallenge ? (
           <>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
