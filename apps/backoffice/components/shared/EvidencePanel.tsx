@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ExternalLink, FileText, ImageIcon, Paperclip, Upload } from 'lucide-react';
+import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, Upload } from 'lucide-react';
 import { Button, DocumentPreviewButton, LegacyInput } from '@getrentos/ui';
 import { cn, formatDate } from '@getrentos/shared';
 import type { EvidenceItem } from '@/types/admin';
@@ -38,6 +38,24 @@ interface EvidencePanelProps {
    * broken file.
    */
   onResolveUrl?: (evidenceId: string) => Promise<string | null | undefined>;
+  /**
+   * Detaches a file that should not be on this record. Only offered where
+   * removing a mis-attach is legitimate — an approver should not be able to
+   * quietly drop evidence from a case.
+   */
+  onRemove?: (evidenceId: string) => void;
+  removingId?: string | null;
+  /**
+   * What removing an item does here. Most cases detach a mis-attached file;
+   * a land review withdraws its reliance on a document without touching the
+   * owner's file.
+   */
+  removeTitle?: string;
+  /**
+   * What the panel lists and its attach button offer. Most cases call these
+   * files evidence; a vendor's paperwork reads better as documents.
+   */
+  heading?: string;
   /** Shown when the case has no files yet. */
   emptyHint?: string;
   className?: string;
@@ -61,6 +79,10 @@ export const EvidencePanel = ({
   canAttach = false,
   isAttaching = false,
   onResolveUrl,
+  onRemove,
+  removingId = null,
+  removeTitle = 'Detach this file',
+  heading = 'Evidence',
   emptyHint = 'No files attached yet.',
   className,
 }: EvidencePanelProps) => {
@@ -109,7 +131,7 @@ export const EvidencePanel = ({
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
-          Evidence ({evidence.length})
+          {heading} ({evidence.length})
         </p>
         {canAttach && onAttach && !showAttachForm && (
           <Button
@@ -119,7 +141,7 @@ export const EvidencePanel = ({
             onClick={() => setShowAttachForm(true)}
           >
             <Paperclip className="w-3.5 h-3.5" />
-            Attach evidence
+            Attach {heading.toLowerCase()}
           </Button>
         )}
       </div>
@@ -154,7 +176,7 @@ export const EvidencePanel = ({
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Why you are adding this (optional, shown on the case)"
+            placeholder="Why you are adding this (optional, shown on the record)"
             className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
           {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
@@ -172,7 +194,7 @@ export const EvidencePanel = ({
               isLoading={isAttaching}
             >
               <Paperclip className="w-3.5 h-3.5" />
-              Attach to case
+              Attach file
             </Button>
             <Button variant="outline" size="sm" onClick={resetForm} disabled={isAttaching}>
               Cancel
@@ -251,7 +273,7 @@ export const EvidencePanel = ({
                   )}
                 </div>
 
-                <div className="shrink-0">
+                <div className="shrink-0 flex items-center gap-1">
                   {isStored ? (
                     <DocumentPreviewButton
                       file={{
@@ -272,6 +294,20 @@ export const EvidencePanel = ({
                       Open
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
+                  )}
+                  {onRemove && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-red-600 dark:text-red-400"
+                      title={removeTitle}
+                      aria-label={removeTitle}
+                      onClick={() => onRemove(item.id)}
+                      isLoading={removingId === item.id}
+                      disabled={removingId === item.id}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   )}
                 </div>
               </li>

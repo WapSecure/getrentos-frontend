@@ -1,3 +1,5 @@
+import type { EvidenceItem } from '@/types/admin';
+
 export type MaintenanceCategory =
   | 'PLUMBING'
   | 'ELECTRICAL'
@@ -133,6 +135,8 @@ export interface AdminVendorQuote {
   approvedAt: string | null;
   rejectedAt: string | null;
   rejectionReason: string | null;
+  /** The paperwork behind the figure — what an approver checks it against. */
+  documents?: EvidenceItem[];
 }
 
 export interface AdminVendorInvoice {
@@ -158,4 +162,6 @@ export interface AdminVendorInvoice {
   voidedAt: string | null;
   voidReason: string | null;
   createdAt: string;
+  /** The vendor's invoice document, and anything else attached to the record. */
+  documents?: EvidenceItem[];
 }
