@@ -165,6 +165,8 @@ export interface AdminRealtor {
   dealsClosed: number;
   averageRating: number;
   reviewCount: number;
+  suspended: boolean;
+  suspendedReason?: string;
   createdAt: string;
 }
 
@@ -230,6 +232,9 @@ export interface AdminRealtorDetail {
   verificationStatus: string;
   trustScore: number;
   createdAt: string;
+  suspended: boolean;
+  suspendedReason?: string;
+  suspendedAt?: string;
   licenses: AdminRealtorLicense[];
   businessSettings?: AdminRealtorBusinessSettings;
   payout?: AdminRealtorPayout;
@@ -263,6 +268,8 @@ export interface AdminAgent {
   verificationCount: number;
   averageRating: number;
   reviewCount: number;
+  suspended: boolean;
+  suspendedReason?: string;
   createdAt: string;
 }
 
@@ -309,6 +316,9 @@ export interface AdminAgentDetail {
   verificationStatus: string;
   trustScore: number;
   createdAt: string;
+  suspended: boolean;
+  suspendedReason?: string;
+  suspendedAt?: string;
   activeClientCount: number;
   pendingClientCount: number;
   propertyCount: number;

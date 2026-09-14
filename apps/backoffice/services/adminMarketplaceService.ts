@@ -1,4 +1,4 @@
-import { authFetch, safeCall, toQuery } from '@getrentos/shared';
+import { authDownload, authFetch, safeCall, toQuery } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from './adminService';
 import type {
@@ -93,6 +93,34 @@ export const adminMarketplaceService = {
     );
   },
 
+  pauseListing(id: string) {
+    return safeCall(() => authFetch(`/admin/marketplace/listings/${id}/pause`, { method: 'POST' }));
+  },
+  resumeListing(id: string) {
+    return safeCall(() =>
+      authFetch(`/admin/marketplace/listings/${id}/resume`, { method: 'POST' })
+    );
+  },
+  closeListing(id: string) {
+    return safeCall(() => authFetch(`/admin/marketplace/listings/${id}/close`, { method: 'POST' }));
+  },
+  flagListing(id: string) {
+    return safeCall(() => authFetch(`/admin/marketplace/listings/${id}/flag`, { method: 'POST' }));
+  },
+  approveListing(id: string) {
+    return safeCall(() =>
+      authFetch(`/admin/marketplace/listings/${id}/approve`, { method: 'POST' })
+    );
+  },
+  expireOffer(id: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/marketplace/offers/${id}/expire`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
   // ---------------- Realtor register ----------------
 
   listRealtors(params: ListRealtorsParams = {}): Promise<ApiResponse<Paginated<AdminRealtor>>> {
@@ -109,6 +137,40 @@ export const adminMarketplaceService = {
     return safeCall(() => authFetch<AdminRealtorDetail>(`/admin/realtors/${realtorId}`));
   },
 
+  suspendRealtor(id: string, reason: string, expiresAt?: string) {
+    return safeCall(() =>
+      authFetch(`/admin/realtors/${id}/suspend`, {
+        method: 'POST',
+        body: JSON.stringify({ reason, expiresAt }),
+      })
+    );
+  },
+  restoreRealtor(id: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/realtors/${id}/restore`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+  revokeRealtorClient(realtorId: string, relationshipId: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/realtors/${realtorId}/clients/${relationshipId}/revoke`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+  exportRealtors(params: ListRealtorsParams = {}): Promise<Blob> {
+    const query = toQuery({
+      search: params.search,
+      licenseStatus: params.licenseStatus,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return authDownload(`/admin/realtors/export${query}`);
+  },
+
   // ---------------- Agent register ----------------
 
   listAgents(params: ListProfessionalsParams = {}): Promise<ApiResponse<Paginated<AdminAgent>>> {
@@ -122,5 +184,51 @@ export const adminMarketplaceService = {
 
   agentDetail(agentId: string): Promise<ApiResponse<AdminAgentDetail>> {
     return safeCall(() => authFetch<AdminAgentDetail>(`/admin/agents/${agentId}`));
+  },
+
+  suspendAgent(id: string, reason: string, expiresAt?: string) {
+    return safeCall(() =>
+      authFetch(`/admin/agents/${id}/suspend`, {
+        method: 'POST',
+        body: JSON.stringify({ reason, expiresAt }),
+      })
+    );
+  },
+  restoreAgent(id: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/agents/${id}/restore`, { method: 'POST', body: JSON.stringify({ reason }) })
+    );
+  },
+  revokeAgentClient(agentId: string, relationshipId: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/agents/${agentId}/clients/${relationshipId}/revoke`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+  reassignAgentTask(taskId: string, newAgentId: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/agents/tasks/${taskId}/reassign`, {
+        method: 'POST',
+        body: JSON.stringify({ newAgentId, reason }),
+      })
+    );
+  },
+  setAgentTaskStatus(taskId: string, status: string, reason: string) {
+    return safeCall(() =>
+      authFetch(`/admin/agents/tasks/${taskId}/status`, {
+        method: 'POST',
+        body: JSON.stringify({ status, reason }),
+      })
+    );
+  },
+  exportAgents(params: ListProfessionalsParams = {}): Promise<Blob> {
+    const query = toQuery({
+      search: params.search,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return authDownload(`/admin/agents/export${query}`);
   },
 };

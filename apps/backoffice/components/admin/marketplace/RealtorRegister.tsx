@@ -28,6 +28,7 @@ import {
 import { cn } from '@getrentos/shared';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
+import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
 import type { AdminRealtor, AdminRealtorDetail, LicenseStatus } from '@/types/marketplace';
 
 const PAGE_SIZE = 10;
@@ -55,6 +56,8 @@ export const RealtorRegister = () => {
   const [license, setLicense] = useState<LicenseFilter>('all');
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<AdminRealtor | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const actions = useProfessionalActions('realtors');
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'realtors', { search, license, page }],
@@ -70,6 +73,19 @@ export const RealtorRegister = () => {
   });
   const items = data?.items ?? [];
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const blob = await adminMarketplaceService.exportRealtors({
+        search: search.trim() || undefined,
+        licenseStatus: license === 'all' ? undefined : license,
+      });
+      downloadBlob(blob, 'realtors.csv');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -80,6 +96,9 @@ export const RealtorRegister = () => {
             reviews.
           </p>
         </div>
+        <Button variant="outline" onClick={handleExport} disabled={exporting}>
+          {exporting ? 'Exporting…' : 'Export CSV'}
+        </Button>
       </div>
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
@@ -150,6 +169,7 @@ export const RealtorRegister = () => {
                       {LICENSE_LABEL[r.licenseStatus]}
                     </Badge>
                     {r.payoutReady && <Badge variant="success">Payable</Badge>}
+                    {r.suspended && <Badge variant="danger">Suspended</Badge>}
                   </div>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <UserRound className="h-3.5 w-3.5" /> {r.email ?? 'No email'}
@@ -187,12 +207,27 @@ export const RealtorRegister = () => {
         />
       </div>
 
-      {active && <RealtorDetailDialog realtorId={active.id} onClose={() => setActive(null)} />}
+      {active && (
+        <RealtorDetailDialog
+          realtorId={active.id}
+          onClose={() => setActive(null)}
+          actions={actions}
+        />
+      )}
+      {actions.feedback}
     </div>
   );
 };
 
-function RealtorDetailDialog({ realtorId, onClose }: { realtorId: string; onClose: () => void }) {
+function RealtorDetailDialog({
+  realtorId,
+  onClose,
+  actions,
+}: {
+  realtorId: string;
+  onClose: () => void;
+  actions: ReturnType<typeof useProfessionalActions>;
+}) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin', 'realtors', realtorId, 'detail'],
     queryFn: () => unwrap(adminMarketplaceService.realtorDetail(realtorId)),
@@ -217,14 +252,22 @@ function RealtorDetailDialog({ realtorId, onClose }: { realtorId: string; onClos
             </Button>
           </div>
         ) : (
-          <RealtorCase360 detail={data} onClose={onClose} />
+          <RealtorCase360 detail={data} onClose={onClose} actions={actions} />
         )}
       </div>
     </div>
   );
 }
 
-function RealtorCase360({ detail, onClose }: { detail: AdminRealtorDetail; onClose: () => void }) {
+function RealtorCase360({
+  detail,
+  onClose,
+  actions,
+}: {
+  detail: AdminRealtorDetail;
+  onClose: () => void;
+  actions: ReturnType<typeof useProfessionalActions>;
+}) {
   const stats = [
     {
       icon: Building2,
@@ -266,8 +309,49 @@ function RealtorCase360({ detail, onClose }: { detail: AdminRealtorDetail; onClo
             {detail.accountStatus}
           </Badge>
           <Badge variant="neutral">Trust {detail.trustScore}</Badge>
+          {detail.suspended ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                actions.request({
+                  title: 'Restore realtor activity?',
+                  description:
+                    'The realtor will immediately regain the ability to list and take clients.',
+                  label: 'Restore',
+                  run: (reason) =>
+                    unwrap(adminMarketplaceService.restoreRealtor(detail.id, reason)),
+                })
+              }
+            >
+              Restore
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() =>
+                actions.request({
+                  title: 'Suspend realtor activity?',
+                  description:
+                    'Blocks new listings and client invitations immediately — independent of the account, which stays otherwise usable (e.g. as a Renter).',
+                  label: 'Suspend',
+                  run: (reason) =>
+                    unwrap(adminMarketplaceService.suspendRealtor(detail.id, reason)),
+                })
+              }
+            >
+              Suspend
+            </Button>
+          )}
         </div>
       </div>
+      {detail.suspended && detail.suspendedReason && (
+        <p className="border-b border-border bg-destructive/5 px-5 py-2 text-sm text-destructive">
+          Suspended{detail.suspendedAt ? ` ${formatDate(detail.suspendedAt)}` : ''}:{' '}
+          {detail.suspendedReason}
+        </p>
+      )}
 
       <div className="space-y-5 p-5">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -347,6 +431,29 @@ function RealtorCase360({ detail, onClose }: { detail: AdminRealtorDetail; onClo
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="neutral">{c.status}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
+                      {c.status === 'ACTIVE' && (
+                        <button
+                          type="button"
+                          className="font-medium text-destructive hover:underline"
+                          onClick={() =>
+                            actions.request({
+                              title: 'Revoke this client relationship?',
+                              description: `${detail.legalName} will immediately lose access to ${c.clientName}'s properties.`,
+                              label: 'Revoke',
+                              run: (reason) =>
+                                unwrap(
+                                  adminMarketplaceService.revokeRealtorClient(
+                                    detail.id,
+                                    c.id,
+                                    reason
+                                  )
+                                ),
+                            })
+                          }
+                        >
+                          Revoke
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
