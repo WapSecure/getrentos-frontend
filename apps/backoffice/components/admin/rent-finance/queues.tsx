@@ -172,11 +172,11 @@ export function PaymentsQueue() {
     setProcessingKey(actionKey);
     try {
       if (type === 'release') {
-        await unwrap(adminRentFinanceService.releasePayment(payment.id));
+        await unwrap(adminRentFinanceService.releasePayment(payment.id, reason.trim()));
       } else if (type === 'flag') {
         await unwrap(adminRentFinanceService.flagPayment(payment.id, reason.trim()));
       } else {
-        await unwrap(adminRentFinanceService.unflagPayment(payment.id));
+        await unwrap(adminRentFinanceService.unflagPayment(payment.id, reason.trim()));
       }
       const successMessage = {
         release: `${naira(payment.amount)} was released for ${payment.propertyTitle}.`,
@@ -204,19 +204,31 @@ export function PaymentsQueue() {
           title: 'Release escrow funds?',
           description: `${naira(pendingAction.payment.amount)} for ${pendingAction.payment.propertyTitle} will be released to the landlord payout flow. This action cannot be undone here.`,
           label: 'Release funds',
+          promptLabel: 'Release reason',
+          promptPlaceholder: 'Why these funds can be settled now (checked with the renter, no dispute)…',
         },
         flag: {
           title: 'Flag payment for review?',
           description: `The payment for ${pendingAction.payment.propertyTitle} will be held for manual review and cannot be released until the review is cleared.`,
           label: 'Flag payment',
+          promptLabel: 'Review reason',
+          promptPlaceholder: 'Describe the issue that requires manual review…',
         },
         clear: {
           title: 'Clear manual review?',
           description: `The review hold on the payment for ${pendingAction.payment.propertyTitle} will be removed. This does not release the funds automatically.`,
           label: 'Clear review',
+          promptLabel: 'Clearing reason',
+          promptPlaceholder: 'Why the review hold can come off (e.g. the rent transfer was confirmed)…',
         },
       }[pendingAction.type]
     : null;
+  /**
+   * A reason is optional when opening a review and required when closing one or
+   * releasing funds — the two actions that hand a payment back to (or past) the
+   * automatic settlement path.
+   */
+  const promptRequired = pendingAction !== null && pendingAction.type !== 'flag';
   const filters: RentFinanceQueueFilter[] = [
     { key: 'status', label: 'Status', options: paymentStatusOptions },
     { key: 'escrowStatus', label: 'Escrow', options: escrowStatusOptions },
@@ -324,11 +336,11 @@ export function PaymentsQueue() {
         description={actionCopy?.description ?? ''}
         confirmLabel={actionCopy?.label ?? 'Confirm'}
         onConfirm={() => void executeAction()}
-        promptLabel={pendingAction?.type === 'flag' ? 'Review reason' : undefined}
-        promptPlaceholder="Describe the issue that requires manual review…"
+        promptLabel={actionCopy?.promptLabel}
+        promptPlaceholder={actionCopy?.promptPlaceholder}
         promptValue={reason}
         onPromptChange={setReason}
-        promptRequired={pendingAction?.type === 'flag'}
+        promptRequired={promptRequired}
         promptMinLength={10}
       />
       {toast && (

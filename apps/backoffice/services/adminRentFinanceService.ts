@@ -68,11 +68,15 @@ export const adminRentFinanceService = {
   flagPayment(paymentId: string, reason?: string): Promise<ApiResponse<AdminRentPayment>> {
     return post<AdminRentPayment>(`payments/${paymentId}/flag`, reason ? { reason } : undefined);
   },
-  unflagPayment(paymentId: string): Promise<ApiResponse<AdminRentPayment>> {
-    return post<AdminRentPayment>(`payments/${paymentId}/unflag`);
+  /**
+   * Clearing a hold and releasing funds both need a stated reason, which the
+   * audit trail keeps — so `reason` is required here rather than optional.
+   */
+  unflagPayment(paymentId: string, reason: string): Promise<ApiResponse<AdminRentPayment>> {
+    return post<AdminRentPayment>(`payments/${paymentId}/unflag`, { reason });
   },
-  releasePayment(paymentId: string): Promise<ApiResponse<AdminRentPayment>> {
-    return post<AdminRentPayment>(`payments/${paymentId}/release`);
+  releasePayment(paymentId: string, reason: string): Promise<ApiResponse<AdminRentPayment>> {
+    return post<AdminRentPayment>(`payments/${paymentId}/release`, { reason });
   },
 
   listArrears(params: RentFinanceQuery = {}): Promise<ApiResponse<Paginated<AdminRentPayment>>> {
