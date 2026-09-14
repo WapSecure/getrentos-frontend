@@ -258,4 +258,6 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  authorityClaims: (params?: { status?: string }) =>
+    ['admin', 'property-authorities', params?.status ?? 'all'] as const,
 };

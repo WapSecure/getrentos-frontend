@@ -64,6 +64,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.approve',
   },
   {
+    label: 'Property Authorities',
+    href: '/admin/property-authorities',
+    icon: Building2,
+    permission: 'verifications.approve',
+  },
+  {
     label: 'Land Diligence',
     href: '/admin/land/diligence',
     icon: MapPinned,

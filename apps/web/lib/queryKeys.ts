@@ -70,7 +70,6 @@ export const renterKeys = {
   applicationNotes: (applicationId: string) =>
     ['renter', 'applications', applicationId, 'notes'] as const,
   roommates: ['renter', 'roommates'] as const,
-  roommateInvites: ['renter', 'roommateInvites'] as const,
   roommateExpenses: ['renter', 'roommateExpenses'] as const,
   calendarEvents: ['renter', 'calendarEvents'] as const,
   trustScore: ['renter', 'trustScore'] as const,
@@ -316,4 +315,21 @@ export const estateResidentKeys = {
 /** Not persona-scoped — every signed-in user has at most one subscription. */
 export const subscriptionKeys = {
   mine: ['subscription', 'mine'] as const,
+  pricing: ['subscription', 'pricing'] as const,
+};
+
+/**
+ * Property authority (not persona-scoped: a mandate is a fact about a property,
+ * so the same cache entry serves the owner, agent and realtor portals).
+ */
+export const authorityKeys = {
+  managed: ['property-authorities', 'managed'] as const,
+  mine: ['property-authorities', 'mine'] as const,
+};
+
+/** Billing lifecycle state (status, trial/period end, cancellation). */
+export const billingKeys = {
+  mine: ['billing', 'mine'] as const,
+  /** Payment history — the customer's receipts. */
+  invoices: (page: number) => ['billing', 'invoices', page] as const,
 };

@@ -317,6 +317,8 @@ export const ROUTES = {
   OWNER_MESSAGES: '/owner/messages',
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
+  /** Properties this owner may act for under someone else's authority. */
+  OWNER_MANAGED: '/owner/managed',
   OWNER_SETTINGS: '/owner/settings',
   OWNER_VERIFICATION: '/owner/verification',
   OWNER_REALTORS: '/owner/realtors',
@@ -353,6 +355,8 @@ export const ROUTES = {
   REALTOR_MESSAGES: '/realtor/messages',
   REALTOR_REVIEWS: '/realtor/reviews',
   REALTOR_TRUST_PROFILE: '/realtor/trust-profile',
+  /** Properties this realtor may act for under a granted mandate. */
+  REALTOR_MANAGED: '/realtor/managed',
   REALTOR_SETTINGS: '/realtor/settings',
   REALTOR_BILLING: '/realtor/billing',
   REALTOR_HELP: '/realtor/help',
@@ -367,12 +371,15 @@ export const ROUTES = {
   AGENT_MESSAGES: '/agent/messages',
   AGENT_REVIEWS: '/agent/reviews',
   AGENT_TRUST_PROFILE: '/agent/trust-profile',
+  /** Properties this agent may act for under a granted mandate. */
+  AGENT_MANAGED: '/agent/managed',
   AGENT_SETTINGS: '/agent/settings',
   AGENT_VERIFICATION: '/agent/verification',
   AGENT_HELP: '/agent/help',
 
   // Admin / BackOffice specific routes
   ADMIN_USERS: '/admin/users',
+  ADMIN_SUBSCRIPTIONS: '/admin/subscriptions',
   ADMIN_VERIFICATIONS: '/admin/verifications',
   ADMIN_DISPUTES: '/admin/disputes',
   ADMIN_FRAUD: '/admin/fraud',
