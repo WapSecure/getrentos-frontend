@@ -43,6 +43,14 @@ const methodIcons: Record<Payment['method'], typeof CreditCard> = {
   wallet: Wallet,
 };
 
+/** Plain-language escrow state for collected funds. */
+const escrowLabel = (status: Payment['escrowStatus']): string =>
+  ({
+    held: 'held by GetRentos',
+    released: 'released to your landlord',
+    pending: 'under review',
+  })[status] ?? status;
+
 export const PaymentCard = ({
   payment,
   onViewDetails,
@@ -139,10 +147,12 @@ export const PaymentCard = ({
               <Calendar className="w-3 h-3" />
               <span>Due {formatDate(payment.dueDate)}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Shield className="w-3 h-3" />
-              <span>Escrow: {payment.escrowStatus}</span>
-            </div>
+            {payment.status === 'paid' && (
+              <div className="flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                <span>Escrow: {escrowLabel(payment.escrowStatus)}</span>
+              </div>
+            )}
           </div>
         </div>
 

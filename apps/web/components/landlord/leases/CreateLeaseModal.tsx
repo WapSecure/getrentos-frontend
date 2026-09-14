@@ -41,7 +41,9 @@ export const CreateLeaseModal = ({
   const handleUnitChange = (id: string) => {
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
-    if (unit && !rentAmount) setRentAmount(String(unit.monthlyRent));
+    // The asking rent from the listing, not the legacy Unit.monthlyRent column
+    // (which is 0 for units priced through a listing).
+    if (unit && !rentAmount) setRentAmount(String(unit.askingRent ?? unit.monthlyRent));
     // An approved applicant is the tenant: prefill rather than make the
     // landlord retype a name we already hold.
     if (unit?.approvedApplicant) setTenantName(unit.approvedApplicant.name);
@@ -79,6 +81,7 @@ export const CreateLeaseModal = ({
       leaseStart,
       leaseEnd,
       rentAmount: Number(rentAmount),
+      rentPeriod: selectedUnit.askingRentPeriod,
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
     };
   };

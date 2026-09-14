@@ -69,7 +69,14 @@ export interface Unit {
   unitName: string;
   bedrooms: number;
   bathrooms: number;
+  /** Legacy column; rent is advertised on the listing and fixed by the lease. */
   monthlyRent: number;
+  /** What the unit's listing asks for, when it has one. */
+  askingRent?: number;
+  askingRentPeriod?: 'month' | 'year';
+  /** What the signed lease charges, when the unit is let. */
+  leaseRent?: number;
+  leaseRentPeriod?: 'month' | 'year';
   occupancyStatus: UnitOccupancyStatus;
   tenantId?: string;
   tenantName?: string;
@@ -120,6 +127,8 @@ export interface Lease {
   leaseStart: string;
   leaseEnd: string;
   rentAmount: number;
+  /** Cadence of rentAmount; absent on leases written before it was tracked. */
+  rentPeriod?: 'month' | 'year';
   securityDeposit?: number;
   status: LeaseStatus;
   tenantSigned: boolean;

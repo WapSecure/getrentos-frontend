@@ -4,8 +4,9 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { ConfirmDialog } from '@getrentos/ui';
-import { Bed, Bath, UserPlus, DoorClosed, MoreVertical } from 'lucide-react';
+import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, Receipt } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
+import { rentSuffix } from '@/lib/leaseTerm';
 import type { Unit, UnitOccupancyStatus } from '@/types/landlord';
 
 const statusConfig: Record<UnitOccupancyStatus, { label: string; className: string }> = {
@@ -27,6 +28,7 @@ interface UnitsTableProps {
   units: Unit[];
   onMarkVacant: (unitId: string) => Promise<void>;
   onAssignTenant: (unitId: string, tenantName: string) => Promise<void>;
+  onChargeUnit: (unit: Unit) => void;
   pendingUnitId?: string;
 }
 
@@ -34,6 +36,7 @@ export const UnitsTable = ({
   units,
   onMarkVacant,
   onAssignTenant,
+  onChargeUnit,
   pendingUnitId,
 }: UnitsTableProps) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -100,7 +103,14 @@ export const UnitsTable = ({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
-                    {formatCurrency(unit.monthlyRent, { compact: true })}
+                    {/* Rent lives on the listing (asking) and the lease (agreed);
+                        Unit.monthlyRent is a legacy column that stays 0. */}
+                    {unit.leaseRent !== undefined || unit.askingRent !== undefined
+                      ? formatCurrency((unit.leaseRent ?? unit.askingRent)!, {
+                          compact: true,
+                        })
+                      : '\u2014'}
+                    {rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -125,6 +135,18 @@ export const UnitsTable = ({
 
                     {openMenuId === unit.id && (
                       <div className="absolute right-4 top-10 z-20 w-44 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-border py-1">
+                        {unit.occupancyStatus === 'occupied' && (
+                          <button
+                            onClick={() => {
+                              onChargeUnit(unit);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
+                          >
+                            <Receipt className="w-3.5 h-3.5" />
+                            Charge rent
+                          </button>
+                        )}
                         {unit.occupancyStatus === 'vacant' ? (
                           <button
                             onClick={() => {

@@ -9,6 +9,7 @@ import { TenantCard } from '@/components/landlord/tenants/TenantCard';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { ListState } from '@/components/shared/ListState';
 import type { RentPaymentStatus } from '@/types/landlord';
 
 const rentStatusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
@@ -27,7 +28,7 @@ export default function LandlordTenantsPage() {
 
   // The tenants endpoint does not accept search/status params, so search and
   // rent-status filtering stay client-side on the current page.
-  const { data } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: [...landlordKeys.tenants, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listTenants({ page, pageSize: PAGE_SIZE })),
   });
@@ -86,18 +87,23 @@ export default function LandlordTenantsPage() {
         </div>
       </div>
 
-      {filteredTenants.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <Users className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No tenants match your filters</p>
-        </div>
-      ) : (
+      <ListState
+        items={filteredTenants}
+        query={{ isPending, isError, refetch }}
+        errorTitle="We couldn't load your tenants"
+        empty={
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <Users className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-muted-foreground">No tenants match your filters</p>
+          </div>
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredTenants.map((tenant, index) => (
             <TenantCard key={tenant.id} tenant={tenant} delay={index * 0.05} />
           ))}
         </div>
-      )}
+      </ListState>
 
       {total > 0 && (
         <Pagination

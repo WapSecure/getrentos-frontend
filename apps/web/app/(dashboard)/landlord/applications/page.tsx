@@ -8,6 +8,7 @@ import { ApplicationCard } from '@/components/landlord/applications/ApplicationC
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
+import { ListState } from '@/components/shared/ListState';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { ApplicationStatus, RentalApplication } from '@/types/landlord';
 
@@ -27,7 +28,7 @@ export default function LandlordApplicationsPage() {
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
 
-  const { data } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: [
       ...landlordKeys.applications(),
       { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
@@ -94,12 +95,18 @@ export default function LandlordApplicationsPage() {
         ))}
       </div>
 
-      {applications.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <FileText className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No applications found</p>
-        </div>
-      ) : (
+      <ListState
+        items={applications}
+        query={{ isPending, isError, refetch }}
+        errorTitle="We couldn't load your applications"
+        skeletonClassName="h-32"
+        empty={
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <FileText className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-muted-foreground">No applications found</p>
+          </div>
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {applications.map((application, index) => (
             <ApplicationCard
@@ -113,7 +120,7 @@ export default function LandlordApplicationsPage() {
             />
           ))}
         </div>
-      )}
+      </ListState>
 
       {total > 0 && (
         <Pagination

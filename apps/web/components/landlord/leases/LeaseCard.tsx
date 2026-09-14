@@ -6,7 +6,7 @@ import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { describeRentPeriod } from '@/lib/leaseTerm';
+import { describeRentPeriod, leaseRentLabel } from '@/lib/leaseTerm';
 import { leaseStatusBadges } from '@/lib/statusBadge';
 import { landlordService } from '@/services/landlordService';
 import type { Lease } from '@/types/landlord';
@@ -73,7 +73,7 @@ export const LeaseCard = ({
         </div>
         <div>
           <p className="text-xs text-gray-400">
-            {describeRentPeriod(lease.leaseStart, lease.leaseEnd)}
+            {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd)}
           </p>
           <p className="text-sm font-medium text-foreground">
             {formatCurrency(lease.rentAmount, { compact: true })}

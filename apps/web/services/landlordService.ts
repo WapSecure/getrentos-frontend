@@ -406,7 +406,7 @@ export const landlordService = {
     data: Pick<
       Lease,
       'unitId' | 'tenantName' | 'leaseStart' | 'leaseEnd' | 'rentAmount' | 'securityDeposit'
-    > & { tenantId?: string },
+    > & { tenantId?: string; rentPeriod?: 'month' | 'year' },
     sendImmediately: boolean
   ): Promise<ApiResponse<Lease>> {
     return safeCall(() =>
@@ -422,6 +422,7 @@ export const landlordService = {
           rentAmount: data.rentAmount,
           securityDeposit: data.securityDeposit,
           ...(data.tenantId ? { tenantId: data.tenantId } : {}),
+          ...(data.rentPeriod ? { rentPeriod: data.rentPeriod } : {}),
           sendImmediately,
         }),
       })
@@ -572,6 +573,22 @@ export const landlordService = {
   }): Promise<ApiResponse<BulkChargeResult>> {
     return safeCall(() =>
       authFetch('/landlord/payments/bulk-charge', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  /**
+   * Charge one unit. Separate from bulkCharge because charging a single tenant
+   * is core rent collection and stays available on the Free plan.
+   */
+  async chargeUnit(data: {
+    unitId: string;
+    category: ChargeCategory;
+    amount: number;
+    dueDate: string;
+    billingCycle: BillingCycle;
+  }): Promise<ApiResponse<BulkChargeResult>> {
+    return safeCall(() =>
+      authFetch('/landlord/payments/charge', { method: 'POST', body: JSON.stringify(data) })
     );
   },
 

@@ -27,8 +27,12 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
     .filter((p) => p.status === 'overdue')
     .reduce((sum, p) => sum + p.amount, 0);
 
+  // Only money that has actually been collected can be held in escrow: an
+  // unpaid charge carries escrowStatus 'held' the moment it is raised, so
+  // filtering on escrow alone reported the outstanding balance as secured
+  // funds.
   const escrowAmount = payments
-    .filter((p) => p.escrowStatus === 'held')
+    .filter((p) => p.status === 'paid' && p.escrowStatus === 'held')
     .reduce((sum, p) => sum + p.amount, 0);
 
   const formatCurrency = (amount: number) => {

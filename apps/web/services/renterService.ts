@@ -125,6 +125,8 @@ export interface PendingLease {
   startDate: string;
   endDate: string;
   rentAmount: number;
+  /** Cadence of rentAmount; absent on leases written before it was tracked. */
+  rentPeriod?: 'month' | 'year';
   securityDeposit?: number;
   landlord: { name: string; email: string; phone: string };
   tenantSigned: boolean;

@@ -9,6 +9,7 @@ import { DocumentRowActions } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
+import { ListState } from '@/components/shared/ListState';
 import { landlordService } from '@/services/landlordService';
 
 type DocumentCategory =
@@ -51,7 +52,7 @@ export default function LandlordDocumentsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: [
       'landlord',
       'documents',
@@ -142,12 +143,17 @@ export default function LandlordDocumentsPage() {
         </div>
       </div>
 
-      {documents.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No documents found</p>
-        </div>
-      ) : (
+      <ListState
+        items={documents}
+        query={{ isPending, isError, refetch }}
+        errorTitle="We couldn't load your documents"
+        empty={
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-muted-foreground">No documents found</p>
+          </div>
+        }
+      >
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {documents.map((doc) => (
             <div
@@ -176,7 +182,7 @@ export default function LandlordDocumentsPage() {
             </div>
           ))}
         </div>
-      )}
+      </ListState>
 
       {total > 0 && (
         <Pagination

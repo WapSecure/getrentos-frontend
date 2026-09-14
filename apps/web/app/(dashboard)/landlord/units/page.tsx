@@ -7,14 +7,16 @@ import { LegacySelect } from '@getrentos/ui';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Receipt, Search, Tag } from 'lucide-react';
+import { Plus, Receipt, Search, Tag, DoorClosed } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
+import { ChargeUnitModal, type ChargeUnitInput } from '@/components/landlord/units/ChargeUnitModal';
 import { BulkPricingModal } from '@/components/landlord/units/BulkPricingModal';
 import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
+import { ListState } from '@/components/shared/ListState';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Unit } from '@/types/landlord';
 
@@ -40,6 +42,8 @@ function LandlordUnitsPageContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkChargeOpen, setIsBulkChargeOpen] = useState(false);
   const [isBulkPricingOpen, setIsBulkPricingOpen] = useState(false);
+  const [chargingUnit, setChargingUnit] = useState<Unit | null>(null);
+  const [chargeError, setChargeError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   // Debounce the search input; reset to page 1 inside the timer callback.
@@ -68,7 +72,12 @@ function LandlordUnitsPageContent() {
   const totalUnits = unitsSummaryData?.total ?? 0;
 
   // Paginated, server-filtered list for the table.
-  const { data } = useQuery({
+  const {
+    data,
+    isPending: isLoadingUnits,
+    isError: unitsFailed,
+    refetch: refetchUnits,
+  } = useQuery({
     queryKey: [
       ...landlordKeys.units(),
       {
@@ -134,6 +143,18 @@ function LandlordUnitsPageContent() {
 
   const handleAddUnit = (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) =>
     addUnitMutation.mutate(data);
+
+  // Single-unit charging: available on every plan, unlike the bulk variant.
+  const chargeUnitMutation = useMutation({
+    mutationFn: (input: ChargeUnitInput) => unwrap(landlordService.chargeUnit(input)),
+    onSuccess: () => {
+      invalidateUnits();
+      setChargingUnit(null);
+      setChargeError(null);
+      setToast({ message: 'Charge raised and the tenant notified.', variant: 'success' });
+    },
+    onError: (error: Error) => setChargeError(error.message),
+  });
 
   return (
     <>
@@ -204,18 +225,33 @@ function LandlordUnitsPageContent() {
         </LegacySelect>
       </div>
 
-      <UnitsTable
-        units={units}
-        onMarkVacant={handleMarkVacant}
-        onAssignTenant={handleAssignTenant}
-        pendingUnitId={
-          markVacantMutation.isPending
-            ? markVacantMutation.variables
-            : assignTenantMutation.isPending
-              ? assignTenantMutation.variables?.unitId
-              : undefined
+      <ListState
+        items={units}
+        query={{ isPending: isLoadingUnits, isError: unitsFailed, refetch: refetchUnits }}
+        errorTitle="We couldn't load your units"
+        skeletonClassName="h-16"
+        skeletonRows={4}
+        empty={
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <DoorClosed className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-muted-foreground">No units found</p>
+          </div>
         }
-      />
+      >
+        <UnitsTable
+          units={units}
+          onMarkVacant={handleMarkVacant}
+          onAssignTenant={handleAssignTenant}
+          onChargeUnit={setChargingUnit}
+          pendingUnitId={
+            markVacantMutation.isPending
+              ? markVacantMutation.variables
+              : assignTenantMutation.isPending
+                ? assignTenantMutation.variables?.unitId
+                : undefined
+          }
+        />
+      </ListState>
 
       {total > 0 && (
         <Pagination
@@ -233,6 +269,17 @@ function LandlordUnitsPageContent() {
         properties={properties}
         defaultPropertyId={propertyFilter !== 'all' ? propertyFilter : undefined}
         onSave={handleAddUnit}
+      />
+
+      <ChargeUnitModal
+        unit={chargingUnit}
+        onClose={() => {
+          setChargingUnit(null);
+          setChargeError(null);
+        }}
+        onCharge={(input) => chargeUnitMutation.mutate(input)}
+        isPending={chargeUnitMutation.isPending}
+        errorMessage={chargeError}
       />
 
       <BulkChargeModal

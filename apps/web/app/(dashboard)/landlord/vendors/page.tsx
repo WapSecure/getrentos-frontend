@@ -11,6 +11,7 @@ import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { ListState } from '@/components/shared/ListState';
 import type { Vendor } from '@/types/landlord';
 
 const PAGE_SIZE = 10;
@@ -22,7 +23,7 @@ export default function LandlordVendorsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // The vendors endpoint does not accept a search param, so search stays client-side.
-  const { data } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE })),
   });
@@ -83,12 +84,17 @@ export default function LandlordVendorsPage() {
         />
       </div>
 
-      {filteredVendors.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <HardHat className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No vendors found</p>
-        </div>
-      ) : (
+      <ListState
+        items={filteredVendors}
+        query={{ isPending, isError, refetch }}
+        errorTitle="We couldn't load your vendors"
+        empty={
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <HardHat className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-muted-foreground">No vendors found</p>
+          </div>
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredVendors.map((vendor, index) => (
             <VendorCard
@@ -99,7 +105,7 @@ export default function LandlordVendorsPage() {
             />
           ))}
         </div>
-      )}
+      </ListState>
 
       {total > 0 && (
         <Pagination
