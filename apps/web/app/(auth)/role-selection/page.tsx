@@ -10,6 +10,14 @@ import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { ROLES } from '@/lib/constants/auth';
 
+/**
+ * Role cards are always clickable. With multi-role off, picking another card
+ * swaps the selection (see `addRole`), and with it on, the pick is added — so
+ * there is no state where a card should silently ignore a click. Signup starts
+ * with Renter pre-selected, so a disabled gate here used to make every other
+ * role look broken: clicking Landlord did nothing and the account was created
+ * as a Renter.
+ */
 export default function RoleSelectionPage() {
   const router = useRouter();
   const {
@@ -97,11 +105,6 @@ export default function RoleSelectionPage() {
                   isSelected={signupData.selectedRoles.includes(role.id)}
                   onSelect={() => addRole(role.id)}
                   onDeselect={() => removeRole(role.id)}
-                  disabled={
-                    !canAddMoreRoles &&
-                    signupData.selectedRoles.length >= 1 &&
-                    !signupData.selectedRoles.includes(role.id)
-                  }
                 />
               </motion.div>
             ))}
