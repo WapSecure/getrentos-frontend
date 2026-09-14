@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Store,
   BadgeCheck,
@@ -15,10 +16,12 @@ import {
   Building2,
   ListChecks,
   Clock,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Badge,
   Button,
+  ConfirmDialog,
   EmptyState,
   PageErrorState,
   Pagination,
@@ -26,6 +29,7 @@ import {
   LegacyInput,
   Select,
   DocumentPreviewButton,
+  Toast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { cn } from '@getrentos/shared';
@@ -71,6 +75,60 @@ const OFFER_STATUS_LABEL: Record<SaleOfferStatus, string> = {
 
 type ListingStatusFilter = 'all' | SaleListingStatus;
 type OfferStatusFilter = 'all' | SaleOfferStatus;
+
+type MarketplaceAction = {
+  title: string;
+  description: string;
+  label?: string;
+  /** When set, the confirm dialog collects a reason and passes it to run(). */
+  needsReason?: boolean;
+  run: (reason: string) => Promise<unknown>;
+};
+
+/** Confirm-dialog + toast wiring for marketplace moderation actions, mirroring the estate queues' pattern. */
+function useMarketplaceActions() {
+  const client = useQueryClient();
+  const [action, setAction] = useState<MarketplaceAction | null>(null);
+  const [reason, setReason] = useState('');
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
+  const mutation = useMutation({
+    mutationFn: async () => action?.run(reason.trim()),
+    onSuccess: async () => {
+      setAction(null);
+      setReason('');
+      setToast({ message: 'Action completed and audited.', variant: 'success' });
+      await client.invalidateQueries({ queryKey: ['admin', 'marketplace'] });
+    },
+    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+  });
+
+  return {
+    request: setAction,
+    feedback: (
+      <>
+        <ConfirmDialog
+          open={Boolean(action)}
+          onOpenChange={(open) => !open && setAction(null)}
+          title={action?.title ?? 'Confirm action'}
+          description={action?.description ?? ''}
+          confirmLabel={action?.label}
+          isLoading={mutation.isPending}
+          promptLabel={action?.needsReason ? 'Administrative reason' : undefined}
+          promptValue={reason}
+          onPromptChange={setReason}
+          promptRequired={action?.needsReason}
+          promptMinLength={10}
+          onConfirm={() => mutation.mutate()}
+        />
+        {toast && (
+          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+        )}
+      </>
+    ),
+  };
+}
 
 export const MarketplaceOversight = () => {
   const [view, setView] = useState<'overview' | 'listings' | 'offers'>('overview');
@@ -279,6 +337,7 @@ function SaleListingsPanel() {
   const [status, setStatus] = useState<ListingStatusFilter>('all');
   const [page, setPage] = useState(1);
   const [activeListing, setActiveListing] = useState<AdminMarketplaceListing | null>(null);
+  const actions = useMarketplaceActions();
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'marketplace', 'listings', { search, status, page }],
@@ -391,19 +450,35 @@ function SaleListingsPanel() {
         onPageChange={setPage}
       />
       {activeListing && (
-        <ListingDetailDialog listingId={activeListing.id} onClose={() => setActiveListing(null)} />
+        <ListingDetailDialog
+          listingId={activeListing.id}
+          onClose={() => setActiveListing(null)}
+          actions={actions}
+        />
       )}
+      {actions.feedback}
     </div>
   );
 }
 
-function ListingDetailDialog({ listingId, onClose }: { listingId: string; onClose: () => void }) {
+function ListingDetailDialog({
+  listingId,
+  onClose,
+  actions,
+}: {
+  listingId: string;
+  onClose: () => void;
+  actions: ReturnType<typeof useMarketplaceActions>;
+}) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin', 'marketplace', 'listings', listingId, 'detail'],
     queryFn: () => unwrap(adminMarketplaceService.listingDetail(listingId)),
   });
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -413,18 +488,28 @@ function ListingDetailDialog({ listingId, onClose }: { listingId: string; onClos
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 id="listing-detail-title" className="text-lg font-semibold">Listing inspection</h2>
+            <h2 id="listing-detail-title" className="text-lg font-semibold">
+              Listing inspection
+            </h2>
             {data && <p className="text-sm text-muted-foreground">{data.title}</p>}
           </div>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </div>
         {isLoading ? (
           <div className="mt-5 h-40 animate-pulse rounded-xl bg-secondary" />
         ) : isError || !data ? (
-          <PageErrorState title="Could not load listing detail" description="Media and publishing checks are unavailable." className="mt-5 min-h-[180px]" />
+          <PageErrorState
+            title="Could not load listing detail"
+            description="Media and publishing checks are unavailable."
+            className="mt-5 min-h-[180px]"
+          />
         ) : (
           <div className="mt-5 space-y-5">
-            <section className={`rounded-xl border p-4 ${data.publishingEligibility.eligible ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
+            <section
+              className={`rounded-xl border p-4 ${data.publishingEligibility.eligible ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}
+            >
               <h3 className="font-medium">Publishing eligibility</h3>
               <p className="mt-1 text-sm">
                 {data.publishingEligibility.eligible
@@ -433,27 +518,122 @@ function ListingDetailDialog({ listingId, onClose }: { listingId: string; onClos
               </p>
               {!data.publishingEligibility.eligible && (
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-destructive">
-                  {data.publishingEligibility.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+                  {data.publishingEligibility.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
                 </ul>
               )}
               <p className="mt-2 text-xs text-muted-foreground">
-                Trust tier {data.publishingEligibility.trustTier} · Identity {data.publishingEligibility.identityVerified ? 'approved' : 'not approved'} · Ownership {data.publishingEligibility.ownershipVerified ? 'approved' : 'not approved'}
+                Trust tier {data.publishingEligibility.trustTier} · Identity{' '}
+                {data.publishingEligibility.identityVerified ? 'approved' : 'not approved'} ·
+                Ownership{' '}
+                {data.publishingEligibility.ownershipVerified ? 'approved' : 'not approved'}
               </p>
             </section>
             <section>
               <h3 className="font-medium">Property media</h3>
               {data.media.length === 0 ? (
-                <p className="mt-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">No cover image, gallery image, or video tour has been uploaded.</p>
+                <p className="mt-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                  No cover image, gallery image, or video tour has been uploaded.
+                </p>
               ) : (
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
                   {data.media.map((file) => (
-                    <div key={`${file.name}-${file.url}`} className="flex items-center justify-between gap-2 rounded-lg border p-3">
+                    <div
+                      key={`${file.name}-${file.url}`}
+                      className="flex items-center justify-between gap-2 rounded-lg border p-3"
+                    >
                       <span className="truncate text-sm">{file.name}</span>
                       <DocumentPreviewButton file={file} title={`Preview ${file.name}`} />
                     </div>
                   ))}
                 </div>
               )}
+            </section>
+            <section>
+              <h3 className="font-medium">Moderation</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {data.status === 'PUBLISHED' && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        actions.request({
+                          title: 'Pause this listing?',
+                          description: 'The listing will stop showing to buyers until resumed.',
+                          label: 'Pause',
+                          run: () => unwrap(adminMarketplaceService.pauseListing(listingId)),
+                        })
+                      }
+                    >
+                      Pause
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        actions.request({
+                          title: 'Flag for verification?',
+                          description:
+                            'The listing will be hidden from public search until it is approved again.',
+                          label: 'Flag',
+                          run: () => unwrap(adminMarketplaceService.flagListing(listingId)),
+                        })
+                      }
+                    >
+                      Flag for review
+                    </Button>
+                  </>
+                )}
+                {data.status === 'PAUSED' && (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      actions.request({
+                        title: 'Resume this listing?',
+                        description: 'The listing will become visible to buyers again.',
+                        label: 'Resume',
+                        run: () => unwrap(adminMarketplaceService.resumeListing(listingId)),
+                      })
+                    }
+                  >
+                    Resume
+                  </Button>
+                )}
+                {data.status === 'PENDING_VERIFICATION' && (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      actions.request({
+                        title: 'Approve this listing?',
+                        description: 'The listing will be published and visible to buyers again.',
+                        label: 'Approve',
+                        run: () => unwrap(adminMarketplaceService.approveListing(listingId)),
+                      })
+                    }
+                  >
+                    Approve
+                  </Button>
+                )}
+                {data.status !== 'CLOSED' && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() =>
+                      actions.request({
+                        title: 'Permanently close this listing?',
+                        description:
+                          'This cannot be undone — the seller would need to create a new listing.',
+                        label: 'Close',
+                        run: () => unwrap(adminMarketplaceService.closeListing(listingId)),
+                      })
+                    }
+                  >
+                    Close permanently
+                  </Button>
+                )}
+              </div>
             </section>
           </div>
         )}
@@ -467,6 +647,7 @@ function OfferQueuePanel() {
   const [status, setStatus] = useState<OfferStatusFilter>('all');
   const [page, setPage] = useState(1);
   const [activeOffer, setActiveOffer] = useState<AdminMarketplaceOffer | null>(null);
+  const actions = useMarketplaceActions();
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'marketplace', 'offers', { search, status, page }],
@@ -576,13 +757,26 @@ function OfferQueuePanel() {
       />
 
       {activeOffer && (
-        <OfferDetailDialog offerId={activeOffer.id} onClose={() => setActiveOffer(null)} />
+        <OfferDetailDialog
+          offerId={activeOffer.id}
+          onClose={() => setActiveOffer(null)}
+          actions={actions}
+        />
       )}
+      {actions.feedback}
     </div>
   );
 }
 
-function OfferDetailDialog({ offerId, onClose }: { offerId: string; onClose: () => void }) {
+function OfferDetailDialog({
+  offerId,
+  onClose,
+  actions,
+}: {
+  offerId: string;
+  onClose: () => void;
+  actions: ReturnType<typeof useMarketplaceActions>;
+}) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin', 'marketplace', 'offers', offerId, 'detail'],
     queryFn: () => unwrap(adminMarketplaceService.offerDetail(offerId)),
@@ -607,7 +801,7 @@ function OfferDetailDialog({ offerId, onClose }: { offerId: string; onClose: () 
             </button>
           </div>
         ) : (
-          <OfferCase360 detail={data} onClose={onClose} />
+          <OfferCase360 detail={data} onClose={onClose} actions={actions} />
         )}
       </div>
     </div>
@@ -617,9 +811,11 @@ function OfferDetailDialog({ offerId, onClose }: { offerId: string; onClose: () 
 function OfferCase360({
   detail,
   onClose,
+  actions,
 }: {
   detail: AdminMarketplaceOfferDetail;
   onClose: () => void;
+  actions: ReturnType<typeof useMarketplaceActions>;
 }) {
   const parties = [
     {
@@ -700,7 +896,15 @@ function OfferCase360({
                 <Landmark className="h-4 w-4" /> Escrow deal
                 <Badge variant="info">{detail.transaction.escrowStatus.replaceAll('_', ' ')}</Badge>
               </p>
-              <p className="font-semibold">{formatCurrency(detail.transaction.amount)}</p>
+              <div className="flex items-center gap-3">
+                <p className="font-semibold">{formatCurrency(detail.transaction.amount)}</p>
+                <Link
+                  href="/admin/escrow"
+                  className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                >
+                  Escrow Oversight <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
             </div>
             {detail.transaction.events.length > 0 && (
               <div className="mt-3 space-y-1.5">
@@ -728,10 +932,36 @@ function OfferCase360({
         )}
       </div>
 
-      <div className="flex justify-end gap-2 border-t border-border p-4">
-        <Button variant="ghost" onClick={onClose}>
-          Close
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border p-4">
+        <Link
+          href={`/admin/users?search=${encodeURIComponent(detail.buyerEmail ?? detail.buyerName)}`}
+          className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+        >
+          View buyer <ExternalLink className="h-3 w-3" />
+        </Link>
+        <div className="flex items-center gap-2">
+          {(detail.status === 'SUBMITTED' || detail.status === 'COUNTERED') && (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() =>
+                actions.request({
+                  title: 'Administratively expire this offer?',
+                  description:
+                    'The offer will be closed as expired. Use this for an abandoned negotiation the buyer or seller never resolved.',
+                  label: 'Expire offer',
+                  needsReason: true,
+                  run: (reason) => unwrap(adminMarketplaceService.expireOffer(detail.id, reason)),
+                })
+              }
+            >
+              Expire offer
+            </Button>
+          )}
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+        </div>
       </div>
     </div>
   );

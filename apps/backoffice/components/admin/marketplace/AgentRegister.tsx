@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ClipboardList,
   Search,
@@ -16,15 +16,22 @@ import {
 import {
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   EmptyState,
+  Input,
   PageErrorState,
   Pagination,
   LegacyInput,
+  Toast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
-import type { AdminAgent, AdminAgentDetail } from '@/types/marketplace';
+import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
+import type { AdminAgent, AdminAgentDetail, AdminAgentTask } from '@/types/marketplace';
 
 const PAGE_SIZE = 10;
 
@@ -40,6 +47,8 @@ export const AgentRegister = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<AdminAgent | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const actions = useProfessionalActions('agents');
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'agents', { search, page }],
@@ -54,6 +63,18 @@ export const AgentRegister = () => {
   });
   const items = data?.items ?? [];
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const blob = await adminMarketplaceService.exportAgents({
+        search: search.trim() || undefined,
+      });
+      downloadBlob(blob, 'agents.csv');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -63,6 +84,9 @@ export const AgentRegister = () => {
             Field-agent register — clients, assigned properties, tasks, inspections and reviews.
           </p>
         </div>
+        <Button variant="outline" onClick={handleExport} disabled={exporting}>
+          {exporting ? 'Exporting…' : 'Export CSV'}
+        </Button>
       </div>
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
@@ -116,6 +140,7 @@ export const AgentRegister = () => {
                     {a.verificationStatus === 'APPROVED' && (
                       <Badge variant="success">Verified</Badge>
                     )}
+                    {a.suspended && <Badge variant="danger">Suspended</Badge>}
                   </div>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <UserRound className="h-3.5 w-3.5" /> {a.email ?? 'No email'}
@@ -149,12 +174,23 @@ export const AgentRegister = () => {
         />
       </div>
 
-      {active && <AgentDetailDialog agentId={active.id} onClose={() => setActive(null)} />}
+      {active && (
+        <AgentDetailDialog agentId={active.id} onClose={() => setActive(null)} actions={actions} />
+      )}
+      {actions.feedback}
     </div>
   );
 };
 
-function AgentDetailDialog({ agentId, onClose }: { agentId: string; onClose: () => void }) {
+function AgentDetailDialog({
+  agentId,
+  onClose,
+  actions,
+}: {
+  agentId: string;
+  onClose: () => void;
+  actions: ReturnType<typeof useProfessionalActions>;
+}) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin', 'agents', agentId, 'detail'],
     queryFn: () => unwrap(adminMarketplaceService.agentDetail(agentId)),
@@ -179,14 +215,23 @@ function AgentDetailDialog({ agentId, onClose }: { agentId: string; onClose: () 
             </Button>
           </div>
         ) : (
-          <AgentCase360 detail={data} onClose={onClose} />
+          <AgentCase360 detail={data} onClose={onClose} actions={actions} />
         )}
       </div>
     </div>
   );
 }
 
-function AgentCase360({ detail, onClose }: { detail: AdminAgentDetail; onClose: () => void }) {
+function AgentCase360({
+  detail,
+  onClose,
+  actions,
+}: {
+  detail: AdminAgentDetail;
+  onClose: () => void;
+  actions: ReturnType<typeof useProfessionalActions>;
+}) {
+  const [reassigning, setReassigning] = useState<AdminAgentTask | null>(null);
   const tasks = detail.tasks;
   const stats = [
     {
@@ -231,8 +276,47 @@ function AgentCase360({ detail, onClose }: { detail: AdminAgentDetail; onClose: 
             {detail.accountStatus}
           </Badge>
           <Badge variant="neutral">Trust {detail.trustScore}</Badge>
+          {detail.suspended ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                actions.request({
+                  title: 'Restore agent activity?',
+                  description:
+                    'The agent will immediately regain the ability to take new clients and field work.',
+                  label: 'Restore',
+                  run: (reason) => unwrap(adminMarketplaceService.restoreAgent(detail.id, reason)),
+                })
+              }
+            >
+              Restore
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() =>
+                actions.request({
+                  title: 'Suspend agent activity?',
+                  description:
+                    'Blocks new client invitations and inspection/verification submissions immediately — independent of the account, which stays otherwise usable.',
+                  label: 'Suspend',
+                  run: (reason) => unwrap(adminMarketplaceService.suspendAgent(detail.id, reason)),
+                })
+              }
+            >
+              Suspend
+            </Button>
+          )}
         </div>
       </div>
+      {detail.suspended && detail.suspendedReason && (
+        <p className="border-b border-border bg-destructive/5 px-5 py-2 text-sm text-destructive">
+          Suspended{detail.suspendedAt ? ` ${formatDate(detail.suspendedAt)}` : ''}:{' '}
+          {detail.suspendedReason}
+        </p>
+      )}
 
       <div className="space-y-5 p-5">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -277,6 +361,25 @@ function AgentCase360({ detail, onClose }: { detail: AdminAgentDetail; onClose: 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="neutral">{c.status}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
+                      {c.status === 'ACTIVE' && (
+                        <button
+                          type="button"
+                          className="font-medium text-destructive hover:underline"
+                          onClick={() =>
+                            actions.request({
+                              title: 'Revoke this client relationship?',
+                              description: `${detail.legalName} will immediately lose access to ${c.clientName}'s properties.`,
+                              label: 'Revoke',
+                              run: (reason) =>
+                                unwrap(
+                                  adminMarketplaceService.revokeAgentClient(detail.id, c.id, reason)
+                                ),
+                            })
+                          }
+                        >
+                          Revoke
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -301,6 +404,43 @@ function AgentCase360({ detail, onClose }: { detail: AdminAgentDetail; onClose: 
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       Due {formatDate(t.dueAt ?? t.createdAt, 'short')}
                     </p>
+                    <div className="mt-2 flex gap-3">
+                      {(t.status === 'ASSIGNED' ||
+                        t.status === 'IN_PROGRESS' ||
+                        t.status === 'OVERDUE') && (
+                        <button
+                          type="button"
+                          className="text-xs font-medium text-primary hover:underline"
+                          onClick={() => setReassigning(t)}
+                        >
+                          Reassign
+                        </button>
+                      )}
+                      {t.status === 'CANCELLED' && (
+                        <button
+                          type="button"
+                          className="text-xs font-medium text-primary hover:underline"
+                          onClick={() =>
+                            actions.request({
+                              title: 'Reopen this cancelled task?',
+                              description:
+                                'The task returns to Assigned so it can be worked or reassigned.',
+                              label: 'Reopen',
+                              run: (reason) =>
+                                unwrap(
+                                  adminMarketplaceService.setAgentTaskStatus(
+                                    t.id,
+                                    'ASSIGNED',
+                                    reason
+                                  )
+                                ),
+                            })
+                          }
+                        >
+                          Reopen
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -314,6 +454,69 @@ function AgentCase360({ detail, onClose }: { detail: AdminAgentDetail; onClose: 
           Close
         </Button>
       </div>
+      {reassigning && (
+        <TaskReassignDialog task={reassigning} onClose={() => setReassigning(null)} />
+      )}
     </div>
+  );
+}
+
+function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: () => void }) {
+  const client = useQueryClient();
+  const [newAgentId, setNewAgentId] = useState('');
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!newAgentId.trim()) throw new Error('Enter the target agent’s user ID.');
+      if (reason.trim().length < 10)
+        throw new Error('Provide an administrative reason of at least 10 characters.');
+      return unwrap(
+        adminMarketplaceService.reassignAgentTask(task.id, newAgentId.trim(), reason.trim())
+      );
+    },
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ['admin', 'agents'] });
+      onClose();
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  return (
+    <>
+      <Dialog open onOpenChange={(open) => !open && onClose()}>
+        <DialogContent>
+          <DialogTitle className="font-semibold">Reassign task</DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
+            {task.title} — find the target agent&apos;s user ID from their own case-360 URL or the
+            users register.
+          </DialogDescription>
+          <div className="mt-5 space-y-4">
+            <label className="block space-y-1.5">
+              <span className="text-sm font-medium">Target agent user ID</span>
+              <Input value={newAgentId} onChange={(e) => setNewAgentId(e.target.value)} />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-sm font-medium">Administrative reason</span>
+              <Input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="At least 10 characters"
+              />
+            </label>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
+                Cancel
+              </Button>
+              <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+                {mutation.isPending ? 'Reassigning…' : 'Reassign'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
+    </>
   );
 }
