@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle2, FileSignature } from 'lucide-react';
 import { Button, SignaturePad } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
+import { describeRentPeriod } from '@/lib/leaseTerm';
 import type { PendingLease } from '@/services/renterService';
 
 interface PendingLeaseCardProps {
@@ -37,7 +38,9 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
           </p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Monthly rent</p>
+          <p className="text-xs text-muted-foreground">
+            {describeRentPeriod(lease.startDate, lease.endDate)}
+          </p>
           <p className="text-sm font-medium text-foreground mt-0.5">
             {formatCurrency(lease.rentAmount)}
           </p>

@@ -69,10 +69,11 @@ export default function LandlordLeasesPage() {
       data: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>;
       sendImmediately: boolean;
     }) => {
-      const { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit } = data;
+      const { unitId, tenantName, tenantId, leaseStart, leaseEnd, rentAmount, securityDeposit } =
+        data;
       return unwrap(
         landlordService.createLease(
-          { unitId, tenantName, leaseStart, leaseEnd, rentAmount, securityDeposit },
+          { unitId, tenantName, tenantId, leaseStart, leaseEnd, rentAmount, securityDeposit },
           sendImmediately
         )
       );

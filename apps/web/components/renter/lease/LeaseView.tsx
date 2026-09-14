@@ -18,35 +18,39 @@ import { FileText } from 'lucide-react';
 import { PageErrorState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export const LeaseView = () => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
+  // A renter whose lease is still awaiting signature has no active lease, no
+  // renewal offer, no increases and no reminders yet: the API answers those with
+  // 404. They are "nothing to report", not an outage — treating them as failures
+  // replaced this whole tab with an error and hid the sign-your-lease card.
   const leaseQuery = useQuery({
     queryKey: renterKeys.lease,
-    queryFn: () => unwrap(renterService.getLease()),
+    queryFn: () => unwrapOptional(renterService.getLease(), null),
   });
   const lease = leaseQuery.data ?? null;
   const pendingLeaseQuery = useQuery({
     queryKey: renterKeys.pendingLease,
-    queryFn: () => unwrap(renterService.getPendingLease()),
+    queryFn: () => unwrapOptional(renterService.getPendingLease(), null),
     enabled: !lease,
   });
   const renewalOfferQuery = useQuery({
     queryKey: renterKeys.renewalOffer,
     // Empty 200 body from the API means "no offer"; see RenterLeaseRenewal.
-    queryFn: async () => (await unwrap(renterService.getRenewalOffer())) ?? null,
+    queryFn: async () => (await unwrapOptional(renterService.getRenewalOffer(), null)) ?? null,
   });
   const rentIncreasesQuery = useQuery({
     queryKey: renterKeys.rentIncreases,
-    queryFn: () => unwrap(renterService.getRentIncreases()),
+    queryFn: () => unwrapOptional(renterService.getRentIncreases(), []),
   });
   const paymentRemindersQuery = useQuery({
     queryKey: renterKeys.upcomingPaymentReminders,
-    queryFn: () => unwrap(renterService.getUpcomingPaymentReminders()),
+    queryFn: () => unwrapOptional(renterService.getUpcomingPaymentReminders(), []),
   });
   const pendingLease = pendingLeaseQuery.data ?? null;
   const renewalOffer = renewalOfferQuery.data ?? null;

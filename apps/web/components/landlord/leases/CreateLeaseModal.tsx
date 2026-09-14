@@ -6,7 +6,7 @@ import { LegacySelect } from '@getrentos/ui';
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, BadgeCheck } from 'lucide-react';
 import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
 import type { Lease, Unit } from '@/types/landlord';
 
@@ -42,6 +42,9 @@ export const CreateLeaseModal = ({
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
     if (unit && !rentAmount) setRentAmount(String(unit.monthlyRent));
+    // An approved applicant is the tenant: prefill rather than make the
+    // landlord retype a name we already hold.
+    if (unit?.approvedApplicant) setTenantName(unit.approvedApplicant.name);
   };
 
   const reset = () => {
@@ -67,7 +70,7 @@ export const CreateLeaseModal = ({
   > | null => {
     if (!selectedUnit || !isValid) return null;
     return {
-      tenantId: `tenant_${Date.now()}`,
+      tenantId: selectedUnit.approvedApplicant?.userId ?? '',
       tenantName: tenantName.trim(),
       propertyId: selectedUnit.propertyId,
       propertyName: selectedUnit.propertyName,
@@ -143,6 +146,21 @@ export const CreateLeaseModal = ({
                       placeholder="Full legal name"
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
+                    {selectedUnit?.approvedApplicant ? (
+                      <p className="mt-1.5 flex items-start gap-1.5 text-xs text-green-700 dark:text-green-400">
+                        <BadgeCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span>
+                          {selectedUnit.approvedApplicant.name} was approved for this unit. This
+                          lease is linked to their account so they can review and sign it in their
+                          own portal.
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        No approved applicant for this unit — the lease is recorded against this
+                        name only, and the tenant will not see it in a GetRentos account.
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">

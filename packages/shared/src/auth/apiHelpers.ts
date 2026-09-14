@@ -267,6 +267,27 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   return response.data as T;
 }
 
+/**
+ * For resources that legitimately may not exist yet.
+ *
+ * A renter with a lease still awaiting signature has no active lease, no renewal
+ * offer, no rent increases and no payment reminders, and the API answers each of
+ * those with 404. Treating that as a failure hid the very screen that lets them
+ * sign, so a 404 resolves to the supplied empty value and every other error
+ * still throws.
+ */
+export async function unwrapOptional<T>(
+  promise: Promise<ApiResponse<T>>,
+  whenMissing: T
+): Promise<T> {
+  try {
+    return await unwrap(promise);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return whenMissing;
+    throw error;
+  }
+}
+
 export function toQuery(params: Record<string, string | number | boolean | undefined>): string {
   const entries = Object.entries(params).filter(
     ([, v]) => v !== undefined && v !== '' && v !== 'all'

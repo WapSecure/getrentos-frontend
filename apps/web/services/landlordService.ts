@@ -406,13 +406,24 @@ export const landlordService = {
     data: Pick<
       Lease,
       'unitId' | 'tenantName' | 'leaseStart' | 'leaseEnd' | 'rentAmount' | 'securityDeposit'
-    >,
+    > & { tenantId?: string },
     sendImmediately: boolean
   ): Promise<ApiResponse<Lease>> {
     return safeCall(() =>
       authFetch('/landlord/leases', {
         method: 'POST',
-        body: JSON.stringify({ ...data, sendImmediately }),
+        // tenantId is omitted when there is no linked applicant: the API then
+        // falls back to this unit's approved applicant, or to the name alone.
+        body: JSON.stringify({
+          unitId: data.unitId,
+          tenantName: data.tenantName,
+          leaseStart: data.leaseStart,
+          leaseEnd: data.leaseEnd,
+          rentAmount: data.rentAmount,
+          securityDeposit: data.securityDeposit,
+          ...(data.tenantId ? { tenantId: data.tenantId } : {}),
+          sendImmediately,
+        }),
       })
     );
   },

@@ -73,6 +73,13 @@ export interface Unit {
   occupancyStatus: UnitOccupancyStatus;
   tenantId?: string;
   tenantName?: string;
+  /** Approved applicant waiting on this unit; the lease links to their account. */
+  approvedApplicant?: {
+    applicationId: string;
+    userId?: string;
+    name: string;
+    email: string;
+  };
 }
 
 export interface Listing {
