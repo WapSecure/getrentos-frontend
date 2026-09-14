@@ -21,6 +21,14 @@ interface ButtonProps {
   rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   shadow?: boolean;
   title?: string;
+  /**
+   * Accessible name, overriding the visible text.
+   *
+   * Needed wherever the same button repeats down a list — "Manage", "View",
+   * "Edit" — because a screen reader then hears a column of identical labels
+   * with no way to tell which row each one belongs to.
+   */
+  'aria-label'?: string;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -41,6 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rounded = 'full',
       shadow = false,
       title,
+      'aria-label': ariaLabel,
     },
     ref
   ) => {
@@ -118,7 +127,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     if (href) {
       return (
-        <Link href={href} className={combinedClassName} title={title}>
+        <Link href={href} className={combinedClassName} title={title} aria-label={ariaLabel}>
           {content}
         </Link>
       );
@@ -138,6 +147,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         className={combinedClassName}
         title={title}
+        aria-label={ariaLabel}
         {...motionProps}
       >
         {content}
