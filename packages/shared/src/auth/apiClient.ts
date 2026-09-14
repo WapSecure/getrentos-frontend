@@ -134,10 +134,35 @@ let refreshPromise: Promise<boolean> | null = null;
 
 const SESSION_EXPIRED_KEY = 'gr_session_expired';
 
+type SessionExpiredListener = () => void;
+const sessionExpiredListeners = new Set<SessionExpiredListener>();
+
+/**
+ * Subscribes to "the session could not be restored". Fires after the access
+ * token has been cleared, so listeners can send the user to sign in rather
+ * than leaving them on a page that quietly renders empty data forever.
+ * Returns an unsubscribe function.
+ */
+export function onSessionExpired(listener: SessionExpiredListener): () => void {
+  sessionExpiredListeners.add(listener);
+  return () => {
+    sessionExpiredListeners.delete(listener);
+  };
+}
+
 /** Marks that the session could not be restored (shown on the login screen). */
 export function markSessionExpired() {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(SESSION_EXPIRED_KEY, '1');
+  // A listener must never break the others, or a throwing one would silently
+  // stop every later subscriber from being told.
+  for (const listener of sessionExpiredListeners) {
+    try {
+      listener();
+    } catch {
+      // ignored on purpose
+    }
+  }
 }
 
 export function consumeSessionExpiredFlag(): boolean {

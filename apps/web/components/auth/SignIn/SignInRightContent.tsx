@@ -10,6 +10,7 @@ import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
 import { Toast, ToastVariant } from '@getrentos/ui';
+import { SessionExpiredNotice } from '@getrentos/ui';
 
 interface SignInRightContentProps {
   method: SignInMethod;
@@ -130,6 +131,8 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             Sign in to continue your property journey
           </p>
         </div>
+
+        <SessionExpiredNotice />
 
         {/* Lockout Warning */}
         {isLocked && lockoutTimer && (

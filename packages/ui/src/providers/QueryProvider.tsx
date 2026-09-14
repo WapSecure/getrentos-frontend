@@ -2,16 +2,47 @@
 
 import { useEffect, useState } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ApiError } from '@getrentos/shared';
+import { ApiError, onSessionExpired } from '@getrentos/shared';
 import { Toast } from '../Toast';
 
+const GENERIC_MUTATION_ERROR = 'We could not complete that action. Please try again.';
+
+/**
+ * unwrap() throws richer Error subclasses (VerificationRequiredError,
+ * PlanGateError) that already carry the backend's message — the specific
+ * reason the action was refused. Reading `message` off any Error keeps that
+ * text in front of the user instead of replacing it with a shrug.
+ */
 const mutationErrorMessage = (error: unknown) => {
   if (error instanceof ApiError) return error.message;
-  return 'We could not complete that action. Please try again.';
+  if (error instanceof Error && error.message.trim()) return error.message;
+  return GENERIC_MUTATION_ERROR;
 };
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
+interface QueryProviderProps {
+  children: React.ReactNode;
+  /** Where to send the user when the session can no longer be restored. */
+  loginPath?: string;
+}
+
+export function QueryProvider({ children, loginPath = '/login' }: QueryProviderProps) {
   const [mutationError, setMutationError] = useState<{ id: number; message: string } | null>(null);
+
+  // A session that cannot be refreshed used to leave the app rendering zeros
+  // with console errors and no explanation. Send them to sign in instead, with
+  // the page they were on so they land back there afterwards.
+  useEffect(() => {
+    return onSessionExpired(() => {
+      const from = `${window.location.pathname}${window.location.search}`;
+      if (window.location.pathname.startsWith(loginPath)) return;
+      // A full navigation, so every in-memory cache and stale prop is dropped
+      // rather than re-rendered as an empty state.
+      window.location.assign(
+        `${loginPath}?reason=session_expired&next=${encodeURIComponent(from)}`
+      );
+    });
+  }, [loginPath]);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({

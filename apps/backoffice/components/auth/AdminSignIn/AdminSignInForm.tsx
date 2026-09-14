@@ -10,6 +10,7 @@ import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
 import { Input } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Toast, ToastVariant } from '@getrentos/ui';
+import { SessionExpiredNotice } from '@getrentos/ui';
 import {
   BACKEND_ROLE_TO_ID,
   ROUTES,
@@ -179,6 +180,8 @@ export const AdminSignInForm = () => {
           Restricted access — for GetRentos staff only
         </p>
       </div>
+
+      <SessionExpiredNotice />
 
       <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {pendingChallenge ? (

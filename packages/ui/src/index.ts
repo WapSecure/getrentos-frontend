@@ -33,6 +33,7 @@ export * from './hooks/useSessionTimeout';
 export * from './SaveButton';
 export * from './SectionHeader';
 export * from './Select';
+export * from './SessionExpiredNotice';
 export * from './SignaturePad';
 export * from './Skeleton';
 export * from './StatCard';

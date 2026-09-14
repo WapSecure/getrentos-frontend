@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background">
         <ThemeProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider loginPath="/admin/login">{children}</QueryProvider>
         </ThemeProvider>
       </body>
     </html>
