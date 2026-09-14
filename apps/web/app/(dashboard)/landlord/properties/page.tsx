@@ -19,7 +19,7 @@ import { landlordService } from '@/services/landlordService';
 import { landService } from '@/services/landService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
-import type { Property } from '@/types/landlord';
+import type { Property, PropertyUpdatePayload } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { ROUTES } from '@/lib/constants/auth';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
@@ -61,7 +61,12 @@ export default function LandlordPropertiesPage() {
   const [verifyingProperty, setVerifyingProperty] = useState<Property | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data } = useQuery({
+  const {
+    data,
+    isPending: isLoadingProperties,
+    isError: propertiesFailed,
+    refetch: refetchProperties,
+  } = useQuery({
     queryKey: [
       ...landlordKeys.properties,
       {
@@ -147,13 +152,8 @@ export default function LandlordPropertiesPage() {
     setToast({ variant: 'error', message: error.message || fallback });
 
   const editMutation = useMutation({
-    mutationFn: ({
-      id,
-      updates,
-    }: {
-      id: string;
-      updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>;
-    }) => unwrap(landlordService.updateProperty(id, updates)),
+    mutationFn: ({ id, updates }: { id: string; updates: PropertyUpdatePayload }) =>
+      unwrap(landlordService.updateProperty(id, updates)),
     onSuccess: invalidateProperties,
     onError: notifyPropertyError('We could not save these changes. Please try again.'),
   });
@@ -173,10 +173,8 @@ export default function LandlordPropertiesPage() {
   const handlePublish = (submission: LandlordPropertySubmission) =>
     publishMutation.mutateAsync(submission).then(() => undefined);
 
-  const handleEditSave = (
-    id: string,
-    updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>
-  ) => editMutation.mutate({ id, updates });
+  const handleEditSave = (id: string, updates: PropertyUpdatePayload) =>
+    editMutation.mutate({ id, updates });
 
   const handleToggleArchive = (id: string) => toggleArchiveMutation.mutate(id);
 
@@ -202,7 +200,9 @@ export default function LandlordPropertiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Properties</h1>
           <p className="text-muted-foreground mt-1">
-            {total} propert{total === 1 ? 'y' : 'ies'} in your portfolio
+            {isLoadingProperties || propertiesFailed
+              ? 'Loading your portfolio…'
+              : `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
@@ -242,7 +242,35 @@ export default function LandlordPropertiesPage() {
         </div>
       </div>
 
-      {properties.length === 0 ? (
+      {isLoadingProperties ? (
+        <div
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          aria-busy="true"
+          aria-label="Loading properties"
+        >
+          {[0, 1, 2].map((index) => (
+            <div
+              key={index}
+              className="h-72 animate-pulse rounded-2xl border border-border bg-card"
+            />
+          ))}
+        </div>
+      ) : propertiesFailed ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+            <Building2 className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">
+            We couldn&apos;t load your properties
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+            Your portfolio is safe — this was a connection problem. Try again.
+          </p>
+          <Button variant="primary" className="mt-6" onClick={() => refetchProperties()}>
+            Try again
+          </Button>
+        </div>
+      ) : properties.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
