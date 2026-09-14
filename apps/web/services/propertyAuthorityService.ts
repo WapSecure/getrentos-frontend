@@ -40,6 +40,7 @@ export interface PropertyAuthorityDto {
   relationship: string;
   status: AuthorityStatus;
   canList: boolean;
+  canManage: boolean;
   canTransact: boolean;
   note?: string | null;
   decisionNote?: string | null;
@@ -63,6 +64,7 @@ export interface ManagedPropertyDto {
   relationship: string;
   status: AuthorityStatus;
   canList: boolean;
+  canManage: boolean;
   canTransact: boolean;
   listingCount: number;
   archived: boolean;

@@ -12,6 +12,7 @@ import {
   RefreshCw,
   ShieldAlert,
   Wallet,
+  Wrench,
 } from 'lucide-react';
 import {
   AUTHORITY_RELATIONSHIPS,
@@ -52,8 +53,20 @@ const statusBadge = (status: string) => (
   </span>
 );
 
-/** The two capabilities a mandate carries, shown as chips so the limits are visible. */
-const CapabilityChips = ({ canList, canTransact }: { canList: boolean; canTransact: boolean }) => (
+/**
+ * The three capabilities a mandate carries, shown as chips so the limits are
+ * visible. They are deliberately separate: being allowed to advertise a
+ * property, to run its tenancy, and to move its money are different grants.
+ */
+const CapabilityChips = ({
+  canList,
+  canManage,
+  canTransact,
+}: {
+  canList: boolean;
+  canManage: boolean;
+  canTransact: boolean;
+}) => (
   <div className="flex flex-wrap gap-2">
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -65,6 +78,17 @@ const CapabilityChips = ({ canList, canTransact }: { canList: boolean; canTransa
     >
       {canList ? <KeyRound className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
       Listings
+    </span>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+        canManage
+          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          : 'bg-muted text-muted-foreground'
+      }`}
+      title="May run the tenancy: units, tenants, applications, leases and maintenance"
+    >
+      {canManage ? <Wrench className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+      Tenancy
     </span>
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -106,7 +130,11 @@ const ManagedPropertyCard = ({ property }: { property: ManagedPropertyDto }) => 
       </span>
     </p>
 
-    <CapabilityChips canList={property.canList} canTransact={property.canTransact} />
+    <CapabilityChips
+      canList={property.canList}
+      canManage={property.canManage}
+      canTransact={property.canTransact}
+    />
 
     <div className="flex items-center justify-between mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
       <span>

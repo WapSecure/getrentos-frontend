@@ -49,16 +49,18 @@ const MIN_REASON_LENGTH = 10;
  *
  * Approving grants a mandate over someone else's property, which is why it
  * lives behind the same verification permissions as the rest of the trust
- * decisions, and why the two capabilities are offered separately: `canList`
- * lets them advertise the property, `canTransact` additionally lets them act on
- * money. Granting the second one is a materially bigger decision than the
- * first, so it is an explicit choice rather than an implied one.
+ * decisions, and why the three capabilities are offered separately: `canList`
+ * lets them advertise the property, `canManage` additionally lets them run its
+ * tenancy, and `canTransact` additionally lets them act on its money. Each is a
+ * materially bigger decision than the last, so they are explicit choices rather
+ * than implied ones.
  */
 export default function PropertyAuthoritiesPage() {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<StatusFilter>('PENDING');
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [canManage, setCanManage] = useState(false);
   const [canTransact, setCanTransact] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState<number | string>('');
   const [note, setNote] = useState('');
@@ -83,6 +85,7 @@ export default function PropertyAuthoritiesPage() {
         action === 'approve'
           ? propertyAuthorityService.approve(claim.id, {
               canList: true,
+              canManage,
               canTransact,
               ...(typeof expiresInDays === 'number' ? { expiresInDays } : {}),
               ...(note.trim() ? { note: note.trim() } : {}),
@@ -106,6 +109,7 @@ export default function PropertyAuthoritiesPage() {
         setOpenId(null);
         setReason('');
         setNote('');
+        setCanManage(false);
         setCanTransact(false);
         setExpiresInDays('');
         void invalidate();
@@ -206,6 +210,9 @@ export default function PropertyAuthoritiesPage() {
                       <Badge variant={claim.canList ? 'info' : 'neutral'}>
                         {claim.canList ? 'Can list' : 'No listing rights'}
                       </Badge>
+                      <Badge variant={claim.canManage ? 'info' : 'neutral'}>
+                        {claim.canManage ? 'Can manage tenancy' : 'No tenancy rights'}
+                      </Badge>
                       <Badge variant={claim.canTransact ? 'success' : 'neutral'}>
                         {claim.canTransact ? 'Can move money' : 'No money rights'}
                       </Badge>
@@ -250,12 +257,26 @@ export default function PropertyAuthoritiesPage() {
                       <input
                         type="checkbox"
                         className="mt-1"
+                        checked={canManage}
+                        onChange={(event) => setCanManage(event.target.checked)}
+                      />
+                      <span className="text-muted-foreground">
+                        Also allow running the tenancy (units, tenants, applications, leases,
+                        maintenance, evictions, expenses). Leave this off for someone who should
+                        only advertise the property.
+                      </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 text-sm">
+                      <input
+                        type="checkbox"
+                        className="mt-1"
                         checked={canTransact}
                         onChange={(event) => setCanTransact(event.target.checked)}
                       />
                       <span className="text-muted-foreground">
                         Also allow money actions (release escrow, accept offers). Leave this off
-                        for someone who should only run the listing.
+                        for someone who should only run the day-to-day.
                       </span>
                     </label>
 

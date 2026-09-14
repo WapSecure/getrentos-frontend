@@ -19,6 +19,7 @@ export interface PropertyAuthorityClaim {
   relationship: string;
   status: AuthorityStatus;
   canList: boolean;
+  canManage: boolean;
   canTransact: boolean;
   note?: string | null;
   requestedById: string;
@@ -54,13 +55,20 @@ export const propertyAuthorityService = {
   },
 
   /**
-   * Grant the mandate. `canList` is required by the API; `canTransact` is the
-   * separate permission to act on money, so a manager can be trusted to run a
-   * listing without being trusted with payouts.
+   * Grant the mandate. `canList` is required by the API; `canManage` is the
+   * separate permission to run the tenancy, and `canTransact` the separate
+   * permission to act on money — so a manager can be trusted to run a property
+   * without being trusted with its payouts.
    */
   async approve(
     id: string,
-    input: { canList: boolean; canTransact?: boolean; expiresInDays?: number; note?: string }
+    input: {
+      canList: boolean;
+      canManage?: boolean;
+      canTransact?: boolean;
+      expiresInDays?: number;
+      note?: string;
+    }
   ): Promise<ApiResponse<PropertyAuthorityClaim>> {
     return safeCall(() =>
       authFetch<PropertyAuthorityClaim>(`/admin/property-authorities/${id}/approve`, {
