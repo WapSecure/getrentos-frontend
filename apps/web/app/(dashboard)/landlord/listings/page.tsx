@@ -25,7 +25,12 @@ export default function LandlordListingsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
 
-  const { data: listings = [] } = useQuery({
+  const {
+    data: listings = [],
+    isPending: isLoadingListings,
+    isError: listingsFailed,
+    refetch: refetchListings,
+  } = useQuery({
     queryKey: landlordKeys.listings(),
     queryFn: () => unwrap(landlordService.listListings()),
   });
@@ -99,8 +104,14 @@ export default function LandlordListingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Listings</h1>
           <p className="text-muted-foreground mt-1">
-            {publishedCount} active listing{publishedCount === 1 ? '' : 's'} • {vacantUnits.length}{' '}
-            vacant unit{vacantUnits.length === 1 ? '' : 's'} unlisted
+            {isLoadingListings || listingsFailed ? (
+              'Loading your listings…'
+            ) : (
+              <>
+                {publishedCount} active listing{publishedCount === 1 ? '' : 's'} •{' '}
+                {vacantUnits.length} vacant unit{vacantUnits.length === 1 ? '' : 's'} unlisted
+              </>
+            )}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
@@ -125,7 +136,35 @@ export default function LandlordListingsPage() {
         ))}
       </div>
 
-      {filteredListings.length === 0 ? (
+      {isLoadingListings ? (
+        <div
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          aria-busy="true"
+          aria-label="Loading listings"
+        >
+          {[0, 1, 2].map((index) => (
+            <div
+              key={index}
+              className="h-72 animate-pulse rounded-2xl border border-border bg-card"
+            />
+          ))}
+        </div>
+      ) : listingsFailed ? (
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+            <Megaphone className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">
+            We couldn&apos;t load your listings
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+            This was a connection problem — nothing was lost. Try again.
+          </p>
+          <Button variant="primary" className="mt-6" onClick={() => refetchListings()}>
+            Try again
+          </Button>
+        </div>
+      ) : filteredListings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Megaphone className="w-8 h-8 text-primary" />
