@@ -6,6 +6,7 @@ import { Home, MapPin } from 'lucide-react';
 import { formatPrice, type Property } from '@/types/renter';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
+import { PropertyPhoto } from '@/components/renter/shared/PropertyPhoto';
 
 interface SimilarPropertiesProps {
   currentId: string;
@@ -36,9 +37,7 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
             href={buildRoute.renterPropertyDetail(property.id)}
             className="block rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
           >
-            <div className="h-24 bg-linear-to-br from-secondary to-muted flex items-center justify-center">
-              <Home className="w-6 h-6 text-gray-400 dark:text-gray-600" />
-            </div>
+            <PropertyPhoto src={property.image} alt={property.title} className="h-24" />
             <div className="p-2.5">
               <p className="text-sm font-medium text-foreground truncate">{property.title}</p>
               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">

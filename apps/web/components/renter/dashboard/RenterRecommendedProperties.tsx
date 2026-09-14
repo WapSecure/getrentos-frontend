@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -27,6 +28,7 @@ export const RenterRecommendedProperties = () => {
   });
   const savedListings = savedListingsData?.items ?? [];
   const savedIds = savedListings.map((p) => p.id);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
 
   const invalidateSaved = () => {
     queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
@@ -83,16 +85,27 @@ export const RenterRecommendedProperties = () => {
               transition={{ delay: 0.35 + index * 0.05, duration: 0.3 }}
               className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Property Image Placeholder */}
               <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto">
-                      <Home className="w-6 h-6 text-primary" />
+                {property.image && !failedImages.includes(property.id) ? (
+                  // Signed MinIO URLs, so plain <img> rather than next/image.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={property.image}
+                    alt={property.title}
+                    loading="lazy"
+                    onError={() => setFailedImages((prev) => [...prev, property.id])}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto">
+                        <Home className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">No photo yet</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">Property Image</p>
                   </div>
-                </div>
+                )}
                 {property.verified && (
                   <span className="absolute top-2 left-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
                     Verified

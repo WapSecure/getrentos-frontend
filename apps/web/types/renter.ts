@@ -34,10 +34,13 @@ export interface Property {
   size: number;
   rating: number;
   verified: boolean;
+  /** Signed cover photo URL (first entry of `images`). */
   image: string;
+  /** Signed photo URLs, cover first. */
+  images?: string[];
+  /** Signed URL of the landlord's uploaded walkthrough video, when present. */
+  videoTourUrl?: string;
   score?: number;
-  hasVirtualTour?: boolean;
-  virtualTourUrl?: string;
   landlordResponseRate?: number;
   landlordRating?: number;
   landlordReviews?: number;

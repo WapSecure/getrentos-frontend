@@ -152,7 +152,9 @@ export default function PropertyDetailPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <PropertyGallery
-            hasVirtualTour={property.hasVirtualTour || false}
+            images={property.images}
+            videoTourUrl={property.videoTourUrl}
+            fallbackImage={property.image}
             onOpenTour={() => openTour('tour')}
           />
 
@@ -344,6 +346,8 @@ export default function PropertyDetailPage() {
         <VirtualTourViewerModal
           propertyTitle={property.title}
           propertyId={property.propertyId}
+          videoTourUrl={property.videoTourUrl}
+          hostName={property.landlordName}
           initialMode={tourMode}
           onClose={() => setTourOpen(false)}
         />

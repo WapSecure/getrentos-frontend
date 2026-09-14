@@ -130,6 +130,8 @@ export const DiscoverPropertyGrid = ({
         <VirtualTourViewerModal
           propertyTitle={tourProperty?.title || null}
           propertyId={tourProperty?.propertyId || null}
+          videoTourUrl={tourProperty?.videoTourUrl}
+          hostName={tourProperty?.landlordName}
           initialMode={tourInitialMode}
           onClose={() => setTourProperty(null)}
         />

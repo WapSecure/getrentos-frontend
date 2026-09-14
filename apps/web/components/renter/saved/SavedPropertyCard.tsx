@@ -11,7 +11,6 @@ import {
   Square,
   Heart,
   Star,
-  Home,
   Trash2,
   BookmarkPlus,
   Clock,
@@ -26,6 +25,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { AddNoteModal } from './AddNoteModal';
 import { SharePropertyModal } from './SharePropertyModal';
+import { PropertyPhoto } from '@/components/renter/shared/PropertyPhoto';
 
 interface SavedPropertyCardProps {
   property: SavedListingItem;
@@ -132,11 +132,11 @@ export const SavedPropertyCard = ({
       <>
         <div className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow">
           <div className="flex flex-col sm:flex-row">
-            <div className="relative w-full sm:w-48 h-40 bg-linear-to-br from-secondary to-muted shrink-0">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Home className="w-8 h-8 text-gray-400" />
-              </div>
-
+            <PropertyPhoto
+              src={property.image}
+              alt={property.title}
+              className="w-full sm:w-48 h-40 shrink-0"
+            >
               {onSelect && (
                 <button
                   onClick={(e) => {
@@ -161,7 +161,7 @@ export const SavedPropertyCard = ({
                   {statusConfig.label}
                 </div>
               )}
-            </div>
+            </PropertyPhoto>
 
             <div className="flex-1 p-4">
               <div className="flex flex-wrap justify-between gap-2">
@@ -297,11 +297,7 @@ export const SavedPropertyCard = ({
   return (
     <>
       <div className="group bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 relative">
-        <div className="relative h-48 bg-linear-to-br from-secondary to-muted">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Home className="w-12 h-12 text-gray-400 dark:text-gray-600" />
-          </div>
-
+        <PropertyPhoto src={property.image} alt={property.title} className="h-48">
           {onSelect && (
             <button
               onClick={(e) => {
@@ -339,7 +335,7 @@ export const SavedPropertyCard = ({
               {statusConfig.label}
             </div>
           )}
-        </div>
+        </PropertyPhoto>
 
         <div className="p-4">
           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">

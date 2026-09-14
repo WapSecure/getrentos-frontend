@@ -45,6 +45,7 @@ export const DiscoverPropertyCard = ({
   onOpenTour,
 }: DiscoverPropertyCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   const formatPrice = () => {
     const formatter = new Intl.NumberFormat('en-NG', {
@@ -79,11 +80,23 @@ export const DiscoverPropertyCard = ({
       className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300"
     >
       <div className="relative h-48 bg-linear-to-br from-secondary to-muted">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Home className="w-12 h-12 text-gray-400 dark:text-gray-600" />
-        </div>
+        {property.image && !imageFailed ? (
+          // Signed MinIO URLs, so plain <img> rather than next/image.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={property.image}
+            alt={property.title}
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Home className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          </div>
+        )}
 
-        <VirtualTourBadge hasTour={property.hasVirtualTour || false} onOpenTour={onOpenTour} />
+        <VirtualTourBadge hasTour={Boolean(property.videoTourUrl)} onOpenTour={onOpenTour} />
 
         {property.verified && (
           <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full z-10">
