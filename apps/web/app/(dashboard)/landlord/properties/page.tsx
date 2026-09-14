@@ -143,6 +143,9 @@ export default function LandlordPropertiesPage() {
     },
   });
 
+  const notifyPropertyError = (fallback: string) => (error: Error) =>
+    setToast({ variant: 'error', message: error.message || fallback });
+
   const editMutation = useMutation({
     mutationFn: ({
       id,
@@ -152,16 +155,19 @@ export default function LandlordPropertiesPage() {
       updates: Pick<Property, 'name' | 'type' | 'address' | 'city' | 'state' | 'totalUnits'>;
     }) => unwrap(landlordService.updateProperty(id, updates)),
     onSuccess: invalidateProperties,
+    onError: notifyPropertyError('We could not save these changes. Please try again.'),
   });
 
   const toggleArchiveMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.toggleArchiveProperty(id)),
     onSuccess: invalidateProperties,
+    onError: notifyPropertyError('We could not update this property. Please try again.'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.deleteProperty(id)),
     onSuccess: invalidateProperties,
+    onError: notifyPropertyError('We could not delete this property. Please try again.'),
   });
 
   const handlePublish = (submission: LandlordPropertySubmission) =>
