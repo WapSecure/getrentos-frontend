@@ -151,8 +151,18 @@ export function HomeManagementWorkOrderQuotes({
     currentUserId && workOrder.createdById && currentUserId === workOrder.createdById
   );
   const approvalAuthorityIsLoading = Boolean(workOrder.createdById) && currentUserId === undefined;
-  const workOrderNeedsQuoteApproval =
-    isWorkOrderOpen(workOrder) && workOrder.approvalRequired && !workOrder.approvedAt;
+  /**
+   * Whether a quote can still be selected.
+   *
+   * The four-eyes control is a budget control: it blocks the creator of a work
+   * order that opted into approval from also approving its spend. A renter-raised
+   * request has no operator creator, and a work order that never opted in has
+   * nothing to separate — selecting a quote there is what locks the approved cost
+   * that an invoice is later checked against, so it must stay possible.
+   */
+  const workOrderOpenForQuoteSelection = isWorkOrderOpen(workOrder) && !workOrder.approvedAt;
+  const canApproveQuotes =
+    workOrderOpenForQuoteSelection && !(workOrder.approvalRequired && workOrderCreatedByCurrentUser);
 
   const invalidateQuoteViews = async () => {
     await Promise.all([
@@ -393,10 +403,9 @@ export function HomeManagementWorkOrderQuotes({
                 const quoteHasVendor = Boolean(quote.vendorId);
                 const canSelectQuote =
                   quote.status === 'SUBMITTED' &&
-                  workOrderNeedsQuoteApproval &&
+                  canApproveQuotes &&
                   quoteHasVendor &&
                   !expired &&
-                  !workOrderCreatedByCurrentUser &&
                   currentUserId !== null &&
                   currentUserId !== undefined;
                 const canRejectQuote = quote.status === 'SUBMITTED' && isWorkOrderOpen(workOrder);
@@ -458,12 +467,12 @@ export function HomeManagementWorkOrderQuotes({
                             <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
                               Checking approval authority…
                             </p>
-                          ) : workOrderCreatedByCurrentUser ? (
+                          ) : workOrder.approvalRequired && workOrderCreatedByCurrentUser ? (
                             <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
-                              A different authorised operator must select a quote for work you
-                              created.
+                              A different authorised operator must select a quote for controlled
+                              spend you created.
                             </p>
-                          ) : !workOrderNeedsQuoteApproval ? (
+                          ) : !canApproveQuotes ? (
                             <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
                               This work order does not currently need quote approval.
                             </p>
