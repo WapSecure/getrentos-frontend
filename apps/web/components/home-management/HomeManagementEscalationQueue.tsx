@@ -202,8 +202,8 @@ export function HomeManagementEscalationQueue({
             Act before a service promise is missed.
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Emergency-routed and breached work orders are prioritized here for a clear operational
-            response.
+            Work orders that were escalated by hand, emergency-routed, or past a service target are
+            prioritized here for a clear operational response.
           </p>
         </div>
         <Select

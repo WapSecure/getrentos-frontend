@@ -660,6 +660,27 @@ export function HomeManagementWorkOrderQueue({
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                           {workOrder.description}
                         </p>
+                        {workOrder.images?.length ? (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {workOrder.images.map((image, index) => (
+                              <a
+                                key={image}
+                                href={image}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="group relative block h-20 w-20 overflow-hidden rounded-xl border border-border bg-secondary/40"
+                                title="Open reported photo evidence"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={image}
+                                  alt={`Reported evidence ${index + 1} for ${workOrder.issueTitle}`}
+                                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                />
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
                         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
                           <span className="inline-flex items-center gap-1.5">
                             <Wrench className="h-3.5 w-3.5" />

@@ -169,6 +169,11 @@ export type HomeManagementWorkOrder = {
   createdById?: string | null;
   createdAt: string;
   resolvedAt?: string | null;
+  /**
+   * Resident photo evidence. The API signs a short-lived download URL per read
+   * so these are safe to render directly.
+   */
+  images?: string[] | null;
   unit: {
     unitName?: string | null;
     property?: { id: string; title?: string | null } | null;
