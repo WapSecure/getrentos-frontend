@@ -5,7 +5,10 @@ import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { homeManagementService } from '@/services/homeManagementService';
 const cards = [
-  { key: 'assets', label: 'Active Assets', icon: Boxes },
+  // This is the count of assets in ACTIVE service, not the register size, so
+  // the label has to say so — otherwise "0" next to a full asset register reads
+  // as a broken number rather than as every asset needing attention.
+  { key: 'assets', label: 'Assets in Service', icon: Boxes },
   { key: 'plansDue', label: 'Care Plans Due', icon: CalendarClock },
   { key: 'openWorkOrders', label: 'Open Work Orders', icon: ClipboardList },
   { key: 'approvalQueue', label: 'Awaiting Approval', icon: ShieldCheck },
