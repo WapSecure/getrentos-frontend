@@ -120,3 +120,32 @@ export interface BulkPublishResult {
   published: number;
   skipped: { listingId: string; reason: string }[];
 }
+
+export type EstateLeadMarket = 'RENT' | 'SALE' | 'SHORTLET';
+
+/**
+ * One enquiry on a property this estate markets.
+ *
+ * `ownerName` is here because the estate is selling someone else's asset: when a
+ * serious buyer appears its job is to bring the owner in. `listedByEstate` mirrors
+ * the public storefront so the console and the public page agree on who is
+ * marketing what.
+ */
+export interface EstateLead {
+  id: string;
+  leadName: string;
+  email: string;
+  phone: string;
+  leadUserId?: string;
+  propertyId: string;
+  propertyName: string;
+  ownerName?: string;
+  market: EstateLeadMarket;
+  inquiryDate: string;
+  lastActivityAt: string;
+  trustScore: number;
+  verified: boolean;
+  stage: string;
+  offerAmount?: number;
+  listedByEstate: boolean;
+}

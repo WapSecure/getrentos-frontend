@@ -16,6 +16,7 @@ import {
   Hammer,
   Vote,
   CalendarCheck,
+  Inbox,
   Landmark,
   Globe,
   Sparkles,
@@ -40,6 +41,7 @@ const PRO_GATED_ROUTES = new Set<string>([ROUTES.ESTATE_MICROSITE, ROUTES.ESTATE
 export const navItems: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.ESTATE_DASHBOARD, icon: LayoutDashboard },
   { label: 'Marketplace', href: ESTATE_MARKETPLACE_ROUTES.ESTATE_MARKETPLACE, icon: Building2 },
+  { label: 'Enquiries', href: ESTATE_MARKETPLACE_ROUTES.ESTATE_LEADS, icon: Inbox },
   { label: 'Announcements', href: ROUTES.ESTATE_ANNOUNCEMENTS, icon: Megaphone },
   { label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
   { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: Receipt },
@@ -60,11 +62,11 @@ export const navItems: NavItem[] = [
 ];
 
 export const navGroups = [
-  { label: 'Overview', items: navItems.slice(0, 2) },
-  { label: 'Residents and access', items: navItems.slice(2, 7) },
-  { label: 'Safety and operations', items: navItems.slice(7, 10) },
-  { label: 'Community', items: navItems.slice(10, 14) },
-  { label: 'Administration', items: navItems.slice(14) },
+  { label: 'Overview', items: navItems.slice(0, 3) },
+  { label: 'Residents and access', items: navItems.slice(3, 8) },
+  { label: 'Safety and operations', items: navItems.slice(8, 11) },
+  { label: 'Community', items: navItems.slice(11, 15) },
+  { label: 'Administration', items: navItems.slice(15) },
 ];
 
 export const EstateSidebar = () => {

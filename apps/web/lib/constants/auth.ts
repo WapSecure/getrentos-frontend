@@ -10,6 +10,8 @@ export * from '@getrentos/shared';
 export const ESTATE_MARKETPLACE_ROUTES = {
   /** The estate's own console: properties it represents, and its listings. */
   ESTATE_MARKETPLACE: '/estate/marketplace',
+  /** Enquiries on the properties the estate markets. */
+  ESTATE_LEADS: '/estate/leads',
   /** The property owner's inbox of requests from estates. */
   OWNER_ESTATE_AGREEMENTS: '/owner/estate-agreements',
   /** Public directory of estates. */

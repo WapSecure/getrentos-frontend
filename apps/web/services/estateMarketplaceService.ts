@@ -5,6 +5,8 @@ import type {
   EstateAgreement,
   EstateDirectoryEntry,
   EstateInventorySummary,
+  EstateLead,
+  EstateLeadMarket,
   EstateListing,
   EstateListingType,
   EstatePropertySummary,
@@ -99,6 +101,17 @@ export const estateMarketplaceService = {
     filters: { status?: string } = {},
   ): Promise<ApiResponse<EstateAgreement[]>> {
     return safeCall(() => authFetch(`/estates/${estateId}/agreements${query(filters)}`));
+  },
+
+  /**
+   * Enquiries on the properties this estate markets. Scoped server-side to
+   * properties the estate currently holds marketing rights for.
+   */
+  listLeads(
+    estateId: string,
+    filters: { market?: EstateLeadMarket; stage?: string; search?: string; page?: number; pageSize?: number } = {},
+  ): Promise<ApiResponse<Paginated<EstateLead>>> {
+    return safeCall(() => authFetch(`/estates/${estateId}/leads${query(filters)}`));
   },
 
   /** Brings the property into the estate and asks its owner for marketing rights. */
