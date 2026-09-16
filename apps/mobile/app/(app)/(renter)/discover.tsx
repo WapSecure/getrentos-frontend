@@ -1,20 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { Heart, Search, SlidersHorizontal, X } from 'lucide-react-native';
+import {
+  BookmarkPlus,
+  Heart,
+  List,
+  Map as MapIcon,
+  Search,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react-native';
 import {
   Chip,
   EmptyState,
   ErrorState,
   PropertyCard,
+  SegmentedControl,
   Skeleton,
   Text,
   TextField,
   useTheme,
 } from '@getrentos/ui-native';
 import { PropertyFilterSheet } from '@/components/property/PropertyFilterSheet';
+import { SaveSearchSheet } from '@/components/property/SaveSearchSheet';
+import { PropertyMapView, type PropertyMapMarker } from '@/components/property/PropertyMapView';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import {
@@ -26,16 +38,30 @@ import {
   type ListingSort,
   type RenterProperty,
 } from '@/lib/api/properties';
+import { formatNaira } from '@/lib/format';
 import { track } from '@/lib/analytics';
+
+const MAP_PAGE_SIZE = 100;
 
 const PAGE_SIZE = 20;
 
 export default function Discover() {
   const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ filters?: string }>();
   const [searchText, setSearchText] = useState('');
-  const [filters, setFilters] = useState<ListingFilters>({});
+  const [filters, setFilters] = useState<ListingFilters>(() => {
+    if (!params.filters) return {};
+    try {
+      return JSON.parse(params.filters) as ListingFilters;
+    } catch {
+      return {};
+    }
+  });
   const [sortBy, setSortBy] = useState<ListingSort>('recent');
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [saveSearchOpen, setSaveSearchOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const { savedIds, toggle } = useSavedListings();
 
   // Debounce the free-text search into the filter set.
@@ -60,6 +86,25 @@ export default function Discover() {
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const total = query.data?.pages[0]?.total ?? 0;
 
+  const mapQuery = useQuery({
+    queryKey: qk.listings.search({ ...filters, sortBy, mode: 'map' } as Record<string, unknown>),
+    queryFn: () => propertiesApi.list({ ...filters, sortBy }, 1, MAP_PAGE_SIZE),
+    enabled: viewMode === 'map',
+  });
+
+  const mapMarkers: PropertyMapMarker[] = useMemo(
+    () =>
+      (mapQuery.data?.items ?? [])
+        .filter((p) => typeof p.latitude === 'number' && typeof p.longitude === 'number')
+        .map((p) => ({
+          id: p.id,
+          latitude: p.latitude as number,
+          longitude: p.longitude as number,
+          priceLabel: formatNaira(p.price, { compact: true }),
+        })),
+    [mapQuery.data]
+  );
+
   const chips = useActiveFilterChips(filters, setFilters);
 
   const onEndReached = useCallback(() => {
@@ -83,31 +128,48 @@ export default function Discover() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* sticky search + filter bar */}
-      <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.sm }}>
+      <View
+        style={{
+          paddingHorizontal: spacing.xl,
+          paddingTop: insets.top + spacing.lg,
+          gap: spacing.sm,
+        }}
+      >
         <View
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
         >
           <Text variant="title">Discover</Text>
-          <Pressable
-            onPress={() => router.push('/(app)/saved')}
-            accessibilityRole="button"
-            accessibilityLabel="Saved homes"
-            hitSlop={10}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: savedIds.size ? colors.accent : 'transparent',
-            }}
-          >
-            <Heart
-              size={19}
-              color={savedIds.size ? colors.primary : colors.foreground}
-              fill={savedIds.size ? colors.primary : 'transparent'}
-            />
-          </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <Pressable
+              onPress={() => router.push('/(app)/saved-searches')}
+              accessibilityRole="button"
+              accessibilityLabel="Saved searches"
+              hitSlop={10}
+              style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <BookmarkPlus size={19} color={colors.foreground} />
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/(app)/saved')}
+              accessibilityRole="button"
+              accessibilityLabel="Saved homes"
+              hitSlop={10}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: savedIds.size ? colors.accent : 'transparent',
+              }}
+            >
+              <Heart
+                size={19}
+                color={savedIds.size ? colors.primary : colors.foreground}
+                fill={savedIds.size ? colors.primary : 'transparent'}
+              />
+            </Pressable>
+          </View>
         </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
@@ -123,6 +185,18 @@ export default function Discover() {
           </View>
           <FilterButton count={chips.length} onPress={() => setSheetOpen(true)} />
         </View>
+
+        <SegmentedControl
+          options={[
+            { value: 'list', label: 'List', icon: <List size={14} color={colors.foreground} /> },
+            { value: 'map', label: 'Map', icon: <MapIcon size={14} color={colors.foreground} /> },
+          ]}
+          value={viewMode}
+          onChange={(v) => {
+            setViewMode(v);
+            track('discover_view_mode_changed', { mode: v });
+          }}
+        />
 
         <ScrollView
           horizontal
@@ -173,11 +247,55 @@ export default function Discover() {
                 <X size={12} color={colors.accentForeground} />
               </Pressable>
             ))}
+            <Pressable
+              onPress={() => setSaveSearchOpen(true)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 5,
+                paddingVertical: 6,
+                paddingHorizontal: 11,
+                borderRadius: 999,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <BookmarkPlus size={12} color={colors.foreground} />
+              <Text variant="caption" style={{ fontWeight: '600' }}>
+                Save search
+              </Text>
+            </Pressable>
           </ScrollView>
         ) : null}
       </View>
 
-      {query.isError && items.length === 0 ? (
+      {viewMode === 'map' ? (
+        mapQuery.isLoading ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <ActivityIndicator color={colors.mutedForeground} />
+          </View>
+        ) : mapQuery.isError ? (
+          <ErrorState onRetry={() => mapQuery.refetch()} />
+        ) : mapMarkers.length === 0 ? (
+          <EmptyState
+            icon={<MapIcon size={34} color={colors.mutedForeground} />}
+            title="Nothing to show on the map"
+            description="These listings don't have map coordinates yet, or none match your filters."
+          />
+        ) : (
+          <View style={{ flex: 1, padding: spacing.xl, paddingTop: spacing.md }}>
+            <Text variant="caption" color="mutedForeground" style={{ marginBottom: spacing.sm }}>
+              {mapMarkers.length} {mapMarkers.length === 1 ? 'home' : 'homes'} on the map
+            </Text>
+            <PropertyMapView
+              markers={mapMarkers}
+              zoom={12}
+              style={{ flex: 1 }}
+              onMarkerPress={(id) => router.push(`/(app)/property/${id}`)}
+            />
+          </View>
+        )
+      ) : query.isError && items.length === 0 ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <LoadingList />
@@ -234,6 +352,11 @@ export default function Discover() {
           setFilters(f);
           track('filters_applied');
         }}
+      />
+      <SaveSearchSheet
+        open={saveSearchOpen}
+        onClose={() => setSaveSearchOpen(false)}
+        filters={filters}
       />
     </View>
   );

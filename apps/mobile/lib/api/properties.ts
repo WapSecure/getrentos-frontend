@@ -23,6 +23,10 @@ export interface RenterProperty {
   verified: boolean;
   score?: number;
   image: string;
+  /** Signed URLs for the full gallery (cover first). */
+  images?: string[];
+  /** Signed URL for the video tour. */
+  videoUrl?: string;
   description?: string;
   amenities?: string[];
   landlordId?: string;
@@ -123,12 +127,32 @@ export type SavedProperty = RenterProperty & {
 };
 
 export const savedListingsApi = {
-  list: (page = 1, pageSize = 50) =>
-    apiFetch<Paginated<SavedProperty>>(`/renter/saved-listings${toQuery({ page, pageSize })}`),
+  list: (page = 1, pageSize = 50, wishlistId?: string) =>
+    apiFetch<Paginated<SavedProperty>>(
+      `/renter/saved-listings${toQuery({ page, pageSize, wishlistId })}`
+    ),
 
-  save: (listingId: string) =>
-    apiFetch<{ saved: boolean }>(`/renter/saved-listings/${listingId}`, { method: 'POST' }),
+  save: (listingId: string, wishlistId?: string) =>
+    apiFetch<{ saved: boolean }>(`/renter/saved-listings/${listingId}`, {
+      method: 'POST',
+      body: { wishlistId },
+    }),
 
   unsave: (listingId: string) =>
     apiFetch<void>(`/renter/saved-listings/${listingId}`, { method: 'DELETE' }),
+
+  setWishlist: (savedListingId: string, wishlistId: string | null) =>
+    apiFetch<{ updated: boolean }>(`/renter/saved-listings/${savedListingId}/wishlist`, {
+      method: 'PATCH',
+      body: { wishlistId },
+    }),
+
+  setNote: (savedListingId: string, note: string | null) =>
+    apiFetch<{ updated: boolean; note: string | null }>(
+      `/renter/saved-listings/${savedListingId}/note`,
+      {
+        method: 'PATCH',
+        body: { note },
+      }
+    ),
 };

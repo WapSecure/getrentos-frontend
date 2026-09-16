@@ -17,6 +17,7 @@ const TWO_FACTOR_OPTIONS = { presentation: 'modal', animation: 'slide_from_botto
 export default function AuthLayout() {
   return (
     <Stack screenOptions={SCREEN_OPTIONS}>
+      <Stack.Screen name="onboarding" options={WELCOME_OPTIONS} />
       <Stack.Screen name="welcome" options={WELCOME_OPTIONS} />
       <Stack.Screen name="sign-in" />
       <Stack.Screen name="forgot-password" />

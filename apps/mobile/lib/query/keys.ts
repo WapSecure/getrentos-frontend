@@ -15,11 +15,109 @@ export const qk = {
     notifications: (page = 1, pageSize = 20) =>
       ['renter', 'notifications', { page, pageSize }] as const,
     recommended: ['renter', 'recommended'] as const,
+    conversations: ['renter', 'conversations'] as const,
+    viewings: ['renter', 'viewings'] as const,
+    pendingLease: ['renter', 'lease', 'pending'] as const,
+    renewalOffer: ['renter', 'lease', 'renewal-offer'] as const,
+    receipts: ['renter', 'payments', 'receipts'] as const,
+    profile: ['renter', 'profile'] as const,
+    twoFactorStatus: ['renter', 'settings', '2fa'] as const,
+    notificationPreferences: ['renter', 'notifications', 'preferences'] as const,
+    trustScore: ['renter', 'trust-score'] as const,
+    wishlists: ['renter', 'wishlists'] as const,
+    savedSearches: ['renter', 'saved-searches'] as const,
+    maintenance: ['renter', 'maintenance'] as const,
+    documents: ['renter', 'documents'] as const,
+    documentSummary: ['renter', 'documents', 'summary'] as const,
+    roommates: ['renter', 'roommates'] as const,
+    roommateInvites: ['renter', 'roommates', 'invites'] as const,
+    roommateExpenses: ['renter', 'roommates', 'expenses'] as const,
+    supportThreads: ['renter', 'support', 'threads'] as const,
+    supportMessages: (threadId: string) =>
+      ['renter', 'support', 'threads', threadId, 'messages'] as const,
+    calendarEvents: ['renter', 'calendar-events'] as const,
+    moveOutChecklist: ['renter', 'dashboard', 'move-out-checklist'] as const,
+    applicationAssistant: ['renter', 'application-assistant'] as const,
+    applicationNotes: (applicationId: string) =>
+      ['renter', 'applications', applicationId, 'notes'] as const,
+    financing: ['renter', 'financing'] as const,
+    creditReporting: ['renter', 'credit-reporting'] as const,
+    recentlyViewed: ['renter', 'recently-viewed'] as const,
+    inspections: ['renter', 'inspections'] as const,
+    referrals: ['referrals', 'summary'] as const,
+    dataExport: ['renter', 'settings', 'data-export'] as const,
   },
   listings: {
     /** Infinite list keyed by the active filter set. */
     search: (filters: Record<string, unknown>) => ['listings', 'search', filters] as const,
     detail: (id: string) => ['listings', 'detail', id] as const,
     saved: ['listings', 'saved'] as const,
+    savedByWishlist: (wishlistId?: string) =>
+      ['listings', 'saved', { wishlistId: wishlistId ?? null }] as const,
+    geoInsights: (id: string, destination?: string) =>
+      ['listings', 'geo-insights', id, destination ?? null] as const,
+  },
+  agent: {
+    dashboard: ['agent', 'dashboard'] as const,
+    profile: ['agent', 'profile'] as const,
+    properties: (page = 1, pageSize = 20, search?: string) =>
+      ['agent', 'properties', { page, pageSize, search: search ?? null }] as const,
+    tasks: (page = 1, pageSize = 20, status?: string, type?: string, search?: string) =>
+      [
+        'agent',
+        'tasks',
+        { page, pageSize, status: status ?? null, type: type ?? null, search: search ?? null },
+      ] as const,
+    inspections: (page = 1, pageSize = 20) => ['agent', 'inspections', { page, pageSize }] as const,
+    verifications: (page = 1, pageSize = 20) =>
+      ['agent', 'verifications', { page, pageSize }] as const,
+    clients: (page = 1, pageSize = 20, status?: string) =>
+      ['agent', 'clients', { page, pageSize, status: status ?? null }] as const,
+    documents: (page = 1, pageSize = 20) => ['agent', 'documents', { page, pageSize }] as const,
+    conversations: ['agent', 'conversations'] as const,
+    messages: (conversationId: string) =>
+      ['agent', 'conversations', conversationId, 'messages'] as const,
+    reviews: (page = 1, pageSize = 20) => ['agent', 'reviews', { page, pageSize }] as const,
+    reviewsSummary: ['agent', 'reviews', 'summary'] as const,
+    sync: ['agent', 'sync'] as const,
+    trustProfile: ['agent', 'trust-profile'] as const,
+  },
+  land: {
+    list: (filters: Record<string, unknown>) => ['land', 'list', filters] as const,
+    detail: (id: string) => ['land', 'detail', id] as const,
+  },
+  shortlets: {
+    list: (filters: Record<string, unknown>) => ['shortlets', 'list', filters] as const,
+    detail: (id: string) => ['shortlets', 'detail', id] as const,
+    availability: (id: string, checkIn?: string, checkOut?: string) =>
+      ['shortlets', 'availability', id, checkIn ?? null, checkOut ?? null] as const,
+    reviews: (id: string) => ['shortlets', 'reviews', id] as const,
+    bookings: (page = 1, pageSize = 20) => ['shortlets', 'bookings', { page, pageSize }] as const,
+    wishlist: ['shortlets', 'wishlist'] as const,
+    wishlistIds: ['shortlets', 'wishlist', 'ids'] as const,
+  },
+  buyer: {
+    dashboard: ['buyer', 'dashboard'] as const,
+    profile: ['buyer', 'profile'] as const,
+    listings: (filters: Record<string, unknown>) => ['buyer', 'listings', filters] as const,
+    recommendations: ['buyer', 'listings', 'recommendations'] as const,
+    listingDetail: (id: string) => ['buyer', 'listings', id] as const,
+    viewings: (page = 1, pageSize = 20) => ['buyer', 'viewings', { page, pageSize }] as const,
+    saved: (page = 1, pageSize = 50) => ['buyer', 'saved', { page, pageSize }] as const,
+    offers: (page = 1, pageSize = 20) => ['buyer', 'offers', { page, pageSize }] as const,
+    offerThread: (id: string) => ['buyer', 'offers', id, 'thread'] as const,
+    transactions: (page = 1, pageSize = 20) =>
+      ['buyer', 'transactions', { page, pageSize }] as const,
+    documents: (page = 1, pageSize = 30) => ['buyer', 'documents', { page, pageSize }] as const,
+    conversations: ['buyer', 'conversations'] as const,
+    messages: (conversationId: string) =>
+      ['buyer', 'conversations', conversationId, 'messages'] as const,
+    paymentMethod: ['buyer', 'settings', 'payment-method'] as const,
+    notificationPreferences: ['buyer', 'settings', 'notifications'] as const,
+    searchPreferences: ['buyer', 'settings', 'search-preferences'] as const,
+    notifications: (page = 1, pageSize = 30) =>
+      ['buyer', 'notifications', { page, pageSize }] as const,
+    reviews: (page = 1, pageSize = 20) => ['buyer', 'reviews', { page, pageSize }] as const,
+    trustProfile: ['buyer', 'trust-profile'] as const,
   },
 } as const;

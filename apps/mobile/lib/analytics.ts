@@ -21,6 +21,7 @@ export type AnalyticsEvent =
   | 'search_performed'
   | 'filters_applied'
   | 'sort_changed'
+  | 'discover_view_mode_changed'
   | 'application_started'
   | 'application_submitted'
   | 'application_withdrawn'

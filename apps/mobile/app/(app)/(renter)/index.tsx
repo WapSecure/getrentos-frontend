@@ -1,10 +1,42 @@
-import { useMemo } from 'react';
-import { View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery } from '@tanstack/react-query';
-import { Heart, FileText, MessageCircle, CalendarClock, type LucideIcon } from 'lucide-react-native';
-import { Card, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  CalendarClock,
+  CheckSquare,
+  ChevronRight,
+  FileCheck2,
+  FileText,
+  Heart,
+  MapPin,
+  MessageCircle,
+  ShieldAlert,
+  ShieldCheck,
+  type LucideIcon,
+} from 'lucide-react-native';
+import {
+  Badge,
+  Card,
+  Price,
+  Progress,
+  PropertyCard,
+  Screen,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { renterApi, type RenterDashboardStats } from '@/lib/api/renter';
+import type { RenterProperty } from '@/lib/api/properties';
+import {
+  applicationsApi,
+  APPLICATION_STATUS_LABEL,
+  APPLICATION_STATUS_TONE,
+} from '@/lib/api/applications';
+import { kycApi } from '@/lib/api/kyc';
+import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
 
@@ -19,79 +51,198 @@ interface Metric {
   key: keyof RenterDashboardStats;
   label: string;
   Icon: LucideIcon;
-  tint: 'primary' | 'success' | 'warning' | 'purple';
+  onPress?: () => void;
 }
 
-const METRICS: Metric[] = [
-  { key: 'savedPropertiesCount', label: 'Saved', Icon: Heart, tint: 'primary' },
-  { key: 'activeApplicationsCount', label: 'Applications', Icon: FileText, tint: 'success' },
-  { key: 'unreadMessagesCount', label: 'Unread', Icon: MessageCircle, tint: 'warning' },
-  { key: 'upcomingViewingsCount', label: 'Viewings', Icon: CalendarClock, tint: 'purple' },
-];
+const CARD_WIDTH = 200;
 
 export default function RenterHome() {
   const { profile } = useAuth();
   const { colors, spacing } = useTheme();
+  const { savedIds, toggle } = useSavedListings();
 
-  const stats = useQuery({
-    queryKey: qk.renter.dashboardStats,
-    queryFn: renterApi.dashboardStats,
+  const stats = useQuery({ queryKey: qk.renter.dashboardStats, queryFn: renterApi.dashboardStats });
+
+  const listings = useQuery({
+    queryKey: qk.renter.recommended,
+    queryFn: renterApi.recommendations,
   });
+  const [hero, ...rest] = listings.data ?? [];
 
-  const tintColor = useMemo(
-    () => ({
-      primary: colors.primary,
-      success: colors.success,
-      warning: colors.warning,
-      purple: colors.purple,
-    }),
-    [colors],
+  const applications = useQuery({
+    queryKey: qk.renter.applications,
+    queryFn: () => applicationsApi.list(1, 10),
+  });
+  const activeApplication = applications.data?.items.find(
+    (a) => a.status === 'pending' || a.status === 'under_review'
   );
 
+  const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
+  const identityVerified = kyc.data?.identity?.status === 'APPROVED';
+  const showVerifyNudge = !!kyc.data && !identityVerified;
+
+  const moveInChecklist = useQuery({
+    queryKey: qk.renter.moveInChecklist,
+    queryFn: renterApi.moveInChecklist,
+  });
+  const moveInItems = moveInChecklist.data ?? [];
+  const moveInDone = moveInItems.filter((i) => i.completed).length;
+
+  const METRICS: Metric[] = [
+    {
+      key: 'savedPropertiesCount',
+      label: 'Saved',
+      Icon: Heart,
+      onPress: () => router.push('/(app)/saved'),
+    },
+    {
+      key: 'activeApplicationsCount',
+      label: 'Applications',
+      Icon: FileText,
+      onPress: () => router.push('/(app)/(renter)/applications'),
+    },
+    {
+      key: 'unreadMessagesCount',
+      label: 'Unread',
+      Icon: MessageCircle,
+      onPress: () => router.push('/(app)/(renter)/messages'),
+    },
+    {
+      key: 'upcomingViewingsCount',
+      label: 'Viewings',
+      Icon: CalendarClock,
+      onPress: () => router.push('/(app)/viewings'),
+    },
+  ];
+
   return (
-    <Screen refreshing={stats.isRefetching} onRefresh={() => stats.refetch()}>
+    <Screen
+      refreshing={stats.isRefetching || listings.isRefetching}
+      onRefresh={() => {
+        stats.refetch();
+        listings.refetch();
+        applications.refetch();
+        moveInChecklist.refetch();
+      }}
+    >
       <View style={{ gap: spacing.xxs }}>
         <Text variant="label" color="primary" uppercase>
           {greeting()}
         </Text>
-        <Text variant="title">{firstName(profile?.legalName)} 👋</Text>
-        <Text variant="body" color="mutedForeground">
-          Here’s what’s happening with your search.
-        </Text>
+        <Text variant="title">{firstName(profile?.legalName)}</Text>
       </View>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
-        {METRICS.map(({ key, label, Icon, tint }) => (
+      {showVerifyNudge ? (
+        <Pressable onPress={() => router.push('/(app)/verify-identity')}>
           <Card
-            key={key}
             elevated
-            style={{ flexBasis: '47%', flexGrow: 1, gap: spacing.sm }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.md,
+              backgroundColor: colors.warningSubtle,
+            }}
           >
+            <ShieldAlert size={20} color={colors.warning} />
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyStrong" style={{ color: colors.warning }}>
+                Verify your identity
+              </Text>
+              <Text variant="caption" color="mutedForeground">
+                Unlocks applications and offers — takes two minutes
+              </Text>
+            </View>
+            <ChevronRight size={18} color={colors.warning} />
+          </Card>
+        </Pressable>
+      ) : activeApplication ? (
+        <Pressable onPress={() => router.push(`/(app)/application/${activeApplication.id}`)}>
+          <Card elevated padding="none">
             <View
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colors.accent,
+                gap: spacing.md,
+                padding: spacing.lg,
               }}
             >
-              <Icon size={18} color={tintColor[tint]} />
+              <FileCheck2 size={20} color={colors.primary} />
+              <View style={{ flex: 1, gap: 3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
+                    {activeApplication.title}
+                  </Text>
+                  <Badge
+                    label={APPLICATION_STATUS_LABEL[activeApplication.status]}
+                    tone={APPLICATION_STATUS_TONE[activeApplication.status]}
+                  />
+                </View>
+                <Price
+                  amount={activeApplication.price}
+                  period={activeApplication.period}
+                  variant="callout"
+                />
+              </View>
+              <ChevronRight size={18} color={colors.mutedForeground} />
             </View>
-            {stats.isPending ? (
-              <Skeleton height={28} width="40%" />
-            ) : (
-              <Text variant="display" style={{ fontSize: 26, lineHeight: 30 }}>
-                {stats.data?.[key] ?? 0}
-              </Text>
-            )}
-            <Text variant="caption" color="mutedForeground">
-              {label}
-            </Text>
           </Card>
-        ))}
-      </View>
+        </Pressable>
+      ) : null}
+
+      {moveInItems.length > 0 ? (
+        <Pressable onPress={() => router.push('/(app)/move-checklist')}>
+          <Card elevated>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <CheckSquare size={20} color={colors.primary} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text variant="bodyStrong">Move-in checklist</Text>
+                <Text variant="caption" color="mutedForeground">
+                  {moveInDone} of {moveInItems.length} done
+                </Text>
+              </View>
+              <ChevronRight size={18} color={colors.mutedForeground} />
+            </View>
+            <View style={{ marginTop: spacing.md }}>
+              <Progress
+                value={moveInItems.length ? moveInDone / moveInItems.length : 0}
+                height={5}
+              />
+            </View>
+          </Card>
+        </Pressable>
+      ) : null}
+
+      <Card elevated padding="none">
+        <View style={{ flexDirection: 'row' }}>
+          {METRICS.map(({ key, label, Icon, onPress }, i) => (
+            <Pressable
+              key={key}
+              onPress={onPress}
+              disabled={!onPress}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                gap: 6,
+                paddingVertical: spacing.lg,
+                borderLeftWidth: i > 0 ? 1 : 0,
+                borderLeftColor: colors.border,
+              }}
+            >
+              <Icon size={17} color={colors.mutedForeground} />
+              {stats.isPending ? (
+                <Skeleton height={22} width={22} />
+              ) : (
+                <Text variant="title" style={{ fontSize: 20, lineHeight: 24 }}>
+                  {stats.data?.[key] ?? 0}
+                </Text>
+              )}
+              <Text variant="caption" color="mutedForeground">
+                {label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </Card>
 
       {stats.isError ? (
         <Card elevated>
@@ -102,13 +253,165 @@ export default function RenterHome() {
         </Card>
       ) : null}
 
-      <Card elevated style={{ gap: spacing.xs }}>
-        <Text variant="bodyStrong">More coming to mobile</Text>
-        <Text variant="callout" color="mutedForeground">
-          Applications, lease, payments, messages and recommendations are next. The foundation —
-          secure auth with refresh, offline-first data, theming — is in place.
-        </Text>
-      </Card>
+      <View style={{ gap: spacing.md }}>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <Text variant="heading">Featured for you</Text>
+          <Pressable
+            onPress={() => router.push('/(app)/(renter)/discover')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
+          >
+            <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
+              See all
+            </Text>
+            <ChevronRight size={15} color={colors.primary} />
+          </Pressable>
+        </View>
+
+        {listings.isPending ? (
+          <Skeleton height={220} radius={16} />
+        ) : hero ? (
+          <HeroCard property={hero} saved={savedIds.has(hero.id)} onToggleSave={toggle} />
+        ) : (
+          <Card elevated>
+            <Text variant="callout" color="mutedForeground">
+              No listings available right now — check back soon.
+            </Text>
+          </Card>
+        )}
+
+        {rest.length > 0 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginHorizontal: -spacing.xl }}
+            contentContainerStyle={{ paddingHorizontal: spacing.xl }}
+          >
+            {rest.map((item) => (
+              <View key={item.id} style={{ width: CARD_WIDTH, marginRight: spacing.md }}>
+                <PropertyCard
+                  property={item}
+                  saved={savedIds.has(item.id)}
+                  onToggleSave={toggle}
+                  onPress={(id) => router.push(`/(app)/property/${id}`)}
+                />
+              </View>
+            ))}
+          </ScrollView>
+        ) : null}
+      </View>
     </Screen>
+  );
+}
+
+/* ------------------------------ pieces ----------------------------------- */
+
+function HeroCard({
+  property,
+  saved,
+  onToggleSave,
+}: {
+  property: RenterProperty;
+  saved: boolean;
+  onToggleSave: (id: string) => void;
+}) {
+  const { colors, radius } = useTheme();
+  return (
+    <Pressable onPress={() => router.push(`/(app)/property/${property.id}`)}>
+      <View
+        style={{
+          height: 220,
+          borderRadius: radius.lg,
+          overflow: 'hidden',
+          backgroundColor: colors.secondary,
+        }}
+      >
+        {property.image ? (
+          <Image
+            source={{ uri: property.image }}
+            contentFit="cover"
+            transition={250}
+            style={StyleSheet.absoluteFill}
+          />
+        ) : (
+          <LinearGradient colors={['#1f74e6', '#0a4fb0']} style={StyleSheet.absoluteFill} />
+        )}
+        <LinearGradient
+          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.05)', 'rgba(0,0,0,0.85)']}
+          locations={[0, 0.4, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+
+        <View
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            right: 12,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
+          {property.verified ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 5,
+                paddingVertical: 6,
+                paddingHorizontal: 10,
+                borderRadius: radius.full,
+                backgroundColor: 'rgba(9,32,66,0.72)',
+              }}
+            >
+              <ShieldCheck size={12} color="#fff" />
+              <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }}>
+                Verified
+              </Text>
+            </View>
+          ) : (
+            <View />
+          )}
+          <Pressable
+            onPress={() => onToggleSave(property.id)}
+            hitSlop={8}
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(9,32,66,0.4)',
+            }}
+          >
+            <Heart
+              size={14}
+              color={saved ? colors.destructive : '#fff'}
+              fill={saved ? colors.destructive : 'transparent'}
+            />
+          </Pressable>
+        </View>
+
+        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 14, gap: 3 }}>
+          <Text variant="bodyStrong" numberOfLines={1} style={{ color: '#fff' }}>
+            {property.title}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <MapPin size={11} color="rgba(255,255,255,0.85)" />
+            <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }} numberOfLines={1}>
+              {property.location}
+            </Text>
+          </View>
+          <Price
+            amount={property.price}
+            period={property.period}
+            variant="callout"
+            style={{ color: '#fff', fontWeight: '700' }}
+            periodColor="rgba(255,255,255,0.75)"
+          />
+        </View>
+      </View>
+    </Pressable>
   );
 }
