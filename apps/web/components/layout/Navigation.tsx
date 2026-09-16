@@ -74,6 +74,18 @@ export const Navigation = () => {
                 Land
               </Link>
               <Link
+                href="/buy"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Buy
+              </Link>
+              <Link
+                href="/rent"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Rent
+              </Link>
+              <Link
                 href={ROUTES.SHORTLET_MARKETPLACE}
                 className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
@@ -178,6 +190,20 @@ export const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Land
+              </Link>
+              <Link
+                href="/buy"
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Buy
+              </Link>
+              <Link
+                href="/rent"
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Rent
               </Link>
               <Link
                 href={ROUTES.SHORTLET_MARKETPLACE}

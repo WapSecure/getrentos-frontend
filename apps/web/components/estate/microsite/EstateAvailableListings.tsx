@@ -23,16 +23,19 @@ const formatNaira = (amount: number) =>
 /**
  * Where a card sends the visitor.
  *
- * Rentals and sales need an account to enquire, so those go to the market with
- * the estate pre-filtered — the visitor lands on the estate's inventory inside
- * the tool that can actually act on it, rather than on a dead end. Short lets
- * are browsable without signing in, so they link straight through.
+ * All three markets now have a PUBLIC browse page, so an anonymous visitor who
+ * found this estate through search can keep browsing it. Before this, rentals and
+ * sales pointed at `/renter/discover` and `/buyer/discover` — dashboard routes —
+ * so the click bounced to the login screen and dropped the estate filter, which
+ * made this public page a funnel into a wall. Contacting a landlord or making an
+ * offer still needs an account; that is the sign-in prompt on the market page, not
+ * a broken link here.
  */
 const marketHref = (listing: EstateStorefrontListing, slug: string) => {
   const estate = encodeURIComponent(slug);
   if (listing.listingType === 'SHORTLET') return `/shortlets?estate=${estate}`;
-  if (listing.listingType === 'SALE') return `/buyer/discover?estate=${estate}`;
-  return `/renter/discover?estate=${estate}`;
+  if (listing.listingType === 'SALE') return `/buy?estate=${estate}`;
+  return `/rent?estate=${estate}`;
 };
 
 const ListingCard = ({ listing, slug }: { listing: EstateStorefrontListing; slug: string }) => (
