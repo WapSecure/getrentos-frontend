@@ -264,6 +264,13 @@ export const buyerKeys = {
 export const estateKeys = {
   myEstate: ['estate', 'me'] as const,
   myEstates: ['estate', 'mine'] as const,
+  // Estate marketplace
+  inventory: (estateId: string) => ['estate', estateId, 'marketplace', 'inventory'] as const,
+  agreements: (estateId: string, status?: string) =>
+    ['estate', estateId, 'marketplace', 'agreements', status ?? 'all'] as const,
+  estateListings: (estateId: string, listingType?: string, status?: string) =>
+    ['estate', estateId, 'marketplace', 'listings', listingType ?? 'all', status ?? 'all'] as const,
+  myAgreements: ['estate-agreements', 'mine'] as const,
   households: (estateId: string) => ['estate', estateId, 'households'] as const,
   dues: (estateId: string, status?: string) =>
     ['estate', estateId, 'dues', status ?? 'all'] as const,

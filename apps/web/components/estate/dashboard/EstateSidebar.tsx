@@ -2,6 +2,7 @@
 
 import {
   LayoutDashboard,
+  Building2,
   Users,
   Receipt,
   KeyRound,
@@ -21,6 +22,7 @@ import {
   PieChart,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
+import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
@@ -37,6 +39,7 @@ const PRO_GATED_ROUTES = new Set<string>([ROUTES.ESTATE_MICROSITE, ROUTES.ESTATE
 
 export const navItems: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.ESTATE_DASHBOARD, icon: LayoutDashboard },
+  { label: 'Marketplace', href: ESTATE_MARKETPLACE_ROUTES.ESTATE_MARKETPLACE, icon: Building2 },
   { label: 'Announcements', href: ROUTES.ESTATE_ANNOUNCEMENTS, icon: Megaphone },
   { label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
   { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: Receipt },

@@ -23,6 +23,7 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
+import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
@@ -65,6 +66,11 @@ export const navItems: NavItem[] = [
   // Literal label (like Billing below): a mandate holder is not necessarily the
   // owner, so this is not phrased as one of the owner's own properties.
   { label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
+  {
+    label: 'Estate requests',
+    href: ESTATE_MARKETPLACE_ROUTES.OWNER_ESTATE_AGREEMENTS,
+    icon: Building2,
+  },
   { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
   { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: Sparkles },
   { label: 'Verification', href: '/owner/verification', icon: ShieldCheck },

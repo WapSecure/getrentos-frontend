@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, MapPin } from 'lucide-react';
 import { estateMicrositeService } from '@/services/estateMicrositeService';
+import { EstateAvailableListings } from './EstateAvailableListings';
 import { unwrap } from '@/lib/apiHelpers';
 import type { EstateMicrositeProfile } from '@/types/estate-microsite';
 
@@ -47,7 +48,7 @@ export const EstateMicrositePageClient = ({
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-16">
+    <div className="max-w-6xl mx-auto px-4 pb-16">
       <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-secondary mt-6">
         {profile.bannerUrl ? (
           <Image
@@ -75,6 +76,21 @@ export const EstateMicrositePageClient = ({
           <p className="text-sm text-muted-foreground mt-6 max-w-2xl">{profile.bio}</p>
         )}
       </div>
+
+      <EstateAvailableListings
+        slug={slug}
+        initialCounts={
+          profile.rentCount !== undefined &&
+          profile.saleCount !== undefined &&
+          profile.shortletCount !== undefined
+            ? {
+                rent: profile.rentCount,
+                sale: profile.saleCount,
+                shortlet: profile.shortletCount,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 };

@@ -7,4 +7,12 @@ export interface EstateMicrositeProfile {
   state: string;
   bannerUrl?: string;
   bio?: string;
+  /** Published listings inside the estate, by market. */
+  listingCount?: number;
+  rentCount?: number;
+  saleCount?: number;
+  shortletCount?: number;
+  gates?: number | null;
+  /** Whether the estate's public page is switched on. */
+  storefrontEnabled?: boolean;
 }
