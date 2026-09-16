@@ -6,6 +6,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { authService } from '@/services/authService';
+import { Logo } from '@/components/ui/Logo';
 
 function MagicLinkVerifyContent() {
   const router = useRouter();
@@ -51,7 +52,10 @@ function MagicLinkVerifyContent() {
   }, [router, searchParams]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
+      <div className="mb-8">
+        <Logo size="lg" />
+      </div>
       <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full text-center shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
         {error ? (
           <>
