@@ -8,9 +8,12 @@ import { BadgeCheck, Bath, BedDouble, Home, MapPin, Ruler, Search } from 'lucide
 import { Badge, EmptyState, Input, Pagination, Select, Skeleton } from '@getrentos/ui';
 import { publicMarketService, type PublicListingCard, type PublicMarket } from '@/services/publicMarketService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
+import { PUBLIC_MARKET_PAGE_SIZE } from '@/lib/publicListingMap';
 import { formatCurrency } from '@/lib/format';
 
-const PAGE_SIZE = 12;
+// Shared with the server component that pre-renders the first page, so the two
+// cannot ask for different page sizes.
+const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
 
 const SORTS: Record<PublicMarket, { value: string; label: string }[]> = {
   rent: [
