@@ -10,7 +10,11 @@ interface MaintenanceStatsProps {
 
 export const MaintenanceStats = ({ requests }: MaintenanceStatsProps) => {
   const total = requests.length;
-  const open = requests.filter((r) => r.status !== 'resolved').length;
+  // A closed request is closed: counting everything that is not "resolved" as
+  // open made cancelled requests inflate the Open figure (two cancelled
+  // requests read as "Open · 2" with "Resolved · 0").
+  const CLOSED = ['resolved', 'cancelled'];
+  const open = requests.filter((r) => !CLOSED.includes(r.status)).length;
   const resolved = requests.filter((r) => r.status === 'resolved').length;
   const urgent = requests.filter((r) => r.priority === 'urgent').length;
   const inProgress = requests.filter((r) => r.status === 'in_progress').length;
