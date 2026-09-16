@@ -8,6 +8,7 @@ import { Logo } from '@/components/ui/Logo';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
+import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { useAuthStore } from '@/lib/store/authStore';
 
 export const Navigation = () => {
@@ -77,6 +78,12 @@ export const Navigation = () => {
                 className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Shortlets
+              </Link>
+              <Link
+                href={ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Estates
               </Link>
               <Link
                 href={ROUTES.PRICING}
@@ -178,6 +185,13 @@ export const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Shortlets
+              </Link>
+              <Link
+                href={ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Estates
               </Link>
               <Link
                 href={ROUTES.PRICING}
