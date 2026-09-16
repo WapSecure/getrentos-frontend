@@ -18,6 +18,8 @@ interface DiscoverFilters {
   propertyType: string;
   verifiedOnly: boolean;
   search?: string;
+  /** Estate public slug — set when arriving from an estate microsite. */
+  estate?: string;
 }
 
 interface DiscoverMapViewProps {
@@ -35,6 +37,7 @@ export const DiscoverMapView = ({ filters }: DiscoverMapViewProps) => {
     bathrooms: filters.bathrooms,
     propertyType: filters.propertyType,
     verifiedOnly: filters.verifiedOnly,
+    estate: filters.estate,
   };
 
   const { data, isLoading } = useQuery({

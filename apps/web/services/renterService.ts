@@ -372,6 +372,8 @@ export interface RenterListingsFilters {
   bathrooms?: string;
   propertyType?: string;
   verifiedOnly?: boolean;
+  /** Estate public slug — limits results to properties inside that estate. */
+  estate?: string;
   page?: number;
   pageSize?: number;
 }

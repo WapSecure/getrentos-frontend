@@ -24,6 +24,8 @@ interface DiscoverPropertyGridProps {
     propertyType: string;
     verifiedOnly: boolean;
     search?: string;
+    /** Estate public slug — set when arriving from an estate microsite. */
+    estate?: string;
   };
   savedProperties: string[];
   onSave: (id: string) => void;
@@ -50,6 +52,7 @@ export const DiscoverPropertyGrid = ({
     bathrooms: filters.bathrooms,
     propertyType: filters.propertyType,
     verifiedOnly: filters.verifiedOnly,
+    estate: filters.estate,
   };
 
   const filtersKey = JSON.stringify(listingsFilters);

@@ -24,6 +24,9 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryFromUrl = searchParams.get('q')?.trim() ?? '';
+  // Arriving from an estate microsite (`?estate=<slug>`). Carried in the filters so
+  // every listing query on this page — grid AND map — stays scoped to that estate.
+  const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [compareList, setCompareList] = useState<Property[]>([]);
@@ -38,7 +41,21 @@ export default function DiscoverPage() {
     propertyType: '',
     verifiedOnly: false,
   });
-  const filters = { ...filterOptions, search: queryFromUrl };
+  // Typed explicitly (not inferred) so `estate` stays OPTIONAL — the filter panel and
+  // the saved-search helpers build filter objects without it, and a required key
+  // would make every one of them a type error.
+  const filters: {
+    location: string;
+    minPrice: string;
+    maxPrice: string;
+    bedrooms: string;
+    bathrooms: string;
+    propertyType: string;
+    verifiedOnly: boolean;
+    search: string;
+    estate?: string;
+  } = { ...filterOptions, search: queryFromUrl };
+  if (estateFromUrl) filters.estate = estateFromUrl;
 
   const savedListingsQuery = useQuery({
     queryKey: renterKeys.savedListings,
@@ -178,6 +195,25 @@ export default function DiscoverPage() {
               </button>
             </div>
           </div>
+
+          {estateFromUrl && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+              <p className="text-sm text-muted-foreground">
+                Showing only properties marketed inside{' '}
+                <span className="font-medium text-foreground">
+                  {estateFromUrl.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                </span>
+                .
+              </p>
+              <button
+                type="button"
+                onClick={() => router.replace('/renter/discover')}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Show all properties
+              </button>
+            </div>
+          )}
 
           {viewMode === 'grid' ? (
             <DiscoverPropertyGrid

@@ -30,6 +30,9 @@ export default function BuyerDiscoverPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('default');
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
+  // Arriving from an estate microsite (`?estate=<slug>`). Kept in the query key so
+  // switching estates refetches rather than serving the previous estate's page.
+  const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const PAGE_SIZE = 9;
 
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function BuyerDiscoverPage() {
     queryKey: [
       'buyer',
       'listings',
-      { search: debouncedSearch, type: typeFilter, sort: sortOrder, page, pageSize: PAGE_SIZE },
+      { search: debouncedSearch, type: typeFilter, sort: sortOrder, estate: estateFromUrl, page, pageSize: PAGE_SIZE },
     ],
     queryFn: () =>
       unwrap(
@@ -52,6 +55,7 @@ export default function BuyerDiscoverPage() {
           search: debouncedSearch || undefined,
           propertyType: typeFilter === 'all' ? undefined : toApiPropertyType(typeFilter),
           sort: sortOrder === 'default' ? undefined : sortOrder,
+          estate: estateFromUrl || undefined,
           page,
           pageSize: PAGE_SIZE,
         })
@@ -113,6 +117,25 @@ export default function BuyerDiscoverPage() {
           {total} propert{total === 1 ? 'y' : 'ies'} for sale
         </p>
       </div>
+
+      {estateFromUrl && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+          <p className="text-sm text-muted-foreground">
+            Showing only properties marketed inside{' '}
+            <span className="font-medium text-foreground">
+              {estateFromUrl.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+            </span>
+            .
+          </p>
+          <button
+            type="button"
+            onClick={() => router.replace('/buyer/discover')}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Show all properties
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">

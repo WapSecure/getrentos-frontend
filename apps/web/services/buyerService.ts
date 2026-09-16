@@ -126,6 +126,8 @@ export interface DiscoverFilters {
   propertyType?: string;
   sort?: string;
   search?: string;
+  /** Estate public slug — limits results to properties inside that estate. */
+  estate?: string;
   page?: number;
   pageSize?: number;
 }
@@ -189,6 +191,7 @@ export const buyerService = {
           propertyType: filters.propertyType,
           sort: filters.sort,
           search: filters.search,
+          estate: filters.estate,
           page: filters.page?.toString(),
           pageSize: filters.pageSize?.toString(),
         })}`

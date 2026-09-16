@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
 import {
@@ -43,6 +43,9 @@ export const ShortletMarketplaceBrowser = () => {
   const [checkOut, setCheckOut] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
+  // Arriving from an estate microsite (`?estate=<slug>`). Public and shareable.
+  const searchParams = useSearchParams();
+  const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
 
   const queryParams = useMemo(
     () => ({
@@ -53,10 +56,11 @@ export const ShortletMarketplaceBrowser = () => {
       checkIn: checkIn || undefined,
       checkOut: checkOut || undefined,
       sort,
+      estate: estateFromUrl || undefined,
       page,
       pageSize: PAGE_SIZE,
     }),
-    [checkIn, checkOut, city, guests, maxPrice, minPrice, page, sort]
+    [checkIn, checkOut, city, guests, maxPrice, minPrice, page, sort, estateFromUrl]
   );
 
   const { data, isLoading, isError } = useQuery({
@@ -154,6 +158,25 @@ export const ShortletMarketplaceBrowser = () => {
           ]}
         />
       </div>
+
+      {estateFromUrl && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+          <p className="text-sm text-muted-foreground">
+            Showing only short-stays inside{' '}
+            <span className="font-medium text-foreground">
+              {estateFromUrl.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+            </span>
+            .
+          </p>
+          <button
+            type="button"
+            onClick={() => router.replace('/shortlets')}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Show all shortlets
+          </button>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">

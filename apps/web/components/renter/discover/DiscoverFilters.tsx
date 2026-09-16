@@ -16,6 +16,8 @@ interface Filters {
   bathrooms: string;
   propertyType: string;
   verifiedOnly: boolean;
+  /** Estate public slug carried through from the URL, not editable in the panel. */
+  estate?: string;
 }
 
 interface DiscoverFiltersProps {

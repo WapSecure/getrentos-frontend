@@ -36,6 +36,8 @@ export interface ShortletListParams {
   sort?: 'newest' | 'price_asc' | 'price_desc';
   checkIn?: string;
   checkOut?: string;
+  /** Estate public slug — limits results to shortlets inside that estate. */
+  estate?: string;
 }
 
 const listQuery = (params: ShortletListParams): string =>
@@ -50,6 +52,7 @@ const listQuery = (params: ShortletListParams): string =>
     sort: params.sort,
     checkIn: params.checkIn,
     checkOut: params.checkOut,
+    estate: params.estate,
   });
 
 export const shortletService = {
