@@ -61,7 +61,9 @@ interface SaleApiItem {
   state?: string;
   propertyType?: string;
   bedrooms?: number;
+  bathrooms?: number;
   isVerified?: boolean;
+  coverImageUrl?: string;
 }
 
 const money = (value: unknown): number => {
@@ -90,7 +92,9 @@ const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   location: [item.city, item.state].filter(Boolean).join(', '),
   propertyType: item.propertyType,
   bedrooms: item.bedrooms,
+  bathrooms: item.bathrooms,
   verified: Boolean(item.isVerified),
+  image: item.coverImageUrl || undefined,
 });
 
 /** Only the parameters each endpoint actually declares — extras are rejected by the global whitelist. */
