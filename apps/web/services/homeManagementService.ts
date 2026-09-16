@@ -318,6 +318,12 @@ export type AssignHomeManagementWorkOrderVendorInput = {
 
 export type ResolveHomeManagementWorkOrderInput = {
   resolutionNote?: string;
+  /**
+   * What the completed work cost. Required when the work order never went
+   * through spend approval, because invoicing reconciles the vendor bill
+   * against it.
+   */
+  finalCost?: number;
 };
 
 export type CancelHomeManagementWorkOrderInput = {

@@ -114,6 +114,7 @@ type AssignVendorInput = WorkOrderIdInput & {
 
 type ResolveWorkOrderInput = WorkOrderIdInput & {
   resolutionNote?: string;
+  finalCost?: number;
 };
 
 type CancelWorkOrderInput = WorkOrderIdInput & {
@@ -218,6 +219,7 @@ export function HomeManagementWorkOrderQueue({
   const [unitForm, setUnitForm] = useState<UnitForm>(initialUnitForm);
   const [lifecycleDialog, setLifecycleDialog] = useState<WorkOrderLifecycleDialog | null>(null);
   const [lifecycleNote, setLifecycleNote] = useState('');
+  const [lifecycleCost, setLifecycleCost] = useState('');
   const [currentUserId] = useState<string | null | undefined>(
     () => getStoredUser<{ id?: string }>()?.id ?? null
   );
@@ -366,12 +368,13 @@ export function HomeManagementWorkOrderQueue({
   });
 
   const resolveWorkOrder = useMutation<HomeManagementWorkOrder, Error, ResolveWorkOrderInput>({
-    mutationFn: ({ id, resolutionNote }) =>
-      unwrap(homeManagementService.resolveWorkOrder(id, { resolutionNote })),
+    mutationFn: ({ id, resolutionNote, finalCost }) =>
+      unwrap(homeManagementService.resolveWorkOrder(id, { resolutionNote, finalCost })),
     onSuccess: async () => {
       await invalidateWorkOrderViews();
       setLifecycleDialog(null);
       setLifecycleNote('');
+      setLifecycleCost('');
       setToast({
         message: 'Work order resolved and recorded in service history.',
         variant: 'success',
@@ -441,6 +444,13 @@ export function HomeManagementWorkOrderQueue({
   ) => {
     if (isLifecycleActionPending) return;
     setLifecycleNote('');
+    // A work order that never went through spend approval has no ceiling to
+    // invoice against, so completing it is where its real cost is captured.
+    setLifecycleCost(
+      action === 'resolve' && workOrder.approvedCost === null && workOrder.estimatedCost
+        ? String(workOrder.estimatedCost)
+        : ''
+    );
     setLifecycleDialog({ action, workOrder });
   };
 
@@ -448,6 +458,7 @@ export function HomeManagementWorkOrderQueue({
     if (!isLifecycleDialogPending) {
       setLifecycleDialog(null);
       setLifecycleNote('');
+      setLifecycleCost('');
     }
   };
 
@@ -491,7 +502,11 @@ export function HomeManagementWorkOrderQueue({
 
     const note = lifecycleNote.trim() || undefined;
     if (lifecycleDialog.action === 'resolve') {
-      resolveWorkOrder.mutate({ id: lifecycleDialog.workOrder.id, resolutionNote: note });
+      resolveWorkOrder.mutate({
+        id: lifecycleDialog.workOrder.id,
+        resolutionNote: note,
+        finalCost: lifecycleCostNeeded ? lifecycleCostValue : undefined,
+      });
       return;
     }
 
@@ -508,6 +523,16 @@ export function HomeManagementWorkOrderQueue({
   const lifecycleNoteLabel = isResolvingLifecycleWorkOrder
     ? 'Resolution note'
     : 'Cancellation reason';
+  // Invoicing reconciles the vendor's bill against the work order's approved
+  // cost, and this work order never had one approved — so the cost has to be
+  // captured here or the job can never be paid.
+  const lifecycleCostNeeded = Boolean(
+    isResolvingLifecycleWorkOrder && lifecycleDialog?.workOrder.approvedCost === null
+  );
+  const lifecycleCostValue = Number(lifecycleCost);
+  const lifecycleCostValid =
+    lifecycleCost.trim() !== '' && Number.isInteger(lifecycleCostValue) && lifecycleCostValue >= 0;
+  const canSubmitLifecycleAction = !lifecycleCostNeeded || lifecycleCostValid;
 
   return (
     <section aria-labelledby="work-order-queue-heading" className="mt-10">
@@ -1002,6 +1027,26 @@ export function HomeManagementWorkOrderQueue({
                 </Field>
               </div>
 
+              {lifecycleCostNeeded && (
+                <div className="mt-4">
+                  <Field
+                    label="Final cost"
+                    htmlFor="home-management-work-order-lifecycle-cost"
+                    hint="This work never needed spend approval, so this becomes the figure the vendor's invoice is reconciled against."
+                  >
+                    <CurrencyInput
+                      id="home-management-work-order-lifecycle-cost"
+                      aria-label="Final cost of the completed work"
+                      prefix="₦"
+                      min={0}
+                      value={lifecycleCost}
+                      disabled={isLifecycleDialogPending}
+                      onValueChange={(v) => setLifecycleCost(v === 0 ? '' : String(v))}
+                    />
+                  </Field>
+                </div>
+              )}
+
               <div className="mt-6 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
                 <Button
                   type="button"
@@ -1016,6 +1061,7 @@ export function HomeManagementWorkOrderQueue({
                   type="submit"
                   variant={isResolvingLifecycleWorkOrder ? 'primary' : 'danger'}
                   rounded="md"
+                  disabled={!canSubmitLifecycleAction}
                   isLoading={isLifecycleDialogPending}
                 >
                   {lifecycleActionLabel}
