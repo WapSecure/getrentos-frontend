@@ -22,6 +22,8 @@ export interface PriceProps {
   variant?: TypographyVariant;
   /** Figure colour. Default `foreground`. */
   color?: 'foreground' | 'primary' | 'success' | 'destructive';
+  /** Suffix colour override — for use over photos/dark scrims where `mutedForeground` has no contrast. */
+  periodColor?: string;
   style?: TextStyle;
 }
 
@@ -47,6 +49,7 @@ export function Price({
   compact = false,
   variant = 'subheading',
   color = 'foreground',
+  periodColor,
   style,
 }: PriceProps) {
   const theme = useTheme();
@@ -74,7 +77,7 @@ export function Price({
           style={{
             fontSize: theme.typography.caption.fontSize,
             fontWeight: '500',
-            color: theme.colors.mutedForeground,
+            color: periodColor ?? theme.colors.mutedForeground,
           }}
         >
           {' '}

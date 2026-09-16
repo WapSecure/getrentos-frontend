@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import type { RenterProperty } from './properties';
 
 export interface RenterDashboardStats {
   savedPropertiesCount: number;
@@ -16,14 +17,21 @@ export interface MoveInChecklistItem {
 }
 
 export const renterApi = {
-  dashboardStats: () =>
-    apiFetch<RenterDashboardStats>('/renter/dashboard/stats'),
+  dashboardStats: () => apiFetch<RenterDashboardStats>('/renter/dashboard/stats'),
 
-  moveInChecklist: () =>
-    apiFetch<MoveInChecklistItem[]>('/renter/dashboard/move-in-checklist'),
+  moveInChecklist: () => apiFetch<MoveInChecklistItem[]>('/renter/dashboard/move-in-checklist'),
 
   toggleMoveInChecklistItem: (key: string) =>
     apiFetch<MoveInChecklistItem>(`/renter/dashboard/move-in-checklist/${key}/toggle`, {
       method: 'PATCH',
     }),
+
+  moveOutChecklist: () => apiFetch<MoveInChecklistItem[]>('/renter/dashboard/move-out-checklist'),
+
+  toggleMoveOutChecklistItem: (key: string) =>
+    apiFetch<MoveInChecklistItem>(`/renter/dashboard/move-out-checklist/${key}/toggle`, {
+      method: 'PATCH',
+    }),
+
+  recommendations: () => apiFetch<RenterProperty[]>('/renter/recommendations'),
 };
