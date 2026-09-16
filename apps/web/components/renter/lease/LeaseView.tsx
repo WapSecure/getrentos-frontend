@@ -37,7 +37,11 @@ export const LeaseView = () => {
   const pendingLeaseQuery = useQuery({
     queryKey: renterKeys.pendingLease,
     queryFn: () => unwrapOptional(renterService.getPendingLease(), null),
-    enabled: !lease,
+    // Always fetch this. It used to be gated on `!lease`, so as soon as the
+    // renter's active lease resolved the query was disabled — and a disabled
+    // query cannot refetch. Invalidation then marked it stale with no way to
+    // refresh, leaving the sign-your-lease card showing the pre-signature state
+    // for a tenant who had already signed.
   });
   const renewalOfferQuery = useQuery({
     queryKey: renterKeys.renewalOffer,
@@ -102,6 +106,13 @@ export const LeaseView = () => {
   const handleSignLease = (id: string, signatureData: string) =>
     signLeaseMutation.mutate({ id, signatureData });
 
+  // Rendered by both branches below. It used to live only in the no-active-lease
+  // branch, so a tenant signing a second lease got no success or failure feedback
+  // at all — including the error when a signature is rejected.
+  const toastNode = toast ? (
+    <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+  ) : null;
+
   const leaseQueries = [
     leaseQuery,
     pendingLeaseQuery,
@@ -141,9 +152,7 @@ export const LeaseView = () => {
             </p>
           </div>
         )}
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
+        {toastNode}
       </>
     );
   }
@@ -192,6 +201,7 @@ export const LeaseView = () => {
           />
         </div>
       </div>
+      {toastNode}
     </>
   );
 };

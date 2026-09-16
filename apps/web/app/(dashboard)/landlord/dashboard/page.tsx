@@ -8,7 +8,7 @@ import { LandlordDashboardHeader } from '@/components/landlord/dashboard/Landlor
 import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStatsCards';
 import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordActivityFeed';
 import { LandlordQuickActions } from '@/components/landlord/dashboard/LandlordQuickActions';
-import { Button } from '@getrentos/ui';
+import { Button, PageLoadingState } from '@getrentos/ui';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -39,7 +39,7 @@ const EMPTY_STATS: LandlordDashboardStats = {
 
 export default function LandlordDashboardPage() {
   const user = useLandlordUser();
-  const { data: stats = EMPTY_STATS } = useQuery({
+  const { data: stats = EMPTY_STATS, isLoading } = useQuery({
     queryKey: landlordKeys.dashboardStats,
     queryFn: () => unwrap(landlordService.getDashboardStats()),
   });
@@ -65,7 +65,12 @@ export default function LandlordDashboardPage() {
     <>
       <LandlordDashboardHeader greeting={greeting} firstName={firstName} />
 
-      {totalProperties === 0 ? (
+      {/* Defaulting the stats to zeros made this render "Add your first
+          property" while the request was still in flight, so an established
+          landlord was told their portfolio was empty on every load. */}
+      {isLoading ? (
+        <PageLoadingState />
+      ) : totalProperties === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary" />
