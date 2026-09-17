@@ -51,8 +51,12 @@ export default function LandlordTenantsPage() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Tenants</h1>
+        {/* Zero is a claim about the portfolio, so wait until it has been read
+            before making it. */}
         <p className="text-muted-foreground mt-1">
-          {total} tenant{total === 1 ? '' : 's'} across your portfolio
+          {isPending
+            ? 'Counting your tenants…'
+            : `${total} tenant${total === 1 ? '' : 's'} across your portfolio`}
         </p>
       </div>
 

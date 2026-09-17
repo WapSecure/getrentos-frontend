@@ -7,7 +7,7 @@ import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
 import { SignLeaseModal } from '@/components/landlord/leases/SignLeaseModal';
-import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Pagination, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -32,7 +32,7 @@ export default function LandlordLeasesPage() {
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data } = useQuery({
+  const { data, isLoading: isLoadingLeases } = useQuery({
     queryKey: [
       ...landlordKeys.leases(),
       { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
@@ -50,7 +50,7 @@ export default function LandlordLeasesPage() {
   const total = data?.total ?? 0;
 
   // Header stat: total active (signed) leases across the portfolio.
-  const { data: activeData } = useQuery({
+  const { data: activeData, isLoading: isLoadingActive } = useQuery({
     queryKey: [...landlordKeys.leases('signed'), { page: 1, pageSize: 1 }],
     queryFn: () => unwrap(landlordService.listLeases({ status: 'signed', page: 1, pageSize: 1 })),
   });
@@ -142,8 +142,12 @@ export default function LandlordLeasesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Leases</h1>
+          {/* A count of zero is a claim about the portfolio, so do not make it
+              until the portfolio has actually been read. */}
           <p className="text-muted-foreground mt-1">
-            {activeLeaseCount} active lease{activeLeaseCount === 1 ? '' : 's'}
+            {isLoadingActive
+              ? 'Counting your active leases…'
+              : `${activeLeaseCount} active lease${activeLeaseCount === 1 ? '' : 's'}`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
@@ -171,7 +175,9 @@ export default function LandlordLeasesPage() {
         ))}
       </div>
 
-      {leases.length === 0 ? (
+      {isLoadingLeases ? (
+        <PageLoadingState />
+      ) : leases.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <FileCheck className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No leases found</p>

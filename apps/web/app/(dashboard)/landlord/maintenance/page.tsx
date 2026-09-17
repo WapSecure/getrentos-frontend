@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Pagination, PageLoadingState } from '@getrentos/ui';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
 import { landlordService } from '@/services/landlordService';
@@ -28,7 +28,7 @@ export default function LandlordMaintenancePage() {
   const [filter, setFilter] = useState<'all' | MaintenanceRequestStatus>('all');
   const [assigningRequest, setAssigningRequest] = useState<LandlordMaintenanceRequest | null>(null);
 
-  const { data } = useQuery({
+  const { data, isPending: isLoadingRequests } = useQuery({
     queryKey: [
       ...landlordKeys.maintenanceRequests(),
       { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
@@ -45,7 +45,7 @@ export default function LandlordMaintenancePage() {
   const requests = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const { data: summary } = useQuery({
+  const { data: summary, isPending: isLoadingSummary } = useQuery({
     queryKey: landlordKeys.maintenanceSummary,
     queryFn: () => unwrap(landlordService.getMaintenanceSummary()),
   });
@@ -86,8 +86,12 @@ export default function LandlordMaintenancePage() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Maintenance</h1>
+        {/* Zero is a claim about the portfolio, so wait until it has been read
+            before making it. */}
         <p className="text-muted-foreground mt-1">
-          {openCount} open ticket{openCount === 1 ? '' : 's'} across your portfolio
+          {isLoadingSummary
+            ? 'Counting your open tickets…'
+            : `${openCount} open ticket${openCount === 1 ? '' : 's'} across your portfolio`}
         </p>
       </div>
 
@@ -110,7 +114,9 @@ export default function LandlordMaintenancePage() {
         ))}
       </div>
 
-      {requests.length === 0 ? (
+      {isLoadingRequests ? (
+        <PageLoadingState />
+      ) : requests.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <Wrench className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground">No maintenance requests found</p>

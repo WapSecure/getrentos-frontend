@@ -102,8 +102,12 @@ export default function LandlordDocumentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Documents</h1>
+          {/* Zero is a claim about the portfolio, so wait until it has been read
+              before making it. */}
           <p className="text-muted-foreground mt-1">
-            {total} document{total === 1 ? '' : 's'} across your portfolio
+            {isPending
+              ? 'Counting your documents…'
+              : `${total} document${total === 1 ? '' : 's'} across your portfolio`}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
