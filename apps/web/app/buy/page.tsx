@@ -6,7 +6,7 @@ import { firstPagePath, saleToCard, type PublicListingCard, type SaleApiItem } f
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
-  title: 'Properties for Sale in Nigeria | GetRentos',
+  title: 'Properties for Sale in Nigeria',
   description:
     'Browse homes for sale across Nigeria. Verified properties, escrow-protected payments, and results you can scope to a single estate.',
   alternates: { canonical: '/buy' },
