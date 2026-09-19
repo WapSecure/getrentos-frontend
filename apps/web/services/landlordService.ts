@@ -20,6 +20,7 @@ import type {
   BulkNudgeResult,
   LandlordMicrositeSettings,
   PropertyUpdatePayload,
+  PortfolioAnalytics,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -596,6 +597,11 @@ export const landlordService = {
     return safeCall(() =>
       authFetch('/landlord/payments/charge', { method: 'POST', body: JSON.stringify(data) })
     );
+  },
+
+  // ---- Portfolio ----
+  async getPortfolioAnalytics(): Promise<ApiResponse<PortfolioAnalytics>> {
+    return safeCall(() => authFetch('/landlord/portfolio/analytics'));
   },
 
   // ---- Financials ----

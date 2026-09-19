@@ -9,6 +9,10 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrento
 import { Button } from '@getrentos/ui';
 import { ImagePlus, Loader2, Play, Star, Video, X } from 'lucide-react';
 import { LocationFields } from '@/components/shared/location/LocationFields';
+import {
+  PropertyValueFields,
+  toOptionalAmount,
+} from '@/components/landlord/properties/PropertyValueFields';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/landlord';
@@ -77,6 +81,12 @@ const EditPropertyForm = ({
   const [state, setState] = useState(property.state);
   const [country, setCountry] = useState(property.country ?? 'Nigeria');
   const [totalUnits, setTotalUnits] = useState(String(property.totalUnits));
+  const [estimatedValue, setEstimatedValue] = useState(
+    property.estimatedValue ? String(property.estimatedValue) : ''
+  );
+  const [purchasePrice, setPurchasePrice] = useState(
+    property.purchasePrice ? String(property.purchasePrice) : ''
+  );
 
   const [photos, setPhotos] = useState<Photo[]>(() => photosFromProperty(property));
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -162,6 +172,8 @@ const EditPropertyForm = ({
         state,
         country,
         totalUnits: Number(totalUnits) || property.totalUnits,
+        estimatedValue: toOptionalAmount(estimatedValue),
+        purchasePrice: toOptionalAmount(purchasePrice),
         coverImageKey: galleryImageKeys[0] ?? null,
         galleryImageKeys,
         videoTourKey: nextVideoKey,
@@ -244,6 +256,21 @@ const EditPropertyForm = ({
             value={totalUnits}
             onValueChange={setTotalUnits}
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <div className="pt-3 mt-1 border-t border-border space-y-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">Value &amp; purchase</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Optional. Lets Portfolio work out this property&apos;s cap rate and yield.
+            </p>
+          </div>
+          <PropertyValueFields
+            estimatedValue={estimatedValue}
+            purchasePrice={purchasePrice}
+            onEstimatedValueChange={setEstimatedValue}
+            onPurchasePriceChange={setPurchasePrice}
           />
         </div>
 

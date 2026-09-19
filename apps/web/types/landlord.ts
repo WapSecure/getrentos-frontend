@@ -45,6 +45,9 @@ export interface Property {
   occupiedUnits: number;
   /** Contracted rent per year across let units, normalised to a year. */
   annualRentRoll: number;
+  /** What the property is worth today and what was paid for it, in naira. Optional — they drive cap rate and yield. */
+  estimatedValue?: number;
+  purchasePrice?: number;
   createdAt: string;
   archived?: boolean;
 }
@@ -66,6 +69,8 @@ export type PropertyUpdatePayload = Partial<
     | 'description'
     | 'totalUnits'
     | 'galleryImageKeys'
+    | 'estimatedValue'
+    | 'purchasePrice'
   >
 > & {
   /** `null` clears the stored cover; omit to leave it untouched. */
@@ -337,4 +342,52 @@ export interface LandlordMicrositeSettings {
   bio?: string;
   bannerUrl?: string;
   enabled: boolean;
+}
+
+/** Rates are percentages to one decimal place (6.4 means 6.4%); money is whole naira. */
+export interface PropertyPerformance {
+  propertyId: string;
+  name: string;
+  city: string;
+  totalUnits: number;
+  occupiedUnits: number;
+  occupancyRate: number | null;
+  annualRentRoll: number;
+  rentCollected: number;
+  operatingExpenses: number;
+  netOperatingIncome: number;
+  expenseRatio: number | null;
+  estimatedValue?: number;
+  purchasePrice?: number;
+  capRate: number | null;
+  grossYield: number | null;
+  yieldOnCost: number | null;
+  appreciation: number | null;
+  /** Cap rate minus the portfolio cap rate, in percentage points. */
+  capRateVsPortfolio: number | null;
+  /** Figures the landlord could add to unlock the rates above. */
+  missing: ('estimatedValue' | 'purchasePrice')[];
+}
+
+export interface PortfolioSummary {
+  windowMonths: number;
+  propertyCount: number;
+  totalUnits: number;
+  occupiedUnits: number;
+  occupancyRate: number | null;
+  rentCollected: number;
+  operatingExpenses: number;
+  netOperatingIncome: number;
+  /** Worth of the properties that have a value on file only. */
+  portfolioValue: number;
+  valuedPropertyCount: number;
+  capRate: number | null;
+  yieldOnCost: number | null;
+  bestCapRatePropertyId: string | null;
+  weakestCapRatePropertyId: string | null;
+}
+
+export interface PortfolioAnalytics {
+  summary: PortfolioSummary;
+  properties: PropertyPerformance[];
 }
