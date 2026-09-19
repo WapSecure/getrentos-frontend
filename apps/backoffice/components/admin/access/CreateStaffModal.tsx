@@ -89,7 +89,7 @@ export const CreateStaffModal = ({
             before the member can sign in.
           </DialogDescription>
 
-          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+          <form method="post" onSubmit={handleSubmit} className="mt-5 space-y-4">
             <Field label="Full name" htmlFor="staff-name" required>
               <Input
                 id="staff-name"

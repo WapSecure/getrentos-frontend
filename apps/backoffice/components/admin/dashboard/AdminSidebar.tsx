@@ -59,6 +59,18 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
+    label: 'Tier 3 Grants',
+    href: '/admin/trust/tier-grants',
+    icon: KeyRound,
+    permission: 'verifications.approve',
+  },
+  {
+    label: 'Property Authorities',
+    href: '/admin/property-authorities',
+    icon: Building2,
+    permission: 'verifications.approve',
+  },
+  {
     label: 'Land Diligence',
     href: '/admin/land/diligence',
     icon: MapPinned,
