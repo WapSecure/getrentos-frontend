@@ -52,7 +52,10 @@ export function PaymentsView() {
         })
       ),
   });
-  const payments = data?.items ?? [];
+  // Memoised so the filter below has a stable dependency. A bare `?? []` fallback
+  // is a new array on every render, which made `filteredPayments` recompute every
+  // render — the cost the memo existed to avoid.
+  const payments = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
 
   const { data: stats = EMPTY_STATS } = useQuery({
