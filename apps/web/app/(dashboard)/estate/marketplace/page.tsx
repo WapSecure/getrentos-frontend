@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clock,
   Home,
+  ImagePlus,
   Loader2,
   Plus,
   Search,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, NumberInput, Select, Toast, type ToastVariant } from '@getrentos/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
+import { ListingMediaPanel } from '@/components/estate/marketplace/ListingMediaPanel';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -315,6 +317,8 @@ export default function EstateMarketplacePage() {
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  /** Which listing's photo panel is open. One at a time — the list is long. */
+  const [mediaListingId, setMediaListingId] = useState<string | null>(null);
 
   const inventory = useQuery({
     queryKey: estateKeys.inventory(estateId),
@@ -547,43 +551,54 @@ export default function EstateMarketplacePage() {
               </p>
             ) : (
               listingRows.map((listing) => (
-                <div
-                  key={listing.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {listing.listingTitle || listing.propertyTitle}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {listing.listingType === 'RENT'
-                        ? 'For rent'
-                        : listing.listingType === 'SALE'
-                          ? 'For sale'
-                          : 'Short let'}{' '}
-                      · {formatNaira(listing.price)} · owner {listing.ownerName}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {listingStatusBadge(listing.status)}
-                    {listing.status === 'PUBLISHED' ? (
+                <div key={listing.id} className="space-y-2">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {listing.listingTitle || listing.propertyTitle}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {listing.listingType === 'RENT'
+                          ? 'For rent'
+                          : listing.listingType === 'SALE'
+                            ? 'For sale'
+                            : 'Short let'}{' '}
+                        · {formatNaira(listing.price)} · owner {listing.ownerName}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {listingStatusBadge(listing.status)}
                       <Button
                         variant="ghost"
-                        onClick={() => setStatus.mutate({ id: listing.id, status: 'PAUSED' })}
+                        onClick={() =>
+                          setMediaListingId((current) => (current === listing.id ? null : listing.id))
+                        }
                       >
-                        <Clock className="w-4 h-4" />
-                        Pause
+                        <ImagePlus className="w-4 h-4" />
+                        {listing.media?.length ? `Photos (${listing.media.length})` : 'Photos'}
                       </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        onClick={() => setStatus.mutate({ id: listing.id, status: 'PUBLISHED' })}
-                        disabled={setStatus.isPending}
-                      >
-                        Publish
-                      </Button>
-                    )}
+                      {listing.status === 'PUBLISHED' ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setStatus.mutate({ id: listing.id, status: 'PAUSED' })}
+                        >
+                          <Clock className="w-4 h-4" />
+                          Pause
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          onClick={() => setStatus.mutate({ id: listing.id, status: 'PUBLISHED' })}
+                          disabled={setStatus.isPending}
+                        >
+                          Publish
+                        </Button>
+                      )}
+                    </div>
                   </div>
+                  {mediaListingId === listing.id && (
+                    <ListingMediaPanel estateId={estateId} listing={listing} />
+                  )}
                 </div>
               ))
             )}
