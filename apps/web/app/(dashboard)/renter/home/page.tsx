@@ -5,7 +5,7 @@ import { HomeOverviewView } from '@/components/renter/home/HomeOverviewView';
 import { LeaseView } from '@/components/renter/lease/LeaseView';
 import { DocumentsView } from '@/components/renter/documents/DocumentsView';
 import { InspectionsSection } from '@/components/renter/home/InspectionsSection';
-import { HubTabs, useHubTab, type HubTab } from '@/components/renter/shared/HubTabs';
+import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
   { id: 'overview', label: 'Overview', icon: House },

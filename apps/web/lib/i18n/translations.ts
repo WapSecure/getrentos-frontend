@@ -35,6 +35,8 @@ export type TranslationKey =
   | 'sidebar.reviews'
   | 'sidebar.trust_profile'
   | 'sidebar.verifications'
+  | 'sidebar.verification'
+  | 'sidebar.billing'
   | 'sidebar.home_management'
   | 'sidebar.realtor_access'
   | 'sidebar.transactions'
@@ -127,6 +129,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.reviews': 'Reviews',
     'sidebar.trust_profile': 'Trust Profile',
     'sidebar.verifications': 'Verifications',
+    'sidebar.verification': 'Verification',
+    'sidebar.billing': 'Billing',
     'sidebar.home_management': 'Home Management',
     'sidebar.realtor_access': 'Realtor Access',
     'sidebar.transactions': 'Transactions',
@@ -218,6 +222,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.reviews': 'Review Dem',
     'sidebar.trust_profile': 'Trust Profile',
     'sidebar.verifications': 'Verification Dem',
+    'sidebar.verification': 'Verification',
+    'sidebar.billing': 'Billing',
     'sidebar.home_management': 'House Management',
     'sidebar.realtor_access': 'Realtor Access',
     'sidebar.transactions': 'Transaction Dem',

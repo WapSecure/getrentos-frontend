@@ -11,7 +11,7 @@ import { HelpSupport } from '@/components/renter/help/HelpSupport';
 import { HelpFeedback } from '@/components/renter/help/HelpFeedback';
 import { HelpStatus } from '@/components/renter/help/HelpStatus';
 import { LegalResourcesView } from '@/components/renter/legal/LegalResourcesView';
-import { HubTabs, useHubTab, type HubTab } from '@/components/renter/shared/HubTabs';
+import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
   { id: 'help', label: 'Help Center', icon: LifeBuoy },
