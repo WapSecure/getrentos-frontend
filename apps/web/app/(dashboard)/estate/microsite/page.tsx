@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
 import { Button, Switch, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
@@ -108,7 +108,7 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
           <div className="flex items-center gap-4">
             {bannerUrl ? (
               <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-border">
-                <Image
+                <SafeImage
                   src={bannerUrl}
                   alt="Microsite banner"
                   fill

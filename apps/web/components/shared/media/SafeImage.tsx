@@ -1,18 +1,15 @@
 'use client';
 
-import Image from 'next/image';
+import Image, { type ImageProps } from 'next/image';
 import { Component, useState, type ReactNode } from 'react';
 
-interface SafeImageProps {
-  /** Absolute or root-relative URL. Anything else, or a failure, renders the fallback. */
+type SafeImageProps = Omit<ImageProps, 'src' | 'alt'> & {
+  /** Absolute or root-relative URL. Anything else renders the fallback. */
   src?: string | null;
   alt?: string;
-  className?: string;
-  sizes?: string;
-  priority?: boolean;
-  /** Rendered in place of the image when it cannot be shown. */
-  fallback: ReactNode;
-}
+  /** Rendered when the image cannot be shown. Defaults to nothing. */
+  fallback?: ReactNode;
+};
 
 /**
  * Catches `next/image` failures so one bad URL cannot take down a whole page.
@@ -20,7 +17,7 @@ interface SafeImageProps {
  * This is not defensive padding — it is a real failure mode. `next/image`
  * throws *synchronously during render* when a remote URL's host is not in
  * `images.remotePatterns` (or, on Next 16, resolves to a private IP). Public
- * pages are rendered inside an error boundary, so that throw replaces the
+ * pages render inside an error boundary, so that single throw replaces the
  * entire page: an estate's storefront vanished because one photo was
  * misconfigured. Per-image isolation turns that into a placeholder.
  *
@@ -29,20 +26,22 @@ interface SafeImageProps {
  *   fires — the failure happens before an <img> exists);
  * - an `onError` handler, for a URL that is configured correctly but fails to
  *   load (expired signature, deleted object).
+ *
+ * Every image on a page that renders a stored upload should go through this;
+ * one unwrapped image is enough to wipe the page it is on.
  */
 export function SafeImage({
   src,
   alt = '',
-  className,
-  sizes,
-  priority,
-  fallback,
+  fallback = null,
+  onError,
+  ...imageProps
 }: SafeImageProps) {
   const [failedToLoad, setFailedToLoad] = useState(false);
 
-  // A signature URL is always absolute; only `http(s)://` and root-relative
-  // paths are handled, so a protocol-relative or malformed value is refused
-  // here rather than throwing from inside next/image.
+  // A stored asset is always reachable as an absolute (signed) URL or a
+  // root-relative path. A protocol-relative or malformed value is refused here
+  // rather than throwing from inside next/image.
   const trimmed = typeof src === 'string' ? src.trim() : '';
   const usable = /^https?:\/\//i.test(trimmed) || /^\/(?!\/)/.test(trimmed);
 
@@ -51,13 +50,13 @@ export function SafeImage({
   return (
     <ImageBoundary fallback={fallback}>
       <Image
+        {...imageProps}
         src={trimmed}
         alt={alt}
-        fill
-        sizes={sizes}
-        className={className}
-        priority={priority}
-        onError={() => setFailedToLoad(true)}
+        onError={(event) => {
+          setFailedToLoad(true);
+          onError?.(event);
+        }}
       />
     </ImageBoundary>
   );

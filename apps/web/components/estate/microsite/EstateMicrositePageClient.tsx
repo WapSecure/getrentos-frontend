@@ -53,6 +53,7 @@ export const EstateMicrositePageClient = ({
         <SafeImage
           src={profile.bannerUrl}
           alt=""
+          fill
           sizes="(max-width: 768px) 100vw, 768px"
           className="object-cover"
           fallback={

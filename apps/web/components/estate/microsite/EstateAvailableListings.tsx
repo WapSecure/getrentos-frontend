@@ -47,6 +47,7 @@ const ListingCard = ({ listing, slug }: { listing: EstateStorefrontListing; slug
       <SafeImage
         src={listing.coverImageUrl}
         alt=""
+        fill
         sizes="(max-width: 640px) 100vw, 320px"
         className="object-cover group-hover:scale-[1.02] transition-transform"
         fallback={

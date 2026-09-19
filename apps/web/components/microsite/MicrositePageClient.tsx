@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from 'lucide-react';
@@ -79,36 +79,32 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
   return (
     <div className="max-w-5xl mx-auto px-4 pb-16">
       <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-secondary mt-6">
-        {profile.bannerUrl ? (
-          <Image
-            src={profile.bannerUrl}
-            alt=""
-            fill
-            sizes="(max-width: 768px) 100vw, 1024px"
-            className="object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5" />
-        )}
+        <SafeImage
+          src={profile.bannerUrl}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 1024px"
+          className="object-cover"
+          loading="lazy"
+          fallback={<div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5" />}
+        />
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 px-2">
         <div className="w-20 h-20 rounded-2xl bg-card border-4 border-background shadow-sm flex items-center justify-center overflow-hidden shrink-0 -mt-10">
-          {profile.avatarUrl ? (
-            <Image
-              src={profile.avatarUrl}
-              alt={profile.displayName}
-              width={80}
-              height={80}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <span className="text-xl font-bold text-primary">
-              {getInitials(profile.displayName)}
-            </span>
-          )}
+          <SafeImage
+            src={profile.avatarUrl}
+            alt={profile.displayName}
+            width={80}
+            height={80}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            fallback={
+              <span className="text-xl font-bold text-primary">
+                {getInitials(profile.displayName)}
+              </span>
+            }
+          />
         </div>
         <div className="flex-1 min-w-0 pb-1 pt-3">
           <div className="flex items-center gap-1.5">
@@ -154,16 +150,14 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
                 className="bg-card rounded-2xl border border-border overflow-hidden"
               >
                 <div className="relative h-40 bg-secondary">
-                  {listing.image ? (
-                    <Image
-                      src={listing.image}
-                      alt={listing.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover"
-                      loading="lazy"
-                    />
-                  ) : null}
+                  <SafeImage
+                    src={listing.image}
+                    alt={listing.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    className="object-cover"
+                    loading="lazy"
+                  />
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-foreground truncate">{listing.title}</h3>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
@@ -213,18 +213,15 @@ export const ShortletMarketplaceBrowser = () => {
               className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition hover:shadow-md"
             >
               <div className="relative flex h-40 items-center justify-center bg-secondary/60">
-                {listing.coverImageUrl ? (
-                  <Image
-                    src={listing.coverImageUrl}
-                    alt={listing.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <BedDouble className="h-10 w-10 text-muted-foreground" />
-                )}
+                <SafeImage
+                  src={listing.coverImageUrl}
+                  alt={listing.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover"
+                  loading="lazy"
+                  fallback={<BedDouble className="h-10 w-10 text-muted-foreground" />}
+                />
                 <div className="absolute left-3 top-3 flex gap-2">
                   {listing.instantBooking && (
                     <Badge className="bg-primary text-primary-foreground">

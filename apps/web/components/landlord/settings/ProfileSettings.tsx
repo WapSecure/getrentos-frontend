@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { getInitials } from '@/lib/format';
 import { Button } from '@getrentos/ui';
 import { SaveButton } from '@getrentos/ui';
@@ -59,20 +59,19 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       </p>
 
       <div className="flex items-center gap-4 mb-6">
-        {avatarUrl ? (
-          <Image
-            src={avatarUrl}
-            alt={fullName || 'User'}
-            width={64}
-            height={64}
-            className="w-16 h-16 rounded-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">
-            {getInitials(fullName || 'User')}
-          </div>
-        )}
+        <SafeImage
+          src={avatarUrl}
+          alt={fullName || 'User'}
+          width={64}
+          height={64}
+          className="w-16 h-16 rounded-full object-cover"
+          loading="lazy"
+          fallback={
+            <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">
+              {getInitials(fullName || 'User')}
+            </div>
+          }
+        />
         <input
           ref={fileInputRef}
           type="file"

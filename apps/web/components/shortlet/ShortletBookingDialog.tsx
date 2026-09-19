@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useQuery } from '@tanstack/react-query';
 import {
   Badge,
@@ -89,13 +89,14 @@ export function ShortletBookingDialog({
 
         {listing.coverImageUrl && (
           <div className="relative h-40 w-full border-y border-border">
-            <Image
+            <SafeImage
               src={listing.coverImageUrl}
               alt={listing.title}
               fill
               sizes="(max-width: 768px) 100vw, 512px"
               className="object-cover"
               loading="lazy"
+              fallback={<div className="h-full w-full bg-secondary" />}
             />
           </div>
         )}

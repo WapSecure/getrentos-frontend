@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { LegacyInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
@@ -150,20 +150,19 @@ const ProfileSettingsForm = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            {avatarUrl ? (
-              <Image
-                src={avatarUrl}
-                alt="Profile"
-                width={80}
-                height={80}
-                className="w-20 h-20 rounded-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-semibold">
-                {user?.fullName?.charAt(0) || 'U'}
-              </div>
-            )}
+            <SafeImage
+              src={avatarUrl}
+              alt="Profile"
+              width={80}
+              height={80}
+              className="w-20 h-20 rounded-full object-cover"
+              loading="lazy"
+              fallback={
+                <div className="w-20 h-20 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-semibold">
+                  {user?.fullName?.charAt(0) || 'U'}
+                </div>
+              }
+            />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
