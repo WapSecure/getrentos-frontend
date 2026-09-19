@@ -27,6 +27,27 @@ export interface TrustProfileStat {
   value: string;
 }
 
+/** One dimension of the trust score, resolved for display (earned of weight). */
+export interface TrustScoreDimension {
+  id: string;
+  label: string;
+  earned: number;
+  weight: number;
+}
+
+/**
+ * How the score decomposes (dimension.v1). Optional: the backend only sends it
+ * while the dimension engine is on, so the UI must degrade gracefully.
+ */
+export interface TrustScoreBreakdown {
+  version: string;
+  total: number;
+  earned: number;
+  penalty: number;
+  dimensions: TrustScoreDimension[];
+  reasonCodes: string[];
+}
+
 /** Role-appropriate trust profile returned by /<role>/trust-profile. */
 export interface TrustProfile {
   trustScore: number;
@@ -35,4 +56,5 @@ export interface TrustProfile {
   history: TrustScoreHistoryItem[];
   badges: Badge[];
   stats: TrustProfileStat[];
+  scoreBreakdown?: TrustScoreBreakdown;
 }

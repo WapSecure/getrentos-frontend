@@ -198,6 +198,7 @@ export default function OwnerOffersPage() {
             error={acceptMutation.error || rejectMutation.error || counterMutation.error}
             href={ROUTES.OWNER_OFFERS}
             verificationHref={ROUTES.OWNER_VERIFICATION}
+            scoreHref={ROUTES.OWNER_TRUST_PROFILE}
           />
         </div>
       )}

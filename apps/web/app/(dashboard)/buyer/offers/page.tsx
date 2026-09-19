@@ -218,6 +218,7 @@ function BuyerOffersPageContent() {
             error={createMutation.error}
             href={`${ROUTES.BUYER_SETTINGS}?tab=verification`}
             verificationHref={ROUTES.BUYER_VERIFICATION}
+            scoreHref={ROUTES.BUYER_TRUST_PROFILE}
           />
         </div>
       )}
