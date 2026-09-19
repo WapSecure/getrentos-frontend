@@ -54,3 +54,6 @@ coverage
 *.key
 *.mobileprovision
 *.orig.*
+
+# Watchman runtime cookie — machine-local state, not project config
+.watchman-cookie-*
