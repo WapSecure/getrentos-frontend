@@ -34,6 +34,17 @@ export interface EstateAgreement {
 
 export type EstateListingType = 'RENT' | 'SALE' | 'SHORTLET';
 
+/**
+ * A photo the estate attached to its own listing.
+ *
+ * `key` is what removal takes — a signed `url` cannot be turned back into a key, so
+ * displaying and acting on a photo need both.
+ */
+export interface EstateListingMedia {
+  key: string;
+  url: string;
+}
+
 export interface EstateListing {
   id: string;
   propertyId: string;
@@ -51,6 +62,12 @@ export interface EstateListing {
   status: 'DRAFT' | 'PENDING_VERIFICATION' | 'PUBLISHED' | 'PAUSED' | 'CLOSED';
   availableFrom?: string;
   coverImageUrl?: string;
+  /**
+   * Photos the estate supplied for this listing, cover first. Absent when it
+   * supplied none, in which case the card falls back to the property's own
+   * imagery — which belongs to the owner, not the estate.
+   */
+  media?: EstateListingMedia[];
   /** Owner of record — never the estate. */
   ownerName?: string;
   viewCount: number;

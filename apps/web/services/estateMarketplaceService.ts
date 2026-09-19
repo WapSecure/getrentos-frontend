@@ -133,6 +133,43 @@ export const estateMarketplaceService = {
     );
   },
 
+  /**
+   * Attach photos to a listing the estate published.
+   *
+   * Photos belong to the LISTING, not the property: an estate is photographing an
+   * asset it does not own, so this never touches the owner's property record. The
+   * server re-checks the marketing agreement, and takes what fits if the upload
+   * exceeds the cap rather than failing the whole batch.
+   */
+  addListingMedia(
+    estateId: string,
+    listingId: string,
+    files: File[],
+  ): Promise<ApiResponse<EstateListing>> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    return safeCall(() =>
+      authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
+        method: 'POST',
+        body: formData,
+      }),
+    );
+  },
+
+  /** Removes one photo. Takes the storage key, not the signed URL. */
+  removeListingMedia(
+    estateId: string,
+    listingId: string,
+    key: string,
+  ): Promise<ApiResponse<EstateListing>> {
+    return safeCall(() =>
+      authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
+        method: 'DELETE',
+        body: JSON.stringify({ key }),
+      }),
+    );
+  },
+
   listListings(
     estateId: string,
     filters: { listingType?: EstateListingType; status?: string; page?: number; pageSize?: number } = {},
