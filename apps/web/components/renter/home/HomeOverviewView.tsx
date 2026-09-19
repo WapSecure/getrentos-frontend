@@ -125,9 +125,12 @@ export function HomeOverviewView() {
   });
 
   const lease = leaseQuery.data;
-  const maintenanceRequests = maintenanceQuery.data?.items ?? [];
+  const maintenanceRequests = useMemo(
+    () => maintenanceQuery.data?.items ?? [],
+    [maintenanceQuery.data]
+  );
   const documents = documentsQuery.data?.items ?? [];
-  const paymentReminders = remindersQuery.data ?? [];
+  const paymentReminders = useMemo(() => remindersQuery.data ?? [], [remindersQuery.data]);
 
   const openRequests = useMemo(
     () =>

@@ -226,7 +226,10 @@ export function HomeManagementSlaPolicies({
 
   const policies = policiesQuery.data?.items ?? [];
   const totalPolicies = policiesQuery.data?.total ?? 0;
-  const activePolicies = activePoliciesQuery.data?.items ?? [];
+  const activePolicies = useMemo(
+    () => activePoliciesQuery.data?.items ?? [],
+    [activePoliciesQuery.data]
+  );
   const configuredPriorities = useMemo(
     () => new Set(activePolicies.map((policy) => policy.priority)),
     [activePolicies]

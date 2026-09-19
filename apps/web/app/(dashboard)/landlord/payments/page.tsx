@@ -52,7 +52,7 @@ export default function LandlordPaymentsPage() {
         })
       ),
   });
-  const payments = data?.items ?? [];
+  const payments = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
 
   const { data: stats = EMPTY_STATS } = useQuery({

@@ -150,12 +150,12 @@ export default function EstateLeadsPage() {
           market: market || undefined,
           page,
           pageSize: 25,
-        }),
+        })
       ),
     enabled: Boolean(estateId),
   });
 
-  const leads = leadsQuery.data?.items ?? [];
+  const leads = useMemo(() => leadsQuery.data?.items ?? [], [leadsQuery.data]);
   const total = leadsQuery.data?.total ?? 0;
 
   // Search is client-side because the page is already small (25 rows): a
@@ -167,7 +167,7 @@ export default function EstateLeadsPage() {
       (lead) =>
         lead.leadName.toLowerCase().includes(term) ||
         lead.propertyName.toLowerCase().includes(term) ||
-        lead.email.toLowerCase().includes(term),
+        lead.email.toLowerCase().includes(term)
     );
   }, [leads, search]);
 
@@ -187,8 +187,8 @@ export default function EstateLeadsPage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Enquiries</h1>
         <p className="text-muted-foreground mt-1">
-          Everyone who has responded to a property {estate?.name ?? 'this estate'} markets — rentals, sales and
-          shortlets in one place.
+          Everyone who has responded to a property {estate?.name ?? 'this estate'} markets —
+          rentals, sales and shortlets in one place.
         </p>
       </div>
 
@@ -278,16 +278,17 @@ export default function EstateLeadsPage() {
       <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         <p className="text-sm text-muted-foreground">
-          You see enquiries for properties the owner has given you marketing rights for. A property that is merely
-          inside the estate — with no agreement — stays private to its owner, and its enquiries never reach this page.
+          You see enquiries for properties the owner has given you marketing rights for. A property
+          that is merely inside the estate — with no agreement — stays private to its owner, and its
+          enquiries never reach this page.
         </p>
       </div>
 
       <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
         <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         <p className="text-sm text-muted-foreground">
-          The property owner sees these same enquiries. Contact them when a lead is serious so you are presenting one
-          story, not two.
+          The property owner sees these same enquiries. Contact them when a lead is serious so you
+          are presenting one story, not two.
         </p>
       </div>
     </div>
