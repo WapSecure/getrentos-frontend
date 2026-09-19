@@ -188,6 +188,34 @@ export const ownerService = {
   archiveProperty: (id: string) =>
     safeCall(() => authFetch(`/owner/properties/${id}`, { method: 'DELETE' })),
 
+  /**
+   * Stage a property photo and hand back its storage key.
+   *
+   * Two steps on purpose: the key only becomes part of the property when it is
+   * sent back through `updateProperty` as `coverImageKey`. Before this existed,
+   * an owner had no way to photograph their own property at all — the only
+   * upload route was the landlord one, which is closed to a PROPERTY_OWNER.
+   */
+  uploadPropertyMedia: (file: File, kind: 'image' | 'video' = 'image') =>
+    safeCall(async () => {
+      const form = new FormData();
+      form.append('kind', kind);
+      form.append('file', file);
+      return authFetch<{ key: string; kind: 'image' | 'video' }>(
+        '/owner/properties/media/upload',
+        { method: 'POST', body: form }
+      );
+    }),
+
+  /** Discard a staged upload that was never attached to a property. */
+  removePropertyMedia: (key: string) =>
+    safeCall(() =>
+      authFetch<{ deleted: boolean }>('/owner/properties/media/upload', {
+        method: 'DELETE',
+        body: JSON.stringify({ key }),
+      })
+    ),
+
   // Sale listings
   listListings: (
     params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
