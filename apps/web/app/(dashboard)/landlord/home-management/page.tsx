@@ -1,15 +1,6 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { HomeManagementWorkspace } from '@/components/home-management/HomeManagementWorkspace';
-import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
-
-export default function LandlordHomeManagementPage() {
-  return (
-    <ProFeatureGate
-      title="Home Management is a Pro feature"
-      description="Upgrade to Pro to unlock SLA-backed maintenance timelines, vendor work orders, quotes, and invoicing."
-    >
-      <HomeManagementWorkspace role="landlord" />
-    </ProFeatureGate>
-  );
+/** Folded into a tab of a hub page; the old URL still lands in the right place. */
+export default function Page() {
+  redirect('/landlord/maintenance?tab=home-management');
 }

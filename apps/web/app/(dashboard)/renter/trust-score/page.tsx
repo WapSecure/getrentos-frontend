@@ -7,7 +7,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { VerificationCenter } from '@/components/shared/verification/VerificationCenter';
 import { TrustScoreView } from '@/components/renter/trust-score/TrustScoreView';
 import { CreditReportingView } from '@/components/renter/credit-reporting/CreditReportingView';
-import { HubTabs, useHubTab, type HubTab } from '@/components/renter/shared/HubTabs';
+import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
   { id: 'trust', label: 'Trust Score', icon: Star },

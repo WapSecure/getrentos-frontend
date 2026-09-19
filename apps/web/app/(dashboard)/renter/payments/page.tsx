@@ -19,7 +19,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { FinancingView } from '@/components/renter/financing/FinancingView';
-import { HubTabs, useHubTab, type HubTab } from '@/components/renter/shared/HubTabs';
+import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
   { id: 'payments', label: 'Payments', icon: CreditCard },

@@ -12,8 +12,6 @@ import {
   Wrench,
   HardHat,
   PieChart,
-  FileBarChart,
-  AlertTriangle,
   FolderOpen,
   MessageCircle,
   Star,
@@ -25,6 +23,7 @@ import {
   Globe,
   Gift,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -36,57 +35,70 @@ import { usePlanTier } from '@/hooks/usePlanTier';
 const PRO_GATED_ROUTES = new Set<string>([
   ROUTES.LANDLORD_SHORTLETS,
   ROUTES.LANDLORD_MICROSITE,
-  ROUTES.LANDLORD_HOME_MANAGEMENT,
   ROUTES.LANDLORD_FINANCIALS,
-  ROUTES.LANDLORD_OWNER_STATEMENTS,
 ]);
 
 interface NavItem {
-  labelKey?: TranslationKey;
-  label?: string;
+  labelKey: TranslationKey;
   href: string;
   icon: React.ElementType;
 }
 
-export const navItems: NavItem[] = [
-  { labelKey: 'sidebar.dashboard', href: ROUTES.LANDLORD_DASHBOARD, icon: LayoutDashboard },
-  { labelKey: 'sidebar.properties', href: ROUTES.LANDLORD_PROPERTIES, icon: Building2 },
-  { labelKey: 'sidebar.units', href: ROUTES.LANDLORD_UNITS, icon: DoorOpen },
-  { labelKey: 'sidebar.listings', href: ROUTES.LANDLORD_LISTINGS, icon: Megaphone },
-  { labelKey: 'sidebar.shortlets', href: ROUTES.LANDLORD_SHORTLETS, icon: BedDouble },
-  { labelKey: 'sidebar.landlord_leads', href: ROUTES.LANDLORD_LEADS, icon: UsersRound },
-  { labelKey: 'sidebar.microsite', href: ROUTES.LANDLORD_MICROSITE, icon: Globe },
-  { labelKey: 'sidebar.referrals', href: ROUTES.LANDLORD_REFERRALS, icon: Gift },
-  { labelKey: 'sidebar.applications', href: ROUTES.LANDLORD_APPLICATIONS, icon: FileText },
-  { labelKey: 'sidebar.tenants', href: ROUTES.LANDLORD_TENANTS, icon: Users },
-  { labelKey: 'sidebar.leases', href: ROUTES.LANDLORD_LEASES, icon: FileCheck },
-  { labelKey: 'sidebar.payments', href: ROUTES.LANDLORD_PAYMENTS, icon: CreditCard },
-  { labelKey: 'sidebar.maintenance', href: ROUTES.LANDLORD_MAINTENANCE, icon: Wrench },
-  { labelKey: 'sidebar.home_management', href: ROUTES.LANDLORD_HOME_MANAGEMENT, icon: Wrench },
-  { labelKey: 'sidebar.vendors', href: ROUTES.LANDLORD_VENDORS, icon: HardHat },
-  { labelKey: 'sidebar.financials', href: ROUTES.LANDLORD_FINANCIALS, icon: PieChart },
-  {
-    labelKey: 'sidebar.owner_statements',
-    href: ROUTES.LANDLORD_OWNER_STATEMENTS,
-    icon: FileBarChart,
-  },
-  { labelKey: 'sidebar.arrears', href: ROUTES.LANDLORD_ARREARS, icon: AlertTriangle },
-  { labelKey: 'sidebar.evictions', href: ROUTES.LANDLORD_EVICTIONS, icon: Gavel },
-  { labelKey: 'sidebar.documents', href: ROUTES.LANDLORD_DOCUMENTS, icon: FolderOpen },
-  { labelKey: 'sidebar.messages', href: ROUTES.LANDLORD_MESSAGES, icon: MessageCircle },
-  { labelKey: 'sidebar.realtor_access', href: ROUTES.LANDLORD_REALTORS, icon: UserRoundCheck },
-  { labelKey: 'sidebar.reviews', href: ROUTES.LANDLORD_REVIEWS, icon: Star },
-  { labelKey: 'sidebar.settings', href: ROUTES.LANDLORD_SETTINGS, icon: Settings },
-  { label: 'Billing', href: ROUTES.LANDLORD_BILLING, icon: Sparkles },
-  { label: 'Verification', href: '/landlord/verification', icon: FileCheck },
-];
+const item = (labelKey: TranslationKey, href: string, icon: React.ElementType): NavItem => ({
+  labelKey,
+  href,
+  icon,
+});
 
+// Payments (+ Arrears), Maintenance (+ Home Management) and Financials
+// (+ Owner Statements) are tabbed hubs, so those folded entries have no row of their own.
 export const navGroups = [
-  { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Portfolio and marketing', items: navItems.slice(1, 8) },
-  { label: 'Tenancy operations', items: navItems.slice(8, 15) },
-  { label: 'Finance and compliance', items: navItems.slice(15, 19) },
-  { label: 'Communication and account', items: navItems.slice(19) },
+  {
+    label: 'Overview',
+    items: [item('sidebar.dashboard', ROUTES.LANDLORD_DASHBOARD, LayoutDashboard)],
+  },
+  {
+    label: 'Portfolio and marketing',
+    items: [
+      item('sidebar.properties', ROUTES.LANDLORD_PROPERTIES, Building2),
+      item('sidebar.units', ROUTES.LANDLORD_UNITS, DoorOpen),
+      item('sidebar.listings', ROUTES.LANDLORD_LISTINGS, Megaphone),
+      item('sidebar.shortlets', ROUTES.LANDLORD_SHORTLETS, BedDouble),
+      item('sidebar.landlord_leads', ROUTES.LANDLORD_LEADS, UsersRound),
+      item('sidebar.microsite', ROUTES.LANDLORD_MICROSITE, Globe),
+    ],
+  },
+  {
+    label: 'Tenancy operations',
+    items: [
+      item('sidebar.applications', ROUTES.LANDLORD_APPLICATIONS, FileText),
+      item('sidebar.tenants', ROUTES.LANDLORD_TENANTS, Users),
+      item('sidebar.leases', ROUTES.LANDLORD_LEASES, FileCheck),
+      item('sidebar.payments', ROUTES.LANDLORD_PAYMENTS, CreditCard),
+      item('sidebar.maintenance', ROUTES.LANDLORD_MAINTENANCE, Wrench),
+      item('sidebar.vendors', ROUTES.LANDLORD_VENDORS, HardHat),
+    ],
+  },
+  {
+    label: 'Finance and compliance',
+    items: [
+      item('sidebar.financials', ROUTES.LANDLORD_FINANCIALS, PieChart),
+      item('sidebar.evictions', ROUTES.LANDLORD_EVICTIONS, Gavel),
+      item('sidebar.documents', ROUTES.LANDLORD_DOCUMENTS, FolderOpen),
+    ],
+  },
+  {
+    label: 'Communication and account',
+    items: [
+      item('sidebar.messages', ROUTES.LANDLORD_MESSAGES, MessageCircle),
+      item('sidebar.realtor_access', ROUTES.LANDLORD_REALTORS, UserRoundCheck),
+      item('sidebar.reviews', ROUTES.LANDLORD_REVIEWS, Star),
+      item('sidebar.referrals', ROUTES.LANDLORD_REFERRALS, Gift),
+      item('sidebar.settings', ROUTES.LANDLORD_SETTINGS, Settings),
+      item('sidebar.billing', ROUTES.LANDLORD_BILLING, Sparkles),
+      item('sidebar.verification', ROUTES.LANDLORD_VERIFICATION, ShieldCheck),
+    ],
+  },
 ];
 
 export const LandlordSidebar = () => {
@@ -100,7 +112,7 @@ export const LandlordSidebar = () => {
         ...group,
         items: group.items.map((item) => ({
           ...item,
-          label: item.labelKey ? t(item.labelKey) : item.label,
+          label: t(item.labelKey),
           locked: !isPro && PRO_GATED_ROUTES.has(item.href),
         })),
       }))}
