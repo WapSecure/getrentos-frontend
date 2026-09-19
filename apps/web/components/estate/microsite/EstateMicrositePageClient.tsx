@@ -3,15 +3,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { Building2, MapPin } from 'lucide-react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
-import { estateMicrositeService } from '@/services/estateMicrositeService';
+import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { EstateAvailableListings } from './EstateAvailableListings';
 import { unwrap } from '@/lib/apiHelpers';
-import type { EstateMicrositeProfile } from '@/types/estate-microsite';
+import type { EstateStorefront } from '@/types/estate-marketplace';
 
 interface EstateMicrositePageClientProps {
   slug: string;
   /** Server-fetched profile (from generateMetadata) used to hydrate the query. */
-  initialProfile?: EstateMicrositeProfile;
+  initialProfile?: EstateStorefront;
 }
 
 export const EstateMicrositePageClient = ({
@@ -23,8 +23,8 @@ export const EstateMicrositePageClient = ({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['estate-microsite', slug, 'profile'],
-    queryFn: () => unwrap(estateMicrositeService.getProfile(slug)),
+    queryKey: ['estate-storefront', slug, 'profile'],
+    queryFn: () => unwrap(estateStorefrontService.getStorefront(slug)),
     initialData: initialProfile,
     staleTime: 5 * 60_000,
     retry: false,

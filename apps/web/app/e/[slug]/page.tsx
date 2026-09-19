@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { EstateMicrositePageClient } from '@/components/estate/microsite/EstateMicrositePageClient';
-import type { EstateMicrositeProfile } from '@/types/estate-microsite';
+import type { EstateStorefront } from '@/types/estate-marketplace';
 
 interface EstateMicrositePageProps {
   params: Promise<{ slug: string }>;
@@ -23,17 +23,21 @@ interface EstateMicrositePageProps {
  * estate.
  */
 type ProfileResult =
-  | { kind: 'ok'; profile: EstateMicrositeProfile }
+  | { kind: 'ok'; profile: EstateStorefront }
   | { kind: 'missing' }
   | { kind: 'error' };
 
 async function fetchProfile(slug: string): Promise<ProfileResult> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   try {
-    const res = await fetch(`${apiUrl}/estate-microsites/${slug}`, { cache: 'no-store' });
+    // One canonical public estate endpoint. /estate-microsites/:slug returned a
+    // strict subset of this from a second service, so the same "is this estate
+    // visible?" rule lived in two places — and this page had to merge two
+    // shapes for the same estate.
+    const res = await fetch(`${apiUrl}/estate-storefronts/${slug}`, { cache: 'no-store' });
     if (res.status === 404) return { kind: 'missing' };
     if (!res.ok) return { kind: 'error' };
-    return { kind: 'ok', profile: (await res.json()) as EstateMicrositeProfile };
+    return { kind: 'ok', profile: (await res.json()) as EstateStorefront };
   } catch {
     return { kind: 'error' };
   }

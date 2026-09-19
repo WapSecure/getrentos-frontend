@@ -10,6 +10,7 @@ import type {
   EstateListing,
   EstateListingType,
   EstatePropertySummary,
+  EstateStorefront,
   EstateStorefrontListing,
 } from '@/types/estate-marketplace';
 
@@ -256,6 +257,11 @@ export const estateStorefrontService = {
     filters: { search?: string; city?: string; state?: string; page?: number; pageSize?: number } = {},
   ): Promise<ApiResponse<Paginated<EstateDirectoryEntry>>> {
     return safeCall(() => authFetch(`/estate-storefronts${query(filters)}`));
+  },
+
+  /** The estate's public page itself. 404s for a dead or unentitled estate. */
+  getStorefront(slug: string): Promise<ApiResponse<EstateStorefront>> {
+    return safeCall(() => authFetch(`/estate-storefronts/${slug}`));
   },
 
   listListings(

@@ -97,6 +97,33 @@ export interface EstatePropertySummary {
   bathrooms?: number | null;
 }
 
+/**
+ * An estate's public page.
+ *
+ * This is the canonical public estate profile. `/estate-microsites/:slug` used
+ * to return a strict subset of it from a second service, which meant the same
+ * visibility and entitlement rules had to be implemented twice — and the second
+ * copy is the one that gets missed. That endpoint is gone.
+ */
+export interface EstateStorefront {
+  slug: string;
+  estateId: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  bannerUrl?: string;
+  bio?: string;
+  /** Published listings inside the estate, by market. */
+  listingCount: number;
+  rentCount: number;
+  saleCount: number;
+  shortletCount: number;
+  gates?: number | null;
+  /** Whether the estate's public page is switched on. */
+  storefrontEnabled: boolean;
+}
+
 export interface EstateStorefrontListing {
   listingId: string;
   propertyId: string;
