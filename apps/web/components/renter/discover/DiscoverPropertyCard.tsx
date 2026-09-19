@@ -34,6 +34,22 @@ interface DiscoverPropertyCardProps {
   onOpenTour: () => void;
 }
 
+/**
+ * A listing's detail can be genuinely absent — one created without a unit has no
+ * bedroom or bathroom count to report, and no floor area either. Printing the
+ * raw number turns "we don't know" into "0 beds", which reads as a real
+ * measurement and contradicts the listing's own title ("3-bedroom apartment …
+ * 0 beds"). Missing detail shows as an em dash instead.
+ */
+function listingDetail(
+  value: number | null | undefined,
+  singular: string,
+  plural: string,
+): string {
+  if (!value) return '—';
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+
 export const DiscoverPropertyCard = ({
   property,
   isSaved,
@@ -142,19 +158,15 @@ export const DiscoverPropertyCard = ({
         <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Bed className="w-3 h-3" />
-            <span>
-              {property.bedrooms} {property.bedrooms === 1 ? 'bed' : 'beds'}
-            </span>
+            <span>{listingDetail(property.bedrooms, 'bed', 'beds')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Bath className="w-3 h-3" />
-            <span>
-              {property.bathrooms} {property.bathrooms === 1 ? 'bath' : 'baths'}
-            </span>
+            <span>{listingDetail(property.bathrooms, 'bath', 'baths')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Square className="w-3 h-3" />
-            <span>{property.size} sqft</span>
+            <span>{property.size ? `${property.size} sqft` : '—'}</span>
           </div>
         </div>
 
