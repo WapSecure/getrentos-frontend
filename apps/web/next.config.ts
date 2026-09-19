@@ -16,8 +16,10 @@ type ImageRemotePattern = {
  */
 function imageRemotePatterns(): ImageRemotePattern[] {
   const patterns: ImageRemotePattern[] = [
-    // Local dev backend — any port (e.g. http://localhost:4000).
-    { protocol: 'http', hostname: 'localhost', port: '*' },
+    // Local dev: MinIO serves uploads from http://localhost:9000 and the dev
+    // API binds a port in the same range. Omitting `port` matches any port —
+    // `port: '*'` does not (Next rejects e.g. localhost:9000 with it).
+    { protocol: 'http', hostname: 'localhost' },
   ];
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -41,6 +43,12 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
   images: {
     remotePatterns: imageRemotePatterns(),
+    // Next 16 refuses to optimise remote images whose host resolves to a
+    // private IP (SSRF guard). Locally, MinIO serves uploads from
+    // http://localhost:9000, so every uploaded photo would crash the page
+    // that renders it unless this is relaxed. Dev only — production images
+    // come from a public CDN/S3 host.
+    ...(process.env.NODE_ENV !== 'production' ? { dangerouslyAllowLocalIP: true } : {}),
   },
   async redirects() {
     // Several former standalone renter pages were merged into tabbed hubs to
