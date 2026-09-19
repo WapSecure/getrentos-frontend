@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
 import { Button, Switch, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
@@ -116,7 +116,7 @@ export default function LandlordMicrositePage() {
             <div className="flex items-center gap-4">
               {bannerUrl ? (
                 <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-border">
-                  <Image
+                  <SafeImage
                     src={bannerUrl}
                     alt="Microsite banner"
                     fill

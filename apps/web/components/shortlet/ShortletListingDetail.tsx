@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
@@ -238,13 +238,18 @@ export function ShortletListingDetail({
         ) : listing.images.length > 0 ? (
           <>
             <div className="relative aspect-[16/9] w-full bg-secondary/50">
-              <Image
+              <SafeImage
                 src={listing.images[activeImage]}
                 alt={listing.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 66vw"
                 className="object-cover"
                 priority={activeImage === 0}
+                fallback={
+                  <div className="flex h-full w-full items-center justify-center">
+                    <BedDouble className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                }
               />
               <div className="absolute left-3 top-3 flex gap-2">
                 {listing.instantBooking && (
@@ -273,7 +278,7 @@ export function ShortletListingDetail({
                         : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <Image
+                    <SafeImage
                       src={url}
                       alt=""
                       fill

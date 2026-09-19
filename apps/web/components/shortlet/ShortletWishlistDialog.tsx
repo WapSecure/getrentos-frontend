@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -103,13 +103,14 @@ function WishlistRow({
       <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary/60">
         {listing.coverImageUrl ? (
           <div className="relative h-full w-full">
-            <Image
+            <SafeImage
               src={listing.coverImageUrl}
               alt={listing.title}
               fill
               sizes="80px"
               className="object-cover"
               loading="lazy"
+              fallback={<BedDouble className="h-6 w-6 text-muted-foreground" />}
             />
           </div>
         ) : (

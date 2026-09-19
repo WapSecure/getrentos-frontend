@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, MapPin } from 'lucide-react';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateMicrositeService } from '@/services/estateMicrositeService';
 import { EstateAvailableListings } from './EstateAvailableListings';
 import { unwrap } from '@/lib/apiHelpers';
@@ -50,20 +50,18 @@ export const EstateMicrositePageClient = ({
   return (
     <div className="max-w-6xl mx-auto px-4 pb-16">
       <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-secondary mt-6">
-        {profile.bannerUrl ? (
-          <Image
-            src={profile.bannerUrl}
-            alt=""
-            fill
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5 flex items-center justify-center">
-            <Building2 className="w-12 h-12 text-primary/40" />
-          </div>
-        )}
+        <SafeImage
+          src={profile.bannerUrl}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 768px"
+          className="object-cover"
+          fallback={
+            <div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5 flex items-center justify-center">
+              <Building2 className="w-12 h-12 text-primary/40" />
+            </div>
+          }
+        />
       </div>
 
       <div className="px-2 mt-6">

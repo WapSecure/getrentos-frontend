@@ -6,7 +6,7 @@ import type { EstateDirectoryEntry } from '@/types/estate-marketplace';
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
-  title: 'Estates on GetRentos — Browse Properties by Estate',
+  title: 'Estates — Browse Properties by Estate',
   description:
     'Browse homes marketed by estates across Nigeria. See every property inside an estate — those its own team lists and those its residents own — and who is marketing each one.',
   alternates: { canonical: '/estates' },

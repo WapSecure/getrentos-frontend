@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useMutation } from '@tanstack/react-query';
 import { Badge, Button, Field, Input, Toast, type ToastVariant } from '@getrentos/ui';
 import { ImagePlus, Link2, Map as MapIcon, Star, Trash2, Video } from 'lucide-react';
@@ -213,7 +213,7 @@ export function ShortletMediaManager({
                         : 'border-dashed border-border opacity-80 hover:border-primary hover:opacity-100'
                     }`}
                   >
-                    <Image
+                    <SafeImage
                       src={s.url}
                       alt=""
                       fill

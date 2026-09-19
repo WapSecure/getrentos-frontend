@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Bath, BedDouble, Building2, CalendarClock, Home, MapPin } from 'lucide-react';
 import { Badge, EmptyState } from '@getrentos/ui';
+import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { EstateListingType, EstateStorefrontListing } from '@/types/estate-marketplace';
@@ -44,20 +44,18 @@ const ListingCard = ({ listing, slug }: { listing: EstateStorefrontListing; slug
     className="group block bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/40 transition-colors"
   >
     <div className="relative h-40 bg-secondary">
-      {listing.coverImageUrl ? (
-        <Image
-          src={listing.coverImageUrl}
-          alt=""
-          fill
-          sizes="(max-width: 640px) 100vw, 320px"
-          className="object-cover group-hover:scale-[1.02] transition-transform"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <Home className="w-8 h-8 text-muted-foreground/40" />
-        </div>
-      )}
+      <SafeImage
+        src={listing.coverImageUrl}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 100vw, 320px"
+        className="object-cover group-hover:scale-[1.02] transition-transform"
+        fallback={
+          <div className="w-full h-full flex items-center justify-center">
+            <Home className="w-8 h-8 text-muted-foreground/40" />
+          </div>
+        }
+      />
       <div className="absolute top-3 left-3 flex gap-2">
         <Badge variant="info">
           {listing.listingType === 'RENT'

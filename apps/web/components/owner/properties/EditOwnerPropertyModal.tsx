@@ -1,15 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
+import { Camera, Loader2 } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
+import { ownerService } from '@/services/ownerService';
+import { unwrap } from '@/lib/apiHelpers';
 
 type OwnerPropertyUpdates = Pick<
   OwnerProperty,
-  'name' | 'propertyType' | 'address' | 'city' | 'state' | 'country' | 'estimatedValue'
+  | 'name'
+  | 'propertyType'
+  | 'address'
+  | 'city'
+  | 'state'
+  | 'country'
+  | 'estimatedValue'
+  | 'coverImageKey'
 >;
 
 interface EditOwnerPropertyModalProps {
@@ -58,19 +68,53 @@ const EditOwnerPropertyForm = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The photo is staged first and only attached on save, matching the API: the
+  // upload returns a storage key, and `coverImageKey` is what binds it.
+  const [coverKey, setCoverKey] = useState(property.coverImageKey);
+  const [previewUrl, setPreviewUrl] = useState(property.coverImageUrl);
+  const [isUploading, setIsUploading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Release the local preview once it is replaced or the modal closes.
+  useEffect(() => {
+    if (!previewUrl?.startsWith('blob:')) return;
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
+
+  const handlePhotoSelected = async (file: File) => {
+    setPhotoError(null);
+    setIsUploading(true);
+    try {
+      // `unwrap` takes the pending response and resolves to its payload, so it
+      // must be awaited — destructuring the promise itself yields undefined.
+      const { key } = await unwrap(ownerService.uploadPropertyMedia(file));
+      setCoverKey(key);
+      setPreviewUrl(URL.createObjectURL(file));
+    } catch (reason) {
+      setPhotoError(reason instanceof Error ? reason.message : 'Unable to upload that photo.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     setError(null);
+    const payload = {
+      name,
+      propertyType,
+      address,
+      city,
+      state,
+      country,
+      estimatedValue: Number(estimatedValue) || property.estimatedValue,
+      // Only send the cover when it changed; an unconditional write would
+      // push a stale key back over a photo edited elsewhere.
+      ...(coverKey !== property.coverImageKey ? { coverImageKey: coverKey } : {}),
+    };
     try {
-      await onSave(property.id, {
-        name,
-        propertyType,
-        address,
-        city,
-        state,
-        country,
-        estimatedValue: Number(estimatedValue) || property.estimatedValue,
-      });
+      await onSave(property.id, payload);
       onClose();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to update the property.');
@@ -99,7 +143,7 @@ const EditOwnerPropertyForm = ({
           <Select
             value={propertyType}
             onValueChange={setPropertyType}
-            options={PROPERTY_TYPE_OPTIONS.map(({ value, label }) => ({ value: label, label }))}
+            options={PROPERTY_TYPE_OPTIONS.map(({ label }) => ({ value: label, label }))}
             ariaLabel="Property type"
           />
         </div>
@@ -132,11 +176,54 @@ const EditOwnerPropertyForm = ({
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Property Photo</label>
+          <div className="flex items-center gap-3">
+            <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
+              {previewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={previewUrl} alt="Property photo" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Camera className="h-6 w-6 text-muted-foreground/50" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {isUploading ? 'Uploading…' : previewUrl ? 'Change photo' : 'Upload photo'}
+              </Button>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Shown on your listings and any estate page featuring this property.
+              </p>
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              // Reset so re-picking the same file still fires a change event.
+              event.target.value = '';
+              if (file) void handlePhotoSelected(file);
+            }}
+          />
+          {photoError && <p className="mt-1 text-sm text-destructive">{photoError}</p>}
+        </div>
+
         <Button
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || isSaving}
+          disabled={!name.trim() || !address.trim() || isSaving || isUploading}
           isLoading={isSaving}
         >
           {isSaving ? 'Saving…' : 'Save Changes'}

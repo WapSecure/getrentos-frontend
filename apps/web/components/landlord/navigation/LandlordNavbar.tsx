@@ -231,7 +231,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
                 ...group,
                 items: group.items.map((item) => ({
                   ...item,
-                  label: item.labelKey ? t(item.labelKey) : item.label,
+                  label: t(item.labelKey),
                 })),
               }))}
             />

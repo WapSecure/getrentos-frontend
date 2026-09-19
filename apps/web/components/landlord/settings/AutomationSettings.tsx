@@ -11,6 +11,8 @@ interface AutomationToggle {
   label: string;
   description: string;
   icon: React.ElementType;
+  /** No automation behind this yet — shown, but not switchable, so it never promises what won't happen. */
+  comingSoon?: boolean;
 }
 
 const TOGGLE_META: AutomationToggle[] = [
@@ -31,6 +33,7 @@ const TOGGLE_META: AutomationToggle[] = [
     label: 'Auto-Generate Invoices',
     description: 'Create a rent invoice automatically each billing cycle',
     icon: FileText,
+    comingSoon: true,
   },
   {
     id: 'leaseExpiry',
@@ -89,18 +92,32 @@ export const AutomationSettings = () => {
                 <item.icon className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">{item.label}</p>
+                <p className="text-sm font-medium text-foreground">
+                  {item.label}
+                  {item.comingSoon && (
+                    <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      Coming soon
+                    </span>
+                  )}
+                </p>
                 <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
               </div>
             </div>
             <button
+              type="button"
+              role="switch"
+              aria-checked={item.comingSoon ? false : settings[item.id]}
+              aria-label={item.label}
+              disabled={item.comingSoon}
               onClick={() => toggle(item.id)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
-                settings[item.id] ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 disabled:cursor-not-allowed disabled:opacity-50 ${
+                settings[item.id] && !item.comingSoon
+                  ? 'bg-primary'
+                  : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.id] ? 'translate-x-6' : 'translate-x-1'}`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.id] && !item.comingSoon ? 'translate-x-6' : 'translate-x-1'}`}
               />
             </button>
           </div>

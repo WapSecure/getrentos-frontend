@@ -6,7 +6,7 @@ import { firstPagePath, rentToCard, type PublicListingCard, type RentApiItem } f
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
-  title: 'Homes to Rent in Nigeria | GetRentos',
+  title: 'Homes to Rent in Nigeria',
   description:
     'Browse rental homes across Nigeria. Verified properties and verified landlords are marked, and you can scope results to a single estate.',
   alternates: { canonical: '/rent' },
