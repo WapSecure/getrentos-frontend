@@ -53,7 +53,9 @@ function AgentVerificationsPageContent() {
       agentOfflineQueue.enqueue('verification', {
         taskId: visit.taskId,
         subjectName: visit.subjectName,
-        subjectType: visit.subjectType.toUpperCase(),
+        // The API sends the subject type as free text; the queued payload has to
+        // be the union the submit call accepts, as in the inspections queue.
+        subjectType: visit.subjectType.toUpperCase() as 'TENANT' | 'BUYER' | 'PROPERTY',
         idVerified: visit.idVerified,
         addressConfirmed: visit.addressConfirmed,
         notes: visit.notes || undefined,
