@@ -100,6 +100,14 @@ export interface SubmitApplicationInput {
   documents: ApplicationDocument[];
 }
 
+export interface ApplicationNote {
+  id: string;
+  applicationId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const applicationsApi = {
   list: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<RenterApplication>>(
@@ -111,4 +119,22 @@ export const applicationsApi = {
 
   withdraw: (id: string) =>
     apiFetch<RenterApplication>(`/renter/applications/${id}/withdraw`, { method: 'PATCH' }),
+
+  listNotes: (applicationId: string) =>
+    apiFetch<ApplicationNote[]>(`/renter/applications/${applicationId}/notes`),
+
+  createNote: (applicationId: string, content: string) =>
+    apiFetch<ApplicationNote>(`/renter/applications/${applicationId}/notes`, {
+      method: 'POST',
+      body: { content },
+    }),
+
+  updateNote: (applicationId: string, noteId: string, content: string) =>
+    apiFetch<ApplicationNote>(`/renter/applications/${applicationId}/notes/${noteId}`, {
+      method: 'PATCH',
+      body: { content },
+    }),
+
+  deleteNote: (applicationId: string, noteId: string) =>
+    apiFetch<void>(`/renter/applications/${applicationId}/notes/${noteId}`, { method: 'DELETE' }),
 };

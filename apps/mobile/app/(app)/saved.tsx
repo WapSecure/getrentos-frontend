@@ -1,16 +1,42 @@
-import { Pressable, RefreshControl, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { ChevronLeft, Heart } from 'lucide-react-native';
-import { EmptyState, PropertyCard, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChevronLeft, Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
+import { Chip, EmptyState, PropertyCard, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
-import type { SavedProperty } from '@/lib/api/properties';
+import { qk } from '@/lib/query/keys';
+import { savedListingsApi, type SavedProperty } from '@/lib/api/properties';
+import { wishlistsApi } from '@/lib/api/wishlists';
+import { WishlistManageSheet } from '@/components/property/WishlistManageSheet';
+import { MoveToWishlistSheet } from '@/components/property/MoveToWishlistSheet';
+import { RecentlyViewedStrip } from '@/components/property/RecentlyViewedStrip';
 
 export default function Saved() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const { items, isLoading, isError, refetch, toggle } = useSavedListings();
+  const { toggle } = useSavedListings();
+  const qc = useQueryClient();
+
+  const [activeWishlistId, setActiveWishlistId] = useState<string | undefined>(undefined);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [movingItem, setMovingItem] = useState<SavedProperty | null>(null);
+
+  const wishlistsQuery = useQuery({ queryKey: qk.renter.wishlists, queryFn: wishlistsApi.list });
+
+  const listQuery = useQuery({
+    queryKey: qk.listings.savedByWishlist(activeWishlistId),
+    queryFn: () => savedListingsApi.list(1, 100, activeWishlistId),
+  });
+  const items = listQuery.data?.items ?? [];
+
+  const refetchAll = () => {
+    listQuery.refetch();
+    wishlistsQuery.refetch();
+    qc.invalidateQueries({ queryKey: qk.listings.saved });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: insets.top }}>
@@ -31,16 +57,59 @@ export default function Saved() {
         >
           <ChevronLeft size={24} color={colors.foreground} />
         </Pressable>
-        <Text variant="title">Saved homes</Text>
+        <Text variant="title" style={{ flex: 1 }}>
+          Saved homes
+        </Text>
+        <Pressable
+          onPress={() => setManageOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Manage wishlists"
+          hitSlop={10}
+        >
+          <Settings2 size={19} color={colors.foreground} />
+        </Pressable>
       </View>
 
-      {isLoading ? (
+      {(wishlistsQuery.data?.length ?? 0) > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.xl,
+            gap: spacing.xs,
+            paddingBottom: spacing.sm,
+          }}
+        >
+          <Chip
+            label="All"
+            selected={!activeWishlistId}
+            onPress={() => setActiveWishlistId(undefined)}
+            size="sm"
+          />
+          {wishlistsQuery.data!.map((w) => (
+            <Chip
+              key={w.id}
+              label={w.name}
+              count={w.count}
+              selected={activeWishlistId === w.id}
+              onPress={() => setActiveWishlistId(w.id)}
+              size="sm"
+            />
+          ))}
+        </ScrollView>
+      ) : null}
+
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+        <RecentlyViewedStrip />
+      </View>
+
+      {listQuery.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} height={116} radius={16} />
           ))}
         </View>
-      ) : isError ? (
+      ) : listQuery.isError ? (
         <EmptyState
           icon={<Heart size={34} color={colors.mutedForeground} />}
           title="Couldn't load your saved homes"
@@ -49,15 +118,21 @@ export default function Saved() {
       ) : items.length === 0 ? (
         <EmptyState
           icon={<Heart size={34} color={colors.mutedForeground} />}
-          title="Nothing saved yet"
-          description="Tap the heart on any listing to keep it here for later."
+          title={activeWishlistId ? 'Nothing in this wishlist yet' : 'Nothing saved yet'}
+          description={
+            activeWishlistId
+              ? 'Move a saved home here from its card menu.'
+              : 'Tap the heart on any listing to keep it here for later.'
+          }
         />
       ) : (
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: SavedProperty }) => (
-            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+            <View
+              style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xs }}
+            >
               <PropertyCard
                 property={item}
                 layout="row"
@@ -65,6 +140,22 @@ export default function Saved() {
                 onToggleSave={toggle}
                 onPress={(id) => router.push(`/(app)/property/${id}`)}
               />
+              <Pressable
+                onPress={() => setMovingItem(item)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 5,
+                  alignSelf: 'flex-end',
+                  paddingHorizontal: spacing.sm,
+                }}
+                hitSlop={8}
+              >
+                <MoreHorizontal size={14} color={colors.mutedForeground} />
+                <Text variant="caption" color="mutedForeground">
+                  Move to wishlist
+                </Text>
+              </Pressable>
             </View>
           )}
           contentContainerStyle={{
@@ -74,12 +165,20 @@ export default function Saved() {
           refreshControl={
             <RefreshControl
               refreshing={false}
-              onRefresh={refetch}
+              onRefresh={refetchAll}
               tintColor={colors.mutedForeground}
             />
           }
         />
       )}
+
+      <WishlistManageSheet open={manageOpen} onClose={() => setManageOpen(false)} />
+      <MoveToWishlistSheet
+        open={!!movingItem}
+        onClose={() => setMovingItem(null)}
+        savedListingId={movingItem?.savedListingId ?? null}
+        currentWishlistId={movingItem?.wishlistId ?? null}
+      />
     </View>
   );
 }

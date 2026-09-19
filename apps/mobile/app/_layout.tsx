@@ -4,7 +4,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
@@ -12,6 +11,8 @@ import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
 import { IMPLEMENTED_PORTALS, portalHref } from '@/lib/roles';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
+import { useOnboardingSeen } from '@/lib/onboarding';
+import { SplashReveal } from '@/components/SplashReveal';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -22,14 +23,16 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
  * transition — never `<Redirect>` scattered across nested layouts (two of them
  * firing at once trips React's update counter on the native stack).
  */
-function useProtectedRoute() {
+function useProtectedRoute(onboardingSeen: boolean | null) {
   const { status, portal } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const lastTarget = useRef<string | null>(null);
 
   useEffect(() => {
-    if (status === 'loading') return;
+    // Hold routing until the intro flag is read, so a returning user never
+    // sees onboarding flash before the welcome screen.
+    if (status === 'loading' || onboardingSeen === null) return;
 
     const root = segments[0]; // '(auth)' | '(app)' | undefined (index)
     const inApp = root === '(app)';
@@ -37,7 +40,8 @@ function useProtectedRoute() {
 
     let target: string | null = null;
     if (status === 'unauthenticated') {
-      if (inApp || root === undefined) target = '/(auth)/welcome';
+      if (inApp || root === undefined)
+        target = onboardingSeen ? '/(auth)/welcome' : '/(auth)/onboarding';
     } else {
       // authenticated
       const group = (segments as string[])[1];
@@ -62,7 +66,7 @@ function useProtectedRoute() {
       router.replace(target as never);
     }
     if (!target) lastTarget.current = null;
-  }, [status, portal, segments, router]);
+  }, [status, portal, segments, router, onboardingSeen]);
 }
 
 const STACK_SCREEN_OPTIONS = { headerShown: false, animation: 'fade' } as const;
@@ -70,19 +74,23 @@ const STACK_SCREEN_OPTIONS = { headerShown: false, animation: 'fade' } as const;
 function Gate() {
   const { status } = useAuth();
   const { colors, scheme } = useTheme();
+  const { seen: onboardingSeen } = useOnboardingSeen();
   useMagicLink();
-  useProtectedRoute();
+  useProtectedRoute(onboardingSeen);
+
+  const booting = status === 'loading' || onboardingSeen === null;
 
   useEffect(() => {
-    if (status !== 'loading') SplashScreen.hideAsync().catch(() => undefined);
-  }, [status]);
+    // Hand the native splash over to `SplashReveal`, which covers the seam.
+    if (!booting) SplashScreen.hideAsync().catch(() => undefined);
+  }, [booting]);
 
   const screenOptions = useMemo(
     () => ({ ...STACK_SCREEN_OPTIONS, contentStyle: { backgroundColor: colors.background } }),
     [colors.background]
   );
 
-  if (status === 'loading') return null;
+  if (booting) return null;
 
   return (
     <>
@@ -92,6 +100,7 @@ function Gate() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
       </Stack>
+      <SplashReveal />
     </>
   );
 }
@@ -100,18 +109,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <BottomSheetModalProvider>
-          <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-            <ThemeProvider onPreferenceChange={persistThemePreference}>
-              <HydrateThemePreference />
-              <ToastProvider>
-                <AuthProvider>
-                  <Gate />
-                </AuthProvider>
-              </ToastProvider>
-            </ThemeProvider>
-          </PersistQueryClientProvider>
-        </BottomSheetModalProvider>
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+          <ThemeProvider onPreferenceChange={persistThemePreference}>
+            <HydrateThemePreference />
+            <ToastProvider>
+              <AuthProvider>
+                <Gate />
+              </AuthProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

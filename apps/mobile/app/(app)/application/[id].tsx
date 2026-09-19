@@ -32,6 +32,7 @@ import {
 } from '@/lib/api/applications';
 import { ApiError } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
+import { ApplicationNotesSection } from '@/components/applications/ApplicationNotesSection';
 
 export default function ApplicationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -230,6 +231,8 @@ export default function ApplicationDetail() {
                   </Text>
                 </View>
               ) : null}
+
+              <ApplicationNotesSection applicationId={app.id} />
 
               <View style={{ gap: spacing.sm }}>
                 <Text variant="bodyStrong">Landlord</Text>

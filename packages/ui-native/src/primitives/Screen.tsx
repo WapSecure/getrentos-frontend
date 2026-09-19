@@ -48,7 +48,7 @@ export function Screen({
       contentContainerStyle={[
         {
           paddingHorizontal: padded ? spacing.xl : 0,
-          paddingTop: spacing.lg,
+          paddingTop: insets.top + spacing.lg,
           paddingBottom: insets.bottom + spacing['3xl'],
           gap: spacing.lg,
         },
@@ -67,7 +67,15 @@ export function Screen({
       {children}
     </ScrollView>
   ) : (
-    <View style={{ flex: 1, paddingHorizontal: padded ? spacing.xl : 0 }}>{children}</View>
+    <View
+      style={{
+        flex: 1,
+        paddingHorizontal: padded ? spacing.xl : 0,
+        paddingTop: insets.top + spacing.lg,
+      }}
+    >
+      {children}
+    </View>
   );
 
   return (

@@ -1,38 +1,66 @@
-import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Image } from 'expo-image';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Calendar,
   ChevronLeft,
   Heart,
   MapPin,
+  Navigation,
   BedDouble,
   Bath,
   Maximize,
+  MessageCircle,
+  PlayCircle,
   ShieldCheck,
 } from 'lucide-react-native';
 import {
   Badge,
   Button,
+  Card,
   Chip,
+  Divider,
   ErrorState,
   Price,
   Skeleton,
   Text,
   useTheme,
+  useToast,
 } from '@getrentos/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import { propertiesApi } from '@/lib/api/properties';
+import { messagesApi } from '@/lib/api/messages';
+import { ApiError } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
+import { recentlyViewedApi } from '@/lib/api/recentlyViewed';
+import { formatDate } from '@/lib/format';
+import { ViewingRequestSheet } from '@/components/property/ViewingRequestSheet';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
+import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
+
+function openDirections(latitude: number, longitude: number, label: string) {
+  const encodedLabel = encodeURIComponent(label);
+  const url = Platform.select({
+    ios: `maps://?daddr=${latitude},${longitude}&q=${encodedLabel}`,
+    android: `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodedLabel})`,
+    default: `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
+  });
+  Linking.openURL(url).catch(() =>
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`)
+  );
+}
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { savedIds, toggle } = useSavedListings();
+  const toast = useToast();
+  const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
 
   const query = useQuery({
     queryKey: qk.listings.detail(id),
@@ -40,8 +68,24 @@ export default function PropertyDetail() {
     enabled: !!id,
   });
 
+  const messageMutation = useMutation({
+    mutationFn: () => {
+      const landlordId = query.data!.landlordId!;
+      return messagesApi.start(landlordId, query.data!.propertyId);
+    },
+    onSuccess: (conversation) => router.push(`/(app)/conversation/${conversation.id}`),
+    onError: (err) =>
+      toast.show(
+        err instanceof ApiError ? err.message : 'Could not start the conversation.',
+        'error'
+      ),
+  });
+
   useEffect(() => {
-    if (query.data) track('listing_viewed', { id });
+    if (query.data) {
+      track('listing_viewed', { id });
+      recentlyViewedApi.record(id).catch(() => undefined);
+    }
   }, [query.data, id]);
 
   const saved = savedIds.has(id);
@@ -53,16 +97,7 @@ export default function PropertyDetail() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
       >
-        <View style={{ height: 300, backgroundColor: colors.secondary }}>
-          {p?.image ? (
-            <Image
-              source={{ uri: p.image }}
-              contentFit="cover"
-              transition={200}
-              style={StyleSheet.absoluteFill}
-            />
-          ) : null}
-        </View>
+        <PropertyGallery images={toGallery(p?.image, p?.images)} height={300} />
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
           {query.isError ? (
@@ -141,9 +176,103 @@ export default function PropertyDetail() {
                 </View>
               ) : null}
 
-              <Text variant="caption" color="mutedForeground">
-                Viewing bookings, the map and reviews arrive in the next update.
-              </Text>
+              {p.reviews && p.reviews.length > 0 ? (
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="bodyStrong">Reviews</Text>
+                  <Card elevated padding="none">
+                    {p.reviews.slice(0, 3).map((r, i) => (
+                      <View key={r.id}>
+                        {i > 0 ? <Divider /> : null}
+                        <View style={{ padding: spacing.lg, gap: 4 }}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <Text variant="callout" style={{ fontWeight: '700' }}>
+                              {r.author}
+                            </Text>
+                            <Text variant="caption" color="mutedForeground">
+                              {r.rating.toFixed(1)} ★
+                            </Text>
+                          </View>
+                          <Text variant="caption" color="mutedForeground">
+                            {formatDate(r.date, 'short')}
+                          </Text>
+                          <Text variant="body" style={{ marginTop: 2 }}>
+                            {r.comment}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </Card>
+                </View>
+              ) : null}
+
+              {p.videoTourUrl ? (
+                <Pressable onPress={() => Linking.openURL(p.videoTourUrl!)}>
+                  <Card
+                    elevated
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                  >
+                    <View
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: colors.accent,
+                      }}
+                    >
+                      <PlayCircle size={20} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text variant="bodyStrong">Video tour</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        Walk through this property on video
+                      </Text>
+                    </View>
+                  </Card>
+                </Pressable>
+              ) : null}
+
+              {p.latitude != null && p.longitude != null ? (
+                <View style={{ gap: spacing.sm }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text variant="bodyStrong">Location</Text>
+                    <Pressable
+                      onPress={() =>
+                        openDirections(p.latitude as number, p.longitude as number, p.title)
+                      }
+                      accessibilityRole="button"
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                      hitSlop={8}
+                    >
+                      <Navigation size={13} color={colors.primary} />
+                      <Text variant="callout" style={{ color: colors.primary, fontWeight: '600' }}>
+                        Directions
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <PropertyMapView
+                    markers={[{ id: p.id, latitude: p.latitude, longitude: p.longitude }]}
+                    variant="location"
+                    zoom={15}
+                    height={200}
+                  />
+                </View>
+              ) : null}
+
+              <GeoInsightsPanel listingId={p.id} />
             </>
           )}
         </View>
@@ -196,6 +325,40 @@ export default function PropertyDetail() {
               fill={saved ? colors.destructive : 'transparent'}
             />
           </Pressable>
+          {p.landlordId ? (
+            <Pressable
+              onPress={() => messageMutation.mutate()}
+              disabled={messageMutation.isPending}
+              accessibilityRole="button"
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: messageMutation.isPending ? 0.6 : 1,
+              }}
+            >
+              <MessageCircle size={20} color={colors.foreground} />
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={() => setViewingSheetOpen(true)}
+            accessibilityRole="button"
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: colors.border,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Calendar size={20} color={colors.foreground} />
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Button
               label="Apply to rent"
@@ -203,6 +366,15 @@ export default function PropertyDetail() {
             />
           </View>
         </View>
+      ) : null}
+
+      {p ? (
+        <ViewingRequestSheet
+          open={viewingSheetOpen}
+          onClose={() => setViewingSheetOpen(false)}
+          propertyId={p.propertyId}
+          propertyTitle={p.title}
+        />
       ) : null}
     </View>
   );

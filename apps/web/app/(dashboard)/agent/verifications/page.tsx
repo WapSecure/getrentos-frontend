@@ -13,6 +13,18 @@ import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
 
+/**
+ * A visit stores its subject in lower case; the API spells it in caps. Written
+ * out case by case rather than `toUpperCase() as ...` so the compiler checks
+ * every member of the union is covered and the result keeps its literal type.
+ */
+const API_SUBJECT_TYPES: Record<VerificationVisit['subjectType'], 'TENANT' | 'BUYER' | 'PROPERTY'> =
+  {
+    tenant: 'TENANT',
+    buyer: 'BUYER',
+    property: 'PROPERTY',
+  };
+
 function AgentVerificationsPageContent() {
   const searchParams = useSearchParams();
   const defaultTaskId = searchParams.get('task') || undefined;
@@ -38,7 +50,7 @@ function AgentVerificationsPageContent() {
         agentService.submitVerification({
           taskId: visit.taskId,
           subjectName: visit.subjectName,
-          subjectType: visit.subjectType.toUpperCase() as 'TENANT' | 'BUYER' | 'PROPERTY',
+          subjectType: API_SUBJECT_TYPES[visit.subjectType],
           idVerified: visit.idVerified,
           addressConfirmed: visit.addressConfirmed,
           notes: visit.notes || undefined,
@@ -53,7 +65,7 @@ function AgentVerificationsPageContent() {
       agentOfflineQueue.enqueue('verification', {
         taskId: visit.taskId,
         subjectName: visit.subjectName,
-        subjectType: visit.subjectType.toUpperCase(),
+        subjectType: API_SUBJECT_TYPES[visit.subjectType],
         idVerified: visit.idVerified,
         addressConfirmed: visit.addressConfirmed,
         notes: visit.notes || undefined,

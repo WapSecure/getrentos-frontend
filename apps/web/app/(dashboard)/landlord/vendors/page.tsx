@@ -27,7 +27,7 @@ export default function LandlordVendorsPage() {
     queryKey: [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE })),
   });
-  const vendors = data?.items ?? [];
+  const vendors = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
 
   const invalidateVendors = () => queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });

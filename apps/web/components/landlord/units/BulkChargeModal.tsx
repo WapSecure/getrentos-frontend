@@ -79,7 +79,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
       ),
     enabled: isOpen,
   });
-  const units = unitsData?.items ?? [];
+  const units = useMemo(() => unitsData?.items ?? [], [unitsData]);
   const totalUnits = unitsData?.total ?? 0;
 
   const eligibleUnits = useMemo(

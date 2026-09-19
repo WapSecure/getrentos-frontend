@@ -32,7 +32,7 @@ export default function LandlordTenantsPage() {
     queryKey: [...landlordKeys.tenants, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listTenants({ page, pageSize: PAGE_SIZE })),
   });
-  const tenants = data?.items ?? [];
+  const tenants = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
 
   const filteredTenants = useMemo(

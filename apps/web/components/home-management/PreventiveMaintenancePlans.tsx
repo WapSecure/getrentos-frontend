@@ -139,7 +139,7 @@ export function PreventiveMaintenancePlans({
         homeManagementService.listAssets({ propertyId: form.propertyId, page: 1, pageSize: 100 })
       ),
   });
-  const propertyAssets = assetsQuery.data?.items ?? [];
+  const propertyAssets = useMemo(() => assetsQuery.data?.items ?? [], [assetsQuery.data]);
 
   const availableAssets = useMemo(
     () =>

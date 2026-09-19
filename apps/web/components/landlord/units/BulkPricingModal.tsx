@@ -60,7 +60,7 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
       ),
     enabled: isOpen,
   });
-  const units = unitsData?.items ?? [];
+  const units = useMemo(() => unitsData?.items ?? [], [unitsData]);
   const totalUnits = unitsData?.total ?? 0;
 
   const eligibleUnits = useMemo(

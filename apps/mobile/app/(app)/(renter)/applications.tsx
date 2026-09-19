@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { FileText, MapPin } from 'lucide-react-native';
@@ -24,11 +25,13 @@ import {
   type ApplicationStatus,
   type RenterApplication,
 } from '@/lib/api/applications';
+import { ApplicationAssistantCard } from '@/components/applications/ApplicationAssistantCard';
 
 type Filter = 'all' | ApplicationStatus;
 
 export default function Applications() {
   const { colors, spacing, radius } = useTheme();
+  const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<Filter>('all');
 
   const query = useQuery({
@@ -44,7 +47,13 @@ export default function Applications() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
+      <View
+        style={{
+          paddingHorizontal: spacing.xl,
+          paddingTop: insets.top + spacing.lg,
+          gap: spacing.md,
+        }}
+      >
         <Text variant="title">Applications</Text>
 
         {all.length > 0 ? (
@@ -75,17 +84,20 @@ export default function Applications() {
           ))}
         </View>
       ) : all.length === 0 ? (
-        <EmptyState
-          icon={<FileText size={34} color={colors.mutedForeground} />}
-          title="No applications yet"
-          description="Submitted rental applications, their status, and required documents will appear here."
-          action={
-            <Button
-              label="Browse listings"
-              onPress={() => router.push('/(app)/(renter)/discover')}
-            />
-          }
-        />
+        <View style={{ padding: spacing.xl, gap: spacing.lg }}>
+          <ApplicationAssistantCard />
+          <EmptyState
+            icon={<FileText size={34} color={colors.mutedForeground} />}
+            title="No applications yet"
+            description="Submitted rental applications, their status, and required documents will appear here."
+            action={
+              <Button
+                label="Browse listings"
+                onPress={() => router.push('/(app)/(renter)/discover')}
+              />
+            }
+          />
+        </View>
       ) : items.length === 0 ? (
         <EmptyState
           icon={<FileText size={34} color={colors.mutedForeground} />}
