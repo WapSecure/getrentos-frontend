@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { Input } from '@getrentos/ui';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, ArrowRight, User, Mail, Lock, CheckCircle } from 'lucide-react';
@@ -26,7 +26,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isValid },
   } = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
@@ -39,8 +39,10 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
     },
   });
 
-  const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
+  // useWatch rather than watch(): watch() returns a function the React Compiler
+  // cannot memoize, so calling it makes the compiler skip this whole component.
+  const password = useWatch({ control, name: 'password' });
+  const confirmPassword = useWatch({ control, name: 'confirmPassword' });
 
   const onSubmitForm = async (data: EmailFormData) => {
     setData({

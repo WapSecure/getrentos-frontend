@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Image, Link as LinkIcon, Download, Eye, X } from 'lucide-react';
+import { FileText, Image as ImageIcon, Link as LinkIcon, Download, Eye, X } from 'lucide-react';
 import { FilePreviewDialog } from '@getrentos/ui';
 
 interface Attachment {
@@ -24,7 +24,7 @@ export const MessageAttachments = ({
 }: MessageAttachmentsProps) => {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const renderAttachmentIcon = (type: string) => {
-    if (type.startsWith('image/')) return <Image className="w-4 h-4" />;
+    if (type.startsWith('image/')) return <ImageIcon className="w-4 h-4" />;
     if (type === 'application/pdf') return <FileText className="w-4 h-4" />;
     return <LinkIcon className="w-4 h-4" />;
   };

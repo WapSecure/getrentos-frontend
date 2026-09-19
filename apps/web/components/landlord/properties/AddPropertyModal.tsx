@@ -502,6 +502,12 @@ const MediaPreview = ({ file }: { file: File }) => {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
     const objectUrl = URL.createObjectURL(file);
+    // The recommended useMemo form is wrong here: StrictMode's
+    // effect -> cleanup -> effect cycle revokes the memoised URL and never
+    // recreates it, so the preview renders as a broken image. Creating the URL
+    // in the effect and storing the result means the second pass mints a live
+    // one, which is why this state write is deliberate.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
   }, [file]);

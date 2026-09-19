@@ -98,6 +98,10 @@ export const PropertyCard = ({
     >
       <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
         {showCover ? (
+          // Signed storage URLs are not in next.config's remotePatterns, so
+          // next/image cannot optimise these; the same escape hatch is used by
+          // ListingCard and ListingPreviewModal.
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={property.coverImage}
             alt={property.name}
