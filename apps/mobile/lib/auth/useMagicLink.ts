@@ -16,7 +16,12 @@ export function useMagicLink() {
   const toast = useToast();
   const handled = useRef<Set<string>>(new Set());
   const deps = useRef({ signInWithMagicLink, toast });
-  deps.current = { signInWithMagicLink, toast };
+  // Latest callbacks kept in a ref so the listener below never has to
+  // re-subscribe. Written from an effect rather than during render, which would
+  // be a render-time ref access.
+  useEffect(() => {
+    deps.current = { signInWithMagicLink, toast };
+  });
 
   useEffect(() => {
     const handle = async (url: string | null) => {
