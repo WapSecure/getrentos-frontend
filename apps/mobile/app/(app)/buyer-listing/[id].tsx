@@ -170,8 +170,8 @@ export default function BuyerListingDetail() {
                 </View>
               ) : null}
 
-              {listing.videoUrl ? (
-                <Pressable onPress={() => Linking.openURL(listing.videoUrl!)}>
+              {listing.videoTourUrl ? (
+                <Pressable onPress={() => Linking.openURL(listing.videoTourUrl!)}>
                   <Card
                     elevated
                     style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}

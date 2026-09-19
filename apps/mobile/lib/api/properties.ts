@@ -26,7 +26,7 @@ export interface RenterProperty {
   /** Signed URLs for the full gallery (cover first). */
   images?: string[];
   /** Signed URL for the video tour. */
-  videoUrl?: string;
+  videoTourUrl?: string;
   description?: string;
   amenities?: string[];
   landlordId?: string;

@@ -211,8 +211,8 @@ export default function PropertyDetail() {
                 </View>
               ) : null}
 
-              {p.videoUrl ? (
-                <Pressable onPress={() => Linking.openURL(p.videoUrl!)}>
+              {p.videoTourUrl ? (
+                <Pressable onPress={() => Linking.openURL(p.videoTourUrl!)}>
                   <Card
                     elevated
                     style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}

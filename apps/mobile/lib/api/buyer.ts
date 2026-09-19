@@ -41,7 +41,7 @@ export interface BuyerListing {
   /** Signed URLs for the gallery. */
   images?: string[];
   /** Signed URL for the video tour. */
-  videoUrl?: string;
+  videoTourUrl?: string;
   latitude?: number;
   longitude?: number;
 }
