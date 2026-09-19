@@ -47,7 +47,9 @@ export default function SignIn() {
   const [magicSent, setMagicSent] = useState(false);
   const [magicBusy, setMagicBusy] = useState(false);
 
-  const attempts = useRef(0);
+  // A state counter, not a ref: the submit handler below is built during render,
+  // so reading a ref from it counts as accessing a ref during render.
+  const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lockSecs, setLockSecs] = useState(0);
 
@@ -85,7 +87,7 @@ export default function SignIn() {
       setLockSecs(left);
       if (left === 0) {
         setLockedUntil(null);
-        attempts.current = 0;
+        setAttempts(0);
       }
     };
     tick();
@@ -101,15 +103,20 @@ export default function SignIn() {
     setFormError(null);
     try {
       const { requiresTwoFactor } = await signIn(identifier, password);
-      attempts.current = 0;
+      setAttempts(0);
       if (rememberMe) rememberIdentifier(identifier);
       else forgetIdentifier();
       await haptics.success();
       if (requiresTwoFactor) router.push('/(auth)/two-factor');
     } catch (err) {
       await haptics.error();
-      attempts.current += 1;
-      if (attempts.current >= MAX_ATTEMPTS) {
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        // This body is an event handler: react-hook-form's handleSubmit invokes it
+        // on submit, never during render. The compiler cannot see that because RHF
+        // is on its incompatible-library list, so it reads this as render-time.
+        // eslint-disable-next-line react-hooks/purity
         setLockedUntil(Date.now() + LOCKOUT_MS);
         setFormError(null);
         toast.show('Too many attempts. Try again in 15 minutes.', 'error');
