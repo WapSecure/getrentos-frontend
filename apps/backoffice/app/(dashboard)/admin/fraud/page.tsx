@@ -15,6 +15,8 @@ import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import { useAdminUser } from '../layout';
 import type { FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
 type StatusFilter = 'all' | FraudAlertStatus;
@@ -24,6 +26,8 @@ const PAGE_SIZE = 12;
 
 export default function AdminFraudPage() {
   const queryClient = useQueryClient();
+  const adminUser = useAdminUser();
+  const canAttachEvidence = hasAdminPermission(adminUser?.roles, 'fraud.review');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -104,6 +108,31 @@ export default function AdminFraudPage() {
     onSuccess: invalidateFraudAlerts,
   });
 
+  const attachEvidenceMutation = useMutation({
+    meta: { showGlobalError: true },
+    mutationFn: ({ id, file, note }: { id: string; file: File; note?: string }) =>
+      unwrap(adminService.addFraudEvidence(id, file, note)),
+    onSuccess: (_created, { id }) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.fraudAlertDetail(id) });
+      invalidateFraudAlerts();
+      // The new file lands in the audit log with everything else on the alert.
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit-log'] });
+    },
+  });
+
+  /**
+   * Signed evidence links expire, so a viewer left open past the deadline asks
+   * for a fresh one rather than failing.
+   */
+  const resolveEvidenceUrl = async (evidenceId: string) => {
+    if (!activeAlertId) return null;
+    const fresh = await unwrap(adminService.getFraudAlertDetail(activeAlertId));
+    const match = fresh.evidence?.find((entry) => entry.id === evidenceId);
+    if (!match || match.kind !== 'STORED') return null;
+    queryClient.setQueryData(adminKeys.fraudAlertDetail(activeAlertId), fresh);
+    return match.url;
+  };
+
   const { data: flaggedData, isError: flaggedCountError } = useQuery({
     queryKey: ['admin', 'fraudAlerts', 'count', 'flagged'],
     queryFn: () =>
@@ -132,11 +161,11 @@ export default function AdminFraudPage() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Fraud &amp; Risk Review</h1>
-            <p className="text-muted-foreground mt-1">
-              {flaggedCountError
-                ? 'Flagged-alert count temporarily unavailable'
-                : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
-            </p>
+          <p className="text-muted-foreground mt-1">
+            {flaggedCountError
+              ? 'Flagged-alert count temporarily unavailable'
+              : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
+          </p>
         </div>
         <Button className="gap-1.5 shrink-0" onClick={() => setShowCreate(true)}>
           <Plus className="w-4 h-4" />
@@ -244,6 +273,12 @@ export default function AdminFraudPage() {
         isUpdating={
           updateStatusMutation.isPending || severityMutation.isPending || reopenMutation.isPending
         }
+        onAttachEvidence={(file, note) => {
+          if (activeAlertId) attachEvidenceMutation.mutate({ id: activeAlertId, file, note });
+        }}
+        canAttachEvidence={canAttachEvidence}
+        isAttachingEvidence={attachEvidenceMutation.isPending}
+        onResolveEvidenceUrl={resolveEvidenceUrl}
       />
     </>
   );

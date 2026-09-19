@@ -3,8 +3,9 @@
 import { LegacyInput, Dialog, DialogContent, DialogTitle, Button, Select } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send, ExternalLink } from 'lucide-react';
+import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from 'lucide-react';
 import { cn, formatCurrency } from '@getrentos/shared';
+import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { Dispute, DisputeDetail, DisputeMessage, DisputeResolveOutcome } from '@/types/admin';
 
 const STATUS_PILL: Record<Dispute['status'], string> = {
@@ -36,11 +37,21 @@ interface DisputeCaseModalProps {
   onEscalate: (id: string) => void;
   onResolve: (id: string, resolution: string | undefined, outcome: DisputeResolveOutcome) => void;
   onSendMessage: (id: string, text: string) => void;
+  /** Uploads the file as this case's evidence. Gated by `canAttachEvidence`. */
+  onAttachEvidence?: (id: string, file: File, note?: string) => void;
+  /**
+   * Re-signs a stored file's URL. Signed links are short-lived by design, so a
+   * viewer left open past the expiry asks for a fresh one instead of showing a
+   * broken file.
+   */
+  onResolveEvidenceUrl?: (evidenceId: string) => Promise<string | null | undefined>;
+  canAttachEvidence?: boolean;
   isResolving?: boolean;
   isEscalating?: boolean;
   isReviewing?: boolean;
   isReopening?: boolean;
   isSendingMessage?: boolean;
+  isAttachingEvidence?: boolean;
 }
 
 export const DisputeCaseModal = ({
@@ -54,11 +65,15 @@ export const DisputeCaseModal = ({
   onEscalate,
   onResolve,
   onSendMessage,
+  onAttachEvidence,
+  onResolveEvidenceUrl,
+  canAttachEvidence = false,
   isResolving = false,
   isEscalating = false,
   isReviewing = false,
   isReopening = false,
   isSendingMessage = false,
+  isAttachingEvidence = false,
 }: DisputeCaseModalProps) => {
   const [messageText, setMessageText] = useState('');
   const [resolutionText, setResolutionText] = useState('');
@@ -71,6 +86,7 @@ export const DisputeCaseModal = ({
   const canDecide = dispute.status !== 'resolved';
   const canStartReview = dispute.status === 'open';
   const canReopen = dispute.status === 'resolved' || dispute.status === 'escalated';
+  const evidence = detail?.evidence ?? [];
 
   const outcomeOptions: { value: DisputeResolveOutcome; label: string }[] = escrowFrozen
     ? [
@@ -149,25 +165,29 @@ export const DisputeCaseModal = ({
                     {detail.resolvedBy.legalName}
                   </p>
                 )}
-                {detail?.evidence && detail.evidence.length > 0 && (
+                {evidence.length > 0 && (
                   <p className="text-muted-foreground">
-                    <span className="font-medium text-foreground">Evidence:</span>{' '}
-                    {detail.evidence.map((url, i) => (
-                      <a
-                        key={url}
-                        href={url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-0.5 text-primary underline decoration-dotted underline-offset-2 hover:opacity-80 mr-2"
-                      >
-                        file {i + 1} <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ))}
+                    <span className="font-medium text-foreground">Evidence:</span> {evidence.length}{' '}
+                    item{evidence.length === 1 ? '' : 's'}
                   </p>
                 )}
               </div>
             )}
           </div>
+
+          <EvidencePanel
+            evidence={evidence}
+            className="px-4 py-3 border-b border-border"
+            canAttach={canAttachEvidence}
+            isAttaching={isAttachingEvidence}
+            onAttach={
+              onAttachEvidence
+                ? (file, note) => onAttachEvidence(dispute.id, file, note)
+                : undefined
+            }
+            onResolveUrl={onResolveEvidenceUrl}
+            emptyHint="No files attached to this case yet. Links submitted by a party arrive as unverified external references; files attached here are held on our side."
+          />
 
           {detail?.resolution && (
             <div className="px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border-b border-border text-sm">

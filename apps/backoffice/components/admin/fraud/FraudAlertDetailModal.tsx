@@ -10,6 +10,7 @@ import {
   Badge,
   type BadgeVariant,
 } from '@getrentos/ui';
+import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { FraudAlertDetail, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
 const SEVERITY_OPTIONS: { value: FraudAlertSeverity; label: string }[] = [
@@ -41,6 +42,12 @@ interface FraudAlertDetailModalProps {
   onStatusChange: (id: string, status: 'investigating' | 'cleared' | 'confirmed') => void;
   onReopen: (id: string) => void;
   isUpdating?: boolean;
+  /** Uploads a file the investigator is working from. Gated by `canAttachEvidence`. */
+  onAttachEvidence?: (file: File, note?: string) => void;
+  canAttachEvidence?: boolean;
+  isAttachingEvidence?: boolean;
+  /** Re-signs a stored file's URL, so a long-open viewer does not break. */
+  onResolveEvidenceUrl?: (evidenceId: string) => Promise<string | null | undefined>;
 }
 
 export const FraudAlertDetailModal = ({
@@ -51,6 +58,10 @@ export const FraudAlertDetailModal = ({
   onStatusChange,
   onReopen,
   isUpdating = false,
+  onAttachEvidence,
+  canAttachEvidence = false,
+  isAttachingEvidence = false,
+  onResolveEvidenceUrl,
 }: FraudAlertDetailModalProps) => {
   if (!alert) return null;
 
@@ -127,6 +138,15 @@ export const FraudAlertDetailModal = ({
                   </p>
                 )}
               </div>
+
+              <EvidencePanel
+                evidence={alert.evidence ?? []}
+                canAttach={canAttachEvidence}
+                isAttaching={isAttachingEvidence}
+                onAttach={onAttachEvidence}
+                onResolveUrl={onResolveEvidenceUrl}
+                emptyHint="No evidence attached. A reason is a claim; attach what backs it up."
+              />
             </>
           )}
         </div>
