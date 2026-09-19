@@ -4,7 +4,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
@@ -115,14 +114,7 @@ export default function RootLayout() {
             <HydrateThemePreference />
             <ToastProvider>
               <AuthProvider>
-                {/*
-                 * Must stay inside the theme/toast/query providers: a presented sheet
-                 * portals its content to this host, so anything above it here is out of
-                 * scope for the sheet's `useTheme`/`useToast`/react-query hooks.
-                 */}
-                <BottomSheetModalProvider>
-                  <Gate />
-                </BottomSheetModalProvider>
+                <Gate />
               </AuthProvider>
             </ToastProvider>
           </ThemeProvider>
