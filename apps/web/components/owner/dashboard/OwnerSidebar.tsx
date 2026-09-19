@@ -18,6 +18,7 @@ import {
   MapPinned,
   BedDouble,
   Sparkles,
+  KeyRound,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -61,6 +62,9 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
   { labelKey: 'sidebar.reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
   { labelKey: 'sidebar.trust_profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
+  // Literal label (like Billing below): a mandate holder is not necessarily the
+  // owner, so this is not phrased as one of the owner's own properties.
+  { label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
   { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
   { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: Sparkles },
   { label: 'Verification', href: '/owner/verification', icon: ShieldCheck },

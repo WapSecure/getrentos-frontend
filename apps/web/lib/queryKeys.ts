@@ -318,6 +318,15 @@ export const subscriptionKeys = {
   pricing: ['subscription', 'pricing'] as const,
 };
 
+/**
+ * Property authority (not persona-scoped: a mandate is a fact about a property,
+ * so the same cache entry serves the owner, agent and realtor portals).
+ */
+export const authorityKeys = {
+  managed: ['property-authorities', 'managed'] as const,
+  mine: ['property-authorities', 'mine'] as const,
+};
+
 /** Billing lifecycle state (status, trial/period end, cancellation). */
 export const billingKeys = {
   mine: ['billing', 'mine'] as const,
