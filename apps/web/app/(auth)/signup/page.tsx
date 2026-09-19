@@ -2,20 +2,13 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Mail,
-  Phone,
-  MessageCircle,
-  Shield,
-  CheckCircle,
-  ArrowLeft,
-  RefreshCw,
-} from 'lucide-react';
+import { Mail, Phone, MessageCircle, CheckCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { EmailSignup } from '@/components/auth/SignupForm/EmailSignup';
 import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
 import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeField';
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
+import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
@@ -106,10 +99,10 @@ export default function SignupPage() {
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-2xl mb-4">
-              <Shield className="w-6 h-6 text-white dark:text-background" />
+          {/* Mobile Logo — pt-16 clears the fixed Back/Start Over buttons above it */}
+          <div className="lg:hidden text-center mb-8 pt-16">
+            <div className="mb-4 flex justify-center">
+              <Logo size="md" />
             </div>
             <h2 className="text-2xl font-bold text-foreground">
               {step === 'signup' ? 'Create an account' : 'Verify your identity'}

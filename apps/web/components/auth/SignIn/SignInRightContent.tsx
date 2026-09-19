@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, ArrowLeft, Mail, Phone, Fingerprint } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Fingerprint } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 import { EmailSignIn } from './methods/EmailSignIn';
 import { PhoneSignIn } from './methods/PhoneSignIn';
 import { MagicLinkSignIn } from './methods/MagicLinkSignIn';
@@ -122,8 +123,8 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
         {/* Mobile Header */}
         <div className="lg:hidden text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-2xl mb-4">
-            <Shield className="w-6 h-6 text-white dark:text-background" />
+          <div className="mb-4 flex justify-center">
+            <Logo size="md" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

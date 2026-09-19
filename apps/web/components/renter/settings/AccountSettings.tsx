@@ -80,7 +80,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
       {/* Change Password */}
       <div className="mb-6">
         <h3 className="text-lg font-medium text-foreground mb-3">Change Password</h3>
-        <form onSubmit={handlePasswordUpdate} className="space-y-4">
+        <form method="post" onSubmit={handlePasswordUpdate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               Current Password

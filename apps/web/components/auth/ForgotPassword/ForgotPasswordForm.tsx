@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { RequestStep } from './steps/RequestStep';
 import { OtpStep } from './steps/OtpStep';
 import { ResetStep } from './steps/ResetStep';
 import { authService } from '@/services/authService';
+import { Logo } from '@/components/ui/Logo';
 import { useMutation } from '@tanstack/react-query';
 
 interface ForgotPasswordFormProps {
@@ -149,8 +150,8 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
 
         {/* Mobile Header */}
         <div className="lg:hidden text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-2xl mb-4">
-            <Shield className="w-6 h-6 text-white dark:text-background" />
+          <div className="mb-4 flex justify-center">
+            <Logo size="md" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Reset Password</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

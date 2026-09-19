@@ -65,7 +65,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
   const strengthText = ['Weak', 'Fair', 'Good', 'Strong'][strengthLevel - 1] || '';
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-5">
+    <form method="post" onSubmit={handleSubmit(onSubmitForm)} className="space-y-5">
       {/* Full Name */}
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">

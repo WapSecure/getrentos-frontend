@@ -175,7 +175,7 @@ export const PhoneSignIn = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {pendingChallenge ? (
         <div className="space-y-4">
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
