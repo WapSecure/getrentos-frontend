@@ -47,6 +47,11 @@ export const qk = {
     referrals: ['referrals', 'summary'] as const,
     dataExport: ['renter', 'settings', 'data-export'] as const,
     paymentMethods: ['renter', 'payments', 'methods'] as const,
+    leasePaymentReminders: ['renter', 'lease', 'payment-reminders'] as const,
+    leaseRentIncreases: ['renter', 'lease', 'rent-increases'] as const,
+    messageTemplates: ['renter', 'messages', 'templates'] as const,
+    messageQuickReplies: ['renter', 'messages', 'quick-replies'] as const,
+    messageReminders: ['renter', 'messages', 'reminders'] as const,
     reviewsPending: ['renter', 'reviews', 'pending'] as const,
     reviewsSubmitted: (page = 1, pageSize = 20) =>
       ['renter', 'reviews', 'submitted', { page, pageSize }] as const,
