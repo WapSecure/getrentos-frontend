@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, X, Star } from 'lucide-react';
 import { Pagination } from '@getrentos/ui';
+import { visitToIso, VisitTimeField } from '@/components/landlord/maintenance/VisitTimeField';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -15,7 +16,9 @@ const PAGE_SIZE = 10;
 interface AssignVendorModalProps {
   request: LandlordMaintenanceRequest | null;
   onClose: () => void;
-  onAssign: (requestId: string, vendorId: string) => void;
+  onAssign: (requestId: string, vendorId: string, scheduledFor?: string) => void;
+  /** Shown under the list when assigning fails, e.g. the visit time was not acceptable. */
+  error?: string | null;
   /** The vendor currently being assigned, if any, so the row shows in-flight feedback. */
   assigningVendorId?: string | null;
 }
@@ -25,11 +28,17 @@ export const AssignVendorModal = ({
   onClose,
   onAssign,
   assigningVendorId = null,
+  error = null,
 }: AssignVendorModalProps) => {
   const [page, setPage] = useState(1);
+  const [visit, setVisit] = useState('');
   const { data } = useQuery({
-    queryKey: [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE, assignment: true }],
-    queryFn: () => unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE })),
+    queryKey: [
+      ...landlordKeys.vendors,
+      { page, pageSize: PAGE_SIZE, assignment: true, activeOnly: true },
+    ],
+    queryFn: () =>
+      unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE, activeOnly: true })),
     enabled: !!request,
   });
   const vendors = data?.items ?? [];
@@ -56,9 +65,19 @@ export const AssignVendorModal = ({
             </div>
 
             <div className="p-4 space-y-2 overflow-y-auto flex-1">
+              <VisitTimeField
+                value={visit}
+                onChange={setVisit}
+                label="Visit date & time (optional)"
+              />
+              {error && (
+                <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+                  {error}
+                </p>
+              )}
               {vendors.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No vendors in your directory yet. Add one from the Vendors page.
+                  No active vendors in your directory. Add or reactivate one from the Vendors page.
                 </p>
               ) : (
                 vendors.map((vendor) => {
@@ -66,7 +85,7 @@ export const AssignVendorModal = ({
                   return (
                     <button
                       key={vendor.id}
-                      onClick={() => onAssign(request.id, vendor.id)}
+                      onClick={() => onAssign(request.id, vendor.id, visitToIso(visit))}
                       disabled={assigningVendorId !== null}
                       className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -78,8 +97,15 @@ export const AssignVendorModal = ({
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
                       ) : (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                          {vendor.rating.toFixed(1)}
+                          {vendor.ratingCount > 0 ? (
+                            <>
+                              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                              {vendor.rating.toFixed(1)}
+                              <span>({vendor.ratingCount})</span>
+                            </>
+                          ) : (
+                            'No ratings yet'
+                          )}
                         </div>
                       )}
                     </button>

@@ -34,6 +34,8 @@ export interface MaintenanceRequest {
   images: string[];
   assignedVendorId?: string;
   assignedVendorName?: string;
+  /** When the assigned vendor is due to visit. */
+  scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;

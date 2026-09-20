@@ -239,8 +239,40 @@ export interface Vendor {
   name: string;
   serviceType: string;
   phone: string;
+  /** Inactive vendors keep their history but cannot be given new work. */
+  isActive: boolean;
+  /** Mean of the rated jobs — 0 while `ratingCount` is 0, so check the count before showing stars. */
   rating: number;
+  ratingCount: number;
   jobsCompleted: number;
+  openJobs: number;
+  /** Approved cost of completed jobs, in naira. */
+  totalSpend: number;
+  averageCost: number | null;
+  averageResolutionDays: number | null;
+  nextVisitAt?: string;
+}
+
+/** What a landlord types when adding or editing a vendor. */
+export type VendorInput = Pick<Vendor, 'name' | 'serviceType' | 'phone'>;
+
+export interface VendorJob {
+  id: string;
+  issueTitle: string;
+  propertyName: string;
+  unitName: string;
+  status: MaintenanceRequestStatus;
+  approvedCost: number | null;
+  rating: number | null;
+  scheduledFor?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface VendorDetail {
+  vendor: Vendor;
+  recentJobs: VendorJob[];
+  upcomingVisits: VendorJob[];
 }
 
 export interface LandlordMaintenanceRequest {
@@ -257,6 +289,12 @@ export interface LandlordMaintenanceRequest {
   unitName: string;
   assignedVendorId?: string;
   assignedVendorName?: string;
+  /** When the assigned vendor is due to visit. */
+  scheduledFor?: string;
+  /** The landlord's own 1-5 mark for the vendor on this job. */
+  vendorRating?: number;
+  /** What the tenant gave, when they rated the job. */
+  tenantVendorRating?: number;
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;

@@ -6,13 +6,14 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat, Search } from 'lucide-react';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
-import { AddVendorModal } from '@/components/landlord/vendors/AddVendorModal';
+import { VendorFormModal } from '@/components/landlord/vendors/VendorFormModal';
+import { VendorDetailModal } from '@/components/landlord/vendors/VendorDetailModal';
 import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { ListState } from '@/components/shared/ListState';
-import type { Vendor } from '@/types/landlord';
+import type { Vendor, VendorInput } from '@/types/landlord';
 
 const PAGE_SIZE = 10;
 
@@ -20,7 +21,10 @@ export default function LandlordVendorsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Vendor | null>(null);
+  const [viewing, setViewing] = useState<Vendor | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // The vendors endpoint does not accept a search param, so search stays client-side.
   const { data, isPending, isError, refetch } = useQuery({
@@ -32,21 +36,60 @@ export default function LandlordVendorsPage() {
 
   const invalidateVendors = () => queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
 
+  const failed = (error: unknown) =>
+    setNotice(
+      error instanceof Error ? error.message : 'We could not complete that. Please try again.'
+    );
+
   const addVendorMutation = useMutation({
-    mutationFn: (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) =>
-      unwrap(landlordService.addVendor(data)),
+    mutationFn: (data: VendorInput) => unwrap(landlordService.addVendor(data)),
     onSuccess: invalidateVendors,
+    onError: failed,
+  });
+
+  const updateVendorMutation = useMutation({
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<VendorInput> & { isActive?: boolean };
+    }) => unwrap(landlordService.updateVendor(id, updates)),
+    onSuccess: invalidateVendors,
+    onError: failed,
   });
 
   const removeVendorMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.removeVendor(id)),
     onSuccess: invalidateVendors,
+    onError: failed,
   });
 
-  const handleAddVendor = (data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>) =>
-    addVendorMutation.mutate(data);
+  const openAddForm = () => {
+    setEditing(null);
+    setIsFormOpen(true);
+  };
 
-  const handleRemoveVendor = (id: string) => removeVendorMutation.mutate(id);
+  const openEditForm = (vendor: Vendor) => {
+    setEditing(vendor);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveVendor = (data: VendorInput) => {
+    setNotice(null);
+    if (editing) updateVendorMutation.mutate({ id: editing.id, updates: data });
+    else addVendorMutation.mutate(data);
+  };
+
+  const handleToggleActive = (vendor: Vendor) => {
+    setNotice(null);
+    updateVendorMutation.mutate({ id: vendor.id, updates: { isActive: !vendor.isActive } });
+  };
+
+  const handleRemoveVendor = (id: string) => {
+    setNotice(null);
+    removeVendorMutation.mutate(id);
+  };
 
   const filteredVendors = useMemo(
     () =>
@@ -67,11 +110,27 @@ export default function LandlordVendorsPage() {
             {total} vendor{total === 1 ? '' : 's'} in your directory
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
+        <Button variant="primary" className="gap-2" onClick={openAddForm}>
           <Plus className="w-4 h-4" />
           Add Vendor
         </Button>
       </div>
+
+      {notice && (
+        <div
+          role="alert"
+          className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+        >
+          <span>{notice}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            className="font-medium hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <div className="relative max-w-sm mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -101,6 +160,9 @@ export default function LandlordVendorsPage() {
               key={vendor.id}
               vendor={vendor}
               delay={index * 0.05}
+              onOpen={setViewing}
+              onEdit={openEditForm}
+              onToggleActive={handleToggleActive}
               onRemove={handleRemoveVendor}
             />
           ))}
@@ -117,11 +179,14 @@ export default function LandlordVendorsPage() {
         />
       )}
 
-      <AddVendorModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSave={handleAddVendor}
+      <VendorFormModal
+        isOpen={isFormOpen}
+        vendor={editing}
+        onClose={() => setIsFormOpen(false)}
+        onSave={handleSaveVendor}
       />
+
+      <VendorDetailModal vendor={viewing} onClose={() => setViewing(null)} />
     </>
   );
 }

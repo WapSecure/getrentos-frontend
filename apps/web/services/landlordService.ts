@@ -21,6 +21,8 @@ import type {
   LandlordMicrositeSettings,
   PropertyUpdatePayload,
   PortfolioAnalytics,
+  VendorDetail,
+  VendorInput,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -705,16 +707,27 @@ export const landlordService = {
 
   // ---- Vendors ----
   async listVendors(
-    params: { page?: number; pageSize?: number } = {}
+    params: { page?: number; pageSize?: number; activeOnly?: boolean } = {}
   ): Promise<ApiResponse<Paginated<Vendor>>> {
     return safeCall(() => authFetch<Paginated<Vendor>>(`/landlord/vendors${toQuery(params)}`));
   },
 
-  async addVendor(
-    data: Omit<Vendor, 'id' | 'rating' | 'jobsCompleted'>
-  ): Promise<ApiResponse<Vendor>> {
+  async getVendorDetail(id: string): Promise<ApiResponse<VendorDetail>> {
+    return safeCall(() => authFetch(`/landlord/vendors/${id}`));
+  },
+
+  async addVendor(data: VendorInput): Promise<ApiResponse<Vendor>> {
     return safeCall(() =>
       authFetch('/landlord/vendors', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  async updateVendor(
+    id: string,
+    updates: Partial<VendorInput> & { isActive?: boolean }
+  ): Promise<ApiResponse<Vendor>> {
+    return safeCall(() =>
+      authFetch(`/landlord/vendors/${id}`, { method: 'PATCH', body: JSON.stringify(updates) })
     );
   },
 
@@ -737,12 +750,37 @@ export const landlordService = {
 
   async assignMaintenanceVendor(
     requestId: string,
-    vendorId: string
+    vendorId: string,
+    scheduledFor?: string
   ): Promise<ApiResponse<LandlordMaintenanceRequest>> {
     return safeCall(() =>
       authFetch(`/landlord/maintenance/${requestId}/assign-vendor`, {
         method: 'PATCH',
-        body: JSON.stringify({ vendorId }),
+        body: JSON.stringify({ vendorId, scheduledFor }),
+      })
+    );
+  },
+
+  async scheduleMaintenanceVisit(
+    requestId: string,
+    scheduledFor: string
+  ): Promise<ApiResponse<LandlordMaintenanceRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/maintenance/${requestId}/schedule-visit`, {
+        method: 'PATCH',
+        body: JSON.stringify({ scheduledFor }),
+      })
+    );
+  },
+
+  async rateMaintenanceVendor(
+    requestId: string,
+    rating: number
+  ): Promise<ApiResponse<LandlordMaintenanceRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/maintenance/${requestId}/rate-vendor`, {
+        method: 'PATCH',
+        body: JSON.stringify({ rating }),
       })
     );
   },

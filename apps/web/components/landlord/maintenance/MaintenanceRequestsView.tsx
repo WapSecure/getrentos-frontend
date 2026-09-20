@@ -6,6 +6,7 @@ import { Wrench } from 'lucide-react';
 import { Pagination, PageLoadingState } from '@getrentos/ui';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
+import { ScheduleVisitModal } from '@/components/landlord/maintenance/ScheduleVisitModal';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -27,6 +28,9 @@ export function MaintenanceRequestsView() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | MaintenanceRequestStatus>('all');
   const [assigningRequest, setAssigningRequest] = useState<LandlordMaintenanceRequest | null>(null);
+  const [schedulingRequest, setSchedulingRequest] = useState<LandlordMaintenanceRequest | null>(
+    null
+  );
 
   const { data, isPending: isLoadingRequests } = useQuery({
     queryKey: [
@@ -57,11 +61,38 @@ export function MaintenanceRequestsView() {
   };
 
   const assignVendorMutation = useMutation({
-    mutationFn: ({ requestId, vendorId }: { requestId: string; vendorId: string }) =>
-      unwrap(landlordService.assignMaintenanceVendor(requestId, vendorId)),
+    mutationFn: ({
+      requestId,
+      vendorId,
+      scheduledFor,
+    }: {
+      requestId: string;
+      vendorId: string;
+      scheduledFor?: string;
+    }) => unwrap(landlordService.assignMaintenanceVendor(requestId, vendorId, scheduledFor)),
     onSuccess: () => {
       invalidateRequests();
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
       setAssigningRequest(null);
+    },
+  });
+
+  const scheduleVisitMutation = useMutation({
+    mutationFn: ({ requestId, scheduledFor }: { requestId: string; scheduledFor: string }) =>
+      unwrap(landlordService.scheduleMaintenanceVisit(requestId, scheduledFor)),
+    onSuccess: () => {
+      invalidateRequests();
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
+      setSchedulingRequest(null);
+    },
+  });
+
+  const rateVendorMutation = useMutation({
+    mutationFn: ({ requestId, rating }: { requestId: string; rating: number }) =>
+      unwrap(landlordService.rateMaintenanceVendor(requestId, rating)),
+    onSuccess: () => {
+      invalidateRequests();
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
     },
   });
 
@@ -75,8 +106,8 @@ export function MaintenanceRequestsView() {
     onSuccess: invalidateRequests,
   });
 
-  const handleAssignVendor = (requestId: string, vendorId: string) =>
-    assignVendorMutation.mutate({ requestId, vendorId });
+  const handleAssignVendor = (requestId: string, vendorId: string, scheduledFor?: string) =>
+    assignVendorMutation.mutate({ requestId, vendorId, scheduledFor });
 
   const handleMarkResolved = (id: string) => markResolvedMutation.mutate(id);
 
@@ -128,7 +159,19 @@ export function MaintenanceRequestsView() {
               key={request.id}
               request={request}
               delay={index * 0.05}
-              onAssignVendor={setAssigningRequest}
+              onAssignVendor={(target) => {
+                assignVendorMutation.reset();
+                setAssigningRequest(target);
+              }}
+              onScheduleVisit={(target) => {
+                scheduleVisitMutation.reset();
+                setSchedulingRequest(target);
+              }}
+              onRateVendor={(id, rating) => rateVendorMutation.mutate({ requestId: id, rating })}
+              isRatingVendor={
+                rateVendorMutation.isPending &&
+                rateVendorMutation.variables?.requestId === request.id
+              }
               onMarkResolved={handleMarkResolved}
               onEscalate={handleEscalate}
               isMarkingResolved={
@@ -156,6 +199,21 @@ export function MaintenanceRequestsView() {
         onAssign={handleAssignVendor}
         assigningVendorId={
           assignVendorMutation.isPending ? assignVendorMutation.variables?.vendorId : null
+        }
+        error={
+          assignVendorMutation.error instanceof Error ? assignVendorMutation.error.message : null
+        }
+      />
+
+      <ScheduleVisitModal
+        request={schedulingRequest}
+        onClose={() => setSchedulingRequest(null)}
+        onSchedule={(requestId, scheduledFor) =>
+          scheduleVisitMutation.mutate({ requestId, scheduledFor })
+        }
+        isSaving={scheduleVisitMutation.isPending}
+        error={
+          scheduleVisitMutation.error instanceof Error ? scheduleVisitMutation.error.message : null
         }
       />
     </>
