@@ -18,6 +18,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
+import { CreditSummaryView } from '@/components/shared/credit/CreditSummaryView';
 import type {
   AffordabilityBand,
   ReferenceOutcome,
@@ -379,6 +380,24 @@ export const ScreeningPanel = ({
             ))}
           </div>
         </div>
+      )}
+
+      {data.creditCheck.latest ? (
+        <div className="p-3 rounded-lg border border-border">
+          <SectionTitle>Verified credit check</SectionTitle>
+          <CreditSummaryView check={data.creditCheck.latest} />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Shared by the applicant on {formatDate(data.creditCheck.latest.sharedAt)} and removed on{' '}
+            {formatDate(data.creditCheck.latest.expiresAt)}. They can take it back at any time.
+          </p>
+        </div>
+      ) : (
+        data.creditCheck.available && (
+          <p className="text-xs text-muted-foreground">
+            The applicant can share a verified credit check from their application. It appears here
+            once they do.
+          </p>
+        )
       )}
 
       <div>

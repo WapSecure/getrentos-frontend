@@ -7,6 +7,7 @@ import type {
   Property,
   RenterInspection,
 } from '@/types/renter';
+import type { SharedCreditCheck } from '@/types/credit-check';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
 import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
@@ -509,6 +510,30 @@ export const renterService = {
         method: 'PATCH',
         body: JSON.stringify({ reason }),
       })
+    );
+  },
+
+  async getCreditCheckState(
+    applicationId: string
+  ): Promise<ApiResponse<{ available: boolean; shared?: SharedCreditCheck }>> {
+    return safeCall(() => authFetch(`/renter/applications/${applicationId}/credit-check`));
+  },
+
+  async shareCreditCheck(
+    applicationId: string,
+    body: { bvn: string; consent: boolean }
+  ): Promise<ApiResponse<SharedCreditCheck>> {
+    return safeCall(() =>
+      authFetch(`/renter/applications/${applicationId}/credit-check`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+    );
+  },
+
+  async revokeCreditCheck(applicationId: string): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch(`/renter/applications/${applicationId}/credit-check`, { method: 'DELETE' })
     );
   },
 

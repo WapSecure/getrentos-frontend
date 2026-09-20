@@ -28,6 +28,7 @@ import {
 import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 import { ApplicationTimeline } from './ApplicationTimeline';
+import { CreditCheckCard } from './CreditCheckCard';
 import { ApplicationNotes } from './ApplicationNotes';
 import { ApplicationWithdrawModal } from './ApplicationWithdrawModal';
 
@@ -321,6 +322,11 @@ export const ApplicationDetailsModal = ({
                         })}
                       </div>
                     </div>
+
+                    {(application.status === 'pending' ||
+                      application.status === 'under_review') && (
+                      <CreditCheckCard applicationId={application.id} />
+                    )}
 
                     {/* Notes */}
                     {application.applicationNotes && (
