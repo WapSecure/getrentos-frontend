@@ -23,6 +23,7 @@ import {
   type Roommate,
   type RoommateExpense,
 } from '@/lib/api/roommates';
+import { AssignTaskSheet } from '@/components/roommates/AssignTaskSheet';
 import { InviteRoommateSheet } from '@/components/roommates/InviteRoommateSheet';
 import { AddExpenseSheet } from '@/components/roommates/AddExpenseSheet';
 import { ApiError } from '@/lib/api/client';
@@ -37,6 +38,7 @@ export default function Roommates() {
   const { profile } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [expenseOpen, setExpenseOpen] = useState(false);
+  const [assigningTo, setAssigningTo] = useState<Roommate | null>(null);
 
   const roommatesQuery = useQuery({ queryKey: qk.renter.roommates, queryFn: roommatesApi.list });
   const invitesQuery = useQuery({
@@ -79,6 +81,13 @@ export default function Roommates() {
         err instanceof ApiError ? err.message : 'Could not remove this roommate.',
         'error'
       ),
+  });
+
+  const addTaskMutation = useMutation({
+    mutationFn: ({ id, task }: { id: string; task: string }) => roommatesApi.addTask(id, task),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.roommates }),
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not add that task.', 'error'),
   });
 
   const completeTaskMutation = useMutation({
@@ -268,30 +277,40 @@ export default function Roommates() {
                     </View>
                   </View>
 
-                  {r.responsibilities.length > 0 ? (
-                    <View style={{ marginTop: spacing.sm, gap: spacing.xs }}>
-                      {r.responsibilities.map((task) => (
-                        <Pressable
-                          key={task}
-                          onPress={() => completeTaskMutation.mutate({ id: r.id, task })}
-                          style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                        >
-                          <View
-                            style={{
-                              width: 16,
-                              height: 16,
-                              borderRadius: 4,
-                              borderWidth: 1.5,
-                              borderColor: colors.border,
-                            }}
-                          />
-                          <Text variant="caption" color="mutedForeground">
-                            {task}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  ) : null}
+                  <View style={{ marginTop: spacing.sm, gap: spacing.xs }}>
+                    {r.responsibilities.map((task) => (
+                      <Pressable
+                        key={task}
+                        onPress={() => completeTaskMutation.mutate({ id: r.id, task })}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                      >
+                        <View
+                          style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: 4,
+                            borderWidth: 1.5,
+                            borderColor: colors.border,
+                          }}
+                        />
+                        <Text variant="caption" color="mutedForeground">
+                          {task}
+                        </Text>
+                      </Pressable>
+                    ))}
+
+                    <Pressable
+                      onPress={() => setAssigningTo(r)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Assign a task to ${r.name}`}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                    >
+                      <Plus size={14} color={colors.primary} />
+                      <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                        Assign a task
+                      </Text>
+                    </Pressable>
+                  </View>
 
                   <Pressable
                     onPress={() => confirmRemove(r)}
@@ -366,6 +385,14 @@ export default function Roommates() {
           </View>
         </ScrollView>
       )}
+
+      <AssignTaskSheet
+        open={!!assigningTo}
+        onClose={() => setAssigningTo(null)}
+        roommate={assigningTo}
+        onSubmit={(task) => addTaskMutation.mutate({ id: assigningTo!.id, task })}
+        submitting={addTaskMutation.isPending}
+      />
 
       <InviteRoommateSheet open={inviteOpen} onClose={() => setInviteOpen(false)} />
       <AddExpenseSheet open={expenseOpen} onClose={() => setExpenseOpen(false)} names={names} />

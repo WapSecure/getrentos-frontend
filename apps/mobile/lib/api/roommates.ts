@@ -61,6 +61,9 @@ export const roommatesApi = {
       method: 'PATCH',
     }),
 
+  addTask: (id: string, task: string) =>
+    apiFetch<Roommate>(`/renter/roommates/${id}/tasks`, { method: 'POST', body: { task } }),
+
   listExpenses: () => apiFetch<RoommateExpense[]>('/renter/roommates/expenses'),
 
   addExpense: (input: {

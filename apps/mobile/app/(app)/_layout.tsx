@@ -88,6 +88,9 @@ export default function AppLayout() {
       <Stack.Screen name="notification-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="reviews" options={DETAIL_OPTIONS} />
       <Stack.Screen name="message-tools" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />
       <Stack.Screen name="security-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>

@@ -14,9 +14,12 @@ import {
   Gift,
   LandPlot,
   LifeBuoy,
+  Lock,
   LogOut,
+  MessageCircle,
   ShieldCheck,
   ShieldEllipsis,
+  Smartphone,
   Sparkles,
   Star,
   TrendingUp,
@@ -304,6 +307,63 @@ export default function Account() {
             <Text variant="bodyStrong">Notifications</Text>
             <Text variant="caption" color="mutedForeground">
               Email, push and in-app preferences
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.mutedForeground} />
+        </Pressable>
+        <Divider />
+        <Pressable
+          onPress={() => router.push('/(app)/privacy-settings')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            padding: spacing.lg,
+          }}
+        >
+          <Lock size={18} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">Privacy</Text>
+            <Text variant="caption" color="mutedForeground">
+              Who sees your profile and activity
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.mutedForeground} />
+        </Pressable>
+        <Divider />
+        <Pressable
+          onPress={() => router.push('/(app)/whatsapp-settings')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            padding: spacing.lg,
+          }}
+        >
+          <MessageCircle size={18} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">WhatsApp updates</Text>
+            <Text variant="caption" color="mutedForeground">
+              Rent alerts without the app
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.mutedForeground} />
+        </Pressable>
+        <Divider />
+        <Pressable
+          onPress={() => router.push('/(app)/ussd')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            padding: spacing.lg,
+          }}
+        >
+          <Smartphone size={18} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">Dial-in access</Text>
+            <Text variant="caption" color="mutedForeground">
+              Use GetRentos with no data
             </Text>
           </View>
           <ChevronRight size={18} color={colors.mutedForeground} />

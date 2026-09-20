@@ -47,6 +47,8 @@ export const qk = {
     referrals: ['referrals', 'summary'] as const,
     dataExport: ['renter', 'settings', 'data-export'] as const,
     paymentMethods: ['renter', 'payments', 'methods'] as const,
+    preferences: ['renter', 'settings', 'preferences'] as const,
+    ussdMenu: ['renter', 'ussd', 'menu'] as const,
     leasePaymentReminders: ['renter', 'lease', 'payment-reminders'] as const,
     leaseRentIncreases: ['renter', 'lease', 'rent-increases'] as const,
     messageTemplates: ['renter', 'messages', 'templates'] as const,
