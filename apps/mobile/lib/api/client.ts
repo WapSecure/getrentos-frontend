@@ -76,7 +76,13 @@ async function readJson<T>(res: Response): Promise<T> {
     throw new ApiError(message, res.status, code);
   }
   if (res.status === 204 || res.status === 205) return undefined as T;
-  return (await res.json()) as T;
+
+  // Several endpoints answer a successful command with an empty 200/201 body.
+  // `res.json()` throws on those, which would surface a server success as a
+  // client-side failure, so treat an empty body as "no content".
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promise<T> {
