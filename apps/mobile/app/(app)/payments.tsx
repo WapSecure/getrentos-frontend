@@ -98,6 +98,15 @@ export default function Payments() {
           Payments
         </Text>
         <Pressable
+          onPress={() => router.push('/(app)/payment-methods')}
+          accessibilityRole="button"
+          accessibilityLabel="Payment methods"
+          hitSlop={10}
+          style={{ marginRight: spacing.lg }}
+        >
+          <Wallet size={20} color={colors.foreground} />
+        </Pressable>
+        <Pressable
           onPress={() => router.push('/(app)/receipts')}
           accessibilityRole="button"
           accessibilityLabel="Receipts"

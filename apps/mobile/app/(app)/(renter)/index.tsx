@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Bell,
   CalendarClock,
   CheckSquare,
   ChevronRight,
@@ -36,6 +37,7 @@ import {
   APPLICATION_STATUS_TONE,
 } from '@/lib/api/applications';
 import { kycApi } from '@/lib/api/kyc';
+import { notificationsApi } from '@/lib/api/notifications';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
@@ -62,6 +64,13 @@ export default function RenterHome() {
   const { savedIds, toggle } = useSavedListings();
 
   const stats = useQuery({ queryKey: qk.renter.dashboardStats, queryFn: renterApi.dashboardStats });
+
+  // Drives the bell badge; the notifications screen owns the full list.
+  const notifications = useQuery({
+    queryKey: qk.renter.notifications(1, 30),
+    queryFn: () => notificationsApi.list(1, 30),
+  });
+  const unreadCount = (notifications.data?.items ?? []).filter((n) => !n.read).length;
 
   const listings = useQuery({
     queryKey: qk.renter.recommended,
@@ -125,11 +134,43 @@ export default function RenterHome() {
         moveInChecklist.refetch();
       }}
     >
-      <View style={{ gap: spacing.xxs }}>
-        <Text variant="label" color="primary" uppercase>
-          {greeting()}
-        </Text>
-        <Text variant="title">{firstName(profile?.legalName)}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <View style={{ flex: 1, gap: spacing.xxs }}>
+          <Text variant="label" color="primary" uppercase>
+            {greeting()}
+          </Text>
+          <Text variant="title">{firstName(profile?.legalName)}</Text>
+        </View>
+        <Pressable
+          onPress={() => router.push('/(app)/notifications')}
+          accessibilityRole="button"
+          accessibilityLabel={
+            unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
+          }
+          hitSlop={10}
+        >
+          <Bell size={22} color={colors.foreground} />
+          {unreadCount > 0 ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: -3,
+                right: -3,
+                minWidth: 16,
+                height: 16,
+                paddingHorizontal: 4,
+                borderRadius: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.destructive,
+              }}
+            >
+              <Text variant="caption" style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </Text>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       {showVerifyNudge ? (
