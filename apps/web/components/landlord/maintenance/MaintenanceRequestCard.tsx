@@ -10,9 +10,12 @@ import {
   Wifi,
   ShieldAlert,
   Droplets,
+  CalendarClock,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
+import { StarRating } from '@/components/landlord/vendors/StarRating';
+import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
 import type {
   MaintenanceCategory,
@@ -72,6 +75,9 @@ interface MaintenanceRequestCardProps {
   request: LandlordMaintenanceRequest;
   delay?: number;
   onAssignVendor: (request: LandlordMaintenanceRequest) => void;
+  onScheduleVisit: (request: LandlordMaintenanceRequest) => void;
+  onRateVendor: (id: string, rating: number) => void;
+  isRatingVendor?: boolean;
   onMarkResolved: (id: string) => void;
   onEscalate: (id: string) => void;
   isMarkingResolved?: boolean;
@@ -82,6 +88,9 @@ export const MaintenanceRequestCard = ({
   request,
   delay = 0,
   onAssignVendor,
+  onScheduleVisit,
+  onRateVendor,
+  isRatingVendor = false,
   onMarkResolved,
   onEscalate,
   isMarkingResolved = false,
@@ -91,6 +100,7 @@ export const MaintenanceRequestCard = ({
   const priority = priorityConfig[request.priority];
   const status = statusConfig[request.status];
   const isResolved = request.status === 'resolved';
+  const isClosed = isResolved || request.status === 'cancelled';
   const isBusy = isMarkingResolved || isEscalating;
 
   return (
@@ -135,7 +145,36 @@ export const MaintenanceRequestCard = ({
         )}
       </div>
 
-      {!isResolved && (
+      {request.scheduledFor && !isClosed && (
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-foreground">
+          <CalendarClock className="w-3.5 h-3.5 text-primary" />
+          Visit {formatVisit(request.scheduledFor)}
+        </p>
+      )}
+
+      {isResolved && request.assignedVendorName && (
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-xs text-muted-foreground mb-1">
+            {request.vendorRating ? 'Your rating for' : 'Rate'} {request.assignedVendorName}
+          </p>
+          <div className="flex items-center gap-3">
+            <StarRating
+              value={request.vendorRating ?? 0}
+              onRate={(rating) => onRateVendor(request.id, rating)}
+              disabled={isRatingVendor}
+              size="md"
+              label="Your rating"
+            />
+            {!request.vendorRating && request.tenantVendorRating && (
+              <span className="text-xs text-muted-foreground">
+                Tenant gave {request.tenantVendorRating}/5
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!isClosed && (
         <div className="flex gap-2 mt-4 pt-4 border-t border-border">
           <Button
             variant="outline"
@@ -148,6 +187,18 @@ export const MaintenanceRequestCard = ({
             <UserCog className="w-3.5 h-3.5" />
             {request.assignedVendorName ? 'Reassign' : 'Assign Vendor'}
           </Button>
+          {request.assignedVendorName && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-2.5"
+              title={request.scheduledFor ? 'Move visit' : 'Book visit'}
+              onClick={() => onScheduleVisit(request)}
+              disabled={isBusy}
+            >
+              <CalendarClock className="w-3.5 h-3.5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

@@ -186,6 +186,23 @@ export const MaintenanceCard = ({
                 <span>{request.assignedVendorName}</span>
               </div>
             )}
+            {request.scheduledFor &&
+              request.status !== 'resolved' &&
+              request.status !== 'cancelled' && (
+                <div className="flex items-center gap-1 font-medium text-foreground">
+                  <Clock className="w-3 h-3" />
+                  <span>
+                    Visit{' '}
+                    {new Date(request.scheduledFor).toLocaleString('en-NG', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+              )}
             {request.vendorRating && (
               <div className="flex items-center gap-1">
                 <Star className="w-3 h-3 fill-primary text-primary" />

@@ -197,6 +197,20 @@ export const MaintenanceDetailsModal = ({
                   <p className="text-sm font-medium text-foreground">
                     {request.assignedVendorName}
                   </p>
+                  {request.scheduledFor && request.status !== 'resolved' && (
+                    <p className="mt-1 text-sm text-foreground">
+                      Visit booked for{' '}
+                      <span className="font-medium">
+                        {new Date(request.scheduledFor).toLocaleString('en-NG', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </p>
+                  )}
                 </div>
               )}
 
