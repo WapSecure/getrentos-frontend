@@ -42,6 +42,7 @@ const buildInitialData = (
     { name: 'Proof of Income', uploaded: false, required: true },
     { name: 'Bank Statement', uploaded: false, required: true },
     { name: 'Reference Letter', uploaded: false, required: false },
+    { name: 'Credit Report', uploaded: false, required: false },
   ],
 });
 

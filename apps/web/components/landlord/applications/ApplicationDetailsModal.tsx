@@ -1,26 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import {
-  X,
-  Mail,
-  Phone,
-  Briefcase,
-  Banknote,
-  FileCheck,
-  FileX,
-  ShieldCheck,
-  Check,
-  MessageSquareText,
-  Users,
-  History,
-} from 'lucide-react';
+import { X, Mail, Phone, ShieldCheck, Check, MessageSquareText } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { formatCurrency, formatDate, getInitials } from '@/lib/format';
-import { unwrap } from '@/lib/apiHelpers';
-import { landlordKeys } from '@/lib/queryKeys';
-import { landlordService } from '@/services/landlordService';
+import { formatDate, getInitials } from '@/lib/format';
+import { ScreeningPanel } from '@/components/landlord/applications/ScreeningPanel';
 import type { RentalApplication } from '@/types/landlord';
 
 interface ApplicationDetailsModalProps {
@@ -40,12 +24,6 @@ export const ApplicationDetailsModal = ({
 }: ApplicationDetailsModalProps) => {
   const isDecided = application?.status === 'approved' || application?.status === 'rejected';
 
-  const { data: tenancyStanding } = useQuery({
-    queryKey: landlordKeys.tenancyStanding(application?.id ?? ''),
-    queryFn: () => unwrap(landlordService.getTenancyStanding(application!.id)),
-    enabled: !!application,
-  });
-
   return (
     <AnimatePresence>
       {application && (
@@ -54,7 +32,7 @@ export const ApplicationDetailsModal = ({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            className="bg-card rounded-xl max-w-2xl w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
@@ -82,48 +60,6 @@ export const ApplicationDetailsModal = ({
                 <span className="text-lg font-bold text-primary">{application.trustScore}</span>
               </div>
 
-              <div className="p-3 rounded-lg border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <History className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Tenancy Standing</span>
-                </div>
-                {tenancyStanding?.shared ? (
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Platform trust score</p>
-                      <p className="font-medium text-foreground">{tenancyStanding.trustScore}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Signed leases</p>
-                      <p className="font-medium text-foreground">
-                        {tenancyStanding.signedLeaseCount}
-                      </p>
-                    </div>
-                    <div className="col-span-2 flex flex-wrap gap-1.5 mt-1">
-                      {tenancyStanding.identityVerified && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                          Identity verified
-                        </span>
-                      )}
-                      {tenancyStanding.emailVerified && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                          Email verified
-                        </span>
-                      )}
-                      {tenancyStanding.phoneVerified && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                          Phone verified
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    This applicant hasn&apos;t opted in to share their prior tenancy history.
-                  </p>
-                )}
-              </div>
-
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                   Personal Information
@@ -140,86 +76,11 @@ export const ApplicationDetailsModal = ({
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  Financial Information
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Banknote className="w-4 h-4 text-gray-400" />
-                    {formatCurrency(application.monthlyIncome)} / month
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Briefcase className="w-4 h-4 text-gray-400" />
-                    {application.employmentStatus}
-                  </div>
-                </div>
-              </div>
-
-              {(application.references.length > 0 || application.nextOfKinName) && (
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" />
-                    References &amp; Next of Kin
-                  </h4>
-                  <div className="space-y-1.5">
-                    {application.nextOfKinName && (
-                      <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm">
-                        <p className="text-foreground font-medium">
-                          {application.nextOfKinName}{' '}
-                          <span className="text-xs text-muted-foreground font-normal">
-                            ({application.nextOfKinRelationship || 'Next of kin'})
-                          </span>
-                        </p>
-                        {application.nextOfKinPhone && (
-                          <p className="text-xs text-muted-foreground">
-                            {application.nextOfKinPhone}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    {application.references.map((reference) => (
-                      <div
-                        key={reference.phone}
-                        className="p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm"
-                      >
-                        <p className="text-foreground font-medium">
-                          {reference.name}{' '}
-                          <span className="text-xs text-muted-foreground font-normal">
-                            ({reference.relationship})
-                          </span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">{reference.phone}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  Documents
-                </h4>
-                <div className="space-y-1.5">
-                  {application.documents.map((doc) => (
-                    <div
-                      key={doc.name}
-                      className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-white/5"
-                    >
-                      <span className="text-sm text-foreground">{doc.name}</span>
-                      {doc.uploaded ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                          <FileCheck className="w-3.5 h-3.5" /> Uploaded
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs text-red-500">
-                          <FileX className="w-3.5 h-3.5" /> Missing
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <ScreeningPanel
+                key={application.id}
+                applicationId={application.id}
+                employmentStatus={application.employmentStatus}
+              />
 
               <p className="text-xs text-gray-400">
                 Submitted {formatDate(application.applicationDate, 'long')}

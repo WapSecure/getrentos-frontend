@@ -167,6 +167,68 @@ export interface TenancyStanding {
   phoneVerified?: boolean;
 }
 
+export type ScreeningFlagLevel = 'ok' | 'watch' | 'concern';
+export type AffordabilityBand = 'comfortable' | 'stretched' | 'high' | 'unknown';
+export type ReferenceOutcome = 'not_contacted' | 'confirmed' | 'concern' | 'unreachable';
+
+export interface ScreeningFlag {
+  level: ScreeningFlagLevel;
+  text: string;
+}
+
+export interface ScreeningAffordability {
+  available: boolean;
+  reason?: string;
+  monthlyIncome: number;
+  monthlyRent?: number;
+  annualRent?: number;
+  /** A year's rent as a share of a year's declared income. */
+  rentToIncomePercent?: number | null;
+  band: AffordabilityBand;
+  /** Whether a proof of income or bank statement is attached; otherwise income is self-declared. */
+  incomeEvidenced: boolean;
+}
+
+export interface ScreeningDocument {
+  name: string;
+  required: boolean;
+  uploaded: boolean;
+  /** Short-lived link to a file the applicant attached to this application. */
+  url?: string;
+  sizeBytes?: number;
+  isCreditReport: boolean;
+}
+
+export interface ScreeningReference {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: string;
+  status: ReferenceOutcome;
+  note?: string;
+  checkedAt?: string;
+}
+
+export interface RentalHistory {
+  paymentsCount: number;
+  onTimeRatePercent: number | null;
+  landlordReviewCount: number;
+  landlordReviewAverage: number | null;
+}
+
+export interface ScreeningReport {
+  applicationId: string;
+  applicantName: string;
+  affordability: ScreeningAffordability;
+  standing: TenancyStanding;
+  history?: RentalHistory;
+  references: ScreeningReference[];
+  nextOfKin?: { name: string; phone?: string; relationship?: string };
+  documents: ScreeningDocument[];
+  flags: ScreeningFlag[];
+  creditCheck: { available: boolean };
+}
+
 export interface RentIncreaseCheck {
   increasePercent: number;
   exceedsGuidance: boolean;
