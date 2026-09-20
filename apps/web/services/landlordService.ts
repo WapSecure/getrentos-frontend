@@ -23,6 +23,9 @@ import type {
   PortfolioAnalytics,
   VendorDetail,
   VendorInput,
+  ScreeningReport,
+  ScreeningReference,
+  ReferenceOutcome,
 } from '@/types/landlord';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
@@ -392,6 +395,23 @@ export const landlordService = {
       authFetch(`/landlord/applications/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
+      })
+    );
+  },
+
+  async getApplicationScreening(applicationId: string): Promise<ApiResponse<ScreeningReport>> {
+    return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening`));
+  },
+
+  async updateReferenceCheck(
+    applicationId: string,
+    referenceId: string,
+    body: { status: ReferenceOutcome; note?: string }
+  ): Promise<ApiResponse<ScreeningReference>> {
+    return safeCall(() =>
+      authFetch(`/landlord/applications/${applicationId}/references/${referenceId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
       })
     );
   },

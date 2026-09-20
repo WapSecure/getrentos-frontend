@@ -26,6 +26,12 @@ import { nameOnly } from '@/lib/validations/input';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 
+/** A line of help under a document, where the name alone doesn't say what to bring. */
+const DOCUMENT_HINTS: Record<string, string> = {
+  'Credit Report':
+    'Optional, and it can strengthen your application. You can get your own credit report free once a year from a licensed bureau such as CRC, FirstCentral or CreditRegistry.',
+};
+
 export interface ApplicationFormData {
   fullName: string;
   email: string;
@@ -322,7 +328,14 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground truncate">{doc.name}</span>
+                    <span className="min-w-0">
+                      <span className="block text-sm text-foreground truncate">{doc.name}</span>
+                      {DOCUMENT_HINTS[doc.name] && (
+                        <span className="block text-xs text-muted-foreground">
+                          {DOCUMENT_HINTS[doc.name]}
+                        </span>
+                      )}
+                    </span>
                     {doc.required && !doc.uploaded && (
                       <span className="text-xs text-red-500 shrink-0">Required</span>
                     )}
