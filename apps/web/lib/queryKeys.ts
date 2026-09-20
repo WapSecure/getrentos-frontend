@@ -71,6 +71,8 @@ export const renterKeys = {
   savedListings: ['renter', 'savedListings'] as const,
   applications: ['renter', 'applications'] as const,
   allApplicationNotes: ['renter', 'applications', 'notes'] as const,
+  applicationCreditCheck: (applicationId: string) =>
+    ['renter', 'applications', applicationId, 'creditCheck'] as const,
   applicationNotes: (applicationId: string) =>
     ['renter', 'applications', applicationId, 'notes'] as const,
   roommates: ['renter', 'roommates'] as const,

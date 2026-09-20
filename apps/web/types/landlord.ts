@@ -1,3 +1,4 @@
+import type { SharedCreditCheck } from '@/types/credit-check';
 import type {
   MaintenanceCategory,
   MaintenancePriority,
@@ -226,7 +227,8 @@ export interface ScreeningReport {
   nextOfKin?: { name: string; phone?: string; relationship?: string };
   documents: ScreeningDocument[];
   flags: ScreeningFlag[];
-  creditCheck: { available: boolean };
+  /** `available` says a credit provider is connected; `latest` is present once the applicant shares a check. */
+  creditCheck: { available: boolean; latest?: SharedCreditCheck };
 }
 
 export interface RentIncreaseCheck {
