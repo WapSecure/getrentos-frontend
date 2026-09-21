@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import {
+  DateTimeField,
+  isCompleteDateTime,
+  isFutureDateTime,
+} from '@/components/shared/forms/DateTimeField';
 import type { Amenity } from '@/types/estate';
 
 interface BookAmenityModalProps {
@@ -32,7 +37,12 @@ export const BookAmenityModal = ({
     onClose();
   };
 
-  const canSubmit = !!amenity && !!startsAt && !!endsAt;
+  const endsBeforeStart =
+    isCompleteDateTime(startsAt) &&
+    isCompleteDateTime(endsAt) &&
+    new Date(endsAt).getTime() <= new Date(startsAt).getTime();
+  const canSubmit =
+    !!amenity && isFutureDateTime(startsAt) && isCompleteDateTime(endsAt) && !endsBeforeStart;
 
   return (
     <AnimatePresence>
@@ -52,21 +62,19 @@ export const BookAmenityModal = ({
             </div>
 
             <div className="p-4 space-y-4">
+              <DateTimeField label="Starts" value={startsAt} onChange={setStartsAt} requireFuture />
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Starts</label>
-                <LegacyInput
-                  type="datetime-local"
-                  value={startsAt}
-                  onChange={(e) => setStartsAt(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Ends</label>
-                <LegacyInput
-                  type="datetime-local"
+                <DateTimeField
+                  label="Ends"
                   value={endsAt}
-                  onChange={(e) => setEndsAt(e.target.value)}
+                  onChange={setEndsAt}
+                  minDate={startsAt.split('T')[0] || undefined}
                 />
+                {endsBeforeStart && (
+                  <p role="alert" className="mt-1 text-xs text-red-500">
+                    The end time must be after the start time.
+                  </p>
+                )}
               </div>
               {error && <p className="text-xs text-red-500">{error}</p>}
             </div>
