@@ -402,6 +402,89 @@ export const PAYOUT_TONE: Record<PayoutStatus, 'success' | 'warning' | 'danger' 
   failed: 'danger',
 };
 
+/* ------------------------------- listings ------------------------------ */
+
+export type ListingStatus = 'draft' | 'published' | 'paused' | 'archived';
+
+export interface LandlordListing {
+  id: string;
+  unitId: string;
+  propertyId: string;
+  propertyName: string;
+  unitName: string;
+  listingTitle: string;
+  askingRent: number;
+  rentPeriod: 'month' | 'year';
+  allowsMonthlyPayment: boolean;
+  amenities: string[];
+  availabilityDate: string;
+  allowPets: boolean;
+  furnished: boolean;
+  shortLetEnabled: boolean;
+  status: ListingStatus;
+  createdAt: string;
+  coverImage?: string;
+  galleryImages?: string[];
+  videoTourUrl?: string;
+}
+
+export const LISTING_STATUS_TONE: Record<
+  ListingStatus,
+  'success' | 'warning' | 'neutral' | 'info'
+> = {
+  published: 'success',
+  paused: 'warning',
+  draft: 'info',
+  archived: 'neutral',
+};
+
+/* --------------------------------- leads ------------------------------- */
+
+export type LeadStage = 'inquiry' | 'viewing' | 'application' | 'lease' | 'lost';
+
+export interface LandlordLead {
+  id: string;
+  leadName: string;
+  email: string;
+  phone: string;
+  leadUserId?: string;
+  propertyId: string;
+  propertyName: string;
+  inquiryDate: string;
+  trustScore: number;
+  verified: boolean;
+  stage: LeadStage;
+  lastActivityAt: string;
+  daysSinceActivity: number;
+  /** The API's own judgement that this lead has gone cold. */
+  stale: boolean;
+}
+
+export const LEAD_STAGE_LABEL: Record<LeadStage, string> = {
+  inquiry: 'Inquiry',
+  viewing: 'Viewing',
+  application: 'Application',
+  lease: 'Lease',
+  lost: 'Lost',
+};
+
+export const LEAD_STAGE_TONE: Record<LeadStage, 'info' | 'warning' | 'success' | 'neutral'> = {
+  inquiry: 'info',
+  viewing: 'warning',
+  application: 'warning',
+  lease: 'success',
+  lost: 'neutral',
+};
+
+/* ------------------------------- microsite ----------------------------- */
+
+export interface MicrositeSettings {
+  slug: string;
+  bio?: string;
+  bannerUrl?: string;
+  enabled: boolean;
+}
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -499,6 +582,26 @@ export const landlordApi = {
 
   retryPayout: (id: string) =>
     apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}/retry-payout`, { method: 'POST' }),
+
+  /** Returns a bare array, not a paginated envelope. */
+  listings: () => apiFetch<LandlordListing[]>('/landlord/listings'),
+
+  toggleListingPause: (id: string) =>
+    apiFetch<LandlordListing>(`/landlord/listings/${id}/toggle-pause`, { method: 'PATCH' }),
+
+  leads: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordLead>>(`/landlord/leads?page=${page}&pageSize=${pageSize}`),
+
+  nudgeLead: (leadId: string) =>
+    apiFetch<{ nudged: boolean }>(`/landlord/leads/${leadId}/nudge`, { method: 'POST' }),
+
+  bulkNudgeLeads: () =>
+    apiFetch<{ nudged: number }>('/landlord/leads/bulk-nudge', { method: 'POST' }),
+
+  microsite: () => apiFetch<MicrositeSettings>('/landlord/microsite'),
+
+  updateMicrosite: (patch: { slug?: string; bio?: string; enabled?: boolean }) =>
+    apiFetch<MicrositeSettings>('/landlord/microsite', { method: 'PATCH', body: patch }),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

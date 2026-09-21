@@ -155,6 +155,9 @@ export const qk = {
     expenses: (page = 1, pageSize = 20) => ['landlord', 'expenses', { page, pageSize }] as const,
     ownerStatements: (page = 1, pageSize = 20) =>
       ['landlord', 'owner-statements', { page, pageSize }] as const,
+    listings: ['landlord', 'listings'] as const,
+    leads: (page = 1, pageSize = 20) => ['landlord', 'leads', { page, pageSize }] as const,
+    microsite: ['landlord', 'microsite'] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
   },
   resident: {

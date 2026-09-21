@@ -61,6 +61,24 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
+          label="Listings"
+          description="What is live, paused or draft"
+          onPress={() => router.push('/(app)/landlord-listings')}
+        />
+        <Divider />
+        <AccountRow
+          label="Leads"
+          description="Enquiries to follow up"
+          onPress={() => router.push('/(app)/landlord-leads')}
+        />
+        <Divider />
+        <AccountRow
+          label="Microsite"
+          description="Your public page and its address"
+          onPress={() => router.push('/(app)/landlord-microsite')}
+        />
+        <Divider />
+        <AccountRow
           label="Financials"
           description="Profit, expenses and owner statements"
           onPress={() => router.push('/(app)/landlord-financials')}
