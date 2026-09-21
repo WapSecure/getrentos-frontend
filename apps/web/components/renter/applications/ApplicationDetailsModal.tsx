@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';
+import { pluralize } from '@/lib/format';
 import { ApplicationTimeline } from './ApplicationTimeline';
 import { ApplicationNotes } from './ApplicationNotes';
 import { ApplicationWithdrawModal } from './ApplicationWithdrawModal';
@@ -224,10 +225,10 @@ export const ApplicationDetailsModal = ({
                           <p className="text-xs text-gray-500">Property Details</p>
                           <div className="flex items-center gap-3 mt-1">
                             <span className="text-sm text-foreground">
-                              {application.bedrooms} beds
+                              {pluralize(application.bedrooms, 'bed')}
                             </span>
                             <span className="text-sm text-foreground">
-                              {application.bathrooms} baths
+                              {pluralize(application.bathrooms, 'bath')}
                             </span>
                             <span className="text-sm text-foreground">{application.size} sqft</span>
                           </div>

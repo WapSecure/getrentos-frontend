@@ -23,6 +23,7 @@ import { buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { pluralize } from '@/lib/format';
 import { AddNoteModal } from './AddNoteModal';
 import { SharePropertyModal } from './SharePropertyModal';
 import { PropertyPhoto } from '@/components/renter/shared/PropertyPhoto';
@@ -186,11 +187,11 @@ export const SavedPropertyCard = ({
               <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Bed className="w-3 h-3" />
-                  <span>{property.bedrooms} beds</span>
+                  <span>{pluralize(property.bedrooms, 'bed')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Bath className="w-3 h-3" />
-                  <span>{property.bathrooms} baths</span>
+                  <span>{pluralize(property.bathrooms, 'bath')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Square className="w-3 h-3" />
@@ -349,11 +350,11 @@ export const SavedPropertyCard = ({
           <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Bed className="w-3 h-3" />
-              <span>{property.bedrooms} beds</span>
+              <span>{pluralize(property.bedrooms, 'bed')}</span>
             </div>
             <div className="flex items-center gap-1">
               <Bath className="w-3 h-3" />
-              <span>{property.bathrooms} baths</span>
+              <span>{pluralize(property.bathrooms, 'bath')}</span>
             </div>
             <div className="flex items-center gap-1">
               <Square className="w-3 h-3" />

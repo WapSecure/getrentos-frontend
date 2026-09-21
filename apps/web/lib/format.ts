@@ -54,3 +54,17 @@ export const getInitials = (fullName: string): string => {
   const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
   return `${first}${last}`.toUpperCase() || 'U';
 };
+
+/**
+ * "1 bed" / "2 beds".
+ *
+ * Several panels hard-coded the plural (`{bedrooms} beds`), so a studio or a
+ * one-bed read "1 beds" / "1 baths" — while the Discover card and the property
+ * detail page inflected it correctly. Centralised so the surfaces cannot drift
+ * apart again.
+ */
+export const pluralize = (
+  count: number,
+  singular: string,
+  plural: string = `${singular}s`
+): string => `${count} ${count === 1 ? singular : plural}`;
