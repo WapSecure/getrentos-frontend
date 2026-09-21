@@ -104,7 +104,13 @@ export function OwnerStatementsView() {
               message: 'Statement issued, but the payout failed — retry it below.',
               variant: 'error',
             }
-          : { message: 'Statement issued.', variant: 'success' }
+          : result.payoutStatus === 'PENDING'
+            ? {
+                message:
+                  'Statement issued. The payout is on its way and shows as paid once your bank confirms it.',
+                variant: 'success',
+              }
+            : { message: 'Statement issued and paid out.', variant: 'success' }
       );
     },
     onError: (error: Error) => {
@@ -121,10 +127,15 @@ export function OwnerStatementsView() {
       setToast(
         result.payoutStatus === 'PAID'
           ? { message: 'Payout succeeded.', variant: 'success' }
-          : {
-              message: 'The payout failed again. Check the payout account and try again.',
-              variant: 'error',
-            }
+          : result.payoutStatus === 'PENDING'
+            ? {
+                message: 'Payout sent again. It shows as paid once your bank confirms it.',
+                variant: 'success',
+              }
+            : {
+                message: 'The payout failed again. Check the payout account and try again.',
+                variant: 'error',
+              }
       );
     },
     onError: (error: Error) => {
