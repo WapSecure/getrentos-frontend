@@ -693,6 +693,40 @@ export interface LandlordMessage {
   isMine?: boolean;
 }
 
+/* ------------------------ property & unit admin ------------------------ */
+
+export const PROPERTY_TYPES = [
+  'apartment',
+  'duplex',
+  'condo',
+  'commercial',
+  'shared_apartment',
+] as const;
+export type PropertyType = (typeof PROPERTY_TYPES)[number];
+
+export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
+  apartment: 'Apartment',
+  duplex: 'Duplex',
+  condo: 'Condo',
+  commercial: 'Commercial',
+  shared_apartment: 'Shared apartment',
+};
+
+export interface UpdatePropertyInput {
+  name?: string;
+  type?: PropertyType;
+  address?: string;
+  city?: string;
+  state?: string;
+  description?: string;
+}
+
+/** Whether the applicant agreed to share their standing from a past tenancy. */
+export interface TenancyStanding {
+  shared: boolean;
+  [key: string]: unknown;
+}
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -930,6 +964,46 @@ export const landlordApi = {
     apiFetch<Paginated<LandlordMessage>>(
       `/landlord/messages/conversations/${id}/messages?page=${page}&pageSize=${pageSize}`
     ),
+
+  updateProperty: (id: string, patch: UpdatePropertyInput) =>
+    apiFetch<LandlordProperty>(`/landlord/properties/${id}`, { method: 'PATCH', body: patch }),
+
+  archiveProperty: (id: string) =>
+    apiFetch<LandlordProperty>(`/landlord/properties/${id}/archive`, { method: 'PATCH' }),
+
+  markUnitVacant: (id: string) =>
+    apiFetch<LandlordUnit>(`/landlord/units/${id}/vacant`, { method: 'PATCH' }),
+
+  assignTenant: (id: string, tenantName: string) =>
+    apiFetch<LandlordUnit>(`/landlord/units/${id}/assign-tenant`, {
+      method: 'PATCH',
+      body: { tenantName },
+    }),
+
+  /** PRO-gated server-side; the caller must handle a plan refusal. */
+  bulkUpdatePricing: (unitIds: string[], askingRent: number) =>
+    apiFetch<{ updated: number }>('/landlord/units/bulk-price', {
+      method: 'PATCH',
+      body: { unitIds, askingRent },
+    }),
+
+  listingVacantUnits: () => apiFetch<LandlordUnit[]>('/landlord/listings/vacant-units'),
+
+  tenancyStanding: (applicationId: string) =>
+    apiFetch<TenancyStanding>(`/landlord/applications/${applicationId}/tenancy-standing`),
+
+  managementFeeConfig: (propertyId: string) =>
+    apiFetch<Record<string, unknown>>(`/landlord/management-fee-config?propertyId=${propertyId}`),
+
+  generateOwnerStatement: (input: {
+    propertyId?: string;
+    periodStart: string;
+    periodEnd: string;
+  }) =>
+    apiFetch<OwnerStatement>('/landlord/owner-statements/generate', {
+      method: 'POST',
+      body: input,
+    }),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

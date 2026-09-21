@@ -1,9 +1,20 @@
-import { Pressable, ScrollView, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { BedDouble, Building2, ChevronLeft, MapPin, ShowerHead } from 'lucide-react-native';
+import {
+  Archive,
+  BedDouble,
+  Building2,
+  ChevronLeft,
+  DoorOpen,
+  MapPin,
+  Pencil,
+  ShowerHead,
+  UserPlus,
+} from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -14,6 +25,7 @@ import {
   Skeleton,
   Text,
   useTheme,
+  useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
@@ -21,12 +33,20 @@ import {
   OCCUPANCY_LABEL,
   OCCUPANCY_TONE,
   VERIFICATION_TONE,
+  type LandlordUnit,
 } from '@/lib/api/landlord';
+import { ApiError } from '@/lib/api/client';
+import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
+import { AssignTenantSheet } from '@/components/landlord/AssignTenantSheet';
 
 export default function LandlordPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [editing, setEditing] = useState(false);
+  const [assigning, setAssigning] = useState<LandlordUnit | null>(null);
 
   // The API has no single-property route — the list is the source of truth,
   // and sharing its query key means arriving from the list costs no refetch.
@@ -42,6 +62,32 @@ export default function LandlordPropertyDetail() {
   });
 
   const p = property.data?.items.find((item) => item.id === id);
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
+    qc.invalidateQueries({ queryKey: ['landlord', 'units'] });
+  };
+  const fail = (e: unknown, fallback: string) =>
+    toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+
+  const archive = useMutation({
+    mutationFn: () => landlordApi.archiveProperty(id),
+    onSuccess: () => {
+      invalidate();
+      toast.show('Property archived.', 'success');
+      router.back();
+    },
+    onError: (e) => fail(e, 'Could not archive that property.'),
+  });
+
+  const markVacant = useMutation({
+    mutationFn: (unitId: string) => landlordApi.markUnitVacant(unitId),
+    onSuccess: () => {
+      invalidate();
+      toast.show('Unit marked vacant.', 'success');
+    },
+    onError: (e) => fail(e, 'Could not update that unit.'),
+  });
   const unitItems = units.data?.items ?? [];
 
   return (
@@ -67,6 +113,32 @@ export default function LandlordPropertyDetail() {
         <Text variant="title" numberOfLines={1} style={{ flex: 1 }}>
           {p?.name ?? 'Property'}
         </Text>
+        {p && !p.archived ? (
+          <>
+            <Pressable
+              onPress={() => setEditing(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Edit property"
+              hitSlop={10}
+              style={{ marginRight: spacing.lg }}
+            >
+              <Pencil size={19} color={colors.foreground} />
+            </Pressable>
+            <Pressable
+              onPress={() =>
+                Alert.alert('Archive property?', 'It will stop appearing in your active list.', [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Archive', style: 'destructive', onPress: () => archive.mutate() },
+                ])
+              }
+              accessibilityRole="button"
+              accessibilityLabel="Archive property"
+              hitSlop={10}
+            >
+              <Archive size={19} color={colors.mutedForeground} />
+            </Pressable>
+          </>
+        ) : null}
       </View>
 
       {property.isError ? (
@@ -193,6 +265,34 @@ export default function LandlordPropertyDetail() {
                           variant="callout"
                         />
                       </View>
+
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
+                        {u.occupancyStatus === 'occupied' ? (
+                          <Pressable
+                            onPress={() => markVacant.mutate(u.id)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Mark ${u.unitName} vacant`}
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                          >
+                            <DoorOpen size={13} color={colors.mutedForeground} />
+                            <Text variant="caption" color="mutedForeground">
+                              Mark vacant
+                            </Text>
+                          </Pressable>
+                        ) : (
+                          <Pressable
+                            onPress={() => setAssigning(u)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Assign a tenant to ${u.unitName}`}
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                          >
+                            <UserPlus size={13} color={colors.primary} />
+                            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                              Assign a tenant
+                            </Text>
+                          </Pressable>
+                        )}
+                      </View>
                     </View>
                   </View>
                 ))}
@@ -201,6 +301,9 @@ export default function LandlordPropertyDetail() {
           </View>
         </ScrollView>
       )}
+
+      <EditPropertySheet open={editing} onClose={() => setEditing(false)} property={p ?? null} />
+      <AssignTenantSheet open={!!assigning} onClose={() => setAssigning(null)} unit={assigning} />
     </View>
   );
 }
