@@ -119,6 +119,47 @@ export function ShortletPayoutsDialog({
             </Button>
           </div>
 
+          {/* Money that is earned but not withdrawable yet, with the reason for each part. */}
+          {summary &&
+            (summary.upcoming > 0 || summary.frozen > 0 || summary.inFailedPayout > 0) && (
+              <ul className="space-y-2 rounded-lg border border-border p-4 text-sm">
+                {summary.upcoming > 0 && (
+                  <li className="flex items-start justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      Coming up
+                      {summary.nextReleaseAt && (
+                        <> — the next part unlocks {formatDate(summary.nextReleaseAt)}</>
+                      )}
+                    </span>
+                    <span className="font-medium">{formatCurrency(summary.upcoming)}</span>
+                  </li>
+                )}
+                {summary.frozen > 0 && (
+                  <li className="flex items-start justify-between gap-3">
+                    <span className="text-muted-foreground">On hold while a dispute is open</span>
+                    <span className="font-medium">{formatCurrency(summary.frozen)}</span>
+                  </li>
+                )}
+                {summary.inFailedPayout > 0 && (
+                  <li className="flex items-start justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      In a payout that failed — support will retry it
+                    </span>
+                    <span className="font-medium">{formatCurrency(summary.inFailedPayout)}</span>
+                  </li>
+                )}
+              </ul>
+            )}
+          {summary && (
+            <p className="text-xs text-muted-foreground">
+              Earnings unlock {summary.holdHours} hours after your guest&apos;s check-in time
+              {summary.holdHours > 24
+                ? ' (a longer wait applies until your first payout is complete)'
+                : ''}
+              , so a guest who doesn&apos;t arrive or reports a problem can be refunded first.
+            </p>
+          )}
+
           {/* Payout account */}
           {account ? (
             <div className="rounded-lg border border-border p-4">

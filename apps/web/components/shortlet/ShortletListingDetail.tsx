@@ -24,7 +24,7 @@ import {
   Video,
   Zap,
 } from 'lucide-react';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
@@ -109,7 +109,12 @@ export function ShortletListingDetail({
         variant: 'success',
       });
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => {
+      // An identity gate is explained inside the dialog with a link to verify, not as a passing toast.
+      if (!(reason instanceof VerificationRequiredError)) {
+        setToast({ message: reason.message, variant: 'error' });
+      }
+    },
   });
 
   const pay = useMutation({
@@ -527,6 +532,7 @@ export function ShortletListingDetail({
           onPay={(id) => pay.mutate(id)}
           onBook={(input) => book.mutate(input)}
           busy={book.isPending}
+          bookError={book.error}
         />
       )}
 

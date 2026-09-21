@@ -55,6 +55,23 @@ const listQuery = (params: ShortletListParams): string =>
     estate: params.estate,
   });
 
+/** Earnings split by when they can be withdrawn. Amounts are whole naira. */
+export interface ShortletPayoutSummary {
+  /** Ready to withdraw now. */
+  available: number;
+  /** Earned, but the stay hasn't started or is still inside the hold. */
+  upcoming: number;
+  /** Past the hold, but a dispute is open on the booking. */
+  frozen: number;
+  /** Sitting in a failed payout that support has to retry. */
+  inFailedPayout: number;
+  /** When the next held earnings unlock. */
+  nextReleaseAt: string | null;
+  /** Hours earnings are held after check-in (longer for a first payout). */
+  holdHours: number;
+  accountSet: boolean;
+}
+
 export const shortletService = {
   // -------- Public marketplace --------
   listPublic: (params: ShortletListParams = {}) =>
@@ -206,9 +223,7 @@ export const shortletService = {
     ),
 
   payoutSummary: () =>
-    safeCall(() =>
-      authFetch<{ available: number; accountSet: boolean }>('/host/shortlets/payouts/summary')
-    ),
+    safeCall(() => authFetch<ShortletPayoutSummary>('/host/shortlets/payouts/summary')),
 
   requestPayout: () =>
     safeCall(() =>
