@@ -21,7 +21,6 @@ import {
   Download,
   Trash2,
   Building2,
-  DollarSign,
   Shield,
   Star,
 } from 'lucide-react';

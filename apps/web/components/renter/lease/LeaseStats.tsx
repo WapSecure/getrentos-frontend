@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Home, Calendar, DollarSign, FileText } from 'lucide-react';
+import { Home, Calendar, FileText } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';
 
@@ -39,7 +40,7 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
       suffix: ' days',
     },
     {
-      icon: DollarSign,
+      icon: NairaSign,
       label: leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate),
       value: formatCurrency(lease.rentAmount),
     },

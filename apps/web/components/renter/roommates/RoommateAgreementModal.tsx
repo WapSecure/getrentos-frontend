@@ -4,7 +4,8 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileText, Check, Users, Clock, Home, DollarSign } from 'lucide-react';
+import { X, FileText, Check, Users, Clock, Home } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button } from '@getrentos/ui';
 
 interface Roommate {
@@ -103,7 +104,7 @@ export const RoommateAgreementModal = ({
 
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-secondary">
-                    <DollarSign className="w-4 h-4 text-gray-500" />
+                    <NairaSign className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
                     <h4 className="font-medium text-foreground">Financial Agreement</h4>
