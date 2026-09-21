@@ -281,7 +281,16 @@ export async function unwrapOptional<T>(
   whenMissing: T
 ): Promise<T> {
   try {
-    return await unwrap(promise);
+    const value = await unwrap(promise);
+    // An empty *success* means the same thing as a 404 here. Nest sends no body
+    // at all (200, `content-length: 0`) when a handler returns `null`, and
+    // `GET /renter/lease/pending` does exactly that whenever the tenant has no
+    // lease awaiting signature. Axios yields `undefined` for that empty body
+    // and `unwrap`'s `as T` cast hides it, so the caller's type says
+    // "PendingLease | null" while the runtime value is `undefined` — which
+    // react-query rejects outright with "Query data cannot be undefined",
+    // replacing the whole renter Lease tab with an error state.
+    return value ?? whenMissing;
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return whenMissing;
     throw error;
