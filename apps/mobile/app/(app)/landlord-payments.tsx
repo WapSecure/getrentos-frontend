@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, MessageSquareWarning, Wallet } from 'lucide-react-native';
+import { ChevronLeft, MessageSquareWarning, Plus, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -17,10 +18,13 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landlordApi, LANDLORD_PAYMENT_TONE, type LandlordPayment } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
+import { ChargeRentSheet } from '@/components/landlord/ChargeRentSheet';
 
 export default function LandlordPayments() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+
+  const [charging, setCharging] = useState(false);
 
   const query = useQuery({
     queryKey: qk.landlord.payments(),
@@ -60,6 +64,14 @@ export default function LandlordPayments() {
         <Text variant="title" style={{ flex: 1 }}>
           Payments
         </Text>
+        <Pressable
+          onPress={() => setCharging(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Raise a charge"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       {query.isError ? (
@@ -141,6 +153,8 @@ export default function LandlordPayments() {
           }
         />
       )}
+
+      <ChargeRentSheet open={charging} onClose={() => setCharging(false)} />
     </View>
   );
 }

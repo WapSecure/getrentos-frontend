@@ -644,6 +644,55 @@ export interface LandlordNotificationPreference {
   push: boolean;
 }
 
+/* ------------------------------- charges ------------------------------- */
+
+export const CHARGE_CATEGORIES = ['RENT', 'SERVICE_CHARGE', 'DEPOSIT', 'LEVY'] as const;
+export type ChargeCategory = (typeof CHARGE_CATEGORIES)[number];
+
+export const CHARGE_CATEGORY_LABEL: Record<ChargeCategory, string> = {
+  RENT: 'Rent',
+  SERVICE_CHARGE: 'Service charge',
+  DEPOSIT: 'Deposit',
+  LEVY: 'Levy',
+};
+
+export const BILLING_CYCLES = ['MONTHLY', 'QUARTERLY', 'ANNUAL'] as const;
+export type BillingCycle = (typeof BILLING_CYCLES)[number];
+
+export const BILLING_CYCLE_LABEL: Record<BillingCycle, string> = {
+  MONTHLY: 'Monthly',
+  QUARTERLY: 'Quarterly',
+  ANNUAL: 'Annual',
+};
+
+export interface ChargeInput {
+  unitId: string;
+  category: ChargeCategory;
+  amount: number;
+  /** `yyyy-MM-dd` */
+  dueDate: string;
+  billingCycle: BillingCycle;
+}
+
+/** What a proposed renewal rent would mean, before committing to it. */
+export interface RenewalCheck {
+  allowed?: boolean;
+  percentageIncrease?: number;
+  message?: string;
+  [key: string]: unknown;
+}
+
+/* --------------------------- conversations ----------------------------- */
+
+export interface LandlordMessage {
+  id: string;
+  senderId?: string;
+  senderName?: string;
+  text: string;
+  createdAt: string;
+  isMine?: boolean;
+}
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -838,6 +887,49 @@ export const landlordApi = {
       method: 'PUT',
       body: { preferences },
     }),
+
+  vacantUnits: () => apiFetch<LandlordUnit[]>('/landlord/leases/vacant-units'),
+
+  sendLease: (id: string) =>
+    apiFetch<LandlordLease>(`/landlord/leases/${id}/send`, { method: 'PATCH' }),
+
+  signLease: (id: string, signatureData: string) =>
+    apiFetch<LandlordLease>(`/landlord/leases/${id}/sign`, {
+      method: 'POST',
+      body: { signatureData },
+    }),
+
+  renewLease: (id: string, rentAmount: number, leaseEnd: string) =>
+    apiFetch<LandlordLease>(`/landlord/leases/${id}/renew`, {
+      method: 'PATCH',
+      body: { rentAmount, leaseEnd },
+    }),
+
+  renewalCheck: (id: string, rentAmount: number) =>
+    apiFetch<RenewalCheck>(`/landlord/leases/${id}/renewal-check`, {
+      method: 'POST',
+      body: { rentAmount },
+    }),
+
+  charge: (input: ChargeInput) =>
+    apiFetch<{ created: number }>('/landlord/payments/charge', { method: 'POST', body: input }),
+
+  bulkCharge: (input: Omit<ChargeInput, 'unitId'> & { unitIds: string[] }) =>
+    apiFetch<{ created: number }>('/landlord/payments/bulk-charge', {
+      method: 'POST',
+      body: input,
+    }),
+
+  confirmViewing: (id: string) =>
+    apiFetch<void>(`/landlord/viewing-requests/${id}/confirm`, { method: 'PATCH' }),
+
+  cancelViewing: (id: string) =>
+    apiFetch<void>(`/landlord/viewing-requests/${id}/cancel`, { method: 'PATCH' }),
+
+  conversationMessages: (id: string, page = 1, pageSize = 50) =>
+    apiFetch<Paginated<LandlordMessage>>(
+      `/landlord/messages/conversations/${id}/messages?page=${page}&pageSize=${pageSize}`
+    ),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

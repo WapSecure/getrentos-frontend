@@ -173,6 +173,9 @@ export const qk = {
     payout: ['landlord', 'settings', 'payout'] as const,
     automation: ['landlord', 'settings', 'automation'] as const,
     notificationPreferences: ['landlord', 'settings', 'notifications'] as const,
+    vacantUnits: ['landlord', 'leases', 'vacant-units'] as const,
+    conversationMessages: (id: string) =>
+      ['landlord', 'messages', 'conversations', id, 'messages'] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
   },
   resident: {
