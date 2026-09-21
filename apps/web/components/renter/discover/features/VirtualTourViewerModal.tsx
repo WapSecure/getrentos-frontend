@@ -8,6 +8,7 @@ import { Button } from '@getrentos/ui';
 import { VideoCallSimulator } from './VideoCallSimulator';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
+import { DateTimeField, isFutureDateTime } from '@/components/shared/forms/DateTimeField';
 import type { TourModalMode } from '@/types/virtual-tour';
 
 interface VirtualTourViewerModalProps {
@@ -109,21 +110,12 @@ export const VirtualTourViewerModal = ({
               {host} will confirm a time to walk you through the property over video.
             </p>
 
-            <div>
-              <label
-                htmlFor="viewing-preferred-time"
-                className="block text-sm font-medium text-foreground mb-1"
-              >
-                Preferred date and time
-              </label>
-              <input
-                id="viewing-preferred-time"
-                type="datetime-local"
-                value={preferredTime}
-                onChange={(event) => setPreferredTime(event.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+            <DateTimeField
+              label="Preferred date and time"
+              value={preferredTime}
+              onChange={setPreferredTime}
+              requireFuture
+            />
 
             {requestViewing.isError && (
               <p className="text-xs text-red-500">
@@ -138,7 +130,9 @@ export const VirtualTourViewerModal = ({
               <Button
                 variant="primary"
                 className="flex-1"
-                disabled={!preferredTime || !propertyId || requestViewing.isPending}
+                disabled={
+                  !isFutureDateTime(preferredTime) || !propertyId || requestViewing.isPending
+                }
                 onClick={() => requestViewing.mutate(new Date(preferredTime).toLocaleString())}
               >
                 {requestViewing.isPending ? 'Submitting…' : 'Confirm'}

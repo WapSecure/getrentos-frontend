@@ -15,7 +15,18 @@ import {
   ShieldCheck,
   Unlink,
 } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Input, NumberInput, Select, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  DatePicker,
+  EmptyState,
+  Input,
+  NumberInput,
+  Select,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ListingMediaPanel } from '@/components/estate/marketplace/ListingMediaPanel';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
@@ -81,7 +92,12 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
 
   const request = useMutation({
     mutationFn: (propertyId: string) =>
-      unwrap(estateMarketplaceService.requestAgreement(estateId, { propertyId, note: note.trim() || undefined })),
+      unwrap(
+        estateMarketplaceService.requestAgreement(estateId, {
+          propertyId,
+          note: note.trim() || undefined,
+        })
+      ),
     onSuccess: (agreement) => {
       setToast({
         message:
@@ -163,7 +179,9 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
         placeholder="Optional note for the owner, e.g. why you are asking"
       />
 
-      {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };
@@ -197,7 +215,7 @@ const NewListingPanel = ({
           price: Number(price),
           availableFrom,
           publish,
-        }),
+        })
       ),
     onSuccess: (listing) => {
       setToast({
@@ -274,15 +292,8 @@ const NewListingPanel = ({
       </div>
 
       <div className="max-w-56">
-        <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-available">
-          Available from
-        </label>
-        <Input
-          id="estate-listing-available"
-          type="date"
-          value={availableFrom}
-          onChange={(event) => setAvailableFrom(event.target.value)}
-        />
+        <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
+        <DatePicker value={availableFrom} onChange={setAvailableFrom} />
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -298,12 +309,18 @@ const NewListingPanel = ({
           disabled={!propertyId || !priceIsValid || create.isPending}
           onClick={() => create.mutate(true)}
         >
-          {create.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          {create.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Send className="w-4 h-4" />
+          )}
           Publish
         </Button>
       </div>
 
-      {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };
@@ -400,7 +417,9 @@ export default function EstateMarketplacePage() {
   const summary = inventory.data;
   const agreementRows = agreements.data ?? [];
   const listingRows = listings.data?.items ?? [];
-  const drafts = listingRows.filter((l) => l.status === 'DRAFT' || l.status === 'PENDING_VERIFICATION');
+  const drafts = listingRows.filter(
+    (l) => l.status === 'DRAFT' || l.status === 'PENDING_VERIFICATION'
+  );
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -533,11 +552,7 @@ export default function EstateMarketplacePage() {
           </div>
 
           {showNewListing && (
-            <NewListingPanel
-              estateId={estateId}
-              agreements={agreementRows}
-              onDone={refresh}
-            />
+            <NewListingPanel estateId={estateId} agreements={agreementRows} onDone={refresh} />
           )}
 
           <div className="mt-5 space-y-2">
@@ -571,7 +586,9 @@ export default function EstateMarketplacePage() {
                       <Button
                         variant="ghost"
                         onClick={() =>
-                          setMediaListingId((current) => (current === listing.id ? null : listing.id))
+                          setMediaListingId((current) =>
+                            current === listing.id ? null : listing.id
+                          )
                         }
                       >
                         <ImagePlus className="w-4 h-4" />
@@ -606,7 +623,9 @@ export default function EstateMarketplacePage() {
         </div>
       </Card>
 
-      {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }
