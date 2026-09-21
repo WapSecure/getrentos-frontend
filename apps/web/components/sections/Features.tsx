@@ -1,32 +1,47 @@
-'use client';
+import {
+  Shield,
+  Lock,
+  FileCheck,
+  Eye,
+  Banknote,
+  BarChart3,
+  Users2,
+  Smartphone,
+} from 'lucide-react';
+import { MarketingCard, SectionHeading } from './primitives';
 
-import { Shield, Lock, FileCheck, Eye, Zap, BarChart3, Users2, Smartphone } from 'lucide-react';
-import { SectionHeader } from '@getrentos/ui';
-import { Card } from '@getrentos/ui';
-import { ParticleBackground } from '@getrentos/ui';
-
+// Each line says what the platform does, not a grade or a licence.
 const features = [
   {
     icon: Shield,
     title: 'Identity Verification',
-    description: 'Every user verified with government ID and biometric checks.',
+    description:
+      'Identity is checked before high-stakes actions, so you know who you are dealing with.',
   },
   {
     icon: FileCheck,
     title: 'Property Verification',
-    description: 'Title deeds, certificates, and ownership documentation.',
+    description: 'Ownership and title documents are reviewed before a property is marked verified.',
   },
   {
     icon: Lock,
     title: 'Escrow Protection',
-    description: 'Bank-grade escrow securing every transaction.',
+    description: 'Payments are held in escrow until the agreed conditions are met.',
   },
-  { icon: Eye, title: 'Fraud Monitoring', description: '24/7 AML and fraud detection systems.' },
-  { icon: Zap, title: 'Instant Payouts', description: 'Fast settlements once conditions are met.' },
+  {
+    icon: Eye,
+    title: 'Fraud Review',
+    description: 'Fraud reports and alerts are reviewed by our team.',
+  },
+  {
+    icon: Banknote,
+    title: 'Payouts to Your Bank',
+    description: 'Earnings are paid to your bank account once conditions are met.',
+  },
   {
     icon: BarChart3,
     title: 'Analytics Dashboard',
-    description: 'Real-time insights and performance metrics.',
+    description: 'See income, spending and how each property performs.',
   },
   {
     icon: Users2,
@@ -35,33 +50,30 @@ const features = [
   },
   {
     icon: Smartphone,
-    title: 'Mobile Ready',
-    description: 'Full functionality on web and mobile apps.',
+    title: 'Works on Your Phone',
+    description: 'Use it in your phone’s browser today, with a mobile app on the way.',
   },
 ];
 
-export const Features = () => {
-  return (
-    <section id="features" className="py-20 px-4 relative overflow-hidden">
-      <ParticleBackground count={30} color="#2c5583" className="z-0" />
-      <div className="max-w-7xl mx-auto relative z-10">
-        <SectionHeader
-          badge="PLATFORM FEATURES"
-          title="Everything you need in one platform"
-          description="Built on trust, powered by technology, designed for real estate professionals."
-        />
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <Card key={index} className="p-6 text-center" delay={index * 0.05}>
-              <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center mx-auto mb-4">
-                <feature.icon className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
-            </Card>
-          ))}
-        </div>
+export const Features = () => (
+  <section id="features" className="relative overflow-hidden px-4 py-20">
+    <div className="relative z-10 mx-auto max-w-7xl">
+      <SectionHeading
+        badge="PLATFORM FEATURES"
+        title="Everything you need in one platform"
+        description="Built on trust, powered by technology, designed for real estate professionals."
+      />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {features.map((feature) => (
+          <MarketingCard key={feature.title} className="p-6 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10">
+              <feature.icon className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-foreground">{feature.title}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{feature.description}</p>
+          </MarketingCard>
+        ))}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);

@@ -1,7 +1,3 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { SectionHeader } from '@getrentos/ui';
 import {
   UserPlus,
   ShieldCheck,
@@ -12,8 +8,7 @@ import {
   CheckCircle,
   Star,
 } from 'lucide-react';
-import { Card } from '@getrentos/ui';
-import { ParticleBackground } from '@getrentos/ui';
+import { MarketingCard, SectionHeading } from './primitives';
 
 const steps = [
   {
@@ -61,40 +56,30 @@ const steps = [
   { number: '08', title: 'Review', icon: Star, description: 'Rate and build your reputation.' },
 ];
 
-export const HowItWorks = () => {
-  return (
-    <section id="flow" className="py-20 px-4 relative overflow-hidden">
-      <ParticleBackground count={25} color="#2c5583" className="z-0" />
-      <div className="max-w-7xl mx-auto relative z-10">
-        <SectionHeader
-          badge="END-TO-END FLOW"
-          title="From search to signature, one continuous loop."
-          description="Every transaction passes through eight stages — trust built at every handoff."
-        />
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.number}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              className="relative"
-            >
-              <Card className="p-6" delay={index * 0.05}>
-                <div className="text-4xl font-bold text-gray-200 dark:text-white/10 mb-3">
-                  {step.number}
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center mb-3">
-                  <step.icon className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+export const HowItWorks = () => (
+  // The id the navbar and footer link to (#how-it-works). It used to be "flow",
+  // so those links never went anywhere.
+  <section id="how-it-works" className="relative overflow-hidden px-4 py-20">
+    <div className="relative z-10 mx-auto max-w-7xl">
+      <SectionHeading
+        badge="END-TO-END FLOW"
+        title="From search to signature, one continuous loop."
+        description="Every transaction passes through eight stages — trust built at every handoff."
+      />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {steps.map((step) => (
+          <MarketingCard key={step.number} className="p-6">
+            <div className="mb-3 text-4xl font-bold text-gray-200 dark:text-white/10">
+              {step.number}
+            </div>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/10">
+              <step.icon className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-foreground">{step.title}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
+          </MarketingCard>
+        ))}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);

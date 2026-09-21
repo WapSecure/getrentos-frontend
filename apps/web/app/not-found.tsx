@@ -2,7 +2,8 @@
 
 import { ArrowLeft, Home, SearchX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Button, Logo } from '@getrentos/ui';
+import { Button } from '@getrentos/ui/Button';
+import { Logo } from '@getrentos/ui/Logo';
 import { ROUTES } from '@getrentos/shared';
 
 export default function NotFound() {

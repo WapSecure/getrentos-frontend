@@ -6,10 +6,8 @@ import { FeaturedProperty } from '@/components/sections/FeaturedProperty';
 import { Features } from '@/components/sections/Features';
 import { Roles } from '@/components/sections/Roles';
 import { HowItWorks } from '@/components/sections/HowItWorks';
-import { Stats } from '@/components/sections/Stats';
-import { Testimonials } from '@/components/sections/Testimonials';
+import { WhyGetRentos } from '@/components/sections/WhyGetRentos';
 import { TrustSecurity } from '@/components/sections/TrustSecurity';
-import { Resources } from '@/components/sections/Resources';
 import { CTA } from '@/components/sections/CTA';
 import { DownloadApp } from '@/components/sections/DownloadApp';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -64,14 +62,12 @@ export default function Home() {
       <main className="min-h-screen bg-white dark:bg-background transition-colors duration-300">
         <Navigation />
         <Hero />
-        <Stats />
+        <WhyGetRentos />
         <FeaturedProperty />
         <Features />
         <Roles />
         <HowItWorks />
-        <Testimonials />
         <TrustSecurity />
-        <Resources />
         <CTA />
         <DownloadApp />
         <Footer />
