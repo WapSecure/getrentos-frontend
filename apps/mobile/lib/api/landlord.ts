@@ -152,8 +152,6 @@ export const landlordApi = {
   properties: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<LandlordProperty>>(`/landlord/properties?page=${page}&pageSize=${pageSize}`),
 
-  property: (id: string) => apiFetch<LandlordProperty>(`/landlord/properties/${id}`),
-
   units: (propertyId: string) =>
     apiFetch<Paginated<LandlordUnit>>(`/landlord/units?propertyId=${propertyId}`),
 

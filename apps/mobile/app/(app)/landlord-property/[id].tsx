@@ -8,6 +8,7 @@ import {
   Badge,
   Card,
   Divider,
+  EmptyState,
   ErrorState,
   Price,
   Skeleton,
@@ -27,10 +28,11 @@ export default function LandlordPropertyDetail() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
 
+  // The API has no single-property route — the list is the source of truth,
+  // and sharing its query key means arriving from the list costs no refetch.
   const property = useQuery({
-    queryKey: qk.landlord.property(id),
-    queryFn: () => landlordApi.property(id),
-    enabled: !!id,
+    queryKey: qk.landlord.properties(),
+    queryFn: () => landlordApi.properties(),
   });
 
   const units = useQuery({
@@ -39,7 +41,7 @@ export default function LandlordPropertyDetail() {
     enabled: !!id,
   });
 
-  const p = property.data;
+  const p = property.data?.items.find((item) => item.id === id);
   const unitItems = units.data?.items ?? [];
 
   return (
@@ -69,6 +71,12 @@ export default function LandlordPropertyDetail() {
 
       {property.isError ? (
         <ErrorState onRetry={() => property.refetch()} />
+      ) : !property.isLoading && !p ? (
+        <EmptyState
+          icon={<Building2 size={30} color={colors.mutedForeground} />}
+          title="Property not found"
+          description="It may have been archived or removed since this screen was opened."
+        />
       ) : (
         <ScrollView
           contentContainerStyle={{

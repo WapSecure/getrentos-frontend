@@ -139,7 +139,6 @@ export const qk = {
     revenueTrend: ['landlord', 'dashboard', 'revenue-trend'] as const,
     properties: (page = 1, pageSize = 20) =>
       ['landlord', 'properties', { page, pageSize }] as const,
-    property: (id: string) => ['landlord', 'properties', id] as const,
     units: (propertyId: string) => ['landlord', 'units', propertyId] as const,
     tenants: (page = 1, pageSize = 20) => ['landlord', 'tenants', { page, pageSize }] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
