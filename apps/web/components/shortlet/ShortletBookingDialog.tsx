@@ -19,6 +19,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import { ROUTES } from '@/lib/constants/auth';
 import type { ShortletBooking, ShortletListing } from '@/types/shortlet';
 
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -31,6 +33,7 @@ export function ShortletBookingDialog({
   createdBooking,
   paying,
   onPay,
+  bookError,
 }: {
   listing: ShortletListing;
   onClose: () => void;
@@ -39,6 +42,8 @@ export function ShortletBookingDialog({
   createdBooking: ShortletBooking | null;
   paying: boolean;
   onPay: (bookingId: string) => void;
+  /** The last failed booking attempt, so an identity gate can offer the way forward. */
+  bookError?: unknown;
 }) {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
@@ -180,6 +185,11 @@ export function ShortletBookingDialog({
             </div>
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
+          <VerificationRequiredNotice
+            error={bookError}
+            href={ROUTES.RENTER_VERIFICATION}
+            verificationHref={ROUTES.RENTER_VERIFICATION}
+          />
 
           {createdBooking ? (
             <div className="space-y-3">
