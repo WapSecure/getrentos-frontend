@@ -123,6 +123,12 @@ export const DiscoverPropertyCard = ({
 
         <button
           onClick={handleSaveClick}
+          // Icon-only, and the same heart repeats down every card, so without a
+          // name a screen reader offers a column of identical "button"s with no
+          // way to tell which property each one saves. The label also carries
+          // the current state, which the fill colour only conveys visually.
+          aria-label={isSaved ? `Remove ${property.title} from your shortlist` : `Save ${property.title} to your shortlist`}
+          title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
           className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors z-10"
         >
           {isSaved ? (
@@ -180,10 +186,24 @@ export const DiscoverPropertyCard = ({
           <Button size="sm" variant="primary" onClick={onViewDetails} className="flex-1">
             View Details
           </Button>
-          <Button size="sm" variant="outline" onClick={handleScheduleViewingClick} className="px-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleScheduleViewingClick}
+            className="px-2"
+            aria-label={`Schedule a viewing for ${property.title}`}
+            title="Schedule a viewing"
+          >
             <Calendar className="w-3 h-3" />
           </Button>
-          <Button size="sm" variant="outline" onClick={handleCompareClick} className="px-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleCompareClick}
+            className="px-2"
+            aria-label={`Compare ${property.title} with another property`}
+            title="Compare with another property"
+          >
             <GitCompare className="w-3 h-3" />
           </Button>
         </div>
