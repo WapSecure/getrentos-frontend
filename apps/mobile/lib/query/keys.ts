@@ -150,6 +150,11 @@ export const qk = {
     payments: (page = 1, pageSize = 20) => ['landlord', 'payments', { page, pageSize }] as const,
     paymentStats: ['landlord', 'payments', 'stats'] as const,
     arrearsSummary: ['landlord', 'payments', 'arrears-summary'] as const,
+    financialsStats: ['landlord', 'financials', 'stats'] as const,
+    financialsChart: ['landlord', 'financials', 'chart'] as const,
+    expenses: (page = 1, pageSize = 20) => ['landlord', 'expenses', { page, pageSize }] as const,
+    ownerStatements: (page = 1, pageSize = 20) =>
+      ['landlord', 'owner-statements', { page, pageSize }] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
   },
   resident: {

@@ -308,6 +308,100 @@ export const LANDLORD_PAYMENT_TONE: Record<
   failed: 'danger',
 };
 
+/* ------------------------------ financials ----------------------------- */
+
+export interface FinancialsStats {
+  rentalIncome: number;
+  outstandingRent: number;
+  maintenanceCosts: number;
+  netProfit: number;
+}
+
+/** One month of the income-vs-expenses chart. Both figures are Naira. */
+export interface FinancialsPoint {
+  period: string;
+  income: number;
+  expenses: number;
+}
+
+/* ------------------------------- expenses ------------------------------ */
+
+export const EXPENSE_CATEGORIES = [
+  'UTILITIES',
+  'INSURANCE',
+  'TAX',
+  'REPAIRS',
+  'MANAGEMENT_FEE',
+  'OTHER',
+] as const;
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+export const EXPENSE_CATEGORY_LABEL: Record<ExpenseCategory, string> = {
+  UTILITIES: 'Utilities',
+  INSURANCE: 'Insurance',
+  TAX: 'Tax',
+  REPAIRS: 'Repairs',
+  MANAGEMENT_FEE: 'Management fee',
+  OTHER: 'Other',
+};
+
+export interface LandlordExpense {
+  id: string;
+  propertyId: string;
+  propertyTitle: string;
+  category: ExpenseCategory;
+  amount: number;
+  currency: string;
+  /** `yyyy-MM-dd` */
+  incurredAt: string;
+  note: string | null;
+  maintenanceRequestId: string | null;
+  createdAt: string;
+}
+
+export interface CreateExpenseInput {
+  propertyId: string;
+  category: ExpenseCategory;
+  amount: number;
+  incurredAt: string;
+  note?: string;
+}
+
+/* --------------------------- owner statements -------------------------- */
+
+export type OwnerStatementStatus = 'draft' | 'issued' | 'paid';
+export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
+
+export interface OwnerStatementLineItem {
+  id: string;
+  label: string;
+  amount: number;
+}
+
+export interface OwnerStatement {
+  id: string;
+  periodStart: string;
+  periodEnd: string;
+  grossIncome: number;
+  totalExpenses: number;
+  managementFee: number;
+  netPayout: number;
+  status: OwnerStatementStatus;
+  payoutStatus: PayoutStatus;
+  transferRef?: string;
+  paidAt: string | null;
+  generatedAt: string;
+  issuedAt: string | null;
+  lineItems?: OwnerStatementLineItem[];
+}
+
+export const PAYOUT_TONE: Record<PayoutStatus, 'success' | 'warning' | 'danger' | 'info'> = {
+  paid: 'success',
+  pending: 'warning',
+  processing: 'info',
+  failed: 'danger',
+};
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -380,6 +474,31 @@ export const landlordApi = {
   paymentStats: () => apiFetch<LandlordPaymentStats>('/landlord/payments/stats'),
 
   arrearsSummary: () => apiFetch<ArrearsSummary>('/landlord/payments/arrears-summary'),
+
+  financialsStats: () => apiFetch<FinancialsStats>('/landlord/financials/stats'),
+
+  financialsChart: () => apiFetch<FinancialsPoint[]>('/landlord/financials/chart'),
+
+  expenses: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordExpense>>(`/landlord/expenses?page=${page}&pageSize=${pageSize}`),
+
+  createExpense: (input: CreateExpenseInput) =>
+    apiFetch<LandlordExpense>('/landlord/expenses', { method: 'POST', body: input }),
+
+  deleteExpense: (id: string) => apiFetch<void>(`/landlord/expenses/${id}`, { method: 'DELETE' }),
+
+  ownerStatements: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<OwnerStatement>>(
+      `/landlord/owner-statements?page=${page}&pageSize=${pageSize}`
+    ),
+
+  ownerStatement: (id: string) => apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}`),
+
+  issueOwnerStatement: (id: string) =>
+    apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}/issue`, { method: 'POST' }),
+
+  retryPayout: (id: string) =>
+    apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}/retry-payout`, { method: 'POST' }),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

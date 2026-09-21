@@ -61,6 +61,12 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
+          label="Financials"
+          description="Profit, expenses and owner statements"
+          onPress={() => router.push('/(app)/landlord-financials')}
+        />
+        <Divider />
+        <AccountRow
           label="Notifications"
           description="Email, push and in-app preferences"
           onPress={() => router.push('/(app)/notification-settings')}
