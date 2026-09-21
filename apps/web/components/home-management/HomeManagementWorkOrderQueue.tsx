@@ -3,7 +3,6 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  BadgeDollarSign,
   CalendarClock,
   CircleAlert,
   ClipboardCheck,
@@ -12,6 +11,7 @@ import {
   UserRound,
   Wrench,
 } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
@@ -567,7 +567,7 @@ export function HomeManagementWorkOrderQueue({
             Create work order
           </Button>
           <QueueStat
-            icon={<BadgeDollarSign className="h-4 w-4" />}
+            icon={<NairaSign className="h-4 w-4" />}
             label="Needs approval on page"
             value={pendingApprovals.length}
             urgent={pendingApprovals.length > 0}

@@ -15,7 +15,8 @@ import {
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
-import { Banknote, CircleDollarSign, Wallet } from 'lucide-react';
+import { Banknote, Wallet } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -192,7 +193,7 @@ export function ShortletPayoutsDialog({
           </div>
 
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            <CircleDollarSign className="h-3.5 w-3.5" /> Payouts transfer to your bank via Paystack.
+            <NairaSign className="h-3.5 w-3.5" /> Payouts transfer to your bank via Paystack.
           </p>
         </div>
         {toast && (

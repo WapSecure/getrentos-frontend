@@ -5,7 +5,8 @@ import { LegacyInput } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { DollarSign, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button, CurrencyInput } from '@getrentos/ui';
 
 interface Expense {
@@ -107,7 +108,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-primary" />
+          <NairaSign className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Expense Tracker</h3>
         </div>
         <div className="flex items-center gap-2">

@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, DollarSign, FileText, User, Mail, Phone, MapPin } from 'lucide-react';
+import { Calendar, FileText, User, Mail, Phone, MapPin } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';
 
@@ -61,7 +62,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
 
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="w-4 h-4 text-primary" />
+              <NairaSign className="w-4 h-4 text-primary" />
               <span className="text-xs text-gray-500">
                 {leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate)}
               </span>

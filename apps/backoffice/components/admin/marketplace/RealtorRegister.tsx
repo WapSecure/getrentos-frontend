@@ -12,9 +12,9 @@ import {
   Landmark,
   BadgeCheck,
   Handshake,
-  CircleDollarSign,
   FileText,
 } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import {
   Badge,
   Button,
@@ -369,7 +369,7 @@ function RealtorCase360({
         {commission && (
           <div className="rounded-xl border border-border p-4">
             <p className="flex items-center gap-2 text-sm font-medium">
-              <CircleDollarSign className="h-4 w-4" /> Commission summary
+              <NairaSign className="h-4 w-4" /> Commission summary
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
               <MiniStat label="Earned" value={formatCurrency(commission.totalEarned)} />

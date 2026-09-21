@@ -1,13 +1,7 @@
 'use client';
 
-import {
-  BadgeDollarSign,
-  CalendarClock,
-  CheckCircle2,
-  ClipboardList,
-  Wrench,
-  type LucideIcon,
-} from 'lucide-react';
+import { CalendarClock, CheckCircle2, ClipboardList, Wrench, type LucideIcon } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { HomeManagementDashboard } from '@/services/homeManagementService';
@@ -89,7 +83,7 @@ export function HomeManagementPortfolioAnalytics({
       label: 'Approved spend',
       value: formatCurrency(summary?.approvedSpend ?? 0, { compact: true }),
       subtext: 'Across all recorded work orders',
-      icon: BadgeDollarSign,
+      icon: NairaSign,
     },
     {
       id: 'assets-needing-service',

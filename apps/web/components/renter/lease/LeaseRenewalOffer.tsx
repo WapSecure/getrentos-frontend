@@ -3,15 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import {
-  Mail,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-} from 'lucide-react';
+import { Mail, CheckCircle, XCircle, AlertCircle, Calendar, TrendingUp } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import type { RenewalOffer } from '@/types/lease';
@@ -147,7 +140,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
         <div className="grid grid-cols-2 gap-3">
           <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-primary" />
+              <NairaSign className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Current Rent</span>
             </div>
             <p className="text-sm font-semibold text-foreground">

@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Calendar, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 
 interface RentIncrease {
   date: string;
@@ -77,7 +78,7 @@ export const RentIncreaseHistory = ({ increases }: RentIncreaseHistoryProps) => 
                 </div>
                 <div className="text-right">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/20 text-orange-600 text-xs rounded-full">
-                    <DollarSign className="w-3 h-3" />+{item.percentageChange}%
+                    <NairaSign className="w-3 h-3" />+{item.percentageChange}%
                   </span>
                   <p className="text-xs text-gray-500 mt-1">{item.reason}</p>
                 </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, PieChart, Calendar } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 
 interface Payment {
   id: string;
@@ -49,7 +50,7 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
             <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-primary" />
+              <NairaSign className="w-3 h-3 text-primary" />
               <span className="text-xs text-gray-500">Total Paid</span>
             </div>
             <p className="text-lg font-bold text-foreground">{formatCurrency(totalPaid)}</p>
