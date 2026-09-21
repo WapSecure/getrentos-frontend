@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ChevronLeft, Pause, Play, Tag, Video } from 'lucide-react-native';
+import { ChevronLeft, Pause, Play, ShieldAlert, Tag, Video } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -28,6 +28,7 @@ export default function LandlordListings() {
   const qc = useQueryClient();
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [gateBlocked, setGateBlocked] = useState(false);
 
   const query = useQuery({
     queryKey: qk.landlord.listings,
@@ -45,8 +46,17 @@ export default function LandlordListings() {
         'success'
       );
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not update that listing.', 'error'),
+    onError: (e) => {
+      // Republishing runs the listing trust gate, which refuses until the
+      // landlord's identity is approved. That is a real requirement, not a
+      // failure, so say what to do rather than "something went wrong".
+      if (e instanceof ApiError && e.code === 'IDENTITY_REQUIRED') {
+        setGateBlocked(true);
+        toast.show('Verify your identity to put a listing back online.', 'error');
+        return;
+      }
+      toast.show(e instanceof ApiError ? e.message : 'Could not update that listing.', 'error');
+    },
   });
 
   const items = query.data ?? [];
@@ -81,6 +91,28 @@ export default function LandlordListings() {
           ) : null}
         </View>
       </View>
+
+      {gateBlocked ? (
+        <Pressable
+          onPress={() => router.push('/(app)/verify-identity')}
+          accessibilityRole="button"
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            marginHorizontal: spacing.xl,
+            marginBottom: spacing.sm,
+            padding: spacing.md,
+            borderRadius: radius.md,
+            backgroundColor: colors.warning + '1f',
+          }}
+        >
+          <ShieldAlert size={16} color={colors.warning} />
+          <Text variant="caption" style={{ flex: 1, color: colors.warning }}>
+            Verify your identity to publish listings
+          </Text>
+        </Pressable>
+      ) : null}
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
