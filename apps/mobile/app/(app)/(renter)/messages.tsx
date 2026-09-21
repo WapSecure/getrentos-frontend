@@ -1,10 +1,10 @@
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MessageCircle, Pin } from 'lucide-react-native';
+import { Archive, MessageCircle, MessageSquareText, Pin } from 'lucide-react-native';
 import {
   Avatar,
   EmptyState,
@@ -30,6 +30,8 @@ export default function Messages() {
     queryKey: qk.renter.conversations,
     queryFn: () => messagesApi.list(1, 30),
   });
+
+  const [showArchived, setShowArchived] = useState(false);
 
   const pinMutation = useMutation({
     mutationFn: (conversationId: string) => messagesApi.togglePin(conversationId),
@@ -62,6 +64,37 @@ export default function Messages() {
     },
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: (conversationId: string) => messagesApi.toggleArchive(conversationId),
+    onMutate: async (conversationId) => {
+      await qc.cancelQueries({ queryKey: qk.renter.conversations });
+      const previous = qc.getQueryData<Paginated<Conversation>>(qk.renter.conversations);
+      qc.setQueryData<Paginated<Conversation>>(qk.renter.conversations, (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.map((c) =>
+                c.id === conversationId ? { ...c, isArchived: !c.isArchived } : c
+              ),
+            }
+          : old
+      );
+      return { previous };
+    },
+    onError: (err, _id, ctx) => {
+      if (ctx?.previous) qc.setQueryData(qk.renter.conversations, ctx.previous);
+      toast.show(
+        err instanceof ApiError ? err.message : 'Could not update that conversation.',
+        'error'
+      );
+    },
+    onSuccess: (updated) => {
+      qc.setQueryData<Paginated<Conversation>>(qk.renter.conversations, (old) =>
+        old ? { ...old, items: old.items.map((c) => (c.id === updated.id ? updated : c)) } : old
+      );
+    },
+  });
+
   // Refresh whenever the tab regains focus so read/unread state stays current.
   useFocusEffect(
     useCallback(() => {
@@ -69,10 +102,14 @@ export default function Messages() {
     }, [qc])
   );
 
-  const items = [...(query.data?.items ?? [])].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-    return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
-  });
+  const all = query.data?.items ?? [];
+  const archivedCount = all.filter((c) => c.isArchived).length;
+  const items = all
+    .filter((c) => c.isArchived === showArchived)
+    .sort((a, b) => {
+      if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+      return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
+    });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -83,7 +120,30 @@ export default function Messages() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Text variant="title">Messages</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <Text variant="title" style={{ flex: 1 }}>
+            Messages
+          </Text>
+          {archivedCount > 0 || showArchived ? (
+            <Pressable
+              onPress={() => setShowArchived((v) => !v)}
+              accessibilityRole="button"
+              accessibilityLabel={showArchived ? 'Show inbox' : 'Show archived'}
+              accessibilityState={{ selected: showArchived }}
+              hitSlop={10}
+            >
+              <Archive size={20} color={showArchived ? colors.primary : colors.foreground} />
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={() => router.push('/(app)/message-tools')}
+            accessibilityRole="button"
+            accessibilityLabel="Message tools"
+            hitSlop={10}
+          >
+            <MessageSquareText size={20} color={colors.foreground} />
+          </Pressable>
+        </View>
       </View>
 
       {query.isError ? (
@@ -103,8 +163,12 @@ export default function Messages() {
       ) : items.length === 0 ? (
         <EmptyState
           icon={<MessageCircle size={34} color={colors.mutedForeground} />}
-          title="No conversations yet"
-          description="Message a landlord from any listing to start a conversation."
+          title={showArchived ? 'Nothing archived' : 'No conversations yet'}
+          description={
+            showArchived
+              ? 'Conversations you archive are kept here.'
+              : 'Message a landlord from any listing to start a conversation.'
+          }
         />
       ) : (
         <FlashList
@@ -115,6 +179,7 @@ export default function Messages() {
               conversation={item}
               onPress={() => router.push(`/(app)/conversation/${item.id}`)}
               onTogglePin={() => pinMutation.mutate(item.id)}
+              onToggleArchive={() => archiveMutation.mutate(item.id)}
             />
           )}
           contentContainerStyle={{ paddingHorizontal: spacing.xl, paddingBottom: spacing['3xl'] }}
@@ -135,16 +200,22 @@ function ConversationRow({
   conversation: c,
   onPress,
   onTogglePin,
+  onToggleArchive,
 }: {
   conversation: Conversation;
   onPress: () => void;
   onTogglePin: () => void;
+  onToggleArchive: () => void;
 }) {
   const { colors, spacing } = useTheme();
   const unread = c.unreadCount > 0;
   return (
     <Pressable
       onPress={onPress}
+      // Long-press is the row's secondary action; archiving is rare enough
+      // that it does not warrant permanent chrome on every row.
+      onLongPress={onToggleArchive}
+      accessibilityHint={c.isArchived ? 'Long press to unarchive' : 'Long press to archive'}
       style={({ pressed }) => ({
         flexDirection: 'row',
         gap: spacing.md,

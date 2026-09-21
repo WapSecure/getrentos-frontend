@@ -68,6 +68,7 @@ export default function AppLayout() {
       <Stack.Screen name="referrals" options={DETAIL_OPTIONS} />
       <Stack.Screen name="data-export" options={DETAIL_OPTIONS} />
       <Stack.Screen name="payments" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="payment-methods" options={DETAIL_OPTIONS} />
       <Stack.Screen name="receipts" options={DETAIL_OPTIONS} />
       <Stack.Screen name="trust-score" options={DETAIL_OPTIONS} />
       <Stack.Screen name="conversation/[id]" options={DETAIL_OPTIONS} />
@@ -83,7 +84,13 @@ export default function AppLayout() {
       <Stack.Screen name="dues" options={DETAIL_OPTIONS} />
       <Stack.Screen name="governance" options={DETAIL_OPTIONS} />
       <Stack.Screen name="edit-profile" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="notifications" options={DETAIL_OPTIONS} />
       <Stack.Screen name="notification-settings" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="reviews" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="message-tools" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />
       <Stack.Screen name="security-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>

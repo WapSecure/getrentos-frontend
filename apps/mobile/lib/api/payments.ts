@@ -48,6 +48,29 @@ export interface Receipt {
   url: string;
 }
 
+/** A card, bank account or wallet the renter has saved for rent payments. */
+export interface SavedPaymentMethod {
+  id: string;
+  type: 'card' | 'bank' | 'wallet';
+  name: string;
+  last4?: string;
+  expiry?: string;
+  isDefault: boolean;
+}
+
+export interface CreatePaymentMethodInput {
+  type: SavedPaymentMethod['type'];
+  name: string;
+  last4?: string;
+  expiry?: string;
+}
+
+export const PAYMENT_METHOD_TYPE_LABEL: Record<SavedPaymentMethod['type'], string> = {
+  card: 'Card',
+  bank: 'Bank account',
+  wallet: 'Wallet',
+};
+
 export const paymentsApi = {
   list: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Payment>>(`/renter/payments?page=${page}&pageSize=${pageSize}`),
@@ -60,4 +83,15 @@ export const paymentsApi = {
 
   dispute: (id: string, reason: string) =>
     apiFetch<Payment>(`/renter/payments/${id}/dispute`, { method: 'POST', body: { reason } }),
+
+  listMethods: () => apiFetch<SavedPaymentMethod[]>('/renter/payments/methods'),
+
+  addMethod: (input: CreatePaymentMethodInput) =>
+    apiFetch<SavedPaymentMethod>('/renter/payments/methods', { method: 'POST', body: input }),
+
+  setDefaultMethod: (id: string) =>
+    apiFetch<SavedPaymentMethod>(`/renter/payments/methods/${id}/default`, { method: 'PATCH' }),
+
+  removeMethod: (id: string) =>
+    apiFetch<void>(`/renter/payments/methods/${id}`, { method: 'DELETE' }),
 };

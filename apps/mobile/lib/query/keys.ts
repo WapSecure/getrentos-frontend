@@ -46,6 +46,19 @@ export const qk = {
     inspections: ['renter', 'inspections'] as const,
     referrals: ['referrals', 'summary'] as const,
     dataExport: ['renter', 'settings', 'data-export'] as const,
+    paymentMethods: ['renter', 'payments', 'methods'] as const,
+    preferences: ['renter', 'settings', 'preferences'] as const,
+    ussdMenu: ['renter', 'ussd', 'menu'] as const,
+    leasePaymentReminders: ['renter', 'lease', 'payment-reminders'] as const,
+    leaseRentIncreases: ['renter', 'lease', 'rent-increases'] as const,
+    messageTemplates: ['renter', 'messages', 'templates'] as const,
+    messageQuickReplies: ['renter', 'messages', 'quick-replies'] as const,
+    messageReminders: ['renter', 'messages', 'reminders'] as const,
+    reviewsPending: ['renter', 'reviews', 'pending'] as const,
+    reviewsSubmitted: (page = 1, pageSize = 20) =>
+      ['renter', 'reviews', 'submitted', { page, pageSize }] as const,
+    reviewsReceived: (page = 1, pageSize = 20) =>
+      ['renter', 'reviews', 'received', { page, pageSize }] as const,
   },
   listings: {
     /** Infinite list keyed by the active filter set. */

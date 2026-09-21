@@ -53,9 +53,12 @@
           "backgroundColor": "#f6f7f9",
           "image": "./assets/icon.png",
           "imageWidth": 160,
-          "dark": { "backgroundColor": "#0a0c11" }
+          "dark": {
+            "backgroundColor": "#0a0c11"
+          }
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true

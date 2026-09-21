@@ -12,6 +12,7 @@ import {
   Phone,
 } from 'lucide-react-native';
 import { Card, Divider, Text, useTheme } from '@getrentos/ui-native';
+import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
 
 const SUPPORT_EMAIL = 'support@getrentos.test';
 const SUPPORT_PHONE = '+2348000000000';
@@ -172,6 +173,8 @@ export default function HelpCenter() {
             then let us know through any of the channels above.
           </Text>
         </View>
+
+        <HelpFeedbackCard />
       </ScrollView>
     </View>
   );

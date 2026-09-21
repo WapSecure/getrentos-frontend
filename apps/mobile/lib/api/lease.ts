@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiDownload, apiFetch } from './client';
 
 export interface LeaseLandlord {
   name: string;
@@ -67,6 +67,25 @@ export interface RenewalOffer {
   terms: string;
 }
 
+/** One step in the rent history for the current lease. */
+export interface RentIncrease {
+  date: string;
+  oldAmount: number;
+  newAmount: number;
+  percentageChange: number;
+  reason: string;
+}
+
+/** A rent payment that has not fallen due yet. */
+export interface UpcomingPaymentReminder {
+  id: string;
+  dueDate: string;
+  amount: number;
+  propertyName: string;
+  status: 'upcoming';
+  daysRemaining: number;
+}
+
 export const leaseApi = {
   getLease: () => apiFetch<Lease>('/renter/lease'),
 
@@ -91,4 +110,12 @@ export const leaseApi = {
       method: 'POST',
       body: { noticeDate, reason },
     }),
+
+  getRentIncreases: () => apiFetch<RentIncrease[]>('/renter/lease/rent-increases'),
+
+  getUpcomingPaymentReminders: () =>
+    apiFetch<UpcomingPaymentReminder[]>('/renter/lease/payment-reminders'),
+
+  /** Streams the signed lease as a PDF; returns it base64-encoded to write to disk. */
+  downloadPdf: () => apiDownload('/renter/lease/pdf'),
 };

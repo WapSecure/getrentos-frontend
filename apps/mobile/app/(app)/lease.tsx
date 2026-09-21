@@ -29,8 +29,9 @@ import { qk } from '@/lib/query/keys';
 import { leaseApi } from '@/lib/api/lease';
 import { ApiError } from '@/lib/api/client';
 import { SignaturePad } from '@/components/lease/SignaturePad';
+import { DownloadLeaseButton } from '@/components/lease/DownloadLeaseButton';
 import { LeaseTerminationSheet } from '@/components/lease/LeaseTerminationSheet';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 
 const LEASE_STATUS_TONE = { active: 'success', expiring: 'warning', expired: 'danger' } as const;
 const PAYMENT_ROW_TONE = { paid: 'success', pending: 'warning', overdue: 'danger' } as const;
@@ -52,6 +53,16 @@ export default function LeaseScreen() {
     queryKey: qk.renter.pendingLease,
     queryFn: leaseApi.getPendingLease,
     enabled: noActiveLease,
+  });
+
+  const remindersQuery = useQuery({
+    queryKey: qk.renter.leasePaymentReminders,
+    queryFn: leaseApi.getUpcomingPaymentReminders,
+  });
+
+  const rentIncreasesQuery = useQuery({
+    queryKey: qk.renter.leaseRentIncreases,
+    queryFn: leaseApi.getRentIncreases,
   });
 
   const renewalQuery = useQuery({
@@ -269,6 +280,79 @@ export default function LeaseScreen() {
             </Card>
           )}
         </View>
+
+        {(remindersQuery.data ?? []).length > 0 ? (
+          <View style={{ gap: spacing.md }}>
+            <Text variant="heading">Coming up</Text>
+            <Card elevated padding="none">
+              {(remindersQuery.data ?? []).map((r, i) => (
+                <View key={r.id}>
+                  {i > 0 ? <Divider /> : null}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: spacing.lg,
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text variant="callout">{r.propertyName}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        Due {formatDate(r.dueDate)}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                      <Price amount={r.amount} variant="callout" />
+                      <Badge
+                        label={
+                          r.daysRemaining <= 0
+                            ? 'Due now'
+                            : `in ${r.daysRemaining} day${r.daysRemaining === 1 ? '' : 's'}`
+                        }
+                        tone={r.daysRemaining <= 3 ? 'warning' : 'neutral'}
+                      />
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </Card>
+          </View>
+        ) : null}
+
+        {(rentIncreasesQuery.data ?? []).length > 0 ? (
+          <View style={{ gap: spacing.md }}>
+            <Text variant="heading">Rent history</Text>
+            <Card elevated padding="none">
+              {(rentIncreasesQuery.data ?? []).map((inc, i) => (
+                <View key={`${inc.date}-${inc.newAmount}`}>
+                  {i > 0 ? <Divider /> : null}
+                  <View style={{ padding: spacing.lg, gap: 4 }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Text variant="callout">{formatDate(inc.date)}</Text>
+                      <Badge
+                        label={`${inc.percentageChange > 0 ? '+' : ''}${inc.percentageChange}%`}
+                        tone={inc.percentageChange > 0 ? 'warning' : 'success'}
+                      />
+                    </View>
+                    <Text variant="caption" color="mutedForeground">
+                      {formatNaira(inc.oldAmount)} → {formatNaira(inc.newAmount)}
+                      {inc.reason ? ` · ${inc.reason}` : ''}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </Card>
+          </View>
+        ) : null}
+
+        <DownloadLeaseButton />
 
         {lease.status !== 'expired' ? (
           <Pressable

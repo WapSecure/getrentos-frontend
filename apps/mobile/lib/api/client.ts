@@ -76,7 +76,13 @@ async function readJson<T>(res: Response): Promise<T> {
     throw new ApiError(message, res.status, code);
   }
   if (res.status === 204 || res.status === 205) return undefined as T;
-  return (await res.json()) as T;
+
+  // Several endpoints answer a successful command with an empty 200/201 body.
+  // `res.json()` throws on those, which would surface a server success as a
+  // client-side failure, so treat an empty body as "no content".
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promise<T> {
@@ -106,6 +112,42 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
   }
 
   return readJson<T>(res);
+}
+
+/**
+ * Fetches an endpoint that streams bytes rather than JSON (e.g. the lease PDF).
+ * Goes through the same auth and silent-refresh path as `apiFetch`.
+ */
+export async function apiDownload(
+  path: string,
+  _retry = false
+): Promise<{ bytes: Uint8Array; mimeType: string }> {
+  const token = hooks.getAccessToken();
+
+  const res = await send(
+    path,
+    {
+      method: 'GET',
+      headers: {
+        'x-client-app': env.clientApp,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    },
+    UPLOAD_TIMEOUT_MS
+  );
+
+  if (res.status === 401 && !_retry) {
+    const fresh = await hooks.refresh();
+    if (fresh) return apiDownload(path, true);
+  }
+
+  if (!res.ok) {
+    // An error body is still JSON, so reuse the envelope parser to surface it.
+    return readJson(res);
+  }
+
+  const mimeType = res.headers.get('content-type') ?? 'application/octet-stream';
+  return { bytes: new Uint8Array(await res.arrayBuffer()), mimeType };
 }
 
 /**
