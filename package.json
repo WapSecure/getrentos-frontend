@@ -2,6 +2,7 @@
   "name": "getrentos",
   "private": true,
   "version": "1.0.0",
+  "packageManager": "pnpm@10.34.1",
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:mobile": "pnpm --filter mobile start",
@@ -21,7 +22,7 @@
     "prettier": "^3.2.5"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.9"
   },
   "pnpm": {
     "overrides": {
