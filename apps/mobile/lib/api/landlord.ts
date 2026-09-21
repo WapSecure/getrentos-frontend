@@ -562,6 +562,88 @@ export interface LandlordDocument {
   sizeLabel: string;
 }
 
+/* ---------------------------- notifications ---------------------------- */
+
+export interface LandlordNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+/* -------------------------------- vendors ------------------------------ */
+
+export interface LandlordVendor {
+  id: string;
+  name: string;
+  serviceType: string;
+  phone: string;
+  rating: number;
+  jobsCompleted: number;
+}
+
+export interface CreateVendorInput {
+  name: string;
+  serviceType: string;
+  phone: string;
+}
+
+/* ------------------------------- settings ------------------------------ */
+
+export interface LandlordProfile {
+  fullName: string;
+  email: string;
+  phone?: string;
+  companyName?: string;
+  avatarUrl?: string;
+}
+
+export interface PayoutAccount {
+  bankCode: string;
+  bankName: string;
+  /** Masked by the API — never the full number. */
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
+}
+
+export interface AutomationSettings {
+  rentReminders: boolean;
+  overdueAlerts: boolean;
+  autoInvoices: boolean;
+  leaseExpiry: boolean;
+}
+
+export const AUTOMATION_LABEL: Record<keyof AutomationSettings, string> = {
+  rentReminders: 'Rent reminders',
+  overdueAlerts: 'Overdue alerts',
+  autoInvoices: 'Automatic invoices',
+  leaseExpiry: 'Lease expiry warnings',
+};
+
+export const AUTOMATION_DESCRIPTION: Record<keyof AutomationSettings, string> = {
+  rentReminders: 'Remind tenants before rent falls due',
+  overdueAlerts: 'Tell you the moment a payment is late',
+  autoInvoices: 'Raise an invoice for each rent cycle',
+  leaseExpiry: 'Warn you before a tenancy runs out',
+};
+
+export const NOTIFICATION_CATEGORY_LABEL: Record<string, string> = {
+  payments: 'Payments',
+  applications: 'Applications',
+  maintenance: 'Maintenance',
+  messages: 'Messages',
+  reviews: 'Reviews',
+};
+
+export interface LandlordNotificationPreference {
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -715,6 +797,47 @@ export const landlordApi = {
 
   documentDownloadUrl: (id: string) =>
     apiFetch<{ url: string; name: string }>(`/landlord/documents/${id}/download`),
+
+  /** Returns a bare array, not a paginated envelope. */
+  notifications: () => apiFetch<LandlordNotification[]>('/landlord/notifications'),
+
+  markNotificationRead: (id: string) =>
+    apiFetch<void>(`/landlord/notifications/${id}/read`, { method: 'PATCH' }),
+
+  markAllNotificationsRead: () =>
+    apiFetch<void>('/landlord/notifications/read-all', { method: 'POST' }),
+
+  vendors: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordVendor>>(`/landlord/vendors?page=${page}&pageSize=${pageSize}`),
+
+  createVendor: (input: CreateVendorInput) =>
+    apiFetch<LandlordVendor>('/landlord/vendors', { method: 'POST', body: input }),
+
+  deleteVendor: (id: string) => apiFetch<void>(`/landlord/vendors/${id}`, { method: 'DELETE' }),
+
+  profile: () => apiFetch<LandlordProfile>('/landlord/profile'),
+
+  updateProfile: (patch: Partial<Omit<LandlordProfile, 'avatarUrl'>>) =>
+    apiFetch<LandlordProfile>('/landlord/profile', { method: 'PUT', body: patch }),
+
+  payoutAccount: () => apiFetch<PayoutAccount>('/landlord/settings/payout'),
+
+  updatePayoutAccount: (input: { bankCode: string; accountNumber: string }) =>
+    apiFetch<PayoutAccount>('/landlord/settings/payout', { method: 'PUT', body: input }),
+
+  automation: () => apiFetch<AutomationSettings>('/landlord/settings/automation'),
+
+  updateAutomation: (next: AutomationSettings) =>
+    apiFetch<AutomationSettings>('/landlord/settings/automation', { method: 'PUT', body: next }),
+
+  notificationPreferences: () =>
+    apiFetch<LandlordNotificationPreference[]>('/landlord/settings/notifications'),
+
+  updateNotificationPreferences: (preferences: LandlordNotificationPreference[]) =>
+    apiFetch<LandlordNotificationPreference[]>('/landlord/settings/notifications', {
+      method: 'PUT',
+      body: { preferences },
+    }),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

@@ -167,6 +167,12 @@ export const qk = {
         'documents',
         { page, pageSize, search: search ?? null, category: category ?? null },
       ] as const,
+    notifications: ['landlord', 'notifications'] as const,
+    vendors: (page = 1, pageSize = 20) => ['landlord', 'vendors', { page, pageSize }] as const,
+    profile: ['landlord', 'profile'] as const,
+    payout: ['landlord', 'settings', 'payout'] as const,
+    automation: ['landlord', 'settings', 'automation'] as const,
+    notificationPreferences: ['landlord', 'settings', 'notifications'] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
   },
   resident: {

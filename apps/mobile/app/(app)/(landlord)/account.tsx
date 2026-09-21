@@ -121,9 +121,15 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
-          label="Notifications"
-          description="Email, push and in-app preferences"
-          onPress={() => router.push('/(app)/notification-settings')}
+          label="Vendors"
+          description="Tradespeople you assign to repairs"
+          onPress={() => router.push('/(app)/landlord-vendors')}
+        />
+        <Divider />
+        <AccountRow
+          label="Settings"
+          description="Profile, payout, automation, alerts"
+          onPress={() => router.push('/(app)/landlord-settings')}
         />
         <Divider />
         <AccountRow

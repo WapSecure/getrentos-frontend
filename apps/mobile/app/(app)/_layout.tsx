@@ -103,6 +103,9 @@ export default function AppLayout() {
       <Stack.Screen name="landlord-evictions" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-reviews" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-documents" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-notifications" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-vendors" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />

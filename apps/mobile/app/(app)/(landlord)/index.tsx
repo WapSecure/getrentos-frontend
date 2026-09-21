@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   Banknote,
+  Bell,
   ChevronRight,
   DoorOpen,
   FileText,
@@ -47,6 +48,13 @@ export default function LandlordOverview() {
     queryFn: landlordApi.revenueTrend,
   });
 
+  // Drives the bell badge; the notifications screen owns the full list.
+  const notifications = useQuery({
+    queryKey: qk.landlord.notifications,
+    queryFn: landlordApi.notifications,
+  });
+  const unreadCount = (notifications.data ?? []).filter((n) => !n.read).length;
+
   const s = stats.data;
   const occupancy =
     s && s.totalProperties > 0 && s.occupiedUnits + s.vacantUnits + s.reservedUnits > 0
@@ -62,11 +70,43 @@ export default function LandlordOverview() {
         revenue.refetch();
       }}
     >
-      <View style={{ gap: spacing.xxs }}>
-        <Text variant="label" color="primary" uppercase>
-          {greeting()}
-        </Text>
-        <Text variant="title">{firstName(profile?.legalName)}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <View style={{ flex: 1, gap: spacing.xxs }}>
+          <Text variant="label" color="primary" uppercase>
+            {greeting()}
+          </Text>
+          <Text variant="title">{firstName(profile?.legalName)}</Text>
+        </View>
+        <Pressable
+          onPress={() => router.push('/(app)/landlord-notifications')}
+          accessibilityRole="button"
+          accessibilityLabel={
+            unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
+          }
+          hitSlop={10}
+        >
+          <Bell size={22} color={colors.foreground} />
+          {unreadCount > 0 ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: -3,
+                right: -3,
+                minWidth: 16,
+                height: 16,
+                paddingHorizontal: 4,
+                borderRadius: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.destructive,
+              }}
+            >
+              <Text variant="caption" style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </Text>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       {/* Money first — it is what a landlord opens the app to check. */}

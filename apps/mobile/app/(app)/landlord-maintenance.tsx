@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, CircleCheck, TriangleAlert, Wrench } from 'lucide-react-native';
+import { ChevronLeft, CircleCheck, HardHat, TriangleAlert, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -25,6 +25,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
+import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
 
 /** Requests still needing the landlord to act. */
 const OPEN = ['pending', 'acknowledged', 'in_progress'];
@@ -35,6 +36,7 @@ export default function LandlordMaintenanceScreen() {
   const qc = useQueryClient();
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [assigning, setAssigning] = useState<LandlordMaintenance | null>(null);
 
   const query = useQuery({
     queryKey: qk.landlord.maintenance(),
@@ -127,6 +129,7 @@ export default function LandlordMaintenanceScreen() {
                 ])
               }
               onEscalate={() => escalate.mutate(item.id)}
+              onAssign={() => setAssigning(item)}
             />
           )}
           contentContainerStyle={{
@@ -149,6 +152,12 @@ export default function LandlordMaintenanceScreen() {
           }
         />
       )}
+
+      <AssignVendorSheet
+        open={!!assigning}
+        onClose={() => setAssigning(null)}
+        request={assigning}
+      />
     </View>
   );
 }
@@ -158,11 +167,13 @@ function RequestCard({
   busy,
   onResolve,
   onEscalate,
+  onAssign,
 }: {
   request: LandlordMaintenance;
   busy: boolean;
   onResolve: () => void;
   onEscalate: () => void;
+  onAssign: () => void;
 }) {
   const { colors, spacing, radius } = useTheme();
   const actionable = OPEN.includes(m.status);
@@ -190,7 +201,23 @@ function RequestCard({
           {m.unitName ? ` · ${m.unitName}` : ''} · {m.tenantName} · {relativeTime(m.createdAt)}
         </Text>
 
-        {m.vendorName ? (
+        {actionable ? (
+          <Pressable
+            onPress={onAssign}
+            accessibilityRole="button"
+            accessibilityLabel={
+              m.vendorName
+                ? `Change vendor for ${m.issueTitle}`
+                : `Assign a vendor to ${m.issueTitle}`
+            }
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+          >
+            <HardHat size={13} color={colors.primary} />
+            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+              {m.vendorName ? `Vendor: ${m.vendorName}` : 'Assign a vendor'}
+            </Text>
+          </Pressable>
+        ) : m.vendorName ? (
           <Text variant="caption" color="mutedForeground">
             Vendor: {m.vendorName}
           </Text>
