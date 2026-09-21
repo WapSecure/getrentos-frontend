@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -32,7 +32,6 @@ import {
   Banknote,
   CalendarCheck,
   CheckCircle2,
-  CircleDollarSign,
   Clock3,
   Gavel,
   MapPin,
@@ -48,6 +47,7 @@ import {
   Wallet,
   XCircle,
 } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
@@ -153,20 +153,27 @@ const SectionError = ({
   />
 );
 
+const readUrlState = (): { tab: Tab; bookingId: string; search: string } => {
+  if (typeof window === 'undefined') return { tab: 'listings', bookingId: '', search: '' };
+  const params = new URLSearchParams(window.location.search);
+  return {
+    tab: params.get('tab') === 'bookings' ? 'bookings' : 'listings',
+    bookingId: params.get('bookingId') ?? '',
+    search: params.get('search') ?? '',
+  };
+};
+
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<Tab>('listings');
-  const [bookingId, setBookingId] = useState('');
+  // Deep links (?tab=bookings&bookingId=…&search=…) are read once, when the screen
+  // opens, rather than copied into state from an effect after it has rendered.
+  const [fromUrl] = useState(readUrlState);
+  const [tab, setTab] = useState<Tab>(fromUrl.tab);
+  const [bookingId] = useState(fromUrl.bookingId);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   // Listings filters
-  const [search, setSearch] = useState('');
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('tab') === 'bookings') setTab('bookings');
-    setBookingId(params.get('bookingId') ?? '');
-    setSearch(params.get('search') ?? '');
-  }, []);
+  const [search, setSearch] = useState(fromUrl.search);
   const [listingStatus, setListingStatus] = useState<'all' | ShortletListingStatus>('all');
   const [listingsPage, setListingsPage] = useState(1);
 
@@ -679,7 +686,7 @@ export const ShortletOversight = () => {
             accent="emerald"
           />
           <StatCard
-            icon={CircleDollarSign}
+            icon={NairaSign}
             label="Booking value"
             value={overview.totalBookingValue}
             accent="red"
@@ -874,7 +881,7 @@ export const ShortletOversight = () => {
             </div>
           ) : payouts.length === 0 ? (
             <EmptyState
-              icon={CircleDollarSign}
+              icon={NairaSign}
               title="No payouts yet"
               description="Hosts receive payouts once they withdraw available earnings."
             />

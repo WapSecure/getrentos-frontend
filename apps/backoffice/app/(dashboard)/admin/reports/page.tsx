@@ -3,7 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { DollarSign, Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
+import { Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button, PageErrorState, Toast, type ToastVariant } from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
@@ -41,14 +42,14 @@ export default function AdminReportsPage() {
   });
 
   const statCards: Array<{
-    icon: typeof DollarSign;
+    icon: typeof NairaSign;
     label: string;
     value: string;
     accent: StatCardAccent;
   }> = statsQuery.data
     ? [
         {
-          icon: DollarSign,
+          icon: NairaSign,
           label: 'Platform GMV (YTD)',
           value: formatCurrency(statsQuery.data.gmvYtd, { compact: true }),
           accent: 'primary',

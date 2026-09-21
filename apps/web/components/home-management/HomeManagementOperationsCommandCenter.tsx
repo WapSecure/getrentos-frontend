@@ -2,7 +2,6 @@
 
 import {
   AlertTriangle,
-  BadgeDollarSign,
   CalendarClock,
   CheckCircle2,
   ChevronRight,
@@ -11,6 +10,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Badge, type BadgeVariant, Button, Card, Skeleton } from '@getrentos/ui';
 import type { HomeManagementDashboard } from '@/services/homeManagementService';
 
@@ -128,7 +128,7 @@ export function HomeManagementOperationsCommandCenter({
       label: 'Approval needed',
       emptyLabel: 'No work-order approval is pending',
       value: summary?.approvalQueue ?? 0,
-      icon: BadgeDollarSign,
+      icon: NairaSign,
       target: 'work-orders',
       urgent: true,
     },

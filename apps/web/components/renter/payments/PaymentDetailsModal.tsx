@@ -8,7 +8,6 @@ import {
   AlertCircle,
   Shield,
   Calendar,
-  DollarSign,
   CreditCard,
   Building2,
   Wallet,
@@ -16,6 +15,7 @@ import {
   FileText,
   MessageCircle,
 } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button } from '@getrentos/ui';
 
 interface Payment {
@@ -131,7 +131,7 @@ export const PaymentDetailsModal = ({
                 </div>
                 <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
                   <div className="flex items-center gap-1">
-                    <DollarSign className="w-3 h-3 text-gray-400" />
+                    <NairaSign className="w-3 h-3 text-gray-400" />
                     <span className="text-xs text-gray-500">Paid On</span>
                   </div>
                   <p className="text-sm font-medium text-foreground">{formatDate(payment.date)}</p>

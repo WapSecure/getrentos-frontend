@@ -9,7 +9,8 @@ import {
   DialogTitle,
   Skeleton,
 } from '@getrentos/ui';
-import { BedDouble, CalendarCheck, CircleDollarSign, Eye, TrendingUp, Wallet } from 'lucide-react';
+import { BedDouble, CalendarCheck, Eye, TrendingUp, Wallet } from 'lucide-react';
+import { NairaSign } from '@getrentos/ui/NairaSign';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -74,7 +75,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
             <>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 <StatCard
-                  icon={CircleDollarSign}
+                  icon={NairaSign}
                   label="Take-home (net)"
                   value={formatCurrency(data.totalEarned)}
                   hint={
@@ -106,13 +107,13 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                 />
                 <StatCard icon={BedDouble} label="Nights sold" value={String(data.nightsSold)} />
                 <StatCard
-                  icon={CircleDollarSign}
+                  icon={NairaSign}
                   label="Avg nightly rate"
                   value={data.avgNightlyRate != null ? formatCurrency(data.avgNightlyRate) : '—'}
                 />
                 {data.taxName && data.taxPct ? (
                   <StatCard
-                    icon={CircleDollarSign}
+                    icon={NairaSign}
                     label={`Guest ${data.taxName}`}
                     value={`${data.taxPct}%`}
                     hint="Added at checkout, collected by GetRentos"

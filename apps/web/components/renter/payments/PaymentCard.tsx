@@ -12,7 +12,6 @@ import {
   Download,
   Shield,
   Calendar,
-  DollarSign,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
