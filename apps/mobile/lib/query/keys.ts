@@ -158,6 +158,15 @@ export const qk = {
     listings: ['landlord', 'listings'] as const,
     leads: (page = 1, pageSize = 20) => ['landlord', 'leads', { page, pageSize }] as const,
     microsite: ['landlord', 'microsite'] as const,
+    evictions: (page = 1, pageSize = 20) => ['landlord', 'evictions', { page, pageSize }] as const,
+    reviewsSummary: ['landlord', 'reviews', 'summary'] as const,
+    reviews: (page = 1, pageSize = 20) => ['landlord', 'reviews', { page, pageSize }] as const,
+    documents: (page = 1, pageSize = 20, search?: string, category?: string) =>
+      [
+        'landlord',
+        'documents',
+        { page, pageSize, search: search ?? null, category: category ?? null },
+      ] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
   },
   resident: {

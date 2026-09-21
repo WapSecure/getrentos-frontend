@@ -485,6 +485,83 @@ export interface MicrositeSettings {
   enabled: boolean;
 }
 
+/* ------------------------------ evictions ------------------------------ */
+
+export type EvictionStatus = 'draft' | 'issued' | 'filed' | 'resolved' | 'withdrawn';
+
+export interface EvictionCase {
+  id: string;
+  leaseId: string;
+  propertyId: string;
+  propertyName: string;
+  unitName: string;
+  tenantName: string;
+  reason: string;
+  status: string;
+  noticeIssuedAt?: string;
+  cureDeadline?: string;
+  filedAt?: string;
+  resolvedAt?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+}
+
+export const EVICTION_TONE: Record<EvictionStatus, 'neutral' | 'warning' | 'danger' | 'success'> = {
+  draft: 'neutral',
+  issued: 'warning',
+  filed: 'danger',
+  resolved: 'success',
+  withdrawn: 'neutral',
+};
+
+/* ------------------------------- reviews ------------------------------- */
+
+export interface LandlordReviewSummary {
+  averageRating: number;
+  reviewCount: number;
+  averageCommunication: number;
+  averagePropertyCondition: number;
+  averageResponsiveness: number;
+}
+
+export interface LandlordReview {
+  id: string;
+  tenantName: string;
+  propertyName: string;
+  rating: number;
+  communication: number;
+  propertyCondition: number;
+  responsiveness: number;
+  comment: string;
+  createdAt: string;
+}
+
+/* ------------------------------ documents ------------------------------ */
+
+export const DOCUMENT_CATEGORIES = [
+  'lease_agreements',
+  'ownership_docs',
+  'escrow_contracts',
+  'inspection_reports',
+] as const;
+export type DocumentCategory = (typeof DOCUMENT_CATEGORIES)[number];
+
+export const DOCUMENT_CATEGORY_LABEL: Record<DocumentCategory, string> = {
+  lease_agreements: 'Lease agreements',
+  ownership_docs: 'Ownership docs',
+  escrow_contracts: 'Escrow contracts',
+  inspection_reports: 'Inspection reports',
+};
+
+export interface LandlordDocument {
+  id: string;
+  name: string;
+  category: string;
+  propertyName: string;
+  uploadedAt: string;
+  sizeLabel: string;
+}
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -602,6 +679,42 @@ export const landlordApi = {
 
   updateMicrosite: (patch: { slug?: string; bio?: string; enabled?: boolean }) =>
     apiFetch<MicrositeSettings>('/landlord/microsite', { method: 'PATCH', body: patch }),
+
+  evictions: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<EvictionCase>>(`/landlord/evictions?page=${page}&pageSize=${pageSize}`),
+
+  issueEvictionNotice: (id: string, cureDays?: number) =>
+    apiFetch<EvictionCase>(`/landlord/evictions/${id}/issue-notice`, {
+      method: 'PATCH',
+      body: { cureDays },
+    }),
+
+  fileEviction: (id: string) =>
+    apiFetch<EvictionCase>(`/landlord/evictions/${id}/file`, { method: 'PATCH' }),
+
+  resolveEviction: (id: string, resolutionNotes?: string) =>
+    apiFetch<EvictionCase>(`/landlord/evictions/${id}/resolve`, {
+      method: 'PATCH',
+      body: { resolutionNotes },
+    }),
+
+  withdrawEviction: (id: string) =>
+    apiFetch<EvictionCase>(`/landlord/evictions/${id}/withdraw`, { method: 'PATCH' }),
+
+  reviewsSummary: () => apiFetch<LandlordReviewSummary>('/landlord/reviews/summary'),
+
+  reviews: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordReview>>(`/landlord/reviews?page=${page}&pageSize=${pageSize}`),
+
+  documents: (page = 1, pageSize = 20, search?: string, category?: DocumentCategory) =>
+    apiFetch<Paginated<LandlordDocument>>(
+      `/landlord/documents?page=${page}&pageSize=${pageSize}` +
+        (search ? `&search=${encodeURIComponent(search)}` : '') +
+        (category ? `&category=${category}` : '')
+    ),
+
+  documentDownloadUrl: (id: string) =>
+    apiFetch<{ url: string; name: string }>(`/landlord/documents/${id}/download`),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

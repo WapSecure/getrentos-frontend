@@ -85,6 +85,42 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
+          label="Documents"
+          description="Leases, ownership papers, reports"
+          onPress={() => router.push('/(app)/landlord-documents')}
+        />
+        <Divider />
+        <AccountRow
+          label="Reviews"
+          description="What tenants say about you"
+          onPress={() => router.push('/(app)/landlord-reviews')}
+        />
+        <Divider />
+        <AccountRow
+          label="Evictions"
+          description="Notice, filing and resolution"
+          onPress={() => router.push('/(app)/landlord-evictions')}
+        />
+        <Divider />
+        <AccountRow
+          label="Verify your identity"
+          description="Required to publish listings"
+          onPress={() => router.push('/(app)/verify-identity')}
+        />
+        <Divider />
+        <AccountRow
+          label="Referrals"
+          description="Invite others, earn rewards"
+          onPress={() => router.push('/(app)/referrals')}
+        />
+        <Divider />
+        <AccountRow
+          label="Shortlet stays"
+          description="Browse and manage short stays"
+          onPress={() => router.push('/(app)/shortlets')}
+        />
+        <Divider />
+        <AccountRow
           label="Notifications"
           description="Email, push and in-app preferences"
           onPress={() => router.push('/(app)/notification-settings')}
