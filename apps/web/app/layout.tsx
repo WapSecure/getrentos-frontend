@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { cookies } from 'next/headers';
 import { Geist } from 'next/font/google';
-import { ThemeProvider, QueryProvider } from '@getrentos/ui';
-import { LanguageProvider, LANGUAGE_COOKIE_KEY } from '@/lib/i18n/LanguageContext';
-import type { Language } from '@/lib/i18n/translations';
+import { ThemeProvider } from '@getrentos/ui/providers/ThemeProvider';
+import { QueryProvider } from '@getrentos/ui/providers/QueryProvider';
+import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -80,20 +79,19 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Read the language cookie server-side so pcm users get localized copy on
-  // first paint instead of an English flash (client-side localStorage sync is
-  // handled inside LanguageProvider).
-  const cookieStore = await cookies();
-  const cookieLanguage = cookieStore.get(LANGUAGE_COOKIE_KEY)?.value;
-  const initialLanguage: Language = cookieLanguage === 'pcm' ? 'pcm' : 'en';
-
+/**
+ * This layout must not read request data (cookies, headers). Doing so makes every
+ * page in the app dynamic — rendered per visitor, sent `no-store`, and impossible
+ * to serve from a CDN — including the public marketing and marketplace pages.
+ * The saved language is therefore restored in the browser by LanguageProvider.
+ */
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={initialLanguage} suppressHydrationWarning className={geist.variable}>
+    <html lang="en" suppressHydrationWarning className={geist.variable}>
       <body className="bg-background antialiased">
         <ThemeProvider>
           <QueryProvider>
-            <LanguageProvider initialLanguage={initialLanguage}>{children}</LanguageProvider>
+            <LanguageProvider>{children}</LanguageProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>
