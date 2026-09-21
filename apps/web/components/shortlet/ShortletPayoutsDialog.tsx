@@ -121,7 +121,10 @@ export function ShortletPayoutsDialog({
 
           {/* Money that is earned but not withdrawable yet, with the reason for each part. */}
           {summary &&
-            (summary.upcoming > 0 || summary.frozen > 0 || summary.inFailedPayout > 0) && (
+            (summary.upcoming > 0 ||
+              summary.frozen > 0 ||
+              summary.inTransit > 0 ||
+              summary.inFailedPayout > 0) && (
               <ul className="space-y-2 rounded-lg border border-border p-4 text-sm">
                 {summary.upcoming > 0 && (
                   <li className="flex items-start justify-between gap-3">
@@ -138,6 +141,14 @@ export function ShortletPayoutsDialog({
                   <li className="flex items-start justify-between gap-3">
                     <span className="text-muted-foreground">On hold while a dispute is open</span>
                     <span className="font-medium">{formatCurrency(summary.frozen)}</span>
+                  </li>
+                )}
+                {summary.inTransit > 0 && (
+                  <li className="flex items-start justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      On its way to your bank — shows as paid once the bank confirms
+                    </span>
+                    <span className="font-medium">{formatCurrency(summary.inTransit)}</span>
                   </li>
                 )}
                 {summary.inFailedPayout > 0 && (

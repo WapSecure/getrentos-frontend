@@ -65,6 +65,8 @@ export interface ShortletPayoutSummary {
   frozen: number;
   /** Sitting in a failed payout that support has to retry. */
   inFailedPayout: number;
+  /** Sent to the bank and not yet confirmed. */
+  inTransit: number;
   /** When the next held earnings unlock. */
   nextReleaseAt: string | null;
   /** Hours earnings are held after check-in (longer for a first payout). */
