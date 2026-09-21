@@ -13,6 +13,7 @@ export default function AppLayout() {
   return (
     <Stack screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="(renter)" />
+      <Stack.Screen name="(landlord)" />
       <Stack.Screen name="(resident)" />
       <Stack.Screen name="(agent)" />
       <Stack.Screen name="agent-task/[id]" options={DETAIL_OPTIONS} />
@@ -88,6 +89,7 @@ export default function AppLayout() {
       <Stack.Screen name="notification-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="reviews" options={DETAIL_OPTIONS} />
       <Stack.Screen name="message-tools" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-property/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />

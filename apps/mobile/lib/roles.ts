@@ -53,7 +53,13 @@ export function primaryPortal(roles: BackendRole[]): Portal {
   return portalsForRoles(roles)[0] ?? 'renter';
 }
 
-export const IMPLEMENTED_PORTALS: readonly Portal[] = ['renter', 'resident', 'agent', 'buyer'];
+export const IMPLEMENTED_PORTALS: readonly Portal[] = [
+  'renter',
+  'resident',
+  'agent',
+  'buyer',
+  'landlord',
+];
 export const portalHref = (p: Portal) => `/(app)/(${p})` as const;
 
 /* --------------------- signup role catalogue --------------------------- */
