@@ -37,6 +37,30 @@ export default function LandlordAccount() {
 
       <Card padding="none">
         <AccountRow
+          label="Applications"
+          description="Review and decide on applicants"
+          onPress={() => router.push('/(app)/landlord-applications')}
+        />
+        <Divider />
+        <AccountRow
+          label="Leases"
+          description="Drafts, signatures and renewals"
+          onPress={() => router.push('/(app)/landlord-leases')}
+        />
+        <Divider />
+        <AccountRow
+          label="Maintenance"
+          description="Open issues across your properties"
+          onPress={() => router.push('/(app)/landlord-maintenance')}
+        />
+        <Divider />
+        <AccountRow
+          label="Payments"
+          description="Rent collected, escrow and arrears"
+          onPress={() => router.push('/(app)/landlord-payments')}
+        />
+        <Divider />
+        <AccountRow
           label="Notifications"
           description="Email, push and in-app preferences"
           onPress={() => router.push('/(app)/notification-settings')}

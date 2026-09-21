@@ -86,7 +86,10 @@ export default function LandlordOverview() {
             </View>
 
             {s && s.outstandingAmount > 0 ? (
-              <View
+              <Pressable
+                onPress={() => router.push('/(app)/landlord-payments')}
+                accessibilityRole="button"
+                accessibilityLabel="View outstanding payments"
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -102,7 +105,7 @@ export default function LandlordOverview() {
                   {s.outstandingPayments === 1 ? '' : 's'} · {}
                   <Price amount={s.outstandingAmount} variant="caption" color="destructive" />
                 </Text>
-              </View>
+              </Pressable>
             ) : null}
           </View>
         )}
@@ -129,31 +132,37 @@ export default function LandlordOverview() {
       ) : null}
 
       {s && s.activeMaintenanceRequests > 0 ? (
-        <Card elevated>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: radius.md,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colors.warning + '1f',
-              }}
-            >
-              <Wrench size={18} color={colors.warning} />
+        <Pressable
+          onPress={() => router.push('/(app)/landlord-maintenance')}
+          accessibilityRole="button"
+          accessibilityLabel={`${s.activeMaintenanceRequests} open maintenance requests`}
+        >
+          <Card elevated>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: radius.md,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: colors.warning + '1f',
+                }}
+              >
+                <Wrench size={18} color={colors.warning} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyStrong">
+                  {s.activeMaintenanceRequests} open maintenance request
+                  {s.activeMaintenanceRequests === 1 ? '' : 's'}
+                </Text>
+                <Text variant="caption" color="mutedForeground">
+                  Assign a vendor or mark them resolved
+                </Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">
-                {s.activeMaintenanceRequests} open maintenance request
-                {s.activeMaintenanceRequests === 1 ? '' : 's'}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Assign a vendor or mark them resolved
-              </Text>
-            </View>
-          </View>
-        </Card>
+          </Card>
+        </Pressable>
       ) : null}
 
       <View style={{ gap: spacing.md }}>

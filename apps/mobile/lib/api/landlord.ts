@@ -131,6 +131,183 @@ export const OCCUPANCY_TONE: Record<OccupancyStatus, 'success' | 'warning' | 'ne
   reserved: 'warning',
 };
 
+/* ----------------------------- applications ---------------------------- */
+
+export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
+
+export interface LandlordApplication {
+  id: string;
+  applicantName: string;
+  applicantEmail: string;
+  applicantPhone: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  unitName?: string;
+  monthlyIncome: number;
+  employmentStatus: string;
+  verificationStatus: string;
+  trustScore: number;
+  applicationDate: string;
+  status: ApplicationStatus;
+  documents: { id: string; name: string; url?: string }[];
+  references: { name: string; relationship?: string; phone?: string }[];
+}
+
+export const APPLICATION_STATUS_LABEL: Record<ApplicationStatus, string> = {
+  pending: 'Pending',
+  under_review: 'In review',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
+};
+
+export const APPLICATION_STATUS_TONE: Record<
+  ApplicationStatus,
+  'success' | 'warning' | 'danger' | 'info' | 'neutral'
+> = {
+  pending: 'warning',
+  under_review: 'info',
+  approved: 'success',
+  rejected: 'danger',
+  withdrawn: 'neutral',
+};
+
+/* -------------------------------- leases ------------------------------- */
+
+export type LeaseStatus = 'draft' | 'sent' | 'signed' | 'active' | 'expired' | 'terminated';
+
+export interface LandlordLease {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  unitName?: string;
+  /** `yyyy-MM-dd` */
+  leaseStart: string;
+  leaseEnd: string;
+  rentAmount: number;
+  securityDeposit: number;
+  status: LeaseStatus;
+  tenantSigned: boolean;
+  landlordSigned: boolean;
+  createdAt: string;
+}
+
+export const LEASE_STATUS_TONE: Record<
+  LeaseStatus,
+  'success' | 'warning' | 'danger' | 'info' | 'neutral'
+> = {
+  draft: 'neutral',
+  sent: 'info',
+  signed: 'success',
+  active: 'success',
+  expired: 'warning',
+  terminated: 'danger',
+};
+
+/* ----------------------------- maintenance ----------------------------- */
+
+export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
+export type MaintenanceStatus =
+  | 'pending'
+  | 'acknowledged'
+  | 'in_progress'
+  | 'resolved'
+  | 'cancelled';
+
+export interface LandlordMaintenance {
+  id: string;
+  issueTitle: string;
+  category: string;
+  description: string;
+  priority: MaintenancePriority;
+  status: MaintenanceStatus;
+  tenantId: string;
+  tenantName: string;
+  propertyId: string;
+  propertyName: string;
+  unitName?: string;
+  vendorId?: string;
+  vendorName?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const MAINTENANCE_STATUS_LABEL: Record<MaintenanceStatus, string> = {
+  pending: 'Pending',
+  acknowledged: 'Acknowledged',
+  in_progress: 'In progress',
+  resolved: 'Resolved',
+  cancelled: 'Cancelled',
+};
+
+export const MAINTENANCE_STATUS_TONE: Record<
+  MaintenanceStatus,
+  'success' | 'warning' | 'danger' | 'info' | 'neutral'
+> = {
+  pending: 'warning',
+  acknowledged: 'info',
+  in_progress: 'info',
+  resolved: 'success',
+  cancelled: 'neutral',
+};
+
+export const PRIORITY_TONE: Record<MaintenancePriority, 'danger' | 'warning' | 'info' | 'neutral'> =
+  {
+    urgent: 'danger',
+    high: 'warning',
+    medium: 'info',
+    low: 'neutral',
+  };
+
+/* ------------------------------- payments ------------------------------ */
+
+export type LandlordPaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing' | 'failed';
+
+export interface LandlordPayment {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  unitName?: string;
+  amount: number;
+  dueDate: string;
+  paidDate?: string;
+  status: LandlordPaymentStatus;
+  escrowStatus?: string;
+  releaseDate?: string;
+  /** Present once the tenant has disputed this payment. */
+  disputeReason?: string;
+}
+
+export interface LandlordPaymentStats {
+  totalCollected: number;
+  outstandingBalance: number;
+  escrowPending: number;
+  upcomingPayments: number;
+}
+
+export interface ArrearsSummary {
+  totalOverdue: number;
+  overdueCount: number;
+}
+
+export const LANDLORD_PAYMENT_TONE: Record<
+  LandlordPaymentStatus,
+  'success' | 'warning' | 'danger' | 'info'
+> = {
+  paid: 'success',
+  pending: 'warning',
+  overdue: 'danger',
+  processing: 'info',
+  failed: 'danger',
+};
+
 /* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
@@ -157,6 +334,52 @@ export const landlordApi = {
 
   tenants: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<LandlordTenant>>(`/landlord/tenants?page=${page}&pageSize=${pageSize}`),
+
+  applications: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordApplication>>(
+      `/landlord/applications?page=${page}&pageSize=${pageSize}`
+    ),
+
+  setApplicationStatus: (id: string, status: ApplicationStatus, reason?: string) =>
+    apiFetch<LandlordApplication>(`/landlord/applications/${id}/status`, {
+      method: 'PATCH',
+      body: { status, reason },
+    }),
+
+  leases: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordLease>>(`/landlord/leases?page=${page}&pageSize=${pageSize}`),
+
+  maintenance: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordMaintenance>>(
+      `/landlord/maintenance?page=${page}&pageSize=${pageSize}`
+    ),
+
+  maintenanceSummary: () => apiFetch<{ openCount: number }>('/landlord/maintenance/summary'),
+
+  resolveMaintenance: (id: string, note?: string) =>
+    apiFetch<LandlordMaintenance>(`/landlord/maintenance/${id}/resolve`, {
+      method: 'PATCH',
+      body: { note },
+    }),
+
+  escalateMaintenance: (id: string, reason?: string) =>
+    apiFetch<LandlordMaintenance>(`/landlord/maintenance/${id}/escalate`, {
+      method: 'PATCH',
+      body: { reason },
+    }),
+
+  assignVendor: (id: string, vendorId: string) =>
+    apiFetch<LandlordMaintenance>(`/landlord/maintenance/${id}/assign-vendor`, {
+      method: 'PATCH',
+      body: { vendorId },
+    }),
+
+  payments: (page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandlordPayment>>(`/landlord/payments?page=${page}&pageSize=${pageSize}`),
+
+  paymentStats: () => apiFetch<LandlordPaymentStats>('/landlord/payments/stats'),
+
+  arrearsSummary: () => apiFetch<ArrearsSummary>('/landlord/payments/arrears-summary'),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

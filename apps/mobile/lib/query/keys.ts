@@ -141,6 +141,15 @@ export const qk = {
       ['landlord', 'properties', { page, pageSize }] as const,
     units: (propertyId: string) => ['landlord', 'units', propertyId] as const,
     tenants: (page = 1, pageSize = 20) => ['landlord', 'tenants', { page, pageSize }] as const,
+    applications: (page = 1, pageSize = 20) =>
+      ['landlord', 'applications', { page, pageSize }] as const,
+    leases: (page = 1, pageSize = 20) => ['landlord', 'leases', { page, pageSize }] as const,
+    maintenance: (page = 1, pageSize = 20) =>
+      ['landlord', 'maintenance', { page, pageSize }] as const,
+    maintenanceSummary: ['landlord', 'maintenance', 'summary'] as const,
+    payments: (page = 1, pageSize = 20) => ['landlord', 'payments', { page, pageSize }] as const,
+    paymentStats: ['landlord', 'payments', 'stats'] as const,
+    arrearsSummary: ['landlord', 'payments', 'arrears-summary'] as const,
     conversations: ['landlord', 'messages', 'conversations'] as const,
   },
   resident: {
