@@ -13,5 +13,5 @@ export { FeaturedProperty } from './sections/FeaturedProperty';
 export { Features } from './sections/Features';
 export { Roles } from './sections/Roles';
 export { HowItWorks } from './sections/HowItWorks';
-export { Stats } from './sections/Stats';
+export { WhyGetRentos } from './sections/WhyGetRentos';
 export { DownloadApp } from './sections/DownloadApp';

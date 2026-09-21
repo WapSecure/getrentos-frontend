@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Logo as BaseLogo } from '@getrentos/ui';
+import { Logo as BaseLogo } from '@getrentos/ui/Logo';
 import {
   ROUTES,
   isAuthenticated,

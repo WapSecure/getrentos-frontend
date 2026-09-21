@@ -8,11 +8,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  ThemeToggle,
-} from '@getrentos/ui';
+} from '@getrentos/ui/DropdownMenu';
+import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
 import { Logo } from '@/components/ui/Logo';
 import { ChevronDown, Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -153,7 +152,7 @@ export const Navigation = () => {
                   <Link href={ROUTES.LOGIN} className={`${linkBase} ${linkIdle}`}>
                     Sign in
                   </Link>
-                  <ThemeToggle />
+                  <ThemeSwitch />
                   <Link
                     href={ROUTES.SIGNUP}
                     className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary-hover hover:shadow-md"
@@ -166,7 +165,7 @@ export const Navigation = () => {
                   <Link href={dashboardHref} className={`${linkBase} ${linkIdle}`}>
                     Dashboard
                   </Link>
-                  <ThemeToggle />
+                  <ThemeSwitch />
                   <button
                     onClick={signOut}
                     className={`${linkBase} text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300`}
@@ -178,7 +177,7 @@ export const Navigation = () => {
             </div>
 
             <div className="flex shrink-0 items-center gap-3 lg:hidden">
-              <ThemeToggle />
+              <ThemeSwitch />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
@@ -192,80 +191,73 @@ export const Navigation = () => {
         </div>
       </nav>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-border/60 bg-white/95 backdrop-blur-xl lg:hidden dark:bg-background/95"
-          >
-            <div className="flex flex-col gap-1 p-4">
-              <p className="px-4 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Marketplaces
-              </p>
-              {MARKETPLACE_LINKS.map((link) => (
+      {isMobileMenuOpen && (
+        <div className="nav-drop fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-border/60 bg-white/95 backdrop-blur-xl lg:hidden dark:bg-background/95">
+          <div className="flex flex-col gap-1 p-4">
+            <p className="px-4 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Marketplaces
+            </p>
+            {MARKETPLACE_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMenu}
+                className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="my-2 h-px bg-border" />
+            {PAGE_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMenu}
+                className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="my-2 h-px bg-border" />
+            {!isSignedIn ? (
+              <>
                 <Link
-                  key={link.href}
-                  href={link.href}
+                  href={ROUTES.LOGIN}
                   onClick={closeMenu}
                   className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
                 >
-                  {link.label}
+                  Sign in
                 </Link>
-              ))}
-
-              <div className="my-2 h-px bg-border" />
-              {PAGE_LINKS.map((link) => (
                 <Link
-                  key={link.href}
-                  href={link.href}
+                  href={ROUTES.SIGNUP}
+                  onClick={closeMenu}
+                  className="mt-1 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary-hover"
+                >
+                  Get early access
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={dashboardHref}
                   onClick={closeMenu}
                   className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
                 >
-                  {link.label}
+                  Dashboard
                 </Link>
-              ))}
-
-              <div className="my-2 h-px bg-border" />
-              {!isSignedIn ? (
-                <>
-                  <Link
-                    href={ROUTES.LOGIN}
-                    onClick={closeMenu}
-                    className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    href={ROUTES.SIGNUP}
-                    onClick={closeMenu}
-                    className="mt-1 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary-hover"
-                  >
-                    Get early access
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href={dashboardHref}
-                    onClick={closeMenu}
-                    className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={signOut}
-                    className="rounded-lg px-4 py-2 text-left text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                  >
-                    Sign out
-                  </button>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <button
+                  onClick={signOut}
+                  className="rounded-lg px-4 py-2 text-left text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                >
+                  Sign out
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };

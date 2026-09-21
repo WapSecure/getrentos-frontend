@@ -1,211 +1,97 @@
-'use client';
-
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
-import { MapPin, Bed, Bath, Square, Building2, TrendingUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { MapPin, Bed, Bath, Square, Building2 } from 'lucide-react';
+import { LinkButton } from './primitives';
 import { ROUTES } from '@/lib/constants/auth';
 
-export const FeaturedProperty = () => {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.6, 1, 0.6]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
-
-  const property = {
-    id: 'RNT-0412',
-    title: '2 Bed Loft',
-    price: '4.2M',
-    location: 'Lekki Phase 1, Lagos',
-    period: '/year',
-    verified: true,
-    badges: ['ID', 'DEED', 'ESCROW'],
-    status: 'Active',
-    beds: 2,
-    baths: 2,
-    size: 1200,
-  };
-
-  const floatingAnimation = {
-    y: [0, -15, 0],
-    rotate: [0, 2, -2, 0],
-    transition: {
-      duration: 4,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  };
-
-  const pulseAnimation = {
-    scale: [1, 1.05, 1],
-    transition: {
-      duration: 2,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  };
-
-  return (
-    <section ref={ref} className="py-20 px-4 overflow-hidden">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          style={{ opacity, scale }}
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="bg-card rounded-2xl overflow-hidden border border-border shadow-xl"
-        >
-          <div className="grid lg:grid-cols-2">
-            {/* Content Side */}
-            <motion.div
-              className="p-8 md:p-12 flex flex-col justify-center"
-              initial={{ x: -50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              <motion.div
-                className="flex items-center gap-3 mb-4"
-                initial={{ x: -20, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
-                  PROPERTY · {property.id}
-                </span>
-                <motion.span className="trust-badge-verified text-xs" animate={pulseAnimation}>
-                  Verified
-                </motion.span>
-              </motion.div>
-
-              <motion.h2
-                className="text-3xl md:text-4xl font-bold text-foreground mb-2"
-                initial={{ x: -20, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                {property.title}
-              </motion.h2>
-
-              <motion.p
-                className="text-4xl md:text-5xl font-bold text-foreground mb-2"
-                initial={{ scale: 0.9, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.5, type: 'spring' }}
-              >
-                ₦{property.price}
-                <span className="text-lg text-gray-500 dark:text-gray-400 font-normal ml-2">
-                  {property.period}
-                </span>
-              </motion.p>
-
-              <motion.div
-                className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-6"
-                initial={{ x: -20, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">{property.location}</span>
-              </motion.div>
-
-              <motion.div
-                className="flex items-center gap-6 mb-6 text-sm text-gray-600 dark:text-gray-300"
-                initial={{ y: 20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.7 }}
-              >
-                <motion.div className="flex items-center gap-2" whileHover={{ scale: 1.05 }}>
-                  <Bed className="w-4 h-4" />
-                  <span>{property.beds} beds</span>
-                </motion.div>
-                <motion.div className="flex items-center gap-2" whileHover={{ scale: 1.05 }}>
-                  <Bath className="w-4 h-4" />
-                  <span>{property.baths} baths</span>
-                </motion.div>
-                <motion.div className="flex items-center gap-2" whileHover={{ scale: 1.05 }}>
-                  <Square className="w-4 h-4" />
-                  <span>{property.size} sqft</span>
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                className="flex flex-wrap gap-3 mb-6"
-                initial={{ y: 20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                {property.badges.map((badge, idx) => (
-                  <motion.span
-                    key={badge}
-                    className="trust-badge cursor-pointer"
-                    whileHover={{ scale: 1.05, backgroundColor: 'rgba(44, 85, 131, 0.2)' }}
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8 + idx * 0.1 }}
-                  >
-                    {badge}
-                  </motion.span>
-                ))}
-              </motion.div>
-
-              <motion.div
-                className="flex items-center justify-between"
-                initial={{ y: 20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: 1 }}
-              >
-                <div className="flex items-center gap-2">
-                  <motion.span
-                    className="status-dot status-dot-active"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {property.status}
-                  </span>
-                </div>
-                <motion.div whileHover={{ x: 5 }}>
-                  <Button variant="outline" size="sm" href={ROUTES.SIGNUP}>
-                    View Details <TrendingUp className="w-3 h-3 ml-1" />
-                  </Button>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-
-            {/* Image Side */}
-            <motion.div
-              className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-muted/50 dark:to-muted min-h-[300px] flex items-center justify-center relative overflow-hidden"
-              initial={{ x: 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              <motion.div animate={floatingAnimation} className="text-center relative z-10">
-                <Building2 className="w-24 h-24 text-gray-400 dark:text-white/20 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-500">Premium Property Visualization</p>
-              </motion.div>
-
-              {/* Animated gradient overlay */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-tr from-primary/0 via-primary/5 to-transparent"
-                animate={{
-                  x: ['-100%', '100%'],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
-              />
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
+/**
+ * An illustration of what a verified listing looks like, and labelled as one. It
+ * used to present itself as a real property (with an id and a "Verified" badge)
+ * and lead to sign-up, which read as a real listing that did not exist.
+ */
+const example = {
+  title: '2 Bed Loft',
+  price: '4.2M',
+  period: '/year',
+  location: 'Lekki Phase 1, Lagos',
+  beds: 2,
+  baths: 2,
+  size: 1200,
+  badges: ['Identity verified', 'Documents reviewed', 'Escrow payment'],
 };
+
+export const FeaturedProperty = () => (
+  <section className="px-4 py-20">
+    <div className="mx-auto max-w-6xl">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+        <div className="grid lg:grid-cols-2">
+          <div className="flex flex-col justify-center p-8 md:p-12">
+            <span className="mb-4 inline-flex w-fit rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-accent-foreground">
+              Example listing
+            </span>
+
+            <h2 className="mb-2 text-3xl font-bold text-foreground md:text-4xl">{example.title}</h2>
+            <p className="mb-2 text-4xl font-bold text-foreground md:text-5xl">
+              ₦{example.price}
+              <span className="ml-1 text-lg font-normal text-muted-foreground">
+                {example.period}
+              </span>
+            </p>
+            <p className="mb-6 flex items-center gap-1.5 text-muted-foreground">
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              {example.location}
+            </p>
+
+            <div className="mb-6 flex items-center gap-6 text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <Bed className="h-4 w-4" aria-hidden="true" />
+                {example.beds} beds
+              </span>
+              <span className="flex items-center gap-2">
+                <Bath className="h-4 w-4" aria-hidden="true" />
+                {example.baths} baths
+              </span>
+              <span className="flex items-center gap-2">
+                <Square className="h-4 w-4" aria-hidden="true" />
+                {example.size} sqft
+              </span>
+            </div>
+
+            <ul className="mb-6 flex flex-wrap gap-2">
+              {example.badges.map((badge) => (
+                <li
+                  key={badge}
+                  className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-foreground dark:bg-white/10"
+                >
+                  {badge}
+                </li>
+              ))}
+            </ul>
+
+            <p className="mb-6 text-sm text-muted-foreground">
+              This is a sample listing that shows what a verified listing looks like. Browse real
+              homes to rent, or create an account to list your own.
+            </p>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <LinkButton href="/rent" size="lg">
+                Browse homes to rent
+              </LinkButton>
+              <LinkButton href={ROUTES.SIGNUP} variant="secondary" size="lg">
+                Create an account
+              </LinkButton>
+            </div>
+          </div>
+
+          <div
+            className="relative flex min-h-[300px] items-center justify-center overflow-hidden bg-linear-to-br from-gray-100 to-gray-200 dark:from-muted/50 dark:to-muted"
+            aria-hidden="true"
+          >
+            <div className="relative z-10 text-center">
+              <Building2 className="mx-auto mb-4 h-24 w-24 text-gray-400 dark:text-white/20" />
+              <p className="text-gray-500">Sample illustration</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);

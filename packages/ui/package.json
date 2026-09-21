@@ -14,6 +14,14 @@
       "style": "./src/styles/index.css",
       "import": "./src/styles/index.css",
       "default": "./src/styles/index.css"
+    },
+    "./providers/*": {
+      "import": "./src/providers/*.tsx",
+      "types": "./src/providers/*.tsx"
+    },
+    "./*": {
+      "import": "./src/*.tsx",
+      "types": "./src/*.tsx"
     }
   },
   "scripts": {

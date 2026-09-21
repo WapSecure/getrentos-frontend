@@ -41,6 +41,9 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
+  // Import only the modules a page uses from the shared UI barrel, so a page that
+  // needs a dropdown doesn't also ship every animated component in the package.
+  experimental: { optimizePackageImports: ['@getrentos/ui'] },
   images: {
     remotePatterns: imageRemotePatterns(),
     // Next 16 refuses to optimise remote images whose host resolves to a
