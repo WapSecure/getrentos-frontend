@@ -132,6 +132,9 @@ export interface EscrowSaleTransaction {
   disputeReason?: string;
   createdAt: string;
   releasedAt?: string;
+  /** Once escrow is released: whether the transfer to your payout account went out. Absent before release. */
+  sellerPayoutStatus?: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
+  sellerPaidAt?: string;
 }
 
 export interface OwnershipTransferDocument {

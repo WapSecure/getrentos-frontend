@@ -29,6 +29,8 @@ import type {
   CommitteeMember,
   CommitteeTitle,
   EstateMicrositeSettings,
+  EstateStatement,
+  EstatePayoutAccount,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -95,6 +97,61 @@ export const estateService = {
       link.remove();
       window.URL.revokeObjectURL(url);
     });
+  },
+
+  // ---- Dues statements ----
+  async listStatements(
+    estateId: string,
+    params: EstatePageQuery = {}
+  ): Promise<ApiResponse<Paginated<EstateStatement>>> {
+    return safeCall(() =>
+      authFetch<Paginated<EstateStatement>>(`/estate/${estateId}/statements${toQuery(params)}`)
+    );
+  },
+
+  async getStatement(estateId: string, id: string): Promise<ApiResponse<EstateStatement>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/statements/${id}`));
+  },
+
+  async generateStatement(
+    estateId: string,
+    data: { periodStart: string; periodEnd: string }
+  ): Promise<ApiResponse<EstateStatement>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/statements/generate`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async issueStatement(estateId: string, id: string): Promise<ApiResponse<EstateStatement>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/statements/${id}/issue`, { method: 'POST' })
+    );
+  },
+
+  async retryStatementPayout(estateId: string, id: string): Promise<ApiResponse<EstateStatement>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/statements/${id}/retry-payout`, { method: 'POST' })
+    );
+  },
+
+  // ---- Payout account ----
+  async getPayoutAccount(estateId: string): Promise<ApiResponse<EstatePayoutAccount>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/payout-account`));
+  },
+
+  async updatePayoutAccount(
+    estateId: string,
+    data: { bankCode: string; accountNumber: string }
+  ): Promise<ApiResponse<EstatePayoutAccount>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/payout-account`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
   },
 
   async listHouseholds(

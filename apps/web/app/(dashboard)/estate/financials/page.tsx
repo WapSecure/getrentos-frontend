@@ -7,6 +7,10 @@ import { FileSpreadsheet, Check } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
 import { EstateFinancialsChart } from '@/components/estate/financials/EstateFinancialsChart';
+import {
+  EstatePayoutAccountCard,
+  EstateStatementsView,
+} from '@/components/estate/financials/EstateStatementsView';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -118,6 +122,11 @@ export default function EstateFinancialsPage() {
 
         <EstateFinancialsChart estateId={estate.id} />
       </ProFeatureGate>
+
+      <div className="mt-10 pt-8 border-t border-border">
+        <EstatePayoutAccountCard estateId={estate.id} />
+        <EstateStatementsView estateId={estate.id} />
+      </div>
     </>
   );
 }

@@ -237,6 +237,13 @@ export type HomeManagementWorkOrderInvoiceStatus =
   | 'VOID';
 
 /**
+ * Whether the vendor has actually been paid — separate from `status` above,
+ * which tracks the approval workflow. An invoice can sit APPROVED for a while
+ * before this ever leaves PENDING.
+ */
+export type HomeManagementInvoicePayoutStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
+
+/**
  * Monetary values in Home Management are whole currency units. This mirrors
  * approved work-order spend and quote amounts, so the invoice UI never needs
  * to round or reconcile fractional cents client-side.
@@ -269,6 +276,9 @@ export type HomeManagementWorkOrderInvoice = {
   voidedById?: string | null;
   voidedAt?: string | null;
   voidReason?: string | null;
+  payoutStatus: HomeManagementInvoicePayoutStatus;
+  payoutTransferRef?: string | null;
+  paidOutAt?: string | null;
   createdAt: string;
   updatedAt: string;
   vendor?: {
@@ -277,6 +287,14 @@ export type HomeManagementWorkOrderInvoice = {
     serviceType?: string | null;
   } | null;
   lineItems: HomeManagementWorkOrderInvoiceLineItem[];
+};
+
+export type VendorPayoutAccount = {
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
 };
 
 export type CreateHomeManagementWorkOrderInvoiceInput = {
@@ -739,6 +757,31 @@ export const homeManagementService = {
   voidWorkOrderInvoice: (invoiceId: string, data: VoidHomeManagementWorkOrderInvoiceInput) =>
     safeCall(() =>
       authFetch<HomeManagementWorkOrderInvoice>(`/home-management/invoices/${invoiceId}/void`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    ),
+  payWorkOrderInvoice: (invoiceId: string) =>
+    safeCall(() =>
+      authFetch<{
+        invoiceId: string;
+        totalAmount: number;
+        payoutStatus: HomeManagementInvoicePayoutStatus;
+        paidOutAt?: string;
+      }>(`/home-management/invoices/${invoiceId}/pay`, { method: 'POST' })
+    ),
+
+  // ---- Vendor payout account ----
+  getVendorPayoutAccount: (vendorId: string) =>
+    safeCall(() =>
+      authFetch<VendorPayoutAccount>(`/home-management/vendors/${vendorId}/payout-account`)
+    ),
+  updateVendorPayoutAccount: (
+    vendorId: string,
+    data: { bankCode: string; accountNumber: string }
+  ) =>
+    safeCall(() =>
+      authFetch<VendorPayoutAccount>(`/home-management/vendors/${vendorId}/payout-account`, {
         method: 'POST',
         body: JSON.stringify(data),
       })
