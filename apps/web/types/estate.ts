@@ -107,6 +107,40 @@ export interface EstateFinancialStats {
   householdsBilled: number;
 }
 
+export type EstateStatementStatus = 'DRAFT' | 'ISSUED';
+export type EstateStatementPayoutStatus = 'PENDING' | 'PAID' | 'FAILED';
+
+export interface EstateStatementLineItem {
+  id: string;
+  label: string;
+  amount: number;
+}
+
+export interface EstateStatement {
+  id: string;
+  periodStart: string;
+  periodEnd: string;
+  grossIncome: number;
+  totalExpenses: number;
+  managementFee: number;
+  netPayout: number;
+  status: EstateStatementStatus;
+  payoutStatus: EstateStatementPayoutStatus;
+  transferRef?: string;
+  paidAt: string | null;
+  generatedAt: string;
+  issuedAt: string | null;
+  lineItems?: EstateStatementLineItem[];
+}
+
+export interface EstatePayoutAccount {
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
+}
+
 export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
 
 export interface VisitorPass {

@@ -190,6 +190,8 @@ export const homeManagementKeys = {
   documents: (role: 'owner' | 'landlord') => ['home-management', role, 'documents'] as const,
   properties: (role: 'owner' | 'landlord') => ['home-management', role, 'properties'] as const,
   vendors: ['home-management', 'landlord', 'vendors'] as const,
+  vendorPayoutAccount: (vendorId: string) =>
+    ['home-management', 'vendors', vendorId, 'payout-account'] as const,
 };
 
 export const ownerKeys = {
@@ -313,6 +315,9 @@ export const estateKeys = {
   financialStats: (estateId: string, period: string) =>
     ['estate', estateId, 'financialStats', period] as const,
   financialChart: (estateId: string) => ['estate', estateId, 'financialChart'] as const,
+  statements: (estateId: string) => ['estate', estateId, 'statements'] as const,
+  statement: (estateId: string, id: string) => ['estate', estateId, 'statements', id] as const,
+  payoutAccount: (estateId: string) => ['estate', estateId, 'payoutAccount'] as const,
 };
 
 export const estateResidentKeys = {

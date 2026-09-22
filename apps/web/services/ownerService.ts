@@ -74,10 +74,18 @@ export interface OwnerMessage {
 }
 
 export interface OwnerPayoutAccount {
+  bankCode: string;
   bankName: string;
   accountNumber: string;
   accountName: string;
   verified: boolean;
+}
+
+export interface OwnerSalePayoutStatus {
+  transactionId: string;
+  amount: number;
+  payoutStatus: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
+  paidAt?: string;
 }
 
 export interface OwnerNotificationPreference {
@@ -201,10 +209,10 @@ export const ownerService = {
       const form = new FormData();
       form.append('kind', kind);
       form.append('file', file);
-      return authFetch<{ key: string; kind: 'image' | 'video' }>(
-        '/owner/properties/media/upload',
-        { method: 'POST', body: form }
-      );
+      return authFetch<{ key: string; kind: 'image' | 'video' }>('/owner/properties/media/upload', {
+        method: 'POST',
+        body: form,
+      });
     }),
 
   /** Discard a staged upload that was never attached to a property. */
@@ -306,14 +314,22 @@ export const ownerService = {
   updateProfile: (data: Partial<OwnerProfile>) =>
     safeCall(() => authFetch('/owner/profile', { method: 'PUT', body: JSON.stringify(data) })),
 
-  // Payout account
-  getPayoutSettings: () => safeCall(() => authFetch<OwnerPayoutAccount>('/owner/settings/payout')),
-  updatePayoutSettings: (data: { bankName: string; accountNumber: string; accountName: string }) =>
+  // Payout account — sale proceeds. Backed by the marketplace seller's own
+  // payout account (real bank resolution and a Paystack transfer recipient),
+  // not the old owner/settings/payout endpoint, which only stored free-text
+  // bank details and never actually paid anyone.
+  getPayoutSettings: () =>
+    safeCall(() => authFetch<OwnerPayoutAccount>('/marketplace/seller/payout-account')),
+  updatePayoutSettings: (data: { bankCode: string; accountNumber: string }) =>
     safeCall(() =>
-      authFetch<OwnerPayoutAccount>('/owner/settings/payout', {
-        method: 'PUT',
+      authFetch<OwnerPayoutAccount>('/marketplace/seller/payout-account', {
+        method: 'POST',
         body: JSON.stringify(data),
       })
+    ),
+  getSalePayoutStatus: (transactionId: string) =>
+    safeCall(() =>
+      authFetch<OwnerSalePayoutStatus>(`/marketplace/seller/transactions/${transactionId}/payout`)
     ),
 
   // Notification preferences

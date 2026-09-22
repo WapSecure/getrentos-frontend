@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BadgeCheck,
   Ban,
+  Banknote,
   CalendarClock,
   ChevronDown,
   ChevronUp,
@@ -70,6 +71,16 @@ const invoiceStatusMeta: Record<
   APPROVED: { label: 'Ready for finance review', variant: 'success' },
   REJECTED: { label: 'Rejected', variant: 'danger' },
   VOID: { label: 'Voided', variant: 'neutral' },
+};
+
+const payoutStatusMeta: Record<
+  HomeManagementWorkOrderInvoice['payoutStatus'],
+  { label: string; variant: BadgeVariant } | null
+> = {
+  PENDING: null,
+  PROCESSING: { label: 'Payout on its way', variant: 'info' },
+  PAID: { label: 'Paid', variant: 'success' },
+  FAILED: { label: 'Payout failed', variant: 'danger' },
 };
 
 let lineItemSequence = 0;
@@ -147,7 +158,13 @@ const invoiceNumberLabel = (invoice: HomeManagementWorkOrderInvoice) =>
   invoice.invoiceNumber?.trim() || 'Unnumbered invoice';
 
 const canVoidInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
-  ['DRAFT', 'SUBMITTED', 'APPROVED'].includes(invoice.status);
+  ['DRAFT', 'SUBMITTED', 'APPROVED'].includes(invoice.status) &&
+  invoice.payoutStatus !== 'PROCESSING' &&
+  invoice.payoutStatus !== 'PAID';
+
+const canPayInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
+  invoice.status === 'APPROVED' &&
+  (invoice.payoutStatus === 'PENDING' || invoice.payoutStatus === 'FAILED');
 
 const isActiveInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
   ['DRAFT', 'SUBMITTED', 'APPROVED'].includes(invoice.status);
@@ -340,6 +357,35 @@ export function HomeManagementWorkOrderInvoices({
     },
     onError: (error) => {
       setToast({ message: error.message || 'Unable to void this invoice.', variant: 'error' });
+    },
+  });
+
+  const payInvoice = useMutation<
+    { invoiceId: string; payoutStatus: string },
+    Error,
+    { invoiceId: string }
+  >({
+    mutationFn: ({ invoiceId }) => unwrap(homeManagementService.payWorkOrderInvoice(invoiceId)),
+    onSuccess: async (result) => {
+      await invalidateInvoiceViews();
+      setToast(
+        result.payoutStatus === 'FAILED'
+          ? {
+              message:
+                'The transfer to the vendor failed. Check their payout account and try again.',
+              variant: 'error',
+            }
+          : {
+              message:
+                result.payoutStatus === 'PAID'
+                  ? 'Vendor paid.'
+                  : 'Payment sent — it shows as paid once the bank confirms.',
+              variant: 'success',
+            }
+      );
+    },
+    onError: (error) => {
+      setToast({ message: error.message || 'Unable to pay this invoice.', variant: 'error' });
     },
   });
 
@@ -572,7 +618,8 @@ export function HomeManagementWorkOrderInvoices({
                   (approveInvoice.isPending &&
                     approveInvoice.variables?.invoiceId === invoice.id) ||
                   (rejectInvoice.isPending && rejectInvoice.variables?.invoiceId === invoice.id) ||
-                  (voidInvoice.isPending && voidInvoice.variables?.invoiceId === invoice.id);
+                  (voidInvoice.isPending && voidInvoice.variables?.invoiceId === invoice.id) ||
+                  (payInvoice.isPending && payInvoice.variables?.invoiceId === invoice.id);
 
                 return (
                   <article key={invoice.id} className="rounded-xl border border-border bg-card p-4">
@@ -583,6 +630,11 @@ export function HomeManagementWorkOrderInvoices({
                             {invoiceNumberLabel(invoice)}
                           </p>
                           <Badge variant={meta.variant}>{meta.label}</Badge>
+                          {payoutStatusMeta[invoice.payoutStatus] && (
+                            <Badge variant={payoutStatusMeta[invoice.payoutStatus]!.variant}>
+                              {payoutStatusMeta[invoice.payoutStatus]!.label}
+                            </Badge>
+                          )}
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {invoiceVendorLabel(invoice)}
@@ -643,10 +695,14 @@ export function HomeManagementWorkOrderInvoices({
                             {invoice.completionNote}
                           </p>
                         )}
-                        {invoice.status === 'APPROVED' && (
+                        {invoice.status === 'APPROVED' && invoice.payoutStatus === 'PENDING' && (
                           <p className="mt-3 rounded-xl bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-800 dark:text-emerald-300">
-                            Approved and ready for finance review. This is not a vendor payment
-                            confirmation.
+                            Approved and ready to pay. The vendor has not been paid yet.
+                          </p>
+                        )}
+                        {invoice.payoutStatus === 'PAID' && invoice.paidOutAt && (
+                          <p className="mt-3 rounded-xl bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-800 dark:text-emerald-300">
+                            Paid on {dateLabel(invoice.paidOutAt)}.
                           </p>
                         )}
                         {invoice.status === 'REJECTED' && invoice.rejectionReason && (
@@ -724,6 +780,22 @@ export function HomeManagementWorkOrderInvoices({
                             onClick={() => openActionDialog('submit', invoice)}
                           >
                             Submit for approval
+                          </Button>
+                        )}
+
+                        {canPayInvoice(invoice) && (
+                          <Button
+                            size="sm"
+                            rounded="md"
+                            fullWidth
+                            icon={<Banknote className="h-3.5 w-3.5" />}
+                            isLoading={
+                              payInvoice.isPending && payInvoice.variables?.invoiceId === invoice.id
+                            }
+                            disabled={pendingForInvoice}
+                            onClick={() => payInvoice.mutate({ invoiceId: invoice.id })}
+                          >
+                            {invoice.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor'}
                           </Button>
                         )}
 

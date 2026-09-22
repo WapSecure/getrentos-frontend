@@ -14,6 +14,9 @@ import {
   User,
   ShieldCheck,
   Cog,
+  Clock,
+  Banknote,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -66,6 +69,41 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
     description: 'Funds released to you after all conditions were met.',
   },
 ];
+
+const payoutStatusMeta: Record<
+  NonNullable<EscrowSaleTransaction['sellerPayoutStatus']>,
+  { title: string; description: string; icon: React.ReactNode; className: string }
+> = {
+  PENDING: {
+    title: 'Payout pending',
+    description: 'Set up your payout account so the sale proceeds can be sent to you.',
+    icon: <Clock className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />,
+    className:
+      'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400',
+  },
+  PROCESSING: {
+    title: 'Payout on its way',
+    description: 'The transfer has been sent and is waiting on your bank to confirm it.',
+    icon: <Clock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />,
+    className:
+      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400',
+  },
+  PAID: {
+    title: 'Paid out',
+    description: 'The sale proceeds have been sent to your payout account.',
+    icon: <Banknote className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />,
+    className:
+      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
+  },
+  FAILED: {
+    title: 'Payout failed',
+    description:
+      'The transfer to your payout account didn’t go through. Check your account details.',
+    icon: <XCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />,
+    className:
+      'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
+  },
+};
 
 export const EscrowTransactionDetailModal = ({
   transaction,
@@ -196,6 +234,24 @@ export const EscrowTransactionDetailModal = ({
                 <p className="text-xs text-gray-400 text-center">
                   Funds released on {formatDate(transaction.releasedAt)}
                 </p>
+              )}
+
+              {transaction.sellerPayoutStatus && (
+                <div
+                  className={`p-3 rounded-lg border flex items-start gap-2 ${
+                    payoutStatusMeta[transaction.sellerPayoutStatus].className
+                  }`}
+                >
+                  {payoutStatusMeta[transaction.sellerPayoutStatus].icon}
+                  <div>
+                    <p className="text-xs font-medium">
+                      {payoutStatusMeta[transaction.sellerPayoutStatus].title}
+                    </p>
+                    <p className="text-xs mt-0.5 opacity-80">
+                      {payoutStatusMeta[transaction.sellerPayoutStatus].description}
+                    </p>
+                  </div>
+                </div>
               )}
 
               <div className="border border-border rounded-lg overflow-hidden">
