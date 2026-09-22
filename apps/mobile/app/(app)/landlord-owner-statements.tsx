@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, RotateCcw, Send, Wallet } from 'lucide-react-native';
+import { ChevronLeft, RotateCcw, Send, Wallet, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -18,6 +18,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { GenerateStatementSheet } from '@/components/landlord/SmallFormSheets';
 import { landlordApi, PAYOUT_TONE, type OwnerStatement } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
@@ -25,6 +26,7 @@ import { formatDate } from '@/lib/format';
 export default function LandlordOwnerStatements() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
   const qc = useQueryClient();
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -85,6 +87,14 @@ export default function LandlordOwnerStatements() {
         <Text variant="title" style={{ flex: 1 }}>
           Owner statements
         </Text>
+        <Pressable
+          onPress={() => setCreating(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Generate a statement"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       {query.isError ? (
@@ -129,6 +139,8 @@ export default function LandlordOwnerStatements() {
           }
         />
       )}
+
+      <GenerateStatementSheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }

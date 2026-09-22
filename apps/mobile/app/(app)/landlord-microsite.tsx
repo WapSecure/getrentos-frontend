@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ChevronLeft, Globe, ImageIcon } from 'lucide-react-native';
+import { Camera, ChevronLeft, Globe, ImageIcon } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -19,6 +19,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type MicrositeSettings } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
+import { pickImage } from '@/lib/filePicker';
 
 export default function LandlordMicrosite() {
   const { colors, spacing, radius } = useTheme();
@@ -83,6 +84,21 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
   const [bio, setBio] = useState(initial.bio ?? '');
   const [enabled, setEnabled] = useState(initial.enabled);
 
+  const uploadBanner = useMutation({
+    mutationFn: async () => {
+      const file = await pickImage();
+      if (!file) return null;
+      return landlordApi.uploadMicrositeBanner(file);
+    },
+    onSuccess: (result) => {
+      if (!result) return; // the picker was dismissed
+      qc.invalidateQueries({ queryKey: qk.landlord.microsite });
+      toast.show('Banner updated.', 'success');
+    },
+    onError: (e) =>
+      toast.show(e instanceof ApiError ? e.message : 'Could not upload that banner.', 'error'),
+  });
+
   const save = useMutation({
     mutationFn: (patch: { slug?: string; bio?: string; enabled?: boolean }) =>
       landlordApi.updateMicrosite(patch),
@@ -108,7 +124,11 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
         gap: spacing.lg,
       }}
     >
-      <View
+      <Pressable
+        onPress={() => uploadBanner.mutate()}
+        disabled={uploadBanner.isPending}
+        accessibilityRole="button"
+        accessibilityLabel={initial.bannerUrl ? 'Change the banner' : 'Add a banner'}
         style={{
           height: 140,
           borderRadius: radius.lg,
@@ -132,7 +152,28 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
             </Text>
           </View>
         )}
-      </View>
+
+        {/* Always offer the swap, even over an existing banner. */}
+        <View
+          style={{
+            position: 'absolute',
+            bottom: spacing.sm,
+            right: spacing.sm,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+            paddingHorizontal: spacing.md,
+            paddingVertical: 6,
+            borderRadius: radius.full,
+            backgroundColor: colors.scrim,
+          }}
+        >
+          <Camera size={13} color="#fff" />
+          <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
+            {uploadBanner.isPending ? 'Uploading…' : initial.bannerUrl ? 'Change' : 'Add'}
+          </Text>
+        </View>
+      </Pressable>
 
       <Card padding={spacing.lg}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>

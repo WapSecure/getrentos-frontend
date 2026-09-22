@@ -3,8 +3,9 @@ import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Banknote, ChevronLeft } from 'lucide-react-native';
+import { Banknote, Camera, ChevronLeft } from 'lucide-react-native';
 import {
+  Avatar,
   Badge,
   Button,
   Card,
@@ -27,6 +28,8 @@ import {
   type LandlordProfile,
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
+import { pickImage } from '@/lib/filePicker';
+import { Image } from 'expo-image';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -157,9 +160,24 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function ProfileForm({ initial }: { initial: LandlordProfile }) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
+
+  const uploadAvatar = useMutation({
+    mutationFn: async () => {
+      const file = await pickImage();
+      if (!file) return null;
+      return landlordApi.uploadAvatar(file);
+    },
+    onSuccess: (result) => {
+      if (!result) return; // the picker was dismissed
+      qc.invalidateQueries({ queryKey: qk.landlord.profile });
+      toast.show('Photo updated.', 'success');
+    },
+    onError: (e) =>
+      toast.show(e instanceof ApiError ? e.message : 'Could not upload that photo.', 'error'),
+  });
 
   const [fullName, setFullName] = useState(initial.fullName);
   const [phone, setPhone] = useState(initial.phone ?? '');
@@ -182,6 +200,42 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
 
   return (
     <View style={{ gap: spacing.md }}>
+      <Pressable
+        onPress={() => uploadAvatar.mutate()}
+        disabled={uploadAvatar.isPending}
+        accessibilityRole="button"
+        accessibilityLabel="Change your photo"
+        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+      >
+        <View
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            overflow: 'hidden',
+            backgroundColor: colors.secondary,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {initial.avatarUrl ? (
+            <Image
+              source={{ uri: initial.avatarUrl }}
+              style={{ width: '100%', height: '100%' }}
+              contentFit="cover"
+            />
+          ) : (
+            <Avatar name={initial.fullName} size={64} />
+          )}
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Camera size={15} color={colors.primary} />
+          <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
+            {uploadAvatar.isPending ? 'Uploading…' : 'Change photo'}
+          </Text>
+        </View>
+      </Pressable>
+
       <TextField label="Full name" value={fullName} onChangeText={setFullName} />
       <TextField
         label="Phone"

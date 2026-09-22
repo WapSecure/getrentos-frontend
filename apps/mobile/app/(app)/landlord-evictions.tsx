@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Gavel, TriangleAlert } from 'lucide-react-native';
+import { ChevronLeft, Download, Gavel, TriangleAlert, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -16,6 +16,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { OpenEvictionSheet } from '@/components/landlord/SmallFormSheets';
 import {
   landlordApi,
   EVICTION_TONE,
@@ -24,6 +25,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 
 function tone(status: string) {
   return EVICTION_TONE[status.toLowerCase() as EvictionStatus] ?? 'neutral';
@@ -32,6 +34,7 @@ function tone(status: string) {
 export default function LandlordEvictions() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
   const qc = useQueryClient();
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -44,6 +47,16 @@ export default function LandlordEvictions() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ['landlord', 'evictions'] });
   const fail = (e: unknown, fallback: string) =>
     toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+
+  const downloadNotice = useMutation({
+    mutationFn: async (kase: EvictionCase) => {
+      const { bytes } = await landlordApi.evictionNoticePdf(kase.id);
+      await shareDownloadedFile(bytes, `eviction-notice-${kase.id}.pdf`, PDF_MIME, 'Notice');
+    },
+    onMutate: (kase) => setBusyId(kase.id),
+    onSettled: () => setBusyId(null),
+    onError: (e) => fail(e, 'Could not download that notice.'),
+  });
 
   const act = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'file' | 'resolve' | 'withdraw' }) =>
@@ -99,6 +112,14 @@ export default function LandlordEvictions() {
             </Text>
           ) : null}
         </View>
+        <Pressable
+          onPress={() => setCreating(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Open an eviction case"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       {query.isError ? (
@@ -127,6 +148,7 @@ export default function LandlordEvictions() {
                   },
                 ])
               }
+              onDownloadNotice={() => downloadNotice.mutate(item)}
             />
           )}
           contentContainerStyle={{
@@ -149,6 +171,8 @@ export default function LandlordEvictions() {
           }
         />
       )}
+
+      <OpenEvictionSheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }
@@ -157,10 +181,12 @@ function CaseCard({
   kase: e,
   busy,
   onAct,
+  onDownloadNotice,
 }: {
   kase: EvictionCase;
   busy: boolean;
   onAct: (action: 'file' | 'resolve' | 'withdraw', label: string) => void;
+  onDownloadNotice: () => void;
 }) {
   const { colors, spacing } = useTheme();
   const status = e.status.toLowerCase();
@@ -199,6 +225,21 @@ function CaseCard({
           <Text variant="caption" color="mutedForeground">
             {e.resolutionNotes}
           </Text>
+        ) : null}
+
+        {status !== 'draft' ? (
+          <Pressable
+            onPress={onDownloadNotice}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel="Download the notice"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, opacity: busy ? 0.5 : 1 }}
+          >
+            <Download size={13} color={colors.primary} />
+            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+              Download notice
+            </Text>
+          </Pressable>
         ) : null}
 
         {open ? (

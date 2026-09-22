@@ -13,6 +13,11 @@ import {
   MapPin,
   Pencil,
   ShowerHead,
+  Camera,
+  Percent,
+  Tags,
+  Plus,
+  Trash2,
   UserPlus,
 } from 'lucide-react-native';
 import {
@@ -38,6 +43,11 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
 import { AssignTenantSheet } from '@/components/landlord/AssignTenantSheet';
+import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
+import { ManagementFeeSheet } from '@/components/landlord/SmallFormSheets';
+import { pickImage } from '@/lib/filePicker';
+import { BulkPriceSheet } from '@/components/landlord/BulkPriceSheet';
+import { usePlanTier } from '@/lib/api/subscription';
 
 export default function LandlordPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,6 +57,10 @@ export default function LandlordPropertyDetail() {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [assigning, setAssigning] = useState<LandlordUnit | null>(null);
+  const [addingUnit, setAddingUnit] = useState(false);
+  const [editingFee, setEditingFee] = useState(false);
+  const [bulkPricing, setBulkPricing] = useState(false);
+  const { isPro } = usePlanTier();
 
   // The API has no single-property route — the list is the source of truth,
   // and sharing its query key means arriving from the list costs no refetch.
@@ -78,6 +92,35 @@ export default function LandlordPropertyDetail() {
       router.back();
     },
     onError: (e) => fail(e, 'Could not archive that property.'),
+  });
+
+  // Deleting is permanent, unlike archiving, so it sits apart and confirms twice over.
+  const remove = useMutation({
+    mutationFn: () => landlordApi.deleteProperty(id),
+    onSuccess: () => {
+      invalidate();
+      toast.show('Property deleted.', 'success');
+      router.back();
+    },
+    onError: (e) => fail(e, 'Could not delete that property.'),
+  });
+
+  /** Uploads a photo and appends its key to the gallery the property already has. */
+  const addPhoto = useMutation({
+    mutationFn: async () => {
+      const file = await pickImage();
+      if (!file || !p) return null;
+      const { key } = await landlordApi.uploadPropertyMedia(file, 'image');
+      return landlordApi.updateProperty(id, {
+        galleryImageKeys: [...(p.galleryImageKeys ?? []), key],
+      });
+    },
+    onSuccess: (result) => {
+      if (!result) return; // the picker was dismissed
+      invalidate();
+      toast.show('Photo added.', 'success');
+    },
+    onError: (e) => fail(e, 'Could not add that photo.'),
   });
 
   const markVacant = useMutation({
@@ -224,7 +267,23 @@ export default function LandlordPropertyDetail() {
           ) : null}
 
           <View style={{ gap: spacing.md }}>
-            <Text variant="heading">Units</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text variant="heading" style={{ flex: 1 }}>
+                Units
+              </Text>
+              <Pressable
+                onPress={() => setAddingUnit(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Add a unit"
+                hitSlop={10}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
+                <Plus size={15} color={colors.primary} />
+                <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
+                  Add unit
+                </Text>
+              </Pressable>
+            </View>
             {units.isLoading ? (
               <Skeleton height={80} radius={radius.lg} />
             ) : unitItems.length === 0 ? (
@@ -301,11 +360,112 @@ export default function LandlordPropertyDetail() {
               </Card>
             )}
           </View>
+
+          {p && !p.archived ? (
+            <Card padding="none">
+              <Pressable
+                onPress={() => addPhoto.mutate()}
+                disabled={addPhoto.isPending}
+                accessibilityRole="button"
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.md,
+                  padding: spacing.lg,
+                }}
+              >
+                <Camera size={18} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyStrong">
+                    {addPhoto.isPending ? 'Uploading…' : 'Add a photo'}
+                  </Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {(p.galleryImageKeys ?? []).length} in the gallery
+                  </Text>
+                </View>
+              </Pressable>
+              {/* PRO-gated server-side; offering it to a FREE plan would only earn a refusal. */}
+              {isPro && unitItems.length > 1 ? (
+                <>
+                  <Divider />
+                  <Pressable
+                    onPress={() => setBulkPricing(true)}
+                    accessibilityRole="button"
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: spacing.md,
+                      padding: spacing.lg,
+                    }}
+                  >
+                    <Tags size={18} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text variant="bodyStrong">Set rent for several units</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        Re-price units in one go
+                      </Text>
+                    </View>
+                  </Pressable>
+                </>
+              ) : null}
+              <Divider />
+              <Pressable
+                onPress={() => setEditingFee(true)}
+                accessibilityRole="button"
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.md,
+                  padding: spacing.lg,
+                }}
+              >
+                <Percent size={18} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyStrong">Management fee</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    What you take from this property&apos;s rent
+                  </Text>
+                </View>
+              </Pressable>
+            </Card>
+          ) : null}
+
+          {p ? (
+            <Pressable
+              onPress={() =>
+                Alert.alert(
+                  'Delete this property?',
+                  'This cannot be undone. Archive it instead if you may want it back.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Delete', style: 'destructive', onPress: () => remove.mutate() },
+                  ]
+                )
+              }
+              disabled={remove.isPending}
+              accessibilityRole="button"
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                paddingVertical: spacing.md,
+              }}
+            >
+              <Trash2 size={15} color={colors.destructive} />
+              <Text variant="callout" color="destructive">
+                Delete property
+              </Text>
+            </Pressable>
+          ) : null}
         </ScrollView>
       )}
 
       <EditPropertySheet open={editing} onClose={() => setEditing(false)} property={p ?? null} />
       <AssignTenantSheet open={!!assigning} onClose={() => setAssigning(null)} unit={assigning} />
+      <AddUnitSheet open={addingUnit} onClose={() => setAddingUnit(false)} propertyId={id} />
+      <ManagementFeeSheet open={editingFee} onClose={() => setEditingFee(false)} propertyId={id} />
+      <BulkPriceSheet open={bulkPricing} onClose={() => setBulkPricing(false)} units={unitItems} />
     </View>
   );
 }

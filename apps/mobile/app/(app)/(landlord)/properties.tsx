@@ -1,10 +1,11 @@
-import { RefreshControl, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Building2, MapPin } from 'lucide-react-native';
+import { Building2, MapPin, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -17,11 +18,13 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
 import { landlordApi, VERIFICATION_TONE, type LandlordProperty } from '@/lib/api/landlord';
 
 export default function LandlordProperties() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
 
   const query = useQuery({
     queryKey: qk.landlord.properties(),
@@ -39,12 +42,24 @@ export default function LandlordProperties() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Text variant="title">Properties</Text>
-        {query.data ? (
-          <Text variant="caption" color="mutedForeground">
-            {query.data.total} propert{query.data.total === 1 ? 'y' : 'ies'}
-          </Text>
-        ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <Text variant="title">Properties</Text>
+            {query.data ? (
+              <Text variant="caption" color="mutedForeground">
+                {query.data.total} propert{query.data.total === 1 ? 'y' : 'ies'}
+              </Text>
+            ) : null}
+          </View>
+          <Pressable
+            onPress={() => setCreating(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Add a property"
+            hitSlop={10}
+          >
+            <Plus size={22} color={colors.primary} />
+          </Pressable>
+        </View>
       </View>
 
       {query.isError ? (
@@ -85,6 +100,8 @@ export default function LandlordProperties() {
           }
         />
       )}
+
+      <CreatePropertySheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }
