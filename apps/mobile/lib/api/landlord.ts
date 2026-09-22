@@ -687,11 +687,11 @@ export interface RenewalCheck {
 
 export interface LandlordMessage {
   id: string;
-  senderId?: string;
-  senderName?: string;
+  /** Which side of the thread wrote it — the API does not send user ids here. */
+  senderId: 'landlord' | 'contact';
   text: string;
-  createdAt: string;
-  isMine?: boolean;
+  timestamp: string;
+  read: boolean;
 }
 
 /* ------------------------ property & unit admin ------------------------ */
@@ -960,6 +960,18 @@ export const landlordApi = {
 
   cancelViewing: (id: string) =>
     apiFetch<void>(`/landlord/viewing-requests/${id}/cancel`, { method: 'PATCH' }),
+
+  sendMessage: (conversationId: string, text: string) =>
+    apiFetch<LandlordMessage>(`/landlord/messages/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      body: { text },
+    }),
+
+  startConversation: (participantId: string, propertyId?: string) =>
+    apiFetch<LandlordConversation>('/landlord/messages/conversations', {
+      method: 'POST',
+      body: { participantId, propertyId },
+    }),
 
   conversationMessages: (id: string, page = 1, pageSize = 50) =>
     apiFetch<Paginated<LandlordMessage>>(

@@ -1,4 +1,5 @@
-import { RefreshControl, View } from 'react-native';
+import { Pressable, RefreshControl, View } from 'react-native';
+import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -89,7 +90,17 @@ function ConversationRow({ c }: { c: LandlordConversation }) {
   const unread = c.unreadCount > 0;
 
   return (
-    <View style={{ flexDirection: 'row', gap: spacing.md, paddingVertical: spacing.md }}>
+    <Pressable
+      onPress={() =>
+        router.push({
+          pathname: '/(app)/landlord-conversation/[id]',
+          params: { id: c.id, name: c.participantName },
+        })
+      }
+      accessibilityRole="button"
+      accessibilityLabel={`Open conversation with ${c.participantName}`}
+      style={{ flexDirection: 'row', gap: spacing.md, paddingVertical: spacing.md }}
+    >
       <Avatar name={c.participantName} size={48} />
       <View style={{ flex: 1, gap: 2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -134,6 +145,6 @@ function ConversationRow({ c }: { c: LandlordConversation }) {
           ) : null}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
