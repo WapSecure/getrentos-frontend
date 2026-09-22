@@ -133,6 +133,51 @@ export const qk = {
     reviews: (page = 1, pageSize = 20) => ['buyer', 'reviews', { page, pageSize }] as const,
     trustProfile: ['buyer', 'trust-profile'] as const,
   },
+  landlord: {
+    dashboardStats: ['landlord', 'dashboard', 'stats'] as const,
+    activity: ['landlord', 'dashboard', 'activity'] as const,
+    revenueTrend: ['landlord', 'dashboard', 'revenue-trend'] as const,
+    properties: (page = 1, pageSize = 20) =>
+      ['landlord', 'properties', { page, pageSize }] as const,
+    units: (propertyId: string) => ['landlord', 'units', propertyId] as const,
+    tenants: (page = 1, pageSize = 20) => ['landlord', 'tenants', { page, pageSize }] as const,
+    applications: (page = 1, pageSize = 20) =>
+      ['landlord', 'applications', { page, pageSize }] as const,
+    leases: (page = 1, pageSize = 20) => ['landlord', 'leases', { page, pageSize }] as const,
+    maintenance: (page = 1, pageSize = 20) =>
+      ['landlord', 'maintenance', { page, pageSize }] as const,
+    maintenanceSummary: ['landlord', 'maintenance', 'summary'] as const,
+    payments: (page = 1, pageSize = 20) => ['landlord', 'payments', { page, pageSize }] as const,
+    paymentStats: ['landlord', 'payments', 'stats'] as const,
+    arrearsSummary: ['landlord', 'payments', 'arrears-summary'] as const,
+    financialsStats: ['landlord', 'financials', 'stats'] as const,
+    financialsChart: ['landlord', 'financials', 'chart'] as const,
+    expenses: (page = 1, pageSize = 20) => ['landlord', 'expenses', { page, pageSize }] as const,
+    ownerStatements: (page = 1, pageSize = 20) =>
+      ['landlord', 'owner-statements', { page, pageSize }] as const,
+    listings: ['landlord', 'listings'] as const,
+    leads: (page = 1, pageSize = 20) => ['landlord', 'leads', { page, pageSize }] as const,
+    microsite: ['landlord', 'microsite'] as const,
+    evictions: (page = 1, pageSize = 20) => ['landlord', 'evictions', { page, pageSize }] as const,
+    reviewsSummary: ['landlord', 'reviews', 'summary'] as const,
+    reviews: (page = 1, pageSize = 20) => ['landlord', 'reviews', { page, pageSize }] as const,
+    documents: (page = 1, pageSize = 20, search?: string, category?: string) =>
+      [
+        'landlord',
+        'documents',
+        { page, pageSize, search: search ?? null, category: category ?? null },
+      ] as const,
+    notifications: ['landlord', 'notifications'] as const,
+    vendors: (page = 1, pageSize = 20) => ['landlord', 'vendors', { page, pageSize }] as const,
+    profile: ['landlord', 'profile'] as const,
+    payout: ['landlord', 'settings', 'payout'] as const,
+    automation: ['landlord', 'settings', 'automation'] as const,
+    notificationPreferences: ['landlord', 'settings', 'notifications'] as const,
+    vacantUnits: ['landlord', 'leases', 'vacant-units'] as const,
+    conversationMessages: (id: string) =>
+      ['landlord', 'messages', 'conversations', id, 'messages'] as const,
+    conversations: ['landlord', 'messages', 'conversations'] as const,
+  },
   resident: {
     household: ['resident', 'household'] as const,
     directory: ['resident', 'directory'] as const,

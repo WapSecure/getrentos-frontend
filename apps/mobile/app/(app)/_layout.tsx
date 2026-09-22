@@ -13,6 +13,7 @@ export default function AppLayout() {
   return (
     <Stack screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="(renter)" />
+      <Stack.Screen name="(landlord)" />
       <Stack.Screen name="(resident)" />
       <Stack.Screen name="(agent)" />
       <Stack.Screen name="agent-task/[id]" options={DETAIL_OPTIONS} />
@@ -88,6 +89,23 @@ export default function AppLayout() {
       <Stack.Screen name="notification-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="reviews" options={DETAIL_OPTIONS} />
       <Stack.Screen name="message-tools" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-property/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-applications" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-leases" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-maintenance" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-payments" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-financials" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-expenses" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-owner-statements" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-listings" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-leads" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-microsite" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-evictions" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-reviews" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-documents" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-notifications" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-vendors" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />
