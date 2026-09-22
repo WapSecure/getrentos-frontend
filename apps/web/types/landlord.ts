@@ -328,6 +328,8 @@ export interface LandlordViewingRequest {
   renterEmail: string;
   status: ViewingRequestStatus;
   requestedAt: string;
+  /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
+  preferredAt?: string;
   scheduledAt?: string;
   notes?: string;
 }

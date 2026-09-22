@@ -11,6 +11,7 @@ export const landlordKeys = {
   vacantUnitsForLease: ['landlord', 'units', 'vacantForLease'] as const,
   listings: (status?: string) => ['landlord', 'listings', status ?? 'all'] as const,
   applications: (status?: string) => ['landlord', 'applications', status ?? 'all'] as const,
+  viewingRequests: (status?: string) => ['landlord', 'viewingRequests', status ?? 'all'] as const,
   leases: (status?: string) => ['landlord', 'leases', status ?? 'all'] as const,
   tenants: ['landlord', 'tenants'] as const,
   payments: (status?: string) => ['landlord', 'payments', status ?? 'all'] as const,
@@ -66,6 +67,7 @@ export const renterKeys = {
   geoInsights: (id: string) => ['renter', 'listing', id, 'geo-insights'] as const,
   savedListings: ['renter', 'savedListings'] as const,
   applications: ['renter', 'applications'] as const,
+  viewings: ['renter', 'viewings'] as const,
   allApplicationNotes: ['renter', 'applications', 'notes'] as const,
   applicationNotes: (applicationId: string) =>
     ['renter', 'applications', applicationId, 'notes'] as const,

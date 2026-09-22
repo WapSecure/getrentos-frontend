@@ -874,6 +874,14 @@ export const landlordService = {
     );
   },
 
+  async listViewingRequests(
+    params: { page?: number; pageSize?: number; status?: string } = {}
+  ): Promise<ApiResponse<Paginated<LandlordViewingRequest>>> {
+    return safeCall(() =>
+      authFetch<Paginated<LandlordViewingRequest>>(`/landlord/viewing-requests${toQuery(params)}`)
+    );
+  },
+
   async confirmViewingRequest(
     id: string,
     scheduledAt: string

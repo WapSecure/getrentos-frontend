@@ -14,6 +14,7 @@ import {
   Users,
   Star,
   Calendar,
+  CalendarCheck,
   BedDouble,
   Gift,
 } from 'lucide-react';
@@ -48,6 +49,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'sidebar.saved', href: ROUTES.RENTER_SAVED, icon: Heart },
       { labelKey: 'sidebar.shortlet_bookings', href: ROUTES.RENTER_BOOKINGS, icon: BedDouble },
       { labelKey: 'sidebar.applications', href: ROUTES.RENTER_APPLICATIONS, icon: FileText },
+      { labelKey: 'sidebar.viewings', href: ROUTES.RENTER_VIEWINGS, icon: CalendarCheck },
     ],
   },
   {

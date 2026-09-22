@@ -15,6 +15,7 @@ import type {
   EscrowStatus,
   LeaseStatus,
   EvictionStatus,
+  ViewingRequestStatus,
 } from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
 import type { OfferStatus } from '@/types/owner';
@@ -55,6 +56,13 @@ export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {
   signed: { label: 'Signed', variant: 'success' },
   lapsed: { label: 'Lapsed unpaid', variant: 'danger', icon: XCircle },
   expired: { label: 'Expired', variant: 'danger' },
+};
+
+export const viewingRequestStatusBadges: Record<ViewingRequestStatus, StatusBadgeEntry> = {
+  requested: { label: 'Requested', variant: 'warning', icon: Clock },
+  confirmed: { label: 'Confirmed', variant: 'info', icon: CheckCircle2 },
+  completed: { label: 'Completed', variant: 'success', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
 
 export const evictionStatusBadges: Record<EvictionStatus, StatusBadgeEntry> = {

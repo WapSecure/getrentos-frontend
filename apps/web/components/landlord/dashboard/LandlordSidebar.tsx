@@ -8,6 +8,7 @@ import {
   FileText,
   Users,
   FileCheck,
+  CalendarCheck,
   CreditCard,
   Wrench,
   HardHat,
@@ -72,6 +73,7 @@ export const navGroups = [
     label: 'Tenancy operations',
     items: [
       item('sidebar.applications', ROUTES.LANDLORD_APPLICATIONS, FileText),
+      item('sidebar.viewing_requests', ROUTES.LANDLORD_VIEWING_REQUESTS, CalendarCheck),
       item('sidebar.tenants', ROUTES.LANDLORD_TENANTS, Users),
       item('sidebar.leases', ROUTES.LANDLORD_LEASES, FileCheck),
       item('sidebar.payments', ROUTES.LANDLORD_PAYMENTS, CreditCard),

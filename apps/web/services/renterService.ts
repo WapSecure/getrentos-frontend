@@ -26,6 +26,8 @@ export interface ViewingRequest {
   unitId?: string;
   status: 'requested' | 'confirmed' | 'completed' | 'cancelled';
   requestedAt: string;
+  /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
+  preferredAt?: string;
   scheduledAt?: string;
   notes?: string;
 }
@@ -838,12 +840,13 @@ export const renterService = {
   async requestViewing(
     propertyId: string,
     unitId?: string,
+    preferredAt?: string,
     notes?: string
   ): Promise<ApiResponse<ViewingRequest>> {
     return safeCall(() =>
       authFetch('/renter/viewing-requests', {
         method: 'POST',
-        body: JSON.stringify({ propertyId, unitId, notes }),
+        body: JSON.stringify({ propertyId, unitId, preferredAt, notes }),
       })
     );
   },
