@@ -41,6 +41,8 @@ export default function LandlordViewingRequestsPage() {
   const [confirmTarget, setConfirmTarget] = useState<{
     id: string;
     propertyName: string;
+    renterName: string;
+    preferredAt?: string;
   } | null>(null);
   const [scheduledAt, setScheduledAt] = useState('');
 
@@ -148,7 +150,12 @@ export default function LandlordViewingRequestsPage() {
                       <Button
                         variant="primary"
                         onClick={() => {
-                          setConfirmTarget({ id: viewing.id, propertyName: viewing.propertyName });
+                          setConfirmTarget({
+                            id: viewing.id,
+                            propertyName: viewing.propertyName,
+                            renterName: viewing.renterName,
+                            preferredAt: viewing.preferredAt,
+                          });
                           setScheduledAt('');
                         }}
                       >
@@ -179,26 +186,38 @@ export default function LandlordViewingRequestsPage() {
 
       <Dialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
         <DialogContent className="max-w-md">
-          <DialogTitle className="font-semibold text-foreground">
-            Confirm viewing for {confirmTarget?.propertyName}
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Pick the time you&apos;ll walk this renter through the property.
-          </DialogDescription>
-          <div className="mt-4">
+          <div className="p-4 border-b border-border">
+            <DialogTitle className="font-semibold text-foreground">Confirm viewing</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              {confirmTarget?.propertyName}
+            </DialogDescription>
+          </div>
+
+          <div className="p-4 space-y-4">
+            {confirmTarget?.renterName && (
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{confirmTarget.renterName}</span>
+                {confirmTarget.preferredAt && (
+                  <> asked for {formatWhen(confirmTarget.preferredAt)}</>
+                )}
+              </p>
+            )}
+
             <DateTimeField
               label="Scheduled time"
               value={scheduledAt}
               onChange={setScheduledAt}
               requireFuture
             />
+
+            {confirmMutation.isError && (
+              <p className="text-xs text-red-500">
+                Could not confirm the viewing. Please try again.
+              </p>
+            )}
           </div>
-          {confirmMutation.isError && (
-            <p className="mt-2 text-xs text-red-500">
-              Could not confirm the viewing. Please try again.
-            </p>
-          )}
-          <div className="mt-4 flex justify-end gap-2">
+
+          <div className="p-4 border-t border-border flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setConfirmTarget(null)}>
               Cancel
             </Button>
