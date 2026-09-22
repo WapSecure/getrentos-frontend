@@ -110,9 +110,11 @@ export default function LandlordPropertyDetail() {
         >
           <ChevronLeft size={26} color={colors.foreground} />
         </Pressable>
-        <Text variant="title" numberOfLines={1} style={{ flex: 1 }}>
-          {p?.name ?? 'Property'}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text variant="title" numberOfLines={1}>
+            {p?.name ?? 'Property'}
+          </Text>
+        </View>
         {p && !p.archived ? (
           <>
             <Pressable
