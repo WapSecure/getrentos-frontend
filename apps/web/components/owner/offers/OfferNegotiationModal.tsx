@@ -36,7 +36,11 @@ export const OfferNegotiationModal = ({
   if (!offer) return null;
 
   const isDecided =
-    offer.status === 'accepted' || offer.status === 'rejected' || offer.status === 'closed';
+    offer.status === 'accepted' ||
+    offer.status === 'rejected' ||
+    offer.status === 'withdrawn' ||
+    offer.status === 'expired' ||
+    offer.status === 'closed';
 
   const handleClose = () => {
     setIsCountering(false);

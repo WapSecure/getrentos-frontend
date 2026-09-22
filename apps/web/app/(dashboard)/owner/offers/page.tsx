@@ -178,6 +178,9 @@ export default function OwnerOffersPage() {
     { value: 'countered', label: 'Countered' },
     { value: 'accepted', label: 'Accepted' },
     { value: 'rejected', label: 'Rejected' },
+    { value: 'withdrawn', label: 'Withdrawn' },
+    { value: 'expired', label: 'Expired' },
+    { value: 'closed', label: 'Closed' },
   ];
 
   return (

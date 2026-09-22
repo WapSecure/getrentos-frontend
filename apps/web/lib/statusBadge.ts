@@ -86,6 +86,8 @@ export const offerStatusBadges: Record<OfferStatus, StatusBadgeEntry> = {
   countered: { label: 'Countered', variant: 'info', icon: RefreshCcw },
   accepted: { label: 'Accepted', variant: 'success', icon: CheckCircle2 },
   rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
+  withdrawn: { label: 'Withdrawn', variant: 'neutral', icon: XCircle },
+  expired: { label: 'Expired', variant: 'neutral', icon: Archive },
   closed: { label: 'Closed', variant: 'neutral', icon: Archive },
 };
 
