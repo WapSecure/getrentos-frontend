@@ -133,7 +133,7 @@ export const VirtualTourViewerModal = ({
                 disabled={
                   !isFutureDateTime(preferredTime) || !propertyId || requestViewing.isPending
                 }
-                onClick={() => requestViewing.mutate(new Date(preferredTime).toLocaleString())}
+                onClick={() => requestViewing.mutate(preferredTime)}
               >
                 {requestViewing.isPending ? 'Submitting…' : 'Confirm'}
               </Button>
