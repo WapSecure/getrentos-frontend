@@ -52,6 +52,8 @@ export interface LandlordProperty {
   description?: string;
   coverImage?: string;
   galleryImages?: string[];
+  /** Storage keys behind galleryImages — what an update must send back. */
+  galleryImageKeys?: string[];
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
@@ -405,7 +407,16 @@ export const PAYOUT_TONE: Record<PayoutStatus, 'success' | 'warning' | 'danger' 
 
 /* ------------------------------- listings ------------------------------ */
 
-export type ListingStatus = 'draft' | 'published' | 'paused' | 'archived';
+/** The server's ListingStatus enum, lowercased by the DTO mapper. */
+export type ListingStatus = 'draft' | 'pending_verification' | 'published' | 'paused' | 'closed';
+
+export const LISTING_STATUS_LABEL: Record<ListingStatus, string> = {
+  draft: 'Draft',
+  pending_verification: 'In review',
+  published: 'Live',
+  paused: 'Paused',
+  closed: 'Closed',
+};
 
 export interface LandlordListing {
   id: string;
@@ -434,9 +445,10 @@ export const LISTING_STATUS_TONE: Record<
   'success' | 'warning' | 'neutral' | 'info'
 > = {
   published: 'success',
+  pending_verification: 'info',
   paused: 'warning',
-  draft: 'info',
-  archived: 'neutral',
+  draft: 'neutral',
+  closed: 'neutral',
 };
 
 /* --------------------------------- leads ------------------------------- */
@@ -720,12 +732,84 @@ export interface UpdatePropertyInput {
   city?: string;
   state?: string;
   description?: string;
+  /** Storage keys from uploadPropertyMedia; null clears the cover. */
+  coverImageKey?: string | null;
+  galleryImageKeys?: string[];
 }
 
 /** Whether the applicant agreed to share their standing from a past tenancy. */
 export interface TenancyStanding {
+  /** False when the applicant chose not to share — the other fields are then absent. */
   shared: boolean;
-  [key: string]: unknown;
+  trustScore?: number;
+  signedLeaseCount?: number;
+  identityVerified?: boolean;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+}
+
+/* ------------------------------- creation ------------------------------ */
+
+export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
+
+export interface ManagementFeeConfig {
+  id: string;
+  propertyId: string;
+  type: ManagementFeeType;
+  value: number;
+}
+
+export interface CreatePropertyInput {
+  name: string;
+  type: PropertyType;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  description?: string;
+  totalUnits?: number;
+  /** Storage keys returned by uploadPropertyMedia. */
+  coverImageKey?: string;
+  galleryImageKeys?: string[];
+  videoTourKey?: string;
+}
+
+export interface CreateUnitInput {
+  propertyId: string;
+  unitName: string;
+  bedrooms: number;
+  bathrooms: number;
+  askingRent?: number;
+  /** Defaults to 'year' server-side when omitted. */
+  askingRentPeriod?: 'year' | 'month';
+}
+
+export interface CreateListingInput {
+  unitId: string;
+  listingTitle: string;
+  askingRent: number;
+  rentPeriod?: 'month' | 'year';
+  allowsMonthlyPayment?: boolean;
+  securityDeposit?: number;
+  /** `yyyy-MM-dd` */
+  availabilityDate: string;
+  amenities: string[];
+  allowPets: boolean;
+  furnished: boolean;
+  shortLetEnabled: boolean;
+}
+
+export interface CreateLeaseInput {
+  unitId: string;
+  tenantName?: string;
+  tenantId?: string;
+  leaseStart: string;
+  leaseEnd: string;
+  rentAmount: number;
+  rentPeriod?: 'month' | 'year';
+  securityDeposit?: number;
+  /** Send to the tenant straight away rather than saving a draft. */
+  sendImmediately: boolean;
 }
 
 /* ------------------------------- messages ------------------------------ */
@@ -955,8 +1039,12 @@ export const landlordApi = {
       body: input,
     }),
 
-  confirmViewing: (id: string) =>
-    apiFetch<void>(`/landlord/viewing-requests/${id}/confirm`, { method: 'PATCH' }),
+  /** The API requires the agreed time as an ISO date-time. */
+  confirmViewing: (id: string, scheduledAt: string) =>
+    apiFetch<void>(`/landlord/viewing-requests/${id}/confirm`, {
+      method: 'PATCH',
+      body: { scheduledAt },
+    }),
 
   cancelViewing: (id: string) =>
     apiFetch<void>(`/landlord/viewing-requests/${id}/cancel`, { method: 'PATCH' }),
@@ -994,10 +1082,14 @@ export const landlordApi = {
     }),
 
   /** PRO-gated server-side; the caller must handle a plan refusal. */
-  bulkUpdatePricing: (unitIds: string[], askingRent: number) =>
+  bulkUpdatePricing: (
+    unitIds: string[],
+    askingRent: number,
+    askingRentPeriod: 'year' | 'month' = 'year'
+  ) =>
     apiFetch<{ updated: number }>('/landlord/units/bulk-price', {
       method: 'PATCH',
-      body: { unitIds, askingRent },
+      body: { unitIds, askingRent, askingRentPeriod },
     }),
 
   listingVacantUnits: () => apiFetch<LandlordUnit[]>('/landlord/listings/vacant-units'),
@@ -1005,8 +1097,43 @@ export const landlordApi = {
   tenancyStanding: (applicationId: string) =>
     apiFetch<TenancyStanding>(`/landlord/applications/${applicationId}/tenancy-standing`),
 
+  /** Empty 200 when nothing is configured yet, which the client reads as undefined. */
   managementFeeConfig: (propertyId: string) =>
-    apiFetch<Record<string, unknown>>(`/landlord/management-fee-config?propertyId=${propertyId}`),
+    apiFetch<ManagementFeeConfig | undefined>(
+      `/landlord/management-fee-config?propertyId=${propertyId}`
+    ),
+
+  setManagementFeeConfig: (input: { propertyId: string; type: ManagementFeeType; value: number }) =>
+    apiFetch<ManagementFeeConfig>('/landlord/management-fee-config', {
+      method: 'PUT',
+      body: input,
+    }),
+
+  createProperty: (input: CreatePropertyInput) =>
+    apiFetch<LandlordProperty>('/landlord/properties', { method: 'POST', body: input }),
+
+  deleteProperty: (id: string) =>
+    apiFetch<void>(`/landlord/properties/${id}`, { method: 'DELETE' }),
+
+  createUnit: (input: CreateUnitInput) =>
+    apiFetch<LandlordUnit>('/landlord/units', { method: 'POST', body: input }),
+
+  createListing: (input: CreateListingInput) =>
+    apiFetch<LandlordListing>('/landlord/listings', { method: 'POST', body: input }),
+
+  createLease: (input: CreateLeaseInput) =>
+    apiFetch<LandlordLease>('/landlord/leases', { method: 'POST', body: input }),
+
+  initiateEviction: (leaseId: string, reason: string) =>
+    apiFetch<EvictionCase>('/landlord/evictions', { method: 'POST', body: { leaseId, reason } }),
+
+  uploadDocument: (file: PickedFile, name: string, category: DocumentCategory) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('name', name);
+    form.append('category', category);
+    return apiUpload<LandlordDocument>('/landlord/documents', form);
+  },
 
   generateOwnerStatement: (input: {
     propertyId?: string;
@@ -1025,7 +1152,10 @@ export const landlordApi = {
     const form = new FormData();
     appendFile(form, 'file', file);
     form.append('kind', kind);
-    return apiUpload<{ key: string; url?: string }>('/landlord/properties/media/upload', form);
+    return apiUpload<{ key: string; kind: 'image' | 'video' }>(
+      '/landlord/properties/media/upload',
+      form
+    );
   },
 
   removePropertyMedia: (key: string) =>

@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Download, Gavel, TriangleAlert } from 'lucide-react-native';
+import { ChevronLeft, Download, Gavel, TriangleAlert, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -16,6 +16,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { OpenEvictionSheet } from '@/components/landlord/SmallFormSheets';
 import {
   landlordApi,
   EVICTION_TONE,
@@ -33,6 +34,7 @@ function tone(status: string) {
 export default function LandlordEvictions() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
   const qc = useQueryClient();
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -110,6 +112,14 @@ export default function LandlordEvictions() {
             </Text>
           ) : null}
         </View>
+        <Pressable
+          onPress={() => setCreating(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Open an eviction case"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       {query.isError ? (
@@ -161,6 +171,8 @@ export default function LandlordEvictions() {
           }
         />
       )}
+
+      <OpenEvictionSheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }

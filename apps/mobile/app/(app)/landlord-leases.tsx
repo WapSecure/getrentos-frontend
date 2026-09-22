@@ -11,6 +11,7 @@ import {
   PenLine,
   RefreshCw,
   Send,
+  Plus,
 } from 'lucide-react-native';
 import {
   Badge,
@@ -24,6 +25,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { CreateLeaseSheet } from '@/components/landlord/CreateLeaseSheet';
 import { landlordApi, LEASE_STATUS_TONE, type LandlordLease } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
@@ -34,6 +36,7 @@ import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 export default function LandlordLeases() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
   const qc = useQueryClient();
   const toast = useToast();
   const [signing, setSigning] = useState<LandlordLease | null>(null);
@@ -105,6 +108,14 @@ export default function LandlordLeases() {
             </Text>
           ) : null}
         </View>
+        <Pressable
+          onPress={() => setCreating(true)}
+          accessibilityRole="button"
+          accessibilityLabel="New lease"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       {query.isError ? (
@@ -152,6 +163,8 @@ export default function LandlordLeases() {
 
       <SignLeaseSheet open={!!signing} onClose={() => setSigning(null)} lease={signing} />
       <RenewLeaseSheet open={!!renewing} onClose={() => setRenewing(null)} lease={renewing} />
+
+      <CreateLeaseSheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }

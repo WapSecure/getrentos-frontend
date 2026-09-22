@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ChevronLeft, Pause, Play, ShieldAlert, Tag, Video } from 'lucide-react-native';
+import { ChevronLeft, Pause, Play, ShieldAlert, Tag, Video, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -18,13 +18,20 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { landlordApi, LISTING_STATUS_TONE, type LandlordListing } from '@/lib/api/landlord';
+import { CreateListingSheet } from '@/components/landlord/CreateListingSheet';
+import {
+  landlordApi,
+  LISTING_STATUS_LABEL,
+  LISTING_STATUS_TONE,
+  type LandlordListing,
+} from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 
 export default function LandlordListings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
   const qc = useQueryClient();
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -90,6 +97,14 @@ export default function LandlordListings() {
             </Text>
           ) : null}
         </View>
+        <Pressable
+          onPress={() => setCreating(true)}
+          accessibilityRole="button"
+          accessibilityLabel="List a unit"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       {gateBlocked ? (
@@ -153,6 +168,8 @@ export default function LandlordListings() {
           }
         />
       )}
+
+      <CreateListingSheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }
@@ -200,7 +217,10 @@ function ListingRow({
             <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
               {l.listingTitle}
             </Text>
-            <Badge label={l.status} tone={LISTING_STATUS_TONE[l.status]} />
+            <Badge
+              label={LISTING_STATUS_LABEL[l.status] ?? l.status}
+              tone={LISTING_STATUS_TONE[l.status] ?? 'neutral'}
+            />
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

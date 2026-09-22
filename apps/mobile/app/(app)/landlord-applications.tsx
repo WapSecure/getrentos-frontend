@@ -27,6 +27,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel';
 
 /** Statuses that still await the landlord's decision. */
 const OPEN_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
@@ -218,6 +219,8 @@ function ApplicationCard({
             <Text variant="caption">{a.trustScore}</Text>
           </Detail>
         </View>
+
+        <TenancyStandingPanel applicationId={a.id} />
 
         {decidable ? (
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>

@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Download, FileText } from 'lucide-react-native';
+import { ChevronLeft, Download, FileText, Plus } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -16,6 +16,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { UploadDocumentSheet } from '@/components/landlord/SmallFormSheets';
 import {
   landlordApi,
   DOCUMENT_CATEGORIES,
@@ -29,6 +30,7 @@ import { formatDate } from '@/lib/format';
 export default function LandlordDocuments() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const [creating, setCreating] = useState(false);
   const toast = useToast();
 
   const [search, setSearch] = useState('');
@@ -73,6 +75,14 @@ export default function LandlordDocuments() {
         <Text variant="title" style={{ flex: 1 }}>
           Documents
         </Text>
+        <Pressable
+          onPress={() => setCreating(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Upload a document"
+          hitSlop={10}
+        >
+          <Plus size={22} color={colors.primary} />
+        </Pressable>
       </View>
 
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm, paddingBottom: spacing.md }}>
@@ -154,6 +164,8 @@ export default function LandlordDocuments() {
           }
         />
       )}
+
+      <UploadDocumentSheet open={creating} onClose={() => setCreating(false)} />
     </View>
   );
 }
