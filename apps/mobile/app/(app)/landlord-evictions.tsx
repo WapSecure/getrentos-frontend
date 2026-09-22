@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Gavel, TriangleAlert } from 'lucide-react-native';
+import { ChevronLeft, Download, Gavel, TriangleAlert } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -24,6 +24,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 
 function tone(status: string) {
   return EVICTION_TONE[status.toLowerCase() as EvictionStatus] ?? 'neutral';
@@ -44,6 +45,16 @@ export default function LandlordEvictions() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ['landlord', 'evictions'] });
   const fail = (e: unknown, fallback: string) =>
     toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+
+  const downloadNotice = useMutation({
+    mutationFn: async (kase: EvictionCase) => {
+      const { bytes } = await landlordApi.evictionNoticePdf(kase.id);
+      await shareDownloadedFile(bytes, `eviction-notice-${kase.id}.pdf`, PDF_MIME, 'Notice');
+    },
+    onMutate: (kase) => setBusyId(kase.id),
+    onSettled: () => setBusyId(null),
+    onError: (e) => fail(e, 'Could not download that notice.'),
+  });
 
   const act = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'file' | 'resolve' | 'withdraw' }) =>
@@ -127,6 +138,7 @@ export default function LandlordEvictions() {
                   },
                 ])
               }
+              onDownloadNotice={() => downloadNotice.mutate(item)}
             />
           )}
           contentContainerStyle={{
@@ -157,10 +169,12 @@ function CaseCard({
   kase: e,
   busy,
   onAct,
+  onDownloadNotice,
 }: {
   kase: EvictionCase;
   busy: boolean;
   onAct: (action: 'file' | 'resolve' | 'withdraw', label: string) => void;
+  onDownloadNotice: () => void;
 }) {
   const { colors, spacing } = useTheme();
   const status = e.status.toLowerCase();
@@ -199,6 +213,21 @@ function CaseCard({
           <Text variant="caption" color="mutedForeground">
             {e.resolutionNotes}
           </Text>
+        ) : null}
+
+        {status !== 'draft' ? (
+          <Pressable
+            onPress={onDownloadNotice}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel="Download the notice"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, opacity: busy ? 0.5 : 1 }}
+          >
+            <Download size={13} color={colors.primary} />
+            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+              Download notice
+            </Text>
+          </Pressable>
         ) : null}
 
         {open ? (

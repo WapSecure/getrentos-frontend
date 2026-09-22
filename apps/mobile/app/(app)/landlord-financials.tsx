@@ -1,16 +1,42 @@
+import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ChevronRight, ReceiptText, Wallet } from 'lucide-react-native';
-import { Card, Divider, ErrorState, Price, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { ChevronLeft, ChevronRight, Download, ReceiptText, Wallet } from 'lucide-react-native';
+import {
+  Card,
+  Divider,
+  ErrorState,
+  Price,
+  Skeleton,
+  Text,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi } from '@/lib/api/landlord';
 import { IncomeExpenseChart } from '@/components/landlord/IncomeExpenseChart';
+import { ApiError } from '@/lib/api/client';
+import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 
 export default function LandlordFinancials() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const toast = useToast();
+  const [exporting, setExporting] = useState(false);
+
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const { bytes } = await landlordApi.financialsExport();
+      await shareDownloadedFile(bytes, 'getrentos-financials.csv', CSV_MIME, 'Financials');
+    } catch (e) {
+      toast.show(e instanceof ApiError ? e.message : 'Could not export that.', 'error');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const stats = useQuery({
     queryKey: qk.landlord.financialsStats,
@@ -43,9 +69,19 @@ export default function LandlordFinancials() {
         >
           <ChevronLeft size={26} color={colors.foreground} />
         </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Financials
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text variant="title">Financials</Text>
+        </View>
+        <Pressable
+          onPress={exportCsv}
+          disabled={exporting}
+          accessibilityRole="button"
+          accessibilityLabel="Export as CSV"
+          accessibilityState={{ busy: exporting }}
+          hitSlop={10}
+        >
+          <Download size={20} color={exporting ? colors.mutedForeground : colors.foreground} />
+        </Pressable>
       </View>
 
       {stats.isError ? (

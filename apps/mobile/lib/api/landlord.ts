@@ -1,4 +1,5 @@
-import { apiFetch } from './client';
+import { apiDownload, apiFetch, apiUpload } from './client';
+import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 
 /* ------------------------------ dashboard ------------------------------ */
@@ -1004,6 +1005,39 @@ export const landlordApi = {
       method: 'POST',
       body: input,
     }),
+
+  /* ------------------------------ file I/O ----------------------------- */
+
+  /** Returns the storage key to attach to a property; the file is not committed yet. */
+  uploadPropertyMedia: (file: PickedFile, kind: 'image' | 'video') => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('kind', kind);
+    return apiUpload<{ key: string; url?: string }>('/landlord/properties/media/upload', form);
+  },
+
+  removePropertyMedia: (key: string) =>
+    apiFetch<void>('/landlord/properties/media/upload', { method: 'DELETE', body: { key } }),
+
+  uploadAvatar: (file: PickedFile) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    return apiUpload<LandlordProfile>('/landlord/profile/avatar', form);
+  },
+
+  uploadMicrositeBanner: (file: PickedFile) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    return apiUpload<MicrositeSettings>('/landlord/microsite/banner', form);
+  },
+
+  /** Streams a PDF; returns the bytes to write to disk and share. */
+  leasePdf: (id: string) => apiDownload(`/landlord/leases/${id}/pdf`),
+
+  evictionNoticePdf: (id: string) => apiDownload(`/landlord/evictions/${id}/notice.pdf`),
+
+  /** Streams CSV, not JSON. */
+  financialsExport: () => apiDownload('/landlord/financials/export'),
 
   conversations: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<LandlordConversation>>(

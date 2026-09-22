@@ -4,7 +4,14 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, FileSignature, PenLine, RefreshCw, Send } from 'lucide-react-native';
+import {
+  ChevronLeft,
+  Download,
+  FileSignature,
+  PenLine,
+  RefreshCw,
+  Send,
+} from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -22,6 +29,7 @@ import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
 import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
 import { SignLeaseSheet } from '@/components/landlord/SignLeaseSheet';
+import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 
 export default function LandlordLeases() {
   const { colors, spacing, radius } = useTheme();
@@ -31,6 +39,22 @@ export default function LandlordLeases() {
   const [signing, setSigning] = useState<LandlordLease | null>(null);
   const [renewing, setRenewing] = useState<LandlordLease | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const downloadPdf = useMutation({
+    mutationFn: async (lease: LandlordLease) => {
+      const { bytes } = await landlordApi.leasePdf(lease.id);
+      await shareDownloadedFile(
+        bytes,
+        `lease-${lease.tenantName.replace(/\s+/g, '-').toLowerCase()}.pdf`,
+        PDF_MIME,
+        'Lease'
+      );
+    },
+    onMutate: (lease) => setBusyId(lease.id),
+    onSettled: () => setBusyId(null),
+    onError: (e) =>
+      toast.show(e instanceof ApiError ? e.message : 'Could not download that lease.', 'error'),
+  });
 
   const send = useMutation({
     mutationFn: (id: string) => landlordApi.sendLease(id),
@@ -102,6 +126,7 @@ export default function LandlordLeases() {
               onSend={() => send.mutate(item.id)}
               onSign={() => setSigning(item)}
               onRenew={() => setRenewing(item)}
+              onDownload={() => downloadPdf.mutate(item)}
             />
           )}
           contentContainerStyle={{
@@ -137,12 +162,14 @@ function LeaseCard({
   onSend,
   onSign,
   onRenew,
+  onDownload,
 }: {
   lease: LandlordLease;
   busy: boolean;
   onSend: () => void;
   onSign: () => void;
   onRenew: () => void;
+  onDownload: () => void;
 }) {
   const { colors, spacing } = useTheme();
 
@@ -200,6 +227,12 @@ function LeaseCard({
               busy={busy}
             />
           ) : null}
+          <LeaseAction
+            icon={<Download size={13} color={colors.primary} />}
+            label="PDF"
+            onPress={onDownload}
+            busy={busy}
+          />
         </View>
       </View>
     </Card>
