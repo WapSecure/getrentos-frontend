@@ -19,6 +19,7 @@ import {
   AUTHORITY_RELATIONSHIP_LABELS,
   propertyAuthorityService,
   type AuthorityRelationship,
+  type AuthorityStatus,
   type ManagedPropertyDto,
   type PropertyAuthorityDto,
 } from '@/services/propertyAuthorityService';
@@ -167,6 +168,20 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
   </div>
 );
 
+/**
+ * What actually happened when a claim was submitted.
+ *
+ * The backend answers a claim that already exists by returning it untouched
+ * rather than creating a duplicate — both an ACTIVE authority and a PENDING
+ * claim come straight back. Announcing "claim filed" in those cases describes
+ * something that did not happen, so the message follows the status we got back.
+ */
+const claimOutcomeMessage = (status: AuthorityStatus) => {
+  if (status === 'ACTIVE') return 'You already act for this property — nothing new was filed.';
+  if (status === 'PENDING') return 'You already have a claim on this property awaiting an officer.';
+  return 'Claim filed. It grants nothing until an officer approves it.';
+};
+
 const ClaimForm = () => {
   const queryClient = useQueryClient();
   const [propertyId, setPropertyId] = useState('');
@@ -177,10 +192,12 @@ const ClaimForm = () => {
 
   const mutation = useMutation({
     mutationFn: () =>
-      unwrap(propertyAuthorityService.request({ propertyId: propertyId.trim(), relationship, note })),
-    onSuccess: () => {
+      unwrap(
+        propertyAuthorityService.request({ propertyId: propertyId.trim(), relationship, note })
+      ),
+    onSuccess: (authority) => {
       setError(null);
-      setSuccess('Claim filed. It grants nothing until an officer approves it.');
+      setSuccess(claimOutcomeMessage(authority.status));
       setPropertyId('');
       setNote('');
       void queryClient.invalidateQueries({ queryKey: authorityKeys.mine });
@@ -245,9 +262,7 @@ const ClaimForm = () => {
           <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
         </div>
       )}
-      {success && (
-        <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-400">{success}</p>
-      )}
+      {success && <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-400">{success}</p>}
 
       <button
         type="button"
