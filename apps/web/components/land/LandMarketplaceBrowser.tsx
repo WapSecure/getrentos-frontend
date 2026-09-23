@@ -31,6 +31,7 @@ import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
 import {
   NIGERIA_STATES,
   NIGERIA_STATE_CITIES,
@@ -45,6 +46,8 @@ import {
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
+/** Whether the person browsing can actually make an offer, and if not, why. */
+type LandViewer = 'buyer' | 'member' | 'anonymous';
 
 interface LandMarketplaceBrowserProps {
   mode: MarketplaceMode;
@@ -134,7 +137,24 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     }
   };
 
-  const buyerRoute = (path: string) => (mode === 'buyer' ? path : ROUTES.LOGIN);
+  /**
+   * Who is looking at the parcels. `mode` only says which surface rendered the
+   * marketplace, so on the public page the CTAs used to tell a signed-in visitor
+   * to "sign in" — and sent them to a sign-in form they had already passed.
+   */
+  const [viewer] = useState<LandViewer>(() =>
+    viewerHasRole('buyer') ? 'buyer' : viewerIsSignedIn() ? 'member' : 'anonymous'
+  );
+  const canOffer = mode === 'buyer' || viewer === 'buyer';
+  const needsSignIn = viewer === 'anonymous';
+
+  /**
+   * Buyers act in place. A signed-in visitor without a buyer account is pointed
+   * at the buyer area, whose layout moves them somewhere they can actually use,
+   * rather than at the sign-in form.
+   */
+  const buyerRoute = (path: string) =>
+    canOffer ? path : needsSignIn ? ROUTES.LOGIN : ROUTES.BUYER_LAND;
 
   return (
     <>
@@ -418,7 +438,11 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   rounded="lg"
                   icon={<MessageSquare className="h-4 w-4" />}
                 >
-                  {mode === 'buyer' ? 'Ask a question' : 'Sign in to ask'}
+                  {canOffer
+                    ? 'Ask a question'
+                    : needsSignIn
+                      ? 'Sign in to ask'
+                      : 'Buyer accounts only'}
                 </Button>
                 <Button
                   href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
@@ -426,7 +450,11 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   rounded="lg"
                   icon={<ShieldCheck className="h-4 w-4" />}
                 >
-                  {mode === 'buyer' ? 'Make an offer' : 'Sign in to offer'}
+                  {canOffer
+                    ? 'Make an offer'
+                    : needsSignIn
+                      ? 'Sign in to offer'
+                      : 'Buyer accounts only'}
                 </Button>
               </div>
             </div>

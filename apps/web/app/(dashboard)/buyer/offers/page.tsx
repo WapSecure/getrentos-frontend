@@ -56,6 +56,7 @@ function BuyerOffersPageContent() {
     mutationFn: (data: {
       listingId: string;
       amount: number;
+      depositAmount?: number;
       financingType?: string;
       message?: string;
     }) => unwrap(buyerService.createOffer(data)),
@@ -100,6 +101,10 @@ function BuyerOffersPageContent() {
     createMutation.mutate({
       listingId: offerData.propertyId,
       amount: offerData.offerAmount,
+      // Omitting this used to be invisible: the field is optional, so the
+      // backend quietly fell back to its 10% default and the buyer's figure
+      // never reached the offer.
+      depositAmount: offerData.depositAmount,
       financingType: offerData.financingType,
       message: offerData.message,
     });
