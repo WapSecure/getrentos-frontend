@@ -12,7 +12,6 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
-import { useSessionTimeout } from '@getrentos/ui';
 
 export type GatemanUser = { fullName: string; email: string; role?: string; roles?: string[] };
 
@@ -25,7 +24,6 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<GatemanUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;

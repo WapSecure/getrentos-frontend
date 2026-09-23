@@ -281,7 +281,11 @@ export async function ensureValidSession(): Promise<boolean> {
   return refreshSession();
 }
 
-export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+  allowRefreshRetry = true
+): Promise<T> {
   // Don't set Content-Type for FormData bodies — the browser must set it
   // itself (including the multipart boundary).
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
@@ -300,6 +304,16 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     // Preserve cancellation semantics for query libraries and route changes.
     if (error instanceof Error && error.name === 'AbortError') throw error;
     throw new ApiError(0, 'Unable to reach the server. Please check your connection.');
+  }
+
+  // The access token is deliberately short-lived, so a 401 usually just means
+  // it lapsed while the user was working — not that the session is over. Spend
+  // the refresh cookie on it and replay the request once before treating the
+  // user as signed out. `/auth/*` is exempt: a 401 from sign-in or the refresh
+  // call itself is the real thing.
+  if (response.status === 401 && allowRefreshRetry && !path.startsWith('/auth/')) {
+    const refreshed = await refreshSession();
+    if (refreshed) return apiFetch<T>(path, options, false);
   }
 
   const body = await readResponseBody<T>(response);

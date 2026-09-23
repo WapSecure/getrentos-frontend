@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { AdminNavbar } from '@/components/admin/navigation/AdminNavbar';
 import { AdminSidebar } from '@/components/admin/dashboard/AdminSidebar';
-import { PageLoadingState, useSessionTimeout } from '@getrentos/ui';
+import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
   isAuthenticated,
@@ -28,7 +28,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  useSessionTimeout(undefined, ROUTES.ADMIN_LOGIN);
 
   useEffect(() => {
     let cancelled = false;

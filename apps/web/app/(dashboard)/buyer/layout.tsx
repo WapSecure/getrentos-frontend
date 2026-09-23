@@ -13,7 +13,6 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
-import { useSessionTimeout } from '@getrentos/ui';
 
 export type BuyerUser = { fullName: string; email: string; role?: string; roles?: string[] };
 
@@ -26,7 +25,6 @@ export default function BuyerLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<BuyerUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;
