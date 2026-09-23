@@ -1,5 +1,6 @@
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
+import type { IssuedVisitorPass, VisitorPass } from './visitor-pass';
 
 export type HouseholdStatus = 'active' | 'inactive';
 
@@ -113,27 +114,12 @@ export interface Poll {
   createdAt: string;
 }
 
-export type VisitorPassStatus = 'pending' | 'checked_in' | 'checked_out' | 'expired' | 'revoked';
-
-export interface VisitorPass {
-  id: string;
-  householdId: string;
-  unitLabel: string;
-  residentName: string;
-  visitorName: string;
-  visitorPhone?: string;
-  purpose?: string;
-  status: VisitorPassStatus;
-  expiresAt: string;
-  checkedInAt?: string;
-  createdAt: string;
-}
-
-export interface IssuedVisitorPass extends VisitorPass {
-  pin: string;
-  /** The pin encoded as a scannable QR code (data:image/png;base64,...). */
-  qrDataUrl: string;
-}
+export type {
+  IssuedVisitorPass,
+  VisitorPass,
+  VisitorPassSource,
+  VisitorPassStatus,
+} from './visitor-pass';
 
 export interface Amenity {
   id: string;
@@ -293,6 +279,22 @@ export const residentApi = {
 
   revokeVisitorPass: (passId: string) =>
     apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/revoke`, { method: 'PATCH' }),
+
+  /**
+   * Consents to a walk-in: someone is at the gate asking for this household and
+   * the estate will not let them in until somebody who lives here says so.
+   */
+  approveWalkIn: (passId: string) =>
+    apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/approve`, {
+      method: 'POST',
+    }),
+
+  /** Refuses a walk-in. The reason is carried through to the guard. */
+  denyWalkIn: (passId: string, reason?: string) =>
+    apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/deny`, {
+      method: 'POST',
+      body: reason ? { reason } : {},
+    }),
 
   listAmenities: () => apiFetch<Amenity[]>('/estate/resident/amenities'),
 

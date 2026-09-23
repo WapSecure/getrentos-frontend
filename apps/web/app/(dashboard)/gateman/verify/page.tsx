@@ -3,10 +3,11 @@
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
-import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, XCircle } from 'lucide-react';
+import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
 import { Button, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
+import { WalkInDialog } from '@/components/gateman/WalkInDialog';
 import {
   clearGateReplaySummary,
   gateOfflineQueue,
@@ -56,9 +57,12 @@ export default function GatemanVerifyPage() {
     error?: string;
     /** Set when a write was recorded on the device instead of the estate. */
     queued?: string;
+    /** Set when a walk-in request has just been sent to the household. */
+    requested?: string;
   } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [walkInOpen, setWalkInOpen] = useState(false);
   const scanInputRef = useRef<HTMLInputElement>(null);
 
   const queue = useGateQueue();
@@ -67,6 +71,36 @@ export default function GatemanVerifyPage() {
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
     queryFn: () => unwrap(estateService.getMyEstate()),
+  });
+
+  /**
+   * Walk-ins the household has not answered, and ones it approved that nobody
+   * has admitted yet. Both poll: the household decides whenever they look at
+   * their phone, and the guard is standing at a barrier waiting for exactly that,
+   * so the panel has to move without them touching anything.
+   */
+  const { data: awaitingData } = useQuery({
+    queryKey: ['estate', estate?.id ?? '', 'walk-ins', 'awaiting'],
+    queryFn: () =>
+      unwrap(
+        estateService.listVisitorPasses(estate!.id, {
+          status: 'awaiting_approval',
+          page: 1,
+          pageSize: 50,
+        })
+      ),
+    enabled: !!estate,
+    refetchInterval: 15_000,
+  });
+
+  const { data: approvedData } = useQuery({
+    queryKey: ['estate', estate?.id ?? '', 'walk-ins', 'approved'],
+    queryFn: () =>
+      unwrap(
+        estateService.listVisitorPasses(estate!.id, { status: 'approved', page: 1, pageSize: 50 })
+      ),
+    enabled: !!estate,
+    refetchInterval: 15_000,
   });
 
   const { data: checkInsData } = useQuery({
@@ -100,6 +134,18 @@ export default function GatemanVerifyPage() {
       .map((write) => write.payload.passId)
   );
   const inside = (checkInsData?.items ?? []).filter((pass) => !leaving.has(pass.id));
+
+  // Admits waiting in the queue are hidden from the walk-in panel for the same
+  // reason departures are hidden from "inside now": at the gate the barrier is
+  // already up. Without this a guard could admit the same visitor repeatedly
+  // while offline, and every extra tap would replay into a conflict.
+  const admitting = new Set(
+    queue
+      .filter((write): write is Extract<typeof write, { type: 'admit' }> => write.type === 'admit')
+      .map((write) => write.payload.passId)
+  );
+  const awaiting = (awaitingData?.items ?? []).filter((pass) => !admitting.has(pass.id));
+  const readyToAdmit = (approvedData?.items ?? []).filter((pass) => !admitting.has(pass.id));
 
   const verify = useMutation({
     mutationFn: (code: string) => unwrap(estateService.verifyVisitorPass(estate!.id, code)),
@@ -159,6 +205,47 @@ export default function GatemanVerifyPage() {
   });
 
   /** Manual drain, for a guard who can see a connection the browser hasn't noticed. */
+  /** Opens the barrier for a walk-in the household has already approved. */
+  const admit = useMutation({
+    mutationFn: (pass: VisitorPass) =>
+      unwrap(estateService.admitWalkInVisitorPass(estate!.id, pass.id)),
+    onSuccess: (pass) => {
+      setResult({ pass });
+      queryClient.invalidateQueries({ queryKey: ['estate', estate!.id] });
+    },
+    onError: async (error, pass) => {
+      // The household already consented, so this is still the guard's decision to
+      // record. Only the network is missing, so queue rather than leave the
+      // visitor waiting for a signal.
+      if (isOfflineFailure(error)) {
+        gateOfflineQueue.enqueue('admit', {
+          estateId: estate!.id,
+          passId: pass.id,
+          occurredAt: new Date().toISOString(),
+          label: `${pass.visitorName} (${pass.unitLabel})`,
+        });
+        setResult({ queued: `${pass.visitorName} admitted` });
+        return;
+      }
+      setResult({
+        error: error instanceof Error ? error.message : 'Could not admit that visitor.',
+      });
+    },
+  });
+
+  const cancelWalkIn = useMutation({
+    mutationFn: (pass: VisitorPass) =>
+      unwrap(estateService.cancelWalkInVisitorPass(estate!.id, pass.id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['estate', estate!.id, 'walk-ins'] });
+    },
+    onError: (error) => {
+      setResult({
+        error: error instanceof Error ? error.message : 'Could not cancel that request.',
+      });
+    },
+  });
+
   const sendNow = async () => {
     setIsSending(true);
     try {
@@ -269,6 +356,22 @@ export default function GatemanVerifyPage() {
           {verify.isPending ? 'Verifying…' : 'Check In'}
         </Button>
 
+        {/* The visitor who has nothing arranged. Raising a request is not the
+            same as letting them in — the household is asked first. */}
+        <Button
+          variant="outline"
+          fullWidth
+          className="gap-2"
+          disabled={verify.isPending}
+          onClick={() => {
+            setResult(null);
+            setWalkInOpen(true);
+          }}
+        >
+          <UserPlus className="w-4 h-4" />
+          Visitor with no pass
+        </Button>
+
         {result?.pass && (
           <div className="flex items-start gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
             <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
@@ -292,6 +395,15 @@ export default function GatemanVerifyPage() {
             </div>
           </div>
         )}
+        {result?.requested && (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 text-foreground">
+            <UserPlus className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Asked the household</p>
+              <p className="text-xs opacity-80 mt-0.5">{result.requested}</p>
+            </div>
+          </div>
+        )}
         {result?.error && (
           <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
             <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -299,6 +411,69 @@ export default function GatemanVerifyPage() {
           </div>
         )}
       </div>
+
+      {/* Walk-ins sit above "inside now": an approved visitor is standing at the
+          barrier right now, which is the most urgent thing on the screen. */}
+      {(awaiting.length > 0 || readyToAdmit.length > 0) && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">At the gate</h2>
+
+          {readyToAdmit.map((pass) => (
+            <div
+              key={pass.id}
+              className="bg-card rounded-2xl border border-green-200 dark:border-green-900/40 p-4 space-y-3"
+            >
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-green-600 dark:text-green-400" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {pass.unitLabel} · {pass.residentName}
+                  </p>
+                  <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
+                    Approved
+                    {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''} — let them in
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="primary"
+                fullWidth
+                disabled={admit.isPending}
+                onClick={() => admit.mutate(pass)}
+              >
+                Admit
+              </Button>
+            </div>
+          ))}
+
+          {awaiting.map((pass) => (
+            <div key={pass.id} className="bg-card rounded-2xl border border-border p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {pass.unitLabel} · asked {formatTime(pass.createdAt)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Waiting for {pass.residentName} to answer. If nobody does by{' '}
+                    {formatTime(pass.expiresAt)}, they cannot be admitted.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={cancelWalkIn.isPending}
+                onClick={() => cancelWalkIn.mutate(pass)}
+              >
+                Cancel request
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* The queue is shown here, where a guard acts, rather than as a banner over
           the whole app. Each line is a real arrival or departure the estate has
@@ -401,6 +576,17 @@ export default function GatemanVerifyPage() {
           </div>
         )}
       </div>
+
+      <WalkInDialog
+        isOpen={walkInOpen}
+        onClose={() => setWalkInOpen(false)}
+        estateId={estate.id}
+        onRaised={(pass) =>
+          setResult({
+            requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. Admit them from "At the gate" once ${pass.residentName} approves.`,
+          })
+        }
+      />
     </div>
   );
 }

@@ -141,7 +141,24 @@ export interface EstatePayoutAccount {
   verified: boolean;
 }
 
-export type VisitorPassStatus = 'pending' | 'checked_in' | 'checked_out' | 'expired' | 'revoked';
+/**
+ * `awaiting_approval` is a walk-in the gate raised and the household has not
+ * answered; `approved` means they consented and the guard has not admitted them
+ * yet. Consent and entry are kept apart on purpose, so the audit can show both
+ * times and there is no arrival recorded for someone who walked away.
+ */
+export type VisitorPassStatus =
+  | 'pending'
+  | 'awaiting_approval'
+  | 'approved'
+  | 'checked_in'
+  | 'checked_out'
+  | 'expired'
+  | 'revoked'
+  | 'denied';
+
+/** `gate` when a guard raised it because somebody arrived with nothing. */
+export type VisitorPassSource = 'resident' | 'gate';
 
 export interface VisitorPass {
   id: string;
@@ -152,10 +169,15 @@ export interface VisitorPass {
   visitorPhone?: string;
   purpose?: string;
   status: VisitorPassStatus;
+  source: VisitorPassSource;
   expiresAt: string;
   checkedInAt?: string;
   /** Set once the gate logs the visitor off the estate. */
   checkedOutAt?: string;
+  /** When the household answered a walk-in request. */
+  respondedAt?: string;
+  /** Why they refused, so the guard can tell the visitor something. */
+  denialReason?: string;
   createdAt: string;
 }
 

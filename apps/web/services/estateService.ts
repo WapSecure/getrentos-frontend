@@ -322,6 +322,54 @@ export const estateService = {
     );
   },
 
+  /**
+   * Raises a walk-in: somebody is at the barrier with nothing arranged.
+   *
+   * Names the unit rather than quoting a code, because there is no code. This
+   * does not admit anyone — it asks the household, and the gate stays shut until
+   * they answer.
+   */
+  async requestWalkInVisitorPass(
+    estateId: string,
+    data: { householdId: string; visitorName: string; visitorPhone?: string; purpose?: string }
+  ): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes/walk-in`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /**
+   * Opens the barrier for a walk-in the household has already approved.
+   * `occurredAt` carries the same meaning as on the queued check-in: if the
+   * connection drops between the approval and the barrier, the admission is
+   * queued and must be recorded as happening when the guard acted.
+   */
+  async admitWalkInVisitorPass(
+    estateId: string,
+    passId: string,
+    occurredAt?: string
+  ): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes/${passId}/admit`, {
+        method: 'PATCH',
+        ...(occurredAt ? { body: JSON.stringify({ occurredAt }) } : {}),
+      })
+    );
+  },
+
+  /** Withdraws a walk-in the gate raised — wrong unit, or the visitor left. */
+  async cancelWalkInVisitorPass(
+    estateId: string,
+    passId: string
+  ): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes/${passId}/cancel`, { method: 'PATCH' })
+    );
+  },
+
   async logVehicleEntry(
     estateId: string,
     data: {

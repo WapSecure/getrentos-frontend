@@ -5,18 +5,25 @@ import type { VisitorPass } from '@/types/estate';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
+  // Warning, not neutral: this one is waiting on the household to answer.
+  awaiting_approval: 'warning',
+  approved: 'success',
   checked_in: 'success',
   checked_out: 'neutral',
   expired: 'neutral',
   revoked: 'danger',
+  denied: 'danger',
 };
 
 const statusLabels: Record<VisitorPass['status'], string> = {
   pending: 'Pending',
+  awaiting_approval: 'Awaiting Approval',
+  approved: 'Approved',
   checked_in: 'Checked In',
   checked_out: 'Checked Out',
   expired: 'Expired',
   revoked: 'Revoked',
+  denied: 'Refused',
 };
 
 const formatDate = (value: string) =>

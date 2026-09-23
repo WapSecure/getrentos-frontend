@@ -208,6 +208,15 @@ export const qk = {
     households: (estateId: string) => ['gateman', estateId, 'households'] as const,
     /** Visitors currently on the estate — anyone CHECKED_IN, however long ago. */
     visitorsInside: (estateId: string) => ['gateman', estateId, 'inside'] as const,
+    /**
+     * Prefix covering both walk-in lists, so one invalidation refreshes the
+     * whole "at the gate" panel after a request, approval, admission or cancel.
+     */
+    walkIns: (estateId: string) => ['gateman', estateId, 'walk-ins'] as const,
+    /** Walk-ins the household has not answered yet. */
+    walkInsAwaiting: (estateId: string) => ['gateman', estateId, 'walk-ins', 'awaiting'] as const,
+    /** Walk-ins the household approved and the gate has not admitted yet. */
+    walkInsApproved: (estateId: string) => ['gateman', estateId, 'walk-ins', 'approved'] as const,
     deliveries: (estateId: string) => ['gateman', estateId, 'deliveries'] as const,
     vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
     incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,

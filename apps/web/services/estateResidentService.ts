@@ -141,6 +141,26 @@ export const estateResidentService = {
     );
   },
 
+  /**
+   * Consents to a walk-in: somebody is at the gate asking for this household, and
+   * the estate will not let them in until somebody who lives here says so.
+   */
+  async approveWalkInVisitorPass(passId: string): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/visitor-passes/${passId}/approve`, { method: 'POST' })
+    );
+  },
+
+  /** Refuses a walk-in. The reason is carried through to the guard. */
+  async denyWalkInVisitorPass(passId: string, reason?: string): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/visitor-passes/${passId}/deny`, {
+        method: 'POST',
+        body: JSON.stringify(reason ? { reason } : {}),
+      })
+    );
+  },
+
   async listMyEstateCommittee(): Promise<ApiResponse<CommitteeMember[]>> {
     return safeCall(() => authFetch('/estate/resident/committee'));
   },

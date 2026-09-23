@@ -1,6 +1,9 @@
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { VisitorPass, VisitorPassStatus } from './visitor-pass';
+
+export type { VisitorPass, VisitorPassSource, VisitorPassStatus } from './visitor-pass';
 
 /**
  * The gate console.
@@ -55,24 +58,6 @@ export interface Household {
   contactEmail?: string;
   status: HouseholdStatus;
   residentLinked: boolean;
-  createdAt: string;
-}
-
-export type VisitorPassStatus = 'pending' | 'checked_in' | 'checked_out' | 'expired' | 'revoked';
-
-export interface VisitorPass {
-  id: string;
-  householdId: string;
-  unitLabel: string;
-  residentName: string;
-  visitorName: string;
-  visitorPhone?: string;
-  purpose?: string;
-  status: VisitorPassStatus;
-  expiresAt: string;
-  checkedInAt?: string;
-  /** Set once the gate logs the visitor off the estate. */
-  checkedOutAt?: string;
   createdAt: string;
 }
 
@@ -170,6 +155,41 @@ export const gatemanApi = {
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
       method: 'PATCH',
       body: occurredAt ? { occurredAt } : undefined,
+    }),
+
+  /**
+   * Raises a walk-in: somebody is at the barrier with nothing arranged.
+   *
+   * The guard names the unit rather than quoting a code, because there is no
+   * code. This does not admit anyone — it asks the household, and the gate stays
+   * shut until they answer.
+   */
+  requestWalkIn: (
+    estateId: string,
+    data: { householdId: string; visitorName: string; visitorPhone?: string; purpose?: string }
+  ) =>
+    apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/walk-in`, {
+      method: 'POST',
+      body: data,
+    }),
+
+  /**
+   * Opens the barrier for a walk-in the household has already approved.
+   *
+   * Takes the same optional `occurredAt` as the other gate writes: a guard whose
+   * connection drops between the approval and the barrier gets their admission
+   * queued, and it must be recorded as happening when they acted.
+   */
+  admitWalkIn: (estateId: string, passId: string, occurredAt?: string) =>
+    apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/admit`, {
+      method: 'PATCH',
+      body: occurredAt ? { occurredAt } : undefined,
+    }),
+
+  /** Withdraws a walk-in the gate raised — wrong unit, or the visitor left. */
+  cancelWalkIn: (estateId: string, passId: string) =>
+    apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/cancel`, {
+      method: 'PATCH',
     }),
 
   listDeliveries: (estateId: string, status: DeliveryLogStatus, page = 1, pageSize = 50) =>

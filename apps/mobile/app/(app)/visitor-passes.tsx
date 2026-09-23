@@ -3,7 +3,7 @@ import { Image, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, KeyRound, Plus } from 'lucide-react-native';
+import { ChevronLeft, Clock, KeyRound, Plus, UserPlus } from 'lucide-react-native';
 import {
   Badge,
   type BadgeTone,
@@ -19,24 +19,38 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
-import { residentApi, type IssuedVisitorPass, type VisitorPassStatus } from '@/lib/api/resident';
+import {
+  residentApi,
+  type IssuedVisitorPass,
+  type VisitorPass,
+  type VisitorPassStatus,
+} from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
+import { haptics } from '@/lib/haptics';
 
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   pending: 'Pending',
+  // A walk-in the gate raised: this household is being asked to decide.
+  awaiting_approval: 'Needs your answer',
+  approved: 'Approved',
   checked_in: 'Checked In',
   checked_out: 'Checked Out',
   expired: 'Expired',
   revoked: 'Revoked',
+  denied: 'Refused',
 };
 
 const STATUS_TONE: Record<VisitorPassStatus, BadgeTone> = {
   pending: 'warning',
+  // Warning tone, not neutral: this one is waiting on the resident.
+  awaiting_approval: 'warning',
+  approved: 'success',
   checked_in: 'success',
   checked_out: 'neutral',
   expired: 'neutral',
   revoked: 'danger',
+  denied: 'danger',
 };
 
 const EXPIRY_PRESETS = [
@@ -83,6 +97,8 @@ export default function ResidentVisitorPasses() {
 
   const [issueOpen, setIssueOpen] = useState(false);
   const [issuedPass, setIssuedPass] = useState<IssuedVisitorPass | null>(null);
+  /** The walk-in the resident is refusing, so the reason can be collected. */
+  const [denying, setDenying] = useState<VisitorPass | null>(null);
 
   const query = useQuery({
     queryKey: qk.resident.visitorPasses,
@@ -110,7 +126,47 @@ export default function ResidentVisitorPasses() {
     onError: () => toast.show("Couldn't revoke that pass. Try again.", 'error'),
   });
 
+  /**
+   * Consenting to a walk-in. Someone is standing at the gate, so the outcome is
+   * always reported: silence here means a visitor is left waiting with no idea
+   * whether anyone is deciding.
+   */
+  const approve = useMutation({
+    mutationFn: (passId: string) => residentApi.approveWalkIn(passId),
+    onSuccess: (pass) => {
+      void haptics.success();
+      qc.invalidateQueries({ queryKey: qk.resident.visitorPasses });
+      toast.show(`The gate has been told to admit ${pass.visitorName}.`, 'success');
+    },
+    onError: (error) => {
+      void haptics.error();
+      toast.show(
+        error instanceof Error ? error.message : "Couldn't approve that visitor.",
+        'error'
+      );
+    },
+  });
+
+  const deny = useMutation({
+    mutationFn: ({ passId, reason }: { passId: string; reason?: string }) =>
+      residentApi.denyWalkIn(passId, reason),
+    onSuccess: (pass) => {
+      qc.invalidateQueries({ queryKey: qk.resident.visitorPasses });
+      setDenying(null);
+      toast.show(`${pass.visitorName} was refused. The gate has been told.`, 'info');
+    },
+    onError: (error) => {
+      toast.show(error instanceof Error ? error.message : "Couldn't refuse that visitor.", 'error');
+    },
+  });
+
   const passes = query.data?.items ?? [];
+
+  // Walk-ins waiting on this household get their own section at the top and are
+  // kept out of the list below: this is the one thing on the screen where a real
+  // person is standing at a barrier while the resident reads it.
+  const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
+  const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -136,13 +192,58 @@ export default function ResidentVisitorPasses() {
         }
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+        {awaiting.length > 0 ? (
+          <View style={{ gap: spacing.md }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              <Clock size={16} color={colors.destructive} />
+              <Text variant="bodyStrong">Waiting at the gate</Text>
+            </View>
+            {awaiting.map((pass) => (
+              <Card key={pass.id} elevated>
+                <View style={{ gap: spacing.sm }}>
+                  <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                    <UserPlus size={20} color={colors.primary} />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{pass.visitorName}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {pass.purpose ? `${pass.purpose} · ` : ''}for {pass.unitLabel}
+                      </Text>
+                      <Text variant="caption" color="mutedForeground">
+                        Asked at {formatDate(pass.createdAt, 'short')}. If nobody answers by{' '}
+                        {formatDate(pass.expiresAt, 'short')}, they are turned away.
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <Button
+                      label="Let them in"
+                      fullWidth
+                      style={{ flex: 1 }}
+                      loading={approve.isPending}
+                      onPress={() => approve.mutate(pass.id)}
+                    />
+                    <Button
+                      label="Refuse"
+                      variant="outline"
+                      fullWidth
+                      style={{ flex: 1 }}
+                      disabled={approve.isPending || deny.isPending}
+                      onPress={() => setDenying(pass)}
+                    />
+                  </View>
+                </View>
+              </Card>
+            ))}
+          </View>
+        ) : null}
+
         {query.isLoading ? (
           <View style={{ gap: spacing.md }}>
             <Skeleton height={76} radius={16} />
             <Skeleton height={76} radius={16} />
           </View>
-        ) : passes.length > 0 ? (
-          passes.map((pass) => (
+        ) : others.length > 0 ? (
+          others.map((pass) => (
             <Card key={pass.id} elevated>
               <View
                 style={{
@@ -190,7 +291,80 @@ export default function ResidentVisitorPasses() {
         submitting={issue.isPending}
       />
       <PassIssuedSheet pass={issuedPass} onClose={() => setIssuedPass(null)} />
+      <DenyWalkInSheet
+        pass={denying}
+        onClose={() => setDenying(null)}
+        onSubmit={(reason) => denying && deny.mutate({ passId: denying.id, reason })}
+        submitting={deny.isPending}
+      />
     </View>
+  );
+}
+
+/**
+ * Collects why a visitor was refused.
+ *
+ * The reason is optional — somebody declining a visitor should not have to
+ * justify it to reach the button — but when it is given the guard reads it out
+ * loud, so it is framed as something to say to the person at the barrier rather
+ * than as a note for the record.
+ */
+function DenyWalkInSheet({
+  pass,
+  onClose,
+  onSubmit,
+  submitting,
+}: {
+  pass: VisitorPass | null;
+  onClose: () => void;
+  onSubmit: (reason?: string) => void;
+  submitting: boolean;
+}) {
+  const { spacing } = useTheme();
+  const [reason, setReason] = useState('');
+
+  return (
+    <Sheet
+      open={!!pass}
+      onClose={onClose}
+      title={pass ? `Refuse ${pass.visitorName}?` : 'Refuse visitor?'}
+      footer={
+        <View style={{ gap: spacing.xs }}>
+          <Button
+            label="Refuse entry"
+            fullWidth
+            loading={submitting}
+            onPress={() => {
+              onSubmit(reason.trim() || undefined);
+              setReason('');
+            }}
+          />
+          <Button
+            label="Back"
+            variant="outline"
+            fullWidth
+            disabled={submitting}
+            onPress={() => {
+              setReason('');
+              onClose();
+            }}
+          />
+        </View>
+      }
+    >
+      <View style={{ gap: spacing.md }}>
+        <Text variant="body">
+          The gate will be told not to admit them, and the visitor will be turned away.
+        </Text>
+        <TextField
+          label="Reason (optional)"
+          value={reason}
+          onChangeText={setReason}
+          placeholder="e.g. I am not expecting anyone"
+          hint="Shown to the guard, who may repeat it to the visitor."
+        />
+      </View>
+    </Sheet>
   );
 }
 

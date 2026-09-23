@@ -18,9 +18,15 @@ import type { IssuedVisitorPass, VisitorPassStatus } from '@/types/estate';
 const statusFilters: { value: VisitorPassStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'pending', label: 'Pending' },
+  // The estate office needs to see walk-ins the gate has raised, both still
+  // waiting on the household and approved but not yet admitted.
+  { value: 'awaiting_approval', label: 'Awaiting Approval' },
+  { value: 'approved', label: 'Approved' },
   { value: 'checked_in', label: 'Checked In' },
+  { value: 'checked_out', label: 'Checked Out' },
   { value: 'expired', label: 'Expired' },
   { value: 'revoked', label: 'Revoked' },
+  { value: 'denied', label: 'Refused' },
 ];
 
 const PAGE_SIZE = 10;

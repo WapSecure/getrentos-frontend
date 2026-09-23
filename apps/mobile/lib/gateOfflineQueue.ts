@@ -4,11 +4,12 @@ import { ApiError } from './api/client';
 import { gatemanApi } from './api/gateman';
 
 /**
- * A durable queue for the two gate writes that must never be lost.
+ * A durable queue for the gate writes that must never be lost.
  *
- * Scope is deliberate. Only check-in and check-out are queued:
+ * Scope is deliberate. Only the three text-only arrival and departure writes are
+ * queued: a PIN check-in, a check-out, and admitting an approved walk-in.
  *
- *  - They are text-only, so the queued payload serialises exactly. The
+ *  - They serialise exactly, so a replay reconstructs the record faithfully. The
  *    photo-bearing writes (vehicle entry, deliveries, incidents) are NOT queued,
  *    because a picked file lives in a cache directory that a restart can empty.
  *    Replaying one could silently file a record without its evidence, and a
@@ -16,6 +17,10 @@ import { gatemanApi } from './api/gateman';
  *  - They are the writes where a missing record is a security and audit problem.
  *    "Who is inside the estate?" is only answerable if every arrival and
  *    departure survived the outage.
+ *
+ * Raising a walk-in is deliberately NOT queued: it asks a household to decide, so
+ * it needs the network by definition and a queued request would ask permission
+ * for somebody who left ten minutes ago.
  *
  * Check-in and check-out are mutually exclusive per visitor while offline (the
  * server-side "inside now" list is what offers a check-out, and a queued arrival
@@ -25,7 +30,7 @@ import { gatemanApi } from './api/gateman';
 
 const KEY = 'getrentos.gate.offline-queue';
 
-export type GateWriteType = 'check-in' | 'check-out';
+export type GateWriteType = 'check-in' | 'check-out' | 'admit';
 
 /**
  * Each write carries exactly what its API call needs, so a replay can switch on
@@ -36,6 +41,12 @@ export type GateWriteType = 'check-in' | 'check-out';
 export type GateWritePayloads = {
   'check-in': { estateId: string; pin: string; occurredAt: string; label: string };
   'check-out': { estateId: string; passId: string; occurredAt: string; label: string };
+  /**
+   * An approved walk-in the guard admitted while the connection was down. The
+   * household's consent is already on the server, so the barrier decision is
+   * still the guard's to record — only the network is missing.
+   */
+  admit: { estateId: string; passId: string; occurredAt: string; label: string };
 };
 
 export type GateWrite = {
@@ -100,9 +111,8 @@ function newId() {
  * visitor who is, in fact, correctly inside.
  */
 function writeKey(write: GateWrite): string {
-  return write.type === 'check-in'
-    ? `check-in:${write.payload.estateId}:${write.payload.pin}`
-    : `check-out:${write.payload.estateId}:${write.payload.passId}`;
+  if (write.type === 'check-in') return `check-in:${write.payload.estateId}:${write.payload.pin}`;
+  return `${write.type}:${write.payload.estateId}:${write.payload.passId}`;
 }
 
 export const gateOfflineQueue = {
@@ -189,6 +199,13 @@ function classify(item: GateWrite, error: unknown): Outcome {
     return 'already-applied';
   }
 
+  if (item.type === 'admit' && error.status === 409) {
+    // The pass is no longer in an admittable state — which is either "already
+    // admitted" (our write landed) or "the approval lapsed while we were
+    // offline" (it never will). Indistinguishable from here, so a person looks.
+    return 'unconfirmed';
+  }
+
   if (item.type === 'check-in' && error.status === 404) {
     // The API answers "invalid, expired, or already-used" with a single 404, so
     // this is genuinely ambiguous: our write may have landed with a lost reply,
@@ -212,6 +229,12 @@ function dispatch(item: GateWrite): Promise<unknown> {
       );
     case 'check-out':
       return gatemanApi.checkOutVisitorPass(
+        item.payload.estateId,
+        item.payload.passId,
+        item.payload.occurredAt
+      );
+    case 'admit':
+      return gatemanApi.admitWalkIn(
         item.payload.estateId,
         item.payload.passId,
         item.payload.occurredAt

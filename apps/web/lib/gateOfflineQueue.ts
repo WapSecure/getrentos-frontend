@@ -25,11 +25,17 @@ import { estateService } from '@/services/estateService';
 
 const KEY = 'getrentos.gate.offline-queue';
 
-export type GateWriteType = 'check-in' | 'check-out';
+export type GateWriteType = 'check-in' | 'check-out' | 'admit';
 
 export type GateWritePayloads = {
   'check-in': { estateId: string; pin: string; occurredAt: string; label: string };
   'check-out': { estateId: string; passId: string; occurredAt: string; label: string };
+  /**
+   * An approved walk-in the guard admitted while the connection was down. The
+   * household's consent is already on the server, so the barrier decision is
+   * still the guard's to record — only the network is missing.
+   */
+  admit: { estateId: string; passId: string; occurredAt: string; label: string };
 };
 
 export type GateWrite = {
@@ -48,9 +54,8 @@ export type GateWrite = {
  * visitor who is, in fact, correctly inside.
  */
 function writeKey(write: GateWrite): string {
-  return write.type === 'check-in'
-    ? `check-in:${write.payload.estateId}:${write.payload.pin}`
-    : `check-out:${write.payload.estateId}:${write.payload.passId}`;
+  if (write.type === 'check-in') return `check-in:${write.payload.estateId}:${write.payload.pin}`;
+  return `${write.type}:${write.payload.estateId}:${write.payload.passId}`;
 }
 
 const listeners = new Set<() => void>();
@@ -157,6 +162,13 @@ function classify(item: GateWrite, error: unknown): Outcome {
     return 'already-applied';
   }
 
+  if (item.type === 'admit' && error.status === 409) {
+    // The pass is no longer in an admittable state — which is either "already
+    // admitted" (our write landed) or "the approval lapsed while we were
+    // offline" (it never will). Indistinguishable from here, so a person looks.
+    return 'unconfirmed';
+  }
+
   if (item.type === 'check-in' && error.status === 404) {
     // The API answers "invalid, expired, or already-used" with a single 404, so
     // this is genuinely ambiguous. Retrying can't tell the two apart and a bad
@@ -180,6 +192,14 @@ function dispatch(item: GateWrite): Promise<unknown> {
     case 'check-out':
       return unwrap(
         estateService.checkOutVisitorPass(
+          item.payload.estateId,
+          item.payload.passId,
+          item.payload.occurredAt
+        )
+      );
+    case 'admit':
+      return unwrap(
+        estateService.admitWalkInVisitorPass(
           item.payload.estateId,
           item.payload.passId,
           item.payload.occurredAt
