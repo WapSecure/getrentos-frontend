@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BACKEND_ROLE_TO_ID, getStoredUser, isAuthenticated } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
+import { viewerHasRole } from '@/lib/viewer';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 
@@ -14,19 +14,7 @@ import { shortletKeys } from '@/lib/queryKeys';
  * query and the heart it drives stay switched off until we know the viewer is a
  * guest.
  */
-export const isGuestShortletViewer = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  if (!isAuthenticated()) return false;
-
-  const user = getStoredUser<{ role?: string; roles?: string[] }>();
-  if (!user) return false;
-
-  const roles = user.roles?.length ? user.roles : user.role ? [user.role] : [];
-  return roles.some((role) => {
-    const id = BACKEND_ROLE_TO_ID[role] ?? role;
-    return id === 'renter' || id === 'buyer';
-  });
-};
+export const isGuestShortletViewer = (): boolean => viewerHasRole('renter', 'buyer');
 
 /**
  * Guest shortlet wishlist: tracks which listings are saved and toggles them.
