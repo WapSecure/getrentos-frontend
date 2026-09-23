@@ -110,6 +110,12 @@ export default function PropertyAuthoritiesPage() {
     void invalidate();
   };
 
+  // NumberInput hands back the sanitised numeric *string*, so a typed "30" is
+  // '30', not 30. Parsing it is what makes the field work: the previous
+  // number-only check quietly dropped it, granting a mandate with no expiry.
+  const expiryDays = Number.parseInt(String(expiresInDays), 10);
+  const hasExpiry = Number.isSafeInteger(expiryDays) && expiryDays > 0;
+
   // One mutation per action keeps the pending state (and the disabled logic that
   // reads it) independent, which matters when an officer acts on several claims
   // in a row.
@@ -119,7 +125,7 @@ export default function PropertyAuthoritiesPage() {
         canList: true,
         canManage,
         canTransact,
-        ...(typeof expiresInDays === 'number' ? { expiresInDays } : {}),
+        ...(hasExpiry ? { expiresInDays: expiryDays } : {}),
         ...(note.trim() ? { note: note.trim() } : {}),
       }),
     onSuccess: (response, claim) => settle('approve', response, claim),
