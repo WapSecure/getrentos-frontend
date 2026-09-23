@@ -141,7 +141,7 @@ export interface EstatePayoutAccount {
   verified: boolean;
 }
 
-export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
+export type VisitorPassStatus = 'pending' | 'checked_in' | 'checked_out' | 'expired' | 'revoked';
 
 export interface VisitorPass {
   id: string;
@@ -154,6 +154,8 @@ export interface VisitorPass {
   status: VisitorPassStatus;
   expiresAt: string;
   checkedInAt?: string;
+  /** Set once the gate logs the visitor off the estate. */
+  checkedOutAt?: string;
   createdAt: string;
 }
 

@@ -200,7 +200,8 @@ export const qk = {
     myEstate: ['gateman', 'estate'] as const,
     gates: (estateId: string) => ['gateman', estateId, 'gates'] as const,
     households: (estateId: string) => ['gateman', estateId, 'households'] as const,
-    todaysCheckIns: (estateId: string) => ['gateman', estateId, 'check-ins'] as const,
+    /** Visitors currently on the estate — anyone CHECKED_IN, however long ago. */
+    visitorsInside: (estateId: string) => ['gateman', estateId, 'inside'] as const,
     deliveries: (estateId: string) => ['gateman', estateId, 'deliveries'] as const,
     vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
     incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,

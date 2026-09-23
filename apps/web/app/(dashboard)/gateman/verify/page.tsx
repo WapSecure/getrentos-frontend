@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
-import { CheckCircle2, KeyRound, QrCode, XCircle } from 'lucide-react';
+import { CheckCircle2, KeyRound, LogOut, QrCode, XCircle } from 'lucide-react';
 import { Button, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -40,8 +40,6 @@ async function decodeQrFromFile(file: File): Promise<string | null> {
 const formatTime = (value: string) =>
   new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
 
-const isToday = (value: string) => new Date(value).toDateString() === new Date().toDateString();
-
 export default function GatemanVerifyPage() {
   const queryClient = useQueryClient();
   const [pin, setPin] = useState('');
@@ -69,9 +67,10 @@ export default function GatemanVerifyPage() {
       ),
     enabled: !!estate,
   });
-  const checkIns = checkInsData?.items ?? [];
-
-  const todaysCheckIns = checkIns.filter((pass) => pass.checkedInAt && isToday(pass.checkedInAt));
+  // Everyone currently on the estate, not just today's arrivals: a visitor who
+  // arrived yesterday and never checked out is exactly the case this list exists
+  // to surface.
+  const inside = checkInsData?.items ?? [];
 
   const verify = useMutation({
     mutationFn: (code: string) => unwrap(estateService.verifyVisitorPass(estate!.id, code)),
@@ -84,6 +83,20 @@ export default function GatemanVerifyPage() {
     },
     onError: (error) => {
       setResult({ error: error instanceof Error ? error.message : 'Verification failed' });
+    },
+  });
+
+  const checkOut = useMutation({
+    mutationFn: (passId: string) => unwrap(estateService.checkOutVisitorPass(estate!.id, passId)),
+    onSuccess: () => {
+      if (estate) {
+        queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'visitorPasses'] });
+      }
+    },
+    onError: (error) => {
+      setResult({
+        error: error instanceof Error ? error.message : 'Could not check that visitor out.',
+      });
     },
   });
 
@@ -202,20 +215,35 @@ export default function GatemanVerifyPage() {
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">Today&apos;s Check-Ins</h2>
-        {todaysCheckIns.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No visitors checked in yet today.</p>
+        <h2 className="text-sm font-semibold text-foreground mb-3">
+          Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
+        </h2>
+        {inside.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No visitors are on the estate right now.</p>
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-            {todaysCheckIns.map((pass) => (
+            {inside.map((pass) => (
               <div key={pass.id} className="p-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{pass.visitorName}</p>
-                  <p className="text-xs text-muted-foreground">{pass.unitLabel}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {pass.unitLabel}
+                    {pass.checkedInAt ? ` · in since ${formatTime(pass.checkedInAt)}` : ''}
+                  </p>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0">
-                  {pass.checkedInAt && formatTime(pass.checkedInAt)}
-                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 shrink-0"
+                  disabled={checkOut.isPending}
+                  onClick={() => {
+                    setResult(null);
+                    checkOut.mutate(pass.id);
+                  }}
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Check out
+                </Button>
               </div>
             ))}
           </div>

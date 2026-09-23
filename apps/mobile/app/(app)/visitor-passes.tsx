@@ -26,6 +26,7 @@ import { formatDate } from '@/lib/format';
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   pending: 'Pending',
   checked_in: 'Checked In',
+  checked_out: 'Checked Out',
   expired: 'Expired',
   revoked: 'Revoked',
 };
@@ -33,6 +34,7 @@ const STATUS_LABEL: Record<VisitorPassStatus, string> = {
 const STATUS_TONE: Record<VisitorPassStatus, BadgeTone> = {
   pending: 'warning',
   checked_in: 'success',
+  checked_out: 'neutral',
   expired: 'neutral',
   revoked: 'danger',
 };
@@ -318,7 +320,7 @@ function PassIssuedSheet({
           </Text>
           <Text variant="caption" color="mutedForeground" center>
             Show this QR code at the gate, or share the PIN. It expires{' '}
-            {formatDate(pass.expiresAt, 'medium')} and won't be shown again.
+            {formatDate(pass.expiresAt, 'medium')} and won&apos;t be shown again.
           </Text>
           <Button label="Done" fullWidth onPress={onClose} />
         </View>

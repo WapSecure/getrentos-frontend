@@ -293,6 +293,16 @@ export const estateService = {
     );
   },
 
+  /**
+   * Logs a checked-in visitor off the estate. Until this existed a pass stayed
+   * checked in forever, so "who is inside?" was unanswerable for people.
+   */
+  async checkOutVisitorPass(estateId: string, passId: string): Promise<ApiResponse<VisitorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes/${passId}/check-out`, { method: 'PATCH' })
+    );
+  },
+
   async logVehicleEntry(
     estateId: string,
     data: {

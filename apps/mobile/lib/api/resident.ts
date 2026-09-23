@@ -113,7 +113,7 @@ export interface Poll {
   createdAt: string;
 }
 
-export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
+export type VisitorPassStatus = 'pending' | 'checked_in' | 'checked_out' | 'expired' | 'revoked';
 
 export interface VisitorPass {
   id: string;

@@ -14,6 +14,7 @@ import type { IssuedVisitorPass, VisitorPass } from '@/types/estate';
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
   checked_in: 'success',
+  checked_out: 'neutral',
   expired: 'neutral',
   revoked: 'danger',
 };
@@ -21,6 +22,7 @@ const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neut
 const statusLabels: Record<VisitorPass['status'], string> = {
   pending: 'Pending',
   checked_in: 'Checked In',
+  checked_out: 'Checked Out',
   expired: 'Expired',
   revoked: 'Revoked',
 };

@@ -58,7 +58,7 @@ export interface Household {
   createdAt: string;
 }
 
-export type VisitorPassStatus = 'pending' | 'checked_in' | 'expired' | 'revoked';
+export type VisitorPassStatus = 'pending' | 'checked_in' | 'checked_out' | 'expired' | 'revoked';
 
 export interface VisitorPass {
   id: string;
@@ -71,6 +71,8 @@ export interface VisitorPass {
   status: VisitorPassStatus;
   expiresAt: string;
   checkedInAt?: string;
+  /** Set once the gate logs the visitor off the estate. */
+  checkedOutAt?: string;
   createdAt: string;
 }
 
@@ -150,6 +152,15 @@ export const gatemanApi = {
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/verify`, {
       method: 'POST',
       body: { pin },
+    }),
+
+  /**
+   * Logs a checked-in visitor off the estate. Until this existed a pass stayed
+   * checked in forever, so "who is inside?" was unanswerable for people.
+   */
+  checkOutVisitorPass: (estateId: string, passId: string) =>
+    apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
+      method: 'PATCH',
     }),
 
   listDeliveries: (estateId: string, status: DeliveryLogStatus, page = 1, pageSize = 50) =>

@@ -11,6 +11,7 @@ import {
   Skeleton,
   Text,
   useTheme,
+  useToast,
 } from '@getrentos/ui-native';
 import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
 import { gatemanApi, type VisitorPass } from '@/lib/api/gateman';
@@ -18,12 +19,10 @@ import { qk } from '@/lib/query/keys';
 import { formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 
-const isToday = (value?: string) =>
-  !!value && new Date(value).toDateString() === new Date().toDateString();
-
 export default function GatemanCheckIn() {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
+  const toast = useToast();
 
   const [pin, setPin] = useState('');
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -36,7 +35,7 @@ export default function GatemanCheckIn() {
   const estate = estateQuery.data ?? null;
 
   const checkInsQuery = useQuery({
-    queryKey: qk.gateman.todaysCheckIns(estate?.id ?? ''),
+    queryKey: qk.gateman.visitorsInside(estate?.id ?? ''),
     queryFn: () => gatemanApi.listVisitorPasses(estate!.id, 'checked_in', 1, 100),
     enabled: !!estate,
   });
@@ -47,7 +46,7 @@ export default function GatemanCheckIn() {
       setResult({ pass });
       setPin('');
       void haptics.success();
-      if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.todaysCheckIns(estate.id) });
+      if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.visitorsInside(estate.id) });
     },
     onError: (error) => {
       setResult({ error: error instanceof Error ? error.message : 'Could not verify that code.' });
@@ -55,7 +54,26 @@ export default function GatemanCheckIn() {
     },
   });
 
-  const todaysCheckIns = (checkInsQuery.data?.items ?? []).filter((p) => isToday(p.checkedInAt));
+  const checkOut = useMutation({
+    mutationFn: (passId: string) => gatemanApi.checkOutVisitorPass(estate!.id, passId),
+    onSuccess: (pass) => {
+      void haptics.success();
+      toast.show(`${pass.visitorName} checked out.`, 'success');
+      if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.visitorsInside(estate.id) });
+    },
+    onError: (error) => {
+      void haptics.error();
+      toast.show(
+        error instanceof Error ? error.message : 'Could not check that visitor out.',
+        'error'
+      );
+    },
+  });
+
+  // Everyone currently on the estate, not just today's arrivals: a visitor who
+  // arrived yesterday and never checked out is exactly the case this list exists
+  // to surface.
+  const inside = checkInsQuery.data?.items ?? [];
 
   /**
    * A scan hands back the same PIN the keypad would have collected, so check
@@ -208,18 +226,18 @@ export default function GatemanCheckIn() {
 
         <View style={{ gap: spacing.md }}>
           <Text variant="bodyStrong">
-            Today&apos;s check-ins{todaysCheckIns.length > 0 ? ` (${todaysCheckIns.length})` : ''}
+            Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
           </Text>
           {checkInsQuery.isLoading ? (
             <Skeleton height={64} radius={16} />
-          ) : todaysCheckIns.length === 0 ? (
+          ) : inside.length === 0 ? (
             <Card>
               <Text variant="caption" color="mutedForeground">
-                No visitors checked in yet today.
+                No visitors are on the estate right now.
               </Text>
             </Card>
           ) : (
-            todaysCheckIns.map((pass) => (
+            inside.map((pass) => (
               <Card key={pass.id} elevated>
                 <View
                   style={{
@@ -234,10 +252,18 @@ export default function GatemanCheckIn() {
                     <Text variant="caption" color="mutedForeground">
                       {pass.unitLabel} · {pass.residentName}
                     </Text>
+                    <Text variant="caption" color="mutedForeground">
+                      In since {pass.checkedInAt ? formatTime(pass.checkedInAt) : '—'}
+                    </Text>
                   </View>
-                  <Text variant="caption" color="mutedForeground">
-                    {pass.checkedInAt ? formatTime(pass.checkedInAt) : '—'}
-                  </Text>
+                  <Button
+                    label="Check out"
+                    variant="outline"
+                    size="sm"
+                    fullWidth={false}
+                    loading={checkOut.isPending}
+                    onPress={() => checkOut.mutate(pass.id)}
+                  />
                 </View>
               </Card>
             ))
