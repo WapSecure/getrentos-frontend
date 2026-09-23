@@ -28,19 +28,32 @@ import { relativeTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
 
-const CATEGORY_OPTIONS: { value: IncidentCategory; label: string }[] = [
-  { value: 'security', label: 'Security' },
-  { value: 'maintenance', label: 'Maintenance' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
-];
+// `Record<…>` on purpose: these mappers lowercase the raw enum for display, so a
+// new backend member should fail the build here rather than surface as a raw
+// token like "other" in the list.
+const CATEGORY_LABEL: Record<IncidentCategory, string> = {
+  security: 'Security',
+  maintenance: 'Maintenance',
+  safety: 'Safety',
+  other: 'Other',
+};
 
-const PRIORITY_OPTIONS: { value: IncidentPriority; label: string }[] = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
+const PRIORITY_LABEL: Record<IncidentPriority, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
+};
+
+const CATEGORY_OPTIONS = (Object.keys(CATEGORY_LABEL) as IncidentCategory[]).map((value) => ({
+  value,
+  label: CATEGORY_LABEL[value],
+}));
+
+const PRIORITY_OPTIONS = (Object.keys(PRIORITY_LABEL) as IncidentPriority[]).map((value) => ({
+  value,
+  label: PRIORITY_LABEL[value],
+}));
 
 const PRIORITY_TONE: Record<IncidentPriority, BadgeTone> = {
   low: 'neutral',
@@ -307,10 +320,10 @@ export default function GatemanIncidents() {
                   }}
                 >
                   <Text variant="bodyStrong" style={{ flex: 1 }}>
-                    {incident.category}
+                    {CATEGORY_LABEL[incident.category]}
                   </Text>
                   <Badge
-                    label={incident.priority}
+                    label={PRIORITY_LABEL[incident.priority]}
                     tone={PRIORITY_TONE[incident.priority] ?? 'neutral'}
                   />
                 </View>

@@ -21,13 +21,20 @@ import { formatTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
 
-const PURPOSE_OPTIONS: { value: VehiclePurpose; label: string }[] = [
-  { value: 'visitor', label: 'Visitor' },
-  { value: 'resident', label: 'Resident' },
-  { value: 'delivery', label: 'Delivery' },
-  { value: 'staff', label: 'Staff' },
-  { value: 'other', label: 'Other' },
-];
+// The read mapper lowercases the enum; a `Record` here means a new backend
+// purpose fails the build instead of rendering raw.
+const PURPOSE_LABEL: Record<VehiclePurpose, string> = {
+  visitor: 'Visitor',
+  resident: 'Resident',
+  delivery: 'Delivery',
+  staff: 'Staff',
+  other: 'Other',
+};
+
+const PURPOSE_OPTIONS = (Object.keys(PURPOSE_LABEL) as VehiclePurpose[]).map((value) => ({
+  value,
+  label: PURPOSE_LABEL[value],
+}));
 
 export default function GatemanVehicles() {
   const { colors, spacing } = useTheme();
@@ -274,7 +281,8 @@ export default function GatemanVehicles() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text variant="bodyStrong">{log.plateNumber}</Text>
                   <Text variant="caption" color="mutedForeground">
-                    {log.vehicleDescription || log.purpose} · entered {formatTime(log.enteredAt)}
+                    {log.vehicleDescription || PURPOSE_LABEL[log.purpose]} · entered{' '}
+                    {formatTime(log.enteredAt)}
                     {log.gateName ? ` · ${log.gateName}` : ''}
                   </Text>
                 </View>
