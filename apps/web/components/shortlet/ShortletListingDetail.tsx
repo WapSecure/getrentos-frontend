@@ -498,7 +498,7 @@ export function ShortletListingDetail({
                 <MessageSquare className="mr-1.5 h-4 w-4" /> Message host
               </Button>
             )}
-            {isSignedIn && (
+            {wishlist.canUseWishlist && (
               <Button
                 variant={wishlist.isSaved(listing.id) ? 'secondary' : 'outline'}
                 className="mt-2 w-full"

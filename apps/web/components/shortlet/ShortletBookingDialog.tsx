@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -24,6 +24,13 @@ import { ROUTES } from '@/lib/constants/auth';
 import type { ShortletBooking, ShortletListing } from '@/types/shortlet';
 
 const TODAY = new Date().toISOString().slice(0, 10);
+
+/** The `YYYY-MM-DD` day after `date`, in the UTC keys the API's calendar uses. */
+const nextDay = (date: string) => {
+  const day = new Date(`${date}T00:00:00.000Z`);
+  day.setUTCDate(day.getUTCDate() + 1);
+  return day.toISOString().slice(0, 10);
+};
 
 export function ShortletBookingDialog({
   listing,
@@ -56,6 +63,21 @@ export function ShortletBookingDialog({
       unwrap(shortletService.availability(listing.id, checkIn || undefined, checkOut || undefined)),
     enabled: Boolean(checkIn && checkOut),
   });
+
+  // The booked/blocked calendar, so the pickers can grey out nights that are
+  // already taken instead of accepting them and refusing on submit.
+  const { data: calendar } = useQuery({
+    queryKey: [...shortletKeys.availability(listing.id), 'calendar'],
+    queryFn: () => unwrap(shortletService.availability(listing.id)),
+  });
+
+  const unavailableNights = useMemo(() => calendar?.unavailableDates ?? [], [calendar]);
+  /**
+   * A taken night cannot start a stay. It can *end* one — the guest leaves in
+   * the morning and the next arrives that afternoon — so a check-out is only
+   * blocked when the night before it is taken.
+   */
+  const blockedCheckOuts = useMemo(() => unavailableNights.map(nextDay), [unavailableNights]);
 
   const handleCheckIn = (value: string) => {
     setCheckIn(value);
@@ -140,6 +162,7 @@ export function ShortletBookingDialog({
                 value={checkIn}
                 onChange={handleCheckIn}
                 min={TODAY}
+                disabledDates={unavailableNights}
                 placeholder="Select check-in"
               />
             </Field>
@@ -148,6 +171,7 @@ export function ShortletBookingDialog({
                 value={checkOut}
                 onChange={setCheckOut}
                 min={checkIn || TODAY}
+                disabledDates={blockedCheckOuts}
                 placeholder="Select check-out"
               />
             </Field>

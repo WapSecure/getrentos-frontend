@@ -63,7 +63,7 @@ export const ShortletMarketplaceBrowser = () => {
     [checkIn, checkOut, city, guests, maxPrice, minPrice, page, sort, estateFromUrl]
   );
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isPending, isError } = useQuery({
     queryKey: [...shortletKeys.public, queryParams],
     queryFn: () => unwrap(shortletService.listPublic(queryParams)),
   });
@@ -230,7 +230,7 @@ export const ShortletMarketplaceBrowser = () => {
                   )}
                   {listing.isVerified && <Badge variant="info">Verified host</Badge>}
                 </div>
-                {isSignedIn && (
+                {wishlist.canUseWishlist && (
                   <button
                     type="button"
                     aria-label={wishlist.isSaved(listing.id) ? 'Remove from saved' : 'Save listing'}
@@ -293,7 +293,13 @@ export const ShortletMarketplaceBrowser = () => {
         </div>
       )}
 
-      <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={total}
+        onPageChange={setPage}
+        isLoading={isPending}
+      />
     </div>
   );
 };

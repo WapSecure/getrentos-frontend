@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -30,6 +30,12 @@ interface DatePickerProps {
   min?: string;
   max?: string;
   disabled?: boolean;
+  /**
+   * Individual days to grey out, as `YYYY-MM-DD` (the same shape the API uses
+   * for the shortlet booking calendar). Lets a picker show what is actually
+   * takeable instead of accepting a date that only fails on submit.
+   */
+  disabledDates?: readonly string[];
   className?: string;
 }
 
@@ -42,6 +48,7 @@ export const DatePicker = ({
   min,
   max,
   disabled,
+  disabledDates,
   className,
 }: DatePickerProps) => {
   const [open, setOpen] = useState(false);
@@ -55,9 +62,12 @@ export const DatePicker = ({
   const leadingBlanks = getDay(monthStart);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
+  const unavailable = useMemo(() => new Set(disabledDates ?? []), [disabledDates]);
+
   const isDisabled = (day: Date) =>
     (minDate && isBefore(day, minDate) && !isSameDay(day, minDate)) ||
-    (maxDate && isAfter(day, maxDate) && !isSameDay(day, maxDate));
+    (maxDate && isAfter(day, maxDate) && !isSameDay(day, maxDate)) ||
+    unavailable.has(format(day, 'yyyy-MM-dd'));
 
   const handleSelect = (day: Date) => {
     if (isDisabled(day)) return;

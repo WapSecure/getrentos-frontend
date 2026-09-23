@@ -153,7 +153,7 @@ export const GuestBookingsWorkspace = () => {
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isPending } = useQuery({
     queryKey: [...shortletKeys.guestBookings, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(shortletService.myBookings({ page, pageSize: PAGE_SIZE })),
   });
@@ -347,6 +347,7 @@ export const GuestBookingsWorkspace = () => {
         pageSize={PAGE_SIZE}
         total={data?.total ?? 0}
         onPageChange={setPage}
+        isLoading={isPending}
       />
       <ConfirmDialog
         open={Boolean(cancelTarget)}
