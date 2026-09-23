@@ -2,20 +2,14 @@
 
 import { Shield, TrendingUp } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { trustBand } from '@/lib/trustScore';
 
 interface TrustScoreHeaderProps {
   trustScore: number;
 }
 
 export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
-  const getScoreLabel = (score: number) => {
-    if (score >= 90) return { label: 'Excellent', color: 'text-green-600' };
-    if (score >= 70) return { label: 'Good', color: 'text-blue-600' };
-    if (score >= 50) return { label: 'Fair', color: 'text-yellow-600' };
-    return { label: 'Needs Improvement', color: 'text-red-600' };
-  };
-
-  const scoreInfo = getScoreLabel(trustScore);
+  const scoreInfo = trustBand(trustScore);
 
   return (
     <div className="mb-6">

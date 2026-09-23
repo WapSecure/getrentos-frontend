@@ -17,6 +17,7 @@ import {
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
+import { pluralize } from '@/lib/format';
 import { Application } from '@/types/renter';
 
 interface ApplicationCardProps {
@@ -89,11 +90,11 @@ export const ApplicationCard = ({
             <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Bed className="w-3 h-3" />
-                <span>{application.bedrooms} beds</span>
+                <span>{pluralize(application.bedrooms, 'bed')}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Bath className="w-3 h-3" />
-                <span>{application.bathrooms} baths</span>
+                <span>{pluralize(application.bathrooms, 'bath')}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Square className="w-3 h-3" />

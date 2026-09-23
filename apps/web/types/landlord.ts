@@ -435,8 +435,47 @@ export interface LandlordViewingRequest {
   renterEmail: string;
   status: ViewingRequestStatus;
   requestedAt: string;
+  /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
+  preferredAt?: string;
   scheduledAt?: string;
   notes?: string;
+}
+
+export type LandlordOfferStatus =
+  | 'submitted'
+  | 'countered'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+  | 'expired'
+  | 'closed';
+
+export type LandlordFinancingType = 'cash' | 'mortgage' | 'installment';
+
+export interface LandlordOffer {
+  id: string;
+  buyerId: string;
+  buyerName: string;
+  propertyId: string;
+  propertyName: string;
+  offerAmount: number;
+  askingPrice: number;
+  financingType: LandlordFinancingType;
+  depositAmount?: number;
+  message?: string;
+  status: LandlordOfferStatus;
+  submittedAt: string;
+}
+
+export interface LandlordOfferMessage {
+  id: string;
+  offerId: string;
+  senderId: string;
+  senderName: string;
+  type: 'message' | 'offer' | 'counter' | 'accepted' | 'rejected';
+  amount?: number;
+  text: string;
+  timestamp: string;
 }
 
 export interface LandlordMicrositeSettings {

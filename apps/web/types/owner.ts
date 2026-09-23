@@ -9,7 +9,14 @@ export type SaleListingStatus =
   | 'published'
   | 'paused'
   | 'closed';
-export type OfferStatus = 'submitted' | 'countered' | 'accepted' | 'rejected' | 'closed';
+export type OfferStatus =
+  | 'submitted'
+  | 'countered'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+  | 'expired'
+  | 'closed';
 export type FinancingType = 'cash' | 'mortgage' | 'installment';
 export type SaleEscrowStatus =
   | 'deposit_pending'

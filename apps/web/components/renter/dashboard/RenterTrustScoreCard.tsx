@@ -20,6 +20,7 @@ import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
+import { trustBand } from '@/lib/trustScore';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
@@ -74,7 +75,9 @@ export const RenterTrustScoreCard = () => {
         <div className="flex flex-col items-center mb-4">
           <TrustScoreRing score={trustScore} size={120} strokeWidth={8} />
           <div className="text-center mt-3">
-            <p className="text-sm font-medium text-foreground">Excellent Trust Score</p>
+            <p className="text-sm font-medium text-foreground">
+              {trustBand(trustScore).label} Trust Score
+            </p>
             <p className="text-xs text-muted-foreground">Higher scores get better opportunities</p>
           </div>
         </div>

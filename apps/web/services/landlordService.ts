@@ -16,6 +16,8 @@ import type {
   TenancyStanding,
   LandlordLead,
   LandlordViewingRequest,
+  LandlordOffer,
+  LandlordOfferMessage,
   LeadNudgeResult,
   BulkNudgeResult,
   LandlordMicrositeSettings,
@@ -938,6 +940,14 @@ export const landlordService = {
     );
   },
 
+  async listViewingRequests(
+    params: { page?: number; pageSize?: number; status?: string } = {}
+  ): Promise<ApiResponse<Paginated<LandlordViewingRequest>>> {
+    return safeCall(() =>
+      authFetch<Paginated<LandlordViewingRequest>>(`/landlord/viewing-requests${toQuery(params)}`)
+    );
+  },
+
   async confirmViewingRequest(
     id: string,
     scheduledAt: string
@@ -954,6 +964,44 @@ export const landlordService = {
     return safeCall(() =>
       authFetch(`/landlord/viewing-requests/${id}/cancel`, { method: 'PATCH' })
     );
+  },
+
+  // ---- Offers (for-sale listings the landlord owns or manages) ----
+  async listOffers(
+    params: { page?: number; pageSize?: number; status?: string; search?: string } = {}
+  ): Promise<ApiResponse<Paginated<LandlordOffer>>> {
+    return safeCall(() =>
+      authFetch<Paginated<LandlordOffer>>(`/landlord/offers${toQuery(params)}`)
+    );
+  },
+
+  async acceptOffer(id: string): Promise<ApiResponse<LandlordOffer>> {
+    return safeCall(() =>
+      authFetch<LandlordOffer>(`/landlord/offers/${id}/accept`, { method: 'POST' })
+    );
+  },
+
+  async rejectOffer(id: string): Promise<ApiResponse<LandlordOffer>> {
+    return safeCall(() =>
+      authFetch<LandlordOffer>(`/landlord/offers/${id}/reject`, { method: 'POST' })
+    );
+  },
+
+  async counterOffer(
+    id: string,
+    amount: number,
+    note?: string
+  ): Promise<ApiResponse<LandlordOffer>> {
+    return safeCall(() =>
+      authFetch<LandlordOffer>(`/landlord/offers/${id}/counter`, {
+        method: 'POST',
+        body: JSON.stringify({ amount, message: note }),
+      })
+    );
+  },
+
+  async getOfferThread(id: string): Promise<ApiResponse<LandlordOfferMessage[]>> {
+    return safeCall(() => authFetch<LandlordOfferMessage[]>(`/landlord/offers/${id}/thread`));
   },
 
   // ---- Microsite ----

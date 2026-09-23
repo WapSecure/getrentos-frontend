@@ -15,6 +15,7 @@ import type {
   EscrowStatus,
   LeaseStatus,
   EvictionStatus,
+  ViewingRequestStatus,
 } from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
 import type { OfferStatus } from '@/types/owner';
@@ -57,6 +58,13 @@ export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {
   expired: { label: 'Expired', variant: 'danger' },
 };
 
+export const viewingRequestStatusBadges: Record<ViewingRequestStatus, StatusBadgeEntry> = {
+  requested: { label: 'Requested', variant: 'warning', icon: Clock },
+  confirmed: { label: 'Confirmed', variant: 'info', icon: CheckCircle2 },
+  completed: { label: 'Completed', variant: 'success', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
+};
+
 export const evictionStatusBadges: Record<EvictionStatus, StatusBadgeEntry> = {
   draft: { label: 'Draft', variant: 'neutral' },
   issued: { label: 'Notice issued', variant: 'warning' },
@@ -78,6 +86,8 @@ export const offerStatusBadges: Record<OfferStatus, StatusBadgeEntry> = {
   countered: { label: 'Countered', variant: 'info', icon: RefreshCcw },
   accepted: { label: 'Accepted', variant: 'success', icon: CheckCircle2 },
   rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
+  withdrawn: { label: 'Withdrawn', variant: 'neutral', icon: XCircle },
+  expired: { label: 'Expired', variant: 'neutral', icon: Archive },
   closed: { label: 'Closed', variant: 'neutral', icon: Archive },
 };
 

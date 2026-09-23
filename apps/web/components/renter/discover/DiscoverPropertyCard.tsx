@@ -34,6 +34,22 @@ interface DiscoverPropertyCardProps {
   onOpenTour: () => void;
 }
 
+/**
+ * A listing's detail can be genuinely absent — one created without a unit has no
+ * bedroom or bathroom count to report, and no floor area either. Printing the
+ * raw number turns "we don't know" into "0 beds", which reads as a real
+ * measurement and contradicts the listing's own title ("3-bedroom apartment …
+ * 0 beds"). Missing detail shows as an em dash instead.
+ */
+function listingDetail(
+  value: number | null | undefined,
+  singular: string,
+  plural: string,
+): string {
+  if (!value) return '—';
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+
 export const DiscoverPropertyCard = ({
   property,
   isSaved,
@@ -107,6 +123,12 @@ export const DiscoverPropertyCard = ({
 
         <button
           onClick={handleSaveClick}
+          // Icon-only, and the same heart repeats down every card, so without a
+          // name a screen reader offers a column of identical "button"s with no
+          // way to tell which property each one saves. The label also carries
+          // the current state, which the fill colour only conveys visually.
+          aria-label={isSaved ? `Remove ${property.title} from your shortlist` : `Save ${property.title} to your shortlist`}
+          title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
           className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors z-10"
         >
           {isSaved ? (
@@ -142,19 +164,15 @@ export const DiscoverPropertyCard = ({
         <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Bed className="w-3 h-3" />
-            <span>
-              {property.bedrooms} {property.bedrooms === 1 ? 'bed' : 'beds'}
-            </span>
+            <span>{listingDetail(property.bedrooms, 'bed', 'beds')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Bath className="w-3 h-3" />
-            <span>
-              {property.bathrooms} {property.bathrooms === 1 ? 'bath' : 'baths'}
-            </span>
+            <span>{listingDetail(property.bathrooms, 'bath', 'baths')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Square className="w-3 h-3" />
-            <span>{property.size} sqft</span>
+            <span>{property.size ? `${property.size} sqft` : '—'}</span>
           </div>
         </div>
 
@@ -168,10 +186,24 @@ export const DiscoverPropertyCard = ({
           <Button size="sm" variant="primary" onClick={onViewDetails} className="flex-1">
             View Details
           </Button>
-          <Button size="sm" variant="outline" onClick={handleScheduleViewingClick} className="px-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleScheduleViewingClick}
+            className="px-2"
+            aria-label={`Schedule a viewing for ${property.title}`}
+            title="Schedule a viewing"
+          >
             <Calendar className="w-3 h-3" />
           </Button>
-          <Button size="sm" variant="outline" onClick={handleCompareClick} className="px-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleCompareClick}
+            className="px-2"
+            aria-label={`Compare ${property.title} with another property`}
+            title="Compare with another property"
+          >
             <GitCompare className="w-3 h-3" />
           </Button>
         </div>

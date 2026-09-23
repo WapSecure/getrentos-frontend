@@ -28,6 +28,7 @@ import { Skeleton } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { pluralize } from '@/lib/format';
 import { formatPrice } from '@/types/renter';
 import type { NearbyPlace, TravelModeResult } from '@/types/renter';
 
@@ -161,10 +162,10 @@ export const GeoInsightsPanel = ({
                     </Badge>
                   )}
                   {insights.pricing.bedrooms != null && (
-                    <Badge variant="neutral">{insights.pricing.bedrooms} beds</Badge>
+                    <Badge variant="neutral">{pluralize(insights.pricing.bedrooms, 'bed')}</Badge>
                   )}
                   {insights.pricing.bathrooms != null && (
-                    <Badge variant="neutral">{insights.pricing.bathrooms} baths</Badge>
+                    <Badge variant="neutral">{pluralize(insights.pricing.bathrooms, 'bath')}</Badge>
                   )}
                 </div>
               )}

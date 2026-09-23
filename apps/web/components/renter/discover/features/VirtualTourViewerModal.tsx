@@ -39,7 +39,7 @@ export const VirtualTourViewerModal = ({
   const requestViewing = useMutation({
     mutationFn: (requestedFor: string) =>
       unwrap(
-        renterService.requestViewing(propertyId!, undefined, `Preferred time: ${requestedFor}`)
+        renterService.requestViewing(propertyId!, undefined, new Date(requestedFor).toISOString())
       ),
     onSuccess: () => {
       setConfirmedTime(preferredTime);
@@ -133,7 +133,7 @@ export const VirtualTourViewerModal = ({
                 disabled={
                   !isFutureDateTime(preferredTime) || !propertyId || requestViewing.isPending
                 }
-                onClick={() => requestViewing.mutate(new Date(preferredTime).toLocaleString())}
+                onClick={() => requestViewing.mutate(preferredTime)}
               >
                 {requestViewing.isPending ? 'Submitting…' : 'Confirm'}
               </Button>

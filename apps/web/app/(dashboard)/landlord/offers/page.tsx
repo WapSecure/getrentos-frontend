@@ -7,18 +7,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Handshake } from 'lucide-react';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
-import { ownerService } from '@/services/ownerService';
+import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
-import { ownerKeys } from '@/lib/queryKeys';
+import { landlordKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
-import type { OfferStatus, OfferMessage } from '@/types/owner';
+import type { LandlordOffer, LandlordOfferStatus } from '@/types/landlord';
+import type { OfferMessage } from '@/types/owner';
 
-type StatusFilter = 'all' | OfferStatus;
+type StatusFilter = 'all' | LandlordOfferStatus;
 
 const PAGE_SIZE = 10;
 
-export default function OwnerOffersPage() {
+export default function LandlordOffersPage() {
   const queryClient = useQueryClient();
   const [pendingMessages, setPendingMessages] = useState<Record<string, OfferMessage[]>>({});
   const [page, setPage] = useState(1);
@@ -37,7 +38,7 @@ export default function OwnerOffersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: [
-      ...ownerKeys.offers,
+      ...landlordKeys.offers(filter === 'all' ? undefined : filter),
       {
         search: debouncedSearch,
         status: filter === 'all' ? undefined : filter,
@@ -47,7 +48,7 @@ export default function OwnerOffersPage() {
     ],
     queryFn: () =>
       unwrap(
-        ownerService.listOffers({
+        landlordService.listOffers({
           search: debouncedSearch || undefined,
           status: filter === 'all' ? undefined : filter,
           page,
@@ -55,32 +56,32 @@ export default function OwnerOffersPage() {
         })
       ),
   });
-  const offers = data?.items ?? [];
+  const offers: LandlordOffer[] = data?.items ?? [];
   const total = data?.total ?? 0;
 
   // Negotiation thread for the currently-open offer, fetched from the backend.
   const { data: thread = [] } = useQuery({
-    queryKey: ownerKeys.offerThread(activeOfferId ?? ''),
-    queryFn: () => unwrap(ownerService.getOfferThread(activeOfferId as string)),
+    queryKey: landlordKeys.offerThread(activeOfferId ?? ''),
+    queryFn: () => unwrap(landlordService.getOfferThread(activeOfferId as string)),
     enabled: !!activeOfferId,
   });
 
   const invalidate = (offerId?: string) => {
-    queryClient.invalidateQueries({ queryKey: ownerKeys.offers });
-    if (offerId) queryClient.invalidateQueries({ queryKey: ownerKeys.offerThread(offerId) });
+    queryClient.invalidateQueries({ queryKey: landlordKeys.offers() });
+    if (offerId) queryClient.invalidateQueries({ queryKey: landlordKeys.offerThread(offerId) });
   };
 
   const acceptMutation = useMutation({
-    mutationFn: (offerId: string) => unwrap(ownerService.acceptOffer(offerId)),
+    mutationFn: (offerId: string) => unwrap(landlordService.acceptOffer(offerId)),
     onSuccess: (_result, offerId) => invalidate(offerId),
   });
   const rejectMutation = useMutation({
-    mutationFn: (offerId: string) => unwrap(ownerService.rejectOffer(offerId)),
+    mutationFn: (offerId: string) => unwrap(landlordService.rejectOffer(offerId)),
     onSuccess: (_result, offerId) => invalidate(offerId),
   });
   const counterMutation = useMutation({
     mutationFn: ({ offerId, amount, note }: { offerId: string; amount: number; note?: string }) =>
-      unwrap(ownerService.counterOffer(offerId, amount, note)),
+      unwrap(landlordService.counterOffer(offerId, amount, note)),
     onSuccess: (_result, { offerId }) => invalidate(offerId),
   });
 
@@ -194,14 +195,13 @@ export default function OwnerOffersPage() {
         </p>
       </div>
 
-      {/* Accepting an offer opens an escrow/payout obligation — financially verified (tier 3) owners only. */}
+      {/* Accepting an offer opens an escrow/payout obligation — financially verified (tier 3) landlords only. */}
       {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (
         <div className="mb-6">
           <VerificationRequiredNotice
             error={acceptMutation.error || rejectMutation.error || counterMutation.error}
-            href={ROUTES.OWNER_OFFERS}
-            verificationHref={ROUTES.OWNER_VERIFICATION}
-            scoreHref={ROUTES.OWNER_TRUST_PROFILE}
+            href={ROUTES.LANDLORD_OFFERS}
+            verificationHref={ROUTES.LANDLORD_VERIFICATION}
           />
         </div>
       )}
@@ -270,7 +270,7 @@ export default function OwnerOffersPage() {
           pageSize={PAGE_SIZE}
           total={total}
           onPageChange={setPage}
-          className="mt-6"
+          className="mt-8"
         />
       )}
 
