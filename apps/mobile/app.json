@@ -58,7 +58,13 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "GetRentos uses the camera to scan a visitor's QR pass at the gate."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, KeyRound, XCircle } from 'lucide-react-native';
+import { CheckCircle2, KeyRound, ScanLine, XCircle } from 'lucide-react-native';
 import {
   Button,
   Card,
@@ -12,6 +12,7 @@ import {
   Text,
   useTheme,
 } from '@getrentos/ui-native';
+import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
 import { gatemanApi, type VisitorPass } from '@/lib/api/gateman';
 import { qk } from '@/lib/query/keys';
 import { formatTime } from '@/lib/format';
@@ -25,6 +26,7 @@ export default function GatemanCheckIn() {
   const qc = useQueryClient();
 
   const [pin, setPin] = useState('');
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [result, setResult] = useState<{ pass?: VisitorPass; error?: string } | null>(null);
 
   const estateQuery = useQuery({
@@ -54,6 +56,17 @@ export default function GatemanCheckIn() {
   });
 
   const todaysCheckIns = (checkInsQuery.data?.items ?? []).filter((p) => isToday(p.checkedInAt));
+
+  /**
+   * A scan hands back the same PIN the keypad would have collected, so check
+   * the visitor straight in — no extra tap while a car waits at the barrier.
+   */
+  const handleScan = (scanned: string) => {
+    setScannerOpen(false);
+    setResult(null);
+    setPin(scanned);
+    verify.mutate(scanned);
+  };
 
   if (estateQuery.isLoading) {
     return (
@@ -85,122 +98,161 @@ export default function GatemanCheckIn() {
   };
 
   return (
-    <Screen refreshing={checkInsQuery.isRefetching} onRefresh={checkInsQuery.refetch}>
-      <View style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.md }}>
-        <View
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: colors.accent,
-            marginBottom: spacing.xs,
-          }}
-        >
-          <KeyRound size={26} color={colors.primary} />
+    <>
+      <Screen refreshing={checkInsQuery.isRefetching} onRefresh={checkInsQuery.refetch}>
+        <View style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.md }}>
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.accent,
+              marginBottom: spacing.xs,
+            }}
+          >
+            <KeyRound size={26} color={colors.primary} />
+          </View>
+          <Text variant="title" center>
+            {estate.name}
+          </Text>
+          <Text variant="callout" color="mutedForeground" center>
+            Scan the visitor&apos;s QR code, or enter their 6-digit PIN.
+          </Text>
         </View>
-        <Text variant="title" center>
-          {estate.name}
-        </Text>
-        <Text variant="callout" color="mutedForeground" center>
-          Enter the visitor&apos;s 6-digit PIN to check them in.
-        </Text>
-      </View>
 
-      <Card elevated>
-        <OtpInput
-          value={pin}
-          onChange={(next) => {
-            setResult(null);
-            setPin(next);
-          }}
-          length={6}
-          disabled={verify.isPending}
-          onComplete={submit}
-        />
-        <Button
-          label={verify.isPending ? 'Checking…' : 'Check In'}
-          loading={verify.isPending}
-          fullWidth
-          disabled={pin.length !== 6}
-          onPress={submit}
-          style={{ marginTop: spacing.lg }}
-        />
-      </Card>
-
-      {result?.pass ? (
         <Card elevated>
-          <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <CheckCircle2 size={22} color={colors.success} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="bodyStrong" style={{ color: colors.success }}>
-                Checked in
-              </Text>
-              <Text variant="body">
-                {result.pass.visitorName} → {result.pass.unitLabel}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Hosted by {result.pass.residentName}
-              </Text>
-            </View>
-          </View>
-        </Card>
-      ) : null}
+          <Button
+            label="Scan QR code"
+            variant="outline"
+            fullWidth
+            icon={<ScanLine size={16} color={colors.foreground} />}
+            disabled={verify.isPending}
+            onPress={() => setScannerOpen(true)}
+          />
 
-      {result?.error ? (
-        <Card elevated>
-          <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <XCircle size={22} color={colors.destructive} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="bodyStrong" style={{ color: colors.destructive }}>
-                Not checked in
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                {result.error}
-              </Text>
-            </View>
-          </View>
-        </Card>
-      ) : null}
-
-      <View style={{ gap: spacing.md }}>
-        <Text variant="bodyStrong">
-          Today&apos;s check-ins{todaysCheckIns.length > 0 ? ` (${todaysCheckIns.length})` : ''}
-        </Text>
-        {checkInsQuery.isLoading ? (
-          <Skeleton height={64} radius={16} />
-        ) : todaysCheckIns.length === 0 ? (
-          <Card>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.md,
+              marginVertical: spacing.lg,
+            }}
+          >
+            <View
+              style={{ flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border }}
+            />
             <Text variant="caption" color="mutedForeground">
-              No visitors checked in yet today.
+              or enter the PIN
             </Text>
-          </Card>
-        ) : (
-          todaysCheckIns.map((pass) => (
-            <Card key={pass.id} elevated>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: spacing.md,
-                }}
-              >
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="bodyStrong">{pass.visitorName}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {pass.unitLabel} · {pass.residentName}
-                  </Text>
-                </View>
+            <View
+              style={{ flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border }}
+            />
+          </View>
+
+          <OtpInput
+            value={pin}
+            onChange={(next) => {
+              setResult(null);
+              setPin(next);
+            }}
+            length={6}
+            disabled={verify.isPending}
+            onComplete={submit}
+          />
+          <Button
+            label={verify.isPending ? 'Checking…' : 'Check In'}
+            loading={verify.isPending}
+            fullWidth
+            disabled={pin.length !== 6}
+            onPress={submit}
+            style={{ marginTop: spacing.lg }}
+          />
+        </Card>
+
+        {result?.pass ? (
+          <Card elevated>
+            <View style={{ flexDirection: 'row', gap: spacing.md }}>
+              <CheckCircle2 size={22} color={colors.success} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text variant="bodyStrong" style={{ color: colors.success }}>
+                  Checked in
+                </Text>
+                <Text variant="body">
+                  {result.pass.visitorName} → {result.pass.unitLabel}
+                </Text>
                 <Text variant="caption" color="mutedForeground">
-                  {pass.checkedInAt ? formatTime(pass.checkedInAt) : '—'}
+                  Hosted by {result.pass.residentName}
                 </Text>
               </View>
+            </View>
+          </Card>
+        ) : null}
+
+        {result?.error ? (
+          <Card elevated>
+            <View style={{ flexDirection: 'row', gap: spacing.md }}>
+              <XCircle size={22} color={colors.destructive} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text variant="bodyStrong" style={{ color: colors.destructive }}>
+                  Not checked in
+                </Text>
+                <Text variant="caption" color="mutedForeground">
+                  {result.error}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        ) : null}
+
+        <View style={{ gap: spacing.md }}>
+          <Text variant="bodyStrong">
+            Today&apos;s check-ins{todaysCheckIns.length > 0 ? ` (${todaysCheckIns.length})` : ''}
+          </Text>
+          {checkInsQuery.isLoading ? (
+            <Skeleton height={64} radius={16} />
+          ) : todaysCheckIns.length === 0 ? (
+            <Card>
+              <Text variant="caption" color="mutedForeground">
+                No visitors checked in yet today.
+              </Text>
             </Card>
-          ))
-        )}
-      </View>
-    </Screen>
+          ) : (
+            todaysCheckIns.map((pass) => (
+              <Card key={pass.id} elevated>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: spacing.md,
+                  }}
+                >
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text variant="bodyStrong">{pass.visitorName}</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      {pass.unitLabel} · {pass.residentName}
+                    </Text>
+                  </View>
+                  <Text variant="caption" color="mutedForeground">
+                    {pass.checkedInAt ? formatTime(pass.checkedInAt) : '—'}
+                  </Text>
+                </View>
+              </Card>
+            ))
+          )}
+        </View>
+      </Screen>
+
+      {/* Remount on open: the scanner latches after one read, and resetting that
+          from an effect would trip react-hooks/set-state-in-effect. */}
+      <QrScannerSheet
+        key={scannerOpen ? 'open' : 'closed'}
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScan={handleScan}
+      />
+    </>
   );
 }
