@@ -7,6 +7,7 @@ import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { IncidentCard } from '@/components/estate/incidents/IncidentCard';
 
 const categoryOptions = [
@@ -33,10 +34,7 @@ export default function GatemanIncidentsPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [panicSent, setPanicSent] = useState(false);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useGatemanPost();
 
   const { data: openIncidents } = useQuery({
     queryKey: estateKeys.incidents(estate?.id ?? '', 'open'),

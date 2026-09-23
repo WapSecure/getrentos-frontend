@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { GatemanNavbar } from '@/components/gateman/GatemanNavbar';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
+import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
 import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
@@ -65,15 +66,21 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
 
   return (
     <GatemanUserContext.Provider value={user}>
-      {/* Renders nothing. Mounted here so the offline queue drains while a guard
-          is actually at the gate. */}
-      <GateQueueSync />
-      <div className="min-h-screen bg-background">
-        <GatemanNavbar user={user} />
-        <main className="pt-16">
-          <div className="max-w-lg mx-auto p-6 lg:p-8">{children}</div>
-        </main>
-      </div>
+      {/* One estate and one barrier for the whole console. Mounted above the
+          navbar so the switcher and every gate page read the same post — an
+          arrival recorded from the vehicles page must be attributed to the same
+          barrier as one recorded from check-in. */}
+      <GatemanPostProvider>
+        {/* Renders nothing. Mounted here so the offline queue drains while a
+            guard is actually at the gate. */}
+        <GateQueueSync />
+        <div className="min-h-screen bg-background">
+          <GatemanNavbar user={user} />
+          <main className="pt-16">
+            <div className="max-w-lg mx-auto p-6 lg:p-8">{children}</div>
+          </main>
+        </div>
+      </GatemanPostProvider>
     </GatemanUserContext.Provider>
   );
 }

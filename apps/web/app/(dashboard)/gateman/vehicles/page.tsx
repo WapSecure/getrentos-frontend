@@ -7,6 +7,7 @@ import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
 const purposeOptions = [
   { value: 'VISITOR', label: 'Visitor' },
@@ -25,14 +26,17 @@ export default function GatemanVehiclesPage() {
   const [vehicleDescription, setVehicleDescription] = useState('');
   const [driverName, setDriverName] = useState('');
   const [purpose, setPurpose] = useState('VISITOR');
-  const [gateId, setGateId] = useState('');
+  /**
+   * `null` means the guard has not touched the gate field, so it follows the
+   * console's post. An explicit `''` means they chose "Not specified" for this
+   * vehicle, which is a real answer and must not be overwritten.
+   */
+  const [gateId, setGateId] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
+  const effectiveGateId = gateId ?? gate?.id ?? '';
 
   const { data: gates } = useQuery({
     queryKey: estateKeys.gates(estate?.id ?? ''),
@@ -57,7 +61,7 @@ export default function GatemanVehiclesPage() {
           vehicleDescription: vehicleDescription.trim() || undefined,
           driverName: driverName.trim() || undefined,
           purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
-          gateId: gateId || undefined,
+          gateId: effectiveGateId || undefined,
           photo: photo ?? undefined,
         })
       ),
@@ -66,7 +70,9 @@ export default function GatemanVehiclesPage() {
       setVehicleDescription('');
       setDriverName('');
       setPurpose('VISITOR');
-      setGateId('');
+      // Back to following the console's post, so the next vehicle does not have
+      // to re-pick the barrier the guard is still standing at.
+      setGateId(null);
       setPhoto(null);
       setError(null);
       queryClient.invalidateQueries({ queryKey: ['estate', estate?.id, 'vehicleLogs'] });
@@ -149,7 +155,7 @@ export default function GatemanVehiclesPage() {
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
             <Select
-              value={gateId}
+              value={effectiveGateId}
               onValueChange={setGateId}
               options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
             />

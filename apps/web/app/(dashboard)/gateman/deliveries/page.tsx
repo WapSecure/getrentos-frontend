@@ -7,6 +7,7 @@ import { Button } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { LogDeliveryModal } from '@/components/estate/deliveries/LogDeliveryModal';
 import { DeliveryLogRow } from '@/components/estate/deliveries/DeliveryLogRow';
 
@@ -17,10 +18,7 @@ export default function GatemanDeliveriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [householdPage, setHouseholdPage] = useState(1);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, isLoading: isEstateLoading } = useGatemanPost();
 
   const { data: gates } = useQuery({
     queryKey: estateKeys.gates(estate?.id ?? ''),

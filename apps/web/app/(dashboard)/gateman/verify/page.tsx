@@ -8,6 +8,7 @@ import { Button, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import {
   clearGateReplaySummary,
   gateOfflineQueue,
@@ -68,20 +69,20 @@ export default function GatemanVerifyPage() {
   const queue = useGateQueue();
   const replaySummary = useGateReplaySummary();
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  // The estate comes from the console's post rather than `/estate/me`, which
+  // answers with the guard's oldest estate and no way to ask for another. The
+  // gate rides along so every write below is attributed to the barrier the guard
+  // is standing at, not merely to the estate.
+  const { estate, gate, needsGateChoice, isLoading: isPostLoading } = useGatemanPost();
+  const gateId = gate?.id;
 
-  /**
-   * Every gate-raised walk-in, in one read. Polled rather than pushed: the
-   * household decides on their own phone whenever they look, and the guard is
-   * standing at a barrier waiting for exactly that.
-   *
-   * Deliberately NOT filtered to the states that still need action. A request
-   * that is refused or that lapses must not simply vanish from the screen of the
-   * guard holding the visitor.
-   */
+  // Every gate-raised walk-in, in one read. Polled rather than pushed: the
+  // household decides on their own phone whenever they look, and the guard is
+  // standing at a barrier waiting for exactly that.
+  //
+  // Deliberately NOT filtered to the states that still need action. A request
+  // that is refused or that lapses must not simply vanish from the screen of the
+  // guard holding the visitor.
   const { data: walkInsData, dataUpdatedAt: walkInsAsOf } = useQuery({
     queryKey: ['estate', estate?.id ?? '', 'walk-ins'],
     queryFn: () =>
@@ -160,7 +161,8 @@ export default function GatemanVerifyPage() {
     : [];
 
   const verify = useMutation({
-    mutationFn: (code: string) => unwrap(estateService.verifyVisitorPass(estate!.id, code)),
+    mutationFn: (code: string) =>
+      unwrap(estateService.verifyVisitorPass(estate!.id, code, { gateId })),
     onSuccess: (pass) => {
       setResult({ pass });
       setPin('');
@@ -177,6 +179,7 @@ export default function GatemanVerifyPage() {
           estateId: estate.id,
           pin: code,
           occurredAt: new Date().toISOString(),
+          gateId,
           label: `PIN ${code}`,
         });
         setResult({ queued: `PIN ${code}` });
@@ -193,7 +196,7 @@ export default function GatemanVerifyPage() {
 
   const checkOut = useMutation({
     mutationFn: (pass: VisitorPass) =>
-      unwrap(estateService.checkOutVisitorPass(estate!.id, pass.id)),
+      unwrap(estateService.checkOutVisitorPass(estate!.id, pass.id, { gateId })),
     onSuccess: () => {
       if (estate) {
         queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'visitorPasses'] });
@@ -205,6 +208,7 @@ export default function GatemanVerifyPage() {
           estateId: estate.id,
           passId: pass.id,
           occurredAt: new Date().toISOString(),
+          gateId,
           label: `${pass.visitorName} (${pass.unitLabel})`,
         });
         setResult({ queued: `${pass.visitorName} checked out` });
@@ -220,7 +224,7 @@ export default function GatemanVerifyPage() {
   /** Opens the barrier for a walk-in the household has already approved. */
   const admit = useMutation({
     mutationFn: (pass: VisitorPass) =>
-      unwrap(estateService.admitWalkInVisitorPass(estate!.id, pass.id)),
+      unwrap(estateService.admitWalkInVisitorPass(estate!.id, pass.id, { gateId })),
     onSuccess: (pass) => {
       setResult({ pass });
       queryClient.invalidateQueries({ queryKey: ['estate', estate!.id] });
@@ -234,6 +238,7 @@ export default function GatemanVerifyPage() {
           estateId: estate!.id,
           passId: pass.id,
           occurredAt: new Date().toISOString(),
+          gateId,
           label: `${pass.visitorName} (${pass.unitLabel})`,
         });
         setResult({ queued: `${pass.visitorName} admitted` });
@@ -294,7 +299,7 @@ export default function GatemanVerifyPage() {
     }
   };
 
-  if (isEstateLoading) {
+  if (isPostLoading) {
     return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
   }
 
@@ -314,9 +319,23 @@ export default function GatemanVerifyPage() {
         </div>
         <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
         <p className="text-muted-foreground text-sm mt-1">
+          {gate ? `${gate.name} · ` : ''}
           Scan the visitor&apos;s QR code, or enter their 6-digit PIN to check them in.
         </p>
       </div>
+
+      {/* The barrier is part of the record, so a guard who has not said which one
+          they are at is told plainly — but is never blocked from recording an
+          arrival, because a real person is standing in front of them. */}
+      {needsGateChoice && (
+        <div className="rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/20 p-4">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            This estate has more than one gate. Use the gate picker above to say which one
+            you&apos;re at, so arrivals are recorded against it. You can still check people in
+            without choosing.
+          </p>
+        </div>
+      )}
 
       <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
         <input
@@ -622,6 +641,7 @@ export default function GatemanVerifyPage() {
         isOpen={walkInOpen}
         onClose={() => setWalkInOpen(false)}
         estateId={estate.id}
+        gateId={gateId}
         onRaised={(pass) =>
           // Phrased without promising an approval: this card stays until the
           // guard leaves the screen, and a refusal must not leave it claiming

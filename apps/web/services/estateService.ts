@@ -38,6 +38,27 @@ type EstatePageQuery = {
   pageSize?: number;
 };
 
+/** Extra fields the gate sends alongside a visitor-pass write. */
+export type GateWriteOptions = {
+  /** ISO time the guard acted, for a write queued offline. */
+  occurredAt?: string;
+  /** The barrier the guard is standing at. */
+  gateId?: string;
+};
+
+/**
+ * Drops absent fields so the gate never sends `gateId: ''` or `occurredAt: null`
+ * — either would be rejected as an invalid id, and the write would be lost for a
+ * reason the guard cannot see or fix. Returns undefined when nothing is set, so a
+ * write with no extra fields is sent with no body at all.
+ */
+function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unknown> | undefined {
+  const body = Object.fromEntries(
+    Object.entries(extra).filter(([, value]) => value !== undefined && value !== '')
+  );
+  return Object.keys(body).length > 0 ? body : undefined;
+}
+
 export const estateService = {
   async createEstate(data: {
     name: string;
@@ -304,16 +325,20 @@ export const estateService = {
    * `occurredAt` is only sent by the offline queue. Without it a check-in that
    * waited in the queue is judged against the clock at replay, so a pass that
    * expired while the connection was down is refused and the arrival is lost.
+   *
+   * `gateId` is the barrier the guard is standing at. It is optional on purpose:
+   * refusing an arrival because the console had not been told which gate it is
+   * at would put a real person behind a data-quality problem.
    */
   async verifyVisitorPass(
     estateId: string,
     pin: string,
-    occurredAt?: string
+    options: GateWriteOptions = {}
   ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/verify`, {
         method: 'POST',
-        body: JSON.stringify(occurredAt ? { pin, occurredAt } : { pin }),
+        body: JSON.stringify(buildGateWriteBody({ pin, ...options })),
       })
     );
   },
@@ -323,17 +348,20 @@ export const estateService = {
    * checked in forever, so "who is inside?" was unanswerable for people.
    *
    * `occurredAt` carries the same meaning as on check-in: the time the guard
-   * actually let the visitor out, not the time the queue got to send it.
+   * actually let the visitor out, not the time the queue got to send it. The
+   * gate is recorded as an *exit* gate, because a visitor may well walk out of a
+   * different barrier than the one they came in by.
    */
   async checkOutVisitorPass(
     estateId: string,
     passId: string,
-    occurredAt?: string
+    options: GateWriteOptions = {}
   ): Promise<ApiResponse<VisitorPass>> {
+    const body = buildGateWriteBody(options);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
         method: 'PATCH',
-        ...(occurredAt ? { body: JSON.stringify({ occurredAt }) } : {}),
+        ...(body ? { body: JSON.stringify(body) } : {}),
       })
     );
   },
@@ -347,7 +375,13 @@ export const estateService = {
    */
   async requestWalkInVisitorPass(
     estateId: string,
-    data: { householdId: string; visitorName: string; visitorPhone?: string; purpose?: string }
+    data: {
+      householdId: string;
+      visitorName: string;
+      visitorPhone?: string;
+      purpose?: string;
+      gateId?: string;
+    }
   ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/walk-in`, {
@@ -366,12 +400,13 @@ export const estateService = {
   async admitWalkInVisitorPass(
     estateId: string,
     passId: string,
-    occurredAt?: string
+    options: GateWriteOptions = {}
   ): Promise<ApiResponse<VisitorPass>> {
+    const body = buildGateWriteBody(options);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/${passId}/admit`, {
         method: 'PATCH',
-        ...(occurredAt ? { body: JSON.stringify({ occurredAt }) } : {}),
+        ...(body ? { body: JSON.stringify(body) } : {}),
       })
     );
   },

@@ -14,6 +14,8 @@ interface WalkInDialogProps {
   isOpen: boolean;
   onClose: () => void;
   estateId: string;
+  /** The barrier the visitor is standing at, when the console knows it. */
+  gateId?: string;
   /** Fired once the household has been asked, so the guard sees what happened. */
   onRaised: (pass: VisitorPass) => void;
 }
@@ -29,7 +31,13 @@ interface WalkInDialogProps {
  * resident can consent, so a request to them could never be answered, and saying
  * so here is kinder than a rejection ten minutes later.
  */
-export const WalkInDialog = ({ isOpen, onClose, estateId, onRaised }: WalkInDialogProps) => {
+export const WalkInDialog = ({
+  isOpen,
+  onClose,
+  estateId,
+  gateId,
+  onRaised,
+}: WalkInDialogProps) => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [household, setHousehold] = useState<Household | null>(null);
@@ -76,6 +84,7 @@ export const WalkInDialog = ({ isOpen, onClose, estateId, onRaised }: WalkInDial
           visitorName: visitorName.trim(),
           visitorPhone: visitorPhone.trim() || undefined,
           purpose: purpose.trim() || undefined,
+          gateId,
         })
       ),
     onSuccess: (pass) => {
