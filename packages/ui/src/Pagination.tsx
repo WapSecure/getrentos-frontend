@@ -8,13 +8,36 @@ interface PaginationProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
+  /**
+   * True while the count is still unknown — normally React Query's `isPending`,
+   * not `isLoading`: `isPending` is also true during SSR and the hydration gap,
+   * which is exactly when `total` is still 0 for want of an answer.
+   *
+   * Without it a list that passes `total={data?.total ?? 0}` announces
+   * "No results" underneath its own loading skeletons, and a slow request looks
+   * like an empty one.
+   */
+  isLoading?: boolean;
   className?: string;
 }
 
-export const Pagination = ({ page, pageSize, total, onPageChange, className }: PaginationProps) => {
+export const Pagination = ({
+  page,
+  pageSize,
+  total,
+  onPageChange,
+  isLoading = false,
+  className,
+}: PaginationProps) => {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
+
+  const summary = isLoading
+    ? 'Loading…'
+    : total === 0
+      ? 'No results'
+      : `Showing ${from}–${to} of ${total}`;
 
   return (
     <div
@@ -23,7 +46,7 @@ export const Pagination = ({ page, pageSize, total, onPageChange, className }: P
         className
       )}
     >
-      <p>{total === 0 ? 'No results' : `Showing ${from}–${to} of ${total}`}</p>
+      <p>{summary}</p>
       <div className="flex items-center gap-1">
         <button
           type="button"
