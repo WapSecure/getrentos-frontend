@@ -11,7 +11,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
-import { primaryPortal, type Portal } from '../roles';
+import { primaryPortal, usablePortal as resolveUsablePortal, type Portal } from '../roles';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
@@ -25,7 +25,10 @@ interface PendingTwoFactor {
 interface AuthContextValue {
   status: 'loading' | 'authenticated' | 'unauthenticated';
   profile: AuthProfile | null;
+  /** Who the user is — their most senior role's portal, built or not. */
   portal: Portal | null;
+  /** The portal to actually open; `null` when nothing they hold is built. */
+  usablePortal: Portal | null;
   pendingTwoFactor: PendingTwoFactor | null;
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
@@ -213,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       profile,
       portal: profile ? primaryPortal(profile.roles) : null,
+      usablePortal: profile ? resolveUsablePortal(profile.roles) : null,
       pendingTwoFactor,
       signIn,
       completeTwoFactor,

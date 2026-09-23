@@ -9,7 +9,7 @@ import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { persister, queryClient } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
-import { IMPLEMENTED_PORTALS, portalHref } from '@/lib/roles';
+import { portalHref } from '@/lib/roles';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
@@ -24,7 +24,7 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
  * firing at once trips React's update counter on the native stack).
  */
 function useProtectedRoute(onboardingSeen: boolean | null) {
-  const { status, portal } = useAuth();
+  const { status, usablePortal } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const lastTarget = useRef<string | null>(null);
@@ -36,7 +36,10 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
 
     const root = segments[0]; // '(auth)' | '(app)' | undefined (index)
     const inApp = root === '(app)';
-    const portalReady = !!portal && IMPLEMENTED_PORTALS.includes(portal);
+    // Route on the portal we can OPEN, not on the user's most senior role —
+    // otherwise a role with no screens yet (realtor, owner, estate) hides a
+    // portal the user does have.
+    const portalReady = !!usablePortal;
 
     let target: string | null = null;
     if (status === 'unauthenticated') {
@@ -46,10 +49,10 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       // authenticated
       const group = (segments as string[])[1];
       if (!inApp) {
-        target = portal && portalReady ? portalHref(portal) : '/(app)/portal-unavailable';
+        target = portalReady ? portalHref(usablePortal) : '/(app)/portal-unavailable';
       } else if (!portalReady) {
         if (group !== 'portal-unavailable') target = '/(app)/portal-unavailable';
-      } else if (portal && group?.startsWith('(') && group !== `(${portal})`) {
+      } else if (usablePortal && group?.startsWith('(') && group !== `(${usablePortal})`) {
         // Two portals' tab groups can share a leaf name (e.g. both define
         // "account"), and group segments are invisible in the URL, so a
         // deep link or stale bookmark can resolve into the WRONG portal's
@@ -57,7 +60,7 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
         // portal group marker — top-level pushed screens outside any
         // group (e.g. "violations", "saved") are unambiguous by name and
         // must stay untouched here.
-        target = portalHref(portal);
+        target = portalHref(usablePortal);
       }
     }
 
@@ -66,7 +69,7 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       router.replace(target as never);
     }
     if (!target) lastTarget.current = null;
-  }, [status, portal, segments, router, onboardingSeen]);
+  }, [status, usablePortal, segments, router, onboardingSeen]);
 }
 
 const STACK_SCREEN_OPTIONS = { headerShown: false, animation: 'fade' } as const;
