@@ -149,6 +149,8 @@ export interface ShortletAvailability {
   estimatedTax?: number;
   taxName?: string;
   taxPct?: number;
+  /** Booked/blocked nights (`YYYY-MM-DD`); only sent when no range is asked for. */
+  unavailableDates?: string[];
 }
 
 export interface CreateShortletListingInput {
