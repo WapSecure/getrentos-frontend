@@ -309,9 +309,19 @@ export async function apiFetch<T>(
   // The access token is deliberately short-lived, so a 401 usually just means
   // it lapsed while the user was working — not that the session is over. Spend
   // the refresh cookie on it and replay the request once before treating the
-  // user as signed out. `/auth/*` is exempt: a 401 from sign-in or the refresh
-  // call itself is the real thing.
-  if (response.status === 401 && allowRefreshRetry && !path.startsWith('/auth/')) {
+  // user as signed out.
+  //
+  // Only when there is a local session to save: a 401 on a *public* page (an
+  // anonymous visitor, or one whose token has gone stale) must not trigger a
+  // refresh at all, because a failed refresh clears the session and fires the
+  // expired listeners — which would bounce someone browsing the marketplace to
+  // the sign-in screen. `/auth/*` is exempt too; a 401 there is the real thing.
+  if (
+    response.status === 401 &&
+    allowRefreshRetry &&
+    !path.startsWith('/auth/') &&
+    Boolean(getAuthToken())
+  ) {
     const refreshed = await refreshSession();
     if (refreshed) return apiFetch<T>(path, options, false);
   }

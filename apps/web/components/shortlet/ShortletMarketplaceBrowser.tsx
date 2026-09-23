@@ -230,7 +230,7 @@ export const ShortletMarketplaceBrowser = () => {
                   )}
                   {listing.isVerified && <Badge variant="info">Verified host</Badge>}
                 </div>
-                {isSignedIn && (
+                {wishlist.canUseWishlist && (
                   <button
                     type="button"
                     aria-label={wishlist.isSaved(listing.id) ? 'Remove from saved' : 'Save listing'}
