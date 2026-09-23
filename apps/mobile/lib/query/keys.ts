@@ -195,4 +195,14 @@ export const qk = {
     dues: ['resident', 'dues'] as const,
     governance: ['resident', 'governance'] as const,
   },
+  gateman: {
+    /** The guard's own post; every other gateman key hangs off its estate id. */
+    myEstate: ['gateman', 'estate'] as const,
+    gates: (estateId: string) => ['gateman', estateId, 'gates'] as const,
+    households: (estateId: string) => ['gateman', estateId, 'households'] as const,
+    todaysCheckIns: (estateId: string) => ['gateman', estateId, 'check-ins'] as const,
+    deliveries: (estateId: string) => ['gateman', estateId, 'deliveries'] as const,
+    vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
+    incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,
+  },
 } as const;

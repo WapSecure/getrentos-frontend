@@ -15,6 +15,7 @@ export default function AppLayout() {
       <Stack.Screen name="(renter)" />
       <Stack.Screen name="(landlord)" />
       <Stack.Screen name="(resident)" />
+      <Stack.Screen name="(gateman)" />
       <Stack.Screen name="(agent)" />
       <Stack.Screen name="agent-task/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="agent-inspection/[taskId]" options={DETAIL_OPTIONS} />

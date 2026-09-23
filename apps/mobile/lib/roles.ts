@@ -59,6 +59,7 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
   'agent',
   'buyer',
   'landlord',
+  'gateman',
 ];
 export const portalHref = (p: Portal) => `/(app)/(${p})` as const;
 

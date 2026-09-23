@@ -26,6 +26,13 @@ export function formatDate(value: string | Date, style: 'short' | 'medium' = 'me
   });
 }
 
+/** Clock time only (e.g. a gate check-in at 2:47 PM). */
+export function formatTime(value: string | Date): string {
+  const d = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
 export function relativeTime(value: string | Date): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   const diff = Date.now() - d.getTime();
