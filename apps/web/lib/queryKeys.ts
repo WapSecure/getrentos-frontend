@@ -36,6 +36,8 @@ export const landlordKeys = {
   maintenanceSummary: ['landlord', 'maintenanceSummary'] as const,
   evictions: ['landlord', 'evictions'] as const,
   leads: ['landlord', 'leads'] as const,
+  offers: (status?: string) => ['landlord', 'offers', status ?? 'all'] as const,
+  offerThread: (offerId: string) => ['landlord', 'offers', offerId, 'thread'] as const,
   micrositeSettings: ['landlord', 'microsite'] as const,
   reviews: ['landlord', 'reviews'] as const,
   reviewSummary: ['landlord', 'reviews', 'summary'] as const,

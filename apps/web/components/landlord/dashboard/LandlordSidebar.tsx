@@ -25,6 +25,7 @@ import {
   Gift,
   Sparkles,
   ShieldCheck,
+  Handshake,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -64,6 +65,7 @@ export const navGroups = [
       item('sidebar.properties', ROUTES.LANDLORD_PROPERTIES, Building2),
       item('sidebar.units', ROUTES.LANDLORD_UNITS, DoorOpen),
       item('sidebar.listings', ROUTES.LANDLORD_LISTINGS, Megaphone),
+      item('sidebar.offers', ROUTES.LANDLORD_OFFERS, Handshake),
       item('sidebar.shortlets', ROUTES.LANDLORD_SHORTLETS, BedDouble),
       item('sidebar.landlord_leads', ROUTES.LANDLORD_LEADS, UsersRound),
       item('sidebar.microsite', ROUTES.LANDLORD_MICROSITE, Globe),
