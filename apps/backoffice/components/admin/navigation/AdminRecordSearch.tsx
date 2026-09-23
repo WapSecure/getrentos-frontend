@@ -17,18 +17,20 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
   const [debounced, setDebounced] = useState('');
   const [focused, setFocused] = useState(false);
   const [active, setActive] = useState(0);
-  const [recent, setRecent] = useState<string[]>([]);
+  // Seeded lazily from storage: reading it in an effect would render an empty
+  // list first, then immediately re-render with the saved searches.
+  const [recent, setRecent] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      return JSON.parse(window.sessionStorage.getItem(RECENT_KEY) ?? '[]') as string[];
+    } catch {
+      return [];
+    }
+  });
   const [type, setType] = useState<AdminSearchType | 'all'>('all');
   const instanceId = useId().replace(/:/g, '');
   const resultsId = `admin-record-search-results-${instanceId}`;
   const root = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    try {
-      setRecent(JSON.parse(window.sessionStorage.getItem(RECENT_KEY) ?? '[]') as string[]);
-    } catch {
-      setRecent([]);
-    }
-  }, []);
   useEffect(() => {
     const timer = window.setTimeout(() => setDebounced(query.trim()), 250);
     return () => window.clearTimeout(timer);

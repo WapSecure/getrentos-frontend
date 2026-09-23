@@ -14,7 +14,7 @@ import {
   Textarea,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { formatDate, type ApiResponse } from '@getrentos/shared';
 import {
   propertyAuthorityService,
   type AuthorityStatus,
@@ -79,48 +79,63 @@ export default function PropertyAuthoritiesPage() {
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: adminKeys.authorityClaims({ status }) });
 
-  const decide = (action: 'approve' | 'reject' | 'revoke') =>
-    useMutation({
-      mutationFn: (claim: PropertyAuthorityClaim) =>
-        action === 'approve'
-          ? propertyAuthorityService.approve(claim.id, {
-              canList: true,
-              canManage,
-              canTransact,
-              ...(typeof expiresInDays === 'number' ? { expiresInDays } : {}),
-              ...(note.trim() ? { note: note.trim() } : {}),
-            })
-          : action === 'reject'
-            ? propertyAuthorityService.reject(claim.id, reason.trim())
-            : propertyAuthorityService.revoke(claim.id, reason.trim()),
-      onSuccess: (response, claim) => {
-        if (!response.success) {
-          setError(response.error ?? 'The decision was not recorded');
-          return;
-        }
-        setError(null);
-        setNotice(
-          action === 'approve'
-            ? `${claim.userEmail ?? 'The claimant'} may now act for that property.`
-            : action === 'reject'
-              ? 'Claim rejected.'
-              : 'Mandate revoked — the publication gate stops counting it immediately.',
-        );
-        setOpenId(null);
-        setReason('');
-        setNote('');
-        setCanManage(false);
-        setCanTransact(false);
-        setExpiresInDays('');
-        void invalidate();
-      },
-    });
+  /**
+   * Shared tail for every decision. Deliberately a plain function: `useMutation`
+   * may only be called from the component body, so the three mutations are
+   * declared below and delegate their result here.
+   */
+  const settle = (
+    action: 'approve' | 'reject' | 'revoke',
+    response: ApiResponse<PropertyAuthorityClaim>,
+    claim: PropertyAuthorityClaim
+  ) => {
+    if (!response.success) {
+      setError(response.error ?? 'The decision was not recorded');
+      return;
+    }
+    setError(null);
+    setNotice(
+      action === 'approve'
+        ? `${claim.userEmail ?? 'The claimant'} may now act for that property.`
+        : action === 'reject'
+          ? 'Claim rejected.'
+          : 'Mandate revoked — the publication gate stops counting it immediately.'
+    );
+    setOpenId(null);
+    setReason('');
+    setNote('');
+    setCanManage(false);
+    setCanTransact(false);
+    setExpiresInDays('');
+    void invalidate();
+  };
 
-  // One hook per action keeps the mutation state (and its disabled logic)
-  // independent, which matters when an officer acts on several claims in a row.
-  const approve = decide('approve');
-  const reject = decide('reject');
-  const revoke = decide('revoke');
+  // One mutation per action keeps the pending state (and the disabled logic that
+  // reads it) independent, which matters when an officer acts on several claims
+  // in a row.
+  const approve = useMutation({
+    mutationFn: (claim: PropertyAuthorityClaim) =>
+      propertyAuthorityService.approve(claim.id, {
+        canList: true,
+        canManage,
+        canTransact,
+        ...(typeof expiresInDays === 'number' ? { expiresInDays } : {}),
+        ...(note.trim() ? { note: note.trim() } : {}),
+      }),
+    onSuccess: (response, claim) => settle('approve', response, claim),
+  });
+
+  const reject = useMutation({
+    mutationFn: (claim: PropertyAuthorityClaim) =>
+      propertyAuthorityService.reject(claim.id, reason.trim()),
+    onSuccess: (response, claim) => settle('reject', response, claim),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (claim: PropertyAuthorityClaim) =>
+      propertyAuthorityService.revoke(claim.id, reason.trim()),
+    onSuccess: (response, claim) => settle('revoke', response, claim),
+  });
 
   const busy = approve.isPending || reject.isPending || revoke.isPending;
   const claims = claimsQuery.data ?? [];
@@ -200,9 +215,7 @@ export default function PropertyAuthoritiesPage() {
                       <span className="font-mono text-xs">{claim.propertyId.slice(0, 8)}</span> ·
                       filed {formatDate(claim.createdAt)}
                     </p>
-                    {claim.note && (
-                      <p className="text-sm text-muted-foreground">“{claim.note}”</p>
-                    )}
+                    {claim.note && <p className="text-sm text-muted-foreground">“{claim.note}”</p>}
                   </div>
 
                   <div className="text-right space-y-1">
@@ -275,8 +288,8 @@ export default function PropertyAuthoritiesPage() {
                         onChange={(event) => setCanTransact(event.target.checked)}
                       />
                       <span className="text-muted-foreground">
-                        Also allow money actions (release escrow, accept offers). Leave this off
-                        for someone who should only run the day-to-day.
+                        Also allow money actions (release escrow, accept offers). Leave this off for
+                        someone who should only run the day-to-day.
                       </span>
                     </label>
 

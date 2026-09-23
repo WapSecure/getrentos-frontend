@@ -45,17 +45,13 @@ export interface MaintenanceQueueConfig<T> {
 const PAGE_SIZE = 10;
 
 export function MaintenanceQueuePage<T>({ config }: { config: MaintenanceQueueConfig<T> }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => readAdminSearchParam());
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<Record<string, string>>(() =>
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
   const Icon = config.icon;
-
-  useEffect(() => {
-    setSearch(readAdminSearchParam());
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -8,7 +8,6 @@ import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
   isAuthenticated,
-  getDashboardRoute,
   BACKEND_ROLE_TO_ID,
   getStoredUser,
   ensureValidSession,
@@ -39,31 +38,34 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       }
       await ensureValidSession();
       if (cancelled) return;
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
+
+      const parsedUser = getStoredUser<AdminUser>();
+      const isAdmin = (parsedUser?.roles ?? []).some(
+        (role) => BACKEND_ROLE_TO_ID[role] === 'admin'
+      );
+
+      // Signed out, signed in as someone without a back-office role, or holding
+      // only an identity-less session — the refresh cookie is not port-scoped, so
+      // this app can silently restore a session from the main app's cookie and
+      // end up with no profile at all. All three are treated as "not an admin".
+      //
+      // They go to the admin sign-in rather than getDashboardRoute(), which
+      // returns main-app paths such as /renter/dashboard: those do not exist here
+      // and dropped the visitor on a 404.
+      if (!isAuthenticated() || !parsedUser || !isAdmin) {
         router.replace(ROUTES.ADMIN_LOGIN);
         return;
       }
 
-      const parsedUser = getStoredUser<AdminUser>();
-      if (parsedUser) {
-        const isAdmin = (parsedUser.roles || []).some((r) => BACKEND_ROLE_TO_ID[r] === 'admin');
-        if (!isAdmin) {
-          router.replace(getDashboardRoute(parsedUser.role || 'renter'));
-          return;
-        }
-
-        const needsStaffAccess = pathname === ROUTES.ADMIN_ACCESS;
-        // Anyone who can manage, create, or approve staff may open the page;
-        // the sections render according to what they are allowed to do.
-        if (needsStaffAccess && !hasStaffAccess(parsedUser.roles)) {
-          router.replace(ROUTES.ADMIN_DASHBOARD);
-          return;
-        }
-
-        setUser(parsedUser);
+      const needsStaffAccess = pathname === ROUTES.ADMIN_ACCESS;
+      // Anyone who can manage, create, or approve staff may open the page;
+      // the sections render according to what they are allowed to do.
+      if (needsStaffAccess && !hasStaffAccess(parsedUser.roles)) {
+        router.replace(ROUTES.ADMIN_DASHBOARD);
+        return;
       }
 
+      setUser(parsedUser);
       setIsLoading(false);
     };
 

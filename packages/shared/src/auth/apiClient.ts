@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from './constants';
+import { BACKEND_ROLE_TO_ID, STORAGE_KEYS } from './constants';
 import { clearAuthSession, getAuthToken, getStoredUser, saveAuthSession } from './authStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -213,7 +213,8 @@ export async function refreshSession(): Promise<boolean> {
 
       // remember-me sessions live in localStorage; ephemeral ones in sessionStorage.
       const rememberMe = !!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const user = getStoredUser<Record<string, unknown>>() ?? {};
+      const user =
+        getStoredUser<Record<string, unknown>>() ?? (await fetchSessionProfile(data.accessToken));
       saveAuthSession({ accessToken: data.accessToken, user }, rememberMe);
       return true;
     } catch {
@@ -226,6 +227,38 @@ export async function refreshSession(): Promise<boolean> {
   })();
 
   return refreshPromise;
+}
+
+/**
+ * Rebuilds the profile for a session that was restored from the refresh cookie
+ * while nothing was in storage.
+ *
+ * The refresh cookie is not port-scoped, so a sibling app on another port can
+ * hand us a session this app knows nothing about. Writing `{}` as the profile
+ * still marks the session as authenticated, but every role check then reads it
+ * as "signed in with no roles" — which is how a visitor ends up on a dashboard
+ * for a role they do not have. Falls back to `{}` when the profile cannot be
+ * read, so the session behaves exactly as it did before.
+ */
+async function fetchSessionProfile(accessToken: string): Promise<Record<string, unknown>> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) return {};
+    const me = await res.json();
+    if (!me?.id) return {};
+    // Mirrors the shape saved at sign-in: the profile plus the client-side
+    // `fullName`/`role` fields the shared helpers read.
+    return {
+      ...me,
+      fullName: me.legalName,
+      role: BACKEND_ROLE_TO_ID[me.roles?.[0]] ?? 'renter',
+    };
+  } catch {
+    return {};
+  }
 }
 
 /**

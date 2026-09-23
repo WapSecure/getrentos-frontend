@@ -15,6 +15,7 @@ import { getInitials, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { PlanTier, PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
 
 const statusConfig: Record<
@@ -44,11 +45,7 @@ const PAGE_SIZE = 10;
 
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    setSearchQuery(new URLSearchParams(window.location.search).get('search') ?? '');
-  }, []);
+  const [searchQuery, setSearchQuery] = useState(() => readAdminSearchParam());
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
