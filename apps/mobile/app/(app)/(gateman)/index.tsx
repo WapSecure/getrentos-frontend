@@ -63,22 +63,19 @@ export default function GatemanCheckIn() {
   });
 
   /**
-   * Walk-ins the household has not answered. Polled rather than pushed: the
+   * Every gate-raised walk-in, in one read. Polled rather than pushed: the
    * household decides on their own phone whenever they look, and the guard is
    * standing at a barrier waiting for exactly that, so the panel has to update
    * without them touching anything.
+   *
+   * Deliberately NOT filtered to the states that still need action. A request
+   * that is refused or that lapses must not simply vanish from the screen of the
+   * guard holding the visitor — deciding what to show is the panel's job, and it
+   * needs the answer to do it.
    */
-  const awaitingQuery = useQuery({
-    queryKey: qk.gateman.walkInsAwaiting(estate?.id ?? ''),
-    queryFn: () => gatemanApi.listVisitorPasses(estate!.id, 'awaiting_approval', 1, 50),
-    enabled: !!estate,
-    refetchInterval: 15_000,
-  });
-
-  /** Walk-ins the household approved and nobody has admitted yet. */
-  const approvedQuery = useQuery({
-    queryKey: qk.gateman.walkInsApproved(estate?.id ?? ''),
-    queryFn: () => gatemanApi.listVisitorPasses(estate!.id, 'approved', 1, 50),
+  const walkInsQuery = useQuery({
+    queryKey: qk.gateman.walkIns(estate?.id ?? ''),
+    queryFn: () => gatemanApi.listWalkIns(estate!.id, 1, 50),
     enabled: !!estate,
     refetchInterval: 15_000,
   });
@@ -202,20 +199,43 @@ export default function GatemanCheckIn() {
   const inside = (checkInsQuery.data?.items ?? []).filter((pass) => !leaving.has(pass.id));
 
   // Admits waiting in the queue are hidden from the walk-in panel for the same
-  // reason departures are hidden from "inside now": at the gate, the barrier is
-  // already up. Without this the guard could admit the same visitor repeatedly
-  // while offline, and each extra tap would replay into a conflict.
+  // reason departures are hidden from "inside now": at the gate the barrier is
+  // already up. Without this a guard could admit the same visitor repeatedly
+  // while offline, and every extra tap would replay into a conflict.
   const admitting = new Set(
     queue
       .filter((write): write is Extract<typeof write, { type: 'admit' }> => write.type === 'admit')
       .map((write) => write.payload.passId)
   );
-  const awaiting = (awaitingQuery.data?.items ?? []).filter(
-    (pass) => !admitting.has(pass.id) && !leaving.has(pass.id)
-  );
-  const readyToAdmit = (approvedQuery.data?.items ?? []).filter(
-    (pass) => !admitting.has(pass.id) && !leaving.has(pass.id)
-  );
+
+  // How long a decided request stays on screen. The guard needs to read the
+  // answer and turn the visitor away; after the visitor has gone it is just
+  // clutter on a screen that has to stay scannable at a barrier.
+  const DECISION_VISIBLE_MS = 30 * 60 * 1000;
+
+  const walkIns = walkInsQuery.data?.items ?? [];
+  const stillOpen = (pass: VisitorPass) => !admitting.has(pass.id) && !leaving.has(pass.id);
+
+  const awaiting = walkIns.filter((pass) => pass.status === 'awaiting_approval' && stillOpen(pass));
+  const readyToAdmit = walkIns.filter((pass) => pass.status === 'approved' && stillOpen(pass));
+  /**
+   * Answered while the guard was standing here: refused by the household, or
+   * lapsed because nobody replied. Both mean "turn this visitor away", which is
+   * exactly the instruction that used to disappear.
+   *
+   * Measured from the moment the list was fetched rather than from the clock: a
+   * query response carries its own timestamp, and reading `Date.now()` during
+   * render is impure — React may render twice, and the two passes would then
+   * disagree about what is on screen. The list polls, so the window still moves.
+   */
+  const asOf = walkInsQuery.dataUpdatedAt;
+  const decided = asOf
+    ? walkIns.filter(
+        (pass) =>
+          (pass.status === 'denied' || pass.status === 'expired') &&
+          asOf - new Date(pass.respondedAt ?? pass.expiresAt).getTime() < DECISION_VISIBLE_MS
+      )
+    : [];
 
   /** Manual drain, for a guard who can see a signal the phone hasn't noticed. */
   const sendNow = async () => {
@@ -459,9 +479,38 @@ export default function GatemanCheckIn() {
 
         {/* Walk-ins live above "inside now": an approved visitor is standing at
             the barrier right now, and that is the most urgent thing on screen. */}
-        {awaiting.length > 0 || readyToAdmit.length > 0 ? (
+        {awaiting.length > 0 || readyToAdmit.length > 0 || decided.length > 0 ? (
           <View style={{ gap: spacing.md }}>
             <Text variant="bodyStrong">At the gate</Text>
+
+            {/* Answered requests come first: the guard is holding the visitor and
+                needs to know whether to open the barrier or turn them away. */}
+            {decided.map((pass) => {
+              const refused = pass.status === 'denied';
+              return (
+                <Card key={pass.id} elevated>
+                  <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                    <XCircle size={20} color={colors.destructive} />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{pass.visitorName}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {pass.unitLabel} · {pass.residentName}
+                      </Text>
+                      <Text variant="caption" style={{ color: colors.destructive }}>
+                        {refused
+                          ? 'Refused — do not admit them.'
+                          : 'No answer — do not admit them.'}
+                      </Text>
+                      {refused && pass.denialReason ? (
+                        <Text variant="caption" color="mutedForeground">
+                          Reason: {pass.denialReason}
+                        </Text>
+                      ) : null}
+                    </View>
+                  </View>
+                </Card>
+              );
+            })}
 
             {readyToAdmit.map((pass) => (
               <Card key={pass.id} elevated>
@@ -570,23 +619,30 @@ export default function GatemanCheckIn() {
       {/* Remount on open: the scanner latches after one read, and resetting that
           from an effect would trip react-hooks/set-state-in-effect. */}
       <QrScannerSheet
-        key={scannerOpen ? 'open' : 'closed'}
+        key={`scanner-${scannerOpen ? 'open' : 'closed'}`}
         open={scannerOpen}
         onClose={() => setScannerOpen(false)}
         onScan={handleScan}
       />
 
       {/* Remount on open so the form starts clean each time — resetting it from
-          an effect would trip react-hooks/set-state-in-effect. */}
+          an effect would trip react-hooks/set-state-in-effect.
+
+          Prefixed key: both sheets are siblings, so a bare "open"/"closed"
+          collided between them and React warned about duplicate keys — which can
+          silently drop or duplicate a sibling. */}
       {estate ? (
         <WalkInSheet
-          key={walkInOpen ? 'open' : 'closed'}
+          key={`walk-in-${walkInOpen ? 'open' : 'closed'}`}
           open={walkInOpen}
           onClose={() => setWalkInOpen(false)}
           estateId={estate.id}
           onRaised={(pass) =>
+            // Phrased without promising an approval: this card stays until the
+            // guard leaves the screen, and a refusal must not leave it claiming
+            // "admit them once they approve" — which is what it used to say.
             setResult({
-              requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. Admit them from "At the gate" once ${pass.residentName} approves.`,
+              requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. ${pass.residentName}'s answer appears under "At the gate".`,
             })
           }
         />

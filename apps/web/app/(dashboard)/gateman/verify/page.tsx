@@ -74,31 +74,18 @@ export default function GatemanVerifyPage() {
   });
 
   /**
-   * Walk-ins the household has not answered, and ones it approved that nobody
-   * has admitted yet. Both poll: the household decides whenever they look at
-   * their phone, and the guard is standing at a barrier waiting for exactly that,
-   * so the panel has to move without them touching anything.
+   * Every gate-raised walk-in, in one read. Polled rather than pushed: the
+   * household decides on their own phone whenever they look, and the guard is
+   * standing at a barrier waiting for exactly that.
+   *
+   * Deliberately NOT filtered to the states that still need action. A request
+   * that is refused or that lapses must not simply vanish from the screen of the
+   * guard holding the visitor.
    */
-  const { data: awaitingData } = useQuery({
-    queryKey: ['estate', estate?.id ?? '', 'walk-ins', 'awaiting'],
+  const { data: walkInsData, dataUpdatedAt: walkInsAsOf } = useQuery({
+    queryKey: ['estate', estate?.id ?? '', 'walk-ins'],
     queryFn: () =>
-      unwrap(
-        estateService.listVisitorPasses(estate!.id, {
-          status: 'awaiting_approval',
-          page: 1,
-          pageSize: 50,
-        })
-      ),
-    enabled: !!estate,
-    refetchInterval: 15_000,
-  });
-
-  const { data: approvedData } = useQuery({
-    queryKey: ['estate', estate?.id ?? '', 'walk-ins', 'approved'],
-    queryFn: () =>
-      unwrap(
-        estateService.listVisitorPasses(estate!.id, { status: 'approved', page: 1, pageSize: 50 })
-      ),
+      unwrap(estateService.listWalkInVisitorPasses(estate!.id, { page: 1, pageSize: 50 })),
     enabled: !!estate,
     refetchInterval: 15_000,
   });
@@ -144,8 +131,33 @@ export default function GatemanVerifyPage() {
       .filter((write): write is Extract<typeof write, { type: 'admit' }> => write.type === 'admit')
       .map((write) => write.payload.passId)
   );
-  const awaiting = (awaitingData?.items ?? []).filter((pass) => !admitting.has(pass.id));
-  const readyToAdmit = (approvedData?.items ?? []).filter((pass) => !admitting.has(pass.id));
+  // How long a decided request stays on screen. The guard needs to read the
+  // answer and turn the visitor away; after that it is clutter on a screen that
+  // has to stay scannable at a barrier.
+  const DECISION_VISIBLE_MS = 30 * 60 * 1000;
+
+  const walkIns = walkInsData?.items ?? [];
+  const stillOpen = (pass: VisitorPass) => !admitting.has(pass.id) && !leaving.has(pass.id);
+  const awaiting = walkIns.filter((pass) => pass.status === 'awaiting_approval' && stillOpen(pass));
+  const readyToAdmit = walkIns.filter((pass) => pass.status === 'approved' && stillOpen(pass));
+  /**
+   * Answered while the guard was standing here: refused by the household, or
+   * lapsed because nobody replied. Both mean "turn this visitor away", which is
+   * exactly the instruction that used to disappear.
+   *
+   * Measured from the moment the list was fetched rather than from the clock: a
+   * query response carries its own timestamp, and reading `Date.now()` during
+   * render is impure — React may render twice, and the two passes would then
+   * disagree about what is on screen. The list polls, so the window still moves.
+   */
+  const asOf = walkInsAsOf;
+  const decided = asOf
+    ? walkIns.filter(
+        (pass) =>
+          (pass.status === 'denied' || pass.status === 'expired') &&
+          asOf - new Date(pass.respondedAt ?? pass.expiresAt).getTime() < DECISION_VISIBLE_MS
+      )
+    : [];
 
   const verify = useMutation({
     mutationFn: (code: string) => unwrap(estateService.verifyVisitorPass(estate!.id, code)),
@@ -414,9 +426,38 @@ export default function GatemanVerifyPage() {
 
       {/* Walk-ins sit above "inside now": an approved visitor is standing at the
           barrier right now, which is the most urgent thing on the screen. */}
-      {(awaiting.length > 0 || readyToAdmit.length > 0) && (
+      {(awaiting.length > 0 || readyToAdmit.length > 0 || decided.length > 0) && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">At the gate</h2>
+
+          {/* Answered requests come first: the guard is holding the visitor and
+              needs to know whether to open the barrier or turn them away. */}
+          {decided.map((pass) => (
+            <div
+              key={pass.id}
+              className="bg-card rounded-2xl border border-red-200 dark:border-red-900/40 p-4"
+            >
+              <div className="flex items-start gap-3">
+                <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {pass.unitLabel} · {pass.residentName}
+                  </p>
+                  <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">
+                    {pass.status === 'denied'
+                      ? 'Refused — do not admit them.'
+                      : 'No answer — do not admit them.'}
+                  </p>
+                  {pass.status === 'denied' && pass.denialReason && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Reason: {pass.denialReason}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
 
           {readyToAdmit.map((pass) => (
             <div
@@ -582,8 +623,11 @@ export default function GatemanVerifyPage() {
         onClose={() => setWalkInOpen(false)}
         estateId={estate.id}
         onRaised={(pass) =>
+          // Phrased without promising an approval: this card stays until the
+          // guard leaves the screen, and a refusal must not leave it claiming
+          // "admit them once they approve" — which is what it used to say.
           setResult({
-            requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. Admit them from "At the gate" once ${pass.residentName} approves.`,
+            requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. ${pass.residentName}'s answer appears under "At the gate".`,
           })
         }
       />

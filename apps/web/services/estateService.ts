@@ -278,6 +278,22 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes${toQuery(query)}`));
   },
 
+  /**
+   * Every walk-in the gate has raised, whatever its state.
+   *
+   * One read rather than one per state, so a request the household has just
+   * answered cannot slip between two queries: the console has to be able to tell
+   * "waiting", "approved" and "refused" apart from the same snapshot.
+   */
+  async listWalkInVisitorPasses(
+    estateId: string,
+    query: EstatePageQuery = {}
+  ): Promise<ApiResponse<Paginated<VisitorPass>>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/visitor-passes${toQuery({ ...query, source: 'gate' })}`)
+    );
+  },
+
   async revokeVisitorPass(estateId: string, passId: string): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/${passId}/revoke`, { method: 'PATCH' })

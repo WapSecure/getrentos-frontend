@@ -129,6 +129,18 @@ export const gatemanApi = {
     ),
 
   /**
+   * Every walk-in the gate has raised, whatever its state.
+   *
+   * One read rather than one per state, so a request the household has just
+   * answered cannot slip between two queries: the console has to be able to tell
+   * "waiting", "approved" and "refused" apart from the same snapshot.
+   */
+  listWalkIns: (estateId: string, page = 1, pageSize = 50) =>
+    apiFetch<Paginated<VisitorPass>>(
+      `/estate/${estateId}/visitor-passes${toQuery({ source: 'gate', page, pageSize })}`
+    ),
+
+  /**
    * Checks a visitor in. `pin` is the 6-digit code the resident shared — the QR
    * code at the gate encodes exactly this pin, so the keyboard path and the scan
    * path converge on the same call.

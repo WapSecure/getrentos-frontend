@@ -26,7 +26,7 @@ import {
   type VisitorPassStatus,
 } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
@@ -209,8 +209,8 @@ export default function ResidentVisitorPasses() {
                         {pass.purpose ? `${pass.purpose} · ` : ''}for {pass.unitLabel}
                       </Text>
                       <Text variant="caption" color="mutedForeground">
-                        Asked at {formatDate(pass.createdAt, 'short')}. If nobody answers by{' '}
-                        {formatDate(pass.expiresAt, 'short')}, they are turned away.
+                        Asked at {formatTime(pass.createdAt)}. If nobody answers by{' '}
+                        {formatTime(pass.expiresAt)}, they are turned away.
                       </Text>
                     </View>
                   </View>
