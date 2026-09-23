@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Car, KeyRound, Package, Siren, User } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
+import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 
 /**
  * The gate console.
@@ -22,61 +23,66 @@ export default function GatemanTabsLayout() {
   const insets = useSafeAreaInsets();
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-        tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopColor: colors.border,
-          height: 52 + insets.bottom,
-          paddingTop: 6,
-          paddingBottom: insets.bottom,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '600',
-        },
-        tabBarItemStyle: { paddingVertical: 2 },
-        tabBarHideOnKeyboard: Platform.OS === 'android',
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Check-In',
-          tabBarIcon: ({ color, size }) => <KeyRound color={color} size={size} />,
+    <>
+      {/* Renders nothing. Mounted here rather than at the app root so the queue
+          drains while a guard is actually at the gate. */}
+      <GateQueueSync />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.mutedForeground,
+          tabBarStyle: {
+            backgroundColor: colors.card,
+            borderTopColor: colors.border,
+            height: 52 + insets.bottom,
+            paddingTop: 6,
+            paddingBottom: insets.bottom,
+          },
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '600',
+          },
+          tabBarItemStyle: { paddingVertical: 2 },
+          tabBarHideOnKeyboard: Platform.OS === 'android',
         }}
-      />
-      <Tabs.Screen
-        name="vehicles"
-        options={{
-          title: 'Vehicles',
-          tabBarIcon: ({ color, size }) => <Car color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="gate-deliveries"
-        options={{
-          title: 'Deliveries',
-          tabBarIcon: ({ color, size }) => <Package color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="incidents"
-        options={{
-          title: 'Incidents',
-          tabBarIcon: ({ color, size }) => <Siren color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{
-          title: 'Account',
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Check-In',
+            tabBarIcon: ({ color, size }) => <KeyRound color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="vehicles"
+          options={{
+            title: 'Vehicles',
+            tabBarIcon: ({ color, size }) => <Car color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="gate-deliveries"
+          options={{
+            title: 'Deliveries',
+            tabBarIcon: ({ color, size }) => <Package color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="incidents"
+          options={{
+            title: 'Incidents',
+            tabBarIcon: ({ color, size }) => <Siren color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="account"
+          options={{
+            title: 'Account',
+            tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+          }}
+        />
+      </Tabs>
+    </>
   );
 }

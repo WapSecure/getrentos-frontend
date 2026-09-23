@@ -196,6 +196,12 @@ export const qk = {
     governance: ['resident', 'governance'] as const,
   },
   gateman: {
+    /**
+     * Prefix for the whole console. Used by the offline queue to refresh
+     * everything a guard is looking at once queued writes finally land — the
+     * "inside now" list and the vehicle and delivery logs all move at once.
+     */
+    all: ['gateman'] as const,
     /** The guard's own post; every other gateman key hangs off its estate id. */
     myEstate: ['gateman', 'estate'] as const,
     gates: (estateId: string) => ['gateman', estateId, 'gates'] as const,

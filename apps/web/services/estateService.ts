@@ -284,11 +284,20 @@ export const estateService = {
     );
   },
 
-  async verifyVisitorPass(estateId: string, pin: string): Promise<ApiResponse<VisitorPass>> {
+  /**
+   * `occurredAt` is only sent by the offline queue. Without it a check-in that
+   * waited in the queue is judged against the clock at replay, so a pass that
+   * expired while the connection was down is refused and the arrival is lost.
+   */
+  async verifyVisitorPass(
+    estateId: string,
+    pin: string,
+    occurredAt?: string
+  ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/verify`, {
         method: 'POST',
-        body: JSON.stringify({ pin }),
+        body: JSON.stringify(occurredAt ? { pin, occurredAt } : { pin }),
       })
     );
   },
@@ -296,10 +305,20 @@ export const estateService = {
   /**
    * Logs a checked-in visitor off the estate. Until this existed a pass stayed
    * checked in forever, so "who is inside?" was unanswerable for people.
+   *
+   * `occurredAt` carries the same meaning as on check-in: the time the guard
+   * actually let the visitor out, not the time the queue got to send it.
    */
-  async checkOutVisitorPass(estateId: string, passId: string): Promise<ApiResponse<VisitorPass>> {
+  async checkOutVisitorPass(
+    estateId: string,
+    passId: string,
+    occurredAt?: string
+  ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
-      authFetch(`/estate/${estateId}/visitor-passes/${passId}/check-out`, { method: 'PATCH' })
+      authFetch(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
+        method: 'PATCH',
+        ...(occurredAt ? { body: JSON.stringify({ occurredAt }) } : {}),
+      })
     );
   },
 

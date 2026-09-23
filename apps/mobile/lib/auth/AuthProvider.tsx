@@ -13,6 +13,7 @@ import { ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
 import { primaryPortal, usablePortal as resolveUsablePortal, type Portal } from '../roles';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
+import { clearCachedProfile, readCachedProfile, writeCachedProfile } from './profileCache';
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
 import { identify, reset as resetAnalytics } from '../analytics';
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPendingTwoFactor(null);
     setStatus('unauthenticated');
     await clearTokens();
+    await clearCachedProfile();
     queryClient.clear();
   }, [queryClient]);
 
@@ -118,6 +120,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     else resetAnalytics();
   }, [profile?.id]);
 
+  // Mirror the profile to disk. Driven by the profile itself rather than by each
+  // sign-in path, so a new way of obtaining a session can't forget to cache it.
+  useEffect(() => {
+    if (profile) void writeCachedProfile(profile);
+  }, [profile]);
+
   // Restore the session on cold start.
   useEffect(() => {
     let cancelled = false;
@@ -145,9 +153,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         if (err instanceof ApiError && err.isAuth) {
           await teardown();
-        } else if (!cancelled) {
-          // Offline / server down: trust the stored token so the app still opens.
-          setStatus('authenticated');
+        } else {
+          // Offline, or the server is down. Trust the stored token so the app
+          // still opens — and restore the cached profile with it, because the
+          // portal comes from the user's roles. Setting `authenticated` alone
+          // leaves every role without a portal and drops them on "portal
+          // unavailable", which is no use to a guard at a barrier with no signal.
+          const cached = await readCachedProfile();
+          if (!cancelled) {
+            setProfile(cached);
+            setStatus('authenticated');
+          }
         }
       }
     })();

@@ -3,10 +3,18 @@
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
-import { CheckCircle2, KeyRound, LogOut, QrCode, XCircle } from 'lucide-react';
+import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, XCircle } from 'lucide-react';
 import { Button, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
-import { unwrap } from '@/lib/apiHelpers';
+import { ApiError, unwrap } from '@/lib/apiHelpers';
+import {
+  clearGateReplaySummary,
+  gateOfflineQueue,
+  isOfflineFailure,
+  replayGateQueue,
+  useGateQueue,
+  useGateReplaySummary,
+} from '@/lib/gateOfflineQueue';
 import { estateKeys } from '@/lib/queryKeys';
 import type { VisitorPass } from '@/types/estate';
 
@@ -43,9 +51,18 @@ const formatTime = (value: string) =>
 export default function GatemanVerifyPage() {
   const queryClient = useQueryClient();
   const [pin, setPin] = useState('');
-  const [result, setResult] = useState<{ pass?: VisitorPass; error?: string } | null>(null);
+  const [result, setResult] = useState<{
+    pass?: VisitorPass;
+    error?: string;
+    /** Set when a write was recorded on the device instead of the estate. */
+    queued?: string;
+  } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const scanInputRef = useRef<HTMLInputElement>(null);
+
+  const queue = useGateQueue();
+  const replaySummary = useGateReplaySummary();
 
   const { data: estate, isLoading: isEstateLoading } = useQuery({
     queryKey: estateKeys.myEstate,
@@ -70,7 +87,19 @@ export default function GatemanVerifyPage() {
   // Everyone currently on the estate, not just today's arrivals: a visitor who
   // arrived yesterday and never checked out is exactly the case this list exists
   // to surface.
-  const inside = checkInsData?.items ?? [];
+  //
+  // Departures waiting in the queue are hidden, because at the gate they have
+  // left. Deriving that from the queue rather than patching the query cache means
+  // the list stays right even after a refetch, and the visitor reappears on its
+  // own only if the write is one the estate never accepted.
+  const leaving = new Set(
+    queue
+      .filter(
+        (write): write is Extract<typeof write, { type: 'check-out' }> => write.type === 'check-out'
+      )
+      .map((write) => write.payload.passId)
+  );
+  const inside = (checkInsData?.items ?? []).filter((pass) => !leaving.has(pass.id));
 
   const verify = useMutation({
     mutationFn: (code: string) => unwrap(estateService.verifyVisitorPass(estate!.id, code)),
@@ -81,24 +110,69 @@ export default function GatemanVerifyPage() {
         queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'visitorPasses'] });
       }
     },
-    onError: (error) => {
+    onError: (error, code) => {
+      // No connection at the barrier. The visitor is standing there and the
+      // resident has already approved them, so refusing the entry would be the
+      // wrong answer — record the arrival here and send it later.
+      if (isOfflineFailure(error) && estate) {
+        gateOfflineQueue.enqueue('check-in', {
+          estateId: estate.id,
+          pin: code,
+          occurredAt: new Date().toISOString(),
+          label: `PIN ${code}`,
+        });
+        setResult({ queued: `PIN ${code}` });
+        setPin('');
+        return;
+      }
+      if (error instanceof ApiError) {
+        setResult({ error: error.message });
+        return;
+      }
       setResult({ error: error instanceof Error ? error.message : 'Verification failed' });
     },
   });
 
   const checkOut = useMutation({
-    mutationFn: (passId: string) => unwrap(estateService.checkOutVisitorPass(estate!.id, passId)),
+    mutationFn: (pass: VisitorPass) =>
+      unwrap(estateService.checkOutVisitorPass(estate!.id, pass.id)),
     onSuccess: () => {
       if (estate) {
         queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'visitorPasses'] });
       }
     },
-    onError: (error) => {
+    onError: (error, pass) => {
+      if (isOfflineFailure(error) && estate) {
+        gateOfflineQueue.enqueue('check-out', {
+          estateId: estate.id,
+          passId: pass.id,
+          occurredAt: new Date().toISOString(),
+          label: `${pass.visitorName} (${pass.unitLabel})`,
+        });
+        setResult({ queued: `${pass.visitorName} checked out` });
+        return;
+      }
       setResult({
         error: error instanceof Error ? error.message : 'Could not check that visitor out.',
       });
     },
   });
+
+  /** Manual drain, for a guard who can see a connection the browser hasn't noticed. */
+  const sendNow = async () => {
+    setIsSending(true);
+    try {
+      const summary = await replayGateQueue();
+      if (estate) {
+        queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'visitorPasses'] });
+      }
+      if (summary && summary.sent === 0 && summary.remaining > 0) {
+        setResult({ error: 'Still no connection. Your entries are safe on this device.' });
+      }
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const handleScanFile = async (file: File) => {
     setResult(null);
@@ -206,6 +280,18 @@ export default function GatemanVerifyPage() {
             </div>
           </div>
         )}
+        {result?.queued && (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+            <CloudOff className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Saved on this device</p>
+              <p className="text-xs opacity-80 mt-0.5">
+                {result.queued} could not reach the estate, so it is stored here and will be sent
+                automatically once there is a connection. The visitor can go through.
+              </p>
+            </div>
+          </div>
+        )}
         {result?.error && (
           <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
             <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -213,6 +299,72 @@ export default function GatemanVerifyPage() {
           </div>
         )}
       </div>
+
+      {/* The queue is shown here, where a guard acts, rather than as a banner over
+          the whole app. Each line is a real arrival or departure the estate has
+          not been told about yet. */}
+      {queue.length > 0 && (
+        <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="flex items-start gap-3">
+            <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                Waiting to send ({queue.length})
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Saved in this browser. They go to the estate as soon as there is a connection.
+              </p>
+              <ul className="mt-2 space-y-1">
+                {queue.map((write) => (
+                  <li key={write.id} className="text-xs text-muted-foreground">
+                    {write.type === 'check-in' ? 'Arrival' : 'Departure'} · {write.payload.label} ·{' '}
+                    {formatTime(write.createdAt)}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                disabled={isSending}
+                onClick={() => void sendNow()}
+              >
+                {isSending ? 'Sending…' : 'Send now'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {replaySummary &&
+        (replaySummary.unconfirmed.length > 0 || replaySummary.rejected.length > 0) && (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+            <CloudOff className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              {replaySummary.unconfirmed.length > 0 && (
+                <p className="text-sm font-medium">
+                  Couldn&apos;t confirm {replaySummary.unconfirmed.length} saved entr
+                  {replaySummary.unconfirmed.length === 1 ? 'y' : 'ies'} (
+                  {replaySummary.unconfirmed.join(', ')}). Check the pass.
+                </p>
+              )}
+              {replaySummary.rejected.length > 0 && (
+                <p className="text-sm font-medium mt-1">
+                  {replaySummary.rejected.length} saved entr
+                  {replaySummary.rejected.length === 1 ? 'y was' : 'ies were'} refused by the estate
+                  ({replaySummary.rejected.join(', ')}).
+                </p>
+              )}
+              <button
+                type="button"
+                className="text-xs underline mt-2"
+                onClick={() => clearGateReplaySummary()}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
 
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">
@@ -238,7 +390,7 @@ export default function GatemanVerifyPage() {
                   disabled={checkOut.isPending}
                   onClick={() => {
                     setResult(null);
-                    checkOut.mutate(pass.id);
+                    checkOut.mutate(pass);
                   }}
                 >
                   <LogOut className="w-3.5 h-3.5" />

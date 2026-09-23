@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { GatemanNavbar } from '@/components/gateman/GatemanNavbar';
+import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { PageLoadingState } from '@getrentos/ui';
 import {
   ROUTES,
@@ -64,6 +65,9 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
 
   return (
     <GatemanUserContext.Provider value={user}>
+      {/* Renders nothing. Mounted here so the offline queue drains while a guard
+          is actually at the gate. */}
+      <GateQueueSync />
       <div className="min-h-screen bg-background">
         <GatemanNavbar user={user} />
         <main className="pt-16">
