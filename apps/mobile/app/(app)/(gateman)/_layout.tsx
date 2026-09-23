@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Car, KeyRound, Package, Siren, User } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
+import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
 
 /**
  * The gate console.
@@ -23,7 +24,10 @@ export default function GatemanTabsLayout() {
   const insets = useSafeAreaInsets();
 
   return (
-    <>
+    // One estate and one gate for the whole console: every tab has to agree about
+    // which ground the guard is standing on, or an entry could be admitted in one
+    // estate and checked out in another.
+    <GatemanPostProvider>
       {/* Renders nothing. Mounted here rather than at the app root so the queue
           drains while a guard is actually at the gate. */}
       <GateQueueSync />
@@ -83,6 +87,6 @@ export default function GatemanTabsLayout() {
           }}
         />
       </Tabs>
-    </>
+    </GatemanPostProvider>
   );
 }

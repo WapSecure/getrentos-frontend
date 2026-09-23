@@ -14,6 +14,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type VehiclePurpose } from '@/lib/api/gateman';
 import type { PickedFile } from '@/lib/api/documents';
 import { qk } from '@/lib/query/keys';
@@ -48,11 +49,7 @@ export default function GatemanVehicles() {
   const [gateId, setGateId] = useState('');
   const [photo, setPhoto] = useState<PickedFile | null>(null);
 
-  const estateQuery = useQuery({
-    queryKey: qk.gateman.myEstate,
-    queryFn: () => gatemanApi.getMyEstate(),
-  });
-  const estate = estateQuery.data ?? null;
+  const { estate, isLoading: isPostLoading } = useGatemanPost();
 
   const gatesQuery = useQuery({
     queryKey: qk.gateman.gates(estate?.id ?? ''),
@@ -105,7 +102,7 @@ export default function GatemanVehicles() {
     if (picked) setPhoto(picked);
   };
 
-  if (estateQuery.isLoading) {
+  if (isPostLoading) {
     return (
       <Screen>
         <Skeleton height={280} radius={16} />

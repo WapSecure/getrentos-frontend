@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Pressable, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
   Clock,
   CloudOff,
   KeyRound,
+  MapPin,
   ScanLine,
   UserPlus,
   XCircle,
@@ -22,8 +23,10 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
+import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 import { WalkInSheet } from '@/components/gateman/WalkInSheet';
 import { ApiError } from '@/lib/api/client';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type VisitorPass } from '@/lib/api/gateman';
 import { gateOfflineQueue, replayGateQueue, useGateQueue } from '@/lib/gateOfflineQueue';
 import { qk } from '@/lib/query/keys';
@@ -50,11 +53,8 @@ export default function GatemanCheckIn() {
 
   const queue = useGateQueue();
 
-  const estateQuery = useQuery({
-    queryKey: qk.gateman.myEstate,
-    queryFn: () => gatemanApi.getMyEstate(),
-  });
-  const estate = estateQuery.data ?? null;
+  const { estate, gate, gates, needsGateChoice, isLoading: isPostLoading } = useGatemanPost();
+  const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   const checkInsQuery = useQuery({
     queryKey: qk.gateman.visitorsInside(estate?.id ?? ''),
@@ -81,7 +81,8 @@ export default function GatemanCheckIn() {
   });
 
   const verify = useMutation({
-    mutationFn: (code: string) => gatemanApi.verifyVisitorPass(estate!.id, code),
+    mutationFn: (code: string) =>
+      gatemanApi.verifyVisitorPass(estate!.id, code, { gateId: gate?.id }),
     onSuccess: (pass) => {
       setResult({ pass });
       setPin('');
@@ -97,6 +98,7 @@ export default function GatemanCheckIn() {
           estateId: estate.id,
           pin: code,
           occurredAt: new Date().toISOString(),
+          gateId: gate?.id,
           label: `PIN ${code}`,
         });
         setResult({ queued: `PIN ${code}` });
@@ -110,7 +112,8 @@ export default function GatemanCheckIn() {
   });
 
   const checkOut = useMutation({
-    mutationFn: (pass: VisitorPass) => gatemanApi.checkOutVisitorPass(estate!.id, pass.id),
+    mutationFn: (pass: VisitorPass) =>
+      gatemanApi.checkOutVisitorPass(estate!.id, pass.id, { gateId: gate?.id }),
     onSuccess: (pass) => {
       void haptics.success();
       toast.show(`${pass.visitorName} checked out.`, 'success');
@@ -122,6 +125,7 @@ export default function GatemanCheckIn() {
           estateId: estate.id,
           passId: pass.id,
           occurredAt: new Date().toISOString(),
+          gateId: gate?.id,
           label: `${pass.visitorName} (${pass.unitLabel})`,
         });
         void haptics.success();
@@ -138,7 +142,8 @@ export default function GatemanCheckIn() {
 
   /** Opens the barrier for a walk-in the household has already approved. */
   const admit = useMutation({
-    mutationFn: (pass: VisitorPass) => gatemanApi.admitWalkIn(estate!.id, pass.id),
+    mutationFn: (pass: VisitorPass) =>
+      gatemanApi.admitWalkIn(estate!.id, pass.id, { gateId: gate?.id }),
     onSuccess: (pass) => {
       void haptics.success();
       setResult({ pass });
@@ -157,6 +162,7 @@ export default function GatemanCheckIn() {
           estateId: estate.id,
           passId: pass.id,
           occurredAt: new Date().toISOString(),
+          gateId: gate?.id,
           label: `${pass.visitorName} (${pass.unitLabel})`,
         });
         void haptics.success();
@@ -262,7 +268,7 @@ export default function GatemanCheckIn() {
     verify.mutate(scanned);
   };
 
-  if (estateQuery.isLoading) {
+  if (isPostLoading) {
     return (
       <Screen>
         <View style={{ gap: spacing.md, marginTop: spacing['6xl'] }}>
@@ -311,10 +317,60 @@ export default function GatemanCheckIn() {
           <Text variant="title" center>
             {estate.name}
           </Text>
+
+          {/* Where this guard is, as a fact they can correct. A guard on two
+              estates was previously shown the oldest one with nothing on screen
+              to suggest the other existed. */}
+          <Pressable
+            onPress={() => setPostSheetOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Change your estate or gate"
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.xs,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+              borderRadius: 999,
+              backgroundColor: colors.accent,
+            }}
+          >
+            <MapPin size={14} color={colors.primary} />
+            <Text variant="caption" style={{ color: colors.primary }}>
+              {gate
+                ? gate.name
+                : gates.length === 0
+                  ? 'No gates named'
+                  : `${gates.length} gates — tap to say which`}
+            </Text>
+          </Pressable>
+
           <Text variant="callout" color="mutedForeground" center>
             Scan the visitor&apos;s QR code, or enter their 6-digit PIN.
           </Text>
         </View>
+
+        {/* Entries are recorded against the gate, so an estate can answer which
+            barrier a visitor came through. Left unpicked rather than guessed:
+            a confident wrong gate is worse than a missing one, and only the
+            guard knows which barrier they are standing at. */}
+        {needsGateChoice ? (
+          <Card elevated>
+            <View style={{ gap: spacing.sm }}>
+              <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                <MapPin size={20} color={colors.destructive} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyStrong">Which gate are you at?</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    This estate has {gates.length} gates. Entries you record will not be attributed
+                    to one until you pick, so the estate cannot tell where someone came through.
+                  </Text>
+                </View>
+              </View>
+              <Button label="Choose my gate" fullWidth onPress={() => setPostSheetOpen(true)} />
+            </View>
+          </Card>
+        ) : null}
 
         <Card elevated>
           <Button
@@ -625,6 +681,10 @@ export default function GatemanCheckIn() {
         onScan={handleScan}
       />
 
+      {estate ? (
+        <PostSwitcherSheet open={postSheetOpen} onClose={() => setPostSheetOpen(false)} />
+      ) : null}
+
       {/* Remount on open so the form starts clean each time — resetting it from
           an effect would trip react-hooks/set-state-in-effect.
 
@@ -637,6 +697,7 @@ export default function GatemanCheckIn() {
           open={walkInOpen}
           onClose={() => setWalkInOpen(false)}
           estateId={estate.id}
+          gateId={gate?.id}
           onRaised={(pass) =>
             // Phrased without promising an approval: this card stays until the
             // guard leaves the screen, and a refusal must not leave it claiming

@@ -204,6 +204,8 @@ export const qk = {
     all: ['gateman'] as const,
     /** The guard's own post; every other gateman key hangs off its estate id. */
     myEstate: ['gateman', 'estate'] as const,
+    /** Every estate this guard can open, for the switcher. */
+    myEstates: ['gateman', 'estates'] as const,
     gates: (estateId: string) => ['gateman', estateId, 'gates'] as const,
     households: (estateId: string) => ['gateman', estateId, 'households'] as const,
     /** Visitors currently on the estate — anyone CHECKED_IN, however long ago. */

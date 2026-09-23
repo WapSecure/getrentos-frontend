@@ -12,6 +12,8 @@ export interface WalkInSheetProps {
   open: boolean;
   onClose: () => void;
   estateId: string;
+  /** The barrier the visitor is standing at, when the console knows it. */
+  gateId?: string;
   /** Fired once the household has been asked, so the caller can show the result. */
   onRaised: (pass: VisitorPass) => void;
 }
@@ -29,7 +31,7 @@ export interface WalkInSheetProps {
  * guard would spend the decision window discovering that. Saying so up front is
  * kinder than a rejection ten minutes later.
  */
-export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetProps) {
+export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkInSheetProps) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -73,6 +75,7 @@ export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetPr
         visitorName: visitorName.trim(),
         visitorPhone: visitorPhone.trim() || undefined,
         purpose: purpose.trim() || undefined,
+        gateId,
       }),
     onSuccess: (pass) => {
       void haptics.success();

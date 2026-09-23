@@ -39,14 +39,20 @@ export type GateWriteType = 'check-in' | 'check-out' | 'admit';
  * id would tell them nothing.
  */
 export type GateWritePayloads = {
-  'check-in': { estateId: string; pin: string; occurredAt: string; label: string };
-  'check-out': { estateId: string; passId: string; occurredAt: string; label: string };
+  'check-in': { estateId: string; pin: string; occurredAt: string; gateId?: string; label: string };
+  'check-out': {
+    estateId: string;
+    passId: string;
+    occurredAt: string;
+    gateId?: string;
+    label: string;
+  };
   /**
    * An approved walk-in the guard admitted while the connection was down. The
    * household's consent is already on the server, so the barrier decision is
    * still the guard's to record — only the network is missing.
    */
-  admit: { estateId: string; passId: string; occurredAt: string; label: string };
+  admit: { estateId: string; passId: string; occurredAt: string; gateId?: string; label: string };
 };
 
 export type GateWrite = {
@@ -221,24 +227,25 @@ function classify(item: GateWrite, error: unknown): Outcome {
 
 function dispatch(item: GateWrite): Promise<unknown> {
   switch (item.type) {
+    // The gate travels with the write. By replay time the guard may have moved
+    // to another estate or another barrier, so reading "where am I now" would
+    // attribute the arrival to the wrong place — the record has to say where it
+    // actually happened.
     case 'check-in':
-      return gatemanApi.verifyVisitorPass(
-        item.payload.estateId,
-        item.payload.pin,
-        item.payload.occurredAt
-      );
+      return gatemanApi.verifyVisitorPass(item.payload.estateId, item.payload.pin, {
+        occurredAt: item.payload.occurredAt,
+        gateId: item.payload.gateId,
+      });
     case 'check-out':
-      return gatemanApi.checkOutVisitorPass(
-        item.payload.estateId,
-        item.payload.passId,
-        item.payload.occurredAt
-      );
+      return gatemanApi.checkOutVisitorPass(item.payload.estateId, item.payload.passId, {
+        occurredAt: item.payload.occurredAt,
+        gateId: item.payload.gateId,
+      });
     case 'admit':
-      return gatemanApi.admitWalkIn(
-        item.payload.estateId,
-        item.payload.passId,
-        item.payload.occurredAt
-      );
+      return gatemanApi.admitWalkIn(item.payload.estateId, item.payload.passId, {
+        occurredAt: item.payload.occurredAt,
+        gateId: item.payload.gateId,
+      });
   }
 }
 

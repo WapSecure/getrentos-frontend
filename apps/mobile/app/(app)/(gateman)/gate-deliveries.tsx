@@ -15,6 +15,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type Household } from '@/lib/api/gateman';
 import type { PickedFile } from '@/lib/api/documents';
 import { qk } from '@/lib/query/keys';
@@ -31,11 +32,7 @@ export default function GatemanDeliveries() {
 
   const [logOpen, setLogOpen] = useState(false);
 
-  const estateQuery = useQuery({
-    queryKey: qk.gateman.myEstate,
-    queryFn: () => gatemanApi.getMyEstate(),
-  });
-  const estate = estateQuery.data ?? null;
+  const { estate, isLoading: isPostLoading } = useGatemanPost();
 
   const gatesQuery = useQuery({
     queryKey: qk.gateman.gates(estate?.id ?? ''),
@@ -85,7 +82,7 @@ export default function GatemanDeliveries() {
     onError: () => toast.show("Couldn't mark that as collected. Try again.", 'error'),
   });
 
-  if (estateQuery.isLoading) {
+  if (isPostLoading) {
     return (
       <Screen>
         <Skeleton height={140} radius={16} />

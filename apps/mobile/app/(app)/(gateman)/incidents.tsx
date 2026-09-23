@@ -16,6 +16,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import {
   gatemanApi,
   PANIC_DESCRIPTION,
@@ -73,11 +74,7 @@ export default function GatemanIncidents() {
   const [photo, setPhoto] = useState<PickedFile | null>(null);
   const [panicSent, setPanicSent] = useState(false);
 
-  const estateQuery = useQuery({
-    queryKey: qk.gateman.myEstate,
-    queryFn: () => gatemanApi.getMyEstate(),
-  });
-  const estate = estateQuery.data ?? null;
+  const { estate, isLoading: isPostLoading } = useGatemanPost();
 
   const openQuery = useQuery({
     queryKey: qk.gateman.incidents(estate?.id ?? ''),
@@ -134,7 +131,7 @@ export default function GatemanIncidents() {
     if (picked) setPhoto(picked);
   };
 
-  if (estateQuery.isLoading) {
+  if (isPostLoading) {
     return (
       <Screen>
         <Skeleton height={280} radius={16} />
