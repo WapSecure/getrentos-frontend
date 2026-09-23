@@ -3,6 +3,19 @@ import { clearAuthSession, getAuthToken, getStoredUser, saveAuthSession } from '
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+/**
+ * Which app this bundle is, sent as `x-client-app`.
+ *
+ * The API namespaces the refresh cookie per app, because cookies are neither
+ * port- nor app-scoped: several front ends on one host share a single cookie
+ * jar. Without this, signing into one app rotated the cookie for all of them and
+ * the others silently picked up the wrong identity. Declaring the app also lets
+ * the API refuse a non-staff account at staff sign-in.
+ *
+ * Unset means the main web app — its cookie name is unchanged.
+ */
+export const CLIENT_APP = process.env.NEXT_PUBLIC_CLIENT_APP || undefined;
+
 if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://')) {
   throw new Error('NEXT_PUBLIC_API_URL must use https:// in production');
 }
@@ -194,7 +207,10 @@ export async function refreshSession(): Promise<boolean> {
       const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(CLIENT_APP ? { 'x-client-app': CLIENT_APP } : {}),
+        },
         body: JSON.stringify({}),
       });
 
@@ -271,7 +287,10 @@ export async function logoutSession(): Promise<void> {
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(CLIENT_APP ? { 'x-client-app': CLIENT_APP } : {}),
+        },
         body: JSON.stringify({}),
       });
     } catch {

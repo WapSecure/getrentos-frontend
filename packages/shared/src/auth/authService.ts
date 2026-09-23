@@ -1,4 +1,4 @@
-import { apiFetch } from './apiClient';
+import { apiFetch, CLIENT_APP } from './apiClient';
 import { safeCall } from './apiHelpers';
 import type { ApiResponse } from './apiHelpers';
 
@@ -87,14 +87,16 @@ export const authService = {
     rememberMe = false,
     /** Declares the calling app to the backend (e.g. 'backoffice') so it can
      *  reject non-staff accounts before issuing a token, instead of relying
-     *  solely on the caller's own post-login role check. */
+     *  solely on the caller's own post-login role check. Defaults to this app's
+     *  configured id so the header and the refresh cookie cannot disagree. */
     clientApp?: string
   ): Promise<ApiResponse<LoginResult>> {
+    const app = clientApp ?? CLIENT_APP;
     return safeCall(() =>
       apiFetch<LoginResult>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ identifier, password, rememberMe }),
-        headers: clientApp ? { 'x-client-app': clientApp } : undefined,
+        headers: app ? { 'x-client-app': app } : undefined,
       })
     );
   },
@@ -105,11 +107,12 @@ export const authService = {
     token: string,
     clientApp?: string
   ): Promise<ApiResponse<AuthResult>> {
+    const app = clientApp ?? CLIENT_APP;
     return safeCall(() =>
       apiFetch<AuthResult>('/auth/login/2fa', {
         method: 'POST',
         body: JSON.stringify({ challengeToken, token }),
-        headers: clientApp ? { 'x-client-app': clientApp } : undefined,
+        headers: app ? { 'x-client-app': app } : undefined,
       })
     );
   },

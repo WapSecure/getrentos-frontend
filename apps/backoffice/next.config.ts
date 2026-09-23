@@ -35,6 +35,21 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
+  /**
+   * Declares this app to the API as `x-client-app: backoffice`.
+   *
+   * The API namespaces its refresh cookie per app, because cookies are not
+   * port- or app-scoped: without this the back office and the main web app,
+   * which share a host, rotated each other's session and could end up acting as
+   * the other's user. It also makes the API refuse a non-staff account at staff
+   * sign-in rather than only checking roles after the fact.
+   *
+   * Set here rather than in `.env.local`, which is gitignored and so would only
+   * apply on the machine that created it.
+   */
+  env: {
+    NEXT_PUBLIC_CLIENT_APP: 'backoffice',
+  },
   images: {
     remotePatterns: imageRemotePatterns(),
   },
