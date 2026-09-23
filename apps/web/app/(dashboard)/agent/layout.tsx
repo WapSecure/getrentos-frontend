@@ -14,7 +14,6 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
-import { useSessionTimeout } from '@getrentos/ui';
 
 export type AgentUser = {
   id?: string;
@@ -33,7 +32,6 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<AgentUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;

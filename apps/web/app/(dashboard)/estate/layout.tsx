@@ -14,8 +14,8 @@ import {
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
-import { useSessionTimeout } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
+
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { Estate } from '@/types/estate';
@@ -89,7 +89,6 @@ export default function EstateLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<EstateUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  useSessionTimeout();
 
   useEffect(() => {
     let cancelled = false;

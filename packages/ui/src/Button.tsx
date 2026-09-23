@@ -22,6 +22,12 @@ interface ButtonProps {
   shadow?: boolean;
   title?: string;
   /**
+   * Focus the button as soon as it mounts. Used by dialogs whose primary
+   * action should be the keyboard's default landing spot, so pressing Enter
+   * accepts the dialog rather than the destructive alternative next to it.
+   */
+  autoFocus?: boolean;
+  /**
    * Accessible name, overriding the visible text.
    *
    * Needed wherever the same button repeats down a list — "Manage", "View",
@@ -49,6 +55,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rounded = 'full',
       shadow = false,
       title,
+      autoFocus = false,
       'aria-label': ariaLabel,
     },
     ref
@@ -148,6 +155,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={combinedClassName}
         title={title}
         aria-label={ariaLabel}
+        autoFocus={autoFocus}
         {...motionProps}
       >
         {content}
