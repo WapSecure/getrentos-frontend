@@ -13,6 +13,7 @@ import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { useAdminUser } from '../layout';
 import type {
@@ -31,11 +32,7 @@ export default function AdminDisputesPage() {
   const queryClient = useQueryClient();
   const adminUser = useAdminUser();
   const canAttachEvidence = hasAdminPermission(adminUser?.roles, 'disputes.resolve');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    setSearchQuery(new URLSearchParams(window.location.search).get('search') ?? '');
-  }, []);
+  const [searchQuery, setSearchQuery] = useState(() => readAdminSearchParam());
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');

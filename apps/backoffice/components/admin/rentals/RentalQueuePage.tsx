@@ -30,15 +30,11 @@ export interface RentalQueueConfig<T> {
 const PAGE_SIZE = 10;
 
 export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => readAdminSearchParam());
   const [debounced, setDebounced] = useState('');
   const [status, setStatus] = useState('all');
   const [page, setPage] = useState(1);
   const Icon = config.icon;
-
-  useEffect(() => {
-    setSearch(readAdminSearchParam());
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
