@@ -6,6 +6,8 @@ export interface Estate {
   state: string;
   gateCount: number | null;
   lateFeeAmount: number;
+  /** Days a due may run past its due date before it is treated as late. */
+  graceDays: number;
   householdCount: number;
   createdAt: string;
 }
