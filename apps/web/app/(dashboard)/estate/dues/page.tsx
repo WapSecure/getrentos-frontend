@@ -103,7 +103,7 @@ export default function EstateDuesPage() {
   });
 
   const updateDueSettings = useMutation({
-    mutationFn: (data: { lateFeeAmount: number }) =>
+    mutationFn: (data: { lateFeeAmount: number; graceDays: number }) =>
       unwrap(estateService.updateDueSettings(estate!.id, data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: estateKeys.myEstates });
@@ -137,7 +137,7 @@ export default function EstateDuesPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
             <Settings className="w-4 h-4" />
-            Late Fee Settings
+            Due Settings
           </Button>
           <Button
             variant="primary"
@@ -218,6 +218,7 @@ export default function EstateDuesPage() {
       <DueSettingsModal
         isOpen={isSettingsOpen}
         currentLateFeeAmount={estate.lateFeeAmount}
+        currentGraceDays={estate.graceDays}
         onClose={() => setIsSettingsOpen(false)}
         onSubmit={(data) => updateDueSettings.mutate(data)}
         isSubmitting={updateDueSettings.isPending}

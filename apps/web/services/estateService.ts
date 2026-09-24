@@ -67,7 +67,7 @@ export const estateService = {
 
   async updateDueSettings(
     estateId: string,
-    data: { lateFeeAmount: number }
+    data: { lateFeeAmount: number; graceDays?: number }
   ): Promise<ApiResponse<Estate>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/due-settings`, { method: 'PATCH', body: JSON.stringify(data) })
