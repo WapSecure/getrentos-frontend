@@ -228,6 +228,8 @@ export const ROUTES = {
   ESTATE_VIOLATIONS: '/estate/violations',
   ESTATE_GOVERNANCE: '/estate/governance',
   ESTATE_VEHICLES: '/estate/vehicles',
+  /** The estate's do-not-admit list, screened at every way in. */
+  ESTATE_WATCHLIST: '/estate/watchlist',
   ESTATE_DELIVERIES: '/estate/deliveries',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',

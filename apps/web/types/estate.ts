@@ -239,6 +239,83 @@ export interface Gate {
   createdAt: string;
 }
 
+/** `PERSON` is recognised by name or phone; `VEHICLE` by registration. */
+export type WatchlistSubjectType = 'PERSON' | 'VEHICLE';
+
+/**
+ * `BLOCK` refuses entry. `WATCH` admits the visitor but the estate wants to be
+told, for somebody they would rather know about than exclude.
+ */
+export type WatchlistSeverity = 'BLOCK' | 'WATCH';
+
+/**
+ * Lifted entries stay on the list rather than being deleted, so the estate can
+ * still answer "was this person on our list in March, and who decided that?" —
+ * a question that gets asked precisely when something has gone wrong.
+ */
+export type WatchlistStatus = 'ACTIVE' | 'LIFTED';
+
+/**
+ * Which detail the match was found on.
+ *
+ * Not cosmetic: a plate or a phone number is an identifier, while a name is a
+ * coincidence waiting to happen, and a guard looking at a real person is
+ * entitled to know which one they are looking at before deciding.
+ */
+export type WatchlistMatchedOn = 'NAME' | 'PHONE' | 'PLATE';
+
+export interface WatchlistEntry {
+  id: string;
+  estateId: string;
+  subjectType: WatchlistSubjectType;
+  severity: WatchlistSeverity;
+  status: WatchlistStatus;
+  label: string;
+  phone?: string;
+  plateNumber?: string;
+  reason: string;
+  photoUrl?: string;
+  addedById: string;
+  expiresAt?: string;
+  liftedAt?: string;
+  liftedById?: string;
+  liftReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * One entry a visitor or vehicle matched.
+ *
+ * `message` is written server-side and shown verbatim. It is the only place the
+ * wording lives, so the gate console on either platform cannot drift into
+ * saying something the estate did not.
+ */
+export interface WatchlistMatch {
+  entryId: string;
+  label: string;
+  subjectType: WatchlistSubjectType;
+  severity: WatchlistSeverity;
+  reason: string;
+  matchedOn: WatchlistMatchedOn;
+  /** True when this match should refuse the entry, false when it only warns. */
+  blocked: boolean;
+  message: string;
+}
+
+/**
+ * The result of screening somebody.
+ *
+ * Always the same shape whether or not anything matched, so a caller cannot
+ * mistake "not screened" for "screened and clear" — only one of those means
+ * anything.
+ */
+export interface WatchlistScreening {
+  flagged: boolean;
+  blocked: boolean;
+  matches: WatchlistMatch[];
+}
+
 export type AnnouncementPriority = 'normal' | 'urgent';
 
 export interface Announcement {

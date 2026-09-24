@@ -6,6 +6,8 @@ import { Car, LogOut as ExitIcon } from 'lucide-react';
 import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
+import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
@@ -34,6 +36,15 @@ export default function GatemanVehiclesPage() {
   const [gateId, setGateId] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * Set when the estate's watch list refused this vehicle.
+   *
+   * Kept apart from `error` on purpose: a blocked registration is the estate's
+   * answer, and the guard needs the plate and the reason in front of them to
+   * decide whether they are looking at the car the estate meant.
+   */
+  const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
 
   const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
   const effectiveGateId = gateId ?? gate?.id ?? '';
@@ -54,7 +65,7 @@ export default function GatemanVehiclesPage() {
   const inside = insideData?.items ?? [];
 
   const logEntry = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ overrideReason }: { overrideReason?: string } = {}) =>
       unwrap(
         estateService.logVehicleEntry(estate!.id, {
           plateNumber: plateNumber.trim().toUpperCase(),
@@ -62,6 +73,7 @@ export default function GatemanVehiclesPage() {
           driverName: driverName.trim() || undefined,
           purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
           gateId: effectiveGateId || undefined,
+          overrideReason,
           photo: photo ?? undefined,
         })
       ),
@@ -75,9 +87,25 @@ export default function GatemanVehiclesPage() {
       setGateId(null);
       setPhoto(null);
       setError(null);
+      setRefusal(null);
+      setOverrideError(null);
       queryClient.invalidateQueries({ queryKey: ['estate', estate?.id, 'vehicleLogs'] });
     },
-    onError: (err) => setError(err instanceof Error ? err.message : 'Unable to log this vehicle.'),
+    onError: (err, input) => {
+      const blocked = readWatchlistRefusal(err);
+      if (blocked) {
+        setError(null);
+        setOverrideError(null);
+        setRefusal(blocked);
+        return;
+      }
+      const message = err instanceof Error ? err.message : 'Unable to log this vehicle.';
+      if (input?.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
+      setError(message);
+    },
   });
 
   const markExited = useMutation({
@@ -181,11 +209,28 @@ export default function GatemanVehiclesPage() {
           disabled={!plateNumber.trim() || logEntry.isPending}
           onClick={() => {
             setError(null);
-            logEntry.mutate();
+            setRefusal(null);
+            setOverrideError(null);
+            logEntry.mutate({});
           }}
         >
           {logEntry.isPending ? 'Logging…' : 'Log Vehicle'}
         </Button>
+
+        {refusal && (
+          <WatchlistBlockedNotice
+            message={refusal.message}
+            matches={refusal.matches}
+            onOverride={(reason) => logEntry.mutate({ overrideReason: reason })}
+            onDefer={() => {
+              setRefusal(null);
+              setOverrideError(null);
+              setPlateNumber('');
+            }}
+            isOverriding={logEntry.isPending}
+            error={overrideError}
+          />
+        )}
 
         {error && <p className="text-sm text-destructive">{error}</p>}
       </div>

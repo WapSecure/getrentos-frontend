@@ -21,6 +21,10 @@ import type {
   DeliveryLog,
   DeliveryLogStatus,
   Gate,
+  WatchlistEntry,
+  WatchlistSeverity,
+  WatchlistStatus,
+  WatchlistSubjectType,
   Incident,
   MaintenanceTicket,
   Poll,
@@ -44,6 +48,14 @@ export type GateWriteOptions = {
   occurredAt?: string;
   /** The barrier the guard is standing at. */
   gateId?: string;
+  /**
+   * A guard's stated reason for admitting somebody the estate has blocked.
+   *
+   * Only ever set on a deliberate override, never on the first attempt: the
+   * reason is the whole point of the override, and it is what the estate office
+   * is told when they are woken by the notification.
+   */
+  overrideReason?: string;
 };
 
 /**
@@ -381,6 +393,7 @@ export const estateService = {
       visitorPhone?: string;
       purpose?: string;
       gateId?: string;
+      overrideReason?: string;
     }
   ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
@@ -429,6 +442,8 @@ export const estateService = {
       driverName?: string;
       purpose?: 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER';
       gateId?: string;
+      /** Set only when the guard is admitting a vehicle the estate has blocked. */
+      overrideReason?: string;
       photo?: File;
     }
   ): Promise<ApiResponse<VehicleLog>> {
@@ -438,6 +453,7 @@ export const estateService = {
     if (data.driverName) formData.append('driverName', data.driverName);
     if (data.purpose) formData.append('purpose', data.purpose);
     if (data.gateId) formData.append('gateId', data.gateId);
+    if (data.overrideReason) formData.append('overrideReason', data.overrideReason);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/vehicle-logs`, { method: 'POST', body: formData })
@@ -535,6 +551,75 @@ export const estateService = {
 
   async deleteGate(estateId: string, gateId: string): Promise<ApiResponse<void>> {
     return safeCall(() => authFetch(`/estate/${estateId}/gates/${gateId}`, { method: 'DELETE' }));
+  },
+
+  // --- Watch list -----------------------------------------------------------
+
+  /**
+   * The estate's do-not-admit list.
+   *
+   * Managing a rule, not enforcing one: the screen itself runs server-side at
+   * every point somebody can enter, so nothing here has to be remembered at a
+   * barrier for the list to work.
+   */
+  async listWatchlist(
+    estateId: string,
+    query: EstatePageQuery & {
+      status?: WatchlistStatus;
+      subjectType?: WatchlistSubjectType;
+      severity?: WatchlistSeverity;
+    } = {}
+  ): Promise<ApiResponse<Paginated<WatchlistEntry>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/watchlist${toQuery(query)}`));
+  },
+
+  /**
+   * Adds somebody to the list.
+   *
+   * Multipart because a photo is the only thing here that helps a guard
+   * recognise a person, and an estate usually has one. The reason is required by
+   * the API — an entry nobody can explain is one nobody can review.
+   */
+  async addWatchlistEntry(
+    estateId: string,
+    data: {
+      label: string;
+      reason: string;
+      subjectType?: WatchlistSubjectType;
+      severity?: WatchlistSeverity;
+      phone?: string;
+      plateNumber?: string;
+      /** ISO date; omit for an entry that stays until somebody lifts it. */
+      expiresAt?: string;
+      photo?: File;
+    }
+  ): Promise<ApiResponse<WatchlistEntry>> {
+    const formData = new FormData();
+    formData.append('label', data.label);
+    formData.append('reason', data.reason);
+    if (data.subjectType) formData.append('subjectType', data.subjectType);
+    if (data.severity) formData.append('severity', data.severity);
+    if (data.phone) formData.append('phone', data.phone);
+    if (data.plateNumber) formData.append('plateNumber', data.plateNumber);
+    if (data.expiresAt) formData.append('expiresAt', data.expiresAt);
+    if (data.photo) formData.append('file', data.photo);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/watchlist`, { method: 'POST', body: formData })
+    );
+  },
+
+  /** Takes an entry off the list. The row stays, so the record of the decision survives. */
+  async liftWatchlistEntry(
+    estateId: string,
+    entryId: string,
+    liftReason: string
+  ): Promise<ApiResponse<WatchlistEntry>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/watchlist/${entryId}/lift`, {
+        method: 'PATCH',
+        body: JSON.stringify({ liftReason }),
+      })
+    );
   },
 
   async createAnnouncement(

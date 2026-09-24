@@ -7,6 +7,8 @@ import { Search, X } from 'lucide-react';
 import { Button, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
+import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { estateKeys } from '@/lib/queryKeys';
 import type { Household, VisitorPass } from '@/types/estate';
 
@@ -45,6 +47,15 @@ export const WalkInDialog = ({
   const [visitorPhone, setVisitorPhone] = useState('');
   const [purpose, setPurpose] = useState('');
   const [error, setError] = useState<string | null>(null);
+  /**
+   * Set when the estate's watch list refused the visitor.
+   *
+   * Held here rather than shown as `error`, because it is the estate's answer
+   * and not a failure: everything the guard typed stays exactly as it is, and
+   * the only thing that changes the outcome is a stated reason to admit them.
+   */
+  const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
 
   const { data: householdsData, isLoading } = useQuery({
     queryKey: [...estateKeys.households(estateId), { page: 1, pageSize: 50 }],
@@ -69,6 +80,8 @@ export const WalkInDialog = ({
     setVisitorPhone('');
     setPurpose('');
     setError(null);
+    setRefusal(null);
+    setOverrideError(null);
   };
 
   const handleClose = () => {
@@ -77,7 +90,7 @@ export const WalkInDialog = ({
   };
 
   const request = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ overrideReason }: { overrideReason?: string } = {}) =>
       unwrap(
         estateService.requestWalkInVisitorPass(estateId, {
           householdId: household!.id,
@@ -85,6 +98,7 @@ export const WalkInDialog = ({
           visitorPhone: visitorPhone.trim() || undefined,
           purpose: purpose.trim() || undefined,
           gateId,
+          overrideReason,
         })
       ),
     onSuccess: (pass) => {
@@ -93,10 +107,22 @@ export const WalkInDialog = ({
       reset();
       onClose();
     },
-    onError: (err) => {
+    onError: (err, input) => {
+      const blocked = readWatchlistRefusal(err);
+      if (blocked) {
+        setError(null);
+        setOverrideError(null);
+        setRefusal(blocked);
+        return;
+      }
       // The estate refuses a request it cannot get answered; surfacing the API's
       // own words here is more use than a generic failure.
-      setError(err instanceof Error ? err.message : 'Could not raise that request.');
+      const message = err instanceof Error ? err.message : 'Could not raise that request.';
+      if (input?.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
+      setError(message);
     },
   });
 
@@ -207,6 +233,16 @@ export const WalkInDialog = ({
                 />
               </div>
 
+              {refusal && (
+                <WatchlistBlockedNotice
+                  message={refusal.message}
+                  matches={refusal.matches}
+                  onOverride={(reason) => request.mutate({ overrideReason: reason })}
+                  isOverriding={request.isPending}
+                  error={overrideError}
+                />
+              )}
+
               {error && (
                 <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
                   {error}
@@ -215,17 +251,29 @@ export const WalkInDialog = ({
             </div>
 
             <div className="p-4 border-t border-border shrink-0 space-y-2">
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canSubmit}
-                onClick={() => request.mutate()}
-              >
-                {request.isPending ? 'Asking…' : 'Ask for approval'}
-              </Button>
-              <p className="text-xs text-muted-foreground text-center">
-                The gate stays closed until the household answers. They have 10 minutes.
-              </p>
+              {/* Once the estate has refused, the primary action is gone on
+                  purpose. Leaving "Ask for approval" here would invite a retry
+                  that returns the same refusal while the visitor waits — the
+                  only route forward is the stated override inside the notice. */}
+              {refusal ? (
+                <Button variant="outline" fullWidth onClick={handleClose}>
+                  Close
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    disabled={!canSubmit}
+                    onClick={() => request.mutate({})}
+                  >
+                    {request.isPending ? 'Asking…' : 'Ask for approval'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    The gate stays closed until the household answers. They have 10 minutes.
+                  </p>
+                </>
+              )}
             </div>
           </motion.div>
         </div>

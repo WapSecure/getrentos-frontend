@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { ApiError } from './api/client';
 import { gatemanApi } from './api/gateman';
+import { WATCHLIST_BLOCKED } from './gateman/watchlistRefusal';
 
 /**
  * A durable queue for the gate writes that must never be lost.
@@ -190,6 +191,14 @@ function classify(item: GateWrite, error: unknown): Outcome {
 
   // Offline or timed out: the normal case, try again on the next signal.
   if (error.isNetwork) return 'retry';
+
+  // An estate's watch list refused this write. The answer is final — the gate
+  // asked and the estate said no — so it must be told apart from the 403 below,
+  // which means something else entirely (a lapsed session). Classifying it as
+  // `retry` would do real damage: the replay loop `break`s on the first write it
+  // cannot settle, so a single refusal would strand every later arrival behind
+  // it and the queue would never drain again. A person decides instead.
+  if (error.code === WATCHLIST_BLOCKED) return 'rejected';
 
   // Auth: the token is gone. Retrying without a login can't succeed, but the
   // write is not the user's fault either, so hold it until they sign in.

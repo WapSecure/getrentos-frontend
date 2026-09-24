@@ -139,6 +139,14 @@ export type GateWriteOptions = {
   occurredAt?: string;
   /** The barrier the guard is standing at. */
   gateId?: string;
+  /**
+   * A guard's stated reason for admitting somebody the estate has blocked.
+   *
+   * Only ever set on a deliberate override, never on the first attempt: the
+   * reason is the whole point of the override, and it is what the estate office
+   * is told when they are woken by the notification.
+   */
+  overrideReason?: string;
 };
 
 export const gatemanApi = {
@@ -222,6 +230,8 @@ export const gatemanApi = {
       visitorPhone?: string;
       purpose?: string;
       gateId?: string;
+      /** Set only when a guard is admitting somebody the estate has blocked. */
+      overrideReason?: string;
     }
   ) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/walk-in`, {
@@ -289,6 +299,8 @@ export const gatemanApi = {
       driverName?: string;
       purpose?: Uppercase<VehiclePurpose>;
       gateId?: string;
+      /** Set only when the guard is admitting a vehicle the estate has blocked. */
+      overrideReason?: string;
       photo?: PickedFile;
     }
   ) => {
@@ -298,6 +310,7 @@ export const gatemanApi = {
     if (data.driverName) form.append('driverName', data.driverName);
     if (data.purpose) form.append('purpose', data.purpose);
     if (data.gateId) form.append('gateId', data.gateId);
+    if (data.overrideReason) form.append('overrideReason', data.overrideReason);
     if (data.photo) appendFile(form, 'file', data.photo);
     return apiUpload<VehicleLog>(`/estate/${estateId}/vehicle-logs`, form);
   },

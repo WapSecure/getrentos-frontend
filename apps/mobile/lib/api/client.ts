@@ -4,11 +4,21 @@ export class ApiError extends Error {
   status: number;
   /** Machine-readable code from the API envelope, e.g. `DATABASE_ERROR`. */
   code?: string;
-  constructor(message: string, status: number, code?: string) {
+  /**
+   * The raw response body, when there was one.
+   *
+   * `unknown` because its shape is the endpoint's own, but some refusals carry
+   * structure the UI has to act on rather than print — an estate's watch list
+   * answers 403 with the entries that fired and the reason on file, and a guard
+   * can only judge whether to override it if they can see it.
+   */
+  details?: unknown;
+  constructor(message: string, status: number, code?: string, details?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
   get isAuth() {
     return this.status === 401;
@@ -66,14 +76,18 @@ async function readJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     let code: string | undefined;
+    let details: unknown;
     try {
       const payload = (await res.json()) as { message?: string; error?: string };
       message = payload.message || message;
       code = payload.error;
+      // The whole envelope, not only the two fields read above: a caller that
+      // needs to act on a refusal rather than echo it has nowhere else to look.
+      details = payload;
     } catch {
       // non-JSON body
     }
-    throw new ApiError(message, res.status, code);
+    throw new ApiError(message, res.status, code, details);
   }
   if (res.status === 204 || res.status === 205) return undefined as T;
 

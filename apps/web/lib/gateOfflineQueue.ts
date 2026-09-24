@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
+import { WATCHLIST_BLOCKED } from '@/lib/gateman/watchlistRefusal';
 import { estateService } from '@/services/estateService';
 
 /**
@@ -155,6 +156,14 @@ type Outcome = 'sent' | 'already-applied' | 'unconfirmed' | 'rejected' | 'retry'
 function classify(item: GateWrite, error: unknown): Outcome {
   if (!(error instanceof ApiError)) return 'retry';
   if (error.status === 0) return 'retry';
+
+  // An estate's watch list refused this write. The answer is final — the gate
+  // asked and the estate said no — so it must be told apart from the 403 below,
+  // which means something else entirely (a lapsed session). Classifying it as
+  // `retry` would do real damage: the replay loop `break`s on the first write it
+  // cannot settle, so a single refusal would strand every later arrival behind
+  // it and the queue would never drain again. A person decides instead.
+  if (error.code === WATCHLIST_BLOCKED) return 'rejected';
 
   // Auth: the session lapsed. Hold the write until the user is signed in again.
   if (error.status === 401 || error.status === 403) return 'retry';

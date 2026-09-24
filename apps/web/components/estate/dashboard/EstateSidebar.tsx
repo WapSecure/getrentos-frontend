@@ -7,6 +7,7 @@ import {
   Receipt,
   KeyRound,
   ShieldCheck,
+  ShieldAlert,
   Megaphone,
   TriangleAlert,
   BookOpen,
@@ -47,6 +48,7 @@ export const navItems: NavItem[] = [
   { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: Receipt },
   { label: 'Visitor Passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
   { label: 'Vehicles', href: ROUTES.ESTATE_VEHICLES, icon: Car },
+  { label: 'Watch list', href: ROUTES.ESTATE_WATCHLIST, icon: ShieldAlert },
   { label: 'Deliveries', href: ROUTES.ESTATE_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
   { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
@@ -61,12 +63,15 @@ export const navItems: NavItem[] = [
   { label: 'Billing', href: ROUTES.ESTATE_BILLING, icon: Sparkles },
 ];
 
+// The groups are positional slices of `navItems`, so inserting an item means
+// moving the boundaries below with it — otherwise every group after the
+// insertion point silently shifts by one.
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
-  { label: 'Residents and access', items: navItems.slice(3, 8) },
-  { label: 'Safety and operations', items: navItems.slice(8, 11) },
-  { label: 'Community', items: navItems.slice(11, 15) },
-  { label: 'Administration', items: navItems.slice(15) },
+  { label: 'Residents and access', items: navItems.slice(3, 9) },
+  { label: 'Safety and operations', items: navItems.slice(9, 12) },
+  { label: 'Community', items: navItems.slice(12, 16) },
+  { label: 'Administration', items: navItems.slice(16) },
 ];
 
 export const EstateSidebar = () => {

@@ -4,7 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserPlus } from 'lucide-react-native';
 import { Button, Card, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { gatemanApi, type Household, type VisitorPass } from '@/lib/api/gateman';
+import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 
@@ -41,6 +43,15 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
   const [visitorName, setVisitorName] = useState('');
   const [visitorPhone, setVisitorPhone] = useState('');
   const [purpose, setPurpose] = useState('');
+  /**
+   * Set when the estate's watch list refused the visitor.
+   *
+   * Held here rather than toasted, because it is the estate's answer and not a
+   * failure: everything the guard typed stays exactly as it is, and the only
+   * thing that changes the outcome is a stated reason to admit them.
+   */
+  const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
 
   const householdsQuery = useQuery({
     queryKey: qk.gateman.households(estateId),
@@ -66,16 +77,24 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
     setVisitorName('');
     setVisitorPhone('');
     setPurpose('');
+    setRefusal(null);
+    setOverrideError(null);
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
   const request = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ overrideReason }: { overrideReason?: string } = {}) =>
       gatemanApi.requestWalkIn(estateId, {
         householdId: household!.id,
         visitorName: visitorName.trim(),
         visitorPhone: visitorPhone.trim() || undefined,
         purpose: purpose.trim() || undefined,
         gateId,
+        overrideReason,
       }),
     onSuccess: (pass) => {
       void haptics.success();
@@ -87,9 +106,21 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
       reset();
       onClose();
     },
-    onError: (error) => {
+    onError: (error, input) => {
+      const blocked = readWatchlistRefusal(error);
+      if (blocked) {
+        setOverrideError(null);
+        setRefusal(blocked);
+        void haptics.error();
+        return;
+      }
+      const message = error instanceof Error ? error.message : 'Could not raise that request.';
+      if (input?.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
       void haptics.error();
-      toast.show(error instanceof Error ? error.message : 'Could not raise that request.', 'error');
+      toast.show(message, 'error');
     },
   });
 
@@ -98,21 +129,31 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
   return (
     <Sheet
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       title="Visitor with no pass"
       snapPoints={['85%']}
       footer={
         <View style={{ gap: spacing.xs }}>
-          <Button
-            label={request.isPending ? 'Asking…' : 'Ask for approval'}
-            loading={request.isPending}
-            fullWidth
-            disabled={!canSubmit}
-            onPress={() => request.mutate()}
-          />
-          <Text variant="caption" color="mutedForeground" center>
-            The gate stays closed until the household answers. They have 10 minutes.
-          </Text>
+          {/* Once the estate has refused, the primary action is gone on purpose.
+              Leaving "Ask for approval" here would invite a retry that returns
+              the same refusal while the visitor waits — the only route forward
+              is the stated override inside the notice. */}
+          {refusal ? (
+            <Button label="Close" variant="outline" fullWidth onPress={handleClose} />
+          ) : (
+            <>
+              <Button
+                label={request.isPending ? 'Asking…' : 'Ask for approval'}
+                loading={request.isPending}
+                fullWidth
+                disabled={!canSubmit}
+                onPress={() => request.mutate({})}
+              />
+              <Text variant="caption" color="mutedForeground" center>
+                The gate stays closed until the household answers. They have 10 minutes.
+              </Text>
+            </>
+          )}
         </View>
       }
     >
@@ -202,6 +243,16 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
               </Text>
             </View>
           </Card>
+        ) : null}
+
+        {refusal ? (
+          <WatchlistBlockedNotice
+            message={refusal.message}
+            matches={refusal.matches}
+            onOverride={(reason) => request.mutate({ overrideReason: reason })}
+            isOverriding={request.isPending}
+            error={overrideError}
+          />
         ) : null}
       </ScrollView>
     </Sheet>
