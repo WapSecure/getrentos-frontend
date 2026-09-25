@@ -1,19 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import {
-  Badge,
-  type BadgeVariant,
-  Button,
-  ConfirmDialog,
-  Select,
-  Toast,
-  type SelectOption,
-} from '@getrentos/ui';
-import { ApiError, unwrap } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { Badge, type BadgeVariant, Button, Select, type SelectOption } from '@getrentos/ui';
+import { unwrap } from '@getrentos/shared';
 import type { LucideIcon } from 'lucide-react';
 import {
   Building2,
@@ -25,6 +15,7 @@ import {
   Gavel,
 } from 'lucide-react';
 import { adminRentalService } from '@/services/adminRentalService';
+import { useAdminAction } from '@/hooks/useAdminAction';
 import { RentalQueuePage, type RentalQueueConfig } from './RentalQueuePage';
 import type {
   AdminRentalApplication,
@@ -118,75 +109,8 @@ const titleCase = (value: string) =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-interface RentalAction {
-  key: string;
-  title: string;
-  description: string;
-  confirmLabel: string;
-  successMessage: string;
-  reasonRequired?: boolean;
-  run: (reason?: string) => Promise<ApiResponse<unknown>>;
-}
-
 function useQueueActions() {
-  const queryClient = useQueryClient();
-  const [pendingAction, setPendingAction] = useState<RentalAction | null>(null);
-  const [processingKey, setProcessingKey] = useState<string | null>(null);
-  const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
-
-  const executeAction = async () => {
-    if (!pendingAction || processingKey) return;
-    const action = pendingAction;
-    setPendingAction(null);
-    setProcessingKey(action.key);
-    try {
-      await unwrap(action.run(reason.trim() || undefined));
-      setToast({ message: action.successMessage, variant: 'success' });
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'rentals'] });
-    } catch (error) {
-      setToast({
-        message:
-          error instanceof ApiError
-            ? error.message
-            : 'The rental action could not be completed. Please try again.',
-        variant: 'error',
-      });
-    } finally {
-      setProcessingKey(null);
-    }
-  };
-
-  const feedback = (
-    <>
-      <ConfirmDialog
-        open={pendingAction !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPendingAction(null);
-            setReason('');
-          }
-        }}
-        title={pendingAction?.title ?? 'Confirm rental action'}
-        description={pendingAction?.description ?? ''}
-        confirmLabel={pendingAction?.confirmLabel ?? 'Confirm'}
-        onConfirm={() => void executeAction()}
-        promptLabel={pendingAction?.reasonRequired ? 'Reason' : undefined}
-        promptPlaceholder="Explain the decision for other administrators…"
-        promptValue={reason}
-        onPromptChange={setReason}
-        promptRequired={pendingAction?.reasonRequired}
-        promptMinLength={10}
-      />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-    </>
-  );
-
-  return { request: setPendingAction, processingKey, feedback };
+  return useAdminAction({ invalidateKeys: [['admin', 'rentals']] });
 }
 
 /** Inline status editor used for lease and eviction lifecycle correction. */
@@ -354,7 +278,8 @@ export function ListingsQueue() {
           ? ' Publishing checks passed: owner identity and ownership proof are approved.'
           : ` Publishing is currently blocked: ${eligibility?.reasons.join('; ') || 'eligibility requirements are incomplete'}.`;
       } catch {
-        eligibilityNote = ' Publishing eligibility will be rechecked by the server before this action completes.';
+        eligibilityNote =
+          ' Publishing eligibility will be rechecked by the server before this action completes.';
       }
     }
     actions.request({

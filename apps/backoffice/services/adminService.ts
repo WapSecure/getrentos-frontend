@@ -255,8 +255,13 @@ export const adminService = {
     return safeCall(() => authFetch('/admin/notifications'));
   },
 
-  async getNotificationPage(page: number, pageSize = 20): Promise<ApiResponse<AdminNotificationPage>> {
-    return safeCall(() => authFetch<AdminNotificationPage>(`/admin/notifications/page${toQuery({ page, pageSize })}`));
+  async getNotificationPage(
+    page: number,
+    pageSize = 20
+  ): Promise<ApiResponse<AdminNotificationPage>> {
+    return safeCall(() =>
+      authFetch<AdminNotificationPage>(`/admin/notifications/page${toQuery({ page, pageSize })}`)
+    );
   },
 
   async markNotificationRead(id: string): Promise<ApiResponse<{ success: boolean }>> {
@@ -542,6 +547,16 @@ export const adminService = {
         body: JSON.stringify({ flagged, reason }),
       })
     );
+  },
+
+  /** Hands the held funds to the seller. Only valid once the buyer's money is held. */
+  async releaseEscrow(id: string): Promise<ApiResponse<PlatformEscrowTransaction>> {
+    return safeCall(() => authFetch(`/admin/escrow/${id}/release`, { method: 'POST' }));
+  },
+
+  /** Returns the held funds to the buyer. Only valid once the buyer's money is held. */
+  async refundEscrow(id: string): Promise<ApiResponse<PlatformEscrowTransaction>> {
+    return safeCall(() => authFetch(`/admin/escrow/${id}/refund`, { method: 'POST' }));
   },
 
   // ---- Audit logs ----
