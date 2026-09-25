@@ -16,8 +16,9 @@ import {
  * telling guards different things. This is only here because "which detail
  * matched" is the one fact a guard needs at a glance before deciding whether the
  * person in front of them is really the person on the list.
+ * Exported so the pre-write check says it the same way.
  */
-const describeBasis = (matchedOn: WatchlistMatchedOn) =>
+export const describeWatchlistBasis = (matchedOn: WatchlistMatchedOn) =>
   matchedOn === 'NAME'
     ? 'name only'
     : matchedOn === 'PHONE'
@@ -95,7 +96,7 @@ export function WatchlistBlockedNotice({
         <View key={match.entryId} style={{ gap: 2 }}>
           <Text variant="bodyStrong">{match.label}</Text>
           <Text variant="caption" color="mutedForeground">
-            {`Matched on ${describeBasis(match.matchedOn)}`}
+            {`Matched on ${describeWatchlistBasis(match.matchedOn)}`}
           </Text>
           {/* The estate's own words, quoted rather than paraphrased: the guard
               has to say something to a human, and this is the only version

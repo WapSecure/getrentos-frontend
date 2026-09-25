@@ -1,6 +1,7 @@
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { WatchlistScreening } from '@/lib/gateman/watchlistRefusal';
 import type { VisitorPass, VisitorPassStatus } from './visitor-pass';
 
 export type { VisitorPass, VisitorPassSource, VisitorPassStatus } from './visitor-pass';
@@ -107,6 +108,8 @@ export interface VehicleLog {
   gateName?: string;
   enteredAt: string;
   exitedAt?: string;
+  /** Set only on the write that logged this vehicle — see `VisitorPass`. */
+  watchlistWarning?: string;
   createdAt: string;
 }
 
@@ -163,6 +166,24 @@ export const gatemanApi = {
   listMyEstates: () => apiFetch<GatemanEstate[]>('/estate/mine'),
 
   listGates: (estateId: string) => apiFetch<Gate[]>(`/estate/${estateId}/gates`),
+
+  /**
+   * Asks the estate's watch list about somebody, instead of attempting a write.
+   *
+   * For a guard who would rather find out before they have told a visitor they
+   * are asking the household — and so a household is never asked to consent to
+   * somebody the estate has already refused. Answering "nobody matched" reveals
+   * who the estate is watching, so the endpoint is access-checked like every
+   * other estate route.
+   */
+  screenWatchlist: (
+    estateId: string,
+    query: { name?: string; phone?: string; plateNumber?: string }
+  ) =>
+    apiFetch<WatchlistScreening>(`/estate/${estateId}/watchlist/screen`, {
+      method: 'POST',
+      body: query,
+    }),
 
   listHouseholds: (estateId: string, page = 1, pageSize = 20) =>
     apiFetch<Paginated<Household>>(

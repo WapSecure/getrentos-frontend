@@ -25,6 +25,7 @@ import type {
   WatchlistSeverity,
   WatchlistStatus,
   WatchlistSubjectType,
+  WatchlistScreening,
   Incident,
   MaintenanceTicket,
   Poll,
@@ -618,6 +619,25 @@ export const estateService = {
       authFetch(`/estate/${estateId}/watchlist/${entryId}/lift`, {
         method: 'PATCH',
         body: JSON.stringify({ liftReason }),
+      })
+    );
+  },
+
+  /**
+   * Checks details against the list instead of attempting a write.
+   *
+   * For a guard who would rather find out before they have told a visitor they
+   * are asking the household. Answering "nobody matched" tells the asker who the
+   * estate is watching, so it is access-checked like everything else here.
+   */
+  async screenWatchlist(
+    estateId: string,
+    query: { name?: string; phone?: string; plateNumber?: string }
+  ): Promise<ApiResponse<WatchlistScreening>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/watchlist/screen`, {
+        method: 'POST',
+        body: JSON.stringify(query),
       })
     );
   },

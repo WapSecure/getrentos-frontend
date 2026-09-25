@@ -8,6 +8,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
@@ -45,6 +46,13 @@ export default function GatemanVehiclesPage() {
    */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * The estate's note about a vehicle it matched but did not refuse.
+   *
+   * The log went through, on purpose. A guard who reads this as a problem starts
+   * second-guessing an entry the estate already decided to allow.
+   */
+  const [warning, setWarning] = useState<string | null>(null);
 
   const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
   const effectiveGateId = gateId ?? gate?.id ?? '';
@@ -77,7 +85,7 @@ export default function GatemanVehiclesPage() {
           photo: photo ?? undefined,
         })
       ),
-    onSuccess: () => {
+    onSuccess: (log) => {
       setPlateNumber('');
       setVehicleDescription('');
       setDriverName('');
@@ -89,6 +97,7 @@ export default function GatemanVehiclesPage() {
       setError(null);
       setRefusal(null);
       setOverrideError(null);
+      setWarning(log.watchlistWarning ?? null);
       queryClient.invalidateQueries({ queryKey: ['estate', estate?.id, 'vehicleLogs'] });
     },
     onError: (err, input) => {
@@ -211,6 +220,7 @@ export default function GatemanVehiclesPage() {
             setError(null);
             setRefusal(null);
             setOverrideError(null);
+            setWarning(null);
             logEntry.mutate({});
           }}
         >
@@ -233,6 +243,8 @@ export default function GatemanVehiclesPage() {
         )}
 
         {error && <p className="text-sm text-destructive">{error}</p>}
+
+        <WatchlistWarning warning={warning ?? undefined} />
       </div>
 
       <div>

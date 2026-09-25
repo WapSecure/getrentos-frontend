@@ -16,8 +16,10 @@ export const OVERRIDE_REASON_MIN_LENGTH = 10;
  * drift into telling guards different things. This is only here because "which
  * detail matched" is the one fact a guard needs at a glance before deciding
  * whether the person in front of them is really the person on the list.
+ *
+ * Exported so the pre-write check says it the same way.
  */
-const describeBasis = (matchedOn: WatchlistMatchedOn) =>
+export const describeWatchlistBasis = (matchedOn: WatchlistMatchedOn) =>
   matchedOn === 'NAME'
     ? 'name only'
     : matchedOn === 'PHONE'
@@ -80,7 +82,7 @@ export const WatchlistBlockedNotice = ({
                   <p className="text-sm text-foreground">
                     {match.label}
                     <span className="text-xs text-muted-foreground">
-                      {` · matched on ${describeBasis(match.matchedOn)}`}
+                      {` · matched on ${describeWatchlistBasis(match.matchedOn)}`}
                     </span>
                   </p>
                   {/* The estate's own words, quoted rather than paraphrased: the
@@ -92,7 +94,7 @@ export const WatchlistBlockedNotice = ({
             </div>
           ) : null}
 
-          <p className="text-sm text-muted-foreground">{message}</p>
+          {message && <p className="text-sm text-muted-foreground">{message}</p>}
 
           <p className="text-xs text-muted-foreground">
             This is a standing instruction from the estate, so trying again will give the same

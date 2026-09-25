@@ -9,6 +9,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import {
@@ -72,6 +73,14 @@ export default function GatemanVerifyPage() {
     queued?: string;
     /** Set when a walk-in request has just been sent to the household. */
     requested?: string;
+    /**
+     * The estate's note about somebody it matched but did not refuse.
+     *
+     * Carried beside the outcome rather than inside it: the visitor was let in,
+     * and a guard who reads this as a failure would start second-guessing an
+     * admission the estate already decided to allow.
+     */
+    warning?: string;
   } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -187,7 +196,7 @@ export default function GatemanVerifyPage() {
     mutationFn: ({ code, overrideReason }: { code: string; overrideReason?: string }) =>
       unwrap(estateService.verifyVisitorPass(estate!.id, code, { gateId, overrideReason })),
     onSuccess: (pass) => {
-      setResult({ pass });
+      setResult({ pass, warning: pass.watchlistWarning });
       setBlocked(null);
       setOverrideError(null);
       setPin('');
@@ -269,7 +278,7 @@ export default function GatemanVerifyPage() {
     mutationFn: ({ pass, overrideReason }: { pass: VisitorPass; overrideReason?: string }) =>
       unwrap(estateService.admitWalkInVisitorPass(estate!.id, pass.id, { gateId, overrideReason })),
     onSuccess: (pass) => {
-      setResult({ pass });
+      setResult({ pass, warning: pass.watchlistWarning });
       setBlocked(null);
       setOverrideError(null);
       queryClient.invalidateQueries({ queryKey: ['estate', estate!.id] });
@@ -528,6 +537,7 @@ export default function GatemanVerifyPage() {
             </div>
           </div>
         )}
+        {result?.warning && <WatchlistWarning warning={result.warning} />}
         {result?.error && (
           <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
             <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -741,6 +751,7 @@ export default function GatemanVerifyPage() {
           // "admit them once they approve" — which is what it used to say.
           setResult({
             requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. ${pass.residentName}'s answer appears under "At the gate".`,
+            warning: pass.watchlistWarning,
           })
         }
       />

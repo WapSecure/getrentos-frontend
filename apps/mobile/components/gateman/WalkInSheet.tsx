@@ -5,8 +5,13 @@ import { UserPlus } from 'lucide-react-native';
 import { Button, Card, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistCheckResult } from '@/components/gateman/WatchlistCheckResult';
 import { gatemanApi, type Household, type VisitorPass } from '@/lib/api/gateman';
-import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import {
+  readWatchlistRefusal,
+  type WatchlistRefusal,
+  type WatchlistScreening,
+} from '@/lib/gateman/watchlistRefusal';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 
@@ -52,6 +57,12 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
    */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * What the estate's list said when the guard asked before attempting the
+   * raise. Set only for an answer that is not a refusal — a refusal is not an
+   * advisory and belongs to the notice below, which owns the decision.
+   */
+  const [screening, setScreening] = useState<WatchlistScreening | null>(null);
 
   const householdsQuery = useQuery({
     queryKey: qk.gateman.households(estateId),
@@ -79,6 +90,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
     setPurpose('');
     setRefusal(null);
     setOverrideError(null);
+    setScreening(null);
   };
 
   const handleClose = () => {
@@ -125,6 +137,46 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
   });
 
   const canSubmit = !!household && visitorName.trim().length > 1 && !request.isPending;
+
+  /**
+   * Asks about this visitor before anything is attempted.
+   *
+   * Needs the household first, because the question is "this visitor, coming to
+   * see this unit" — and because if the answer refuses them, the only way
+   * forward is the override, which raises the request.
+   */
+  const canCheck =
+    !!household &&
+    !request.isPending &&
+    (visitorName.trim().length > 0 || visitorPhone.replace(/\D/g, '').length >= 7);
+
+  const check = useMutation({
+    mutationFn: () =>
+      gatemanApi.screenWatchlist(estateId, {
+        name: visitorName.trim() || undefined,
+        phone: visitorPhone.trim() || undefined,
+      }),
+    onSuccess: (result) => {
+      setOverrideError(null);
+      if (result.blocked) {
+        // The same answer the raise would give, reached earlier: before the
+        // guard has promised the visitor anything, and without a household being
+        // asked to consent to somebody the estate has already refused.
+        setScreening(null);
+        setRefusal({ message: result.message ?? '', matches: result.matches });
+        return;
+      }
+      setRefusal(null);
+      setScreening(result);
+    },
+    onError: (error) => {
+      void haptics.error();
+      toast.show(
+        error instanceof Error ? error.message : 'Could not check the watch list.',
+        'error'
+      );
+    },
+  });
 
   return (
     <Sheet
@@ -254,6 +306,23 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
             error={overrideError}
           />
         ) : null}
+
+        {/* Last thing before the footer, because it is the last thing worth
+            knowing before a household is asked. */}
+        <View style={{ gap: spacing.xs }}>
+          <Button
+            label={check.isPending ? 'Checking…' : 'Check the watch list'}
+            variant="outline"
+            loading={check.isPending}
+            fullWidth
+            disabled={!canCheck}
+            onPress={() => {
+              setScreening(null);
+              check.mutate();
+            }}
+          />
+          {screening ? <WatchlistCheckResult screening={screening} /> : null}
+        </View>
       </ScrollView>
     </Sheet>
   );

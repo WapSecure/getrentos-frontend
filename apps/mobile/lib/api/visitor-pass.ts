@@ -46,6 +46,14 @@ export interface VisitorPass {
   respondedAt?: string;
   /** Why they refused, so the guard can tell the visitor something. */
   denialReason?: string;
+  /**
+   * Set only on a write that screened somebody at a gate, and only when the
+   * estate's list matched without refusing them.
+   *
+   * Absent on a pass read from the estate's records: that pass was not screened
+   * at the moment somebody is looking at it.
+   */
+  watchlistWarning?: string;
   createdAt: string;
 }
 

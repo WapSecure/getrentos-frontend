@@ -26,6 +26,7 @@ import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 import { WalkInSheet } from '@/components/gateman/WalkInSheet';
 import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedSheet';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { ApiError } from '@/lib/api/client';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
@@ -51,6 +52,14 @@ export default function GatemanCheckIn() {
     queued?: string;
     /** Set when a walk-in request has just been sent to the household. */
     requested?: string;
+    /**
+     * The estate's note about somebody it matched but did not refuse.
+     *
+     * Carried beside the outcome rather than inside it: the visitor was let in,
+     * and a guard who reads this as a failure starts second-guessing an
+     * admission the estate already decided to allow.
+     */
+    warning?: string;
   } | null>(null);
 
   const queue = useGateQueue();
@@ -101,7 +110,7 @@ export default function GatemanCheckIn() {
     mutationFn: ({ code, overrideReason }: { code: string; overrideReason?: string }) =>
       gatemanApi.verifyVisitorPass(estate!.id, code, { gateId: gate?.id, overrideReason }),
     onSuccess: (pass) => {
-      setResult({ pass });
+      setResult({ pass, warning: pass.watchlistWarning });
       setBlocked(null);
       setOverrideError(null);
       setPin('');
@@ -189,7 +198,7 @@ export default function GatemanCheckIn() {
       gatemanApi.admitWalkIn(estate!.id, pass.id, { gateId: gate?.id, overrideReason }),
     onSuccess: (pass) => {
       void haptics.success();
-      setResult({ pass });
+      setResult({ pass, warning: pass.watchlistWarning });
       setBlocked(null);
       setOverrideError(null);
       toast.show(`${pass.visitorName} admitted.`, 'success');
@@ -552,6 +561,8 @@ export default function GatemanCheckIn() {
           </Card>
         ) : null}
 
+        {result?.warning ? <WatchlistWarning warning={result.warning} /> : null}
+
         {result?.queued ? (
           <Card elevated>
             <View style={{ flexDirection: 'row', gap: spacing.md }}>
@@ -806,6 +817,7 @@ export default function GatemanCheckIn() {
             // "admit them once they approve" — which is what it used to say.
             setResult({
               requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. ${pass.residentName}'s answer appears under "At the gate".`,
+              warning: pass.watchlistWarning,
             })
           }
         />

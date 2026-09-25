@@ -16,6 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { gatemanApi, type VehiclePurpose } from '@/lib/api/gateman';
 import type { PickedFile } from '@/lib/api/documents';
@@ -59,6 +60,11 @@ export default function GatemanVehicles() {
    */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * The estate's note about a vehicle it matched but did not refuse. The log
+   * went through, on purpose.
+   */
+  const [warning, setWarning] = useState<string | null>(null);
 
   const { estate, isLoading: isPostLoading } = useGatemanPost();
 
@@ -87,7 +93,7 @@ export default function GatemanVehicles() {
         overrideReason,
         photo: photo ?? undefined,
       }),
-    onSuccess: () => {
+    onSuccess: (log) => {
       void haptics.success();
       setPlateNumber('');
       setVehicleDescription('');
@@ -97,6 +103,7 @@ export default function GatemanVehicles() {
       setPhoto(null);
       setRefusal(null);
       setOverrideError(null);
+      setWarning(log.watchlistWarning ?? null);
       if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.vehicleLogs(estate.id) });
     },
     onError: (error, input) => {
@@ -280,10 +287,13 @@ export default function GatemanVehicles() {
           onPress={() => {
             setRefusal(null);
             setOverrideError(null);
+            setWarning(null);
             logEntry.mutate({});
           }}
           style={{ marginTop: spacing.xs }}
         />
+
+        {warning ? <WatchlistWarning warning={warning} /> : null}
 
         {refusal ? (
           <WatchlistBlockedNotice

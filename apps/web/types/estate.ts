@@ -180,6 +180,15 @@ export interface VisitorPass {
   respondedAt?: string;
   /** Why they refused, so the guard can tell the visitor something. */
   denialReason?: string;
+  /**
+   * Set only on a write that screened somebody at a gate, and only when the
+   * estate's list matched without refusing them.
+   *
+   * Absent on a pass read from the estate's records: that pass was not screened
+   * at the moment somebody is looking at it, and a warning there would report a
+   * check that never happened.
+   */
+  watchlistWarning?: string;
   createdAt: string;
 }
 
@@ -228,6 +237,8 @@ export interface VehicleLog {
   gateName?: string;
   enteredAt: string;
   exitedAt?: string;
+  /** Set only on the write that logged this vehicle — see `VisitorPass`. */
+  watchlistWarning?: string;
   createdAt: string;
 }
 
@@ -314,6 +325,13 @@ export interface WatchlistScreening {
   flagged: boolean;
   blocked: boolean;
   matches: WatchlistMatch[];
+  /**
+   * The refusal in words, when there is one to give.
+   *
+   * Undefined when nothing blocked — "nothing found" is better said plainly by
+   * the caller than by a sentence that has to hedge about what it did not cover.
+   */
+  message?: string;
 }
 
 export type AnnouncementPriority = 'normal' | 'urgent';

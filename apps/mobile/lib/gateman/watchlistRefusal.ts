@@ -67,3 +67,24 @@ export function readWatchlistRefusal(error: unknown): WatchlistRefusal | null {
 
 /** Matches the API's floor, so the form never allows something the server will reject. */
 export const OVERRIDE_REASON_MIN_LENGTH = 10;
+
+/**
+ * The answer to "is this person on the list?", asked before anything is
+ * attempted.
+ *
+ * Everything here is released to the estate's own gate staff, including the
+ * reason an entry gives. The reason is withheld only when a pass is being
+ * *issued*, because that is often done by whoever the visitor asked.
+ */
+export interface WatchlistScreening {
+  flagged: boolean;
+  blocked: boolean;
+  matches: WatchlistMatch[];
+  /**
+   * The refusal in words, when there is one to give.
+   *
+   * Undefined when nothing blocked — "nothing found" is better said plainly by
+   * the caller than by a sentence that has to hedge about what it did not cover.
+   */
+  message?: string;
+}

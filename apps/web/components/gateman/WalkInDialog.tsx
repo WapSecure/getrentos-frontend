@@ -9,8 +9,9 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistCheckResult } from '@/components/gateman/WatchlistCheckResult';
 import { estateKeys } from '@/lib/queryKeys';
-import type { Household, VisitorPass } from '@/types/estate';
+import type { Household, VisitorPass, WatchlistScreening } from '@/types/estate';
 
 interface WalkInDialogProps {
   isOpen: boolean;
@@ -56,6 +57,12 @@ export const WalkInDialog = ({
    */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * What the estate's list said when the guard asked before attempting the
+   * raise. Set only for an answer that is not a refusal — a refusal is not an
+   * advisory and belongs to the panel below, which owns the decision.
+   */
+  const [screening, setScreening] = useState<WatchlistScreening | null>(null);
 
   const { data: householdsData, isLoading } = useQuery({
     queryKey: [...estateKeys.households(estateId), { page: 1, pageSize: 50 }],
@@ -82,6 +89,7 @@ export const WalkInDialog = ({
     setError(null);
     setRefusal(null);
     setOverrideError(null);
+    setScreening(null);
   };
 
   const handleClose = () => {
@@ -127,6 +135,44 @@ export const WalkInDialog = ({
   });
 
   const canSubmit = !!household && visitorName.trim().length > 0 && !request.isPending;
+
+  /**
+   * Asks about this visitor before anything is attempted.
+   *
+   * Needs the household first, because the question is "this visitor, coming to
+   * see this unit" — and because if the answer refuses them, the only way
+   * forward is the override, which raises the request.
+   */
+  const canCheck =
+    !!household &&
+    !request.isPending &&
+    (visitorName.trim().length > 0 || visitorPhone.replace(/\D/g, '').length >= 7);
+
+  const check = useMutation({
+    mutationFn: () =>
+      unwrap(
+        estateService.screenWatchlist(estateId, {
+          name: visitorName.trim() || undefined,
+          phone: visitorPhone.trim() || undefined,
+        })
+      ),
+    onSuccess: (result) => {
+      setError(null);
+      setOverrideError(null);
+      if (result.blocked) {
+        // The same answer the raise would give, reached earlier: before the
+        // guard has promised the visitor anything, and without a household being
+        // asked to consent to somebody the estate has already refused.
+        setScreening(null);
+        setRefusal({ message: result.message ?? '', matches: result.matches });
+        return;
+      }
+      setRefusal(null);
+      setScreening(result);
+    },
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : 'Could not check the watch list.'),
+  });
 
   return (
     <AnimatePresence>
@@ -242,6 +288,23 @@ export const WalkInDialog = ({
                   error={overrideError}
                 />
               )}
+
+              {/* Last thing before the footer, because it is the last thing worth
+                  knowing before a household is asked. */}
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  fullWidth
+                  disabled={!canCheck}
+                  onClick={() => {
+                    setScreening(null);
+                    check.mutate();
+                  }}
+                >
+                  {check.isPending ? 'Checking…' : 'Check the watch list'}
+                </Button>
+                {screening && <WatchlistCheckResult screening={screening} />}
+              </div>
 
               {error && (
                 <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
