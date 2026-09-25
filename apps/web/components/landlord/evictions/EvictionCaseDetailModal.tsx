@@ -19,6 +19,7 @@ interface EvictionCaseDetailModalProps {
   onDownloadPdf: (id: string) => void;
   isDownloading?: boolean;
   downloadError?: string | null;
+  actionError?: string | null;
   isActing?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const EvictionCaseDetailModal = ({
   onDownloadPdf,
   isDownloading,
   downloadError,
+  actionError,
   isActing,
 }: EvictionCaseDetailModalProps) => {
   const [cureDays, setCureDays] = useState('14');
@@ -50,6 +52,10 @@ export const EvictionCaseDetailModal = ({
   if (!evictionCase) return null;
 
   const badge = evictionStatusBadges[evictionCase.status];
+  // A case can be corrected by an admin while this modal is open, so the inline
+  // forms follow the *current* status rather than the fact that they were opened.
+  const isDraft = evictionCase.status === 'draft';
+  const canResolve = evictionCase.status === 'issued' || evictionCase.status === 'filed';
 
   return (
     <AnimatePresence>
@@ -124,7 +130,7 @@ export const EvictionCaseDetailModal = ({
                 </div>
               )}
 
-              {showIssueForm && (
+              {showIssueForm && isDraft && (
                 <div className="p-3 rounded-lg border border-border space-y-2">
                   <label className="block text-sm font-medium text-foreground">
                     Cure period (days)
@@ -142,7 +148,7 @@ export const EvictionCaseDetailModal = ({
                 </div>
               )}
 
-              {showResolveForm && (
+              {showResolveForm && canResolve && (
                 <div className="p-3 rounded-lg border border-border space-y-2">
                   <label className="block text-sm font-medium text-foreground">
                     Resolution notes <span className="text-gray-400 font-normal">(optional)</span>
@@ -179,6 +185,12 @@ export const EvictionCaseDetailModal = ({
               {downloadError ? (
                 <p className="text-xs text-red-600 dark:text-red-400" role="alert">
                   {downloadError}
+                </p>
+              ) : null}
+
+              {actionError ? (
+                <p className="text-xs text-red-600 dark:text-red-400" role="alert">
+                  {actionError}
                 </p>
               ) : null}
 
