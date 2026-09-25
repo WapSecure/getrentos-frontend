@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { ApiError } from './api/client';
 import { gatemanApi } from './api/gateman';
 import { WATCHLIST_BLOCKED } from './gateman/watchlistRefusal';
+import { CONTRACTOR_NOT_PERMITTED } from './gateman/contractorRefusal';
 
 /**
  * A durable queue for the gate writes that must never be lost.
@@ -182,6 +183,20 @@ export const gateOfflineQueue = {
 type Outcome = 'sent' | 'already-applied' | 'unconfirmed' | 'rejected' | 'retry';
 
 /**
+ * 403s that are the estate's own decision, never a lapsed session.
+ *
+ * The queue holds arrivals the network dropped. Replaying one of these gets the
+ * same answer forever, and the drain STOPS at the first write it cannot settle —
+ * so a refusal left sitting in the queue strands every arrival behind it.
+ * Anything added here has to be final: a code that could succeed on a later
+ * retry does not belong in this set.
+ */
+const FINAL_REFUSAL_CODES: ReadonlySet<string> = new Set([
+  WATCHLIST_BLOCKED,
+  CONTRACTOR_NOT_PERMITTED,
+]);
+
+/**
  * Decides whether a failed replay should be retried, trusted, or handed to a
  * human. A queue that retries forever behind one poison item never drains, so
  * only genuinely transient problems are allowed to hold the queue up.
@@ -192,13 +207,14 @@ function classify(item: GateWrite, error: unknown): Outcome {
   // Offline or timed out: the normal case, try again on the next signal.
   if (error.isNetwork) return 'retry';
 
-  // An estate's watch list refused this write. The answer is final — the gate
-  // asked and the estate said no — so it must be told apart from the 403 below,
-  // which means something else entirely (a lapsed session). Classifying it as
-  // `retry` would do real damage: the replay loop `break`s on the first write it
-  // cannot settle, so a single refusal would strand every later arrival behind
-  // it and the queue would never drain again. A person decides instead.
-  if (error.code === WATCHLIST_BLOCKED) return 'rejected';
+  // The estate itself refused this write — its watch list said no, or the
+  // person's standing authorisation does not cover now. The answer is final, so
+  // it has to be told apart from the 403 below, which means something else
+  // entirely (a lapsed session). Classifying one of these as `retry` would do
+  // real damage: the replay loop `break`s on the first write it cannot settle,
+  // so a single refusal would strand every later arrival behind it and the queue
+  // would never drain again. A person decides instead.
+  if (error.code !== undefined && FINAL_REFUSAL_CODES.has(error.code)) return 'rejected';
 
   // Auth: the token is gone. Retrying without a login can't succeed, but the
   // write is not the user's fault either, so hold it until they sign in.
