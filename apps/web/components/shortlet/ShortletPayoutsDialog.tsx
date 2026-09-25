@@ -101,6 +101,19 @@ export function ShortletPayoutsDialog({
               verificationHref={verificationHref}
             />
           )}
+          {/* The same requirement, shown before the host tries: the balance below is
+              real money they cannot withdraw yet, so say so up front. */}
+          {!withdraw.error && summary && !summary.canWithdraw && (
+            <VerificationRequiredNotice
+              error={{
+                reason: 'TRUST_TIER_REQUIRED',
+                tierRequired: summary.withdrawTierRequired,
+                currentTier: summary.hostTier,
+              }}
+              href={verificationHref}
+              verificationHref={verificationHref}
+            />
+          )}
           {/* Balance */}
           <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2">
@@ -112,7 +125,17 @@ export function ShortletPayoutsDialog({
             </div>
             <Button
               onClick={() => withdraw.mutate()}
-              disabled={!summary?.accountSet || !summary.available || withdraw.isPending}
+              disabled={
+                !summary?.accountSet ||
+                !summary.available ||
+                summary?.canWithdraw === false ||
+                withdraw.isPending
+              }
+              title={
+                summary?.canWithdraw === false
+                  ? `Withdrawing needs Trust Tier ${summary.withdrawTierRequired}.`
+                  : undefined
+              }
             >
               <Banknote className="mr-1.5 h-4 w-4" />
               {withdraw.isPending ? 'Withdrawing…' : 'Withdraw'}
