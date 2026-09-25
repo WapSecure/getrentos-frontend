@@ -130,8 +130,8 @@ export const LeaseCard = ({
         )}
         {lease.status === 'awaiting_payment' && (
           <p className="text-xs text-muted-foreground py-2">
-            Waiting for the tenant&apos;s payment. Your countersignature is what releases the keys
-            — it cannot happen before the money is held.
+            Waiting for the tenant&apos;s payment. Your countersignature is what releases the keys —
+            it cannot happen before the money is held.
           </p>
         )}
         {lease.status === 'awaiting_landlord' && (
@@ -172,7 +172,7 @@ export const LeaseCard = ({
               onClick={() => onRequestRenewal(lease)}
             >
               <RefreshCcw className="w-3.5 h-3.5" />
-              Renew
+              {lease.pendingRenewalOffer ? 'Replace offer' : 'Renew'}
             </Button>
           </>
         )}
@@ -185,10 +185,25 @@ export const LeaseCard = ({
             onClick={() => onRequestRenewal(lease)}
           >
             <FileCheck className="w-3.5 h-3.5" />
-            Create New Lease
+            {lease.pendingRenewalOffer ? 'Replace offer' : 'Create New Lease'}
           </Button>
         )}
       </div>
+
+      {lease.pendingRenewalOffer ? (
+        <div className="mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 flex gap-2">
+          <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-700 dark:text-amber-300" />
+          <p className="text-xs text-amber-800 dark:text-amber-300">
+            Renewal offer sent {formatDate(lease.pendingRenewalOffer.offeredAt)} —{' '}
+            {formatCurrency(lease.pendingRenewalOffer.newRentAmount)} (
+            {lease.pendingRenewalOffer.increasePercentage >= 0 ? '+' : ''}
+            {lease.pendingRenewalOffer.increasePercentage}%) until{' '}
+            {formatDate(lease.pendingRenewalOffer.newEndDate)}. The current terms stay in force
+            until the tenant accepts.
+          </p>
+        </div>
+      ) : null}
+
       {downloadError ? (
         <p className="mt-3 text-xs text-red-600 dark:text-red-400" role="alert">
           {downloadError}
