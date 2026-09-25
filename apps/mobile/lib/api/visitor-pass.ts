@@ -25,8 +25,13 @@ export type VisitorPassStatus =
   | 'revoked'
   | 'denied';
 
-/** `gate` when a guard raised it because somebody arrived with nothing. */
-export type VisitorPassSource = 'resident' | 'gate';
+/**
+ * `resident` when the household raised it; `gate` when a guard raised it
+ * because somebody arrived with nothing; `contractor` when the estate office
+ * authorised them to keep arriving — the arrival is still recorded against the
+ * household they are working for, but nobody raised a pass for this visit.
+ */
+export type VisitorPassSource = 'resident' | 'gate' | 'contractor';
 
 export interface VisitorPass {
   id: string;

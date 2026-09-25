@@ -11,6 +11,7 @@ import { WalkInDialog } from '@/components/gateman/WalkInDialog';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import { describeStandingPass } from '@/lib/gateman/standingPass';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import {
   clearGateReplaySummary,
@@ -396,6 +397,9 @@ export default function GatemanVerifyPage() {
     );
   }
 
+  // Null for every ordinary arrival, so the card below is untouched for them.
+  const standingPassNote = result?.pass ? describeStandingPass(result.pass) : null;
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -513,6 +517,7 @@ export default function GatemanVerifyPage() {
                 {result.pass.visitorName} checked in for {result.pass.unitLabel}
               </p>
               <p className="text-xs opacity-80 mt-0.5">{result.pass.residentName}</p>
+              {standingPassNote && <p className="text-xs opacity-80 mt-0.5">{standingPassNote}</p>}
             </div>
           </div>
         )}

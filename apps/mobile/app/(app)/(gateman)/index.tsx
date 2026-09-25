@@ -29,6 +29,7 @@ import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedShee
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { ApiError } from '@/lib/api/client';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import { describeStandingPass } from '@/lib/gateman/standingPass';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type VisitorPass } from '@/lib/api/gateman';
 import { gateOfflineQueue, replayGateQueue, useGateQueue } from '@/lib/gateOfflineQueue';
@@ -342,6 +343,10 @@ export default function GatemanCheckIn() {
     verify.mutate({ code: scanned });
   };
 
+  // Null for every ordinary arrival, so the confirmation below is unchanged for
+  // them. Derived once rather than twice so the two conditionals cannot drift.
+  const standingPassNote = result?.pass ? describeStandingPass(result.pass) : null;
+
   if (isPostLoading) {
     return (
       <Screen>
@@ -542,6 +547,11 @@ export default function GatemanCheckIn() {
                 <Text variant="caption" color="mutedForeground">
                   Hosted by {result.pass.residentName}
                 </Text>
+                {standingPassNote ? (
+                  <Text variant="caption" color="mutedForeground">
+                    {standingPassNote}
+                  </Text>
+                ) : null}
               </View>
             </View>
           </Card>
