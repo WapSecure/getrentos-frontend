@@ -72,6 +72,11 @@ export interface ShortletPayoutSummary {
   /** Hours earnings are held after check-in (longer for a first payout). */
   holdHours: number;
   accountSet: boolean;
+  /** The host's trust tier, and the tier withdrawing requires. */
+  hostTier: number;
+  withdrawTierRequired: number;
+  /** False when the host is below `withdrawTierRequired`, so the client can explain first. */
+  canWithdraw: boolean;
 }
 
 export const shortletService = {
