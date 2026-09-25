@@ -22,6 +22,7 @@ import {
   Globe,
   Sparkles,
   PieChart,
+  UserCheck,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
@@ -49,6 +50,10 @@ export const navItems: NavItem[] = [
   { label: 'Visitor Passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
   { label: 'Vehicles', href: ROUTES.ESTATE_VEHICLES, icon: Car },
   { label: 'Watch list', href: ROUTES.ESTATE_WATCHLIST, icon: ShieldAlert },
+  // Next to the watch list because the two answer the same question from
+  // opposite sides: who must not be admitted, and who is already allowed to keep
+  // coming back.
+  { label: 'Regular visitors', href: ROUTES.ESTATE_CONTRACTORS, icon: UserCheck },
   { label: 'Deliveries', href: ROUTES.ESTATE_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
   { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
@@ -68,10 +73,10 @@ export const navItems: NavItem[] = [
 // insertion point silently shifts by one.
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
-  { label: 'Residents and access', items: navItems.slice(3, 9) },
-  { label: 'Safety and operations', items: navItems.slice(9, 12) },
-  { label: 'Community', items: navItems.slice(12, 16) },
-  { label: 'Administration', items: navItems.slice(16) },
+  { label: 'Residents and access', items: navItems.slice(3, 10) },
+  { label: 'Safety and operations', items: navItems.slice(10, 13) },
+  { label: 'Community', items: navItems.slice(13, 17) },
+  { label: 'Administration', items: navItems.slice(17) },
 ];
 
 export const EstateSidebar = () => {

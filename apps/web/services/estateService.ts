@@ -26,6 +26,9 @@ import type {
   WatchlistStatus,
   WatchlistSubjectType,
   WatchlistScreening,
+  ContractorPass,
+  ContractorPassStatus,
+  IssuedContractorPass,
   Incident,
   MaintenanceTicket,
   Poll,
@@ -619,6 +622,67 @@ export const estateService = {
       authFetch(`/estate/${estateId}/watchlist/${entryId}/lift`, {
         method: 'PATCH',
         body: JSON.stringify({ liftReason }),
+      })
+    );
+  },
+
+  // --- Contractor passes (Enterprise) --------------------------------------
+
+  /**
+   * The estate's standing authorisations.
+   *
+   * The status filter is translated server-side, so "active" means still in
+   * force rather than still ACTIVE in a column — a lapsed authorisation must not
+   * be able to hide in that list where nobody looks at it again.
+   */
+  async listContractorPasses(
+    estateId: string,
+    query: EstatePageQuery & { status?: ContractorPassStatus } = {}
+  ): Promise<ApiResponse<Paginated<ContractorPass>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/contractor-passes${toQuery(query)}`));
+  },
+
+  /**
+   * Authorises somebody to arrive repeatedly.
+   *
+   * Enterprise-only, so a 403 `PLAN_UPGRADE_REQUIRED` is an expected answer
+   * rather than a fault — it carries both the tier required and the one the
+   * estate is on, which is what the upsell needs to say what they are buying.
+   */
+  async createContractorPass(
+    estateId: string,
+    data: {
+      householdId: string;
+      name: string;
+      phone?: string;
+      company?: string;
+      trade?: string;
+      validFrom: string;
+      validUntil: string;
+      /** Omit or empty for every day. */
+      daysOfWeek?: number[];
+      dailyFrom?: string;
+      dailyTo?: string;
+    }
+  ): Promise<ApiResponse<IssuedContractorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/contractor-passes`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /** Withdraws an authorisation. The row stays, so the decision survives it. */
+  async revokeContractorPass(
+    estateId: string,
+    passId: string,
+    reason: string
+  ): Promise<ApiResponse<ContractorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/contractor-passes/${passId}/revoke`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
       })
     );
   },

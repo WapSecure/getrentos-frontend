@@ -275,6 +275,62 @@ export type WatchlistStatus = 'ACTIVE' | 'LIFTED';
  */
 export type WatchlistMatchedOn = 'NAME' | 'PHONE' | 'PLATE';
 
+export type ContractorPassStatus = 'ACTIVE' | 'REVOKED' | 'EXPIRED';
+
+/**
+ * A standing authorisation for somebody who arrives repeatedly.
+ *
+ * Not a kind of VisitorPass: that IS a visit — created, used once, closed. This
+ * is a permission that outlives any single arrival, so the two answer different
+ * questions. Every arrival here still records its own visitor pass, which is
+ * what keeps "who is inside?" and check-out working unchanged.
+ */
+export interface ContractorPass {
+  id: string;
+  estateId: string;
+  householdId: string;
+  /** The unit they work for, when the authorisation names one. */
+  householdLabel?: string | null;
+  /** The person, not the firm — a company that rotates staff is re-authorised. */
+  name: string;
+  phone?: string | null;
+  company?: string | null;
+  trade?: string | null;
+  status: ContractorPassStatus;
+  /** Ready to render: Active / Withdrawn / Expired. */
+  statusLabel: string;
+  validFrom: string;
+  validUntil: string;
+  /** 0 = Sunday. Empty means every day. */
+  daysOfWeek: number[];
+  dailyFrom?: string | null;
+  dailyTo?: string | null;
+  /** "Monday and Thursday, 08:00-17:00, until 31 Dec 2026". */
+  scheduleLabel: string;
+  /**
+   * Arrivals this authorisation has let in, ever.
+   *
+   * The number an estate actually reviews: a cleaner authorised for Tuesdays who
+   * has been admitted forty times is the shape of problem this exists to show.
+   */
+  visitCount: number;
+  createdAt: string;
+  revokedAt?: string | null;
+  revokeReason?: string | null;
+}
+
+/**
+ * The one and only time the PIN is visible.
+ *
+ * Nothing can read it back afterwards, so there is no "show me the code again"
+ * screen — the manager hands it over once, or withdraws the authorisation and
+ * issues a new one.
+ */
+export interface IssuedContractorPass extends ContractorPass {
+  pin: string;
+  qrDataUrl: string;
+}
+
 export interface WatchlistEntry {
   id: string;
   estateId: string;

@@ -230,6 +230,11 @@ export const ROUTES = {
   ESTATE_VEHICLES: '/estate/vehicles',
   /** The estate's do-not-admit list, screened at every way in. */
   ESTATE_WATCHLIST: '/estate/watchlist',
+  /**
+   * Standing authorisations for people who keep arriving — a cleaner on
+   * Tuesdays, a contractor on site for six weeks. Enterprise-gated.
+   */
+  ESTATE_CONTRACTORS: '/estate/contractors',
   ESTATE_DELIVERIES: '/estate/deliveries',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',

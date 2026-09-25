@@ -74,7 +74,15 @@ function fallbackMessage(status: number): string {
  * fallback every other call site shows via `err.message`).
  */
 const FRIENDLY_ERROR_CODES: Record<string, string> = {
-  PLAN_UPGRADE_REQUIRED: 'This feature requires the Pro plan. Upgrade to unlock it.',
+  // PLAN_UPGRADE_REQUIRED is deliberately NOT in this table.
+  //
+  // A fixed sentence here read "This feature requires the Pro plan", and it
+  // overrode whatever the backend sent. That was survivable while Pro was the
+  // only paid tier; it is now wrong for every Enterprise gate, where it told an
+  // estate on Pro to buy the plan they already had. The backend composes this
+  // one per feature and names the tier it needs — "Contractor passes is an
+  // Enterprise feature. Upgrade to Enterprise to use it." — so the body's own
+  // message is the good copy, and the table entry was only ever hiding it.
   PLAN_LIMIT_REACHED:
     "You've reached the limit for your current plan. Upgrade to Pro to remove it.",
 };

@@ -303,6 +303,8 @@ export const estateKeys = {
   gates: (estateId: string) => ['estate', estateId, 'gates'] as const,
   watchlist: (estateId: string, filter?: string) =>
     ['estate', estateId, 'watchlist', filter ?? 'all'] as const,
+  contractorPasses: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'contractor-passes', filter ?? 'all'] as const,
   incidents: (estateId: string, status?: string) =>
     ['estate', estateId, 'incidents', status ?? 'all'] as const,
   maintenanceTickets: (estateId: string, status?: string) =>
