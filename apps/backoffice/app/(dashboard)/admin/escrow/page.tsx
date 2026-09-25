@@ -3,9 +3,9 @@
 import { LegacyInput } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Landmark, Flag } from 'lucide-react';
-import { ConfirmDialog, DataTable, type Column } from '@getrentos/ui';
+import { useQuery } from '@tanstack/react-query';
+import { Search, Landmark, Flag, Send, Undo2 } from 'lucide-react';
+import { DataTable, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -14,6 +14,9 @@ import { formatCurrency, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import { useAdminUser } from '../layout';
+import { useAdminAction } from '@/hooks/useAdminAction';
 import type { PlatformEscrowStatus, PlatformEscrowTransaction } from '@/types/admin';
 
 const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: BadgeVariant }> = {
@@ -27,17 +30,26 @@ const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: Badge
   refunded: { label: 'Refunded', variant: 'warning' },
 };
 
+/**
+ * Where the platform is actually holding the buyer's money, so release/refund have
+ * something to move. Mirrors `HOLDABLE_ESCROW_STATUSES` on the API — a deposit that
+ * has not been paid cannot be released or refunded, and offering the button for it
+ * would only produce a rejection.
+ */
+const SETTLEABLE_STATUSES: PlatformEscrowStatus[] = ['funds_held', 'verification', 'final_payment'];
+
 type StatusFilter = 'all' | PlatformEscrowStatus;
 
 const PAGE_SIZE = 10;
 
 export default function AdminEscrowPage() {
-  const queryClient = useQueryClient();
+  const user = useAdminUser();
+  const canSettle = hasAdminPermission(user?.roles, 'escrow.approve');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
-  const [pendingFlag, setPendingFlag] = useState<PlatformEscrowTransaction | null>(null);
+  const actions = useAdminAction({ invalidateKeys: [['admin', 'escrow']] });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,12 +85,6 @@ export default function AdminEscrowPage() {
       unwrap(adminService.listEscrowTransactions({ flagged: true, page: 1, pageSize: 1 })),
   });
   const flaggedCount = flaggedData?.total ?? 0;
-
-  const toggleFlagMutation = useMutation({
-    mutationFn: ({ id, flagged }: { id: string; flagged: boolean }) =>
-      unwrap(adminService.toggleEscrowFlag(id, flagged)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'escrow'] }),
-  });
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -132,28 +138,96 @@ export default function AdminEscrowPage() {
       className: 'text-muted-foreground whitespace-nowrap',
     },
     {
-      key: 'flag',
+      key: 'actions',
       header: '',
-      render: (t) => (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!toggleFlagMutation.isPending) setPendingFlag(t);
-          }}
-          disabled={toggleFlagMutation.isPending}
-          aria-label={t.flagged ? 'Remove transaction review flag' : 'Flag transaction for review'}
-          className={cn(
-            'p-1.5 rounded-lg transition-colors',
-            t.flagged
-              ? 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
-              : 'text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-secondary'
-          )}
-          title={t.flagged ? 'Unflag transaction' : 'Flag for review'}
-        >
-          <Flag className="w-3.5 h-3.5" />
-        </button>
-      ),
+      render: (t) => {
+        const settling = SETTLEABLE_STATUSES.includes(t.status);
+        const busy = actions.processingKey !== null;
+        const amount = formatCurrency(t.amount, { compact: true });
+        return (
+          <div className="flex items-center justify-end gap-1">
+            {canSettle && settling && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (busy) return;
+                    actions.request({
+                      key: `release:${t.id}`,
+                      title: 'Release these funds to the seller?',
+                      description: `${amount} held for ${t.propertyTitle} will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
+                      confirmLabel: 'Release funds',
+                      successMessage: `${amount} released to ${t.sellerName}.`,
+                      run: () => adminService.releaseEscrow(t.id),
+                    });
+                  }}
+                  disabled={busy}
+                  aria-label={`Release escrow funds for ${t.propertyTitle}`}
+                  className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-emerald-600 hover:bg-secondary dark:hover:text-emerald-400 disabled:opacity-50"
+                  title={`Release ${amount} to the seller`}
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (busy) return;
+                    actions.request({
+                      key: `refund:${t.id}`,
+                      title: 'Refund these funds to the buyer?',
+                      description: `${amount} held for ${t.propertyTitle} will be returned to ${t.buyerName}. This settles the escrow and cannot be reversed from here.`,
+                      confirmLabel: 'Refund buyer',
+                      successMessage: `${amount} refunded to ${t.buyerName}.`,
+                      run: () => adminService.refundEscrow(t.id),
+                    });
+                  }}
+                  disabled={busy}
+                  aria-label={`Refund escrow funds for ${t.propertyTitle}`}
+                  className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-amber-600 hover:bg-secondary dark:hover:text-amber-400 disabled:opacity-50"
+                  title={`Refund ${amount} to the buyer`}
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (busy) return;
+                actions.request({
+                  key: `flag:${t.id}`,
+                  title: t.flagged ? 'Remove review flag?' : 'Flag escrow transaction?',
+                  description: `${t.propertyTitle} (${amount}) will be ${
+                    t.flagged ? 'removed from' : 'added to'
+                  } the manual review queue.`,
+                  confirmLabel: t.flagged ? 'Remove flag' : 'Flag for review',
+                  successMessage: t.flagged
+                    ? 'Transaction removed from the review queue.'
+                    : 'Transaction added to the review queue.',
+                  run: () => adminService.toggleEscrowFlag(t.id, !t.flagged),
+                });
+              }}
+              disabled={busy}
+              aria-label={
+                t.flagged ? 'Remove transaction review flag' : 'Flag transaction for review'
+              }
+              className={cn(
+                'p-1.5 rounded-lg transition-colors',
+                t.flagged
+                  ? 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
+                  : 'text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-secondary',
+                busy && 'opacity-50'
+              )}
+              title={t.flagged ? 'Unflag transaction' : 'Flag for review'}
+            >
+              <Flag className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        );
+      },
       className: 'text-right',
     },
   ];
@@ -227,22 +301,7 @@ export default function AdminEscrowPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={pendingFlag !== null}
-        onOpenChange={(open) => !open && setPendingFlag(null)}
-        title={pendingFlag?.flagged ? 'Remove review flag?' : 'Flag escrow transaction?'}
-        description={
-          pendingFlag
-            ? `${pendingFlag.propertyTitle} (${formatCurrency(pendingFlag.amount, { compact: true })}) will be ${pendingFlag.flagged ? 'removed from' : 'added to'} the manual review queue.`
-            : ''
-        }
-        confirmLabel={pendingFlag?.flagged ? 'Remove flag' : 'Flag for review'}
-        onConfirm={() => {
-          if (pendingFlag) {
-            toggleFlagMutation.mutate({ id: pendingFlag.id, flagged: !pendingFlag.flagged });
-          }
-        }}
-      />
+      {actions.feedback}
     </>
   );
 }
