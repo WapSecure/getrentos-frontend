@@ -27,7 +27,8 @@ import {
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
+import { tierAtLeast, type PlanTier } from '@getrentos/shared';
 
 interface NavItem {
   label: string;
@@ -35,10 +36,22 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-/** Nav items whose destination is entirely Pro-gated (see Batch 7c). Dashboard,
- * Governance, and Households are only *partially* gated (one section/action
- * each), so they deliberately stay unlocked here. */
-const PRO_GATED_ROUTES = new Set<string>([ROUTES.ESTATE_MICROSITE, ROUTES.ESTATE_FINANCIALS]);
+/**
+ * Which plan each nav item's destination needs, where it needs one at all.
+ *
+ * Dashboard, Governance, and Households are only *partially* gated (one
+ * section/action each), so they deliberately stay unlocked here.
+ *
+ * "Regular visitors" is the Enterprise one: issuing somebody a standing
+ * authorisation is an operational convenience on top of the free visitor-pass
+ * machinery, not a safety feature — a free estate can still screen arrivals and
+ * turn people away, which is what must never be paywalled.
+ */
+const GATED_ROUTES: Partial<Record<string, PlanTier>> = {
+  [ROUTES.ESTATE_MICROSITE]: 'PRO',
+  [ROUTES.ESTATE_FINANCIALS]: 'PRO',
+  [ROUTES.ESTATE_CONTRACTORS]: 'ENTERPRISE',
+};
 
 export const navItems: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.ESTATE_DASHBOARD, icon: LayoutDashboard },
@@ -80,17 +93,31 @@ export const navGroups = [
 ];
 
 export const EstateSidebar = () => {
-  const { isPro } = usePlanTier();
+  const { estate } = useSelectedEstate();
+  /**
+   * The ESTATE's plan, not the viewer's. A staff member's own subscription says
+   * nothing about what the estate they work for has bought — and the backend
+   * resolves entitlement through the estate owner, so reading the caller's tier
+   * marked a paying estate's features as locked for its staff, and a free
+   * estate's as open for a manager who happened to subscribe personally.
+   *
+   * Unknown (the field is absent) locks nothing. The page behind an unlocked
+   * item still refuses with the real upsell, which is a far better failure than
+   * hiding a feature the estate pays for.
+   */
+  const planTier = estate?.planTier;
+
   return (
     <GroupedSidebar
       ariaLabel="Estate administration navigation"
       dashboardHref={ROUTES.ESTATE_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
-        items: group.items.map((item) => ({
-          ...item,
-          locked: !isPro && PRO_GATED_ROUTES.has(item.href),
-        })),
+        items: group.items.map((item) => {
+          const required = GATED_ROUTES[item.href];
+          const locked = Boolean(planTier && required && !tierAtLeast(planTier, required));
+          return { ...item, locked, lockedPlan: required };
+        }),
       }))}
     />
   );

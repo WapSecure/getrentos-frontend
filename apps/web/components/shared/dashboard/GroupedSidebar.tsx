@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import type { ElementType, ReactNode } from 'react';
+import { PLAN_TIER_LABELS, type PlanTier } from '@getrentos/shared';
 
 export interface GroupedSidebarItem {
   label: ReactNode;
@@ -11,6 +12,14 @@ export interface GroupedSidebarItem {
   icon: ElementType;
   /** Shows a small lock badge — the page itself still opens, and prompts to upgrade. */
   locked?: boolean;
+  /**
+   * Which plan clears the lock, so the badge can say so out loud.
+   *
+   * Defaults to Pro, which is what every gated item was until Enterprise
+   * existed. Pass this whenever the gate is not Pro, or the badge announces the
+   * wrong plan to a screen reader.
+   */
+  lockedPlan?: PlanTier;
 }
 
 export interface GroupedSidebarGroup {
@@ -68,7 +77,7 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
                     {item.locked && (
                       <Lock
                         className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
-                        aria-label="Pro plan feature"
+                        aria-label={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
                       />
                     )}
                   </Link>
@@ -113,7 +122,7 @@ export function GroupedMobileNavigation({
                   {item.locked && (
                     <Lock
                       className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
-                      aria-label="Pro plan feature"
+                      aria-label={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
                     />
                   )}
                 </Link>

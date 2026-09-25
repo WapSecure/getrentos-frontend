@@ -1,3 +1,5 @@
+import type { PlanTier } from '@getrentos/shared';
+
 export interface Estate {
   id: string;
   name: string;
@@ -10,6 +12,18 @@ export interface Estate {
   graceDays: number;
   householdCount: number;
   createdAt: string;
+  /**
+   * What this estate's subscription reaches — the ESTATE'S plan, not the
+   * viewer's.
+   *
+   * An estate is entitled through its organisation's owner, so a manager on a
+   * free personal plan still administers an Enterprise estate, and a manager on
+   * Pro still cannot use Enterprise features on a free one. Any "is this paid
+   * for?" badge in the estate console has to read this, and must treat an absent
+   * value as UNKNOWN rather than FREE: hiding a feature the estate pays for is
+   * worse than showing one that refuses with an upsell on submit.
+   */
+  planTier?: PlanTier;
 }
 
 export type HouseholdStatus = 'active' | 'inactive';
