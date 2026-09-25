@@ -156,6 +156,17 @@ export interface Lease {
   paymentDueAt?: string;
   /** Set once the landlord confirmed handover. */
   possessionConfirmedAt?: string;
+  /**
+   * Renewal terms awaiting the tenant's answer. While this is present the lease
+   * still carries its current rent and end date — accepting is what applies them.
+   */
+  pendingRenewalOffer?: {
+    id: string;
+    newRentAmount: number;
+    increasePercentage: number;
+    newEndDate: string;
+    offeredAt: string;
+  };
   createdAt: string;
 }
 
