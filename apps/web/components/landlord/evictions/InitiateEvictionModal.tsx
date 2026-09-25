@@ -16,6 +16,7 @@ interface InitiateEvictionModalProps {
   onClose: () => void;
   onSubmit: (leaseId: string, reason: string) => void;
   isSubmitting?: boolean;
+  error?: string | null;
 }
 
 export const InitiateEvictionModal = ({
@@ -23,6 +24,7 @@ export const InitiateEvictionModal = ({
   onClose,
   onSubmit,
   isSubmitting,
+  error,
 }: InitiateEvictionModalProps) => {
   const [leaseId, setLeaseId] = useState('');
   const [reason, setReason] = useState('');
@@ -114,20 +116,27 @@ export const InitiateEvictionModal = ({
               </div>
             </div>
 
-            <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                className="gap-1.5"
-                onClick={() => onSubmit(leaseId, reason.trim())}
-                disabled={!canSubmit || isSubmitting}
-              >
-                <Gavel className="w-3.5 h-3.5" />
-                {isSubmitting ? 'Creating…' : 'Create Case'}
-              </Button>
+            <div className="p-4 border-t border-border space-y-2">
+              {error ? (
+                <p className="text-xs text-red-600 dark:text-red-400" role="alert">
+                  {error}
+                </p>
+              ) : null}
+              <div className="flex gap-3">
+                <Button variant="ghost" fullWidth onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  className="gap-1.5"
+                  onClick={() => onSubmit(leaseId, reason.trim())}
+                  disabled={!canSubmit || isSubmitting}
+                >
+                  <Gavel className="w-3.5 h-3.5" />
+                  {isSubmitting ? 'Creating…' : 'Create Case'}
+                </Button>
+              </div>
             </div>
           </motion.div>
         </div>
