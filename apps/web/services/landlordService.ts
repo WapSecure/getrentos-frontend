@@ -181,6 +181,8 @@ export interface LandlordAutomationSettings {
   overdueAlerts: boolean;
   autoInvoices: boolean;
   leaseExpiry: boolean;
+  /** Days rent may run past its due date before it is flagged overdue. */
+  graceDays: number;
 }
 
 export interface LandlordDashboardStats {
