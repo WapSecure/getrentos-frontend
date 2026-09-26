@@ -226,6 +226,70 @@ export interface Paginated<T> {
   totalPages: number;
 }
 
+/** What kind of emergency was declared. Drives the wording every resident is sent. */
+export type EmergencyKind = 'FIRE' | 'GAS_LEAK' | 'STRUCTURAL' | 'SECURITY' | 'MEDICAL' | 'OTHER';
+
+/**
+ * `TIMED_OUT` is not a kind of closed: a roll nobody stood down has no all-clear
+ * to report, so it keeps its own status and its own wording.
+ */
+export type MusterStatus = 'ACTIVE' | 'CLOSED' | 'TIMED_OUT';
+
+/** Where one person is. `UNACCOUNTED` is where everybody starts. */
+export type MusterRollState = 'UNACCOUNTED' | 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
+
+/** What a resident may say about their own household. */
+export type MusterSelfAnswer = 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
+
+/** One name on a roll call, as this household is allowed to see it. */
+export interface MusterRollEntry {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  personName: string;
+  basis: 'RESIDENT' | 'ON_SITE';
+  basisLabel: string;
+  state: MusterRollState;
+  stateLabel: string;
+  stateAt?: string | null;
+  stateNote?: string | null;
+}
+
+/** Counted server-side, so the phone and the estate office cannot disagree. */
+export interface MusterTally {
+  total: number;
+  accountedFor: number;
+  notOnSite: number;
+  needsHelp: number;
+  unaccounted: number;
+  settled: boolean;
+}
+
+export interface ResidentMuster {
+  id: string;
+  kind: EmergencyKind;
+  kindLabel: string;
+  description: string;
+  assemblyPoint?: string | null;
+  /** What residents were told to do, composed server-side. */
+  assemblyInstruction: string;
+  status: MusterStatus;
+  statusLabel: string;
+  declaredAt: string;
+  tally: MusterTally;
+  /** "13 people on the roll, 1 person accounted for, …" */
+  tallyLabel: string;
+}
+
+/**
+ * What a resident sees during an emergency: their own lines, and the estate's
+ * numbers. Never the estate's roll — the names are not this household's to see.
+ */
+export interface ResidentEmergency {
+  muster: ResidentMuster;
+  myEntries: MusterRollEntry[];
+}
+
 function toQuery(params: Record<string, string | number | boolean | undefined>): string {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
@@ -339,5 +403,33 @@ export const residentApi = {
     apiFetch<GovernanceRecord>(`/estate/resident/governance/${recordId}/sign`, {
       method: 'POST',
       body: { signatureData },
+    }),
+
+  /**
+   * The roll call in progress, or null.
+   *
+   * Null is the ordinary answer, not an error: most of the time the estate is not
+   * on fire. No household id is sent — the household is resolved from the
+   * signed-in user, so there is nothing here to tamper with.
+   *
+   * Normalised to null here rather than at the call sites, because the handler
+   * returns `null` and Nest sends that as an empty body, which `readJson` yields
+   * as `undefined` — and react-query rejects an undefined query result outright,
+   * so "nothing is happening" would render as a broken screen.
+   */
+  getEmergency: async (): Promise<ResidentEmergency | null> =>
+    (await apiFetch<ResidentEmergency | null>('/estate/resident/emergency')) ?? null,
+
+  /**
+   * Answers for your own household.
+   *
+   * Moves this household's residents only: a visitor line stays with the marshal,
+   * because the person the estate admitted is not necessarily the person holding
+   * the phone.
+   */
+  answerRollCall: (data: { state: MusterSelfAnswer; stateNote?: string }) =>
+    apiFetch<ResidentEmergency>('/estate/resident/emergency/answer', {
+      method: 'POST',
+      body: data,
     }),
 };

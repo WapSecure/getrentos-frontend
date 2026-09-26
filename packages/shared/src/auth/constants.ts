@@ -235,6 +235,14 @@ export const ROUTES = {
    * Tuesdays, a contractor on site for six weeks. Enterprise-gated.
    */
   ESTATE_CONTRACTORS: '/estate/contractors',
+  /**
+   * Raising the alarm and calling the roll.
+   *
+   * Free on every plan, and deliberately so: an estate that has to pay to find
+   * out whether the people in its building are safe is an estate that will not
+   * find out. Nothing here is a convenience on top of something already bought.
+   */
+  ESTATE_EMERGENCY: '/estate/emergency',
   ESTATE_DELIVERIES: '/estate/deliveries',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
@@ -253,6 +261,13 @@ export const ROUTES = {
   RESIDENT_ANNOUNCEMENTS: '/resident/announcements',
   RESIDENT_VISITOR_PASSES: '/resident/visitor-passes',
   RESIDENT_VIOLATIONS: '/resident/violations',
+  /**
+   * Where a resident answers the estate's roll call.
+   *
+   * Reached from a banner rather than browsed to, because an emergency screen
+   * that is only found by looking for it is one that is not found at all.
+   */
+  RESIDENT_EMERGENCY: '/resident/emergency',
   RESIDENT_DELIVERIES: '/resident/deliveries',
   RESIDENT_DIRECTORY: '/resident/directory',
   RESIDENT_MAINTENANCE: '/resident/maintenance',

@@ -305,6 +305,17 @@ export const estateKeys = {
     ['estate', estateId, 'watchlist', filter ?? 'all'] as const,
   contractorPasses: (estateId: string, filter?: string) =>
     ['estate', estateId, 'contractor-passes', filter ?? 'all'] as const,
+  /**
+   * The roll call in progress, or null.
+   *
+   * Its own key rather than a filter on the list, because the console polls this
+   * one during an emergency and the history can be a hundred rows long.
+   */
+  activeMuster: (estateId: string) => ['estate', estateId, 'emergency-musters', 'active'] as const,
+  emergencyMusters: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'emergency-musters', 'list', filter ?? 'all'] as const,
+  emergencyMuster: (estateId: string, musterId: string) =>
+    ['estate', estateId, 'emergency-musters', musterId] as const,
   incidents: (estateId: string, status?: string) =>
     ['estate', estateId, 'incidents', status ?? 'all'] as const,
   maintenanceTickets: (estateId: string, status?: string) =>
@@ -343,6 +354,13 @@ export const estateResidentKeys = {
   amenityBookings: ['estate', 'resident', 'amenityBookings'] as const,
   committee: ['estate', 'resident', 'committee'] as const,
   governance: ['estate', 'resident', 'governance'] as const,
+  /**
+   * The roll call this household is being asked to answer, or null.
+   *
+   * Shared by the banner on the dashboard and the answer screen, so a resident
+   * who answers on one does not leave a stale banner on the other.
+   */
+  emergency: ['estate', 'resident', 'emergency'] as const,
 };
 
 /** Not persona-scoped — every signed-in user has at most one subscription. */

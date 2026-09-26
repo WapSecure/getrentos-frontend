@@ -7,6 +7,7 @@ import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { EmergencyBanner } from '@/components/estate/resident/EmergencyBanner';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-NG', {
@@ -67,6 +68,11 @@ export default function ResidentDashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* First, above even the household header: if the estate is calling the
+          roll, nothing else on this screen matters as much. Renders nothing when
+          there is no emergency, which is almost always. */}
+      <EmergencyBanner />
+
       <div className="rounded-2xl border border-border/90 bg-card p-6 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-xl bg-accent text-primary flex items-center justify-center shrink-0">

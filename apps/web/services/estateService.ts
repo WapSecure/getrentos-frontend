@@ -29,6 +29,11 @@ import type {
   ContractorPass,
   ContractorPassStatus,
   IssuedContractorPass,
+  EmergencyKind,
+  EmergencyMuster,
+  MusterRollState,
+  MusterStatus,
+  MusterSummary,
   Incident,
   MaintenanceTicket,
   Poll,
@@ -702,6 +707,114 @@ export const estateService = {
       authFetch(`/estate/${estateId}/watchlist/screen`, {
         method: 'POST',
         body: JSON.stringify(query),
+      })
+    );
+  },
+
+  // --- Emergency mustering ---------------------------------------------------
+
+  /**
+   * Raises the alarm and takes the roll.
+   *
+   * The roll is built server-side in the same transaction that records the
+   * muster: everybody the estate believes is inside at this moment, taken once.
+   * A client that assembled the list itself would be assembling it from however
+   * old its cache happened to be, and the whole value of a roll call is that it
+   * is a snapshot taken at a stated time.
+   */
+  async declareMuster(
+    estateId: string,
+    data: { kind: EmergencyKind; description: string; assemblyPoint?: string }
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /** The roll call in progress, or null — which is the ordinary case. */
+  async getActiveMuster(estateId: string): Promise<ApiResponse<EmergencyMuster | null>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters/active`));
+  },
+
+  /**
+   * Every roll call the estate has raised, newest first.
+   *
+   * Summaries only: a roll holds a person per line, so a page of ten of them is
+   * not something to fetch to draw a list.
+   */
+  async listMusters(
+    estateId: string,
+    query: EstatePageQuery & { status?: MusterStatus } = {}
+  ): Promise<ApiResponse<Paginated<MusterSummary>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters${toQuery(query)}`));
+  },
+
+  /** One roll call with its roll, for the console that is answering it. */
+  async getMuster(estateId: string, musterId: string): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters/${musterId}`));
+  },
+
+  /**
+   * A marshal's answer about one person.
+   *
+   * Returns the whole muster, not just the line, so the tally on screen always
+   * matches the roll beneath it — the numbers are the reason a marshal trusts
+   * the screen, and a locally-adjusted count would be the one thing they cannot
+   * check.
+   */
+  async updateRollEntry(
+    estateId: string,
+    musterId: string,
+    entryId: string,
+    data: { state: MusterRollState; stateNote?: string }
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters/${musterId}/roll/${entryId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /**
+   * Re-reads the gate and adds anybody who came in since the roll was taken.
+   *
+   * Only ever adds: the roll call that does not know about the courier admitted
+   * at 14:05 will report the building clear while he is still in it. Existing
+   * lines, answered or not, are left alone.
+   */
+  async addMusterArrivals(
+    estateId: string,
+    musterId: string
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters/${musterId}/roll/arrivals`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  /**
+   * Stands the roll down.
+   *
+   * A note is required by the API whenever somebody is still unaccounted for.
+   * The form asks for it up front for that case rather than letting the manager
+   * find out from a 400 — an estate that searched and did not find somebody has
+   * to be able to stop, and the refusal would otherwise arrive at the worst
+   * possible moment.
+   */
+  async closeMuster(
+    estateId: string,
+    musterId: string,
+    closingNote?: string
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters/${musterId}/close`, {
+        method: 'POST',
+        body: JSON.stringify(closingNote ? { closingNote } : {}),
       })
     );
   },

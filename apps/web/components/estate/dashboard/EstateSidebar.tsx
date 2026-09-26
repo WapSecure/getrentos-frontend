@@ -70,6 +70,10 @@ export const navItems: NavItem[] = [
   { label: 'Deliveries', href: ROUTES.ESTATE_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
   { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
+  // Not in GATED_ROUTES, and deliberately not: raising the alarm and calling the
+  // roll is free on every plan. An estate that had to pay to find out whether the
+  // people inside its building are safe is one that would not find out.
+  { label: 'Emergency', href: ROUTES.ESTATE_EMERGENCY, icon: Siren },
   { label: 'Maintenance', href: ROUTES.ESTATE_MAINTENANCE, icon: Hammer },
   { label: 'Polls', href: ROUTES.ESTATE_POLLS, icon: Vote },
   { label: 'Amenities', href: ROUTES.ESTATE_AMENITIES, icon: CalendarCheck },
@@ -87,9 +91,9 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
   { label: 'Residents and access', items: navItems.slice(3, 10) },
-  { label: 'Safety and operations', items: navItems.slice(10, 13) },
-  { label: 'Community', items: navItems.slice(13, 17) },
-  { label: 'Administration', items: navItems.slice(17) },
+  { label: 'Safety and operations', items: navItems.slice(10, 14) },
+  { label: 'Community', items: navItems.slice(14, 18) },
+  { label: 'Administration', items: navItems.slice(18) },
 ];
 
 export const EstateSidebar = () => {

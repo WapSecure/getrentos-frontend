@@ -27,6 +27,7 @@ import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { EmergencyBanner } from '@/components/resident/EmergencyBanner';
 
 const QUICK_LINKS = [
   { href: '/(app)/maintenance', label: 'Maintenance', icon: Wrench },
@@ -69,6 +70,11 @@ export default function ResidentHome() {
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>
+      {/* First, above even the greeting: if the estate is calling the roll,
+          nothing else on this screen matters as much. Renders nothing when there
+          is no emergency, which is almost always. */}
+      <EmergencyBanner />
+
       <View style={{ gap: 2 }}>
         <Text variant="title">Hi, {firstName(profile?.legalName)}</Text>
         {household.data ? (

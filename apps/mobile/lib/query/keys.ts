@@ -194,6 +194,13 @@ export const qk = {
     maintenance: ['resident', 'maintenance'] as const,
     dues: ['resident', 'dues'] as const,
     governance: ['resident', 'governance'] as const,
+    /**
+     * The roll call this household is being asked to answer, or null.
+     *
+     * Shared by the banner on the resident home screen and the answer screen, so
+     * answering on one cannot leave a stale banner on the other.
+     */
+    emergency: ['resident', 'emergency'] as const,
   },
   gateman: {
     /**

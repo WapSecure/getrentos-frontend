@@ -85,6 +85,7 @@ export default function AppLayout() {
       <Stack.Screen name="maintenance" options={DETAIL_OPTIONS} />
       <Stack.Screen name="dues" options={DETAIL_OPTIONS} />
       <Stack.Screen name="governance" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="emergency" options={DETAIL_OPTIONS} />
       <Stack.Screen name="edit-profile" options={DETAIL_OPTIONS} />
       <Stack.Screen name="notifications" options={DETAIL_OPTIONS} />
       <Stack.Screen name="notification-settings" options={DETAIL_OPTIONS} />

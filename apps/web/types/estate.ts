@@ -409,6 +409,123 @@ export interface WatchlistScreening {
   message?: string;
 }
 
+/**
+ * What kind of emergency was declared.
+ *
+ * Drives the wording every resident is sent, which is why it is a fixed set
+ * rather than free text: "gas leak" has to reach people as "a gas leak, leave by
+ * the nearest exit", not depend on what a manager typed at 3am.
+ */
+export type EmergencyKind = 'FIRE' | 'GAS_LEAK' | 'STRUCTURAL' | 'SECURITY' | 'MEDICAL' | 'OTHER';
+
+/**
+ * `TIMED_OUT` is not a kind of closed.
+ *
+ * A roll nobody stood down has no all-clear to report — the estate stopped
+ * asking, which is a different and less reassuring thing to tell people, so it
+ * keeps its own status and its own wording.
+ */
+export type MusterStatus = 'ACTIVE' | 'CLOSED' | 'TIMED_OUT';
+
+/** Where one person is. `UNACCOUNTED` is where everybody starts. */
+export type MusterRollState = 'UNACCOUNTED' | 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
+
+/**
+ * One name on a roll call.
+ *
+ * `basisLabel` says why they are on the roll — a resident of the estate, or
+ * somebody who was inside when the alarm was raised. A visitor admitted *after*
+ * the roll was taken gets a third wording, because claiming they were here when
+ * the alarm went is a claim about where a person physically was.
+ */
+export interface MusterRollEntry {
+  id: string;
+  householdId: string;
+  /** The unit, so a marshal can walk the roll in order. */
+  unitLabel: string;
+  personName: string;
+  basis: 'RESIDENT' | 'ON_SITE';
+  basisLabel: string;
+  visitorPassId?: string | null;
+  admittedAt?: string | null;
+  state: MusterRollState;
+  /** Ready to render: Accounted for / Not yet accounted for / … */
+  stateLabel: string;
+  stateAt?: string | null;
+  stateById?: string | null;
+  stateNote?: string | null;
+}
+
+/**
+ * The numbers at the top of the screen.
+ *
+ * Counted server-side and never derived here: the console, the resident app and
+ * the notification people are sent must all print the same figures, and three
+ * independent sums of the same roll is three chances to disagree.
+ */
+export interface MusterTally {
+  total: number;
+  accountedFor: number;
+  notOnSite: number;
+  needsHelp: number;
+  unaccounted: number;
+  /** True when every name has an answer, whatever the answer was. */
+  settled: boolean;
+}
+
+export interface EmergencyMuster {
+  id: string;
+  estateId: string;
+  kind: EmergencyKind;
+  /** 'Fire' / 'Gas leak' — the heading. */
+  kindLabel: string;
+  description: string;
+  assemblyPoint?: string | null;
+  /** What residents were told to do, composed server-side. */
+  assemblyInstruction: string;
+  status: MusterStatus;
+  /** 'In progress' / 'Closed' / 'Timed out'. */
+  statusLabel: string;
+  declaredAt: string;
+  declaredById: string;
+  closedAt?: string | null;
+  closedById?: string | null;
+  closingNote?: string | null;
+  /** False once closed or timed out: the roll stops moving for a reason. */
+  rollOpen: boolean;
+  tally: MusterTally;
+  /** "13 people on the roll, 1 person accounted for, …" */
+  tallyLabel: string;
+  roll: MusterRollEntry[];
+}
+
+/** A roll call as the history list shows it — no names, because a roll can be hundreds long. */
+export interface MusterSummary {
+  id: string;
+  kind: EmergencyKind;
+  kindLabel: string;
+  description: string;
+  status: MusterStatus;
+  statusLabel: string;
+  declaredAt: string;
+  closedAt?: string | null;
+  tally: MusterTally;
+  tallyLabel: string;
+}
+
+/**
+ * What a resident sees during an emergency: their own lines, and the estate's
+ * numbers. Never the estate's roll — a list of names, units and who was home in
+ * the middle of the night is the most sensitive thing this feature produces.
+ */
+export interface ResidentEmergency {
+  muster: EmergencyMuster;
+  myEntries: MusterRollEntry[];
+}
+
+/** What a resident may say about their own household. */
+export type MusterSelfAnswer = 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
+
 export type AnnouncementPriority = 'normal' | 'urgent';
 
 export interface Announcement {
