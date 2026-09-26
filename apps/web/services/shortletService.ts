@@ -2,6 +2,8 @@ import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   BlockShortletDatesInput,
   BlockedDateRange,
+  ShortletCalendarFeed,
+  ShortletCalendarSync,
   ShortletSeason,
   ShortletSeasonInput,
   CreateShortletBookingInput,
@@ -324,6 +326,34 @@ export const shortletService = {
     safeCall(() =>
       authFetch(`/host/shortlets/blocked-dates/${blockedDateId}`, { method: 'DELETE' })
     ),
+
+  calendarSync: (listingId: string) =>
+    safeCall(() => authFetch<ShortletCalendarSync>(`/host/shortlets/${listingId}/calendar-sync`)),
+
+  resetCalendarExport: (listingId: string) =>
+    safeCall(() =>
+      authFetch<{ exportUrl: string }>(`/host/shortlets/${listingId}/calendar-sync/reset-export`, {
+        method: 'POST',
+      })
+    ),
+
+  addCalendarFeed: (listingId: string, input: { name: string; url: string }) =>
+    safeCall(() =>
+      authFetch<ShortletCalendarFeed>(`/host/shortlets/${listingId}/calendar-feeds`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  syncCalendarFeed: (feedId: string) =>
+    safeCall(() =>
+      authFetch<ShortletCalendarFeed>(`/host/shortlets/calendar-feeds/${feedId}/sync`, {
+        method: 'POST',
+      })
+    ),
+
+  removeCalendarFeed: (feedId: string) =>
+    safeCall(() => authFetch(`/host/shortlets/calendar-feeds/${feedId}`, { method: 'DELETE' })),
 
   listSeasons: (listingId: string) =>
     safeCall(() => authFetch<ShortletSeason[]>(`/host/shortlets/${listingId}/seasons`)),

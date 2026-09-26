@@ -347,6 +347,26 @@ export interface BlockedDateRange {
   startDate: string;
   endDate: string;
   reason?: string;
+  /** Name of the outside calendar these dates came from; the host can't remove them here. */
+  importedFrom?: string;
+}
+
+/** An outside calendar (Airbnb, Booking.com, ...) whose events block dates here. */
+export interface ShortletCalendarFeed {
+  id: string;
+  name: string;
+  url: string;
+  lastSyncedAt?: string;
+  lastError?: string;
+  eventCount: number;
+  /** Imported stays that overlap a GetRentos booking. */
+  conflictCount: number;
+}
+
+export interface ShortletCalendarSync {
+  /** The link other sites subscribe to. */
+  exportUrl: string;
+  feeds: ShortletCalendarFeed[];
 }
 
 export type ShortletDisputeCategory =
