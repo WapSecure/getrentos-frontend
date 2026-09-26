@@ -484,7 +484,53 @@ export function ShortletListingDetail({
                   <span>+{listing.weekendUpliftPct}%</span>
                 </div>
               ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.weeklyDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Stays of 7+ nights</span>
+                  <span className="text-success">{listing.weeklyDiscountPct}% off</span>
+                </div>
+              ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.monthlyDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Stays of 28+ nights</span>
+                  <span className="text-success">{listing.monthlyDiscountPct}% off</span>
+                </div>
+              ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.lastMinuteDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Check-in within {listing.lastMinuteDays} day
+                    {listing.lastMinuteDays === 1 ? '' : 's'}
+                  </span>
+                  <span className="text-success">{listing.lastMinuteDiscountPct}% off</span>
+                </div>
+              ) : null}
+              {listing.advanceNoticeDays ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Book ahead</span>
+                  <span>
+                    {listing.advanceNoticeDays === 1
+                      ? '1 day’s notice'
+                      : `${listing.advanceNoticeDays} days’ notice`}
+                  </span>
+                </div>
+              ) : null}
             </div>
+            {(listing.seasons ?? []).length > 0 && (
+              <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
+                <p className="font-medium">Peak seasons</p>
+                {(listing.seasons ?? []).map((season) => (
+                  <div key={season.id} className="text-muted-foreground">
+                    <span className="text-foreground">{season.name}</span>:{' '}
+                    {formatDate(season.startDate, 'short')} to {formatDate(season.endDate, 'short')}
+                    {season.nightlyRate != null
+                      ? ` · ${formatCurrency(season.nightlyRate)} / night`
+                      : ''}
+                    {season.minNights != null ? ` · min ${season.minNights} nights` : ''}
+                  </div>
+                ))}
+              </div>
+            )}
             <Button className="mt-4 w-full" onClick={openBooking}>
               <PlayCircle className="mr-1.5 h-4 w-4" />
               {listing.instantBooking ? 'Book now — instant confirmation' : 'Request to book'}
