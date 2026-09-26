@@ -1,4 +1,33 @@
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
+export type ShortletDiscountType = 'WEEKLY' | 'MONTHLY' | 'LAST_MINUTE';
+
+/** A date range with its own nightly rate and/or minimum stay; start/end are the first and last night. */
+export interface ShortletSeason {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  nightlyRate?: number;
+  minNights?: number;
+}
+
+export interface ShortletSeasonInput {
+  name: string;
+  startDate: string;
+  endDate: string;
+  nightlyRate?: number | null;
+  minNights?: number | null;
+}
+
+/** The peak-season rules a host sets on a listing. */
+export interface ShortletPricingRules {
+  weeklyDiscountPct?: number;
+  monthlyDiscountPct?: number;
+  lastMinuteDiscountPct?: number;
+  lastMinuteDays?: number;
+  advanceNoticeDays?: number;
+  prepDays?: number;
+}
 export type ShortletCancellationPolicy = 'FLEXIBLE' | 'MODERATE' | 'STRICT';
 export type ShortletBookingStatus =
   | 'REQUESTED'
@@ -32,6 +61,14 @@ export interface ShortletListing {
   minNights: number;
   maxNights?: number;
   weekendUpliftPct?: number;
+  weeklyDiscountPct: number;
+  monthlyDiscountPct: number;
+  lastMinuteDiscountPct: number;
+  lastMinuteDays: number;
+  advanceNoticeDays: number;
+  prepDays: number;
+  /** Current and upcoming seasons. */
+  seasons: ShortletSeason[];
   currency: string;
   instantBooking: boolean;
   maxGuests: number;
@@ -64,7 +101,10 @@ export interface ShortletBooking {
   nights: number;
   nightlyRate?: number;
   cleaningFee?: number;
+  /** Nights after any discount. */
   subtotal: number;
+  discountType?: ShortletDiscountType;
+  discountAmount?: number;
   total: number;
   status: ShortletBookingStatus;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
@@ -147,13 +187,23 @@ export interface ShortletAvailability {
   estimatedNights?: number;
   estimatedTotal?: number;
   estimatedTax?: number;
+  /** Nights before any discount. */
+  estimatedBaseSubtotal?: number;
+  /** Nights after the discount. */
+  estimatedSubtotal?: number;
+  estimatedCleaningFee?: number;
+  discountType?: ShortletDiscountType;
+  discountPct?: number;
+  discountAmount?: number;
+  /** Nights priced at a season rate. */
+  seasonalNights?: number;
   taxName?: string;
   taxPct?: number;
   /** Booked/blocked nights (`YYYY-MM-DD`); only sent when no range is asked for. */
   unavailableDates?: string[];
 }
 
-export interface CreateShortletListingInput {
+export interface CreateShortletListingInput extends ShortletPricingRules {
   propertyId: string;
   unitId?: string;
   listingTitle?: string;
@@ -178,7 +228,7 @@ export interface CreateShortletListingInput {
   deposit?: number;
 }
 
-export interface UpdateShortletListingInput {
+export interface UpdateShortletListingInput extends ShortletPricingRules {
   pricingMode?: ShortletPricingMode;
   nightlyRate?: number;
   cleaningFee?: number;

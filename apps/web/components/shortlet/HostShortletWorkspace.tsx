@@ -33,6 +33,7 @@ import {
   Plus,
   ShieldAlert,
   Star,
+  Tags,
   Zap,
 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -51,6 +52,7 @@ import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
 import { ShortletOpenDepositClaimDialog } from './ShortletOpenDepositClaimDialog';
 import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
+import { ShortletPeakPricingDialog } from './ShortletPeakPricingDialog';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -113,6 +115,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ShortletListing | null>(null);
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
+  const [pricingTarget, setPricingTarget] = useState<ShortletListing | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
@@ -268,6 +271,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                       {l.cleaningFee ? ` · ${formatCurrency(l.cleaningFee)} cleaning` : ''}
                       {l.deposit ? ` · ${formatCurrency(l.deposit)} deposit` : ''}
                     </p>
+                    {peakSummary(l) && (
+                      <p className="mt-1 text-xs text-muted-foreground">{peakSummary(l)}</p>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {l.status !== 'CLOSED' && l.status !== 'PENDING_VERIFICATION' && (
@@ -297,6 +303,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     )}
                     <Button variant="outline" size="sm" onClick={() => setEditTarget(l)}>
                       Edit
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setPricingTarget(l)}>
+                      <Tags className="mr-1.5 h-4 w-4" /> Pricing &amp; seasons
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setBlockTarget(l)}>
                       <CalendarOff className="mr-1.5 h-4 w-4" /> Block dates
@@ -462,6 +471,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             setToast({ message: 'Listing updated.', variant: 'success' });
           }}
         />
+      )}
+      {pricingTarget && (
+        <ShortletPeakPricingDialog listing={pricingTarget} onClose={() => setPricingTarget(null)} />
       )}
       {blockTarget && (
         <BlockDatesDialog listing={blockTarget} onClose={() => setBlockTarget(null)} />
@@ -1019,6 +1031,21 @@ function EditListingDialog({
 }
 
 // ---------- Block dates dialog ----------
+
+/** One line naming the peak-season rules in force, or null when there are none. */
+function peakSummary(l: ShortletListing): string | null {
+  const parts: string[] = [];
+  const seasons = l.seasons ?? [];
+  if (seasons.length > 0) {
+    parts.push(seasons.length === 1 ? `Season: ${seasons[0].name}` : `${seasons.length} seasons`);
+  }
+  if (l.weeklyDiscountPct) parts.push(`${l.weeklyDiscountPct}% off 7+ nights`);
+  if (l.monthlyDiscountPct) parts.push(`${l.monthlyDiscountPct}% off 28+ nights`);
+  if (l.lastMinuteDiscountPct) parts.push(`${l.lastMinuteDiscountPct}% last-minute`);
+  if (l.advanceNoticeDays) parts.push(`${l.advanceNoticeDays}d notice`);
+  if (l.prepDays) parts.push(`${l.prepDays}d prep`);
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
 
 function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onClose: () => void }) {
   const queryClient = useQueryClient();
