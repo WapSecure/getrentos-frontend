@@ -27,6 +27,7 @@ import {
 import {
   BarChart3,
   CalendarOff,
+  CalendarSync,
   Banknote,
   Gavel,
   MessageSquare,
@@ -53,6 +54,7 @@ import { ShortletOpenDepositClaimDialog } from './ShortletOpenDepositClaimDialog
 import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
 import { ShortletPeakPricingDialog } from './ShortletPeakPricingDialog';
+import { ShortletCalendarSyncDialog } from './ShortletCalendarSyncDialog';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -116,6 +118,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [editTarget, setEditTarget] = useState<ShortletListing | null>(null);
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
   const [pricingTarget, setPricingTarget] = useState<ShortletListing | null>(null);
+  const [syncTarget, setSyncTarget] = useState<ShortletListing | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
@@ -310,6 +313,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     <Button variant="outline" size="sm" onClick={() => setBlockTarget(l)}>
                       <CalendarOff className="mr-1.5 h-4 w-4" /> Block dates
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSyncTarget(l)}>
+                      <CalendarSync className="mr-1.5 h-4 w-4" /> Calendar sync
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -471,6 +477,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             setToast({ message: 'Listing updated.', variant: 'success' });
           }}
         />
+      )}
+      {syncTarget && (
+        <ShortletCalendarSyncDialog listing={syncTarget} onClose={() => setSyncTarget(null)} />
       )}
       {pricingTarget && (
         <ShortletPeakPricingDialog listing={pricingTarget} onClose={() => setPricingTarget(null)} />
@@ -1143,16 +1152,20 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
                 >
                   <span>
                     {formatDate(b.startDate, 'short')} → {formatDate(b.endDate, 'short')}
-                    {b.reason ? ` · ${b.reason}` : ''}
+                    {b.reason && !b.importedFrom ? ` · ${b.reason}` : ''}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeBlock.mutate(b.id)}
-                    disabled={removeBlock.isPending}
-                  >
-                    Remove
-                  </Button>
+                  {b.importedFrom ? (
+                    <Badge variant="neutral">From {b.importedFrom}</Badge>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeBlock.mutate(b.id)}
+                      disabled={removeBlock.isPending}
+                    >
+                      Remove
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

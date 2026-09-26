@@ -240,6 +240,8 @@ export const shortletKeys = {
   hostBlockedDates: (listingId: string) =>
     ['shortlets', 'host', listingId, 'blocked-dates'] as const,
   hostSeasons: (listingId: string) => ['shortlets', 'host', listingId, 'seasons'] as const,
+  hostCalendarSync: (listingId: string) =>
+    ['shortlets', 'host', listingId, 'calendar-sync'] as const,
   guestMessages: ['shortlets', 'messages'] as const,
   hostMessages: ['shortlets', 'host', 'messages'] as const,
   hostPayouts: ['shortlets', 'host', 'payouts'] as const,
