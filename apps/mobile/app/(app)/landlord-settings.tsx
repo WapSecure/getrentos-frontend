@@ -208,6 +208,9 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
               source={{ uri: initial.avatarUrl }}
               style={{ width: '100%', height: '100%' }}
               contentFit="cover"
+              cachePolicy="memory-disk"
+              recyclingKey={initial.avatarUrl}
+              accessible={false}
             />
           ) : (
             <Avatar name={initial.fullName} size={64} />

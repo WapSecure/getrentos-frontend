@@ -90,8 +90,8 @@ export default function BuyerDiscover() {
                   source={{ uri: item.image }}
                   contentFit="cover"
                   cachePolicy="memory-disk"
-                  transition={200}
                   recyclingKey={item.id}
+                  transition={200}
                   accessible={false}
                   style={{ width: '100%', height: 160 }}
                 />

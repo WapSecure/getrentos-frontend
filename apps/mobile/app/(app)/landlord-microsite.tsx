@@ -128,6 +128,9 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
             source={{ uri: initial.bannerUrl }}
             style={{ width: '100%', height: '100%' }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={initial.bannerUrl}
+            accessible={false}
           />
         ) : (
           <View style={{ alignItems: 'center', gap: 6 }}>

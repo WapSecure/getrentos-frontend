@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import {
   AccessibilityInfo,
+  Platform,
   Pressable,
   View,
   type AccessibilityRole,
@@ -46,6 +47,7 @@ export function Checkbox({
         accessibilityLabel={accessibilityLabel ?? (typeof label === 'string' ? label : undefined)}
         accessibilityState={{ checked, disabled }}
         accessibilityHint={error ? `Error: ${error}` : undefined}
+        aria-invalid={!!error}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}
       >
         <View
@@ -71,7 +73,12 @@ export function Checkbox({
         )}
       </Pressable>
       {error ? (
-        <Text variant="caption" color="destructive" style={{ marginLeft: 32 }}>
+        <Text
+          variant="caption"
+          color="destructive"
+          accessibilityLiveRegion="polite"
+          style={{ marginLeft: 32 }}
+        >
           {error}
         </Text>
       ) : null}
@@ -98,7 +105,7 @@ export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (message)
+    if (message && Platform.OS === 'ios')
       AccessibilityInfo.announceForAccessibility(title ? `${title}. ${message}` : message);
   }, [message, title]);
 
@@ -108,7 +115,7 @@ export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
     error: { fg: colors.destructive, bg: colors.destructiveSubtle, Icon: AlertCircle },
     warning: { fg: colors.warning, bg: colors.warningSubtle, Icon: TriangleAlert },
     success: { fg: colors.success, bg: colors.successSubtle, Icon: CheckCircle2 },
-    info: { fg: colors.primary, bg: colors.accent, Icon: Info },
+    info: { fg: colors.accentForeground, bg: colors.accent, Icon: Info },
   }[tone];
 
   return (

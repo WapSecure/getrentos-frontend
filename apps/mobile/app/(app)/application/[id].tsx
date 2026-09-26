@@ -80,7 +80,14 @@ export default function ApplicationDetail() {
       >
         <View style={{ height: 160, backgroundColor: colors.secondary }}>
           {app?.image ? (
-            <Image source={{ uri: app.image }} contentFit="cover" style={StyleSheet.absoluteFill} />
+            <Image
+              source={{ uri: app.image }}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              recyclingKey={app.id}
+              accessible={false}
+              style={StyleSheet.absoluteFill}
+            />
           ) : null}
         </View>
 

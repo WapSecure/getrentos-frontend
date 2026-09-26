@@ -19,7 +19,8 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
     <Card
       elevated
       padding="none"
-      accessibilityLabel={loading ? 'Loading dashboard summary' : 'Dashboard summary'}
+      accessible={loading}
+      accessibilityLabel={loading ? 'Loading dashboard summary' : undefined}
       accessibilityState={{ busy: loading }}
     >
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -80,7 +81,10 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
           ) : (
             <View
               key={metric?.label ?? row.index}
+              accessible={!!metric}
+              accessibilityRole={metric ? 'text' : undefined}
               accessibilityLabel={metric ? `${metric.label}: ${metric.value}` : undefined}
+              importantForAccessibility={metric ? 'yes' : 'no-hide-descendants'}
               style={style}
             >
               {content}

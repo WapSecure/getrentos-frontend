@@ -120,6 +120,10 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
           {profile.avatarUrl ? (
             <Image
               source={{ uri: profile.avatarUrl }}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              recyclingKey={profile.avatarUrl}
+              accessible={false}
               style={{ width: 84, height: 84, borderRadius: 42 }}
             />
           ) : (

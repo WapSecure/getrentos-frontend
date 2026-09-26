@@ -220,6 +220,9 @@ export default function LandlordPropertyDetail() {
                   source={{ uri: p.coverImage }}
                   style={{ width: '100%', height: '100%' }}
                   contentFit="cover"
+                  cachePolicy="memory-disk"
+                  recyclingKey={p.id}
+                  accessible={false}
                 />
               ) : (
                 <Building2 size={30} color={colors.mutedForeground} />

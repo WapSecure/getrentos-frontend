@@ -195,6 +195,9 @@ function ListingRow({
               source={{ uri: l.coverImage }}
               style={{ width: '100%', height: '100%' }}
               contentFit="cover"
+              cachePolicy="memory-disk"
+              recyclingKey={l.id}
+              accessible={false}
             />
           ) : (
             <Tag size={20} color={colors.mutedForeground} />

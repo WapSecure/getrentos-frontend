@@ -66,14 +66,21 @@ export default function ShortletWishlist() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: ShortletListing }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/shortlet/${item.id}`)}>
+              <Pressable
+                onPress={() => router.push(`/(app)/shortlet/${item.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`View ${item.title}`}
+              >
                 <Card elevated padding="none" style={{ overflow: 'hidden' }}>
                   <View>
                     {item.coverImageUrl ? (
                       <Image
                         source={{ uri: item.coverImageUrl }}
                         contentFit="cover"
+                        cachePolicy="memory-disk"
+                        recyclingKey={item.id}
                         transition={200}
+                        accessible={false}
                         style={{ width: '100%', height: 150 }}
                       />
                     ) : (
@@ -90,7 +97,10 @@ export default function ShortletWishlist() {
                       </View>
                     )}
                     <Pressable
-                      onPress={() => removeMutation.mutate(item.id)}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        removeMutation.mutate(item.id);
+                      }}
                       accessibilityRole="button"
                       accessibilityLabel="Remove from wishlist"
                       hitSlop={8}

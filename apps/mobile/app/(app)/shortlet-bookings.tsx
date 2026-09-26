@@ -142,12 +142,19 @@ export default function ShortletBookings() {
           renderItem={({ item }: { item: ShortletBooking }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
               <Card elevated padding="none" style={{ overflow: 'hidden' }}>
-                <Pressable onPress={() => router.push(`/(app)/shortlet/${item.listingId}`)}>
+                <Pressable
+                  onPress={() => router.push(`/(app)/shortlet/${item.listingId}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View ${item.propertyTitle}`}
+                >
                   {item.coverImageUrl ? (
                     <Image
                       source={{ uri: item.coverImageUrl }}
                       contentFit="cover"
+                      cachePolicy="memory-disk"
+                      recyclingKey={item.id}
                       transition={200}
+                      accessible={false}
                       style={{ width: '100%', height: 130 }}
                     />
                   ) : null}

@@ -134,9 +134,12 @@ export function EmptyState({
 }) {
   const { spacing } = useTheme();
   return (
-    <View style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}>
+    <View
+      accessibilityLiveRegion="polite"
+      style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}
+    >
       {icon}
-      <Text variant="heading" center>
+      <Text variant="heading" accessibilityRole="header" center>
         {title}
       </Text>
       {description ? (
