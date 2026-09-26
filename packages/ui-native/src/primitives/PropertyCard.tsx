@@ -35,7 +35,9 @@ export function describeProperty(p: PropertyCardData): string {
     price,
     p.bedrooms ? `${p.bedrooms} bedroom${p.bedrooms === 1 ? '' : 's'}` : null,
     p.bathrooms ? `${p.bathrooms} bathroom${p.bathrooms === 1 ? '' : 's'}` : null,
+    p.size ? `${p.size} square metres` : null,
     p.tag,
+    p.score != null ? `${Math.round(p.score)} percent match` : null,
     p.verified ? 'Verified' : null,
   ]
     .filter(Boolean)
@@ -234,11 +236,11 @@ const styles = StyleSheet.create({
   },
   heart: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    top: 4,
+    right: 4,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(9,32,66,0.4)',

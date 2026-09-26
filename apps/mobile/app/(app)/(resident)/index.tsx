@@ -19,6 +19,7 @@ import {
   Card,
   Divider,
   EmptyState,
+  ErrorState,
   Screen,
   SectionHeader,
   Skeleton,
@@ -82,7 +83,15 @@ export default function ResidentHome() {
         }
       />
 
-      {dues.isLoading ? (
+      {dues.isError ? (
+        <Card elevated>
+          <ErrorState
+            title="We couldn't load your dues"
+            description="Check your connection and try again before making a payment."
+            onRetry={() => dues.refetch()}
+          />
+        </Card>
+      ) : dues.isLoading ? (
         <Skeleton height={90} radius={16} />
       ) : (
         <Card elevated>
@@ -121,7 +130,13 @@ export default function ResidentHome() {
           onAction={() => router.push('/(app)/(resident)/announcements')}
         />
         <View style={{ marginTop: spacing.md, gap: spacing.md }}>
-          {announcements.isLoading ? (
+          {announcements.isError ? (
+            <ErrorState
+              title="Announcements are unavailable"
+              description="Try again to load the latest updates from your estate team."
+              onRetry={() => announcements.refetch()}
+            />
+          ) : announcements.isLoading ? (
             <>
               <Skeleton height={14} width="90%" />
               <Skeleton height={14} width="70%" />

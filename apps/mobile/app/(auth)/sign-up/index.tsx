@@ -191,8 +191,16 @@ function Terms({
         label="I agree to the Terms of Service and Privacy Policy."
       />
       <View style={{ flexDirection: 'row', gap: 16, marginLeft: 32 }}>
-        <LinkButton label="Read the Terms" onPress={() => openLegal('terms')} />
-        <LinkButton label="Privacy Policy" onPress={() => openLegal('privacy')} />
+        <LinkButton
+          label="Read the Terms"
+          accessibilityRole="link"
+          onPress={() => openLegal('terms')}
+        />
+        <LinkButton
+          label="Privacy Policy"
+          accessibilityRole="link"
+          onPress={() => openLegal('privacy')}
+        />
       </View>
     </View>
   );

@@ -12,6 +12,7 @@ import {
 import {
   Card,
   EmptyState,
+  ErrorState,
   Price,
   Screen,
   SectionHeader,
@@ -63,6 +64,23 @@ export default function BuyerHome() {
       ]
     : [];
 
+  if (dashboard.isError) {
+    return (
+      <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
+        <DashboardHeader
+          eyebrow={greeting()}
+          title={firstName(profile?.legalName)}
+          subtitle="Your property journey, at a glance"
+        />
+        <ErrorState
+          title="We couldn't load your dashboard"
+          description="Check your connection and try again. Your saved homes and offers are safe."
+          onRetry={() => dashboard.refetch()}
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
       <DashboardHeader
@@ -74,7 +92,12 @@ export default function BuyerHome() {
       <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
       {dashboard.data?.activeTransactions ? (
-        <Pressable onPress={() => router.push('/(app)/buyer-transactions')}>
+        <Pressable
+          onPress={() => router.push('/(app)/buyer-transactions')}
+          accessibilityRole="button"
+          accessibilityLabel={`${dashboard.data.activeTransactions} active ${dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}`}
+          accessibilityHint="Opens escrow transaction progress"
+        >
           <Card
             elevated
             style={{
@@ -117,7 +140,13 @@ export default function BuyerHome() {
           />
         ) : (
           dashboard.data.recommendations.map((r) => (
-            <Pressable key={r.id} onPress={() => router.push(`/(app)/buyer-listing/${r.id}`)}>
+            <Pressable
+              key={r.id}
+              onPress={() => router.push(`/(app)/buyer-listing/${r.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${r.title}, ${r.city}, ${Math.round(r.price).toLocaleString('en-NG')} naira`}
+              accessibilityHint="Opens property details"
+            >
               <Card elevated>
                 <View
                   style={{

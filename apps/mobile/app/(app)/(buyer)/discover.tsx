@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -63,8 +63,100 @@ export default function BuyerDiscover() {
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
 
-  const items = query.data?.pages.flatMap((p) => p.items) ?? [];
+  const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const total = query.data?.pages[0]?.total ?? 0;
+  const hasNextPage = query.hasNextPage;
+  const isFetchingNextPage = query.isFetchingNextPage;
+  const fetchNextPage = query.fetchNextPage;
+
+  const onEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: BuyerListing }) => {
+      const saved = savedIds.has(item.id);
+      return (
+        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+          <Pressable
+            onPress={() => router.push(`/(app)/buyer-listing/${item.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.title}, ${item.address}, ${item.city}, ${Math.round(item.askingPrice).toLocaleString('en-NG')} naira`}
+            accessibilityHint="Opens property details"
+          >
+            <Card elevated padding="none" style={{ overflow: 'hidden' }}>
+              {item.image ? (
+                <Image
+                  source={{ uri: item.image }}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
+                  recyclingKey={item.id}
+                  accessible={false}
+                  style={{ width: '100%', height: 160 }}
+                />
+              ) : (
+                <View
+                  style={{
+                    width: '100%',
+                    height: 160,
+                    backgroundColor: colors.secondary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ImageOff size={22} color={colors.mutedForeground} />
+                </View>
+              )}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: spacing.sm,
+                  padding: spacing.lg,
+                }}
+              >
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyStrong" numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                    {item.address}, {item.city}
+                  </Text>
+                  <Price amount={item.askingPrice} variant="bodyStrong" style={{ marginTop: 4 }} />
+                </View>
+                <Pressable
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    toggle(item.id);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    saved ? `Remove ${item.title} from saved` : `Save ${item.title}`
+                  }
+                  accessibilityState={{ selected: saved }}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Heart
+                    size={20}
+                    color={saved ? colors.destructive : colors.mutedForeground}
+                    fill={saved ? colors.destructive : 'transparent'}
+                  />
+                </Pressable>
+              </View>
+            </Card>
+          </Pressable>
+        </View>
+      );
+    },
+    [colors.destructive, colors.mutedForeground, colors.secondary, savedIds, spacing, toggle]
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -152,67 +244,8 @@ export default function BuyerDiscover() {
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: BuyerListing }) => (
-            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/buyer-listing/${item.id}`)}>
-                <Card elevated padding="none" style={{ overflow: 'hidden' }}>
-                  {item.image ? (
-                    <Image
-                      source={{ uri: item.image }}
-                      contentFit="cover"
-                      transition={200}
-                      style={{ width: '100%', height: 160 }}
-                    />
-                  ) : (
-                    <View
-                      style={{
-                        width: '100%',
-                        height: 160,
-                        backgroundColor: colors.secondary,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <ImageOff size={22} color={colors.mutedForeground} />
-                    </View>
-                  )}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      justifyContent: 'space-between',
-                      gap: spacing.sm,
-                      padding: spacing.lg,
-                    }}
-                  >
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                        {item.address}, {item.city}
-                      </Text>
-                      <Price
-                        amount={item.askingPrice}
-                        variant="bodyStrong"
-                        style={{ marginTop: 4 }}
-                      />
-                    </View>
-                    <Pressable onPress={() => toggle(item.id)} hitSlop={8}>
-                      <Heart
-                        size={20}
-                        color={savedIds.has(item.id) ? colors.destructive : colors.mutedForeground}
-                        fill={savedIds.has(item.id) ? colors.destructive : 'transparent'}
-                      />
-                    </Pressable>
-                  </View>
-                </Card>
-              </Pressable>
-            </View>
-          )}
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
-          }}
+          renderItem={renderItem}
+          onEndReached={onEndReached}
           onEndReachedThreshold={0.6}
           ListHeaderComponent={
             <Text

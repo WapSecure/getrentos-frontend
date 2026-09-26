@@ -16,7 +16,12 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
     : metrics.map((metric, index) => ({ metric, index }));
 
   return (
-    <Card elevated padding="none" accessibilityLabel="Dashboard summary">
+    <Card
+      elevated
+      padding="none"
+      accessibilityLabel={loading ? 'Loading dashboard summary' : 'Dashboard summary'}
+      accessibilityState={{ busy: loading }}
+    >
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
         {rows.map((row) => {
           const metric = row.metric;

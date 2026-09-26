@@ -49,5 +49,13 @@ export function useBuyerSaved() {
     [mutation, savedIds]
   );
 
-  return { savedIds, toggle, isLoading: query.isLoading, items: query.data?.items ?? [] };
+  return {
+    savedIds,
+    toggle,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    isRefetching: query.isRefetching,
+    refetch: query.refetch,
+    items: query.data?.items ?? [],
+  };
 }

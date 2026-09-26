@@ -105,6 +105,9 @@ export function Skeleton({
 
   return (
     <Animated.View
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       style={{
         height,
         width,
@@ -159,7 +162,10 @@ export function ErrorState({
 }) {
   const { colors, spacing, radius } = useTheme();
   return (
-    <View style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}>
+    <View
+      accessibilityLiveRegion="polite"
+      style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}
+    >
       <View
         style={{
           width: 44,
@@ -172,7 +178,7 @@ export function ErrorState({
       >
         <RotateCw size={20} color={colors.destructive} />
       </View>
-      <Text variant="heading" center>
+      <Text variant="heading" accessibilityRole="header" center>
         {title}
       </Text>
       <Text variant="body" color="mutedForeground" center style={{ maxWidth: 300 }}>
@@ -182,6 +188,7 @@ export function ErrorState({
         <Pressable
           onPress={onRetry}
           accessibilityRole="button"
+          accessibilityLabel={`Try again: ${title}`}
           hitSlop={8}
           style={{
             marginTop: spacing.sm,

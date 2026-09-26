@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    minHeight: 40,
+    minHeight: 44,
     paddingVertical: 8,
   },
 });

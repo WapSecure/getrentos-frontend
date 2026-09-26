@@ -364,13 +364,19 @@ function LegalNote() {
       <Text variant="caption" color="mutedForeground">
         By continuing you agree to our{' '}
       </Text>
-      <LinkButton label="Terms" onPress={() => openLegal('terms')} style={{ minHeight: 32 }} />
+      <LinkButton
+        label="Terms"
+        accessibilityRole="link"
+        onPress={() => openLegal('terms')}
+        style={{ minHeight: 32 }}
+      />
       <Text variant="caption" color="mutedForeground">
         {' '}
         and{' '}
       </Text>
       <LinkButton
         label="Privacy Policy"
+        accessibilityRole="link"
         onPress={() => openLegal('privacy')}
         style={{ minHeight: 32 }}
       />

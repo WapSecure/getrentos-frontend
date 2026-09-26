@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
 import {
   Chip,
   EmptyState,
+  ErrorState,
   IconButton,
   PropertyCard,
   Skeleton,
@@ -39,13 +40,49 @@ export default function Saved() {
     queryKey: qk.listings.savedByWishlist(activeWishlistId),
     queryFn: () => savedListingsApi.list(1, 100, activeWishlistId),
   });
-  const items = listQuery.data?.items ?? [];
+  const items = useMemo(() => listQuery.data?.items ?? [], [listQuery.data]);
+  const refetchList = listQuery.refetch;
+  const refetchWishlists = wishlistsQuery.refetch;
 
-  const refetchAll = () => {
-    listQuery.refetch();
-    wishlistsQuery.refetch();
+  const refetchAll = useCallback(() => {
+    refetchList();
+    refetchWishlists();
     qc.invalidateQueries({ queryKey: qk.listings.saved });
-  };
+  }, [refetchList, refetchWishlists, qc]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: SavedProperty }) => (
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xs }}>
+        <PropertyCard
+          property={item}
+          layout="row"
+          saved
+          onToggleSave={toggle}
+          onPress={(id) => router.push(`/(app)/property/${id}`)}
+        />
+        <Pressable
+          onPress={() => setMovingItem(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Move ${item.title} to another wishlist`}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+            alignSelf: 'flex-end',
+            minHeight: 44,
+            paddingHorizontal: spacing.sm,
+          }}
+          hitSlop={8}
+        >
+          <MoreHorizontal size={14} color={colors.mutedForeground} />
+          <Text variant="caption" color="mutedForeground">
+            Move to wishlist
+          </Text>
+        </Pressable>
+      </View>
+    ),
+    [colors.mutedForeground, spacing.md, spacing.sm, spacing.xl, spacing.xs, toggle]
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -104,10 +141,10 @@ export default function Saved() {
           ))}
         </View>
       ) : listQuery.isError ? (
-        <EmptyState
-          icon={<Heart size={34} color={colors.mutedForeground} />}
+        <ErrorState
           title="Couldn't load your saved homes"
-          description="Pull down to try again."
+          description="Check your connection and try again. Your shortlist is safe."
+          onRetry={() => listQuery.refetch()}
         />
       ) : items.length === 0 ? (
         <EmptyState
@@ -123,42 +160,14 @@ export default function Saved() {
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: SavedProperty }) => (
-            <View
-              style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xs }}
-            >
-              <PropertyCard
-                property={item}
-                layout="row"
-                saved
-                onToggleSave={toggle}
-                onPress={(id) => router.push(`/(app)/property/${id}`)}
-              />
-              <Pressable
-                onPress={() => setMovingItem(item)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
-                  alignSelf: 'flex-end',
-                  paddingHorizontal: spacing.sm,
-                }}
-                hitSlop={8}
-              >
-                <MoreHorizontal size={14} color={colors.mutedForeground} />
-                <Text variant="caption" color="mutedForeground">
-                  Move to wishlist
-                </Text>
-              </Pressable>
-            </View>
-          )}
+          renderItem={renderItem}
           contentContainerStyle={{
             paddingTop: spacing.sm,
             paddingBottom: insets.bottom + spacing['3xl'],
           }}
           refreshControl={
             <RefreshControl
-              refreshing={false}
+              refreshing={listQuery.isRefetching || wishlistsQuery.isRefetching}
               onRefresh={refetchAll}
               tintColor={colors.mutedForeground}
             />

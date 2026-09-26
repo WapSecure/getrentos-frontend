@@ -14,6 +14,7 @@ import {
 import {
   Card,
   Divider,
+  ErrorState,
   IconButton,
   Price,
   Screen,
@@ -97,7 +98,13 @@ export default function LandlordOverview() {
 
       {/* Money first — it is what a landlord opens the app to check. */}
       <Card elevated>
-        {stats.isLoading ? (
+        {stats.isError ? (
+          <ErrorState
+            title="We couldn't load your portfolio"
+            description="Your property and payment data is safe. Check your connection and try again."
+            onRetry={() => stats.refetch()}
+          />
+        ) : stats.isLoading ? (
           <View style={{ gap: spacing.sm }}>
             <Skeleton height={16} width="50%" />
             <Skeleton height={30} width="70%" />
@@ -137,16 +144,18 @@ export default function LandlordOverview() {
         )}
       </Card>
 
-      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <StatTile
-          label="Properties"
-          value={s?.totalProperties ?? 0}
-          loading={stats.isLoading}
-          onPress={() => router.push('/(app)/(landlord)/properties')}
-        />
-        <StatTile label="Occupied" value={`${occupancy}%`} loading={stats.isLoading} />
-        <StatTile label="Vacant" value={s?.vacantUnits ?? 0} loading={stats.isLoading} />
-      </View>
+      {!stats.isError ? (
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          <StatTile
+            label="Properties"
+            value={s?.totalProperties ?? 0}
+            loading={stats.isLoading}
+            onPress={() => router.push('/(app)/(landlord)/properties')}
+          />
+          <StatTile label="Occupied" value={`${occupancy}%`} loading={stats.isLoading} />
+          <StatTile label="Vacant" value={s?.vacantUnits ?? 0} loading={stats.isLoading} />
+        </View>
+      ) : null}
 
       {(revenue.data ?? []).length > 0 ? (
         <View style={{ gap: spacing.md }}>
@@ -196,7 +205,13 @@ export default function LandlordOverview() {
           title="Recent activity"
           description="The latest movement across your portfolio"
         />
-        {activity.isLoading ? (
+        {activity.isError ? (
+          <ErrorState
+            title="Recent activity is unavailable"
+            description="Try again to load the latest updates across your portfolio."
+            onRetry={() => activity.refetch()}
+          />
+        ) : activity.isLoading ? (
           <View style={{ gap: spacing.sm }}>
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} height={62} radius={radius.lg} />

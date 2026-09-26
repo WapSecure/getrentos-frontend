@@ -14,6 +14,7 @@ import {
   Button,
   Card,
   EmptyState,
+  ErrorState,
   OtpInput,
   Screen,
   SectionHeader,
@@ -271,6 +272,18 @@ export default function GatemanCheckIn() {
           <Skeleton height={120} radius={16} />
           <Skeleton height={64} radius={16} />
         </View>
+      </Screen>
+    );
+  }
+
+  if (estateQuery.isError) {
+    return (
+      <Screen refreshing={estateQuery.isRefetching} onRefresh={() => estateQuery.refetch()}>
+        <ErrorState
+          title="We couldn't load your gate assignment"
+          description="Check your connection and try again. Offline check-ins already stored on this device remain safe."
+          onRetry={() => estateQuery.refetch()}
+        />
       </Screen>
     );
   }

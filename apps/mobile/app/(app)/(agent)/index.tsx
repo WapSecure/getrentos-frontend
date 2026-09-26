@@ -13,6 +13,7 @@ import {
   Badge,
   Card,
   EmptyState,
+  ErrorState,
   Screen,
   SectionHeader,
   Skeleton,
@@ -54,6 +55,23 @@ export default function AgentHome() {
       ]
     : [];
 
+  if (dashboard.isError) {
+    return (
+      <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
+        <DashboardHeader
+          eyebrow={greeting()}
+          title={firstName(profile?.legalName)}
+          subtitle="Field operations and property work"
+        />
+        <ErrorState
+          title="We couldn't load your workspace"
+          description="Check your connection and try again. Your assigned work is safe."
+          onRetry={() => dashboard.refetch()}
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
       <DashboardHeader
@@ -63,7 +81,12 @@ export default function AgentHome() {
       />
 
       {dashboard.data && dashboard.data.overdueTasks > 0 ? (
-        <Pressable onPress={() => router.push('/(app)/(agent)/tasks')}>
+        <Pressable
+          onPress={() => router.push('/(app)/(agent)/tasks')}
+          accessibilityRole="button"
+          accessibilityLabel={`${dashboard.data.overdueTasks} overdue ${dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}`}
+          accessibilityHint="Opens your assigned tasks"
+        >
           <Card
             elevated
             style={{
@@ -111,7 +134,13 @@ export default function AgentHome() {
           />
         ) : (
           dashboard.data.upcomingTasks.map((task: AgentTask) => (
-            <Pressable key={task.id} onPress={() => router.push(`/(app)/agent-task/${task.id}`)}>
+            <Pressable
+              key={task.id}
+              onPress={() => router.push(`/(app)/agent-task/${task.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${task.title}, ${AGENT_TASK_TYPE_LABEL[task.type]}, ${AGENT_TASK_STATUS_LABEL[task.status]}, due ${formatDate(task.dueAt, 'short')}`}
+              accessibilityHint="Opens task details"
+            >
               <Card elevated>
                 <View
                   style={{

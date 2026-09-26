@@ -1,5 +1,12 @@
 import { useEffect, type ReactNode } from 'react';
-import { AccessibilityInfo, Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  AccessibilityInfo,
+  Pressable,
+  View,
+  type AccessibilityRole,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { AlertCircle, Check, CheckCircle2, Info, TriangleAlert } from 'lucide-react-native';
 import { useTheme } from '../theme';
@@ -140,6 +147,7 @@ export interface LinkButtonProps {
   onPress: () => void;
   tone?: 'primary' | 'muted';
   disabled?: boolean;
+  accessibilityRole?: AccessibilityRole;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -150,6 +158,7 @@ export function LinkButton({
   onPress,
   tone = 'primary',
   disabled,
+  accessibilityRole = 'button',
   accessibilityHint,
   style,
 }: LinkButtonProps) {
@@ -157,7 +166,7 @@ export function LinkButton({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
