@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Heart, ImageOff } from 'lucide-react-native';
+import { Heart, ImageOff } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -16,6 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function ShortletWishlist() {
   const { colors, spacing, radius } = useTheme();
@@ -38,26 +39,12 @@ export default function ShortletWishlist() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Saved stays</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Shortlet shortlist"
+        title="Saved stays"
+        subtitle="Favorite stays ready for comparison"
+        onBack={() => router.back()}
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

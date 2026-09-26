@@ -23,10 +23,8 @@
     "android": {
       "package": "com.getrentos.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0071E3",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#F5FAFF",
+        "foregroundImage": "./assets/icon-premium.png"
       },
       "predictiveBackGestureEnabled": false,
       "edgeToEdgeEnabled": true

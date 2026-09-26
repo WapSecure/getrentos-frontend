@@ -147,8 +147,12 @@ export function formatLandArea(value: number, unit: LandAreaUnit): string {
 }
 
 export const landApi = {
-  list: (filters: LandFilters = {}, page = 1, pageSize = 20) =>
-    apiFetch<Paginated<LandListing>>(`/land${toQuery({ ...filters, page, pageSize })}`),
+  // The public route declares no `search` (and rejects unknown params), so the
+  // free-text box searches by city.
+  list: ({ search, ...filters }: LandFilters = {}, page = 1, pageSize = 20) =>
+    apiFetch<Paginated<LandListing>>(
+      `/land${toQuery({ ...filters, city: filters.city ?? search, page, pageSize })}`
+    ),
 
   get: (listingId: string) => apiFetch<LandListing>(`/land/listings/${listingId}`),
 };

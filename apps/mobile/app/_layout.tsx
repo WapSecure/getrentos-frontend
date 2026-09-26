@@ -36,7 +36,9 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     // sees onboarding flash before the welcome screen.
     if (status === 'loading' || onboardingSeen === null) return;
 
-    const root = segments[0]; // '(auth)' | '(app)' | undefined (index)
+    // '(auth)' | '(market)' | '(app)' | undefined (index). The public market is
+    // open to signed-out visitors; signed-in users fall through to their portal.
+    const root = segments[0];
     const inApp = root === '(app)';
     // Route on the portal we can OPEN, not on the user's most senior role —
     // otherwise a role with no screens yet (realtor, owner, estate) hides a
@@ -103,6 +105,7 @@ function Gate() {
       <Stack screenOptions={screenOptions}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(market)" />
         <Stack.Screen name="(app)" />
       </Stack>
       <SplashReveal />

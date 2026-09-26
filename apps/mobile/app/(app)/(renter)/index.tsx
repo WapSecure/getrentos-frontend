@@ -19,7 +19,9 @@ import {
 } from 'lucide-react-native';
 import {
   Badge,
+  Button,
   Card,
+  describeProperty,
   IconButton,
   Price,
   Progress,
@@ -134,6 +136,8 @@ export default function RenterHome() {
         listings.refetch();
         applications.refetch();
         moveInChecklist.refetch();
+        notifications.refetch();
+        kyc.refetch();
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -250,14 +254,19 @@ export default function RenterHome() {
               key={key}
               onPress={onPress}
               disabled={!onPress}
-              style={{
+              accessibilityRole="button"
+              accessibilityLabel={
+                stats.isPending ? `${label}, loading` : `${label}: ${stats.data?.[key] ?? 0}`
+              }
+              style={({ pressed }) => ({
                 flex: 1,
                 alignItems: 'center',
                 gap: 6,
                 paddingVertical: spacing.lg,
                 borderLeftWidth: i > 0 ? 1 : 0,
                 borderLeftColor: colors.border,
-              }}
+                backgroundColor: pressed ? colors.secondary : 'transparent',
+              })}
             >
               <Icon size={17} color={colors.mutedForeground} />
               {stats.isPending ? (
@@ -276,11 +285,18 @@ export default function RenterHome() {
       </Card>
 
       {stats.isError ? (
-        <Card elevated>
+        <Card elevated style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Couldn’t load your dashboard</Text>
-          <Text variant="callout" color="mutedForeground" style={{ marginTop: 4 }}>
-            Pull down to try again.
+          <Text variant="callout" color="mutedForeground">
+            Check your connection, then try again.
           </Text>
+          <Button
+            label="Try again"
+            variant="secondary"
+            size="sm"
+            fullWidth={false}
+            onPress={() => stats.refetch()}
+          />
         </Card>
       ) : null}
 
@@ -294,6 +310,19 @@ export default function RenterHome() {
 
         {listings.isPending ? (
           <Skeleton height={220} radius={16} />
+        ) : listings.isError && !hero ? (
+          <Card elevated style={{ gap: spacing.sm }}>
+            <Text variant="callout" color="mutedForeground">
+              We couldn’t load recommendations right now.
+            </Text>
+            <Button
+              label="Try again"
+              variant="secondary"
+              size="sm"
+              fullWidth={false}
+              onPress={() => listings.refetch()}
+            />
+          </Card>
         ) : hero ? (
           <HeroCard property={hero} saved={savedIds.has(hero.id)} onToggleSave={toggle} />
         ) : (
@@ -352,7 +381,7 @@ function HeroCard({
       <Pressable
         onPress={() => router.push(`/(app)/property/${property.id}`)}
         accessibilityRole="button"
-        accessibilityLabel={`${property.title}, ${property.location}, ${property.price}`}
+        accessibilityLabel={describeProperty(property)}
         style={{
           flex: 1,
         }}
@@ -362,6 +391,7 @@ function HeroCard({
             source={{ uri: property.image }}
             contentFit="cover"
             transition={250}
+            accessible={false}
             style={StyleSheet.absoluteFill}
           />
         ) : (
@@ -409,7 +439,7 @@ function HeroCard({
           ) : (
             <View />
           )}
-          <View style={{ width: 30 }} />
+          <View style={{ width: 36 }} />
         </View>
 
         <View style={{ position: 'absolute', left: 16, right: 16, bottom: 14, gap: 3 }}>
@@ -433,7 +463,7 @@ function HeroCard({
       </Pressable>
       <Pressable
         onPress={() => onToggleSave(property.id)}
-        hitSlop={8}
+        hitSlop={7}
         accessibilityRole="button"
         accessibilityLabel={
           saved ? `Remove ${property.title} from saved` : `Save ${property.title}`
@@ -441,18 +471,18 @@ function HeroCard({
         accessibilityState={{ selected: saved }}
         style={{
           position: 'absolute',
-          top: 12,
-          right: 12,
-          width: 30,
-          height: 30,
-          borderRadius: 15,
+          top: 8,
+          right: 8,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: 'rgba(9,32,66,0.54)',
         }}
       >
         <Heart
-          size={14}
+          size={16}
           color={saved ? colors.destructive : colors.primaryForeground}
           fill={saved ? colors.destructive : 'transparent'}
         />

@@ -70,6 +70,13 @@ export const qk = {
     geoInsights: (id: string, destination?: string) =>
       ['listings', 'geo-insights', id, destination ?? null] as const,
   },
+  /** The signed-out marketplace — public data only, safe to persist. */
+  market: {
+    list: (kind: string, filters: Record<string, unknown>) =>
+      ['market', 'list', kind, filters] as const,
+    detail: (kind: string, id: string) => ['market', 'detail', kind, id] as const,
+    estates: (search?: string) => ['market', 'estates', search ?? null] as const,
+  },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,
     profile: ['agent', 'profile'] as const,

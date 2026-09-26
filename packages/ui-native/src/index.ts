@@ -41,7 +41,7 @@ export { Price } from './primitives/Price';
 export type { PriceProps } from './primitives/Price';
 export { Chip } from './primitives/Chip';
 export type { ChipProps } from './primitives/Chip';
-export { PropertyCard } from './primitives/PropertyCard';
+export { PropertyCard, describeProperty } from './primitives/PropertyCard';
 export type { PropertyCardProps, PropertyCardData } from './primitives/PropertyCard';
 export { ThemeToggle } from './primitives/ThemeToggle';
 export type { ThemeToggleProps } from './primitives/ThemeToggle';

@@ -3,12 +3,13 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Calendar as CalendarIcon, ChevronLeft, MapPin, Plus } from 'lucide-react-native';
+import { Calendar as CalendarIcon, MapPin, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -22,6 +23,7 @@ import {
 } from '@/lib/api/calendar';
 import { CalendarEventSheet } from '@/components/calendar/CalendarEventSheet';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 function groupByDate(events: CalendarEvent[]): { date: string; events: CalendarEvent[] }[] {
   const sorted = [...events].sort((a, b) => {
@@ -48,44 +50,19 @@ export default function CalendarScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Calendar
-        </Text>
-        <Pressable
-          onPress={() => setCreating(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Add event"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Your schedule"
+        title="Calendar"
+        subtitle="Viewings, payments and important dates"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setCreating(true)}
+            accessibilityLabel="Add event"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

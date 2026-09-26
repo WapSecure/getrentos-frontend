@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -41,11 +41,24 @@ export default function Applications() {
     queryFn: () => applicationsApi.list(1, 50),
   });
 
-  const all = query.data?.items ?? [];
-  const items = useMemo(() => {
-    const list = query.data?.items ?? [];
-    return filter === 'all' ? list : list.filter((a) => a.status === filter);
-  }, [query.data, filter]);
+  const all = useMemo(() => query.data?.items ?? [], [query.data]);
+  const items = useMemo(
+    () => (filter === 'all' ? all : all.filter((a) => a.status === filter)),
+    [all, filter]
+  );
+  // Only offer statuses the renter actually has, each with its count.
+  const counts = useMemo(() => {
+    const c = new Map<ApplicationStatus, number>();
+    all.forEach((a) => c.set(a.status, (c.get(a.status) ?? 0) + 1));
+    return c;
+  }, [all]);
+  const refresh = (
+    <RefreshControl
+      refreshing={query.isRefetching}
+      onRefresh={() => query.refetch()}
+      tintColor={colors.mutedForeground}
+    />
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -63,27 +76,37 @@ export default function Applications() {
         />
 
         {all.length > 0 ? (
-          <FlashList
-            data={(['all', ...APPLICATION_STATUSES] as Filter[]).map((f) => ({ f }))}
+          <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(x) => x.f}
-            renderItem={({ item }) => (
+            style={{ marginHorizontal: -spacing.xl }}
+            contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}
+          >
+            <Chip
+              selected={filter === 'all'}
+              label="All"
+              count={all.length}
+              onPress={() => setFilter('all')}
+              size="sm"
+            />
+            {APPLICATION_STATUSES.filter((st) => counts.has(st)).map((st) => (
               <Chip
-                selected={filter === item.f}
-                label={item.f === 'all' ? 'All' : APPLICATION_STATUS_LABEL[item.f]}
-                onPress={() => setFilter(item.f)}
+                key={st}
+                selected={filter === st}
+                label={APPLICATION_STATUS_LABEL[st]}
+                count={counts.get(st)}
+                onPress={() => setFilter(st)}
                 size="sm"
               />
-            )}
-            style={{ marginHorizontal: -spacing.xl }}
-            contentContainerStyle={{ paddingHorizontal: spacing.xl }}
-          />
+            ))}
+          </ScrollView>
         ) : null}
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
+      {query.isError && all.length === 0 ? (
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
+          <ErrorState onRetry={() => query.refetch()} />
+        </ScrollView>
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
           {[0, 1, 2].map((i) => (
@@ -91,7 +114,10 @@ export default function Applications() {
           ))}
         </View>
       ) : all.length === 0 ? (
-        <View style={{ padding: spacing.xl, gap: spacing.lg }}>
+        <ScrollView
+          contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
+          refreshControl={refresh}
+        >
           <ApplicationAssistantCard />
           <EmptyState
             icon={<FileText size={34} color={colors.mutedForeground} />}
@@ -104,12 +130,13 @@ export default function Applications() {
               />
             }
           />
-        </View>
+        </ScrollView>
       ) : items.length === 0 ? (
         <EmptyState
           icon={<FileText size={34} color={colors.mutedForeground} />}
           title="Nothing here"
           description="No applications match this filter."
+          action={<Button label="Show all" variant="outline" onPress={() => setFilter('all')} />}
         />
       ) : (
         <FlashList
@@ -121,13 +148,7 @@ export default function Applications() {
             </View>
           )}
           contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: spacing['3xl'] }}
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
+          refreshControl={refresh}
         />
       )}
     </View>
@@ -139,6 +160,9 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
   return (
     <Pressable
       onPress={() => router.push(`/(app)/application/${a.id}`)}
+      accessibilityRole="button"
+      accessibilityLabel={`${a.title}, ${APPLICATION_STATUS_LABEL[a.status]}, ${a.address}, applied ${a.applicationDate}`}
+      accessibilityHint="Opens the application"
       style={({ pressed }) => [
         {
           flexDirection: 'row',
@@ -161,7 +185,14 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
         }}
       >
         {a.image ? (
-          <Image source={{ uri: a.image }} contentFit="cover" style={{ flex: 1 }} />
+          <Image
+            source={{ uri: a.image }}
+            contentFit="cover"
+            recyclingKey={a.id}
+            transition={150}
+            accessible={false}
+            style={{ flex: 1 }}
+          />
         ) : null}
       </View>
       <View style={{ flex: 1, gap: 4 }}>

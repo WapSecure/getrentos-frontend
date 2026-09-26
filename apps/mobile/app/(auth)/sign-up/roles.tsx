@@ -16,6 +16,7 @@ import {
 import {
   AuthScaffold,
   Button,
+  FormAlert,
   PressableScale,
   Text,
   useReducedMotion,
@@ -69,6 +70,7 @@ export default function SignUpRoles() {
       title="How will you use GetRentos?"
       subtitle="Pick what fits today — you can add more roles later, with supporting documents."
       progress={1}
+      progressLabel="Sign-up step 3 of 3"
       onBack={() => router.back()}
       footer={
         <>
@@ -114,11 +116,7 @@ export default function SignUpRoles() {
             disabled={selectedRoles.length === 0}
             onPress={submit}
           />
-          {error ? (
-            <Text variant="callout" color="destructive" center>
-              {error}
-            </Text>
-          ) : null}
+          <FormAlert message={error} />
           <PressableScale
             haptic={false}
             onPress={() => {
@@ -195,7 +193,7 @@ export default function SignUpRoles() {
                           backgroundColor: colors.secondary,
                         }}
                       >
-                        <Text variant="caption" color="mutedForeground" style={{ fontSize: 10.5 }}>
+                        <Text variant="caption" color="mutedForeground">
                           {VERIFICATION_LABEL[req]}
                         </Text>
                       </View>

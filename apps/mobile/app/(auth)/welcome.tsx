@@ -3,7 +3,14 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { ArrowRight, BadgeCheck, Building2, ShieldCheck, Sparkles } from 'lucide-react-native';
+import {
+  ArrowRight,
+  BadgeCheck,
+  Building2,
+  Search,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react-native';
 import {
   BrandLogo,
   Button,
@@ -90,7 +97,11 @@ export default function Welcome() {
               NIGERIA&apos;S TRUSTED PROPERTY OS
             </Text>
           </View>
-          <Text variant="display" style={{ fontSize: 38, lineHeight: 43, letterSpacing: -1.3 }}>
+          <Text
+            variant="display"
+            accessibilityRole="header"
+            style={{ fontSize: 38, lineHeight: 43, letterSpacing: -1.3 }}
+          >
             Move with clarity.{`\n`}Live with confidence.
           </Text>
           <Text
@@ -130,7 +141,14 @@ export default function Welcome() {
               <BadgeCheck size={21} color={colors.success} />
             </View>
             <View style={{ height: 1, backgroundColor: colors.border }} />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                rowGap: spacing.sm,
+              }}
+            >
               <TrustPoint icon={<BadgeCheck size={14} color={colors.success} />} label="Verified" />
               <TrustPoint
                 icon={<ShieldCheck size={14} color={colors.primary} />}
@@ -160,9 +178,12 @@ export default function Welcome() {
           variant="outline"
           onPress={() => router.push('/(auth)/sign-in')}
         />
-        <Text variant="caption" color="mutedForeground" center style={{ marginTop: spacing.xs }}>
-          Secure by design · Built for every property journey
-        </Text>
+        <Button
+          label="Browse homes without an account"
+          variant="ghost"
+          icon={<Search size={16} color={colors.primary} />}
+          onPress={() => router.push('/(market)')}
+        />
         {__DEV__ ? (
           <Pressable
             onPress={replayIntro}

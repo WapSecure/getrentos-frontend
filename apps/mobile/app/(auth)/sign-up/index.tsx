@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, View, type TextInput } from 'react-native';
+import { View, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, Phone, MessageCircle, User, Check, ChevronDown, Gift } from 'lucide-react-native';
+import { AtSign, Phone, MessageCircle, User, ChevronDown, Gift } from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
+  Checkbox,
+  FormAlert,
+  LinkButton,
   PasswordField,
   PressableScale,
   SegmentedControl,
@@ -19,6 +22,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
+import { openLegal } from '@/lib/links';
 import {
   emailSignupSchema,
   phoneSignupSchema,
@@ -111,6 +115,7 @@ function MethodSwitch({
 }: Pick<Shared, 'method' | 'setMethod' | 'colors'>) {
   return (
     <SegmentedControl<Method>
+      accessibilityLabel="Sign up with"
       value={method}
       onChange={setMethod}
       options={[
@@ -171,53 +176,41 @@ function Terms({
   value,
   onChange,
   error,
-  colors,
-  radius,
 }: {
   value: boolean;
   onChange: (v: boolean) => void;
   error?: string;
-  colors: Shared['colors'];
-  radius: Shared['radius'];
 }) {
   return (
-    <View style={{ gap: 4 }}>
-      <Pressable
-        onPress={() => onChange(!value)}
-        accessibilityRole="checkbox"
-        accessibilityLabel="Agree to the Terms of Service and Privacy Policy"
-        accessibilityState={{ checked: value }}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
-      >
-        <View
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: radius.sm - 2,
-            borderWidth: 1.5,
-            borderColor: value ? colors.primary : colors.border,
-            backgroundColor: value ? colors.primary : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {value ? <Check size={14} color={colors.primaryForeground} strokeWidth={3} /> : null}
-        </View>
-        <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-          I agree to the Terms of Service and Privacy Policy.
-        </Text>
-      </Pressable>
-      {error ? (
-        <Text variant="caption" color="destructive" style={{ marginLeft: 32 }}>
-          {error}
-        </Text>
-      ) : null}
+    <View>
+      <Checkbox
+        checked={value}
+        onChange={onChange}
+        error={error}
+        accessibilityLabel="I agree to the Terms of Service and Privacy Policy"
+        label="I agree to the Terms of Service and Privacy Policy."
+      />
+      <View style={{ flexDirection: 'row', gap: 16, marginLeft: 32 }}>
+        <LinkButton label="Read the Terms" onPress={() => openLegal('terms')} />
+        <LinkButton label="Privacy Policy" onPress={() => openLegal('privacy')} />
+      </View>
+    </View>
+  );
+}
+
+function SignInLink() {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+      <Text variant="callout" color="mutedForeground">
+        Already have an account?{' '}
+      </Text>
+      <LinkButton label="Sign in" onPress={() => router.replace('/(auth)/sign-in')} />
     </View>
   );
 }
 
 function EmailForm(props: Shared) {
-  const { colors, spacing, radius, startVerification, setFormError, formError, referral } = props;
+  const { colors, spacing, startVerification, setFormError, formError, referral } = props;
   const emailRef = useRef<TextInput>(null);
   const pwRef = useRef<TextInput>(null);
   const confirmRef = useRef<TextInput>(null);
@@ -264,23 +257,12 @@ function EmailForm(props: Shared) {
       title="Join GetRentos"
       subtitle="One account for renting, buying, listing and managing property."
       progress={1 / 3}
+      progressLabel="Sign-up step 1 of 3"
       onBack={() => router.replace('/(auth)/welcome')}
       footer={
         <>
           <Button label="Continue" loading={isSubmitting} onPress={submit} />
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-            <Text variant="callout" color="mutedForeground">
-              Already have an account?{' '}
-            </Text>
-            <Text
-              variant="callout"
-              color="primary"
-              style={{ fontWeight: '700' }}
-              onPress={() => router.replace('/(auth)/sign-in')}
-            >
-              Sign in
-            </Text>
-          </View>
+          <SignInLink />
         </>
       }
     >
@@ -296,6 +278,8 @@ function EmailForm(props: Shared) {
                 placeholder="Ada Lovelace"
                 leftIcon={<User size={18} color={colors.mutedForeground} />}
                 autoCapitalize="words"
+                autoComplete="name"
+                textContentType="name"
                 returnKeyType="next"
                 value={value}
                 onChangeText={onChange}
@@ -317,6 +301,8 @@ function EmailForm(props: Shared) {
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
+                autoComplete="email"
+                textContentType="emailAddress"
                 returnKeyType="next"
                 value={value}
                 onChangeText={onChange}
@@ -335,6 +321,8 @@ function EmailForm(props: Shared) {
                 label="Password"
                 placeholder="At least 8 characters"
                 showStrength
+                autoComplete="new-password"
+                textContentType="newPassword"
                 returnKeyType="next"
                 value={value}
                 onChangeText={onChange}
@@ -352,6 +340,8 @@ function EmailForm(props: Shared) {
                 ref={confirmRef}
                 label="Confirm password"
                 placeholder="Re-enter your password"
+                autoComplete="new-password"
+                textContentType="newPassword"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -370,16 +360,10 @@ function EmailForm(props: Shared) {
                 value={!!value}
                 onChange={onChange}
                 error={errors.acceptedTerms?.message as string | undefined}
-                colors={colors}
-                radius={radius}
               />
             )}
           />
-          {formError ? (
-            <Text variant="callout" color="destructive">
-              {formError}
-            </Text>
-          ) : null}
+          <FormAlert message={formError} />
         </View>
       </View>
     </AuthScaffold>
@@ -387,7 +371,8 @@ function EmailForm(props: Shared) {
 }
 
 function PhoneForm(props: Shared) {
-  const { colors, spacing, radius, startVerification, setFormError, formError, referral } = props;
+  const { colors, spacing, startVerification, setFormError, formError, referral } = props;
+  const phoneRef = useRef<TextInput>(null);
   const pwRef = useRef<TextInput>(null);
   const confirmRef = useRef<TextInput>(null);
 
@@ -433,8 +418,14 @@ function PhoneForm(props: Shared) {
       title="Join GetRentos"
       subtitle="One account for renting, buying, listing and managing property."
       progress={1 / 3}
+      progressLabel="Sign-up step 1 of 3"
       onBack={() => router.replace('/(auth)/welcome')}
-      footer={<Button label="Continue" loading={isSubmitting} onPress={submit} />}
+      footer={
+        <>
+          <Button label="Continue" loading={isSubmitting} onPress={submit} />
+          <SignInLink />
+        </>
+      }
     >
       <View style={{ gap: spacing.xl }}>
         <MethodSwitch {...props} />
@@ -448,9 +439,13 @@ function PhoneForm(props: Shared) {
                 placeholder="Ada Lovelace"
                 leftIcon={<User size={18} color={colors.mutedForeground} />}
                 autoCapitalize="words"
+                autoComplete="name"
+                textContentType="name"
+                returnKeyType="next"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
+                onSubmitEditing={() => phoneRef.current?.focus()}
                 error={errors.fullName?.message}
               />
             )}
@@ -460,10 +455,14 @@ function PhoneForm(props: Shared) {
             name="phone"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextField
+                ref={phoneRef}
                 label="Phone number"
                 placeholder="+234 801 234 5678"
                 leftIcon={<Phone size={18} color={colors.mutedForeground} />}
                 keyboardType="phone-pad"
+                autoComplete="tel"
+                textContentType="telephoneNumber"
+                returnKeyType="next"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -481,6 +480,8 @@ function PhoneForm(props: Shared) {
                 label="Password"
                 placeholder="At least 8 characters"
                 showStrength
+                autoComplete="new-password"
+                textContentType="newPassword"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -497,6 +498,8 @@ function PhoneForm(props: Shared) {
                 ref={confirmRef}
                 label="Confirm password"
                 placeholder="Re-enter your password"
+                autoComplete="new-password"
+                textContentType="newPassword"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -515,16 +518,10 @@ function PhoneForm(props: Shared) {
                 value={!!value}
                 onChange={onChange}
                 error={errors.acceptedTerms?.message as string | undefined}
-                colors={colors}
-                radius={radius}
               />
             )}
           />
-          {formError ? (
-            <Text variant="callout" color="destructive">
-              {formError}
-            </Text>
-          ) : null}
+          <FormAlert message={formError} />
         </View>
       </View>
     </AuthScaffold>

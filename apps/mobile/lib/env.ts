@@ -28,8 +28,12 @@ function resolveApiUrl(): string {
 
 const API_URL = resolveApiUrl();
 
+/** The public website — legal pages and share links. */
+const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL || 'https://getrentos.com').replace(/\/$/, '');
+
 export const env = {
   apiUrl: API_URL,
+  webUrl: WEB_URL,
   /** Sent as `x-client-app` so the API returns the refresh token in the body. */
   clientApp: 'mobile' as const,
 };

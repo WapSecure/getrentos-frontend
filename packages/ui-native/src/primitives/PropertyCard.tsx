@@ -20,6 +20,26 @@ export interface PropertyCardData {
   verified?: boolean;
   /** Match/quality score 0–100, shown as a ring when present. */
   score?: number | null;
+  /** One short secondary fact, e.g. "600 sqm · C of O" or "Instant book". */
+  tag?: string;
+}
+
+const SPOKEN_PERIOD = { month: 'per month', year: 'per year', night: 'per night' } as const;
+
+/** What a screen reader hears for a card: price in naira, not a bare number. */
+export function describeProperty(p: PropertyCardData): string {
+  const price = `${Math.round(p.price).toLocaleString('en-NG')} naira${p.period ? ` ${SPOKEN_PERIOD[p.period]}` : ''}`;
+  return [
+    p.title,
+    p.location,
+    price,
+    p.bedrooms ? `${p.bedrooms} bedroom${p.bedrooms === 1 ? '' : 's'}` : null,
+    p.bathrooms ? `${p.bathrooms} bathroom${p.bathrooms === 1 ? '' : 's'}` : null,
+    p.tag,
+    p.verified ? 'Verified' : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
 }
 
 export interface PropertyCardProps {
@@ -114,6 +134,8 @@ function PropertyCardBase({
         placeholder={{ blurhash: BLURHASH }}
         contentFit="cover"
         transition={200}
+        recyclingKey={property.id}
+        accessible={false}
         style={StyleSheet.absoluteFill}
       />
       {property.verified ? (
@@ -141,9 +163,7 @@ function PropertyCardBase({
       <Pressable
         onPress={onPress ? () => onPress(property.id) : undefined}
         accessibilityRole={onPress ? 'button' : undefined}
-        accessibilityLabel={
-          onPress ? `${property.title}, ${property.location}, ${property.price}` : undefined
-        }
+        accessibilityLabel={onPress ? describeProperty(property) : undefined}
         style={({ pressed }) => ({
           flexDirection: row ? 'row' : 'column',
           opacity: pressed && onPress ? 0.92 : 1,
@@ -171,6 +191,11 @@ function PropertyCardBase({
             </Text>
           </View>
           <Specs property={property} />
+          {property.tag ? (
+            <Text variant="caption" color="primary" numberOfLines={1} style={{ fontWeight: '600' }}>
+              {property.tag}
+            </Text>
+          ) : null}
         </View>
       </Pressable>
       {onToggleSave ? (

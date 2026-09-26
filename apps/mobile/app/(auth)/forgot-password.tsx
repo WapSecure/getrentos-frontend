@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn, SlideInRight } from 'react-native-reanimated';
-import { AtSign, Phone, MessageCircle, KeyRound } from 'lucide-react-native';
+import { AtSign, KeyRound, MessageCircle, Phone } from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
+  FormAlert,
+  LinkButton,
   OtpInput,
   PasswordField,
   SegmentedControl,
@@ -19,6 +21,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { authApi, type OtpMethod } from '@/lib/api/auth';
 import { haptics } from '@/lib/haptics';
+import { useCountdown } from '@/hooks/useCountdown';
 import {
   EMAIL_RE,
   PHONE_RE,
@@ -28,6 +31,7 @@ import {
 
 type Step = 'request' | 'otp' | 'reset';
 const RESEND_SECONDS = 60;
+const STEP_INDEX: Record<Step, number> = { request: 0, otp: 1, reset: 2 };
 
 export default function ForgotPassword() {
   const { colors, spacing } = useTheme();
@@ -39,8 +43,7 @@ export default function ForgotPassword() {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cooldown, setCooldown] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cooldown = useCountdown();
 
   const {
     control,
@@ -52,19 +55,7 @@ export default function ForgotPassword() {
     mode: 'onTouched',
   });
 
-  useEffect(() => () => (timer.current ? clearInterval(timer.current) : undefined), []);
-
-  const startCooldown = () => {
-    setCooldown(RESEND_SECONDS);
-    timer.current && clearInterval(timer.current);
-    timer.current = setInterval(() => {
-      setCooldown((c) => {
-        if (c <= 1 && timer.current) clearInterval(timer.current);
-        return c - 1;
-      });
-    }, 1000);
-  };
-
+  const channelLabel = method === 'whatsapp' ? 'WhatsApp' : method;
   const identifierValid =
     method === 'email' ? EMAIL_RE.test(identifier.trim()) : PHONE_RE.test(identifier.trim());
 
@@ -78,9 +69,10 @@ export default function ForgotPassword() {
     try {
       const { reference: ref } = await authApi.sendOtp(identifier.trim(), method, 'password_reset');
       setReference(ref);
+      setCode('');
       setStep('otp');
-      startCooldown();
-      toast.show(`Code sent to your ${method === 'whatsapp' ? 'WhatsApp' : method}.`, 'success');
+      cooldown.start(RESEND_SECONDS);
+      toast.show(`Code sent to your ${channelLabel}.`, 'success');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not send a reset code.');
     } finally {
@@ -89,7 +81,7 @@ export default function ForgotPassword() {
   };
 
   const verify = async (value = code) => {
-    if (value.length !== 6 || !reference) return;
+    if (value.length !== 6 || !reference || busy) return;
     setBusy(true);
     setError(null);
     try {
@@ -107,10 +99,11 @@ export default function ForgotPassword() {
   };
 
   const resend = async () => {
-    if (!reference || cooldown > 0) return;
+    if (!reference || cooldown.running) return;
     try {
       await authApi.resendOtp(reference);
-      startCooldown();
+      cooldown.start(RESEND_SECONDS);
+      setError(null);
       toast.show('New code sent.', 'success');
     } catch {
       toast.show('Could not resend the code.', 'error');
@@ -133,7 +126,13 @@ export default function ForgotPassword() {
     }
   });
 
-  const stepIndex = { request: 0, otp: 1, reset: 2 }[step];
+  const backToRequest = () => {
+    setStep('request');
+    setCode('');
+    setError(null);
+  };
+
+  const stepIndex = STEP_INDEX[step];
 
   return (
     <AuthScaffold
@@ -147,8 +146,9 @@ export default function ForgotPassword() {
             : 'Choose a strong password you don’t use anywhere else.'
       }
       progress={(stepIndex + 1) / 3}
+      progressLabel={`Recovery step ${stepIndex + 1} of 3`}
       onBack={() => {
-        if (step === 'otp') setStep('request');
+        if (step === 'otp') backToRequest();
         else if (step === 'reset') setStep('otp');
         else router.back();
       }}
@@ -175,6 +175,7 @@ export default function ForgotPassword() {
       {step === 'request' ? (
         <Animated.View entering={FadeIn.duration(180)} style={{ gap: spacing.xl }}>
           <SegmentedControl<OtpMethod>
+            accessibilityLabel="Send the code by"
             value={method}
             onChange={(m) => {
               setMethod(m);
@@ -202,43 +203,71 @@ export default function ForgotPassword() {
           <TextField
             label={method === 'email' ? 'Email address' : 'Phone number'}
             placeholder={method === 'email' ? 'you@example.com' : '+234 801 234 5678'}
+            leftIcon={
+              method === 'email' ? (
+                <AtSign size={18} color={colors.mutedForeground} />
+              ) : (
+                <Phone size={18} color={colors.mutedForeground} />
+              )
+            }
             keyboardType={method === 'email' ? 'email-address' : 'phone-pad'}
+            autoComplete={method === 'email' ? 'email' : 'tel'}
+            textContentType={method === 'email' ? 'emailAddress' : 'telephoneNumber'}
             autoCapitalize="none"
             autoCorrect={false}
+            returnKeyType="send"
             value={identifier}
-            onChangeText={setIdentifier}
+            onChangeText={(v) => {
+              setIdentifier(v);
+              if (error) setError(null);
+            }}
             onSubmitEditing={sendCode}
-            error={error ?? undefined}
           />
+          <FormAlert message={error} />
         </Animated.View>
       ) : step === 'otp' ? (
-        <Animated.View entering={SlideInRight.duration(220)} style={{ gap: spacing.xl }}>
-          <OtpInput value={code} onChange={setCode} onComplete={verify} autoFocus />
-          <View style={{ alignItems: 'center' }}>
-            {cooldown > 0 ? (
-              <Text variant="callout" color="mutedForeground">
-                Resend code in {cooldown}s
-              </Text>
-            ) : (
-              <Text
-                variant="callout"
-                color="primary"
-                style={{ fontWeight: '700' }}
-                onPress={resend}
-              >
-                Resend code
-              </Text>
-            )}
+        <Animated.View
+          entering={SlideInRight.duration(220)}
+          style={{ gap: spacing.xl, alignItems: 'center' }}
+        >
+          <View style={{ alignSelf: 'stretch' }}>
+            <OtpInput
+              value={code}
+              onChange={(v) => {
+                setCode(v);
+                if (error) setError(null);
+              }}
+              onComplete={verify}
+              invalid={!!error}
+              disabled={busy}
+              autoFocus
+            />
           </View>
-          {error ? (
-            <Text variant="callout" color="destructive" center>
-              {error}
+          {cooldown.running ? (
+            <Text
+              variant="callout"
+              color="mutedForeground"
+              accessibilityLabel={`You can request a new code in ${cooldown.remaining} seconds`}
+            >
+              Resend code in {cooldown.remaining}s
             </Text>
-          ) : null}
+          ) : (
+            <LinkButton label="Resend code" onPress={resend} />
+          )}
+          <LinkButton
+            label={`Use a different ${method === 'email' ? 'email' : 'number'}`}
+            tone="muted"
+            onPress={backToRequest}
+          />
+          <View style={{ alignSelf: 'stretch' }}>
+            <FormAlert message={error} />
+          </View>
         </Animated.View>
       ) : (
         <Animated.View entering={SlideInRight.duration(220)} style={{ gap: spacing.lg }}>
           <View
+            importantForAccessibility="no-hide-descendants"
+            accessibilityElementsHidden
             style={{
               width: 52,
               height: 52,
@@ -258,6 +287,9 @@ export default function ForgotPassword() {
                 label="New password"
                 placeholder="At least 8 characters"
                 showStrength
+                autoComplete="new-password"
+                textContentType="newPassword"
+                returnKeyType="next"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -272,6 +304,9 @@ export default function ForgotPassword() {
               <PasswordField
                 label="Confirm new password"
                 placeholder="Re-enter your password"
+                autoComplete="new-password"
+                textContentType="newPassword"
+                returnKeyType="done"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -280,11 +315,7 @@ export default function ForgotPassword() {
               />
             )}
           />
-          {error ? (
-            <Text variant="callout" color="destructive">
-              {error}
-            </Text>
-          ) : null}
+          <FormAlert message={error} />
         </Animated.View>
       )}
     </AuthScaffold>

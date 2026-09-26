@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import { BrandLogo, Text, useTheme } from '@getrentos/ui-native';
+import { scheduleOnRN } from 'react-native-worklets';
+import { BrandLogo, Text, useReducedMotion, useTheme } from '@getrentos/ui-native';
 
-const MARK_IN = 460;
-const HOLD = 420;
-const FADE_OUT = 360;
+// Kept short: this sits between the native splash and a usable first screen,
+// so every millisecond here is launch time the user waits through.
+const MARK_IN = 380;
+const HOLD = 160;
+const FADE_OUT = 280;
 
 /**
  * Brand reveal that covers the handoff from the native splash to the first
@@ -21,6 +23,7 @@ const FADE_OUT = 360;
  */
 export function SplashReveal() {
   const { colors, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const [done, setDone] = useState(false);
 
   const markScale = useSharedValue(0.86);
@@ -29,31 +32,39 @@ export function SplashReveal() {
   const cover = useSharedValue(1);
 
   useEffect(() => {
-    // Reanimated shared values are intentionally mutable animation handles.
-    /* eslint-disable react-hooks/immutability */
-    markOpacity.value = withTiming(1, { duration: MARK_IN, easing: Easing.out(Easing.cubic) });
-    markScale.value = withTiming(1, { duration: MARK_IN, easing: Easing.out(Easing.back(1.4)) });
-    wordOpacity.value = withDelay(
-      220,
-      withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })
+    const finish = (finished?: boolean) => {
+      'worklet';
+      if (finished) scheduleOnRN(setDone, true);
+    };
+    if (reduceMotion) {
+      // No scale or drift — show the brand and dissolve.
+      markOpacity.set(1);
+      markScale.set(1);
+      wordOpacity.set(1);
+      cover.set(withDelay(HOLD, withTiming(0, { duration: FADE_OUT }, finish)));
+      return;
+    }
+    markOpacity.set(withTiming(1, { duration: MARK_IN, easing: Easing.out(Easing.cubic) }));
+    markScale.set(withTiming(1, { duration: MARK_IN, easing: Easing.out(Easing.back(1.4)) }));
+    wordOpacity.set(
+      withDelay(180, withTiming(1, { duration: 280, easing: Easing.out(Easing.cubic) }))
     );
-    cover.value = withDelay(
-      MARK_IN + HOLD,
-      withTiming(0, { duration: FADE_OUT, easing: Easing.inOut(Easing.quad) }, (finished) => {
-        if (finished) runOnJS(setDone)(true);
-      })
+    cover.set(
+      withDelay(
+        MARK_IN + HOLD,
+        withTiming(0, { duration: FADE_OUT, easing: Easing.inOut(Easing.quad) }, finish)
+      )
     );
-    /* eslint-enable react-hooks/immutability */
-  }, [markOpacity, markScale, wordOpacity, cover]);
+  }, [markOpacity, markScale, wordOpacity, cover, reduceMotion]);
 
-  const coverStyle = useAnimatedStyle(() => ({ opacity: cover.value }));
+  const coverStyle = useAnimatedStyle(() => ({ opacity: cover.get() }));
   const markStyle = useAnimatedStyle(() => ({
-    opacity: markOpacity.value,
-    transform: [{ scale: markScale.value }],
+    opacity: markOpacity.get(),
+    transform: [{ scale: markScale.get() }],
   }));
   const wordStyle = useAnimatedStyle(() => ({
-    opacity: wordOpacity.value,
-    transform: [{ translateY: (1 - wordOpacity.value) * 8 }],
+    opacity: wordOpacity.get(),
+    transform: [{ translateY: (1 - wordOpacity.get()) * 8 }],
   }));
 
   if (done) return null;
@@ -61,6 +72,8 @@ export function SplashReveal() {
   return (
     <Animated.View
       pointerEvents="none"
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
       style={[
         StyleSheet.absoluteFill,
         {

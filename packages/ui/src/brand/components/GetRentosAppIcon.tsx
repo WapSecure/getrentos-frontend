@@ -11,12 +11,16 @@ export function GetRentosAppIcon(props: SVGProps<SVGSVGElement>) {
           <stop offset="1" stopColor="#0E5BEF" />
         </linearGradient>
       </defs>
-      <rect width="144" height="144" rx="34" fill="#0B1220" />
-      <g transform="translate(8)">
-        <path
-          d="M16 44 64 14 112 44 112 70 96 70 96 53 64 33 32 53 32 91 64 110 88 96 88 79 68 79 68 63 104 63 104 105 64 129 16 100Z"
-          fill="url(#gr_GetRentosAppIcon_b)"
-        />
+      <rect width="144" height="144" rx="34" fill="#F5FAFF" />
+      <g
+        transform="translate(8)"
+        fill="none"
+        stroke="url(#gr_GetRentosAppIcon_b)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M18 122 64 24l46 98" strokeWidth="24" />
+        <path d="M64 122V96" strokeWidth="16" />
       </g>
     </svg>
   );
