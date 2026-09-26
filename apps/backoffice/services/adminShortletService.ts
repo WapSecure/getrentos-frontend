@@ -2,6 +2,8 @@ import { authFetch, safeCall, toQuery } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
+  AdminHostPenalty,
+  AdminHostPenaltyStatus,
   AdminShortletBooking,
   AdminShortletBookingDetail,
   AdminShortletDepositClaim,
@@ -157,6 +159,24 @@ export const adminShortletService = {
     });
     return safeCall(() =>
       authFetch<Paginated<AdminShortletPayoutAccount>>(`/admin/shortlets/payout-accounts${query}`)
+    );
+  },
+
+  listHostPenalties(
+    params: { status?: AdminHostPenaltyStatus; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminHostPenalty>>> {
+    const query = toQuery({ status: params.status, page: params.page, pageSize: params.pageSize });
+    return safeCall(() =>
+      authFetch<Paginated<AdminHostPenalty>>(`/admin/shortlets/host-penalties${query}`)
+    );
+  },
+
+  waiveHostPenalty(penaltyId: string, reason: string): Promise<ApiResponse<AdminHostPenalty>> {
+    return safeCall(() =>
+      authFetch<AdminHostPenalty>(`/admin/shortlets/host-penalties/${penaltyId}/waive`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
     );
   },
 

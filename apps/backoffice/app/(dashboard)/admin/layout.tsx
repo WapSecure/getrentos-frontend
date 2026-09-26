@@ -90,7 +90,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <AdminNavbar user={user} />
         <div className="flex">
           <AdminSidebar roles={user?.roles} />
-          <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
+          {/* min-w-0: without it this flex item grows to its widest child (e.g. a
+              tab strip) and the whole page scrolls sideways instead of that child. */}
+          <main className="min-w-0 flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>

@@ -10,6 +10,7 @@ import {
   Armchair,
   BedDouble,
   CalendarCheck,
+  CalendarX,
   Clock,
   Heart,
   Image as ImageIcon,
@@ -516,6 +517,14 @@ export function ShortletListingDetail({
                 </div>
               ) : null}
             </div>
+            {(listing.hostCancellations12m ?? 0) > 0 && (
+              <p className="mt-3 flex items-start gap-1.5 rounded-md bg-secondary/50 px-3 py-2 text-xs">
+                <CalendarX className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
+                The host cancelled {listing.hostCancellations12m} confirmed stay
+                {listing.hostCancellations12m === 1 ? '' : 's'} here in the last 12 months. If your
+                host cancels, you get back everything you paid.
+              </p>
+            )}
             {(listing.seasons ?? []).length > 0 && (
               <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
                 <p className="font-medium">Peak seasons</p>

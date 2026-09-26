@@ -55,6 +55,7 @@ import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
 import { ShortletPeakPricingDialog } from './ShortletPeakPricingDialog';
 import { ShortletCalendarSyncDialog } from './ShortletCalendarSyncDialog';
+import { HostCancelBookingDialog } from './HostCancelBookingDialog';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -119,6 +120,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
   const [pricingTarget, setPricingTarget] = useState<ShortletListing | null>(null);
   const [syncTarget, setSyncTarget] = useState<ShortletListing | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
@@ -442,7 +444,22 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
                     <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
                   </Button>
+                  {b.status === 'CONFIRMED' && b.checkIn > TODAY && (
+                    <Button variant="ghost" size="sm" onClick={() => setCancelTarget(b)}>
+                      Cancel stay
+                    </Button>
+                  )}
                 </div>
+              )}
+              {b.status === 'CANCELLED' && b.cancelledBy && (
+                <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
+                  {b.cancelledBy === 'HOST'
+                    ? 'You cancelled this stay'
+                    : b.cancelledBy === 'GUEST'
+                      ? 'The guest cancelled this stay'
+                      : 'Support cancelled this stay'}
+                  {b.cancellationReason ? `: “${b.cancellationReason}”` : '.'}
+                </p>
               )}
             </div>
           ))}
@@ -475,6 +492,16 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             setEditTarget(null);
             invalidateAll();
             setToast({ message: 'Listing updated.', variant: 'success' });
+          }}
+        />
+      )}
+      {cancelTarget && (
+        <HostCancelBookingDialog
+          booking={cancelTarget}
+          onClose={() => setCancelTarget(null)}
+          onDone={(message) => {
+            setCancelTarget(null);
+            setToast({ message, variant: 'success' });
           }}
         />
       )}
@@ -1152,10 +1179,12 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
                 >
                   <span>
                     {formatDate(b.startDate, 'short')} → {formatDate(b.endDate, 'short')}
-                    {b.reason && !b.importedFrom ? ` · ${b.reason}` : ''}
+                    {b.reason && !b.importedFrom && !b.lockedByCancellation ? ` · ${b.reason}` : ''}
                   </span>
                   {b.importedFrom ? (
                     <Badge variant="neutral">From {b.importedFrom}</Badge>
+                  ) : b.lockedByCancellation ? (
+                    <Badge variant="neutral">Closed: you cancelled a stay</Badge>
                   ) : (
                     <Button
                       variant="ghost"
