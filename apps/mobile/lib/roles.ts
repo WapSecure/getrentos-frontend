@@ -67,6 +67,7 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
   'buyer',
   'landlord',
   'gateman',
+  'owner',
 ];
 
 /**

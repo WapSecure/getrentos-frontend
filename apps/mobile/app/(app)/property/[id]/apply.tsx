@@ -44,6 +44,7 @@ import {
   Text,
   TextField,
   toISODate,
+  useReducedMotion,
   useTheme,
 } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -140,6 +141,7 @@ function validateStep(step: number, data: FormState): FieldErrors {
 export default function ApplyToRent() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const qc = useQueryClient();
@@ -381,8 +383,14 @@ export default function ApplyToRent() {
       >
         <Animated.View
           key={step}
-          entering={(direction === 1 ? SlideInRight : SlideInLeft).duration(240)}
-          exiting={(direction === 1 ? SlideOutLeft : SlideOutRight).duration(180)}
+          entering={
+            reduceMotion ? undefined : (direction === 1 ? SlideInRight : SlideInLeft).duration(240)
+          }
+          exiting={
+            reduceMotion
+              ? undefined
+              : (direction === 1 ? SlideOutLeft : SlideOutRight).duration(180)
+          }
           style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}
         >
           <View style={{ gap: 3 }}>
@@ -1045,6 +1053,7 @@ function SuccessView({
   onKeepBrowsing: () => void;
 }) {
   const { colors, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -1060,7 +1069,7 @@ function SuccessView({
       }}
     >
       <Animated.View
-        entering={FadeIn.duration(420)}
+        entering={reduceMotion ? undefined : FadeIn.duration(420)}
         style={{
           width: 64,
           height: 64,
@@ -1073,7 +1082,7 @@ function SuccessView({
         <CheckCircle2 size={30} color={colors.success} />
       </Animated.View>
       <Animated.View
-        entering={FadeIn.duration(420).delay(120)}
+        entering={reduceMotion ? undefined : FadeIn.duration(420).delay(120)}
         style={{ alignItems: 'center', gap: spacing.md }}
       >
         <Text variant="heading" center>
@@ -1086,7 +1095,7 @@ function SuccessView({
         </Text>
       </Animated.View>
       <Animated.View
-        entering={FadeIn.duration(420).delay(220)}
+        entering={reduceMotion ? undefined : FadeIn.duration(420).delay(220)}
         style={{ width: '100%', gap: spacing.sm, marginTop: spacing.lg }}
       >
         <Button label="View my application" onPress={onViewApplication} />

@@ -116,7 +116,16 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
       }}
     >
       <View style={{ alignItems: 'center', gap: spacing.sm }}>
-        <Pressable onPress={() => avatarMutation.mutate()} disabled={avatarMutation.isPending}>
+        <Pressable
+          onPress={() => avatarMutation.mutate()}
+          disabled={avatarMutation.isPending}
+          accessibilityRole="button"
+          accessibilityLabel="Change profile photo"
+          accessibilityState={{
+            disabled: avatarMutation.isPending,
+            busy: avatarMutation.isPending,
+          }}
+        >
           {profile.avatarUrl ? (
             <Image
               source={{ uri: profile.avatarUrl }}

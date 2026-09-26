@@ -108,15 +108,19 @@ export default function ShortletWishlist() {
                         position: 'absolute',
                         top: spacing.md,
                         right: spacing.md,
-                        width: 34,
-                        height: 34,
-                        borderRadius: 17,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: 'rgba(0,0,0,0.35)',
                       }}
                     >
-                      <Heart size={17} color="#fff" fill="#fff" />
+                      <Heart
+                        size={19}
+                        color={colors.primaryForeground}
+                        fill={colors.primaryForeground}
+                      />
                     </Pressable>
                   </View>
                   <View style={{ padding: spacing.lg, gap: 2 }}>
