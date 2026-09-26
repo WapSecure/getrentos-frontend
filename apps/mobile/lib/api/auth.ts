@@ -41,6 +41,14 @@ export const authApi = {
       body: { identifier, password },
     }),
 
+  /** Sign in with Apple — may ask for a 2FA code just like a password sign-in. */
+  appleSignIn: (identityToken: string, nonce: string, fullName?: string) =>
+    apiFetch<LoginResult>('/auth/oauth/apple/native', {
+      method: 'POST',
+      anonymous: true,
+      body: { identityToken, nonce, fullName },
+    }),
+
   completeTwoFactor: (challengeToken: string, token: string) =>
     apiFetch<AuthSession>('/auth/login/2fa', {
       method: 'POST',

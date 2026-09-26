@@ -117,5 +117,7 @@ export const leaseApi = {
     apiFetch<UpcomingPaymentReminder[]>('/renter/lease/payment-reminders'),
 
   /** Streams the signed lease as a PDF; returns it base64-encoded to write to disk. */
-  downloadPdf: () => apiDownload('/renter/lease/pdf'),
+  /** A specific lease (e.g. one awaiting signature) or, without an id, the current one. */
+  downloadPdf: (leaseId?: string) =>
+    apiDownload(leaseId ? `/renter/lease/${leaseId}/pdf` : '/renter/lease/pdf'),
 };

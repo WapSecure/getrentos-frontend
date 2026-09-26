@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ChevronRight,
   FileSignature,
+  FileText,
   Heart,
   Home as HomeIcon,
   ShoppingBag,
@@ -25,7 +26,7 @@ import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName } from '@/lib/format';
+import { firstName, relativeTime } from '@/lib/format';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -61,6 +62,12 @@ export default function BuyerHome() {
           onPress: () => router.push('/(app)/buyer-viewings'),
         },
         { label: 'Purchases', value: dashboard.data.completedPurchases, Icon: ShoppingBag },
+        {
+          label: 'Documents',
+          value: dashboard.data.documentsUploaded,
+          Icon: FileText,
+          onPress: () => router.push('/(app)/buyer-documents'),
+        },
       ]
     : [];
 
@@ -170,6 +177,48 @@ export default function BuyerHome() {
           ))
         )}
       </View>
+
+      {dashboard.data?.recentActivity?.length ? (
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader
+            title="Recent activity"
+            description="Offers, viewings and escrow updates"
+          />
+          <Card elevated padding="none">
+            {dashboard.data.recentActivity.slice(0, 6).map((a, i) => (
+              <View
+                key={a.id}
+                accessible
+                accessibilityLabel={`${a.message}, ${relativeTime(a.timestamp)}`}
+                style={{
+                  flexDirection: 'row',
+                  gap: spacing.md,
+                  paddingHorizontal: spacing.lg,
+                  paddingVertical: spacing.md,
+                  borderTopWidth: i ? 1 : 0,
+                  borderTopColor: colors.border,
+                }}
+              >
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    marginTop: 6,
+                    backgroundColor: colors.primary,
+                  }}
+                />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="callout">{a.message}</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {relativeTime(a.timestamp)}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </Card>
+        </View>
+      ) : null}
     </Screen>
   );
 }

@@ -1,14 +1,27 @@
 import { env } from '../env';
 
+/**
+ * Extra fields a trust or verification gate puts on its 403, e.g.
+ * `{ error: 'TRUST_TIER_REQUIRED', tierRequired: 3, currentTier: 2 }`.
+ */
+export interface ApiErrorDetails {
+  tierRequired?: number;
+  currentTier?: number;
+  /** Why a tier the user holds was still refused, e.g. `SCORE_BELOW_TIER3_MIN`. */
+  reason?: string;
+}
+
 export class ApiError extends Error {
   status: number;
   /** Machine-readable code from the API envelope, e.g. `DATABASE_ERROR`. */
   code?: string;
-  constructor(message: string, status: number, code?: string) {
+  details: ApiErrorDetails;
+  constructor(message: string, status: number, code?: string, details: ApiErrorDetails = {}) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
   get isAuth() {
     return this.status === 401;
@@ -66,14 +79,25 @@ async function readJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     let code: string | undefined;
+    const details: ApiErrorDetails = {};
     try {
-      const payload = (await res.json()) as { message?: string; error?: string };
+      const payload = (await res.json()) as {
+        message?: string;
+        error?: string;
+        // The API's exception filter names these `required` and `tier`.
+        required?: unknown;
+        tier?: unknown;
+        reason?: unknown;
+      };
       message = payload.message || message;
       code = payload.error;
+      if (typeof payload.required === 'number') details.tierRequired = payload.required;
+      if (typeof payload.tier === 'number') details.currentTier = payload.tier;
+      if (typeof payload.reason === 'string') details.reason = payload.reason;
     } catch {
       // non-JSON body
     }
-    throw new ApiError(message, res.status, code);
+    throw new ApiError(message, res.status, code, details);
   }
   if (res.status === 204 || res.status === 205) return undefined as T;
 

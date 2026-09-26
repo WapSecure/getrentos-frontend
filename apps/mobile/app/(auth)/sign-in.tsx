@@ -30,6 +30,8 @@ import {
 import { haptics } from '@/lib/haptics';
 import { openLegal } from '@/lib/links';
 import { GoogleMark } from '@/components/auth/GoogleMark';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { AppleSignInCancelled, appleSignInAvailable } from '@/lib/auth/apple';
 import { signInSchema, type SignInValues } from '@/lib/validation';
 
 type Method = 'password' | 'magic';
@@ -39,8 +41,27 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
 export default function SignIn() {
-  const { signIn, signInWithProvider } = useAuth();
-  const { colors, spacing } = useTheme();
+  const { signIn, signInWithProvider, signInWithApple } = useAuth();
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  useEffect(() => {
+    appleSignInAvailable().then(setAppleAvailable);
+  }, []);
+
+  const signInApple = async () => {
+    setFormError(null);
+    try {
+      const { requiresTwoFactor } = await signInWithApple();
+      await haptics.success();
+      if (requiresTwoFactor) router.push('/(auth)/two-factor');
+    } catch (err) {
+      if (err instanceof AppleSignInCancelled) return;
+      await haptics.error();
+      setFormError(
+        err instanceof ApiError ? err.message : 'Could not sign in with Apple. Try again.'
+      );
+    }
+  };
+  const { colors, spacing, scheme } = useTheme();
   const toast = useToast();
   const passwordRef = useRef<TextInput>(null);
   const [method, setMethod] = useState<Method>('password');
@@ -141,13 +162,17 @@ export default function SignIn() {
     setOauthBusy(true);
     setFormError(null);
     try {
-      await signInWithProvider('google');
+      const { requiresTwoFactor } = await signInWithProvider('google');
       await haptics.success();
+      if (requiresTwoFactor) router.push('/(auth)/two-factor');
     } catch (err) {
       if (!(err instanceof OAuthCancelled)) {
         await haptics.error();
         setFormError(
-          err instanceof ApiError ? err.message : 'Could not sign in with Google. Try again.'
+          // Includes the API's own refusal (e.g. a suspended account), sent on the redirect.
+          err instanceof Error && err.message
+            ? err.message
+            : 'Could not sign in with Google. Try again.'
         );
       }
     } finally {
@@ -330,6 +355,21 @@ export default function SignIn() {
           </Text>
           <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
         </View>
+
+        {appleAvailable ? (
+          // Apple's own button, as their guidelines require.
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+            buttonStyle={
+              scheme === 'dark'
+                ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={14}
+            style={{ height: 50 }}
+            onPress={signInApple}
+          />
+        ) : null}
 
         <Button
           label="Continue with Google"

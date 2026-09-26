@@ -2,6 +2,7 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
+  CalendarCheck,
   BadgeCheck,
   BedDouble,
   Bell,
@@ -94,6 +95,13 @@ export default function BuyerAccount() {
           label="Shortlet stays"
           description="Book short stays and manage trips"
           onPress={() => router.push('/(app)/shortlets')}
+        />
+        <Divider />
+        <Row
+          icon={<CalendarCheck size={18} color={colors.primary} />}
+          label="My bookings"
+          description="Upcoming and past shortlet stays"
+          onPress={() => router.push('/(app)/shortlet-bookings')}
         />
         <Divider />
         <Row

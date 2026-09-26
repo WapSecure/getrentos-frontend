@@ -190,7 +190,12 @@ function PaymentRow({
           <Pressable
             onPress={onPay}
             disabled={paying}
+            accessibilityRole="button"
+            accessibilityLabel={paying ? 'Paying' : 'Pay now'}
+            accessibilityState={{ disabled: paying, busy: paying }}
             style={{
+              minHeight: 44,
+              justifyContent: 'center',
               paddingVertical: 8,
               paddingHorizontal: 16,
               borderRadius: 999,
@@ -205,7 +210,9 @@ function PaymentRow({
         ) : p.receiptUrl ? (
           <Pressable
             onPress={() => Linking.openURL(p.receiptUrl!)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            accessibilityRole="link"
+            accessibilityLabel="Open receipt"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 44 }}
           >
             <ReceiptIcon size={14} color={colors.primary} />
             <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
@@ -223,7 +230,12 @@ function PaymentRow({
           </Text>
         </View>
       ) : disputable ? (
-        <Pressable onPress={onDispute} style={{ marginTop: spacing.sm }}>
+        <Pressable
+          onPress={onDispute}
+          accessibilityRole="button"
+          accessibilityLabel="Dispute this payment"
+          style={{ marginTop: spacing.xs, minHeight: 44, justifyContent: 'center' }}
+        >
           <Text
             variant="caption"
             color="mutedForeground"

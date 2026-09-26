@@ -1,9 +1,17 @@
-import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Image, Pressable, ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, Database, KeyRound, Phone, ShieldCheck, Trash2 } from 'lucide-react-native';
+import {
+  ChevronRight,
+  Database,
+  KeyRound,
+  Phone,
+  ScanFace,
+  ShieldCheck,
+  Trash2,
+} from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -20,6 +28,12 @@ import { qk } from '@/lib/query/keys';
 import { profileApi, type TwoFactorEnrollment } from '@/lib/api/profile';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import {
+  biometricSupport,
+  unlockWithBiometrics,
+  useAppLockEnabled,
+  type BiometricSupport,
+} from '@/lib/appLock';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function SecuritySettings() {
@@ -42,6 +56,7 @@ export default function SecuritySettings() {
           gap: spacing.lg,
         }}
       >
+        <AppLockSection />
         <PhoneVerificationSection />
         <TwoFactorSection />
         <PasswordSection />
@@ -49,6 +64,53 @@ export default function SecuritySettings() {
         <DangerSection />
       </ScrollView>
     </View>
+  );
+}
+
+/** Face ID / fingerprint before the app opens — on this phone only. */
+function AppLockSection() {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const { enabled, setEnabled } = useAppLockEnabled();
+  const [support, setSupport] = useState<BiometricSupport | null>(null);
+
+  useEffect(() => {
+    biometricSupport().then(setSupport);
+  }, []);
+
+  if (!support) return null;
+
+  const toggle = async (next: boolean) => {
+    if (next) {
+      // Prove it works before relying on it, so nobody locks themselves out.
+      const ok = await unlockWithBiometrics(`Turn on ${support.label} for GetRentos`);
+      if (!ok) return;
+      toast.show(`${support.label} lock is on.`, 'success');
+    }
+    setEnabled(next);
+  };
+
+  return (
+    <Card elevated>
+      <SectionHeader
+        icon={<ScanFace size={16} color={colors.primary} />}
+        title={`${support.label.charAt(0).toUpperCase()}${support.label.slice(1)} lock`}
+      />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+          {support.available
+            ? `Ask for ${support.label} when GetRentos opens, or after a minute away.`
+            : `Set up ${support.label} or a screen lock in your phone's settings to use this.`}
+        </Text>
+        <Switch
+          value={!!enabled}
+          disabled={!support.available}
+          onValueChange={toggle}
+          accessibilityLabel={`${support.label} lock`}
+          trackColor={{ true: colors.primary, false: colors.border }}
+        />
+      </View>
+    </Card>
   );
 }
 
