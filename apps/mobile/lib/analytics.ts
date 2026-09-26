@@ -21,6 +21,7 @@ export type AnalyticsEvent =
   | 'market_estate_opened'
   | 'market_listing_shared'
   | 'market_signin_cta'
+  | 'market_filters_applied'
   | 'listing_saved'
   | 'listing_unsaved'
   | 'search_performed'

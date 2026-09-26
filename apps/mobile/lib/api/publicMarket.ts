@@ -64,12 +64,71 @@ export interface MarketDetail extends MarketCard {
 }
 
 export interface MarketFilters {
+  /** Free text: title, address, city, state or estate name (land: also plot number). */
   search?: string;
   /** Estate public slug — where an estate's "For rent" / "For sale" lands. */
   estate?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: MarketSort;
+  /** Rent, buy, shortlets. */
+  bedrooms?: number;
+  bathrooms?: number;
+  propertyType?: string;
+  /** Rent, buy, shortlets. Land is always verified to be listed at all. */
+  verifiedOnly?: boolean;
+  /** Rent only. */
+  furnished?: boolean;
+  petsAllowed?: boolean;
+  monthlyPayment?: boolean;
+  /** Shortlets only. */
+  guests?: number;
+  instantBooking?: boolean;
+  /** Land only. */
+  titleType?: string;
+  minAreaSqm?: number;
+  roadAccess?: boolean;
+}
+
+/** Which refinements each market's API accepts — the filter sheet shows only these. */
+export const MARKET_FILTERS: Record<MarketKind, readonly (keyof MarketFilters)[]> = {
+  rent: [
+    'minPrice',
+    'maxPrice',
+    'bedrooms',
+    'bathrooms',
+    'propertyType',
+    'verifiedOnly',
+    'furnished',
+    'petsAllowed',
+    'monthlyPayment',
+  ],
+  sale: ['minPrice', 'maxPrice', 'bedrooms', 'bathrooms', 'propertyType', 'verifiedOnly'],
+  shortlet: [
+    'minPrice',
+    'maxPrice',
+    'bedrooms',
+    'bathrooms',
+    'propertyType',
+    'verifiedOnly',
+    'guests',
+    'instantBooking',
+  ],
+  land: ['minPrice', 'maxPrice', 'titleType', 'minAreaSqm', 'roadAccess'],
+};
+
+/** How many refinements (beyond search and sort) are active for a market. */
+export function activeFilterCount(kind: MarketKind, f: MarketFilters): number {
+  return MARKET_FILTERS[kind].filter((k) => {
+    const v = f[k];
+    return v !== undefined && v !== '' && v !== false;
+  }).length;
+}
+
+/** The public web page for a listing — what the share sheet sends. */
+export function marketWebPath(kind: MarketKind, id: string): string {
+  const base = { rent: '/rent', sale: '/buy', shortlet: '/shortlets', land: '/land' }[kind];
+  return `${base}/${encodeURIComponent(id)}`;
 }
 
 export type MarketSort = 'newest' | 'price_asc' | 'price_desc';
@@ -226,10 +285,11 @@ const gallery = (cover?: string, images?: string[]) =>
 
 /* --------------------------------- query --------------------------------- */
 
-function toQuery(params: Record<string, string | number | undefined>): string {
+function toQuery(params: Record<string, string | number | boolean | undefined>): string {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
+    // `false` is dropped on purpose: an unticked filter means "don't filter".
+    if (v === undefined || v === '' || v === false) continue;
     q.set(k, String(v));
   }
   const s = q.toString();
@@ -245,18 +305,6 @@ const RENT_SORT: Record<MarketSort, string> = {
 
 const anon = { anonymous: true } as const;
 
-/**
- * The shortlet and land modules have no sort parameter, so their list is
- * ordered here when a price sort is asked for — within the loaded page only,
- * which is honest for the page the visitor is looking at.
- */
-const sortPage = (items: MarketCard[], sort?: MarketSort) =>
-  sort === 'price_asc'
-    ? [...items].sort((a, b) => a.price - b.price)
-    : sort === 'price_desc'
-      ? [...items].sort((a, b) => b.price - a.price)
-      : items;
-
 async function mapPage<T>(
   promise: Promise<Paginated<T>>,
   map: (item: T) => MarketCard
@@ -268,13 +316,32 @@ async function mapPage<T>(
 export const publicMarketApi = {
   list(kind: MarketKind, f: MarketFilters, page = 1, pageSize = 20) {
     // Only the parameters each route declares: the API rejects anything else (400).
-    const paging = { page, pageSize };
-    const base = { ...paging, minPrice: f.minPrice, maxPrice: f.maxPrice };
+    const common = {
+      page,
+      pageSize,
+      search: f.search,
+      minPrice: f.minPrice,
+      maxPrice: f.maxPrice,
+    };
+    const rooms = {
+      bedrooms: f.bedrooms,
+      bathrooms: f.bathrooms,
+      propertyType: f.propertyType,
+      verifiedOnly: f.verifiedOnly,
+    };
     switch (kind) {
       case 'rent':
         return mapPage(
           apiFetch<Paginated<RentalDto>>(
-            `/rentals${toQuery({ ...base, search: f.search, estate: f.estate, sortBy: f.sort ? RENT_SORT[f.sort] : undefined })}`,
+            `/rentals${toQuery({
+              ...common,
+              ...rooms,
+              estate: f.estate,
+              furnished: f.furnished,
+              petsAllowed: f.petsAllowed,
+              monthlyPayment: f.monthlyPayment,
+              sortBy: f.sort ? RENT_SORT[f.sort] : undefined,
+            })}`,
             anon
           ),
           rentToCard
@@ -282,7 +349,7 @@ export const publicMarketApi = {
       case 'sale':
         return mapPage(
           apiFetch<Paginated<SaleDto>>(
-            `/marketplace/listings${toQuery({ ...base, city: f.search, estate: f.estate, sort: f.sort })}`,
+            `/marketplace/listings${toQuery({ ...common, ...rooms, estate: f.estate, sort: f.sort })}`,
             anon
           ),
           saleToCard
@@ -290,17 +357,29 @@ export const publicMarketApi = {
       case 'shortlet':
         return mapPage(
           apiFetch<Paginated<ShortletListing>>(
-            // No price or sort parameters on this route.
-            `/shortlets${toQuery({ ...paging, search: f.search, estate: f.estate })}`,
+            `/shortlets${toQuery({
+              ...common,
+              ...rooms,
+              estate: f.estate,
+              guests: f.guests,
+              instantBooking: f.instantBooking,
+              sort: f.sort,
+            })}`,
             anon
           ),
           shortletToCard
-        ).then((p) => ({ ...p, items: sortPage(p.items, f.sort) }));
+        );
       case 'land':
         return mapPage(
           apiFetch<Paginated<LandListing>>(
-            // Public land filters by city, not free text.
-            `/land${toQuery({ ...base, city: f.search, sort: f.sort })}`,
+            `/land${toQuery({
+              ...common,
+              estate: f.estate,
+              titleType: f.titleType,
+              minAreaSqm: f.minAreaSqm,
+              roadAccess: f.roadAccess,
+              sort: f.sort,
+            })}`,
             anon
           ),
           landToCard

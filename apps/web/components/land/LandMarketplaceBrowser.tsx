@@ -1,14 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Input,
   NumberInput,
   Pagination,
   Select,
@@ -22,6 +24,7 @@ import {
   MapPin,
   MessageSquare,
   Ruler,
+  Search,
   ShieldCheck,
   Sparkles,
   Trees,
@@ -73,8 +76,37 @@ const parcelTitle = (listing: PublicLandListing) =>
     .filter(Boolean)
     .join(' · ');
 
+const TITLE_TYPE_OPTIONS = [
+  { value: '', label: 'Any title document' },
+  { value: 'CERTIFICATE_OF_OCCUPANCY', label: 'Certificate of Occupancy' },
+  { value: 'GOVERNOR_CONSENT', label: "Governor's Consent" },
+  { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
+  { value: 'REGISTERED_CONVEYANCE', label: 'Registered Conveyance' },
+  { value: 'EXCISION_GAZETTE', label: 'Excision / Gazette' },
+  { value: 'ALLOCATION_LETTER', label: 'Allocation letter' },
+  { value: 'SURVEY_PLAN', label: 'Survey plan' },
+];
+
+/** Square metres; a standard Lagos plot is roughly 450–650 sqm. */
+const AREA_OPTIONS = [
+  { value: '', label: 'Any plot size' },
+  { value: '450', label: '450 sqm+ (a plot)' },
+  { value: '900', label: '900 sqm+ (2 plots)' },
+  { value: '4047', label: '1 acre+' },
+  { value: '10000', label: '1 hectare+' },
+];
+
 export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) => {
   const queryClient = useQueryClient();
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => clearTimeout(t);
+  }, [search]);
+  const [titleType, setTitleType] = useState('');
+  const [minArea, setMinArea] = useState('');
+  const [roadAccess, setRoadAccess] = useState(false);
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -87,6 +119,10 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
 
   const queryParams = useMemo(
     () => ({
+      search: debouncedSearch || undefined,
+      titleType: titleType || undefined,
+      minAreaSqm: minArea ? Number(minArea) : undefined,
+      roadAccess,
       city: city.trim() || undefined,
       state: state.trim() || undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
@@ -95,7 +131,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
       page,
       pageSize: PAGE_SIZE,
     }),
-    [city, maxPrice, minPrice, page, sort, state]
+    [city, maxPrice, minPrice, page, sort, state, debouncedSearch, titleType, minArea, roadAccess]
   );
 
   const { data, isLoading, isError, error } = useQuery({
@@ -173,7 +209,21 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           </p>
         </div>
 
-        <div className="mb-6 grid gap-3 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_0.8fr]">
+        <div className="mb-3">
+          <Input
+            id="land-search"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Search by area, estate, street or plot number"
+            aria-label="Search land listings"
+            leadingIcon={<Search className="h-4 w-4" />}
+          />
+        </div>
+
+        <div className="mb-3 grid gap-3 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_0.8fr]">
           <Select
             value={state}
             onValueChange={(value) => {
@@ -220,6 +270,36 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             ]}
             ariaLabel="Sort land listings"
           />
+        </div>
+
+        <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="w-56">
+            <Select
+              value={titleType}
+              onValueChange={(value) => updateFilter(setTitleType, value)}
+              options={TITLE_TYPE_OPTIONS}
+              ariaLabel="Title document"
+            />
+          </div>
+          <div className="w-48">
+            <Select
+              value={minArea}
+              onValueChange={(value) => updateFilter(setMinArea, value)}
+              options={AREA_OPTIONS}
+              ariaLabel="Minimum plot size"
+            />
+          </div>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+            <Checkbox
+              checked={roadAccess}
+              onCheckedChange={(v) => {
+                setRoadAccess(v);
+                setPage(1);
+              }}
+              aria-label="Road access only"
+            />
+            Road access
+          </label>
         </div>
 
         <div className="mb-5 flex items-center justify-between gap-3">

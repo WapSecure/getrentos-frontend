@@ -13,6 +13,7 @@ import {
   LandPlot,
   Search,
   ShieldCheck,
+  SlidersHorizontal,
   X,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -32,6 +33,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
+  activeFilterCount,
   isMarketKind,
   MARKET_LABEL,
   MARKET_SORT_LABEL,
@@ -42,6 +44,8 @@ import {
   type MarketSort,
 } from '@/lib/api/publicMarket';
 import { track } from '@/lib/analytics';
+import { forgetListing } from '@/lib/pendingListing';
+import { MarketFilterSheet, type MarketRefinements } from '@/components/market/MarketFilterSheet';
 
 type Tab = MarketKind | 'estates';
 
@@ -62,7 +66,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   sale: {
     title: 'Homes for sale',
     body: 'Make an offer and pay through escrow once you sign in.',
-    search: 'Search by city',
+    search: 'Search area, estate or title',
   },
   shortlet: {
     title: 'Shortlets',
@@ -72,7 +76,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   land: {
     title: 'Land',
     body: 'Verified, in-date parcels with title and due-diligence details.',
-    search: 'Search by city',
+    search: 'Search area, estate or plot',
   },
   estates: {
     title: 'Estates',
@@ -105,8 +109,7 @@ export default function Marketplace() {
   const selectTab = (next: Tab) => {
     if (next === tab) return;
     setTab(next);
-    // Land is the one market the API can't scope to an estate.
-    if (next === 'land' || next === 'estates') setEstate(null);
+    if (next === 'estates') setEstate(null);
     track('market_tab_changed', { tab: next });
   };
 
@@ -151,7 +154,10 @@ export default function Marketplace() {
             size="sm"
             variant="outline"
             fullWidth={false}
-            onPress={() => router.push('/(auth)/sign-in')}
+            onPress={() => {
+              forgetListing();
+              router.push('/(auth)/sign-in');
+            }}
           />
         </View>
 
@@ -272,9 +278,12 @@ function Listings({
   intro: { title: string; body: string };
 }) {
   const { colors, spacing } = useTheme();
+  const [refine, setRefine] = useState<MarketRefinements>({});
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const refineCount = activeFilterCount(kind, refine);
   const filters = useMemo(
-    () => ({ search: search || undefined, sort, estate: estate?.slug }),
-    [search, sort, estate]
+    () => ({ ...refine, search: search || undefined, sort, estate: estate?.slug }),
+    [refine, search, sort, estate]
   );
 
   const query = useInfiniteQuery({
@@ -337,13 +346,25 @@ function Listings({
         </Card>
       ) : null}
 
-      {/* Shortlets have no server-side price sort; they sort within a page. */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={{ marginHorizontal: -spacing.xl }}
         contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}
       >
+        <Chip
+          size="sm"
+          label="Filters"
+          count={refineCount}
+          selected={refineCount > 0}
+          leadingIcon={
+            <SlidersHorizontal
+              size={13}
+              color={refineCount ? colors.accentForeground : colors.foreground}
+            />
+          }
+          onPress={() => setSheetOpen(true)}
+        />
         {SORTS.map((s) => (
           <Chip
             key={s}
@@ -363,6 +384,19 @@ function Listings({
     </View>
   );
 
+  const sheet = (
+    <MarketFilterSheet
+      open={sheetOpen}
+      kind={kind}
+      value={refine}
+      onClose={() => setSheetOpen(false)}
+      onApply={(next) => {
+        setRefine(next);
+        track('market_filters_applied', { kind, count: activeFilterCount(kind, next) });
+      }}
+    />
+  );
+
   if (query.isError && items.length === 0) {
     return (
       <View style={{ flex: 1 }}>
@@ -372,6 +406,7 @@ function Listings({
           description="Check your connection and try again."
           onRetry={() => query.refetch()}
         />
+        {sheet}
       </View>
     );
   }
@@ -389,53 +424,59 @@ function Listings({
             </View>
           ))}
         </View>
+        {sheet}
       </View>
     );
   }
 
   return (
-    <FlashList
-      data={items}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      onEndReached={onEndReached}
-      onEndReachedThreshold={0.6}
-      keyboardDismissMode="on-drag"
-      keyboardShouldPersistTaps="handled"
-      ListHeaderComponent={<View style={{ paddingBottom: spacing.md }}>{header}</View>}
-      ListEmptyComponent={
-        <EmptyState
-          icon={<Search size={34} color={colors.mutedForeground} />}
-          title={estate ? 'Nothing listed here yet' : 'No listings match that'}
-          description={
-            estate
-              ? `${estate.name} has nothing in this market right now.`
-              : 'Try a different area, or clear the search.'
-          }
-          action={
-            estate ? (
-              <Button label="Show all listings" variant="outline" onPress={onClearEstate} />
-            ) : undefined
-          }
-        />
-      }
-      ListFooterComponent={
-        query.isFetchingNextPage ? (
-          <View style={{ paddingVertical: spacing.xl }}>
-            <ActivityIndicator color={colors.mutedForeground} accessibilityLabel="Loading more" />
-          </View>
-        ) : (
-          <View style={{ height: 120 }} />
-        )
-      }
-      refreshControl={
-        <RefreshControl
-          refreshing={query.isRefetching && !query.isFetchingNextPage}
-          onRefresh={() => query.refetch()}
-          tintColor={colors.mutedForeground}
-        />
-      }
-    />
+    <>
+      <FlashList
+        data={items}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.6}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={<View style={{ paddingBottom: spacing.md }}>{header}</View>}
+        ListEmptyComponent={
+          <EmptyState
+            icon={<Search size={34} color={colors.mutedForeground} />}
+            title={estate ? 'Nothing listed here yet' : 'No listings match that'}
+            description={
+              estate
+                ? `${estate.name} has nothing in this market right now.`
+                : 'Try a different area, widen the price range, or clear a filter.'
+            }
+            action={
+              refineCount > 0 ? (
+                <Button label="Clear filters" variant="outline" onPress={() => setRefine({})} />
+              ) : estate ? (
+                <Button label="Show all listings" variant="outline" onPress={onClearEstate} />
+              ) : undefined
+            }
+          />
+        }
+        ListFooterComponent={
+          query.isFetchingNextPage ? (
+            <View style={{ paddingVertical: spacing.xl }}>
+              <ActivityIndicator color={colors.mutedForeground} accessibilityLabel="Loading more" />
+            </View>
+          ) : (
+            <View style={{ height: 120 }} />
+          )
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={query.isRefetching && !query.isFetchingNextPage}
+            onRefresh={() => query.refetch()}
+            tintColor={colors.mutedForeground}
+          />
+        }
+      />
+      {sheet}
+    </>
   );
 }
 
@@ -602,7 +643,10 @@ function JoinBar() {
           label="Join free"
           size="sm"
           fullWidth={false}
-          onPress={() => router.push('/(auth)/sign-up')}
+          onPress={() => {
+            forgetListing();
+            router.push('/(auth)/sign-up');
+          }}
         />
       </View>
     </View>

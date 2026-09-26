@@ -10,6 +10,7 @@ import { queryClient, queryPersistenceOptions } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
 import { portalHref } from '@/lib/roles';
+import { takeListingHref } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
@@ -71,6 +72,12 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     if (target && lastTarget.current !== target) {
       lastTarget.current = target;
       router.replace(target as never);
+      // Signed in from a public listing: land on it, with the portal home
+      // underneath so Back goes somewhere sensible.
+      if (status === 'authenticated' && portalReady && !inApp) {
+        const listing = takeListingHref(usablePortal);
+        if (listing) router.push(listing);
+      }
     }
     if (!target) lastTarget.current = null;
   }, [status, usablePortal, segments, router, onboardingSeen]);

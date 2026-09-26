@@ -40,6 +40,14 @@ export interface ShortletListParams {
   checkOut?: string;
   /** Estate public slug — limits results to shortlets inside that estate. */
   estate?: string;
+  /** Public browse: title, address, city, state or estate name. */
+  search?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  propertyType?: string;
+  /** Only `true` is sent; unticked means "don't filter". */
+  instantBooking?: boolean;
+  verifiedOnly?: boolean;
 }
 
 const listQuery = (params: ShortletListParams): string =>
@@ -52,6 +60,12 @@ const listQuery = (params: ShortletListParams): string =>
     minPrice: params.minPrice,
     maxPrice: params.maxPrice,
     sort: params.sort,
+    search: params.search,
+    bedrooms: params.bedrooms,
+    bathrooms: params.bathrooms,
+    propertyType: params.propertyType,
+    instantBooking: params.instantBooking ? 'true' : undefined,
+    verifiedOnly: params.verifiedOnly ? 'true' : undefined,
     checkIn: params.checkIn,
     checkOut: params.checkOut,
     estate: params.estate,
