@@ -11,6 +11,7 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { useTheme } from '../theme';
+import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 
 export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
@@ -45,6 +46,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   ref
 ) {
   const { colors, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
   const [focused, setFocused] = useState(false);
   const [reveal, setReveal] = useState(false);
 
@@ -76,6 +78,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           // The visible label is a sibling, so screen readers need it on the input itself.
           accessibilityLabel={accessibilityLabel ?? label ?? rest.placeholder}
           accessibilityHint={error ? `Error: ${error}` : (accessibilityHint ?? hint)}
+          accessibilityState={{ disabled: rest.editable === false }}
+          aria-invalid={!!error}
           placeholderTextColor={colors.mutedForeground}
           selectionColor={colors.primary}
           secureTextEntry={secure && !reveal}
@@ -94,9 +98,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={reveal ? 'Hide password' : 'Show password'}
-            hitSlop={14}
             onPress={() => setReveal((v) => !v)}
-            style={styles.right}
+            style={[styles.right, styles.reveal]}
           >
             {reveal ? (
               <EyeOff size={18} color={colors.mutedForeground} />
@@ -112,8 +115,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
       {error ? (
         <Animated.View
           accessibilityLiveRegion="polite"
-          entering={FadeIn.duration(140)}
-          exiting={FadeOut.duration(100)}
+          entering={reduceMotion ? undefined : FadeIn.duration(140)}
+          exiting={reduceMotion ? undefined : FadeOut.duration(100)}
         >
           <Text variant="caption" color="destructive" style={styles.helper}>
             {error}
@@ -134,6 +137,13 @@ const styles = StyleSheet.create({
   field: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, minHeight: 54 },
   left: { marginRight: 8 },
   right: { marginLeft: 8 },
+  reveal: {
+    width: 44,
+    minHeight: 44,
+    marginRight: -10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   input: { flex: 1, fontSize: 16, paddingVertical: 14 },
   helper: { marginLeft: 4 },
 });

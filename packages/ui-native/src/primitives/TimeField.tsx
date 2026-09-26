@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Clock } from 'lucide-react-native';
 import { useTheme } from '../theme';
+import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 
 export interface TimeFieldProps {
@@ -24,6 +25,7 @@ export interface TimeFieldProps {
   startHour?: number;
   /** Last selectable hour, exclusive (default 20). */
   endHour?: number;
+  error?: string | null;
   hint?: string;
   disabled?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
@@ -57,11 +59,13 @@ export function TimeField({
   stepMinutes = 30,
   startHour = 8,
   endHour = 20,
+  error,
   hint,
   disabled,
   containerStyle,
 }: TimeFieldProps) {
   const { colors, radius, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
 
   const slots = buildSlots(startHour, endHour, stepMinutes);
@@ -82,6 +86,9 @@ export function TimeField({
         onPress={() => !disabled && setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={label ?? placeholder}
+        accessibilityHint={error ? `Error: ${error}` : hint}
+        accessibilityState={{ disabled }}
+        aria-invalid={!!error}
         disabled={disabled}
         style={{
           flexDirection: 'row',
@@ -90,6 +97,8 @@ export function TimeField({
           minHeight: 54,
           borderRadius: radius.md,
           backgroundColor: colors.secondary,
+          borderWidth: 1.5,
+          borderColor: error ? colors.destructive : 'transparent',
           opacity: disabled ? 0.6 : 1,
         }}
       >
@@ -99,7 +108,16 @@ export function TimeField({
         <Clock size={18} color={colors.mutedForeground} />
       </Pressable>
 
-      {hint ? (
+      {error ? (
+        <Text
+          variant="caption"
+          color="destructive"
+          accessibilityLiveRegion="polite"
+          style={{ marginLeft: 4 }}
+        >
+          {error}
+        </Text>
+      ) : hint ? (
         <Text variant="caption" color="mutedForeground" style={{ marginLeft: 4 }}>
           {hint}
         </Text>
@@ -108,22 +126,25 @@ export function TimeField({
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={reduceMotion ? 'none' : 'fade'}
         onRequestClose={() => setOpen(false)}
         statusBarTranslucent
       >
-        <Pressable
-          onPress={() => setOpen(false)}
-          accessibilityRole="button"
-          accessibilityLabel="Close time picker"
+        <View
           style={[
             StyleSheet.absoluteFill,
             { backgroundColor: colors.scrim, alignItems: 'center', justifyContent: 'center' },
           ]}
         >
-          {/* Swallow presses inside the card so tapping a slot doesn't dismiss first. */}
           <Pressable
-            onPress={() => {}}
+            onPress={() => setOpen(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close time picker"
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            accessibilityViewIsModal
+            accessibilityLabel="Time picker"
             style={{
               width: 320,
               maxWidth: '90%',
@@ -150,8 +171,10 @@ export function TimeField({
                         setOpen(false);
                       }}
                       accessibilityRole="button"
+                      accessibilityLabel={formatTimeLabel(slot)}
                       accessibilityState={{ selected: isSelected }}
                       style={{
+                        minHeight: 44,
                         paddingVertical: 9,
                         paddingHorizontal: 14,
                         borderRadius: radius.md,
@@ -174,8 +197,8 @@ export function TimeField({
                 })}
               </View>
             </ScrollView>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );

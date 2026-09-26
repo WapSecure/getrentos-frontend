@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } f
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTheme } from '../theme';
+import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 import { PressableScale, type PressableScaleProps } from './PressableScale';
 
@@ -20,7 +21,8 @@ export interface ButtonProps extends Omit<PressableScaleProps, 'style' | 'childr
   style?: StyleProp<ViewStyle>;
 }
 
-const HEIGHT: Record<ButtonSize, number> = { sm: 42, md: 50, lg: 56 };
+const MIN_HEIGHT: Record<ButtonSize, number> = { sm: 44, md: 50, lg: 56 };
+const VERTICAL_PADDING: Record<ButtonSize, number> = { sm: 9, md: 12, lg: 15 };
 
 export function Button({
   label,
@@ -36,6 +38,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const { colors, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
   const isDisabled = disabled || loading;
 
   const palette = useMemo(() => {
@@ -58,12 +61,15 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={palette.fg} />
       ) : (
-        <Animated.View entering={FadeIn.duration(120)} style={styles.content}>
+        <Animated.View
+          entering={reduceMotion ? undefined : FadeIn.duration(120)}
+          style={styles.content}
+        >
           {icon}
           <Text
             variant={size === 'sm' ? 'callout' : 'bodyStrong'}
-            style={{ color: palette.fg, fontWeight: '700' }}
-            numberOfLines={1}
+            style={{ color: palette.fg, fontWeight: '700', flexShrink: 1, textAlign: 'center' }}
+            numberOfLines={2}
           >
             {label}
           </Text>
@@ -76,8 +82,9 @@ export function Button({
   const frame: StyleProp<ViewStyle> = [
     styles.base,
     {
-      height: HEIGHT[size],
+      minHeight: MIN_HEIGHT[size],
       paddingHorizontal: size === 'sm' ? 16 : 22,
+      paddingVertical: VERTICAL_PADDING[size],
       borderRadius: radius.lg,
       alignSelf: fullWidth ? 'stretch' : 'flex-start',
       borderColor: palette.border,
@@ -116,5 +123,11 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  content: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    flexShrink: 1,
+  },
 });

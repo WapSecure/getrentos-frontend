@@ -390,6 +390,8 @@ function HeroCard({
           <Image
             source={{ uri: property.image }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={property.id}
             transition={250}
             accessible={false}
             style={StyleSheet.absoluteFill}

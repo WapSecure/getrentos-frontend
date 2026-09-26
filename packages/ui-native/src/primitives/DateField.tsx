@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } fr
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useTheme } from '../theme';
+import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -89,6 +90,7 @@ export function DateField({
   containerStyle,
 }: DateFieldProps) {
   const { colors, radius, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
 
   const selected = parseISODate(value);
@@ -143,6 +145,9 @@ export function DateField({
         onPress={openPicker}
         accessibilityRole="button"
         accessibilityLabel={label ?? placeholder}
+        accessibilityHint={error ? `Error: ${error}` : hint}
+        accessibilityState={{ disabled }}
+        aria-invalid={!!error}
         disabled={disabled}
         style={{
           flexDirection: 'row',
@@ -167,7 +172,11 @@ export function DateField({
       </Pressable>
 
       {error ? (
-        <Animated.View entering={FadeIn.duration(140)} exiting={FadeOut.duration(100)}>
+        <Animated.View
+          accessibilityLiveRegion="polite"
+          entering={reduceMotion ? undefined : FadeIn.duration(140)}
+          exiting={reduceMotion ? undefined : FadeOut.duration(100)}
+        >
           <Text variant="caption" color="destructive" style={{ marginLeft: 4 }}>
             {error}
           </Text>
@@ -181,25 +190,28 @@ export function DateField({
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={reduceMotion ? 'none' : 'fade'}
         onRequestClose={() => setOpen(false)}
         statusBarTranslucent
       >
-        <Pressable
-          onPress={() => setOpen(false)}
-          accessibilityRole="button"
-          accessibilityLabel="Close calendar"
+        <View
           style={[
             StyleSheet.absoluteFill,
             { backgroundColor: colors.scrim, alignItems: 'center', justifyContent: 'center' },
           ]}
         >
-          {/* Swallow presses inside the card so tapping the calendar doesn't dismiss it. */}
           <Pressable
-            onPress={() => {}}
+            onPress={() => setOpen(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close calendar"
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            accessibilityViewIsModal
+            accessibilityLabel="Date picker"
             style={{
-              width: 320,
-              maxWidth: '90%',
+              width: 360,
+              maxWidth: '94%',
               borderRadius: radius['2xl'],
               backgroundColor: colors.card,
               borderWidth: 1,
@@ -219,8 +231,13 @@ export function DateField({
                 onPress={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
                 accessibilityRole="button"
                 accessibilityLabel="Previous month"
-                hitSlop={8}
-                style={{ padding: 6, borderRadius: radius.sm }}
+                style={{
+                  width: 44,
+                  height: 44,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: radius.sm,
+                }}
               >
                 <ChevronLeft size={18} color={colors.foreground} />
               </Pressable>
@@ -231,8 +248,13 @@ export function DateField({
                 onPress={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
                 accessibilityRole="button"
                 accessibilityLabel="Next month"
-                hitSlop={8}
-                style={{ padding: 6, borderRadius: radius.sm }}
+                style={{
+                  width: 44,
+                  height: 44,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: radius.sm,
+                }}
               >
                 <ChevronRight size={18} color={colors.foreground} />
               </Pressable>
@@ -256,7 +278,7 @@ export function DateField({
               ))}
 
               {Array.from({ length: leadingBlanks }).map((_, i) => (
-                <View key={`blank-${i}`} style={{ width: `${100 / 7}%`, height: 40 }} />
+                <View key={`blank-${i}`} style={{ width: `${100 / 7}%`, height: 44 }} />
               ))}
 
               {days.map((day) => {
@@ -268,7 +290,7 @@ export function DateField({
                     key={day.toISOString()}
                     style={{
                       width: `${100 / 7}%`,
-                      height: 40,
+                      height: 44,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
@@ -280,8 +302,8 @@ export function DateField({
                       accessibilityLabel={formatDisplay(day)}
                       accessibilityState={{ selected: isSelected, disabled: dayDisabled }}
                       style={{
-                        width: 34,
-                        height: 34,
+                        width: 40,
+                        height: 44,
                         borderRadius: radius.sm,
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -309,8 +331,10 @@ export function DateField({
             <Pressable
               onPress={() => select(today)}
               accessibilityRole="button"
+              accessibilityLabel="Select today"
               style={{
                 marginTop: spacing.md,
+                minHeight: 44,
                 paddingVertical: 8,
                 alignItems: 'center',
                 borderRadius: radius.sm,
@@ -320,8 +344,8 @@ export function DateField({
                 Today
               </Text>
             </Pressable>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );

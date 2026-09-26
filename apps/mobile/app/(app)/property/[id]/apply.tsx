@@ -344,6 +344,9 @@ export default function ApplyToRent() {
           <Image
             source={{ uri: property.image }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={property.id}
+            accessible={false}
             style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: colors.secondary }}
           />
         ) : null}

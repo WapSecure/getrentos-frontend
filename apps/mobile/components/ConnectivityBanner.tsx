@@ -47,7 +47,7 @@ export function ConnectivityBanner() {
 
   const reconnected = status === 'reconnected';
   const backgroundColor = reconnected ? colors.success : colors.foreground;
-  const contentColor = reconnected ? colors.primaryForeground : colors.background;
+  const contentColor = colors.background;
   const title = reconnected ? 'Back online' : "You're offline";
   const message = reconnected
     ? 'Your information can refresh again'

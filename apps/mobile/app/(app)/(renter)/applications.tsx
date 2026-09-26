@@ -188,6 +188,7 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
           <Image
             source={{ uri: a.image }}
             contentFit="cover"
+            cachePolicy="memory-disk"
             recyclingKey={a.id}
             transition={150}
             accessible={false}

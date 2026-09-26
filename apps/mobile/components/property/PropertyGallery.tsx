@@ -60,13 +60,17 @@ export function PropertyGallery({
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScroll}
         scrollEventThrottle={16}
+        accessibilityLabel={`Property photos, image ${page + 1} of ${images.length}`}
       >
         {images.map((uri, i) => (
           <Image
             key={`${i}-${uri}`}
             source={{ uri }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={uri}
             transition={200}
+            accessible={false}
             style={{ width: SCREEN_WIDTH, height }}
           />
         ))}
