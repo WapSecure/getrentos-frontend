@@ -6,7 +6,7 @@ import { useAgentUser } from '../layout';
 import { User, Bell, Landmark, MapPin, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/agent/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/agent/settings/NotificationSettings';
-import { PayoutSettings } from '@/components/agent/settings/PayoutSettings';
+import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { FieldPreferencesSettings } from '@/components/agent/settings/FieldPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 
@@ -35,7 +35,9 @@ export default function AgentSettingsPage() {
       case 'notifications':
         return <NotificationSettings />;
       case 'payouts':
-        return <PayoutSettings />;
+        return (
+          <SellerPayoutSettings description="Where proceeds from properties you sell on the marketplace are sent once escrow releases — transfers run through Paystack." />
+        );
       case 'preferences':
         return <FieldPreferencesSettings />;
       default:

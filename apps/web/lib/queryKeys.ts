@@ -143,7 +143,6 @@ export const realtorKeys = {
   commissions: ['realtor', 'commissions'] as const,
   commissionTrend: ['realtor', 'commissions', 'trend'] as const,
   settingsProfile: ['realtor', 'settings', 'profile'] as const,
-  settingsPayout: ['realtor', 'settings', 'payout'] as const,
   settingsNotifications: ['realtor', 'settings', 'notifications'] as const,
   settingsPreferences: ['realtor', 'settings', 'preferences'] as const,
   notifications: ['realtor', 'notifications'] as const,
@@ -361,4 +360,10 @@ export const billingKeys = {
   mine: ['billing', 'mine'] as const,
   /** Payment history — the customer's receipts. */
   invoices: (page: number) => ['billing', 'invoices', page] as const,
+};
+
+/** Marketplace seller payouts — shared by Owner, Realtor and Agent. */
+export const sellerPayoutKeys = {
+  account: ['marketplace', 'seller', 'payout-account'] as const,
+  payouts: ['marketplace', 'seller', 'payouts'] as const,
 };
