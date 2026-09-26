@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -8,9 +8,11 @@ import { getAuthToken } from '@getrentos/shared';
 import {
   Badge,
   Button,
+  Checkbox,
   CurrencyInput,
   DatePicker,
   EmptyState,
+  Input,
   NumberInput,
   Pagination,
   Select,
@@ -20,7 +22,6 @@ import { BedDouble, CalendarCheck, Heart, MapPin, Search, Star, Zap } from 'luci
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency } from '@/lib/format';
@@ -35,6 +36,15 @@ export const ShortletMarketplaceBrowser = () => {
   const [isSignedIn] = useState(() => Boolean(getAuthToken()));
   const wishlist = useShortletWishlist();
 
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => clearTimeout(t);
+  }, [search]);
+  const [bedrooms, setBedrooms] = useState('');
+  const [instantOnly, setInstantOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [city, setCity] = useState('');
   const [guests, setGuests] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -49,6 +59,10 @@ export const ShortletMarketplaceBrowser = () => {
 
   const queryParams = useMemo(
     () => ({
+      search: debouncedSearch || undefined,
+      bedrooms: bedrooms ? Number(bedrooms) : undefined,
+      instantBooking: instantOnly,
+      verifiedOnly,
       city: city.trim() || undefined,
       guests: guests ? Number(guests) : undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
@@ -60,7 +74,21 @@ export const ShortletMarketplaceBrowser = () => {
       page,
       pageSize: PAGE_SIZE,
     }),
-    [checkIn, checkOut, city, guests, maxPrice, minPrice, page, sort, estateFromUrl]
+    [
+      checkIn,
+      checkOut,
+      city,
+      guests,
+      maxPrice,
+      minPrice,
+      page,
+      sort,
+      estateFromUrl,
+      debouncedSearch,
+      bedrooms,
+      instantOnly,
+      verifiedOnly,
+    ]
   );
 
   const { data, isLoading, isPending, isError } = useQuery({
@@ -75,11 +103,9 @@ export const ShortletMarketplaceBrowser = () => {
     setPage(1);
   };
 
+  // The listing page is public and server-rendered; booking is what needs an
+  // account, and the page itself asks for sign-in at that step.
   const openListing = (listing: ShortletListing) => {
-    if (!isSignedIn) {
-      router.push(ROUTES.LOGIN);
-      return;
-    }
     router.push(`/shortlets/${listing.id}`);
   };
 
@@ -97,8 +123,22 @@ export const ShortletMarketplaceBrowser = () => {
         </p>
       </div>
 
+      <div className="mb-3">
+        <Input
+          id="shortlet-search"
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search by area, street, estate or title"
+          aria-label="Search shortlets"
+          leadingIcon={<Search className="h-4 w-4" />}
+        />
+      </div>
+
       {/* Filters */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
+      <div className="mb-3 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
         <div className="col-span-2 md:col-span-2 xl:col-span-1">
           <Select
             value={city}
@@ -157,6 +197,45 @@ export const ShortletMarketplaceBrowser = () => {
             { value: 'price_desc', label: 'Price: high to low' },
           ]}
         />
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div className="w-40">
+          <Select
+            ariaLabel="Bedrooms"
+            value={bedrooms}
+            onValueChange={(v) => updateFilter(setBedrooms, v)}
+            options={[
+              { value: '', label: 'Any bedrooms' },
+              ...[1, 2, 3, 4].map((n) => ({
+                value: String(n),
+                label: `${n}+ bedroom${n === 1 ? '' : 's'}`,
+              })),
+            ]}
+          />
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <Checkbox
+            checked={instantOnly}
+            onCheckedChange={(v) => {
+              setInstantOnly(v);
+              setPage(1);
+            }}
+            aria-label="Instant booking only"
+          />
+          Instant booking
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <Checkbox
+            checked={verifiedOnly}
+            onCheckedChange={(v) => {
+              setVerifiedOnly(v);
+              setPage(1);
+            }}
+            aria-label="Verified only"
+          />
+          Verified only
+        </label>
       </div>
 
       {estateFromUrl && (
@@ -284,7 +363,7 @@ export const ShortletMarketplaceBrowser = () => {
                     }}
                   >
                     <CalendarCheck className="mr-1.5 h-4 w-4" />{' '}
-                    {isSignedIn ? 'Book' : 'Sign in to book'}
+                    {isSignedIn ? 'Book' : 'View details'}
                   </Button>
                 </div>
               </div>

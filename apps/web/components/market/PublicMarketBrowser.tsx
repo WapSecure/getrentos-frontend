@@ -1,15 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import { BadgeCheck, Bath, BedDouble, Home, MapPin, Ruler, Search } from 'lucide-react';
-import { Badge, EmptyState, Input, Pagination, Select, Skeleton } from '@getrentos/ui';
-import { publicMarketService, type PublicListingCard, type PublicMarket } from '@/services/publicMarketService';
+import {
+  BadgeCheck,
+  Bath,
+  BedDouble,
+  Home,
+  MapPin,
+  Ruler,
+  Search,
+  SlidersHorizontal,
+} from 'lucide-react';
+import {
+  Badge,
+  Checkbox,
+  CurrencyInput,
+  EmptyState,
+  Input,
+  Pagination,
+  Select,
+  Skeleton,
+} from '@getrentos/ui';
+import {
+  publicMarketService,
+  type PublicListingCard,
+  type PublicMarket,
+} from '@/services/publicMarketService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { PUBLIC_MARKET_PAGE_SIZE } from '@/lib/publicListingMap';
 import { formatCurrency } from '@/lib/format';
+import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 
 // Shared with the server component that pre-renders the first page, so the two
 // cannot ask for different page sizes.
@@ -37,8 +60,14 @@ const NOUNS: Record<PublicMarket, { one: string; many: string }> = {
   sale: { one: 'property', many: 'properties' },
 };
 
+const detailHref = (market: PublicMarket, id: string) =>
+  `${market === 'rent' ? '/rent' : '/buy'}/${id}`;
+
 const ListingCard = ({ listing, market }: { listing: PublicListingCard; market: PublicMarket }) => (
-  <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
+  <Link
+    href={detailHref(market, listing.id)}
+    className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+  >
     {mapMedia(listing, market)}
 
     <div className="flex flex-1 flex-col p-5">
@@ -76,7 +105,9 @@ const ListingCard = ({ listing, market }: { listing: PublicListingCard; market: 
             {listing.size} sqm
           </span>
         ) : null}
-        {listing.propertyType && <Badge variant="neutral">{listing.propertyType.toLowerCase()}</Badge>}
+        {listing.propertyType && (
+          <Badge variant="neutral">{listing.propertyType.toLowerCase()}</Badge>
+        )}
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-2 pt-4">
@@ -87,14 +118,11 @@ const ListingCard = ({ listing, market }: { listing: PublicListingCard; market: 
           )}
         </p>
         {/* Browsing is open to anyone; contacting the landlord or making an offer
-            is not. Saying so here is the difference between a deliberate signup
-            funnel and a link that looks broken. */}
-        <Link href="/login" className="text-sm font-medium text-primary hover:underline">
-          {market === 'rent' ? 'Sign in to enquire' : 'Sign in to offer'}
-        </Link>
+            is not — the detail page says so and carries the sign-in step. */}
+        <span className="text-sm font-medium text-primary">View details</span>
       </div>
     </div>
-  </div>
+  </Link>
 );
 
 function mapMedia(listing: PublicListingCard, market: PublicMarket) {
@@ -113,6 +141,66 @@ function mapMedia(listing: PublicListingCard, market: PublicMarket) {
       <Home className="h-8 w-8 text-primary/40" />
     </div>
   );
+}
+
+interface Refinements {
+  minPrice: string;
+  maxPrice: string;
+  bedrooms: string;
+  bathrooms: string;
+  propertyType: string;
+  verifiedOnly: boolean;
+  furnished: boolean;
+  petsAllowed: boolean;
+  monthlyPayment: boolean;
+}
+
+const NO_REFINEMENTS: Refinements = {
+  minPrice: '',
+  maxPrice: '',
+  bedrooms: '',
+  bathrooms: '',
+  propertyType: '',
+  verifiedOnly: false,
+  furnished: false,
+  petsAllowed: false,
+  monthlyPayment: false,
+};
+
+const countRefinements = (r: Refinements) =>
+  Object.values(r).filter((v) => (typeof v === 'boolean' ? v : v !== '')).length;
+
+const ROOM_OPTIONS = (noun: 'bed' | 'bath') => [
+  { value: '', label: `Any ${noun}s` },
+  ...[1, 2, 3, 4, 5].map((n) => ({
+    value: String(n),
+    label: `${n}+ ${noun}${n === 1 ? '' : 's'}`,
+  })),
+];
+
+const FilterToggle = ({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) => (
+  <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+    <Checkbox checked={checked} onCheckedChange={onChange} aria-label={label} />
+    {label}
+  </label>
+);
+
+/** Waits for typing to pause before a value is used in a request. */
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(t);
+  }, [value, delayMs]);
+  return debounced;
 }
 
 /**
@@ -136,18 +224,45 @@ export const PublicMarketBrowser = ({
   const searchParams = useSearchParams();
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
 
-  const [location, setLocation] = useState('');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search.trim(), 350);
+  const [refine, setRefine] = useState<Refinements>(NO_REFINEMENTS);
+  const [showFilters, setShowFilters] = useState(false);
   const [sort, setSort] = useState(SORTS[market][0].value);
   const [page, setPage] = useState(1);
 
-  const isDefaultView = !location.trim() && !estateFromUrl && page === 1 && sort === SORTS[market][0].value;
+  const activeCount = countRefinements(refine);
+  const isDefaultView =
+    !debouncedSearch &&
+    !estateFromUrl &&
+    page === 1 &&
+    sort === SORTS[market][0].value &&
+    activeCount === 0;
 
   const filters = {
-    location: location.trim() || undefined,
+    search: debouncedSearch || undefined,
     estate: estateFromUrl || undefined,
+    minPrice: refine.minPrice ? Number(refine.minPrice) : undefined,
+    maxPrice: refine.maxPrice ? Number(refine.maxPrice) : undefined,
+    bedrooms: refine.bedrooms ? Number(refine.bedrooms) : undefined,
+    bathrooms: refine.bathrooms ? Number(refine.bathrooms) : undefined,
+    propertyType: refine.propertyType || undefined,
+    verifiedOnly: refine.verifiedOnly,
+    ...(market === 'rent'
+      ? {
+          furnished: refine.furnished,
+          petsAllowed: refine.petsAllowed,
+          monthlyPayment: refine.monthlyPayment,
+        }
+      : {}),
     sort,
     page,
     pageSize: PAGE_SIZE,
+  };
+
+  const update = <K extends keyof Refinements>(key: K, value: Refinements[K]) => {
+    setRefine((r) => ({ ...r, [key]: value }));
+    setPage(1);
   };
 
   const { data, isLoading, isError } = useQuery({
@@ -193,13 +308,14 @@ export const PublicMarketBrowser = ({
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="sm:max-w-md sm:flex-1">
           <Input
-            id="public-market-location"
-            value={location}
+            id="public-market-search"
+            value={search}
             onChange={(event) => {
-              setLocation(event.target.value);
+              setSearch(event.target.value);
               setPage(1);
             }}
-            placeholder="Search by area, city or street"
+            placeholder="Search by area, city, street, estate or title"
+            aria-label="Search listings"
             leadingIcon={<Search className="h-4 w-4" />}
           />
         </div>
@@ -214,7 +330,108 @@ export const PublicMarketBrowser = ({
             options={SORTS[market]}
           />
         </div>
+        <button
+          type="button"
+          onClick={() => setShowFilters((v) => !v)}
+          aria-expanded={showFilters}
+          aria-controls="public-market-filters"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:border-primary/60"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filters
+          {activeCount > 0 && (
+            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+              {activeCount}
+            </span>
+          )}
+        </button>
       </div>
+
+      {showFilters && (
+        <div
+          id="public-market-filters"
+          className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-3 lg:grid-cols-6"
+        >
+          <CurrencyInput
+            prefix="₦"
+            placeholder="Min price"
+            aria-label="Minimum price"
+            value={refine.minPrice}
+            onValueChange={(v) => update('minPrice', v ? String(v) : '')}
+          />
+          <CurrencyInput
+            prefix="₦"
+            placeholder="Max price"
+            aria-label="Maximum price"
+            value={refine.maxPrice}
+            onValueChange={(v) => update('maxPrice', v ? String(v) : '')}
+          />
+          <Select
+            ariaLabel="Bedrooms"
+            value={refine.bedrooms}
+            onValueChange={(v) => update('bedrooms', v)}
+            options={ROOM_OPTIONS('bed')}
+          />
+          <Select
+            ariaLabel="Bathrooms"
+            value={refine.bathrooms}
+            onValueChange={(v) => update('bathrooms', v)}
+            options={ROOM_OPTIONS('bath')}
+          />
+          <Select
+            ariaLabel="Property type"
+            value={refine.propertyType}
+            onValueChange={(v) => update('propertyType', v)}
+            options={[
+              { value: '', label: 'Any type' },
+              ...PROPERTY_TYPE_OPTIONS.filter((o) => market === 'sale' || o.value !== 'LAND').map(
+                (o) => ({
+                  value: o.value,
+                  label: o.label,
+                })
+              ),
+            ]}
+          />
+          <div className="col-span-2 flex flex-wrap items-center gap-x-5 gap-y-3 md:col-span-3 lg:col-span-6">
+            <FilterToggle
+              label="Verified only"
+              checked={refine.verifiedOnly}
+              onChange={(v) => update('verifiedOnly', v)}
+            />
+            {market === 'rent' && (
+              <>
+                <FilterToggle
+                  label="Furnished"
+                  checked={refine.furnished}
+                  onChange={(v) => update('furnished', v)}
+                />
+                <FilterToggle
+                  label="Pets allowed"
+                  checked={refine.petsAllowed}
+                  onChange={(v) => update('petsAllowed', v)}
+                />
+                <FilterToggle
+                  label="Pay monthly"
+                  checked={refine.monthlyPayment}
+                  onChange={(v) => update('monthlyPayment', v)}
+                />
+              </>
+            )}
+            {activeCount > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRefine(NO_REFINEMENTS);
+                  setPage(1);
+                }}
+                className="ml-auto text-sm font-medium text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -238,7 +455,7 @@ export const PublicMarketBrowser = ({
             description={
               estateFromUrl
                 ? `${humaniseSlug(estateFromUrl)} has no ${noun.many} listed in this market right now.`
-                : 'Try a different area, or clear the search.'
+                : 'Try a different area, widen the price range, or clear a filter.'
             }
           />
         </div>

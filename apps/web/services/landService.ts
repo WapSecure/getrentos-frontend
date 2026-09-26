@@ -18,10 +18,21 @@ export interface OwnerLandListParams {
 export interface PublicLandListParams {
   page?: number;
   pageSize?: number;
+  /** Title, address, city, state, estate name or plot number. */
+  search?: string;
   city?: string;
   state?: string;
+  /** Estate public slug. */
+  estate?: string;
   minPrice?: number;
   maxPrice?: number;
+  /** e.g. CERTIFICATE_OF_OCCUPANCY */
+  titleType?: string;
+  /** Parcel area bounds in square metres, whatever unit each parcel was recorded in. */
+  minAreaSqm?: number;
+  maxAreaSqm?: number;
+  /** Only `true` is sent; unticked means "don't filter". */
+  roadAccess?: boolean;
   sort?: 'price_asc' | 'price_desc' | 'newest';
 }
 
@@ -107,6 +118,12 @@ export const landService = {
           state: params.state,
           minPrice: params.minPrice,
           maxPrice: params.maxPrice,
+          search: params.search,
+          estate: params.estate,
+          titleType: params.titleType,
+          minAreaSqm: params.minAreaSqm,
+          maxAreaSqm: params.maxAreaSqm,
+          roadAccess: params.roadAccess ? 'true' : undefined,
           sort: params.sort,
         })}`
       );

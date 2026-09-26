@@ -33,12 +33,14 @@ import { qk } from '@/lib/query/keys';
 import {
   isMarketKind,
   MARKET_LABEL,
+  marketWebPath,
   publicMarketApi,
   type MarketDetail,
   type MarketKind,
 } from '@/lib/api/publicMarket';
 import { env } from '@/lib/env';
 import { track } from '@/lib/analytics';
+import { rememberListing } from '@/lib/pendingListing';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 
@@ -47,13 +49,6 @@ const CTA: Record<MarketKind, string> = {
   sale: 'Sign in to make an offer',
   shortlet: 'Sign in to book',
   land: 'Sign in to make an offer',
-};
-
-const WEB_PATH: Record<MarketKind, (id: string) => string> = {
-  rent: () => '/rent',
-  sale: () => '/buy',
-  shortlet: (id) => `/shortlets/${id}`,
-  land: () => '/land',
 };
 
 export default function PublicListing() {
@@ -75,7 +70,7 @@ export default function PublicListing() {
     if (!p || !valid) return;
     track('market_listing_shared', { kind });
     await Share.share({
-      message: `${p.title} · ${p.location}\n${env.webUrl}${WEB_PATH[kind as MarketKind](p.id)}`,
+      message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath(kind as MarketKind, p.id)}`,
     }).catch(() => undefined);
   };
 
@@ -364,13 +359,21 @@ function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) 
     >
       <View style={{ flex: 1 }}>
         <Price amount={listing.price} period={listing.period} variant="subheading" />
-        <LinkButton label="Create a free account" onPress={() => router.push('/(auth)/sign-up')} />
+        <LinkButton
+          label="Create a free account"
+          onPress={() => {
+            rememberListing(kind, listing.id);
+            router.push('/(auth)/sign-up');
+          }}
+        />
       </View>
       <Button
         label={CTA[kind]}
         fullWidth={false}
         onPress={() => {
           track('market_signin_cta', { kind });
+          // Come back to this listing once signed in.
+          rememberListing(kind, listing.id);
           router.push('/(auth)/sign-in');
         }}
       />
