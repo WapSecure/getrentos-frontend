@@ -50,6 +50,7 @@ import {
 import { NairaSign } from '@getrentos/ui/NairaSign';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
+import { HostCancellationFeesPanel } from './HostCancellationFeesPanel';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import type {
@@ -122,6 +123,7 @@ type Tab =
   | 'reviews'
   | 'disputes'
   | 'claims'
+  | 'host-fees'
   | 'fees';
 
 const REVIEW_RATING_VALUES: { value: 'all' | number; label: string }[] = [
@@ -713,6 +715,7 @@ export const ShortletOversight = () => {
               'reviews',
               'disputes',
               'claims',
+              'host-fees',
               'fees',
             ] as Tab[]
           ).map((t) => (
@@ -740,7 +743,9 @@ export const ShortletOversight = () => {
                           ? `Disputes (${disputesData?.total ?? 0})`
                           : t === 'claims'
                             ? `Deposit claims (${claimsData?.total ?? 0})`
-                            : 'Fees & taxes'}
+                            : t === 'host-fees'
+                              ? 'Host cancellations'
+                              : 'Fees & taxes'}
             </button>
           ))}
         </div>
@@ -1091,6 +1096,8 @@ export const ShortletOversight = () => {
             onPageChange={setDisputesPage}
           />
         </div>
+      ) : tab === 'host-fees' ? (
+        <HostCancellationFeesPanel canWaive={canPayout} />
       ) : tab === 'claims' ? (
         <div className="rounded-xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
@@ -1578,6 +1585,11 @@ function PayoutRow({ payout, onOpen }: { payout: AdminShortletPayout; onOpen: ()
       <div className="flex items-center gap-2">
         <div className="text-right">
           <p className="font-semibold">{formatCurrency(payout.amount)}</p>
+          {(payout.penaltyDeducted ?? 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              after {formatCurrency(payout.penaltyDeducted ?? 0)} cancellation fees
+            </p>
+          )}
           {payout.paidAt && (
             <p className="text-xs text-muted-foreground">
               Paid {formatDate(payout.paidAt, 'short')}

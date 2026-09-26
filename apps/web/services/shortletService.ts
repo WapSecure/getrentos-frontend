@@ -2,6 +2,8 @@ import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   BlockShortletDatesInput,
   BlockedDateRange,
+  HostCancelPreview,
+  ShortletHostPenalty,
   ShortletCalendarFeed,
   ShortletCalendarSync,
   ShortletSeason,
@@ -85,6 +87,8 @@ export interface ShortletPayoutSummary {
   inFailedPayout: number;
   /** Sent to the bank and not yet confirmed. */
   inTransit: number;
+  /** Cancellation fees still owed; taken out of the next withdrawals. */
+  penaltiesOutstanding: number;
   /** When the next held earnings unlock. */
   nextReleaseAt: string | null;
   /** Hours earnings are held after check-in (longer for a first payout). */
@@ -325,6 +329,26 @@ export const shortletService = {
   unblockDates: (blockedDateId: string) =>
     safeCall(() =>
       authFetch(`/host/shortlets/blocked-dates/${blockedDateId}`, { method: 'DELETE' })
+    ),
+
+  previewHostCancel: (bookingId: string) =>
+    safeCall(() =>
+      authFetch<HostCancelPreview>(`/host/shortlets/bookings/${bookingId}/cancel-preview`)
+    ),
+
+  hostCancelBooking: (bookingId: string, reason: string) =>
+    safeCall(() =>
+      authFetch<ShortletBooking>(`/host/shortlets/bookings/${bookingId}/cancel`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    ),
+
+  hostCancellationFees: (params: { page?: number; pageSize?: number } = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletHostPenalty>>(
+        `/host/shortlets/cancellation-fees${toQuery(params)}`
+      )
     ),
 
   calendarSync: (listingId: string) =>

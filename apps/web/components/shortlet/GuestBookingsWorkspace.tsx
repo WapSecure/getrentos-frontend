@@ -267,6 +267,15 @@ export const GuestBookingsWorkspace = () => {
                     night{b.nights > 1 ? 's' : ''} · {b.guestCount} guest
                     {b.guestCount > 1 ? 's' : ''}
                   </p>
+                  {b.status === 'CANCELLED' && b.cancelledBy === 'HOST' && (
+                    <p className="mt-2 max-w-md rounded-md bg-secondary/50 px-3 py-2 text-xs">
+                      <span className="font-medium">Your host cancelled this stay</span>
+                      {b.cancellationReason ? `: “${b.cancellationReason}”` : '.'}{' '}
+                      {b.paymentStatus === 'REFUNDED'
+                        ? 'You were refunded everything you paid, including tax and deposit.'
+                        : 'You had not paid, so nothing was charged.'}
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>

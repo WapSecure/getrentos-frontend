@@ -147,7 +147,8 @@ export function ShortletPayoutsDialog({
             (summary.upcoming > 0 ||
               summary.frozen > 0 ||
               summary.inTransit > 0 ||
-              summary.inFailedPayout > 0) && (
+              summary.inFailedPayout > 0 ||
+              (summary.penaltiesOutstanding ?? 0) > 0) && (
               <ul className="space-y-2 rounded-lg border border-border p-4 text-sm">
                 {summary.upcoming > 0 && (
                   <li className="flex items-start justify-between gap-3">
@@ -180,6 +181,16 @@ export function ShortletPayoutsDialog({
                       In a payout that failed — support will retry it
                     </span>
                     <span className="font-medium">{formatCurrency(summary.inFailedPayout)}</span>
+                  </li>
+                )}
+                {(summary.penaltiesOutstanding ?? 0) > 0 && (
+                  <li className="flex items-start justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      Cancellation fees you owe — taken out of your next withdrawal
+                    </span>
+                    <span className="whitespace-nowrap font-medium text-destructive">
+                      −{formatCurrency(summary.penaltiesOutstanding)}
+                    </span>
                   </li>
                 )}
               </ul>
@@ -258,6 +269,8 @@ export function ShortletPayoutsDialog({
                       <p className="mt-1 text-xs text-muted-foreground">
                         {p.bookingCount} booking{p.bookingCount === 1 ? '' : 's'} ·{' '}
                         {formatDate(p.createdAt, 'short')}
+                        {(p.penaltyDeducted ?? 0) > 0 &&
+                          ` · ${formatCurrency(p.penaltyDeducted ?? 0)} cancellation fees taken out`}
                       </p>
                     </div>
                     <p className="font-semibold">{formatCurrency(p.amount)}</p>

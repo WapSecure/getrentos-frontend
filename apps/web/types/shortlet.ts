@@ -69,6 +69,8 @@ export interface ShortletListing {
   prepDays: number;
   /** Current and upcoming seasons. */
   seasons: ShortletSeason[];
+  /** Confirmed stays the host cancelled on this listing in the last 12 months (detail view). */
+  hostCancellations12m?: number;
   currency: string;
   instantBooking: boolean;
   maxGuests: number;
@@ -107,6 +109,10 @@ export interface ShortletBooking {
   discountAmount?: number;
   total: number;
   status: ShortletBookingStatus;
+  /** Who cancelled, when the booking is CANCELLED and it is known. */
+  cancelledBy?: 'GUEST' | 'HOST' | 'ADMIN';
+  /** The host's reason, when the host cancelled. */
+  cancellationReason?: string;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
   paymentRequired?: boolean;
@@ -323,7 +329,10 @@ export interface ShortletPayout {
   id: string;
   hostId: string;
   hostName?: string;
+  /** Sent to the bank, after any cancellation fees. */
   amount: number;
+  /** Cancellation fees taken out of this payout. */
+  penaltyDeducted?: number;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
   paidAt?: string;
@@ -349,6 +358,8 @@ export interface BlockedDateRange {
   reason?: string;
   /** Name of the outside calendar these dates came from; the host can't remove them here. */
   importedFrom?: string;
+  /** Closed because the host cancelled a booking on them; can't be reopened. */
+  lockedByCancellation?: boolean;
 }
 
 /** An outside calendar (Airbnb, Booking.com, ...) whose events block dates here. */
@@ -443,4 +454,35 @@ export interface ShortletViewsAnalytics {
     uniqueViewers: number;
   }[];
   daily: { date: string; views: number }[];
+}
+
+/** What cancelling a confirmed stay would refund the guest and cost the host. */
+export interface HostCancelPreview {
+  canCancel: boolean;
+  blockedReason?: string;
+  daysBeforeCheckIn: number;
+  guestPaid: boolean;
+  /** Stay, tax and deposit, in naira. */
+  guestRefund: number;
+  feePercent: number;
+  /** Taken from the host's future payouts, in naira. */
+  fee: number;
+}
+
+export interface ShortletHostPenalty {
+  id: string;
+  bookingId: string;
+  listingTitle: string;
+  checkIn: string;
+  checkOut: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+  daysBeforeCheckIn: number;
+  percent: number;
+  amount: number;
+  settledAmount: number;
+  outstanding: number;
+  status: 'OUTSTANDING' | 'SETTLED' | 'WAIVED';
+  waiverReason?: string;
+  createdAt: string;
 }
