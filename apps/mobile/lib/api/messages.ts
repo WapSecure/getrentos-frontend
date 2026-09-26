@@ -73,6 +73,9 @@ export const messagesApi = {
   list: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<Conversation>>(`/renter/messages?page=${page}&pageSize=${pageSize}`),
 
+  /** One conversation with its messages — polled by an open thread. */
+  get: (conversationId: string) => apiFetch<Conversation>(`/renter/messages/${conversationId}`),
+
   start: (participantId: string, propertyId?: string) =>
     apiFetch<Conversation>('/renter/messages', {
       method: 'POST',

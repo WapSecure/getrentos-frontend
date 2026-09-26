@@ -8,6 +8,8 @@ import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerFinancingType } from '@/lib/api/buyerOffers';
 import type { BuyerListing } from '@/lib/api/buyer';
 import { ApiError } from '@/lib/api/client';
+import { VerificationGateNotice } from '@/components/VerificationGateNotice';
+import { readGate } from '@/lib/verificationGate';
 
 interface Props {
   open: boolean;
@@ -57,8 +59,11 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
       onClose();
       router.push(`/(app)/buyer-offer/${offer.id}`);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not submit this offer.', 'error'),
+    onError: (err) => {
+      // A verification gate is explained inline, with the way forward — not as a toast.
+      if (readGate(err)) return;
+      toast.show(err instanceof ApiError ? err.message : 'Could not submit this offer.', 'error');
+    },
   });
 
   const canSubmit = Number(amount) > 0;
@@ -100,6 +105,11 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
         onChangeText={setMessage}
         multiline
         numberOfLines={3}
+      />
+      <VerificationGateNotice
+        error={mutation.error}
+        scoreHref="/(app)/buyer-trust-profile"
+        onNavigate={onClose}
       />
       <Button
         label="Submit offer"

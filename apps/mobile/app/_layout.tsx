@@ -9,11 +9,14 @@ import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
 import { queryClient, queryPersistenceOptions } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
 import { portalHref } from '@/lib/roles';
 import { takeListingHref } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
+import { AppLockGate } from '@/components/AppLockGate';
 import { ConnectivityBanner } from '@/components/ConnectivityBanner';
 import { Sentry } from '@/lib/monitoring';
 
@@ -90,6 +93,8 @@ function Gate() {
   const { colors, scheme } = useTheme();
   const { seen: onboardingSeen } = useOnboardingSeen();
   useMagicLink();
+  usePushNotifications();
+  useOverTheAirUpdates();
   useProtectedRoute(onboardingSeen);
 
   const booting = status === 'loading' || onboardingSeen === null;
@@ -115,6 +120,7 @@ function Gate() {
         <Stack.Screen name="(market)" />
         <Stack.Screen name="(app)" />
       </Stack>
+      <AppLockGate />
       <SplashReveal />
       <ConnectivityBanner />
     </>

@@ -16,6 +16,8 @@ export const qk = {
       ['renter', 'notifications', { page, pageSize }] as const,
     recommended: ['renter', 'recommended'] as const,
     conversations: ['renter', 'conversations'] as const,
+    /** One thread. Lives under `conversations` so invalidating the inbox refreshes it too. */
+    conversation: (id: string) => ['renter', 'conversations', 'one', id] as const,
     viewings: ['renter', 'viewings'] as const,
     pendingLease: ['renter', 'lease', 'pending'] as const,
     renewalOffer: ['renter', 'lease', 'renewal-offer'] as const,

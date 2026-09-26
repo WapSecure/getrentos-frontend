@@ -26,6 +26,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { routeForActionUrl } from '@/lib/notificationRoutes';
 import { qk } from '@/lib/query/keys';
 import { notificationsApi, type RenterNotification } from '@/lib/api/notifications';
 import type { NotificationCategory } from '@/lib/api/notificationPreferences';
@@ -42,28 +43,6 @@ const CATEGORY_ICON: Record<NotificationCategory, typeof Bell> = {
   lease: Home,
   system: ShieldAlert,
 };
-
-/**
- * The API sends `action.url` as a web path (e.g. `/renter/payments`). Map the
- * ones the app implements onto their native routes; anything unmapped simply
- * renders without a tap target rather than pushing a dead route.
- */
-const WEB_PATH_TO_ROUTE: Record<string, string> = {
-  '/renter/payments': '/(app)/payments',
-  '/renter/applications': '/(app)/(renter)/applications',
-  '/renter/maintenance': '/(app)/renter-maintenance',
-  '/renter/messages': '/(app)/(renter)/messages',
-  '/renter/lease': '/(app)/lease',
-  '/renter/documents': '/(app)/documents',
-  '/renter/saved': '/(app)/saved',
-  '/renter/trust-score': '/(app)/trust-score',
-};
-
-function routeForAction(url?: string): string | null {
-  if (!url) return null;
-  const path = url.split('?')[0].replace(/\/$/, '');
-  return WEB_PATH_TO_ROUTE[path] ?? null;
-}
 
 export default function Notifications() {
   const { colors, spacing, radius } = useTheme();
@@ -140,13 +119,13 @@ export default function Notifications() {
 
   const open = (n: RenterNotification) => {
     if (!n.read) readOne.mutate(n.id);
-    const route = routeForAction(n.action?.url);
+    const route = routeForActionUrl(n.action?.url);
     if (route) router.push(route as never);
   };
 
   const renderItem = ({ item }: { item: RenterNotification }) => {
     const Icon = CATEGORY_ICON[item.type] ?? Bell;
-    const route = routeForAction(item.action?.url);
+    const route = routeForActionUrl(item.action?.url);
     return (
       <Pressable
         onPress={() => open(item)}

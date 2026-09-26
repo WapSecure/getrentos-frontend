@@ -69,7 +69,11 @@ export default function Receipts() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Receipt }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => Linking.openURL(item.url)}>
+              <Pressable
+                onPress={() => Linking.openURL(item.url)}
+                accessibilityRole="link"
+                accessibilityLabel={`Receipt for ${item.propertyName}, ${formatDate(item.date, 'short')}`}
+              >
                 <Card elevated>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                     <View style={{ flex: 1, gap: 2 }}>

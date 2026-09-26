@@ -146,8 +146,10 @@ export default function Maintenance() {
                   {item.status === 'submitted' || item.status === 'assigned' ? (
                     <Pressable
                       onPress={() => confirmCancel(item.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Cancel request: ${item.title}`}
                       hitSlop={8}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 36 }}
                     >
                       <Ban size={13} color={colors.mutedForeground} />
                       <Text variant="caption" color="mutedForeground">
@@ -158,8 +160,10 @@ export default function Maintenance() {
                   {item.status === 'resolved' && !item.vendorRating ? (
                     <Pressable
                       onPress={() => setRatingFor(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Rate the vendor for ${item.title}`}
                       hitSlop={8}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 36 }}
                     >
                       <Star size={13} color={colors.primary} />
                       <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
@@ -178,14 +182,26 @@ export default function Maintenance() {
                 </View>
 
                 {ratingFor?.id === item.id ? (
-                  <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm }}>
+                  <View
+                    accessibilityRole="radiogroup"
+                    accessibilityLabel="Vendor rating"
+                    style={{ flexDirection: 'row', marginTop: spacing.xs }}
+                  >
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Pressable
                         key={n}
                         onPress={() => rateMutation.mutate({ id: item.id, rating: n })}
-                        hitSlop={6}
+                        disabled={rateMutation.isPending}
+                        accessibilityRole="radio"
+                        accessibilityLabel={`${n} star${n === 1 ? '' : 's'}`}
+                        style={{
+                          width: 44,
+                          height: 44,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
                       >
-                        <Star size={22} color={colors.warning} fill="transparent" />
+                        <Star size={24} color={colors.warning} fill="transparent" />
                       </Pressable>
                     ))}
                   </View>

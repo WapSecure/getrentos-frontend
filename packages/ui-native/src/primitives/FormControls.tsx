@@ -10,6 +10,7 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { AlertCircle, Check, CheckCircle2, Info, TriangleAlert } from 'lucide-react-native';
 import { useTheme } from '../theme';
+import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 
 /* -------------------------------- Checkbox -------------------------------- */
@@ -94,6 +95,7 @@ export interface FormAlertProps {
  */
 export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
   const { colors, spacing, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (message)
@@ -111,8 +113,8 @@ export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
 
   return (
     <Animated.View
-      entering={FadeIn.duration(160)}
-      exiting={FadeOut.duration(120)}
+      entering={reduceMotion ? undefined : FadeIn.duration(160)}
+      exiting={reduceMotion ? undefined : FadeOut.duration(120)}
       accessible
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"

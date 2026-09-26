@@ -12,6 +12,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
 import { primaryPortal, usablePortal as resolveUsablePortal, type Portal } from '../roles';
+import { unregisterPush } from '../push';
+import { requestAppleCredential } from './apple';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
 import { clearCachedProfile, readCachedProfile, writeCachedProfile } from './profileCache';
 import { markSessionExpired } from './sessionExpiry';
@@ -21,7 +23,8 @@ import { persister } from '../query/client';
 
 interface PendingTwoFactor {
   challengeToken: string;
-  profile: AuthProfile;
+  /** Absent when the challenge came from Google (the redirect carries only the token). */
+  profile?: AuthProfile;
 }
 
 interface AuthContextValue {
@@ -37,7 +40,10 @@ interface AuthContextValue {
   cancelTwoFactor: () => void;
   signInWithMagicLink: (token: string) => Promise<void>;
   /** Provider sign-in (system browser). Throws `OAuthCancelled` if dismissed. */
-  signInWithProvider: (provider: 'google') => Promise<void>;
+  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  signInWithProvider: (provider: 'google') => Promise<{ requiresTwoFactor: boolean }>;
+  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  signInWithApple: () => Promise<{ requiresTwoFactor: boolean }>;
   /** Adopt a session obtained elsewhere (signup). */
   applyExternalSession: (session: AuthSession) => void;
   signOut: () => Promise<void>;
@@ -188,6 +194,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession]
   );
 
+  const signInWithApple = useCallback(async () => {
+    const { identityToken, nonce, fullName } = await requestAppleCredential();
+    const result = await authApi.appleSignIn(identityToken, nonce, fullName);
+    if (isTwoFactorChallenge(result)) {
+      const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
+      setPendingTwoFactor({ challengeToken, profile: prof });
+      return { requiresTwoFactor: true };
+    }
+    applySession(result);
+    return { requiresTwoFactor: false };
+  }, [applySession]);
+
   const completeTwoFactor = useCallback(
     async (code: string) => {
       if (!pendingTwoFactor) throw new Error('No two-factor challenge in progress');
@@ -207,7 +225,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signInWithProvider = useCallback(async (provider: 'google') => {
-    const { accessToken, refreshToken } = await startOAuth(provider);
+    const result = await startOAuth(provider);
+    if (result.kind === 'challenge') {
+      setPendingTwoFactor({ challengeToken: result.challengeToken });
+      return { requiresTwoFactor: true };
+    }
+    const { accessToken, refreshToken } = result;
     accessTokenRef.current = accessToken;
     refreshTokenRef.current = refreshToken;
     await writeTokens({ accessToken, refreshToken });
@@ -215,9 +238,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const prof = await authApi.me();
     setProfile(prof);
     setStatus('authenticated');
+    return { requiresTwoFactor: false };
   }, []);
 
   const signOut = useCallback(async () => {
+    // While the session is still valid: stop pushes to this phone.
+    await unregisterPush();
     const rt = refreshTokenRef.current;
     if (rt) {
       try {
@@ -241,6 +267,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelTwoFactor: () => setPendingTwoFactor(null),
       signInWithMagicLink,
       signInWithProvider,
+      signInWithApple,
       applyExternalSession: applySession,
       signOut,
     }),
@@ -252,6 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       completeTwoFactor,
       signInWithMagicLink,
       signInWithProvider,
+      signInWithApple,
       applySession,
       signOut,
     ]

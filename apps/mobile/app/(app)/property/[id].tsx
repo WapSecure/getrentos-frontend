@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import {
   Maximize,
   MessageCircle,
   PlayCircle,
+  Share2,
   ShieldCheck,
 } from 'lucide-react-native';
 import {
@@ -23,6 +24,8 @@ import {
   Chip,
   Divider,
   ErrorState,
+  IconButton,
+  LinkButton,
   Price,
   Skeleton,
   Text,
@@ -37,6 +40,8 @@ import { ApiError } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { recentlyViewedApi } from '@/lib/api/recentlyViewed';
 import { formatDate } from '@/lib/format';
+import { env } from '@/lib/env';
+import { marketWebPath } from '@/lib/api/publicMarket';
 import { ViewingRequestSheet } from '@/components/property/ViewingRequestSheet';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
@@ -61,6 +66,7 @@ export default function PropertyDetail() {
   const { savedIds, toggle } = useSavedListings();
   const toast = useToast();
   const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
 
   const query = useQuery({
     queryKey: qk.listings.detail(id),
@@ -115,7 +121,9 @@ export default function PropertyDetail() {
                   <Price amount={p.price} period={p.period} variant="title" />
                   {p.verified ? <Badge label="Verified" tone="success" /> : null}
                 </View>
-                <Text variant="heading">{p.title}</Text>
+                <Text variant="heading" accessibilityRole="header">
+                  {p.title}
+                </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <MapPin size={13} color={colors.mutedForeground} />
                   <Text variant="callout" color="mutedForeground">
@@ -124,15 +132,20 @@ export default function PropertyDetail() {
                 </View>
               </View>
 
-              <View style={{ flexDirection: 'row', gap: spacing.xl }}>
-                <Spec
-                  icon={<BedDouble size={16} color={colors.foreground} />}
-                  label={`${p.bedrooms} bed`}
-                />
-                <Spec
-                  icon={<Bath size={16} color={colors.foreground} />}
-                  label={`${p.bathrooms} bath`}
-                />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl }}>
+                {/* Falsy on purpose: "0 bed" reads as a claim, not missing data. */}
+                {p.bedrooms ? (
+                  <Spec
+                    icon={<BedDouble size={16} color={colors.foreground} />}
+                    label={`${p.bedrooms} bed${p.bedrooms === 1 ? '' : 's'}`}
+                  />
+                ) : null}
+                {p.bathrooms ? (
+                  <Spec
+                    icon={<Bath size={16} color={colors.foreground} />}
+                    label={`${p.bathrooms} bath${p.bathrooms === 1 ? '' : 's'}`}
+                  />
+                ) : null}
                 {p.size ? (
                   <Spec
                     icon={<Maximize size={16} color={colors.foreground} />}
@@ -142,17 +155,31 @@ export default function PropertyDetail() {
               </View>
 
               {p.description ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong">About this home</Text>
-                  <Text variant="body" color="mutedForeground">
+                <View style={{ gap: spacing.xs }}>
+                  <Text variant="bodyStrong" accessibilityRole="header">
+                    About this home
+                  </Text>
+                  <Text
+                    variant="body"
+                    color="mutedForeground"
+                    numberOfLines={descriptionOpen ? undefined : 6}
+                  >
                     {p.description}
                   </Text>
+                  {p.description.length > 280 ? (
+                    <LinkButton
+                      label={descriptionOpen ? 'Show less' : 'Read more'}
+                      onPress={() => setDescriptionOpen((v) => !v)}
+                    />
+                  ) : null}
                 </View>
               ) : null}
 
               {p.amenities?.length ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong">Amenities</Text>
+                  <Text variant="bodyStrong" accessibilityRole="header">
+                    Amenities
+                  </Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
                     {p.amenities.map((a) => (
                       <Chip key={a} label={a} size="sm" />
@@ -163,7 +190,9 @@ export default function PropertyDetail() {
 
               {p.landlordName ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong">Listed by</Text>
+                  <Text variant="bodyStrong" accessibilityRole="header">
+                    Listed by
+                  </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Text variant="body">{p.landlordName}</Text>
                     {p.landlordVerified ? <ShieldCheck size={14} color={colors.success} /> : null}
@@ -178,7 +207,9 @@ export default function PropertyDetail() {
 
               {p.reviews && p.reviews.length > 0 ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong">Reviews</Text>
+                  <Text variant="bodyStrong" accessibilityRole="header">
+                    Reviews
+                  </Text>
                   <Card elevated padding="none">
                     {p.reviews.slice(0, 3).map((r, i) => (
                       <View key={r.id}>
@@ -212,7 +243,11 @@ export default function PropertyDetail() {
               ) : null}
 
               {p.videoTourUrl ? (
-                <Pressable onPress={() => Linking.openURL(p.videoTourUrl!)}>
+                <Pressable
+                  onPress={() => Linking.openURL(p.videoTourUrl!)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Watch the video tour"
+                >
                   <Card
                     elevated
                     style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
@@ -248,13 +283,16 @@ export default function PropertyDetail() {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <Text variant="bodyStrong">Location</Text>
+                    <Text variant="bodyStrong" accessibilityRole="header">
+                      Location
+                    </Text>
                     <Pressable
                       onPress={() =>
                         openDirections(p.latitude as number, p.longitude as number, p.title)
                       }
                       accessibilityRole="button"
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                      accessibilityLabel="Get directions"
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}
                       hitSlop={8}
                     >
                       <Navigation size={13} color={colors.primary} />
@@ -278,15 +316,36 @@ export default function PropertyDetail() {
         </View>
       </ScrollView>
 
-      {/* floating back */}
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        style={[styles.back, { top: insets.top + 8 }]}
+      {/* floating controls over the gallery */}
+      <View
+        pointerEvents="box-none"
+        style={{
+          position: 'absolute',
+          top: insets.top + spacing.sm,
+          left: spacing.lg,
+          right: spacing.lg,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
       >
-        <ChevronLeft size={22} color="#fff" />
-      </Pressable>
+        <IconButton
+          onPress={() => router.back()}
+          haptic={false}
+          accessibilityLabel="Go back"
+          icon={<ChevronLeft size={22} color={colors.foreground} />}
+        />
+        {p ? (
+          <IconButton
+            onPress={() =>
+              Share.share({
+                message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
+              }).catch(() => undefined)
+            }
+            accessibilityLabel="Share this home"
+            icon={<Share2 size={19} color={colors.foreground} />}
+          />
+        ) : null}
+      </View>
 
       {/* sticky action bar */}
       {p ? (
@@ -309,6 +368,8 @@ export default function PropertyDetail() {
           <Pressable
             onPress={() => toggle(id)}
             accessibilityRole="button"
+            accessibilityLabel={saved ? 'Remove from saved' : 'Save this home'}
+            accessibilityState={{ selected: saved }}
             style={{
               width: 52,
               height: 52,
@@ -330,6 +391,8 @@ export default function PropertyDetail() {
               onPress={() => messageMutation.mutate()}
               disabled={messageMutation.isPending}
               accessibilityRole="button"
+              accessibilityLabel={`Message ${p.landlordName ?? 'the landlord'}`}
+              accessibilityState={{ busy: messageMutation.isPending }}
               style={{
                 width: 52,
                 height: 52,
@@ -347,6 +410,7 @@ export default function PropertyDetail() {
           <Pressable
             onPress={() => setViewingSheetOpen(true)}
             accessibilityRole="button"
+            accessibilityLabel="Book a viewing"
             style={{
               width: 52,
               height: 52,
@@ -388,16 +452,3 @@ function Spec({ icon, label }: { icon: React.ReactNode; label: string }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  back: {
-    position: 'absolute',
-    left: 16,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(9,32,66,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
