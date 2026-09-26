@@ -91,7 +91,6 @@ export function Button({
       borderWidth: variant === 'outline' ? StyleSheet.hairlineWidth * 2 : 0,
     },
     variant !== 'primary' && variant !== 'destructive' && { backgroundColor: palette.bg },
-    isDisabled && { opacity: 0.5 },
     style,
   ];
 

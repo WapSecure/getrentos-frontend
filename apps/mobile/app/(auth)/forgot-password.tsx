@@ -15,6 +15,7 @@ import {
   SegmentedControl,
   Text,
   TextField,
+  useReducedMotion,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -35,6 +36,7 @@ const STEP_INDEX: Record<Step, number> = { request: 0, otp: 1, reset: 2 };
 
 export default function ForgotPassword() {
   const { colors, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const toast = useToast();
   const [step, setStep] = useState<Step>('request');
   const [method, setMethod] = useState<OtpMethod>('email');
@@ -173,7 +175,10 @@ export default function ForgotPassword() {
       }
     >
       {step === 'request' ? (
-        <Animated.View entering={FadeIn.duration(180)} style={{ gap: spacing.xl }}>
+        <Animated.View
+          entering={reduceMotion ? undefined : FadeIn.duration(180)}
+          style={{ gap: spacing.xl }}
+        >
           <SegmentedControl<OtpMethod>
             accessibilityLabel="Send the code by"
             value={method}
@@ -227,7 +232,7 @@ export default function ForgotPassword() {
         </Animated.View>
       ) : step === 'otp' ? (
         <Animated.View
-          entering={SlideInRight.duration(220)}
+          entering={reduceMotion ? undefined : SlideInRight.duration(220)}
           style={{ gap: spacing.xl, alignItems: 'center' }}
         >
           <View style={{ alignSelf: 'stretch' }}>
@@ -264,7 +269,10 @@ export default function ForgotPassword() {
           </View>
         </Animated.View>
       ) : (
-        <Animated.View entering={SlideInRight.duration(220)} style={{ gap: spacing.lg }}>
+        <Animated.View
+          entering={reduceMotion ? undefined : SlideInRight.duration(220)}
+          style={{ gap: spacing.lg }}
+        >
           <View
             importantForAccessibility="no-hide-descendants"
             accessibilityElementsHidden

@@ -272,7 +272,7 @@ export default function ApplicationDetail() {
         accessibilityLabel="Back"
         style={[styles.back, { top: insets.top + 8 }]}
       >
-        <ChevronLeft size={22} color="#fff" />
+        <ChevronLeft size={22} color={colors.primaryForeground} />
       </Pressable>
 
       {canWithdraw ? (
@@ -322,9 +322,9 @@ const styles = StyleSheet.create({
   back: {
     position: 'absolute',
     left: 16,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: 'rgba(9,32,66,0.5)',
     alignItems: 'center',
     justifyContent: 'center',

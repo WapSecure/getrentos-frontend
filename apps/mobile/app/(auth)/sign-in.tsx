@@ -14,6 +14,7 @@ import {
   SegmentedControl,
   Text,
   TextField,
+  useReducedMotion,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -62,6 +63,7 @@ export default function SignIn() {
     }
   };
   const { colors, spacing, scheme } = useTheme();
+  const reduceMotion = useReducedMotion();
   const toast = useToast();
   const passwordRef = useRef<TextInput>(null);
   const [method, setMethod] = useState<Method>('password');
@@ -261,7 +263,11 @@ export default function SignIn() {
         ) : null}
 
         {method === 'password' ? (
-          <Animated.View key="pw" entering={FadeIn.duration(180)} style={{ gap: spacing.lg }}>
+          <Animated.View
+            key="pw"
+            entering={reduceMotion ? undefined : FadeIn.duration(180)}
+            style={{ gap: spacing.lg }}
+          >
             <Controller
               control={control}
               name="identifier"
@@ -315,7 +321,11 @@ export default function SignIn() {
             </Row>
           </Animated.View>
         ) : (
-          <Animated.View key="magic" entering={FadeIn.duration(180)} style={{ gap: spacing.md }}>
+          <Animated.View
+            key="magic"
+            entering={reduceMotion ? undefined : FadeIn.duration(180)}
+            style={{ gap: spacing.md }}
+          >
             {magicSent ? (
               <FormAlert
                 tone="success"

@@ -112,7 +112,10 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
               contentFit="cover"
             />
             <Pressable
-              onPress={() => setCover(null)}
+              onPress={(event) => {
+                event.stopPropagation();
+                setCover(null);
+              }}
               accessibilityRole="button"
               accessibilityLabel="Remove the cover photo"
               hitSlop={8}
@@ -120,15 +123,15 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
                 position: 'absolute',
                 top: spacing.sm,
                 right: spacing.sm,
-                width: 28,
-                height: 28,
-                borderRadius: 14,
+                width: 44,
+                height: 44,
+                borderRadius: 22,
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: colors.scrim,
               }}
             >
-              <X size={15} color="#fff" />
+              <X size={18} color={colors.primaryForeground} />
             </Pressable>
           </>
         ) : (

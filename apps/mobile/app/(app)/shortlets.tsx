@@ -171,15 +171,19 @@ export default function Shortlets() {
                           position: 'absolute',
                           top: spacing.md,
                           right: spacing.md,
-                          width: 34,
-                          height: 34,
-                          borderRadius: 17,
+                          width: 44,
+                          height: 44,
+                          borderRadius: 22,
                           alignItems: 'center',
                           justifyContent: 'center',
                           backgroundColor: 'rgba(0,0,0,0.35)',
                         }}
                       >
-                        <Heart size={17} color="#fff" fill={saved ? '#fff' : 'transparent'} />
+                        <Heart
+                          size={19}
+                          color={colors.primaryForeground}
+                          fill={saved ? colors.primaryForeground : 'transparent'}
+                        />
                       </Pressable>
                     </View>
 

@@ -17,6 +17,7 @@ import {
   SegmentedControl,
   Text,
   TextField,
+  useReducedMotion,
   useTheme,
 } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
@@ -146,8 +147,10 @@ function Referral({
   setReferral,
   colors,
 }: Pick<Shared, 'showReferral' | 'setShowReferral' | 'referral' | 'setReferral' | 'colors'>) {
+  const reduceMotion = useReducedMotion();
+
   return showReferral ? (
-    <Animated.View entering={FadeIn.duration(160)}>
+    <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(160)}>
       <TextField
         label="Referral code (optional)"
         placeholder="Enter a code"

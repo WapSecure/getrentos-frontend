@@ -156,8 +156,8 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
             backgroundColor: colors.scrim,
           }}
         >
-          <Camera size={13} color="#fff" />
-          <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
+          <Camera size={13} color={colors.primaryForeground} />
+          <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '600' }}>
             {uploadBanner.isPending ? 'Uploading…' : initial.bannerUrl ? 'Change' : 'Add'}
           </Text>
         </View>
