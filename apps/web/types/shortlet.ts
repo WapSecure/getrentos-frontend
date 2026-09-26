@@ -71,6 +71,18 @@ export interface ShortletListing {
   seasons: ShortletSeason[];
   /** Confirmed stays the host cancelled on this listing in the last 12 months (detail view). */
   hostCancellations12m?: number;
+  houseRules?: string;
+  /** Unset = the host hasn't said. */
+  petsAllowed?: boolean;
+  smokingAllowed?: boolean;
+  partiesAllowed?: boolean;
+  powerSources?: string[];
+  powerHoursPerDay?: number;
+  waterSupply?: string;
+  internetType?: string;
+  internetSpeedMbps?: number;
+  /** Host view only. */
+  checkInInstructions?: string;
   currency: string;
   instantBooking: boolean;
   maxGuests: number;
@@ -113,6 +125,8 @@ export interface ShortletBooking {
   cancelledBy?: 'GUEST' | 'HOST' | 'ADMIN';
   /** The host's reason, when the host cancelled. */
   cancellationReason?: string;
+  /** How to get in; only on a confirmed, paid stay. */
+  checkInInstructions?: string;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
   paymentRequired?: boolean;
@@ -234,7 +248,21 @@ export interface CreateShortletListingInput extends ShortletPricingRules {
   deposit?: number;
 }
 
-export interface UpdateShortletListingInput extends ShortletPricingRules {
+/** House rules, power, water, internet and check-in instructions; null clears a field. */
+export interface ShortletEssentialsInput {
+  houseRules?: string | null;
+  petsAllowed?: boolean | null;
+  smokingAllowed?: boolean | null;
+  partiesAllowed?: boolean | null;
+  powerSources?: string[];
+  powerHoursPerDay?: number | null;
+  waterSupply?: string | null;
+  internetType?: string | null;
+  internetSpeedMbps?: number | null;
+  checkInInstructions?: string | null;
+}
+
+export interface UpdateShortletListingInput extends ShortletPricingRules, ShortletEssentialsInput {
   pricingMode?: ShortletPricingMode;
   nightlyRate?: number;
   cleaningFee?: number;

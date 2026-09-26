@@ -11,6 +11,7 @@ import {
   BedDouble,
   CalendarCheck,
   CalendarX,
+  Droplets,
   Clock,
   Heart,
   Image as ImageIcon,
@@ -23,6 +24,7 @@ import {
   Star,
   Users,
   Video,
+  Wifi,
   Zap,
 } from 'lucide-react';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
@@ -31,6 +33,12 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency, formatDate } from '@/lib/format';
+import {
+  INTERNET_TYPE_LABEL,
+  POWER_SOURCE_LABEL,
+  powerHoursLabel,
+  WATER_SUPPLY_LABEL,
+} from '@/lib/shortlet/essentials';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
 import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
 import type {
@@ -46,6 +54,18 @@ const CANCELLATION_RULE: Record<ShortletCancellationPolicy, string> = {
   MODERATE: 'Full refund 5+ days before; 50% up to 1 day before check-in.',
   STRICT: 'Full refund 7+ days before; 50% from 3 days; no refund within 3 days.',
 };
+
+const hasUtilities = (l: ShortletListing) =>
+  l.powerHoursPerDay != null ||
+  (l.powerSources ?? []).length > 0 ||
+  Boolean(l.waterSupply) ||
+  Boolean(l.internetType);
+
+const hasRules = (l: ShortletListing) =>
+  l.petsAllowed != null ||
+  l.smokingAllowed != null ||
+  l.partiesAllowed != null ||
+  Boolean(l.houseRules);
 
 export function ShortletListingDetail({
   listingId,
@@ -366,6 +386,75 @@ export function ShortletListingDetail({
                   </Badge>
                 ))}
               </div>
+            </section>
+          )}
+
+          {hasUtilities(listing) && (
+            <section>
+              <h2 className="mb-1 text-lg font-semibold">Power, water &amp; internet</h2>
+              <p className="mb-2 text-xs text-muted-foreground">As described by the host.</p>
+              <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                {(listing.powerHoursPerDay != null || (listing.powerSources ?? []).length > 0) && (
+                  <div className="flex items-start gap-2">
+                    <Zap className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span>
+                      {listing.powerHoursPerDay != null && (
+                        <span className="font-medium">
+                          {powerHoursLabel(listing.powerHoursPerDay)}
+                        </span>
+                      )}
+                      {(listing.powerSources ?? []).length > 0 && (
+                        <span className="block text-muted-foreground">
+                          {(listing.powerSources ?? [])
+                            .map((s) => POWER_SOURCE_LABEL[s] ?? s)
+                            .join(' · ')}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                )}
+                {listing.waterSupply && (
+                  <div className="flex items-center gap-2">
+                    <Droplets className="h-4 w-4 text-muted-foreground" />
+                    {WATER_SUPPLY_LABEL[listing.waterSupply] ?? listing.waterSupply}
+                  </div>
+                )}
+                {listing.internetType && (
+                  <div className="flex items-center gap-2">
+                    <Wifi className="h-4 w-4 text-muted-foreground" />
+                    {INTERNET_TYPE_LABEL[listing.internetType] ?? listing.internetType}
+                    {listing.internetSpeedMbps ? ` · about ${listing.internetSpeedMbps} Mbps` : ''}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {hasRules(listing) && (
+            <section>
+              <h2 className="mb-2 text-lg font-semibold">House rules</h2>
+              <div className="mb-2 flex flex-wrap gap-2">
+                {listing.petsAllowed != null && (
+                  <Badge variant={listing.petsAllowed ? 'success' : 'neutral'}>
+                    {listing.petsAllowed ? 'Pets allowed' : 'No pets'}
+                  </Badge>
+                )}
+                {listing.smokingAllowed != null && (
+                  <Badge variant={listing.smokingAllowed ? 'success' : 'neutral'}>
+                    {listing.smokingAllowed ? 'Smoking allowed' : 'No smoking'}
+                  </Badge>
+                )}
+                {listing.partiesAllowed != null && (
+                  <Badge variant={listing.partiesAllowed ? 'success' : 'neutral'}>
+                    {listing.partiesAllowed ? 'Parties & events allowed' : 'No parties or events'}
+                  </Badge>
+                )}
+              </div>
+              {listing.houseRules && (
+                <p className="whitespace-pre-line text-sm text-muted-foreground">
+                  {listing.houseRules}
+                </p>
+              )}
             </section>
           )}
 

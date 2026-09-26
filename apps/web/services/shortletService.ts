@@ -32,6 +32,11 @@ import type {
 } from '@/types/shortlet';
 
 export interface ShortletListParams {
+  /** Only stays with all of these amenities. */
+  amenities?: string[];
+  /** Only stays whose host says they have power 24 hours a day. */
+  power24h?: boolean;
+  petsAllowed?: boolean;
   page?: number;
   pageSize?: number;
   city?: string;
@@ -70,6 +75,9 @@ const listQuery = (params: ShortletListParams): string =>
     propertyType: params.propertyType,
     instantBooking: params.instantBooking ? 'true' : undefined,
     verifiedOnly: params.verifiedOnly ? 'true' : undefined,
+    amenities: params.amenities?.length ? params.amenities.join(',') : undefined,
+    power24h: params.power24h ? 'true' : undefined,
+    petsAllowed: params.petsAllowed ? 'true' : undefined,
     checkIn: params.checkIn,
     checkOut: params.checkOut,
     estate: params.estate,
