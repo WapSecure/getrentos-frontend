@@ -6,7 +6,7 @@ import { useRealtorUser } from '../layout';
 import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/realtor/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/realtor/settings/NotificationSettings';
-import { PayoutSettings } from '@/components/realtor/settings/PayoutSettings';
+import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { BusinessPreferencesSettings } from '@/components/realtor/settings/BusinessPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 
@@ -35,7 +35,9 @@ export default function RealtorSettingsPage() {
       case 'notifications':
         return <NotificationSettings />;
       case 'payouts':
-        return <PayoutSettings />;
+        return (
+          <SellerPayoutSettings description="Where proceeds from properties you sell on the marketplace are sent once escrow releases. Commission from your clients is paid to you directly, not through GetRentos." />
+        );
       case 'preferences':
         return <BusinessPreferencesSettings />;
       default:

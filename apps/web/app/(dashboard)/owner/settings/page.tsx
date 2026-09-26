@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { User, Bell, Landmark, SlidersHorizontal } from 'lucide-react';
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
-import { PayoutSettings } from '@/components/owner/settings/PayoutSettings';
+import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 
 type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences';
@@ -28,7 +28,9 @@ export default function OwnerSettingsPage() {
       case 'notifications':
         return <NotificationSettings />;
       case 'payouts':
-        return <PayoutSettings />;
+        return (
+          <SellerPayoutSettings description="Where your marketplace sale proceeds are sent once escrow releases — transfers run through Paystack." />
+        );
       case 'preferences':
         return <PreferencesSettings />;
       default:

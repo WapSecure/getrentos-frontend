@@ -519,24 +519,6 @@ export const realtorService = {
       })
     );
   },
-  getPayoutAccount: () =>
-    safeCall(() =>
-      authFetch<{
-        bankName: string;
-        accountNumber: string;
-        accountName: string;
-        verified: boolean;
-      }>('/realtor/settings/payout')
-    ),
-  updatePayoutAccount: (data: { bankName: string; accountNumber: string; accountName: string }) =>
-    safeCall(() =>
-      authFetch<{
-        bankName: string;
-        accountNumber: string;
-        accountName: string;
-        verified: boolean;
-      }>('/realtor/settings/payout', { method: 'PUT', body: JSON.stringify(data) })
-    ),
   getNotificationPreferences: () =>
     safeCall(() =>
       authFetch<{ id: string; email: boolean; push: boolean }[]>('/realtor/settings/notifications')
