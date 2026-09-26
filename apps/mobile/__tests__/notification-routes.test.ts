@@ -30,4 +30,14 @@ describe('notification routes', () => {
       '/(app)/notifications'
     );
   });
+
+  it('sends a seller to their own side of an offer or escrow', () => {
+    expect(routeForNotification({ type: 'OFFER_RECEIVED' }, 'owner')).toBe('/(app)/(owner)/offers');
+    expect(routeForNotification({ type: 'ESCROW_RELEASED' }, 'owner')).toBe(
+      '/(app)/owner-transactions'
+    );
+    expect(routeForNotification({ type: 'OFFER_COUNTERED' }, 'buyer')).toBe(
+      '/(app)/(buyer)/offers'
+    );
+  });
 });

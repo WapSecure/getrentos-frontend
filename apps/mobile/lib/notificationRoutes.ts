@@ -28,6 +28,11 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/landlord/maintenance': '/(app)/landlord-maintenance',
   '/landlord/leases': '/(app)/landlord-leases',
   '/landlord/messages': '/(app)/(landlord)/messages',
+  '/owner/offers': '/(app)/(owner)/offers',
+  '/owner/properties': '/(app)/(owner)/properties',
+  '/owner/transactions': '/(app)/owner-transactions',
+  '/owner/messages': '/(app)/(owner)/messages',
+  '/owner/leads': '/(app)/owner-leads',
   '/resident/visitor-passes': '/(app)/visitor-passes',
   '/resident/dues': '/(app)/dues',
   '/resident/deliveries': '/(app)/deliveries',
@@ -47,8 +52,14 @@ const TYPE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_ANNOUNCEMENT_', '/(app)/(resident)/announcements'],
 ];
 
+/** Owner-side screens for the same notification types. */
+const OWNER_FALLBACK: [prefix: string, route: string][] = [
+  ['OFFER_', '/(app)/(owner)/offers'],
+  ['ESCROW_', '/(app)/owner-transactions'],
+];
+
 /** Portals whose tab bar has a Messages tab. */
-const PORTALS_WITH_INBOX = new Set<Portal>(['renter', 'buyer', 'landlord', 'agent']);
+const PORTALS_WITH_INBOX = new Set<Portal>(['renter', 'buyer', 'landlord', 'agent', 'owner']);
 
 /** The native route for a web action path, or null if the app has no screen for it. */
 export function routeForActionUrl(url?: string | null): string | null {
@@ -69,6 +80,12 @@ export function routeForNotification(
 ): string {
   const direct = routeForActionUrl(actionUrl);
   if (direct) return direct;
+  // Sellers see offers and escrow from the other side of the table.
+  const portalFallback =
+    portal === 'owner' && type
+      ? OWNER_FALLBACK.find(([prefix]) => type.startsWith(prefix))?.[1]
+      : undefined;
+  if (portalFallback) return portalFallback;
   const byType = type ? TYPE_FALLBACK.find(([prefix]) => type.startsWith(prefix))?.[1] : null;
   if (byType) return byType;
   if (type === 'NEW_MESSAGE' && portal && PORTALS_WITH_INBOX.has(portal)) {
