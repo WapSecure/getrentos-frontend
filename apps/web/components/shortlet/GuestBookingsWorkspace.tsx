@@ -20,6 +20,7 @@ import {
   CreditCard,
   Gavel,
   Heart,
+  KeyRound,
   MapPin,
   MessageSquare,
   RotateCcw,
@@ -267,6 +268,14 @@ export const GuestBookingsWorkspace = () => {
                     night{b.nights > 1 ? 's' : ''} · {b.guestCount} guest
                     {b.guestCount > 1 ? 's' : ''}
                   </p>
+                  {b.checkInInstructions && (
+                    <div className="mt-2 max-w-md rounded-md border border-border bg-secondary/40 px-3 py-2 text-xs">
+                      <p className="mb-1 flex items-center gap-1.5 font-medium">
+                        <KeyRound className="h-3.5 w-3.5" /> How to get in
+                      </p>
+                      <p className="whitespace-pre-line">{b.checkInInstructions}</p>
+                    </div>
+                  )}
                   {b.status === 'CANCELLED' && b.cancelledBy === 'HOST' && (
                     <p className="mt-2 max-w-md rounded-md bg-secondary/50 px-3 py-2 text-xs">
                       <span className="font-medium">Your host cancelled this stay</span>

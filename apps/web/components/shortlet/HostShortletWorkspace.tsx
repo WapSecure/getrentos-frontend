@@ -28,6 +28,7 @@ import {
   BarChart3,
   CalendarOff,
   CalendarSync,
+  ClipboardList,
   Banknote,
   Gavel,
   MessageSquare,
@@ -56,6 +57,8 @@ import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
 import { ShortletPeakPricingDialog } from './ShortletPeakPricingDialog';
 import { ShortletCalendarSyncDialog } from './ShortletCalendarSyncDialog';
 import { HostCancelBookingDialog } from './HostCancelBookingDialog';
+import { ShortletEssentialsDialog } from './ShortletEssentialsDialog';
+import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -69,19 +72,6 @@ const PAGE_SIZE = 10;
 type Tab = 'listings' | 'bookings';
 type HostRole = 'owner' | 'landlord';
 const TODAY = new Date().toISOString().slice(0, 10);
-
-const SHORTLET_AMENITIES = [
-  'WiFi',
-  'Parking',
-  'Swimming Pool',
-  'Security',
-  '24/7 Power',
-  'Gym',
-  'Elevator',
-  'Air Conditioning',
-  'Kitchen',
-  'Washer',
-];
 
 const CANCELLATION_POLICIES: { value: ShortletCancellationPolicy; label: string; hint: string }[] =
   [
@@ -120,6 +110,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
   const [pricingTarget, setPricingTarget] = useState<ShortletListing | null>(null);
   const [syncTarget, setSyncTarget] = useState<ShortletListing | null>(null);
+  const [essentialsTarget, setEssentialsTarget] = useState<ShortletListing | null>(null);
   const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
@@ -315,6 +306,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     <Button variant="outline" size="sm" onClick={() => setBlockTarget(l)}>
                       <CalendarOff className="mr-1.5 h-4 w-4" /> Block dates
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => setEssentialsTarget(l)}>
+                      <ClipboardList className="mr-1.5 h-4 w-4" /> Rules &amp; essentials
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => setSyncTarget(l)}>
                       <CalendarSync className="mr-1.5 h-4 w-4" /> Calendar sync
                     </Button>
@@ -503,6 +497,12 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             setCancelTarget(null);
             setToast({ message, variant: 'success' });
           }}
+        />
+      )}
+      {essentialsTarget && (
+        <ShortletEssentialsDialog
+          listing={essentialsTarget}
+          onClose={() => setEssentialsTarget(null)}
         />
       )}
       {syncTarget && (

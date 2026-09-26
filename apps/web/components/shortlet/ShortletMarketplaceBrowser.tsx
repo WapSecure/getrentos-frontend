@@ -20,6 +20,7 @@ import {
 } from '@getrentos/ui';
 import { BedDouble, CalendarCheck, Heart, MapPin, Search, Star, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
+import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
@@ -45,6 +46,9 @@ export const ShortletMarketplaceBrowser = () => {
   const [bedrooms, setBedrooms] = useState('');
   const [instantOnly, setInstantOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [power24h, setPower24h] = useState(false);
+  const [petsOnly, setPetsOnly] = useState(false);
+  const [amenities, setAmenities] = useState<string[]>([]);
   const [city, setCity] = useState('');
   const [guests, setGuests] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -63,6 +67,9 @@ export const ShortletMarketplaceBrowser = () => {
       bedrooms: bedrooms ? Number(bedrooms) : undefined,
       instantBooking: instantOnly,
       verifiedOnly,
+      power24h,
+      petsAllowed: petsOnly,
+      amenities,
       city: city.trim() || undefined,
       guests: guests ? Number(guests) : undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
@@ -88,6 +95,9 @@ export const ShortletMarketplaceBrowser = () => {
       bedrooms,
       instantOnly,
       verifiedOnly,
+      power24h,
+      petsOnly,
+      amenities,
     ]
   );
 
@@ -236,6 +246,53 @@ export const ShortletMarketplaceBrowser = () => {
           />
           Verified only
         </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <Checkbox
+            checked={power24h}
+            onCheckedChange={(v) => {
+              setPower24h(v);
+              setPage(1);
+            }}
+            aria-label="Power 24 hours a day"
+          />
+          24-hour power
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <Checkbox
+            checked={petsOnly}
+            onCheckedChange={(v) => {
+              setPetsOnly(v);
+              setPage(1);
+            }}
+            aria-label="Pets allowed"
+          />
+          Pets allowed
+        </label>
+      </div>
+      <div className="-mt-3 mb-6 flex flex-wrap gap-2" role="group" aria-label="Amenities">
+        {SHORTLET_AMENITIES.filter((a) => a !== '24/7 Power').map((amenity) => {
+          const on = amenities.includes(amenity);
+          return (
+            <button
+              key={amenity}
+              type="button"
+              aria-pressed={on}
+              onClick={() => {
+                setAmenities((current) =>
+                  on ? current.filter((a) => a !== amenity) : [...current, amenity]
+                );
+                setPage(1);
+              }}
+              className={`cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
+                on
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border text-muted-foreground hover:bg-secondary'
+              }`}
+            >
+              {amenity}
+            </button>
+          );
+        })}
       </div>
 
       {estateFromUrl && (
