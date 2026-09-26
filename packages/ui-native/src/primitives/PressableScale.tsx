@@ -8,6 +8,7 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import { useReducedMotion } from '../accessibility';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -29,12 +30,13 @@ export const PressableScale = forwardRef<View, PressableScaleProps>(function Pre
   { activeScale = 0.97, haptic = true, onPressIn, onPressOut, style, children, disabled, ...rest },
   ref
 ) {
+  const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0); // 0 = released, 1 = pressed
 
   const animatedStyle = useAnimatedStyle(() => {
-    const scale = 1 - progress.value * (1 - activeScale);
+    const scale = reduceMotion ? 1 : 1 - progress.value * (1 - activeScale);
     return { transform: [{ scale: withSpring(scale, SPRING) }] };
-  });
+  }, [activeScale, reduceMotion]);
 
   return (
     <AnimatedPressable

@@ -4,19 +4,13 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  AlertTriangle,
-  ChevronLeft,
-  FileStack,
-  Receipt as ReceiptIcon,
-  Wallet,
-} from 'lucide-react-native';
+import { AlertTriangle, FileStack, Receipt as ReceiptIcon, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -33,10 +27,10 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function Payments() {
   const { colors, spacing, radius } = useTheme();
-  const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
   const [disputePayment, setDisputePayment] = useState<Payment | null>(null);
@@ -76,45 +70,26 @@ export default function Payments() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Payments
-        </Text>
-        <Pressable
-          onPress={() => router.push('/(app)/payment-methods')}
-          accessibilityRole="button"
-          accessibilityLabel="Payment methods"
-          hitSlop={10}
-          style={{ marginRight: spacing.lg }}
-        >
-          <Wallet size={20} color={colors.foreground} />
-        </Pressable>
-        <Pressable
-          onPress={() => router.push('/(app)/receipts')}
-          accessibilityRole="button"
-          accessibilityLabel="Receipts"
-          hitSlop={10}
-        >
-          <FileStack size={20} color={colors.foreground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Renter finance"
+        title="Payments"
+        subtitle="Rent, receipts and payment history"
+        onBack={() => router.back()}
+        accessory={
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <IconButton
+              onPress={() => router.push('/(app)/payment-methods')}
+              accessibilityLabel="Payment methods"
+              icon={<Wallet size={19} color={colors.foreground} />}
+            />
+            <IconButton
+              onPress={() => router.push('/(app)/receipts')}
+              accessibilityLabel="Receipts"
+              icon={<FileStack size={19} color={colors.foreground} />}
+            />
+          </View>
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

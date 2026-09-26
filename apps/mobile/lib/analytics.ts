@@ -1,11 +1,12 @@
 /**
  * Analytics + error-reporting seam.
  *
- * One indirection so screens call `track(...)` / `report(...)` today against a
- * dev console sink, and a real provider (PostHog, Segment, Sentry) is wired in
- * here later without touching call sites. Never throws — instrumentation must
- * not be able to break a screen.
+ * One indirection so screens call `track(...)` / `report(...)`. Product events
+ * become privacy-safe Sentry breadcrumbs and caught failures become reports;
+ * development also keeps its readable console sink. Never throws.
  */
+
+import { Sentry } from './monitoring';
 
 type Props = Record<string, string | number | boolean | null | undefined>;
 
@@ -33,18 +34,20 @@ let userId: string | null = null;
 
 export function identify(id: string, traits?: Props): void {
   userId = id;
+  Sentry.setUser({ id });
   if (__DEV__) console.log('[analytics] identify', id, traits ?? {});
 }
 
 export function reset(): void {
   userId = null;
+  Sentry.setUser(null);
   if (__DEV__) console.log('[analytics] reset');
 }
 
 export function track(event: AnalyticsEvent, props?: Props): void {
   try {
     if (__DEV__) console.log('[analytics]', event, { userId, ...props });
-    // TODO: forward to the real provider once configured.
+    Sentry.addBreadcrumb({ category: 'product', message: event, data: props, level: 'info' });
   } catch {
     /* never throw from instrumentation */
   }
@@ -55,7 +58,9 @@ export function report(error: unknown, context?: Props): void {
   try {
     const message = error instanceof Error ? error.message : String(error);
     if (__DEV__) console.warn('[report]', message, context ?? {});
-    // TODO: forward to Sentry/Crashlytics once configured.
+    Sentry.captureException(error instanceof Error ? error : new Error(message), {
+      extra: context,
+    });
   } catch {
     /* swallow */
   }

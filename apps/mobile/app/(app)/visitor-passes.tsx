@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, Clock, KeyRound, Plus, UserPlus } from 'lucide-react-native';
+import { Clock, KeyRound, Plus, UserPlus } from 'lucide-react-native';
 import {
   Badge,
   type BadgeTone,
@@ -11,6 +10,7 @@ import {
   Card,
   Chip,
   EmptyState,
+  IconButton,
   Screen,
   Skeleton,
   Text,
@@ -28,6 +28,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   pending: 'Pending',
@@ -59,36 +60,6 @@ const EXPIRY_PRESETS = [
   { label: '24 hours', hours: 24 },
   { label: '3 days', hours: 72 },
 ] as const;
-
-function BackHeader({ title, action }: { title: string; action?: React.ReactNode }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title" style={{ flex: 1 }}>
-        {title}
-      </Text>
-      {action}
-    </View>
-  );
-}
 
 export default function ResidentVisitorPasses() {
   const { colors, spacing } = useTheme();
@@ -170,25 +141,17 @@ export default function ResidentVisitorPasses() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader
+      <DetailScreenHeader
+        eyebrow="Access control"
         title="Visitor Passes"
-        action={
-          <Pressable
+        subtitle="Invite guests and approve gate arrivals"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
             onPress={() => setIssueOpen(true)}
-            accessibilityRole="button"
             accessibilityLabel="Issue a new pass"
-            hitSlop={10}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: colors.accent,
-            }}
-          >
-            <Plus size={18} color={colors.primary} />
-          </Pressable>
+            icon={<Plus size={20} color={colors.primary} />}
+          />
         }
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>

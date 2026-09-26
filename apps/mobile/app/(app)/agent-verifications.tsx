@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, CheckCircle, ChevronLeft, XCircle } from 'lucide-react-native';
+import { BadgeCheck, CheckCircle, XCircle } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -22,6 +22,7 @@ import {
   type AgentVerificationSubjectType,
 } from '@/lib/api/agent';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 const SUBJECT_TYPES: AgentVerificationSubjectType[] = ['TENANT', 'BUYER', 'PROPERTY'];
 const SUBJECT_LABEL: Record<AgentVerificationSubjectType, string> = {
@@ -66,27 +67,22 @@ export default function AgentVerifications() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Verifications</Text>
+        <DetailHeader
+          eyebrow="Trust operations"
+          title="Verifications"
+          subtitle="Identity and property field checks"
+          onBack={() => router.back()}
+        />
       </View>
 
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <ScrollView
+          accessibilityLabel="Filter verifications by subject"
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing.xs }}

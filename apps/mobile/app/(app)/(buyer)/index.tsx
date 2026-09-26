@@ -9,7 +9,18 @@ import {
   ShoppingBag,
   Wallet,
 } from 'lucide-react-native';
-import { Card, Price, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Card,
+  EmptyState,
+  Price,
+  Screen,
+  SectionHeader,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -54,55 +65,13 @@ export default function BuyerHome() {
 
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-      <View style={{ gap: spacing.xxs }}>
-        <Text variant="label" color="primary" uppercase>
-          {greeting()}
-        </Text>
-        <Text variant="title">{firstName(profile?.legalName)}</Text>
-      </View>
+      <DashboardHeader
+        eyebrow={greeting()}
+        title={firstName(profile?.legalName)}
+        subtitle="Your property journey, at a glance"
+      />
 
-      <Card elevated padding="none">
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {dashboard.isPending
-            ? [0, 1, 2, 3].map((i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: '50%',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingVertical: spacing.lg,
-                  }}
-                >
-                  <Skeleton height={22} width={22} />
-                </View>
-              ))
-            : metrics.map(({ label, value, Icon, onPress }, i) => (
-                <Pressable
-                  key={label}
-                  onPress={onPress}
-                  disabled={!onPress}
-                  style={{
-                    width: '50%',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingVertical: spacing.lg,
-                    borderLeftWidth: i % 2 === 1 ? 1 : 0,
-                    borderTopWidth: i >= 2 ? 1 : 0,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <Icon size={17} color={colors.mutedForeground} />
-                  <Text variant="title" style={{ fontSize: 20, lineHeight: 24 }}>
-                    {value}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {label}
-                  </Text>
-                </Pressable>
-              ))}
-        </View>
-      </Card>
+      <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
       {dashboard.data?.activeTransactions ? (
         <Pressable onPress={() => router.push('/(app)/buyer-transactions')}>
@@ -131,29 +100,21 @@ export default function BuyerHome() {
       ) : null}
 
       <View style={{ gap: spacing.md }}>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Text variant="heading">Recommended for you</Text>
-          <Pressable
-            onPress={() => router.push('/(app)/(buyer)/discover')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
-          >
-            <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-              See all
-            </Text>
-            <ChevronRight size={15} color={colors.primary} />
-          </Pressable>
-        </View>
+        <SectionHeader
+          title="Recommended for you"
+          description="Verified opportunities matched to your activity"
+          actionLabel="See all"
+          onAction={() => router.push('/(app)/(buyer)/discover')}
+        />
 
         {dashboard.isPending ? (
           <Skeleton height={140} radius={16} />
         ) : !dashboard.data?.recommendations?.length ? (
-          <Card elevated>
-            <Text variant="callout" color="mutedForeground">
-              No recommendations yet — start browsing to help us learn what you like.
-            </Text>
-          </Card>
+          <EmptyState
+            icon={<HomeIcon size={30} color={colors.mutedForeground} />}
+            title="Your recommendations are warming up"
+            description="Browse and save a few properties so we can tailor this space to you."
+          />
         ) : (
           dashboard.data.recommendations.map((r) => (
             <Pressable key={r.id} onPress={() => router.push(`/(app)/buyer-listing/${r.id}`)}>

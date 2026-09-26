@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Home,
-  ShieldCheck,
-} from 'lucide-react-native';
+import { Calendar, ChevronRight, FileText, Home, ShieldCheck } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -32,12 +24,12 @@ import { SignaturePad } from '@/components/lease/SignaturePad';
 import { DownloadLeaseButton } from '@/components/lease/DownloadLeaseButton';
 import { LeaseTerminationSheet } from '@/components/lease/LeaseTerminationSheet';
 import { formatDate, formatNaira } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const LEASE_STATUS_TONE = { active: 'success', expiring: 'warning', expired: 'danger' } as const;
 const PAYMENT_ROW_TONE = { paid: 'success', pending: 'warning', overdue: 'danger' } as const;
 
 export default function LeaseScreen() {
-  const insets = useSafeAreaInsets();
   const { colors, spacing } = useTheme();
   const [terminationSheetOpen, setTerminationSheetOpen] = useState(false);
 
@@ -72,26 +64,12 @@ export default function LeaseScreen() {
   });
 
   const header = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingTop: insets.top + 8,
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.sm,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">Lease</Text>
-    </View>
+    <DetailScreenHeader
+      eyebrow="Your tenancy"
+      title="Lease"
+      subtitle="Agreement, payments and renewal"
+      onBack={() => router.back()}
+    />
   );
 
   if (leaseQuery.isLoading || (noActiveLease && pendingQuery.isLoading)) {

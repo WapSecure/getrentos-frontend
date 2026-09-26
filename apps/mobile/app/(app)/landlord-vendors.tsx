@@ -4,12 +4,13 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, HardHat, Phone, Plus, Trash2 } from 'lucide-react-native';
+import { HardHat, Phone, Plus, Trash2 } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -20,6 +21,7 @@ import { landlordApi, type LandlordVendor } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { AddVendorSheet } from '@/components/landlord/AddVendorSheet';
 import { StarRating } from '@/components/reviews/StarRating';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordVendors() {
   const { colors, spacing, radius } = useTheme();
@@ -47,41 +49,21 @@ export default function LandlordVendors() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Vendors</Text>
-          {query.data ? (
-            <Text variant="caption" color="mutedForeground">
-              {query.data.total} on your list
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={() => setAdding(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Add a vendor"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Operations"
+        title="Vendors"
+        subtitle={
+          query.data ? `${query.data.total} on your list` : 'Your trusted service providers'
+        }
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setAdding(true)}
+            accessibilityLabel="Add a vendor"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

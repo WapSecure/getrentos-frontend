@@ -18,7 +18,9 @@ import {
   Button,
   Card,
   Divider,
+  EmptyState,
   Screen,
+  SectionHeader,
   Skeleton,
   Text,
   useTheme,
@@ -27,6 +29,7 @@ import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const QUICK_LINKS = [
   { href: '/(app)/maintenance', label: 'Maintenance', icon: Wrench },
@@ -69,16 +72,15 @@ export default function ResidentHome() {
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>
-      <View style={{ gap: 2 }}>
-        <Text variant="title">Hi, {firstName(profile?.legalName)}</Text>
-        {household.data ? (
-          <Text variant="callout" color="mutedForeground">
-            {household.data.estate.name} · Unit {household.data.unitLabel}
-          </Text>
-        ) : household.isLoading ? (
-          <Skeleton height={16} width="60%" />
-        ) : null}
-      </View>
+      <DashboardHeader
+        eyebrow="Your community"
+        title={`Hi, ${firstName(profile?.legalName)}`}
+        subtitle={
+          household.data
+            ? `${household.data.estate.name} · Unit ${household.data.unitLabel}`
+            : 'Everything around your home, in one place'
+        }
+      />
 
       {dues.isLoading ? (
         <Skeleton height={90} radius={16} />
@@ -112,10 +114,12 @@ export default function ResidentHome() {
       )}
 
       <Card elevated>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Megaphone size={18} color={colors.primary} />
-          <Text variant="bodyStrong">Recent announcements</Text>
-        </View>
+        <SectionHeader
+          title="Recent announcements"
+          description="Updates from your estate team"
+          actionLabel="View all"
+          onAction={() => router.push('/(app)/(resident)/announcements')}
+        />
         <View style={{ marginTop: spacing.md, gap: spacing.md }}>
           {announcements.isLoading ? (
             <>
@@ -145,41 +149,51 @@ export default function ResidentHome() {
               </View>
             ))
           ) : (
-            <Text variant="caption" color="mutedForeground">
-              No announcements yet.
-            </Text>
+            <EmptyState
+              icon={<Megaphone size={28} color={colors.mutedForeground} />}
+              title="You're up to date"
+              description="New community announcements will appear here."
+            />
           )}
         </View>
-        <Pressable
-          onPress={() => router.push('/(app)/(resident)/announcements')}
-          style={{ marginTop: spacing.md }}
-        >
-          <Text variant="callout" style={{ color: colors.primary, fontWeight: '600' }}>
-            View all
-          </Text>
-        </Pressable>
       </Card>
 
       <View style={{ gap: spacing.sm }}>
-        <Text variant="bodyStrong">Community</Text>
+        <SectionHeader
+          title="Community services"
+          description="Fast access to everyday estate tools"
+        />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {QUICK_LINKS.map(({ href, label, icon: Icon }) => (
             <Pressable
               key={href}
               onPress={() => router.push(href)}
-              style={{
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              style={({ pressed }) => ({
                 width: '31%',
-                aspectRatio: 1,
+                minHeight: 104,
                 borderRadius: radius.lg,
                 borderWidth: 1,
                 borderColor: colors.border,
-                backgroundColor: colors.card,
+                backgroundColor: pressed ? colors.accent : colors.card,
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: spacing.xs,
-              }}
+                gap: spacing.sm,
+              })}
             >
-              <Icon size={22} color={colors.primary} />
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: radius.md,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: colors.accent,
+                }}
+              >
+                <Icon size={19} color={colors.primary} />
+              </View>
               <Text variant="caption" style={{ fontWeight: '600' }} center>
                 {label}
               </Text>

@@ -34,6 +34,7 @@ export interface Palette {
   successSubtle: string;
   warningSubtle: string;
   purpleSubtle: string;
+  destructiveSubtle: string;
   ring: string;
   /** Opaque overlay for modals / sheets. */
   scrim: string;
@@ -64,6 +65,7 @@ export const lightColors: Palette = {
   successSubtle: '#e7f7ef',
   warningSubtle: '#fdf1e3',
   purpleSubtle: '#f3eefb',
+  destructiveSubtle: '#fdecec',
   ring: 'rgba(0, 113, 227, 0.28)',
   scrim: 'rgba(22, 27, 34, 0.45)',
 };
@@ -93,6 +95,7 @@ export const darkColors: Palette = {
   successSubtle: '#0e2b1c',
   warningSubtle: '#2e1f0a',
   purpleSubtle: '#251a3f',
+  destructiveSubtle: '#3a1517',
   ring: 'rgba(47, 140, 255, 0.4)',
   scrim: 'rgba(0, 0, 0, 0.6)',
 };

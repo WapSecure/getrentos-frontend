@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, LifeBuoy, Plus } from 'lucide-react-native';
+import { LifeBuoy, Plus } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -12,6 +12,7 @@ import {
   Chip,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   TextField,
@@ -23,6 +24,7 @@ import { qk } from '@/lib/query/keys';
 import { supportApi, SUPPORT_CATEGORIES, type SupportThread } from '@/lib/api/support';
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function Support() {
   const { colors, spacing, radius } = useTheme();
@@ -38,44 +40,19 @@ export default function Support() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Support
-        </Text>
-        <Pressable
-          onPress={() => setComposeOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Contact support"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="GetRentos care"
+        title="Support"
+        subtitle="Track conversations with our support team"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setComposeOpen(true)}
+            accessibilityLabel="Contact support"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

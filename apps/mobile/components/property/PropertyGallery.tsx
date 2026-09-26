@@ -91,7 +91,8 @@ export function PropertyGallery({
                 width: i === page ? 18 : 6,
                 height: 6,
                 borderRadius: 3,
-                backgroundColor: i === page ? '#fff' : 'rgba(255,255,255,0.55)',
+                backgroundColor: colors.primaryForeground,
+                opacity: i === page ? 1 : 0.55,
               }}
             />
           ))}

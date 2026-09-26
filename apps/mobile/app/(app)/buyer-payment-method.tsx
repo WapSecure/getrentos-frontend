@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ShieldCheck } from 'lucide-react-native';
+import { ShieldCheck } from 'lucide-react-native';
 import {
   Button,
   Card,
@@ -20,11 +20,10 @@ import {
   type BuyerPaymentMethod as BuyerPaymentMethodData,
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function BuyerPaymentMethod() {
   const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({
     queryKey: qk.buyer.paymentMethod,
     queryFn: buyerSettingsApi.getPaymentMethod,
@@ -32,26 +31,12 @@ export default function BuyerPaymentMethod() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Payment method</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Buyer finance"
+        title="Payment method"
+        subtitle="Manage your escrow funding account"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>

@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerListing, type ListingFilters } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const PAGE_SIZE = 20;
 const SORTS: { value: ListingFilters['sort']; label: string }[] = [
@@ -74,7 +75,11 @@ export default function BuyerDiscover() {
           gap: spacing.sm,
         }}
       >
-        <Text variant="title">Discover</Text>
+        <DashboardHeader
+          eyebrow="Property marketplace"
+          title="Discover"
+          subtitle="Explore verified opportunities matched to you"
+        />
         <TextField
           placeholder="Search city, area or title"
           leftIcon={<Search size={18} color={colors.mutedForeground} />}
@@ -85,6 +90,7 @@ export default function BuyerDiscover() {
         />
         <ScrollView
           horizontal
+          accessibilityLabel="Filter properties by type"
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing.xs }}
         >
@@ -112,6 +118,7 @@ export default function BuyerDiscover() {
 
         <ScrollView
           horizontal
+          accessibilityLabel="Sort properties"
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing.xs }}
         >

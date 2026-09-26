@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell, ChevronLeft, ShieldCheck, UserPlus, Zap } from 'lucide-react-native';
+import { Bell, ShieldCheck, UserPlus, Zap } from 'lucide-react-native';
 import {
   Avatar,
   Badge,
@@ -25,6 +25,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function LandlordLeads() {
   const { colors, spacing, radius } = useTheme();
@@ -69,53 +70,43 @@ export default function LandlordLeads() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Leads</Text>
-          {query.data ? (
-            <Text variant="caption" color={stale > 0 ? 'destructive' : 'mutedForeground'}>
-              {query.data.total} lead{query.data.total === 1 ? '' : 's'}
-              {stale > 0 ? ` · ${stale} gone cold` : ''}
-            </Text>
-          ) : null}
-        </View>
-
-        {/* Chasing every cold lead one by one is the job this replaces. */}
-        {stale > 0 ? (
-          <Pressable
-            onPress={() =>
-              Alert.alert('Nudge all cold leads?', `${stale} will get a follow-up message.`, [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Nudge all', onPress: () => bulkNudge.mutate() },
-              ])
-            }
-            disabled={bulkNudge.isPending}
-            accessibilityRole="button"
-            accessibilityLabel="Nudge all cold leads"
-            hitSlop={10}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-          >
-            <Zap size={16} color={colors.primary} />
-            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-              Nudge all
-            </Text>
-          </Pressable>
-        ) : null}
+        <DetailHeader
+          eyebrow="Pipeline"
+          title="Leads"
+          subtitle={
+            query.data
+              ? `${query.data.total} lead${query.data.total === 1 ? '' : 's'}${stale > 0 ? ` · ${stale} gone cold` : ''}`
+              : 'Enquiries and follow-up activity'
+          }
+          onBack={() => router.back()}
+          accessory={
+            stale > 0 ? (
+              <Pressable
+                onPress={() =>
+                  Alert.alert('Nudge all cold leads?', `${stale} will get a follow-up message.`, [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Nudge all', onPress: () => bulkNudge.mutate() },
+                  ])
+                }
+                disabled={bulkNudge.isPending}
+                accessibilityRole="button"
+                accessibilityLabel="Nudge all cold leads"
+                hitSlop={10}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+              >
+                <Zap size={16} color={colors.primary} />
+                <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                  Nudge all
+                </Text>
+              </Pressable>
+            ) : null
+          }
+        />
       </View>
 
       {query.isError ? (

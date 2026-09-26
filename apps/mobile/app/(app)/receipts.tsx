@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ChevronRight, FileStack } from 'lucide-react-native';
+import { ChevronRight, FileStack } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -16,6 +16,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { paymentsApi, type Receipt } from '@/lib/api/payments';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function Receipts() {
   const { colors, spacing, radius } = useTheme();
@@ -39,15 +40,13 @@ export default function Receipts() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Receipts</Text>
+        <DetailHeader
+          eyebrow="Payment records"
+          title="Receipts"
+          subtitle="Verified proof of completed payments"
+          onBack={() => router.back()}
+          style={{ flex: 1 }}
+        />
       </View>
 
       {query.isError ? (

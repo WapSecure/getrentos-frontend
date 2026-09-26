@@ -29,6 +29,8 @@ export function SplashReveal() {
   const cover = useSharedValue(1);
 
   useEffect(() => {
+    // Reanimated shared values are intentionally mutable animation handles.
+    /* eslint-disable react-hooks/immutability */
     markOpacity.value = withTiming(1, { duration: MARK_IN, easing: Easing.out(Easing.cubic) });
     markScale.value = withTiming(1, { duration: MARK_IN, easing: Easing.out(Easing.back(1.4)) });
     wordOpacity.value = withDelay(
@@ -41,6 +43,7 @@ export function SplashReveal() {
         if (finished) runOnJS(setDone)(true);
       })
     );
+    /* eslint-enable react-hooks/immutability */
   }, [markOpacity, markScale, wordOpacity, cover]);
 
   const coverStyle = useAnimatedStyle(() => ({ opacity: cover.value }));

@@ -2,19 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, View, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import {
-  AtSign,
-  Phone,
-  MessageCircle,
-  User,
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  Gift,
-} from 'lucide-react-native';
+import { AtSign, Phone, MessageCircle, User, Check, ChevronDown, Gift } from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
@@ -194,6 +185,7 @@ function Terms({
       <Pressable
         onPress={() => onChange(!value)}
         accessibilityRole="checkbox"
+        accessibilityLabel="Agree to the Terms of Service and Privacy Policy"
         accessibilityState={{ checked: value }}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
       >
@@ -233,7 +225,6 @@ function EmailForm(props: Shared) {
   const {
     control,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<EmailSignupValues>({
     resolver: zodResolver(emailSignupSchema),
@@ -246,6 +237,7 @@ function EmailForm(props: Shared) {
     },
     mode: 'onTouched',
   });
+  const password = useWatch({ control, name: 'password' });
 
   const submit = handleSubmit(async (v) => {
     setFormError(null);
@@ -365,9 +357,7 @@ function EmailForm(props: Shared) {
                 onBlur={onBlur}
                 onSubmitEditing={submit}
                 error={errors.confirmPassword?.message}
-                hint={
-                  value.length > 0 && value === watch('password') ? 'Passwords match' : undefined
-                }
+                hint={value.length > 0 && value === password ? 'Passwords match' : undefined}
               />
             )}
           />
@@ -404,7 +394,6 @@ function PhoneForm(props: Shared) {
   const {
     control,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<PhoneSignupValues>({
     resolver: zodResolver(phoneSignupSchema),
@@ -417,6 +406,7 @@ function PhoneForm(props: Shared) {
     },
     mode: 'onTouched',
   });
+  const password = useWatch({ control, name: 'password' });
 
   const submit = handleSubmit(async (v) => {
     setFormError(null);
@@ -512,9 +502,7 @@ function PhoneForm(props: Shared) {
                 onBlur={onBlur}
                 onSubmitEditing={submit}
                 error={errors.confirmPassword?.message}
-                hint={
-                  value.length > 0 && value === watch('password') ? 'Passwords match' : undefined
-                }
+                hint={value.length > 0 && value === password ? 'Passwords match' : undefined}
               />
             )}
           />

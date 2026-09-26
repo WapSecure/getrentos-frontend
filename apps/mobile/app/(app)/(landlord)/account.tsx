@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { ChevronRight, LogOut, ShieldCheck } from 'lucide-react-native';
 import { Avatar, Card, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function LandlordAccount() {
   const { colors, spacing } = useTheme();
@@ -16,7 +17,11 @@ export default function LandlordAccount() {
 
   return (
     <Screen>
-      <Text variant="title">Account</Text>
+      <DashboardHeader
+        eyebrow="Landlord workspace"
+        title="Account"
+        subtitle="Profile, preferences and property tools"
+      />
 
       <Card padding={spacing.lg}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>

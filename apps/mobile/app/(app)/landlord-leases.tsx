@@ -4,20 +4,13 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  ChevronLeft,
-  Download,
-  FileSignature,
-  PenLine,
-  RefreshCw,
-  Send,
-  Plus,
-} from 'lucide-react-native';
+import { Download, FileSignature, PenLine, RefreshCw, Send, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -32,6 +25,7 @@ import { ApiError } from '@/lib/api/client';
 import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
 import { SignLeaseSheet } from '@/components/landlord/SignLeaseSheet';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function LandlordLeases() {
   const { colors, spacing, radius } = useTheme();
@@ -83,39 +77,28 @@ export default function LandlordLeases() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Leases</Text>
-          {query.data ? (
-            <Text variant="caption" color="mutedForeground">
-              {query.data.total} lease{query.data.total === 1 ? '' : 's'}
-              {awaitingSignature > 0 ? ` · ${awaitingSignature} awaiting signature` : ''}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={() => setCreating(true)}
-          accessibilityRole="button"
-          accessibilityLabel="New lease"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
+        <DetailHeader
+          eyebrow="Leasing"
+          title="Leases"
+          subtitle={
+            query.data
+              ? `${query.data.total} lease${query.data.total === 1 ? '' : 's'}${awaitingSignature > 0 ? ` · ${awaitingSignature} awaiting signature` : ''}`
+              : 'Create, sign and renew agreements'
+          }
+          onBack={() => router.back()}
+          accessory={
+            <IconButton
+              onPress={() => setCreating(true)}
+              accessibilityLabel="New lease"
+              icon={<Plus size={20} color={colors.primary} />}
+            />
+          }
+        />
       </View>
 
       {query.isError ? (

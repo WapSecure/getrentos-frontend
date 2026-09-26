@@ -9,7 +9,18 @@ import {
   ClipboardList,
   Clock,
 } from 'lucide-react-native';
-import { Badge, Card, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  Screen,
+  SectionHeader,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,
@@ -45,12 +56,11 @@ export default function AgentHome() {
 
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-      <View style={{ gap: spacing.xxs }}>
-        <Text variant="label" color="primary" uppercase>
-          {greeting()}
-        </Text>
-        <Text variant="title">{firstName(profile?.legalName)}</Text>
-      </View>
+      <DashboardHeader
+        eyebrow={greeting()}
+        title={firstName(profile?.legalName)}
+        subtitle="Field operations and property work"
+      />
 
       {dashboard.data && dashboard.data.overdueTasks > 0 ? (
         <Pressable onPress={() => router.push('/(app)/(agent)/tasks')}>
@@ -78,62 +88,15 @@ export default function AgentHome() {
         </Pressable>
       ) : null}
 
-      <Card elevated padding="none">
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {dashboard.isPending
-            ? [0, 1, 2, 3].map((i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: '50%',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingVertical: spacing.lg,
-                  }}
-                >
-                  <Skeleton height={22} width={22} />
-                </View>
-              ))
-            : metrics.map(({ label, value, Icon }, i) => (
-                <View
-                  key={label}
-                  style={{
-                    width: '50%',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingVertical: spacing.lg,
-                    borderLeftWidth: i % 2 === 1 ? 1 : 0,
-                    borderTopWidth: i >= 2 ? 1 : 0,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <Icon size={17} color={colors.mutedForeground} />
-                  <Text variant="title" style={{ fontSize: 20, lineHeight: 24 }}>
-                    {value}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {label}
-                  </Text>
-                </View>
-              ))}
-        </View>
-      </Card>
+      <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
       <View style={{ gap: spacing.md }}>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Text variant="heading">Upcoming tasks</Text>
-          <Pressable
-            onPress={() => router.push('/(app)/(agent)/tasks')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
-          >
-            <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-              See all
-            </Text>
-            <ChevronRight size={15} color={colors.primary} />
-          </Pressable>
-        </View>
+        <SectionHeader
+          title="Upcoming tasks"
+          description="Prioritized by deadline and status"
+          actionLabel="See all"
+          onAction={() => router.push('/(app)/(agent)/tasks')}
+        />
 
         {dashboard.isPending ? (
           <View style={{ gap: spacing.sm }}>
@@ -141,11 +104,11 @@ export default function AgentHome() {
             <Skeleton height={80} radius={16} />
           </View>
         ) : !dashboard.data?.upcomingTasks.length ? (
-          <Card elevated>
-            <Text variant="callout" color="mutedForeground">
-              Nothing due — you&apos;re all caught up.
-            </Text>
-          </Card>
+          <EmptyState
+            icon={<ClipboardCheck size={30} color={colors.mutedForeground} />}
+            title="You're all caught up"
+            description="New field assignments will appear here when they are scheduled."
+          />
         ) : (
           dashboard.data.upcomingTasks.map((task: AgentTask) => (
             <Pressable key={task.id} onPress={() => router.push(`/(app)/agent-task/${task.id}`)}>

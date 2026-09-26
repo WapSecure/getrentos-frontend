@@ -12,6 +12,7 @@
     "build:mobile": "pnpm --filter mobile build",
     "build:backoffice": "pnpm --filter backoffice build",
     "build:shared": "pnpm --filter @getrentos/shared build",
+    "quality:mobile": "pnpm --filter mobile quality",
     "build:all": "pnpm run build:shared && pnpm run build:web && pnpm run build:backoffice",
     "clean": "pnpm -r clean",
     "prepare": "husky"
@@ -22,9 +23,12 @@
     "prettier": "^3.2.5"
   },
   "engines": {
-    "node": ">=20.9"
+    "node": ">=22.13"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@sentry/cli"
+    ],
     "overrides": {
       "react-native-worklets": "0.10.1",
       "@expo/dom-webview": "^57.0.1",

@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck, ChevronLeft } from 'lucide-react-native';
+import { CalendarCheck } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -21,6 +20,7 @@ import { Sheet } from '@/components/Sheet';
 import { residentApi, type Amenity } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const HOUR_SLOTS = Array.from({ length: 14 }, (_, i) => 8 + i); // 8am–9pm
 const DURATIONS = [
@@ -50,33 +50,6 @@ function hourLabel(h: number): string {
   const period = h >= 12 ? 'PM' : 'AM';
   const hour12 = h % 12 === 0 ? 12 : h % 12;
   return `${hour12}:00 ${period}`;
-}
-
-function BackHeader({ title }: { title: string }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">{title}</Text>
-    </View>
-  );
 }
 
 export default function ResidentAmenities() {
@@ -118,7 +91,12 @@ export default function ResidentAmenities() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader title="Amenities" />
+      <DetailScreenHeader
+        eyebrow="Estate living"
+        title="Amenities"
+        subtitle="Reserve shared spaces and facilities"
+        onBack={() => router.back()}
+      />
       <Screen>
         <View style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Available</Text>
@@ -209,7 +187,7 @@ export default function ResidentAmenities() {
             ))
           ) : (
             <Text variant="caption" color="mutedForeground">
-              You haven't booked anything yet.
+              You haven&apos;t booked anything yet.
             </Text>
           )}
         </View>

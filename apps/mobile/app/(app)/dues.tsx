@@ -1,9 +1,8 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, Receipt, Repeat } from 'lucide-react-native';
+import { Receipt, Repeat } from 'lucide-react-native';
 import {
   Badge,
   type BadgeTone,
@@ -19,6 +18,7 @@ import {
 import { residentApi, type Due, type DueCategory, type DueStatus } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const STATUS_LABEL: Record<DueStatus, string> = {
   pending: 'Pending',
@@ -40,33 +40,6 @@ const CATEGORY_LABEL: Record<DueCategory, string> = {
   deposit: 'Deposit',
   levy: 'Levy',
 };
-
-function BackHeader({ title }: { title: string }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">{title}</Text>
-    </View>
-  );
-}
 
 export default function ResidentDues() {
   const { colors, spacing } = useTheme();
@@ -96,7 +69,12 @@ export default function ResidentDues() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader title="Dues" />
+      <DetailScreenHeader
+        eyebrow="Estate finance"
+        title="Dues"
+        subtitle="Charges, payments and recurring obligations"
+        onBack={() => router.back()}
+      />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         {query.isLoading ? (
           <View style={{ gap: spacing.md }}>

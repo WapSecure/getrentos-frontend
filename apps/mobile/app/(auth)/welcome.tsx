@@ -1,20 +1,24 @@
-import { Pressable, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { ArrowRight } from 'lucide-react-native';
-import { BrandLogo, Button, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import { ArrowRight, BadgeCheck, Building2, ShieldCheck, Sparkles } from 'lucide-react-native';
+import {
+  BrandLogo,
+  Button,
+  Card,
+  Text,
+  ThemeToggle,
+  useReducedMotion,
+  useTheme,
+} from '@getrentos/ui-native';
 import { resetOnboarding } from '@/lib/onboarding';
 
-/**
- * Auth gateway. The intro has already made the case for the product, so this
- * screen stays a brand moment plus a choice — it deliberately does not repeat
- * the onboarding's value props.
- */
 export default function Welcome() {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
 
   const replayIntro = async () => {
     await resetOnboarding();
@@ -24,8 +28,22 @@ export default function Welcome() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <LinearGradient
-        colors={[colors.accent, colors.background]}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 520 }}
+        colors={[colors.accent, colors.background, colors.background]}
+        locations={[0, 0.58, 1]}
+        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          width: 240,
+          height: 240,
+          borderRadius: 120,
+          right: -110,
+          top: 80,
+          backgroundColor: colors.infoSubtle,
+          opacity: 0.7,
+        }}
       />
 
       <View
@@ -37,34 +55,95 @@ export default function Welcome() {
           paddingHorizontal: spacing.xl,
         }}
       >
-        <BrandLogo size={22} />
+        <BrandLogo size={24} />
         <ThemeToggle variant="pill" compact />
       </View>
 
-      {/* brand moment */}
-      <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: spacing.xl }}>
-        <Animated.View entering={FadeIn.duration(420)} style={{ marginBottom: spacing['2xl'] }}>
-          <BrandLogo size={56} showWordmark={false} />
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.duration(460).delay(80)}>
-          <Text variant="display" style={{ fontSize: 34, lineHeight: 40, letterSpacing: -1 }}>
-            Property, without{'\n'}the leap of faith.
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.lg,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(460).delay(60)}>
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.xs,
+              paddingVertical: 6,
+              paddingHorizontal: spacing.sm,
+              borderRadius: radius.full,
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.border,
+              marginBottom: spacing.lg,
+            }}
+          >
+            <Sparkles size={13} color={colors.primary} />
+            <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
+              NIGERIA&apos;S TRUSTED PROPERTY OS
+            </Text>
+          </View>
+          <Text variant="display" style={{ fontSize: 38, lineHeight: 43, letterSpacing: -1.3 }}>
+            Move with clarity.{`\n`}Live with confidence.
           </Text>
           <Text
             variant="body"
             color="mutedForeground"
-            style={{ marginTop: spacing.md, maxWidth: 320 }}
+            style={{ marginTop: spacing.md, maxWidth: 340 }}
           >
-            Create an account to save homes, apply, and pay through escrow — with every landlord and
-            agent verified first.
+            Verified homes, protected payments, and every property relationship in one beautifully
+            simple place.
           </Text>
         </Animated.View>
-      </View>
 
-      {/* choice */}
+        <Animated.View
+          entering={reduceMotion ? undefined : FadeIn.duration(480).delay(150)}
+          style={{ marginTop: spacing.xl }}
+        >
+          <Card elevated style={{ gap: spacing.md, borderColor: colors.primary, borderWidth: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: radius.lg,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: colors.primary,
+                }}
+              >
+                <Building2 size={23} color={colors.primaryForeground} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyStrong">A safer way to find home</Text>
+                <Text variant="caption" color="mutedForeground">
+                  Renting, buying and managing—connected
+                </Text>
+              </View>
+              <BadgeCheck size={21} color={colors.success} />
+            </View>
+            <View style={{ height: 1, backgroundColor: colors.border }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TrustPoint icon={<BadgeCheck size={14} color={colors.success} />} label="Verified" />
+              <TrustPoint
+                icon={<ShieldCheck size={14} color={colors.primary} />}
+                label="Protected"
+              />
+              <TrustPoint icon={<Sparkles size={14} color={colors.purple} />} label="Effortless" />
+            </View>
+          </Card>
+        </Animated.View>
+      </ScrollView>
+
       <Animated.View
-        entering={FadeInDown.duration(460).delay(160)}
+        entering={reduceMotion ? undefined : FadeInDown.duration(460).delay(220)}
         style={{
           paddingHorizontal: spacing.xl,
           paddingBottom: insets.bottom + spacing.lg,
@@ -81,15 +160,14 @@ export default function Welcome() {
           variant="outline"
           onPress={() => router.push('/(auth)/sign-in')}
         />
-
-        <Text variant="caption" color="mutedForeground" center style={{ marginTop: spacing.sm }}>
-          By continuing you agree to our Terms &amp; Privacy Policy.
+        <Text variant="caption" color="mutedForeground" center style={{ marginTop: spacing.xs }}>
+          Secure by design · Built for every property journey
         </Text>
-
         {__DEV__ ? (
           <Pressable
             onPress={replayIntro}
             accessibilityRole="button"
+            accessibilityLabel="Replay product introduction"
             style={{ alignItems: 'center', paddingTop: spacing.xs }}
           >
             <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
@@ -98,6 +176,18 @@ export default function Welcome() {
           </Pressable>
         ) : null}
       </Animated.View>
+    </View>
+  );
+}
+
+function TrustPoint({ icon, label }: { icon: React.ReactNode; label: string }) {
+  const { spacing } = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+      {icon}
+      <Text variant="caption" style={{ fontWeight: '700' }}>
+        {label}
+      </Text>
     </View>
   );
 }

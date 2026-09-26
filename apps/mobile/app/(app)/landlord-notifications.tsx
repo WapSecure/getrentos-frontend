@@ -7,7 +7,6 @@ import {
   Banknote,
   Bell,
   CheckCheck,
-  ChevronLeft,
   FileText,
   MessageCircle,
   Star,
@@ -27,6 +26,7 @@ import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordNotification } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 /**
  * The API's `type` is an open string, so match on the meaningful prefix and
@@ -83,43 +83,31 @@ export default function LandlordNotifications() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Notifications
-        </Text>
-        {unread > 0 ? (
-          <Pressable
-            onPress={() => readAll.mutate()}
-            disabled={readAll.isPending}
-            accessibilityRole="button"
-            accessibilityLabel="Mark all read"
-            hitSlop={10}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-          >
-            <CheckCheck size={16} color={colors.primary} />
-            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-              Mark all read
-            </Text>
-          </Pressable>
-        ) : null}
-      </View>
+      <DetailScreenHeader
+        eyebrow="Landlord workspace"
+        title="Notifications"
+        subtitle={
+          unread > 0 ? `${unread} unread update${unread === 1 ? '' : 's'}` : 'You are all caught up'
+        }
+        onBack={() => router.back()}
+        accessory={
+          unread > 0 ? (
+            <Pressable
+              onPress={() => readAll.mutate()}
+              disabled={readAll.isPending}
+              accessibilityRole="button"
+              accessibilityLabel="Mark all read"
+              hitSlop={10}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            >
+              <CheckCheck size={16} color={colors.primary} />
+              <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                Mark all read
+              </Text>
+            </Pressable>
+          ) : null
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

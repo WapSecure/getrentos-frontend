@@ -9,6 +9,7 @@ import { Avatar, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getre
 import { qk } from '@/lib/query/keys';
 import { buyerMessagesApi, type BuyerConversation } from '@/lib/api/buyerMessages';
 import { relativeTime } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function BuyerMessages() {
   const { colors, spacing } = useTheme();
@@ -39,7 +40,11 @@ export default function BuyerMessages() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Text variant="title">Messages</Text>
+        <DashboardHeader
+          eyebrow="Buyer workspace"
+          title="Messages"
+          subtitle="Keep every property conversation together"
+        />
       </View>
 
       {query.isError ? (

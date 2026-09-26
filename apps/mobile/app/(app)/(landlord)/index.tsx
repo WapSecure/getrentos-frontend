@@ -11,7 +11,17 @@ import {
   TriangleAlert,
   Wrench,
 } from 'lucide-react-native';
-import { Card, Divider, Price, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Card,
+  Divider,
+  IconButton,
+  Price,
+  Screen,
+  SectionHeader,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -77,36 +87,12 @@ export default function LandlordOverview() {
           </Text>
           <Text variant="title">{firstName(profile?.legalName)}</Text>
         </View>
-        <Pressable
+        <IconButton
           onPress={() => router.push('/(app)/landlord-notifications')}
-          accessibilityRole="button"
-          accessibilityLabel={
-            unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
-          }
-          hitSlop={10}
-        >
-          <Bell size={22} color={colors.foreground} />
-          {unreadCount > 0 ? (
-            <View
-              style={{
-                position: 'absolute',
-                top: -3,
-                right: -3,
-                minWidth: 16,
-                height: 16,
-                paddingHorizontal: 4,
-                borderRadius: 8,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colors.destructive,
-              }}
-            >
-              <Text variant="caption" style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </Text>
-            </View>
-          ) : null}
-        </Pressable>
+          accessibilityLabel="Notifications"
+          badge={unreadCount}
+          icon={<Bell size={21} color={colors.foreground} />}
+        />
       </View>
 
       {/* Money first — it is what a landlord opens the app to check. */}
@@ -206,7 +192,10 @@ export default function LandlordOverview() {
       ) : null}
 
       <View style={{ gap: spacing.md }}>
-        <Text variant="heading">Recent activity</Text>
+        <SectionHeader
+          title="Recent activity"
+          description="The latest movement across your portfolio"
+        />
         {activity.isLoading ? (
           <View style={{ gap: spacing.sm }}>
             {[0, 1, 2].map((i) => (

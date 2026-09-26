@@ -5,12 +5,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ChevronLeft, Pause, Play, ShieldAlert, Tag, Video, Plus } from 'lucide-react-native';
+import { Pause, Play, ShieldAlert, Tag, Video, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -27,6 +28,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function LandlordListings() {
   const { colors, spacing, radius } = useTheme();
@@ -73,44 +75,31 @@ export default function LandlordListings() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Listings</Text>
-          {query.data ? (
-            <Text variant="caption" color="mutedForeground">
-              {live} live of {items.length}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={() => setCreating(true)}
-          accessibilityRole="button"
-          accessibilityLabel="List a unit"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
+        <DetailHeader
+          eyebrow="Marketplace"
+          title="Listings"
+          subtitle={query.data ? `${live} live of ${items.length}` : 'Publish and manage vacancies'}
+          onBack={() => router.back()}
+          accessory={
+            <IconButton
+              onPress={() => setCreating(true)}
+              accessibilityLabel="List a unit"
+              icon={<Plus size={20} color={colors.primary} />}
+            />
+          }
+        />
       </View>
 
       {gateBlocked ? (
         <Pressable
           onPress={() => router.push('/(app)/verify-identity')}
           accessibilityRole="button"
+          accessibilityLabel="Verify your identity to publish listings"
           style={{
             flexDirection: 'row',
             alignItems: 'center',

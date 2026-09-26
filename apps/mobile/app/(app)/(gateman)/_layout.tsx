@@ -1,9 +1,9 @@
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Car, KeyRound, Package, Siren, User } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
+import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 /**
  * The gate console.
@@ -27,26 +27,7 @@ export default function GatemanTabsLayout() {
       {/* Renders nothing. Mounted here rather than at the app root so the queue
           drains while a guard is actually at the gate. */}
       <GateQueueSync />
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.mutedForeground,
-          tabBarStyle: {
-            backgroundColor: colors.card,
-            borderTopColor: colors.border,
-            height: 52 + insets.bottom,
-            paddingTop: 6,
-            paddingBottom: insets.bottom,
-          },
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: '600',
-          },
-          tabBarItemStyle: { paddingVertical: 2 },
-          tabBarHideOnKeyboard: Platform.OS === 'android',
-        }}
-      >
+      <Tabs screenOptions={premiumTabBarOptions(colors, insets.bottom)}>
         <Tabs.Screen
           name="index"
           options={{

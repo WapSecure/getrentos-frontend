@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
 import {
   Button,
   Card,
@@ -21,13 +20,12 @@ import {
   type BuyerSearchPreferences as BuyerSearchPreferencesData,
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Duplex', 'Bungalow', 'Land', 'Commercial'];
 
 export default function BuyerSearchPreferences() {
   const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({
     queryKey: qk.buyer.searchPreferences,
     queryFn: buyerSettingsApi.getSearchPreferences,
@@ -35,26 +33,12 @@ export default function BuyerSearchPreferences() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Search preferences</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Property discovery"
+        title="Search preferences"
+        subtitle="Tune budgets, locations and match alerts"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>

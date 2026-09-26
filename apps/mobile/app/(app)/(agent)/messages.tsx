@@ -9,6 +9,7 @@ import { Avatar, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getre
 import { qk } from '@/lib/query/keys';
 import { agentMessagesApi, type AgentConversation } from '@/lib/api/agentMessages';
 import { relativeTime } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function AgentMessages() {
   const { colors, spacing } = useTheme();
@@ -37,7 +38,11 @@ export default function AgentMessages() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Text variant="title">Messages</Text>
+        <DashboardHeader
+          eyebrow="Field operations"
+          title="Messages"
+          subtitle="Stay aligned with clients and property teams"
+        />
       </View>
 
       {query.isError ? (

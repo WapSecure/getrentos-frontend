@@ -4,8 +4,16 @@ import { router } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
-import { Chip, EmptyState, PropertyCard, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
+import {
+  Chip,
+  EmptyState,
+  IconButton,
+  PropertyCard,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import { savedListingsApi, type SavedProperty } from '@/lib/api/properties';
@@ -13,6 +21,7 @@ import { wishlistsApi } from '@/lib/api/wishlists';
 import { WishlistManageSheet } from '@/components/property/WishlistManageSheet';
 import { MoveToWishlistSheet } from '@/components/property/MoveToWishlistSheet';
 import { RecentlyViewedStrip } from '@/components/property/RecentlyViewedStrip';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function Saved() {
   const { colors, spacing } = useTheme();
@@ -39,39 +48,24 @@ export default function Saved() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: insets.top }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingHorizontal: spacing.xl,
-          paddingVertical: spacing.md,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Saved homes
-        </Text>
-        <Pressable
-          onPress={() => setManageOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Manage wishlists"
-          hitSlop={10}
-        >
-          <Settings2 size={19} color={colors.foreground} />
-        </Pressable>
-      </View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <DetailScreenHeader
+        eyebrow="Your shortlist"
+        title="Saved homes"
+        subtitle="Organize and compare favorite listings"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setManageOpen(true)}
+            accessibilityLabel="Manage wishlists"
+            icon={<Settings2 size={19} color={colors.foreground} />}
+          />
+        }
+      />
 
       {(wishlistsQuery.data?.length ?? 0) > 0 ? (
         <ScrollView
+          accessibilityLabel="Filter saved homes by wishlist"
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{

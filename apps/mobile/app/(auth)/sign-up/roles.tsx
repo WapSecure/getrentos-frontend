@@ -13,7 +13,14 @@ import {
   Check,
   type LucideIcon,
 } from 'lucide-react-native';
-import { AuthScaffold, Button, PressableScale, Text, useTheme } from '@getrentos/ui-native';
+import {
+  AuthScaffold,
+  Button,
+  PressableScale,
+  Text,
+  useReducedMotion,
+  useTheme,
+} from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
@@ -31,6 +38,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 export default function SignUpRoles() {
   const { colors, spacing, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
   const { draft, selectedRoles, multiRole, toggleRole, setMultiRole, createAccount, reset } =
     useSignup();
   const [busy, setBusy] = useState(false);
@@ -67,6 +75,9 @@ export default function SignUpRoles() {
           <PressableScale
             haptic
             onPress={() => setMultiRole(!multiRole)}
+            accessibilityRole="switch"
+            accessibilityLabel="Use GetRentos in more than one way"
+            accessibilityState={{ checked: multiRole }}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -128,9 +139,20 @@ export default function SignUpRoles() {
           const Icon = ICONS[role.icon] ?? Home;
           const selected = selectedRoles.includes(role.id as SignupRoleId);
           return (
-            <Animated.View key={role.id} entering={FadeInDown.duration(280).delay(i * 45)}>
+            <Animated.View
+              key={role.id}
+              entering={reduceMotion ? undefined : FadeInDown.duration(280).delay(i * 45)}
+            >
               <PressableScale
                 onPress={() => toggleRole(role.id)}
+                accessibilityRole={multiRole ? 'checkbox' : 'radio'}
+                accessibilityLabel={`${role.name}. ${role.tagline}`}
+                accessibilityHint={
+                  role.requires.length
+                    ? `Verification required: ${role.requires.map((req) => VERIFICATION_LABEL[req]).join(', ')}`
+                    : undefined
+                }
+                accessibilityState={{ checked: selected }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

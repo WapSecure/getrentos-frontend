@@ -3,15 +3,7 @@ import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Database,
-  KeyRound,
-  Phone,
-  ShieldCheck,
-  Trash2,
-} from 'lucide-react-native';
+import { ChevronRight, Database, KeyRound, Phone, ShieldCheck, Trash2 } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -28,6 +20,7 @@ import { qk } from '@/lib/query/keys';
 import { profileApi, type TwoFactorEnrollment } from '@/lib/api/profile';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -35,26 +28,12 @@ export default function SecuritySettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Security</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Account protection"
+        title="Security"
+        subtitle="Identity, password and two-factor authentication"
+        onBack={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={{

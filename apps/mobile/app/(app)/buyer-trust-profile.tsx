@@ -1,9 +1,7 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import {
-  ChevronLeft,
   CheckCircle,
   Crown,
   Mail,
@@ -31,6 +29,7 @@ import {
   type TrustBadge,
   type VerificationItem,
 } from '@/lib/api/buyerTrustProfile';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const ICONS: Record<string, typeof Shield> = {
   User,
@@ -52,32 +51,16 @@ function Icon({ name, size, color }: { name: string; size: number; color: string
 
 export default function BuyerTrustProfile() {
   const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({ queryKey: qk.buyer.trustProfile, queryFn: buyerTrustProfileApi.get });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Trust & verification</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Buyer reputation"
+        title="Trust & verification"
+        subtitle="Identity checks, activity and earned badges"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

@@ -1,9 +1,9 @@
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Star } from 'lucide-react-native';
+import { Star } from 'lucide-react-native';
 import {
   Card,
   Divider,
@@ -16,6 +16,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { buyerReviewsApi, type BuyerReview } from '@/lib/api/buyerReviews';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function BuyerReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -29,26 +30,12 @@ export default function BuyerReviews() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Reviews</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Buyer activity"
+        title="Reviews"
+        subtitle="Feedback you have shared after transactions"
+        onBack={() => router.back()}
+      />
 
       {listQuery.isError ? (
         <ErrorState onRetry={() => listQuery.refetch()} />

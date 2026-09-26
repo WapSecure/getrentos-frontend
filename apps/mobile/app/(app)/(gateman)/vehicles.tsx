@@ -8,6 +8,7 @@ import {
   Chip,
   EmptyState,
   Screen,
+  SectionHeader,
   Skeleton,
   Text,
   TextField,
@@ -20,6 +21,7 @@ import { qk } from '@/lib/query/keys';
 import { formatTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 // The read mapper lowercases the enum; a `Record` here means a new backend
 // purpose fails the build instead of rendering raw.
@@ -127,14 +129,11 @@ export default function GatemanVehicles() {
 
   return (
     <Screen refreshing={insideQuery.isRefetching} onRefresh={insideQuery.refetch}>
-      <View style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.md }}>
-        <Text variant="title" center>
-          {estate.name}
-        </Text>
-        <Text variant="callout" color="mutedForeground" center>
-          Log a vehicle entering the estate.
-        </Text>
-      </View>
+      <DashboardHeader
+        eyebrow="Gate operations"
+        title="Vehicle log"
+        subtitle={`${estate.name} · Record entries and exits accurately`}
+      />
 
       <Card elevated>
         <TextField
@@ -258,7 +257,10 @@ export default function GatemanVehicles() {
       </Card>
 
       <View style={{ gap: spacing.md }}>
-        <Text variant="bodyStrong">Currently inside ({inside.length})</Text>
+        <SectionHeader
+          title={`Currently inside (${inside.length})`}
+          description="Vehicles without a recorded exit"
+        />
         {insideQuery.isLoading ? (
           <Skeleton height={64} radius={16} />
         ) : inside.length === 0 ? (

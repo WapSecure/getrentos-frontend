@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Dimensions, Pressable, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,15 +13,20 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { ArrowRight } from 'lucide-react-native';
-import { BrandLogo, Button, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import {
+  BrandLogo,
+  Button,
+  Text,
+  ThemeToggle,
+  useReducedMotion,
+  useTheme,
+} from '@getrentos/ui-native';
 import {
   EscrowScene,
   FindPropertiesScene,
   VerifiedPeopleScene,
 } from '@/components/onboarding/OnboardingScenes';
 import { useOnboardingSeen } from '@/lib/onboarding';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const SLIDES = [
   {
@@ -50,12 +55,16 @@ const SLIDES = [
 export default function Onboarding() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const reduceMotion = useReducedMotion();
   const { markSeen } = useOnboardingSeen();
   const scrollRef = useRef<Animated.ScrollView>(null);
   const scrollX = useSharedValue(0);
   const [index, setIndex] = useState(0);
 
   const onScroll = useAnimatedScrollHandler((e) => {
+    // Reanimated shared values are intentionally mutable inside UI-thread worklets.
+    // eslint-disable-next-line react-hooks/immutability
     scrollX.value = e.contentOffset.x;
   });
 
@@ -69,8 +78,8 @@ export default function Onboarding() {
       finish();
       return;
     }
-    scrollRef.current?.scrollTo({ x: (index + 1) * SCREEN_WIDTH, animated: true });
-  }, [index, finish]);
+    scrollRef.current?.scrollTo({ x: (index + 1) * screenWidth, animated: !reduceMotion });
+  }, [index, finish, reduceMotion, screenWidth]);
 
   const isLast = index === SLIDES.length - 1;
 
@@ -93,6 +102,21 @@ export default function Onboarding() {
       >
         <BrandLogo size={22} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
+          <View
+            accessibilityLabel={`Step ${index + 1} of ${SLIDES.length}`}
+            style={{
+              paddingVertical: 5,
+              paddingHorizontal: spacing.sm,
+              borderRadius: radius.full,
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <Text variant="caption" color="mutedForeground" style={{ fontWeight: '700' }}>
+              {index + 1} / {SLIDES.length}
+            </Text>
+          </View>
           {!isLast ? (
             <Pressable onPress={finish} accessibilityRole="button" hitSlop={10}>
               <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
@@ -112,12 +136,20 @@ export default function Onboarding() {
         onScroll={onScroll}
         scrollEventThrottle={16}
         onMomentumScrollEnd={(e) =>
-          setIndex(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH))
+          setIndex(Math.round(e.nativeEvent.contentOffset.x / screenWidth))
         }
+        accessibilityLabel="GetRentos introduction"
         style={{ flex: 1, marginTop: spacing.xl }}
       >
         {SLIDES.map((slide, i) => (
-          <Slide key={slide.key} slide={slide} i={i} scrollX={scrollX} />
+          <Slide
+            key={slide.key}
+            slide={slide}
+            i={i}
+            scrollX={scrollX}
+            screenWidth={screenWidth}
+            reduceMotion={reduceMotion}
+          />
         ))}
       </Animated.ScrollView>
 
@@ -134,7 +166,10 @@ export default function Onboarding() {
           {SLIDES.map((slide, i) => (
             <Animated.View
               key={slide.key}
-              layout={LinearTransition.duration(240)}
+              accessibilityLabel={
+                i === index ? `Current step: ${slide.title.replace('\n', ' ')}` : undefined
+              }
+              layout={reduceMotion ? undefined : LinearTransition.duration(240)}
               style={{
                 height: 4,
                 borderRadius: radius.full,
@@ -178,45 +213,46 @@ function Slide({
   slide,
   i,
   scrollX,
+  screenWidth,
+  reduceMotion,
 }: {
   slide: (typeof SLIDES)[number];
   i: number;
   scrollX: SharedValue<number>;
+  screenWidth: number;
+  reduceMotion: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();
   const { Scene } = slide;
 
   // The scene drifts and settles as its page comes to rest; copy follows a beat later.
   const sceneStyle = useAnimatedStyle(() => {
-    const d = scrollX.value - i * SCREEN_WIDTH;
+    if (reduceMotion) return {};
+    const d = scrollX.value - i * screenWidth;
     return {
-      opacity: interpolate(d, [-SCREEN_WIDTH, 0, SCREEN_WIDTH], [0, 1, 0], Extrapolation.CLAMP),
+      opacity: interpolate(d, [-screenWidth, 0, screenWidth], [0, 1, 0], Extrapolation.CLAMP),
       transform: [
         {
           translateX: interpolate(
             d,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.22, 0, -SCREEN_WIDTH * 0.22]
+            [-screenWidth, 0, screenWidth],
+            [screenWidth * 0.22, 0, -screenWidth * 0.22]
           ),
         },
         {
-          scale: interpolate(
-            d,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [0.9, 1, 0.9],
-            Extrapolation.CLAMP
-          ),
+          scale: interpolate(d, [-screenWidth, 0, screenWidth], [0.9, 1, 0.9], Extrapolation.CLAMP),
         },
       ],
     };
   });
 
   const copyStyle = useAnimatedStyle(() => {
-    const d = scrollX.value - i * SCREEN_WIDTH;
+    if (reduceMotion) return {};
+    const d = scrollX.value - i * screenWidth;
     return {
       opacity: interpolate(
         d,
-        [-SCREEN_WIDTH * 0.7, 0, SCREEN_WIDTH * 0.7],
+        [-screenWidth * 0.7, 0, screenWidth * 0.7],
         [0, 1, 0],
         Extrapolation.CLAMP
       ),
@@ -224,7 +260,7 @@ function Slide({
         {
           translateY: interpolate(
             d,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
+            [-screenWidth, 0, screenWidth],
             [26, 0, 26],
             Extrapolation.CLAMP
           ),
@@ -234,7 +270,11 @@ function Slide({
   });
 
   return (
-    <View style={{ width: SCREEN_WIDTH }}>
+    <View
+      accessibilityRole="summary"
+      accessibilityLabel={`${slide.eyebrow}. ${slide.title.replace('\n', ' ')}. ${slide.body}`}
+      style={{ width: screenWidth }}
+    >
       {/* copy leads, directly under the header — nothing floats */}
       <Animated.View style={[{ paddingHorizontal: spacing.xl }, copyStyle]}>
         <Text variant="label" color="primary" uppercase>

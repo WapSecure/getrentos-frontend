@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, Sparkles, Lock, Check } from 'lucide-react-native';
+import { AtSign, Sparkles, Lock, Check, ShieldCheck } from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
@@ -222,6 +222,28 @@ export default function SignIn() {
             },
           ]}
         />
+
+        <View
+          accessibilityRole="text"
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            padding: spacing.md,
+            borderRadius: radius.lg,
+            backgroundColor: colors.successSubtle,
+          }}
+        >
+          <ShieldCheck size={18} color={colors.success} />
+          <View style={{ flex: 1 }}>
+            <Text variant="callout" style={{ color: colors.success, fontWeight: '700' }}>
+              Your account is protected
+            </Text>
+            <Text variant="caption" color="mutedForeground">
+              Secure sessions, optional 2-step verification, and privacy-first access.
+            </Text>
+          </View>
+        </View>
 
         {locked ? (
           <View

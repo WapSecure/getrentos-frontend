@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle2, ChevronLeft, TrendingUp } from 'lucide-react-native';
+import { CheckCircle2, TrendingUp } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -28,6 +28,7 @@ import {
 } from '@/lib/api/creditReporting';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function CreditReporting() {
   const { colors, spacing } = useTheme();
@@ -50,15 +51,13 @@ export default function CreditReporting() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Credit reporting</Text>
+        <DetailHeader
+          eyebrow="Financial reputation"
+          title="Credit reporting"
+          subtitle="Turn on-time rent into verified history"
+          onBack={() => router.back()}
+          style={{ flex: 1 }}
+        />
       </View>
 
       {query.isLoading ? (

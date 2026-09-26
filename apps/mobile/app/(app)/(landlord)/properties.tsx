@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -11,6 +11,7 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   PressableScale,
   Price,
   Skeleton,
@@ -19,6 +20,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { landlordApi, VERIFICATION_TONE, type LandlordProperty } from '@/lib/api/landlord';
 
 export default function LandlordProperties() {
@@ -42,24 +44,22 @@ export default function LandlordProperties() {
           paddingBottom: spacing.sm,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <View style={{ flex: 1 }}>
-            <Text variant="title">Properties</Text>
-            {query.data ? (
-              <Text variant="caption" color="mutedForeground">
-                {query.data.total} propert{query.data.total === 1 ? 'y' : 'ies'}
-              </Text>
-            ) : null}
-          </View>
-          <Pressable
-            onPress={() => setCreating(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Add a property"
-            hitSlop={10}
-          >
-            <Plus size={22} color={colors.primary} />
-          </Pressable>
-        </View>
+        <DashboardHeader
+          eyebrow="Portfolio"
+          title="Properties"
+          subtitle={
+            query.data
+              ? `${query.data.total} propert${query.data.total === 1 ? 'y' : 'ies'}`
+              : 'Manage your property portfolio'
+          }
+          accessory={
+            <IconButton
+              onPress={() => setCreating(true)}
+              accessibilityLabel="Add a property"
+              icon={<Plus size={20} color={colors.primary} />}
+            />
+          }
+        />
       </View>
 
       {query.isError ? (

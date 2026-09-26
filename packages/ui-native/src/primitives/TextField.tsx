@@ -38,6 +38,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
     rightAccessory,
     onFocus,
     onBlur,
+    accessibilityLabel,
+    accessibilityHint,
     ...rest
   },
   ref
@@ -57,11 +59,12 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
       ) : null}
 
       <View
+        accessibilityState={{ disabled: rest.editable === false }}
         style={[
           styles.field,
           {
             borderRadius: radius.md,
-            backgroundColor: colors.secondary,
+            backgroundColor: focused ? colors.card : colors.secondary,
             borderColor,
             borderWidth: 1.5,
           },
@@ -70,6 +73,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
         {leftIcon ? <View style={styles.left}>{leftIcon}</View> : null}
         <TextInput
           ref={ref}
+          // The visible label is a sibling, so screen readers need it on the input itself.
+          accessibilityLabel={accessibilityLabel ?? label ?? rest.placeholder}
+          accessibilityHint={error ? `Error: ${error}` : (accessibilityHint ?? hint)}
           placeholderTextColor={colors.mutedForeground}
           selectionColor={colors.primary}
           secureTextEntry={secure && !reveal}
@@ -88,7 +94,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={reveal ? 'Hide password' : 'Show password'}
-            hitSlop={12}
+            hitSlop={14}
             onPress={() => setReveal((v) => !v)}
             style={styles.right}
           >
@@ -104,7 +110,11 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
       </View>
 
       {error ? (
-        <Animated.View entering={FadeIn.duration(140)} exiting={FadeOut.duration(100)}>
+        <Animated.View
+          accessibilityLiveRegion="polite"
+          entering={FadeIn.duration(140)}
+          exiting={FadeOut.duration(100)}
+        >
           <Text variant="caption" color="destructive" style={styles.helper}>
             {error}
           </Text>

@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, CircleCheck, HardHat, TriangleAlert, Wrench } from 'lucide-react-native';
+import { CircleCheck, HardHat, TriangleAlert, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -26,6 +26,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 /** Requests still needing the landlord to act. */
 const OPEN = ['pending', 'acknowledged', 'in_progress'];
@@ -80,30 +81,23 @@ export default function LandlordMaintenanceScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Maintenance</Text>
-          {query.data ? (
-            <Text variant="caption" color={openCount > 0 ? 'destructive' : 'mutedForeground'}>
-              {openCount > 0 ? `${openCount} open` : 'Nothing open'}
-            </Text>
-          ) : null}
-        </View>
+        <DetailHeader
+          eyebrow="Operations"
+          title="Maintenance"
+          subtitle={
+            query.data
+              ? openCount > 0
+                ? `${openCount} open request${openCount === 1 ? '' : 's'}`
+                : 'Nothing open'
+              : 'Track repairs and vendor work'
+          }
+          onBack={() => router.back()}
+        />
       </View>
 
       {query.isError ? (

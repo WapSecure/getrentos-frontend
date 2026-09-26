@@ -3,7 +3,7 @@ import { Pressable, ScrollView, View, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Camera, ChevronLeft } from 'lucide-react-native';
+import { Camera } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { profileApi, type RenterProfile } from '@/lib/api/profile';
 import { pickImage } from '@/lib/filePicker';
 import { ApiError } from '@/lib/api/client';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function EditProfile() {
   const { colors, spacing } = useTheme();
@@ -36,15 +37,13 @@ export default function EditProfile() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Edit profile</Text>
+        <DetailHeader
+          eyebrow="Your account"
+          title="Edit profile"
+          subtitle="Photo, contact details and personal bio"
+          onBack={() => router.back()}
+          style={{ flex: 1 }}
+        />
       </View>
 
       {!query.data ? (

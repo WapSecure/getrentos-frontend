@@ -4,12 +4,13 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Download, Gavel, TriangleAlert, Plus } from 'lucide-react-native';
+import { Download, Gavel, TriangleAlert, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -26,6 +27,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 function tone(status: string) {
   return EVICTION_TONE[status.toLowerCase() as EvictionStatus] ?? 'neutral';
@@ -86,41 +88,25 @@ export default function LandlordEvictions() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Evictions</Text>
-          {query.data ? (
-            <Text variant="caption" color={active.length > 0 ? 'destructive' : 'mutedForeground'}>
-              {active.length > 0 ? `${active.length} active` : 'No active cases'}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={() => setCreating(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Open an eviction case"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Tenancy cases"
+        title="Evictions"
+        subtitle={
+          query.data
+            ? active.length > 0
+              ? `${active.length} active`
+              : 'No active cases'
+            : 'Notices, filings and resolutions'
+        }
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setCreating(true)}
+            accessibilityLabel="Open an eviction case"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

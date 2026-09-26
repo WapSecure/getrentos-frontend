@@ -1,10 +1,15 @@
 export * from './theme';
+export { useReducedMotion } from './accessibility';
 export { Text } from './primitives/Text';
 export type { TextProps } from './primitives/Text';
 export { PressableScale } from './primitives/PressableScale';
 export type { PressableScaleProps } from './primitives/PressableScale';
 export { Button } from './primitives/Button';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './primitives/Button';
+export { IconButton } from './primitives/IconButton';
+export type { IconButtonProps } from './primitives/IconButton';
+export { SectionHeader } from './primitives/SectionHeader';
+export type { SectionHeaderProps } from './primitives/SectionHeader';
 export { TextField } from './primitives/TextField';
 export type { TextFieldProps } from './primitives/TextField';
 export { DateField, toISODate } from './primitives/DateField';
@@ -20,6 +25,13 @@ export type { SegmentedControlProps, SegmentOption } from './primitives/Segmente
 export { Progress } from './primitives/Progress';
 export type { ProgressProps } from './primitives/Progress';
 export { AuthScaffold } from './primitives/AuthScaffold';
+export { Checkbox, FormAlert, LinkButton } from './primitives/FormControls';
+export type {
+  CheckboxProps,
+  FormAlertProps,
+  FormAlertTone,
+  LinkButtonProps,
+} from './primitives/FormControls';
 export type { AuthScaffoldProps } from './primitives/AuthScaffold';
 export { Card } from './primitives/Card';
 export type { CardProps } from './primitives/Card';

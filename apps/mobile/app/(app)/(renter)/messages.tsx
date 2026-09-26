@@ -9,6 +9,7 @@ import {
   Avatar,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -19,6 +20,7 @@ import { messagesApi, type Conversation } from '@/lib/api/messages';
 import type { Paginated } from '@/lib/api/properties';
 import { relativeTime } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function Messages() {
   const { colors, spacing } = useTheme();
@@ -120,30 +122,31 @@ export default function Messages() {
           paddingBottom: spacing.sm,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Text variant="title" style={{ flex: 1 }}>
-            Messages
-          </Text>
-          {archivedCount > 0 || showArchived ? (
-            <Pressable
-              onPress={() => setShowArchived((v) => !v)}
-              accessibilityRole="button"
-              accessibilityLabel={showArchived ? 'Show inbox' : 'Show archived'}
-              accessibilityState={{ selected: showArchived }}
-              hitSlop={10}
-            >
-              <Archive size={20} color={showArchived ? colors.primary : colors.foreground} />
-            </Pressable>
-          ) : null}
-          <Pressable
-            onPress={() => router.push('/(app)/message-tools')}
-            accessibilityRole="button"
-            accessibilityLabel="Message tools"
-            hitSlop={10}
-          >
-            <MessageSquareText size={20} color={colors.foreground} />
-          </Pressable>
-        </View>
+        <DashboardHeader
+          eyebrow="Renter workspace"
+          title="Messages"
+          subtitle="Keep every property conversation together"
+          accessory={
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              {archivedCount > 0 || showArchived ? (
+                <IconButton
+                  onPress={() => setShowArchived((v) => !v)}
+                  accessibilityLabel={showArchived ? 'Show inbox' : 'Show archived'}
+                  selected={showArchived}
+                  badge={archivedCount}
+                  icon={
+                    <Archive size={20} color={showArchived ? colors.primary : colors.foreground} />
+                  }
+                />
+              ) : null}
+              <IconButton
+                onPress={() => router.push('/(app)/message-tools')}
+                accessibilityLabel="Message tools"
+                icon={<MessageSquareText size={20} color={colors.foreground} />}
+              />
+            </View>
+          }
+        />
       </View>
 
       {query.isError ? (

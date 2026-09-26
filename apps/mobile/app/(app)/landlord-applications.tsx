@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Briefcase, Check, ChevronLeft, FileText, ShieldCheck, X } from 'lucide-react-native';
+import { Briefcase, Check, FileText, ShieldCheck, X } from 'lucide-react-native';
 import {
   Avatar,
   Badge,
@@ -28,6 +28,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 /** Statuses that still await the landlord's decision. */
 const OPEN_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
@@ -84,30 +85,23 @@ export default function LandlordApplications() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Applications</Text>
-          {query.data ? (
-            <Text variant="caption" color="mutedForeground">
-              {open > 0 ? `${open} awaiting your decision` : 'Nothing awaiting a decision'}
-            </Text>
-          ) : null}
-        </View>
+        <DetailHeader
+          eyebrow="Leasing"
+          title="Applications"
+          subtitle={
+            query.data
+              ? open > 0
+                ? `${open} awaiting your decision`
+                : 'Nothing awaiting a decision'
+              : 'Review prospective tenants'
+          }
+          onBack={() => router.back()}
+        />
       </View>
 
       {query.isError ? (

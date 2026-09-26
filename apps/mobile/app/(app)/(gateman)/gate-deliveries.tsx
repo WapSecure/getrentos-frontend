@@ -8,6 +8,7 @@ import {
   Chip,
   EmptyState,
   Screen,
+  SectionHeader,
   Skeleton,
   Text,
   TextField,
@@ -21,6 +22,7 @@ import { qk } from '@/lib/query/keys';
 import { formatTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const HOUSEHOLD_PAGE_SIZE = 100;
 
@@ -107,14 +109,11 @@ export default function GatemanDeliveries() {
 
   return (
     <Screen refreshing={awaitingQuery.isRefetching} onRefresh={awaitingQuery.refetch}>
-      <View style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.md }}>
-        <Text variant="title" center>
-          {estate.name}
-        </Text>
-        <Text variant="callout" color="mutedForeground" center>
-          Log a delivery for a household.
-        </Text>
-      </View>
+      <DashboardHeader
+        eyebrow="Gate operations"
+        title="Deliveries"
+        subtitle={`${estate.name} · Receive and release household parcels`}
+      />
 
       <Button
         label="Log Delivery"
@@ -124,7 +123,10 @@ export default function GatemanDeliveries() {
       />
 
       <View style={{ gap: spacing.md }}>
-        <Text variant="bodyStrong">Awaiting pickup ({awaiting.length})</Text>
+        <SectionHeader
+          title={`Awaiting pickup (${awaiting.length})`}
+          description="Parcels still held at the gate"
+        />
         {awaitingQuery.isLoading ? (
           <Skeleton height={64} radius={16} />
         ) : awaiting.length === 0 ? (

@@ -1,18 +1,15 @@
 import type { ReactNode } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { ChevronLeft } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Progress } from './Progress';
+import { BrandLogo } from './BrandLogo';
+import { IconButton } from './IconButton';
+import { useReducedMotion } from '../accessibility';
 
 export interface AuthScaffoldProps {
   children: ReactNode;
@@ -23,13 +20,15 @@ export interface AuthScaffoldProps {
   onBack?: () => void;
   /** 0…1 — renders a progress bar under the header when set. */
   progress?: number;
+  /** Spoken with the progress bar, e.g. "Step 2 of 3". */
+  progressLabel?: string;
   /** Sticky footer (primary action) above the home indicator. */
   footer?: ReactNode;
 }
 
 /**
  * The shared shell for every onboarding screen: safe-area, keyboard handling,
- * a light back affordance, an optional step progress bar, a large title block
+ * a 44-point back affordance, an optional step progress bar, a large title
  * that animates in, and a sticky footer for the primary action.
  */
 export function AuthScaffold({
@@ -39,65 +38,86 @@ export function AuthScaffold({
   kicker,
   onBack,
   progress,
+  progressLabel,
   footer,
 }: AuthScaffoldProps) {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
 
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      // Android runs edge-to-edge, so the window no longer resizes for the
+      // keyboard — pad on both platforms or the sticky footer ends up under it.
+      behavior={Platform.OS === 'web' ? undefined : 'padding'}
     >
+      <LinearGradient
+        pointerEvents="none"
+        colors={[colors.accent, colors.background]}
+        style={styles.brandWash}
+      />
       <View style={{ paddingTop: insets.top + spacing.sm, paddingHorizontal: spacing.xl }}>
         <View style={styles.headerRow}>
           {onBack ? (
-            <Pressable
+            <IconButton
               onPress={onBack}
-              hitSlop={12}
-              accessibilityRole="button"
+              haptic={false}
               accessibilityLabel="Go back"
-              style={[styles.backBtn, { backgroundColor: colors.secondary }]}
-            >
-              <ChevronLeft size={22} color={colors.foreground} />
-            </Pressable>
+              icon={<ChevronLeft size={22} color={colors.foreground} />}
+            />
           ) : (
-            <View style={styles.backBtn} />
+            <View style={styles.backSpacer} />
           )}
+          <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+            <BrandLogo size={20} />
+          </View>
+          <View style={styles.backSpacer} />
         </View>
         {progress !== undefined ? (
           <View style={{ marginTop: spacing.md }}>
-            <Progress value={progress} />
+            <Progress value={progress} accessibilityLabel={progressLabel ?? 'Progress'} />
           </View>
         ) : null}
       </View>
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
+        keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: spacing.xl,
-          paddingTop: spacing.xl,
-          paddingBottom: spacing['4xl'],
+          paddingTop: spacing['2xl'],
+          paddingBottom: spacing['3xl'],
           gap: spacing['2xl'],
         }}
       >
-        <Animated.View entering={FadeInUp.duration(320)} style={{ gap: spacing.xs }}>
+        <Animated.View
+          entering={reduceMotion ? undefined : FadeInUp.duration(320)}
+          style={{ gap: spacing.xs }}
+        >
           {kicker ? (
             <Text variant="label" color="primary" uppercase>
               {kicker}
             </Text>
           ) : null}
-          <Text variant="title">{title}</Text>
+          <Text
+            variant="display"
+            accessibilityRole="header"
+            style={{ fontSize: 30, lineHeight: 36, letterSpacing: -0.8 }}
+          >
+            {title}
+          </Text>
           {subtitle ? (
-            <Text variant="body" color="mutedForeground">
+            <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.xxs }}>
               {subtitle}
             </Text>
           ) : null}
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(340).delay(60)}>{children}</Animated.View>
+        <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(340).delay(60)}>
+          {children}
+        </Animated.View>
       </ScrollView>
 
       {footer ? (
@@ -106,7 +126,10 @@ export function AuthScaffold({
             paddingHorizontal: spacing.xl,
             paddingTop: spacing.md,
             paddingBottom: insets.bottom + spacing.md,
-            gap: spacing.sm,
+            gap: spacing.xs,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.border,
+            backgroundColor: colors.card,
           }}
         >
           {footer}
@@ -118,12 +141,12 @@ export function AuthScaffold({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', minHeight: 40 },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    minHeight: 44,
   },
+  brandWash: { position: 'absolute', top: 0, left: 0, right: 0, height: 360 },
+  backSpacer: { width: 44, height: 44 },
 });

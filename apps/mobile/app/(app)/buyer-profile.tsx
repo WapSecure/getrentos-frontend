@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ShieldCheck } from 'lucide-react-native';
+import { ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -18,35 +18,20 @@ import {
 import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerProfile as BuyerProfileData } from '@/lib/api/buyer';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function BuyerProfileScreen() {
   const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({ queryKey: qk.buyer.profile, queryFn: buyerApi.profile });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Profile</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Buyer account"
+        title="Profile"
+        subtitle="Identity and contact details"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>

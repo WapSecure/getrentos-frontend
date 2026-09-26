@@ -4,12 +4,13 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, Ban, ChevronLeft, Plus, Star, Wrench } from 'lucide-react-native';
+import { AlertTriangle, Ban, Plus, Star, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -25,6 +26,7 @@ import {
 } from '@/lib/api/maintenance';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function Maintenance() {
   const { colors, spacing, radius } = useTheme();
@@ -71,44 +73,19 @@ export default function Maintenance() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Maintenance
-        </Text>
-        <Pressable
-          onPress={() => router.push('/(app)/report-maintenance')}
-          accessibilityRole="button"
-          accessibilityLabel="Report an issue"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Home care"
+        title="Maintenance"
+        subtitle="Report and track repair requests"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/report-maintenance')}
+            accessibilityLabel="Report an issue"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

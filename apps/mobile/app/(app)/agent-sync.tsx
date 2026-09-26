@@ -1,9 +1,9 @@
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle, ChevronLeft, CloudOff, RefreshCw } from 'lucide-react-native';
+import { CheckCircle, CloudOff, RefreshCw } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -16,6 +16,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { agentSyncApi, type AgentSyncItem } from '@/lib/api/agentSync';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const STATUS_ICON: Record<AgentSyncItem['syncStatus'], typeof CheckCircle> = {
   synced: CheckCircle,
@@ -38,26 +39,12 @@ export default function AgentSync() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Sync status</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Offline readiness"
+        title="Sync status"
+        subtitle="Track field records waiting to upload"
+        onBack={() => router.back()}
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +25,7 @@ import {
   type BuyerOfferStatus,
 } from '@/lib/api/buyerOffers';
 import { formatDate } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const STATUSES: BuyerOfferStatus[] = [
   'submitted',
@@ -55,9 +57,14 @@ export default function BuyerOffers() {
           gap: spacing.md,
         }}
       >
-        <Text variant="title">Offers</Text>
+        <DashboardHeader
+          eyebrow="Buyer workspace"
+          title="Offers"
+          subtitle="Track every negotiation in one place"
+        />
         <ScrollView
           horizontal
+          accessibilityLabel="Filter offers by status"
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing.xs }}
         >
@@ -93,13 +100,15 @@ export default function BuyerOffers() {
           }
         />
       ) : (
-        <ScrollView
+        <FlashList
+          data={items}
+          keyExtractor={(offer) => offer.id}
           contentContainerStyle={{
             padding: spacing.xl,
             paddingTop: spacing.md,
-            gap: spacing.md,
             paddingBottom: insets.bottom + spacing['3xl'],
           }}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           refreshControl={
             <RefreshControl
               refreshing={query.isRefetching}
@@ -107,9 +116,12 @@ export default function BuyerOffers() {
               tintColor={colors.mutedForeground}
             />
           }
-        >
-          {items.map((offer: BuyerOffer) => (
-            <Pressable key={offer.id} onPress={() => router.push(`/(app)/buyer-offer/${offer.id}`)}>
+          renderItem={({ item: offer }: { item: BuyerOffer }) => (
+            <Pressable
+              onPress={() => router.push(`/(app)/buyer-offer/${offer.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${offer.propertyTitle}, ${BUYER_OFFER_STATUS_LABEL[offer.status]}`}
+            >
               <Card elevated>
                 <View
                   style={{
@@ -135,8 +147,8 @@ export default function BuyerOffers() {
                 </View>
               </Card>
             </Pressable>
-          ))}
-        </ScrollView>
+          )}
+        />
       )}
     </View>
   );

@@ -124,63 +124,74 @@ function PropertyCardBase({
           </Text>
         </View>
       ) : null}
+    </View>
+  );
+
+  return (
+    <View
+      style={[
+        {
+          backgroundColor: colors.card,
+          borderRadius: radius.lg,
+          overflow: 'hidden',
+        },
+        shadows.sm,
+      ]}
+    >
+      <Pressable
+        onPress={onPress ? () => onPress(property.id) : undefined}
+        accessibilityRole={onPress ? 'button' : undefined}
+        accessibilityLabel={
+          onPress ? `${property.title}, ${property.location}, ${property.price}` : undefined
+        }
+        style={({ pressed }) => ({
+          flexDirection: row ? 'row' : 'column',
+          opacity: pressed && onPress ? 0.92 : 1,
+        })}
+      >
+        {media}
+        <View style={{ flex: 1, padding: spacing.md, gap: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Price
+                amount={property.price}
+                period={property.period ?? undefined}
+                variant="subheading"
+              />
+              <Text variant="bodyStrong" numberOfLines={1}>
+                {property.title}
+              </Text>
+            </View>
+            {property.score != null ? <ScoreRing score={property.score} /> : null}
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <MapPin size={12} color={colors.mutedForeground} />
+            <Text variant="caption" color="mutedForeground" numberOfLines={1} style={{ flex: 1 }}>
+              {property.location}
+            </Text>
+          </View>
+          <Specs property={property} />
+        </View>
+      </Pressable>
       {onToggleSave ? (
         <Pressable
           onPress={() => onToggleSave(property.id)}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel={saved ? 'Remove from saved' : 'Save property'}
+          accessibilityLabel={
+            saved ? `Remove ${property.title} from saved` : `Save ${property.title}`
+          }
+          accessibilityState={{ selected: saved }}
           style={styles.heart}
         >
           <Heart
             size={16}
-            color={saved ? colors.destructive : '#fff'}
+            color={saved ? colors.destructive : colors.primaryForeground}
             fill={saved ? colors.destructive : 'transparent'}
           />
         </Pressable>
       ) : null}
     </View>
-  );
-
-  return (
-    <Pressable
-      onPress={onPress ? () => onPress(property.id) : undefined}
-      accessibilityRole="button"
-      style={({ pressed }) => [
-        {
-          flexDirection: row ? 'row' : 'column',
-          backgroundColor: colors.card,
-          borderRadius: radius.lg,
-          overflow: 'hidden',
-          opacity: pressed && onPress ? 0.92 : 1,
-        },
-        shadows.sm,
-      ]}
-    >
-      {media}
-      <View style={{ flex: 1, padding: spacing.md, gap: 6 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
-          <View style={{ flex: 1, gap: 2 }}>
-            <Price
-              amount={property.price}
-              period={property.period ?? undefined}
-              variant="subheading"
-            />
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {property.title}
-            </Text>
-          </View>
-          {property.score != null ? <ScoreRing score={property.score} /> : null}
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <MapPin size={12} color={colors.mutedForeground} />
-          <Text variant="caption" color="mutedForeground" numberOfLines={1} style={{ flex: 1 }}>
-            {property.location}
-          </Text>
-        </View>
-        <Specs property={property} />
-      </View>
-    </Pressable>
   );
 }
 

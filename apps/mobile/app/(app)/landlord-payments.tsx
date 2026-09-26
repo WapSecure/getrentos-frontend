@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, MessageSquareWarning, Plus, Wallet } from 'lucide-react-native';
+import { MessageSquareWarning, Plus, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -19,6 +20,7 @@ import { qk } from '@/lib/query/keys';
 import { landlordApi, LANDLORD_PAYMENT_TONE, type LandlordPayment } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
 import { ChargeRentSheet } from '@/components/landlord/ChargeRentSheet';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function LandlordPayments() {
   const { colors, spacing, radius } = useTheme();
@@ -45,33 +47,24 @@ export default function LandlordPayments() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Payments
-        </Text>
-        <Pressable
-          onPress={() => setCharging(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Raise a charge"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
+        <DetailHeader
+          eyebrow="Financials"
+          title="Payments"
+          subtitle="Collections, escrow and arrears"
+          onBack={() => router.back()}
+          accessory={
+            <IconButton
+              onPress={() => setCharging(true)}
+              accessibilityLabel="Raise a charge"
+              icon={<Plus size={20} color={colors.primary} />}
+            />
+          }
+        />
       </View>
 
       {query.isError ? (

@@ -17,6 +17,7 @@ import { clearCachedProfile, readCachedProfile, writeCachedProfile } from './pro
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
 import { identify, reset as resetAnalytics } from '../analytics';
+import { persister } from '../query/client';
 
 interface PendingTwoFactor {
   challengeToken: string;
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await clearTokens();
     await clearCachedProfile();
     queryClient.clear();
+    await persister.removeClient();
   }, [queryClient]);
 
   const refresh = useCallback(async (): Promise<string | null> => {

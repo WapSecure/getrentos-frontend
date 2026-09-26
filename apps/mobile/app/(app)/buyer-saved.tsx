@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Heart } from 'lucide-react-native';
+import { Heart } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -17,6 +17,7 @@ import { qk } from '@/lib/query/keys';
 import { buyerSavedApi } from '@/lib/api/buyerSaved';
 import type { BuyerListing } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function BuyerSaved() {
   const { colors, spacing } = useTheme();
@@ -33,23 +34,21 @@ export default function BuyerSaved() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Saved listings</Text>
+        <DetailHeader
+          eyebrow="Buyer journey"
+          title="Saved listings"
+          subtitle={
+            query.data
+              ? `${items.length} saved home${items.length === 1 ? '' : 's'}`
+              : 'Your property shortlist'
+          }
+          onBack={() => router.back()}
+        />
       </View>
 
       {query.isError ? (
@@ -95,7 +94,12 @@ export default function BuyerSaved() {
                         style={{ marginTop: 4 }}
                       />
                     </View>
-                    <Pressable onPress={() => toggle(item.id)} hitSlop={8}>
+                    <Pressable
+                      onPress={() => toggle(item.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${item.title} from saved listings`}
+                      hitSlop={12}
+                    >
                       <Heart size={20} color={colors.destructive} fill={colors.destructive} />
                     </Pressable>
                   </View>

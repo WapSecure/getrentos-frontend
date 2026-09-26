@@ -9,6 +9,7 @@ import { FileText, MapPin } from 'lucide-react-native';
 import {
   Badge,
   Button,
+  Chip,
   EmptyState,
   ErrorState,
   Price,
@@ -26,6 +27,7 @@ import {
   type RenterApplication,
 } from '@/lib/api/applications';
 import { ApplicationAssistantCard } from '@/components/applications/ApplicationAssistantCard';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 type Filter = 'all' | ApplicationStatus;
 
@@ -54,7 +56,11 @@ export default function Applications() {
           gap: spacing.md,
         }}
       >
-        <Text variant="title">Applications</Text>
+        <DashboardHeader
+          eyebrow="Renter workspace"
+          title="Applications"
+          subtitle="Track every application and next step"
+        />
 
         {all.length > 0 ? (
           <FlashList
@@ -63,10 +69,11 @@ export default function Applications() {
             showsHorizontalScrollIndicator={false}
             keyExtractor={(x) => x.f}
             renderItem={({ item }) => (
-              <FilterChip
-                active={filter === item.f}
+              <Chip
+                selected={filter === item.f}
                 label={item.f === 'all' ? 'All' : APPLICATION_STATUS_LABEL[item.f]}
                 onPress={() => setFilter(item.f)}
+                size="sm"
               />
             )}
             style={{ marginHorizontal: -spacing.xl }}
@@ -124,39 +131,6 @@ export default function Applications() {
         />
       )}
     </View>
-  );
-}
-
-function FilterChip({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  const { colors } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        marginRight: 8,
-        paddingVertical: 7,
-        paddingHorizontal: 13,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: active ? colors.primary : colors.border,
-        backgroundColor: active ? colors.accent : colors.card,
-      }}
-    >
-      <Text
-        variant="callout"
-        style={{ fontWeight: '600', color: active ? colors.accentForeground : colors.foreground }}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 

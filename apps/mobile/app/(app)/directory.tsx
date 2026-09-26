@@ -1,8 +1,7 @@
-import { Pressable, Switch, View } from 'react-native';
+import { Switch, View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, Contact } from 'lucide-react-native';
+import { Contact } from 'lucide-react-native';
 import {
   Avatar,
   Card,
@@ -15,33 +14,7 @@ import {
 } from '@getrentos/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
-
-function BackHeader({ title }: { title: string }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">{title}</Text>
-    </View>
-  );
-}
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function ResidentDirectory() {
   const { colors, spacing } = useTheme();
@@ -71,7 +44,12 @@ export default function ResidentDirectory() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader title="Directory" />
+      <DetailScreenHeader
+        eyebrow="Community"
+        title="Directory"
+        subtitle="Connect with opted-in neighbors"
+        onBack={() => router.back()}
+      />
       <Screen>
         <Card elevated>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>

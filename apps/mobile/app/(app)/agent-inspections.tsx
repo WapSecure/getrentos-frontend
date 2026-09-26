@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ClipboardCheck } from 'lucide-react-native';
+import { ClipboardCheck } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -18,6 +18,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentInspection } from '@/lib/api/agent';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 const STATUSES = ['DRAFT', 'SUBMITTED'] as const;
 type InspectionStatus = (typeof STATUSES)[number];
@@ -45,27 +46,22 @@ export default function AgentInspections() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Inspections</Text>
+        <DetailHeader
+          eyebrow="Field operations"
+          title="Inspections"
+          subtitle="Draft and submitted property reports"
+          onBack={() => router.back()}
+        />
       </View>
 
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <ScrollView
+          accessibilityLabel="Filter inspections by status"
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing.xs }}

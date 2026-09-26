@@ -17,6 +17,7 @@ import {
   Chip,
   EmptyState,
   ErrorState,
+  IconButton,
   PropertyCard,
   SegmentedControl,
   Skeleton,
@@ -40,6 +41,7 @@ import {
 } from '@/lib/api/properties';
 import { formatNaira } from '@/lib/format';
 import { track } from '@/lib/analytics';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const MAP_PAGE_SIZE = 100;
 
@@ -135,42 +137,33 @@ export default function Discover() {
           gap: spacing.sm,
         }}
       >
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Text variant="title">Discover</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-            <Pressable
-              onPress={() => router.push('/(app)/saved-searches')}
-              accessibilityRole="button"
-              accessibilityLabel="Saved searches"
-              hitSlop={10}
-              style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
-            >
-              <BookmarkPlus size={19} color={colors.foreground} />
-            </Pressable>
-            <Pressable
-              onPress={() => router.push('/(app)/saved')}
-              accessibilityRole="button"
-              accessibilityLabel="Saved homes"
-              hitSlop={10}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: savedIds.size ? colors.accent : 'transparent',
-              }}
-            >
-              <Heart
-                size={19}
-                color={savedIds.size ? colors.primary : colors.foreground}
-                fill={savedIds.size ? colors.primary : 'transparent'}
+        <DashboardHeader
+          eyebrow="Find a home"
+          title="Discover"
+          subtitle="Verified homes matched to your needs"
+          accessory={
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              <IconButton
+                onPress={() => router.push('/(app)/saved-searches')}
+                accessibilityLabel="Saved searches"
+                icon={<BookmarkPlus size={19} color={colors.foreground} />}
               />
-            </Pressable>
-          </View>
-        </View>
+              <IconButton
+                onPress={() => router.push('/(app)/saved')}
+                accessibilityLabel="Saved homes"
+                selected={savedIds.size > 0}
+                badge={savedIds.size}
+                icon={
+                  <Heart
+                    size={19}
+                    color={savedIds.size ? colors.primary : colors.foreground}
+                    fill={savedIds.size ? colors.primary : 'transparent'}
+                  />
+                }
+              />
+            </View>
+          }
+        />
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
             <TextField

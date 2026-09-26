@@ -3,6 +3,7 @@ import { Animated, Pressable, StyleSheet, View, type ViewProps } from 'react-nat
 import { RotateCw } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
+import { useReducedMotion } from '../accessibility';
 
 /* ------------------------------- Divider ---------------------------------- */
 
@@ -84,9 +85,14 @@ export function Skeleton({
   radius?: number;
 }) {
   const { colors, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
   const pulse = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
+    if (reduceMotion) {
+      pulse.setValue(0.72);
+      return;
+    }
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
@@ -95,7 +101,7 @@ export function Skeleton({
     );
     loop.start();
     return () => loop.stop();
-  }, [pulse]);
+  }, [pulse, reduceMotion]);
 
   return (
     <Animated.View

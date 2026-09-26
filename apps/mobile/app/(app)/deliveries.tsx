@@ -1,39 +1,12 @@
-import { Image, Pressable, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, Package } from 'lucide-react-native';
+import { Package } from 'lucide-react-native';
 import { Badge, Card, EmptyState, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
-
-function BackHeader({ title }: { title: string }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">{title}</Text>
-    </View>
-  );
-}
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function ResidentDeliveries() {
   const { colors, spacing, radius } = useTheme();
@@ -44,7 +17,12 @@ export default function ResidentDeliveries() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader title="Deliveries" />
+      <DetailScreenHeader
+        eyebrow="Household activity"
+        title="Deliveries"
+        subtitle="Packages received and collected at the gate"
+        onBack={() => router.back()}
+      />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         {query.isLoading ? (
           <View style={{ gap: spacing.md }}>

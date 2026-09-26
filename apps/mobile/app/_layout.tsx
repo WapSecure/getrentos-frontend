@@ -6,13 +6,15 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
-import { persister, queryClient } from '@/lib/query/client';
+import { queryClient, queryPersistenceOptions } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
 import { portalHref } from '@/lib/roles';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
+import { ConnectivityBanner } from '@/components/ConnectivityBanner';
+import { Sentry } from '@/lib/monitoring';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -104,15 +106,16 @@ function Gate() {
         <Stack.Screen name="(app)" />
       </Stack>
       <SplashReveal />
+      <ConnectivityBanner />
     </>
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={queryPersistenceOptions}>
           <ThemeProvider onPreferenceChange={persistThemePreference}>
             <HydrateThemePreference />
             <ToastProvider>
@@ -126,3 +129,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

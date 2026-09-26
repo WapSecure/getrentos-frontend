@@ -4,11 +4,12 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Download, FileText, Plus } from 'lucide-react-native';
+import { Download, FileText, Plus } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   TextField,
@@ -26,6 +27,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -54,36 +56,19 @@ export default function LandlordDocuments() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Documents
-        </Text>
-        <Pressable
-          onPress={() => setCreating(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Upload a document"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Property records"
+        title="Documents"
+        subtitle="Ownership, leases and compliance files"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setCreating(true)}
+            accessibilityLabel="Upload a document"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm, paddingBottom: spacing.md }}>
         <TextField

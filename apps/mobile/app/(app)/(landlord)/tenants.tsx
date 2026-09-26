@@ -21,6 +21,7 @@ import {
   type LandlordTenant,
 } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function LandlordTenants() {
   const { colors, spacing, radius } = useTheme();
@@ -43,13 +44,15 @@ export default function LandlordTenants() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Text variant="title">Tenants</Text>
-        {query.data ? (
-          <Text variant="caption" color={behind > 0 ? 'destructive' : 'mutedForeground'}>
-            {query.data.total} tenant{query.data.total === 1 ? '' : 's'}
-            {behind > 0 ? ` · ${behind} behind on rent` : ''}
-          </Text>
-        ) : null}
+        <DashboardHeader
+          eyebrow="Portfolio"
+          title="Tenants"
+          subtitle={
+            query.data
+              ? `${query.data.total} tenant${query.data.total === 1 ? '' : 's'}${behind > 0 ? ` · ${behind} behind on rent` : ''}`
+              : 'Lease relationships and rent status'
+          }
+        />
       </View>
 
       {query.isError ? (

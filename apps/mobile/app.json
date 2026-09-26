@@ -5,11 +5,11 @@
     "version": "1.0.0",
     "scheme": "getrentos",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon-premium.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/icon-premium.png",
       "resizeMode": "contain",
       "backgroundColor": "#f6f7f9"
     },
@@ -51,7 +51,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#f6f7f9",
-          "image": "./assets/icon.png",
+          "image": "./assets/icon-premium.png",
           "imageWidth": 160,
           "dark": {
             "backgroundColor": "#0a0c11"
@@ -64,7 +64,8 @@
         {
           "cameraPermission": "GetRentos uses the camera to scan a visitor's QR pass at the gate."
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true

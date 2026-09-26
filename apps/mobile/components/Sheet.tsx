@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useReducedMotion, useTheme } from '@getrentos/ui-native';
 
 export interface SheetProps {
   open: boolean;
@@ -47,6 +47,7 @@ function resolveHeight(snapPoints?: (string | number)[]): number | undefined {
  */
 export function Sheet({ open, onClose, title, snapPoints, footer, children }: SheetProps) {
   const { colors, spacing, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   // `useState` initialiser keeps one stable Animated.Value without touching a ref during render.
   const [anim] = useState(() => new Animated.Value(0));
@@ -54,10 +55,10 @@ export function Sheet({ open, onClose, title, snapPoints, footer, children }: Sh
   useEffect(() => {
     Animated.timing(anim, {
       toValue: open ? 1 : 0,
-      duration: open ? 220 : 160,
+      duration: reduceMotion ? 0 : open ? 220 : 160,
       useNativeDriver: true,
     }).start();
-  }, [open, anim]);
+  }, [open, anim, reduceMotion]);
 
   const height = resolveHeight(snapPoints);
 
@@ -75,7 +76,7 @@ export function Sheet({ open, onClose, title, snapPoints, footer, children }: Sh
         >
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel={title ? `Dismiss ${title}` : 'Dismiss dialog'}
             onPress={onClose}
             style={{ flex: 1 }}
           />
@@ -83,6 +84,7 @@ export function Sheet({ open, onClose, title, snapPoints, footer, children }: Sh
 
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <Animated.View
+            accessibilityViewIsModal
             style={{
               backgroundColor: colors.card,
               borderTopLeftRadius: radius['2xl'],
@@ -114,7 +116,11 @@ export function Sheet({ open, onClose, title, snapPoints, footer, children }: Sh
             />
 
             {title ? (
-              <Text variant="heading" style={{ marginBottom: spacing.md }}>
+              <Text
+                accessibilityRole="header"
+                variant="heading"
+                style={{ marginBottom: spacing.md }}
+              >
                 {title}
               </Text>
             ) : null}

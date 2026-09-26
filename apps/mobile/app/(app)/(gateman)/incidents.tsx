@@ -10,6 +10,7 @@ import {
   Chip,
   EmptyState,
   Screen,
+  SectionHeader,
   Skeleton,
   Text,
   TextField,
@@ -27,6 +28,7 @@ import { qk } from '@/lib/query/keys';
 import { relativeTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 // `Record<…>` on purpose: these mappers lowercase the raw enum for display, so a
 // new backend member should fail the build here rather than surface as a raw
@@ -156,14 +158,11 @@ export default function GatemanIncidents() {
 
   return (
     <Screen refreshing={openQuery.isRefetching} onRefresh={openQuery.refetch}>
-      <View style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.md }}>
-        <Text variant="title" center>
-          {estate.name}
-        </Text>
-        <Text variant="callout" color="mutedForeground" center>
-          Report an incident or raise the alarm.
-        </Text>
-      </View>
+      <DashboardHeader
+        eyebrow="Gate operations"
+        title="Incidents"
+        subtitle={`${estate.name} · Report, escalate and track safety events`}
+      />
 
       <Pressable
         accessibilityRole="button"
@@ -179,11 +178,15 @@ export default function GatemanIncidents() {
           opacity: panic.isPending ? 0.6 : 1,
         }}
       >
-        <TriangleAlert size={32} color="#fff" />
-        <Text variant="title" style={{ color: '#fff' }}>
+        <TriangleAlert size={32} color={colors.destructiveForeground} />
+        <Text variant="title" style={{ color: colors.destructiveForeground }}>
           {panic.isPending ? 'Sending…' : 'PANIC ALERT'}
         </Text>
-        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }} center>
+        <Text
+          variant="caption"
+          style={{ color: colors.destructiveForeground, opacity: 0.85 }}
+          center
+        >
           Tap to immediately notify the estate manager
         </Text>
       </Pressable>
@@ -298,7 +301,10 @@ export default function GatemanIncidents() {
       </Card>
 
       <View style={{ gap: spacing.md }}>
-        <Text variant="bodyStrong">Open incidents ({open.length})</Text>
+        <SectionHeader
+          title={`Open incidents (${open.length})`}
+          description="Active reports awaiting resolution"
+        />
         {openQuery.isLoading ? (
           <Skeleton height={64} radius={16} />
         ) : open.length === 0 ? (

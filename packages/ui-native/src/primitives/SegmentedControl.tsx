@@ -12,6 +12,8 @@ export interface SegmentedControlProps<T extends string> {
   options: SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  /** Names the group for screen readers, e.g. "Sign-in method". */
+  accessibilityLabel?: string;
 }
 
 /** iOS-style segmented control — used for the auth method switchers. */
@@ -19,19 +21,27 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  accessibilityLabel,
 }: SegmentedControlProps<T>) {
   const { colors, radius, shadows } = useTheme();
 
   return (
-    <View style={[styles.track, { backgroundColor: colors.secondary, borderRadius: radius.md }]}>
-      {options.map((opt) => {
+    <View
+      accessibilityRole="tablist"
+      accessibilityLabel={accessibilityLabel}
+      style={[styles.track, { backgroundColor: colors.secondary, borderRadius: radius.md }]}
+    >
+      {options.map((opt, i) => {
         const active = opt.value === value;
         return (
           <Pressable
             key={opt.value}
             accessibilityRole="tab"
+            accessibilityLabel={`${opt.label}, ${i + 1} of ${options.length}`}
             accessibilityState={{ selected: active }}
-            onPress={() => onChange(opt.value)}
+            onPress={() => {
+              if (!active) onChange(opt.value);
+            }}
             style={[
               styles.segment,
               { borderRadius: radius.md - 3 },
@@ -64,6 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 9,
+    minHeight: 40,
+    paddingVertical: 8,
   },
 });

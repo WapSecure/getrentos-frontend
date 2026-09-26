@@ -24,7 +24,14 @@ const BACKEND_ROLE_TO_PORTAL: Record<string, Portal> = {
   GATEMAN: 'gateman',
   RESIDENT: 'resident',
   BACKOFFICE_ADMIN: 'admin',
+  VERIFICATION_OFFICER: 'admin',
   SUPER_ADMIN: 'admin',
+  FRAUD_ANALYST: 'admin',
+  DISPUTE_OFFICER: 'admin',
+  ESCROW_OFFICER: 'admin',
+  FINANCE_APPROVER: 'admin',
+  COMPLIANCE_MANAGER: 'admin',
+  SUPPORT_AGENT: 'admin',
 };
 
 const PORTAL_PRIORITY: Portal[] = [

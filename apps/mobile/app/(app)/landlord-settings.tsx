@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Banknote, Camera, ChevronLeft } from 'lucide-react-native';
+import { Banknote, Camera } from 'lucide-react-native';
 import {
   Avatar,
   Badge,
@@ -30,6 +30,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -48,28 +49,12 @@ export default function LandlordSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Settings
-        </Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Landlord workspace"
+        title="Settings"
+        subtitle="Profile, payout and portfolio automation"
+        onBack={() => router.back()}
+      />
 
       {profile.isError ? (
         <ErrorState onRetry={() => profile.refetch()} />
