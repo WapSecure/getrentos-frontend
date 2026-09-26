@@ -21,9 +21,15 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
-import type { ShortletBooking, ShortletListing } from '@/types/shortlet';
+import type { ShortletBooking, ShortletDiscountType, ShortletListing } from '@/types/shortlet';
 
 const TODAY = new Date().toISOString().slice(0, 10);
+
+const DISCOUNT_LABEL: Record<ShortletDiscountType, string> = {
+  WEEKLY: 'Weekly discount',
+  MONTHLY: 'Monthly discount',
+  LAST_MINUTE: 'Last-minute discount',
+};
 
 /** The `YYYY-MM-DD` day after `date`, in the UTC keys the API's calendar uses. */
 const nextDay = (date: string) => {
@@ -206,6 +212,19 @@ export function ShortletBookingDialog({
               ) : (
                 <p className="text-destructive">{availability.reason}</p>
               )}
+              {availability.available && availability.discountAmount ? (
+                <p className="mt-1 text-success">
+                  {DISCOUNT_LABEL[availability.discountType ?? 'WEEKLY']} (
+                  {availability.discountPct}
+                  %): −{formatCurrency(availability.discountAmount)} off the nights
+                </p>
+              ) : null}
+              {availability.available && availability.seasonalNights ? (
+                <p className="mt-1 text-muted-foreground">
+                  {availability.seasonalNights} of these nights are at the host&rsquo;s peak-season
+                  rate.
+                </p>
+              ) : null}
             </div>
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}

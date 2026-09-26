@@ -2,6 +2,8 @@ import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   BlockShortletDatesInput,
   BlockedDateRange,
+  ShortletSeason,
+  ShortletSeasonInput,
   CreateShortletBookingInput,
   CreateShortletListingInput,
   CreateShortletReviewInput,
@@ -308,6 +310,28 @@ export const shortletService = {
     safeCall(() =>
       authFetch(`/host/shortlets/blocked-dates/${blockedDateId}`, { method: 'DELETE' })
     ),
+
+  listSeasons: (listingId: string) =>
+    safeCall(() => authFetch<ShortletSeason[]>(`/host/shortlets/${listingId}/seasons`)),
+
+  createSeason: (listingId: string, input: ShortletSeasonInput) =>
+    safeCall(() =>
+      authFetch<ShortletSeason>(`/host/shortlets/${listingId}/seasons`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  updateSeason: (seasonId: string, input: Partial<ShortletSeasonInput>) =>
+    safeCall(() =>
+      authFetch<ShortletSeason>(`/host/shortlets/seasons/${seasonId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  deleteSeason: (seasonId: string) =>
+    safeCall(() => authFetch(`/host/shortlets/seasons/${seasonId}`, { method: 'DELETE' })),
 
   hostEarningsAnalytics: () =>
     safeCall(() => authFetch<ShortletEarningsAnalytics>('/host/shortlets/analytics')),
