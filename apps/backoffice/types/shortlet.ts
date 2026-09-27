@@ -175,7 +175,15 @@ export interface AdminShortletDispute {
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
+  /** A Guest Promise report: decided with a money outcome, not a plain resolve. */
+  guestPromise?: boolean;
+  problemType?: string;
+  evidenceUrls?: string[];
+  outcome?: AdminGuestPromiseOutcome;
+  refundAmount?: number;
 }
+
+export type AdminGuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
 
 export interface AdminShortletDisputeMessage {
   id: string;

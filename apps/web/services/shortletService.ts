@@ -8,6 +8,7 @@ import {
 import type {
   BlockShortletDatesInput,
   BlockedDateRange,
+  GuestPromiseProblem,
   HostCancelPreview,
   ShortletHostPenalty,
   ShortletCalendarFeed,
@@ -298,6 +299,28 @@ export const shortletService = {
       authFetch<ShortletListing>(`/host/shortlets/${listingId}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
+      })
+    ),
+
+  uploadPromisePhoto: (bookingId: string, file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return safeCall(() =>
+      authFetch<{ key: string }>(`/shortlets/bookings/${bookingId}/guest-promise/photos`, {
+        method: 'POST',
+        body: fd,
+      })
+    );
+  },
+
+  reportGuestPromise: (
+    bookingId: string,
+    input: { problemType: GuestPromiseProblem; description: string; imageKeys?: string[] }
+  ) =>
+    safeCall(() =>
+      authFetch<ShortletDispute>(`/shortlets/bookings/${bookingId}/guest-promise`, {
+        method: 'POST',
+        body: JSON.stringify(input),
       })
     ),
 

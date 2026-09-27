@@ -33,6 +33,7 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { GUEST_PROMISE_TEXT } from '@/lib/shortlet/guestPromise';
 import {
   INTERNET_TYPE_LABEL,
   POWER_SOURCE_LABEL,
@@ -606,6 +607,13 @@ export function ShortletListingDetail({
                 </div>
               ) : null}
             </div>
+            <p className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
+              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+              <span>
+                <span className="font-medium text-foreground">GetRentos Guest Promise.</span>{' '}
+                {GUEST_PROMISE_TEXT}
+              </span>
+            </p>
             {(listing.hostCancellations12m ?? 0) > 0 && (
               <p className="mt-3 flex items-start gap-1.5 rounded-md bg-secondary/50 px-3 py-2 text-xs">
                 <CalendarX className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
