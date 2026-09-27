@@ -1,4 +1,5 @@
-import { Alert, RefreshControl, ScrollView, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Platform, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import {
   Divider,
   ErrorState,
   FormAlert,
+  LinkButton,
   Price,
   Skeleton,
   Text,
@@ -29,6 +31,15 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate } from '@/lib/format';
+import {
+  buyOffer,
+  loadProOffers,
+  manageStoreSubscription,
+  purchasesAvailable,
+  restorePurchases,
+  type ProOffer,
+} from '@/lib/purchases';
+import { openLegal } from '@/lib/links';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 const PERSONA: Partial<Record<string, PlanPersona>> = {
@@ -39,9 +50,9 @@ const PERSONA: Partial<Record<string, PlanPersona>> = {
 const date = (iso: string) => formatDate(iso, 'medium');
 
 /**
- * Plan and receipts for every paying persona. Starting or restarting Pro is
- * not offered here: app-store rules require their own in-app purchase for a
- * digital subscription, so the app shows the plan and never sells it.
+ * Plan and receipts for every paying persona. Pro is bought here through the
+ * App Store / Google Play (store rules); a plan bought on the web is still
+ * cancelled here, and a store plan is managed in the store.
  */
 export default function Billing() {
   const { colors, spacing, radius } = useTheme();
@@ -92,7 +103,10 @@ export default function Billing() {
       ) : !mine.data ? (
         <Skeleton height={120} radius={radius.lg} />
       ) : (
-        <PlanCard billing={mine.data} />
+        <>
+          <PlanCard billing={mine.data} />
+          {!mine.data.isActive && purchasesAvailable() ? <BuyPro /> : null}
+        </>
       )}
 
       {pricing.data?.entitlements[persona]?.length ? (
@@ -132,6 +146,8 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
   const toast = useToast();
   const pro = b.isActive;
   const trialing = b.status === 'TRIALING';
+  const storeManaged = b.managedBy === 'app_store' || b.managedBy === 'play_store';
+  const storeName = b.managedBy === 'play_store' ? 'Google Play' : 'the App Store';
 
   const cancel = useMutation({
     mutationFn: billingApi.cancel,
@@ -178,9 +194,22 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
         </View>
       ) : null}
       {b.status === 'PAST_DUE' ? (
-        <FormAlert message="Your last payment failed. Update your card from your GetRentos account on the web to keep Pro." />
+        <FormAlert
+          message={
+            storeManaged
+              ? `Your last payment failed. Update your payment method in ${storeName} to keep Pro.`
+              : 'Your last payment failed. Update your card from your GetRentos account on the web to keep Pro.'
+          }
+        />
       ) : null}
-      {pro && !b.cancelAtPeriodEnd ? (
+      {pro && storeManaged ? (
+        // Store subscriptions are cancelled and changed in the store, not by us.
+        <Button
+          label={`Manage in ${storeName}`}
+          variant="secondary"
+          onPress={() => void manageStoreSubscription()}
+        />
+      ) : pro && !b.cancelAtPeriodEnd ? (
         <Button
           label={trialing ? 'Cancel trial' : 'Cancel plan'}
           variant="secondary"
@@ -188,11 +217,92 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
           onPress={confirmCancel}
         />
       ) : null}
-      {!pro ? (
+      {!pro && !purchasesAvailable() ? (
         <Text variant="caption" color="mutedForeground">
-          Plan changes aren’t available in the app.
+          Plan changes aren’t available in this version of the app.
         </Text>
       ) : null}
+    </Card>
+  );
+}
+
+/**
+ * Pro through the App Store / Google Play. What the store charges is shown in
+ * the store's own formatting, with the auto-renewal terms the stores require
+ * next to the button.
+ */
+function BuyPro() {
+  const { spacing, radius } = useTheme();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [activating, setActivating] = useState(false);
+  const offers = useQuery({ queryKey: ['store', 'pro-offers'], queryFn: loadProOffers });
+
+  // The store confirms the purchase at once; our API hears via RevenueCat's
+  // webhook a moment later. Wait for it rather than claiming Pro early.
+  const waitForPro = async () => {
+    setActivating(true);
+    for (let i = 0; i < 15; i += 1) {
+      const next = await billingApi.mine().catch(() => null);
+      if (next?.isActive) {
+        qc.setQueryData(qk.billing.mine, next);
+        qc.invalidateQueries({ queryKey: ['me', 'subscription'] });
+        toast.show('Welcome to Pro.', 'success');
+        setActivating(false);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    setActivating(false);
+    toast.show('Payment received. Pro will switch on in a few minutes.', 'info');
+  };
+
+  const buy = useMutation({
+    mutationFn: (offer: ProOffer) => buyOffer(offer),
+    onSuccess: (bought) => {
+      if (bought) void waitForPro();
+    },
+    onError: (err) =>
+      toast.show(err instanceof Error ? err.message : 'The purchase didn’t go through.', 'error'),
+  });
+  const restore = useMutation({
+    mutationFn: restorePurchases,
+    onSuccess: () => void waitForPro(),
+    onError: () => toast.show('Nothing to restore on this account.', 'info'),
+  });
+
+  if (offers.isPending) return <Skeleton height={120} radius={radius.lg} />;
+  if (!offers.data?.length) return null;
+
+  return (
+    <Card elevated style={{ gap: spacing.md }}>
+      <Text variant="bodyStrong" accessibilityRole="header">
+        Upgrade to Pro
+      </Text>
+      {offers.data.map((o) => (
+        <Button
+          key={o.id}
+          label={`${o.price} ${o.cycle === 'ANNUAL' ? 'per year' : 'per month'}`}
+          variant={o.cycle === 'MONTHLY' ? 'primary' : 'secondary'}
+          loading={(buy.isPending && buy.variables?.id === o.id) || activating}
+          disabled={buy.isPending || activating}
+          onPress={() => buy.mutate(o)}
+        />
+      ))}
+      <Text variant="caption" color="mutedForeground">
+        Payment is charged to your {Platform.OS === 'ios' ? 'Apple ID' : 'Google Play'} account. Pro
+        renews automatically unless you cancel at least 24 hours before the period ends; manage or
+        cancel it in your {Platform.OS === 'ios' ? 'App Store' : 'Google Play'} settings.
+      </Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg }}>
+        <LinkButton label="Terms" onPress={() => openLegal('terms')} />
+        <LinkButton label="Privacy" onPress={() => openLegal('privacy')} />
+        <LinkButton
+          label="Restore purchases"
+          onPress={() => restore.mutate()}
+          disabled={restore.isPending}
+        />
+      </View>
     </Card>
   );
 }

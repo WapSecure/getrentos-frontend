@@ -18,6 +18,7 @@ import {
   type Portal,
 } from '../roles';
 import { readPreferredPortal, writePreferredPortal } from '../preferredPortal';
+import { forgetPurchaser, identifyPurchaser } from '../purchases';
 import { unregisterPush } from '../push';
 import { requestAppleCredential } from './apple';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
@@ -260,6 +261,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void readPreferredPortal().then(setPreferredPortal);
   }, []);
 
+  // In-app purchases are tied to the signed-in account (see lib/purchases).
+  const userId = profile?.id;
+  useEffect(() => {
+    if (userId) void identifyPurchaser(userId);
+  }, [userId]);
+
   const switchWorkspace = useCallback((portal: Portal) => {
     setPreferredPortal(portal);
     void writePreferredPortal(portal);
@@ -272,6 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // While the session is still valid: stop pushes to this phone.
     await unregisterPush();
+    await forgetPurchaser();
     const rt = refreshTokenRef.current;
     if (rt) {
       try {
