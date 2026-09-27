@@ -3,6 +3,9 @@ import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
   BarChart3,
+  Bell,
+  Landmark,
+  UserRound,
   CircleHelp,
   FileStack,
   Gauge,
@@ -83,6 +86,27 @@ export default function OwnerAccount() {
   ];
 
   const settings: SettingsItem[] = [
+    {
+      key: 'profile',
+      label: 'Profile',
+      description: 'Name, company and phone',
+      icon: UserRound,
+      onPress: go('/(app)/owner-profile'),
+    },
+    {
+      key: 'payout',
+      label: 'Payout account',
+      description: 'Where sale proceeds are paid',
+      icon: Landmark,
+      onPress: go('/(app)/seller-payout'),
+    },
+    {
+      key: 'notifications',
+      label: 'Notifications',
+      description: 'Offers, escrow and verification alerts',
+      icon: Bell,
+      onPress: go('/(app)/owner-notification-settings'),
+    },
     {
       key: 'preferences',
       label: 'Selling preferences',

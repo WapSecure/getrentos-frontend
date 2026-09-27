@@ -263,6 +263,34 @@ export interface OwnerDocument {
   downloadUrl?: string;
 }
 
+export interface OwnerProfile {
+  legalName: string;
+  email: string;
+  phone?: string;
+  phoneVerified: boolean;
+  companyName?: string;
+  avatarUrl?: string;
+  trustScore: number;
+  verificationStatus: string;
+}
+
+export interface OwnerNotification {
+  id: string;
+  /** Lower-cased NotificationType, e.g. "offer_received". */
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface OwnerNotificationPreference {
+  /** Category: offers, escrow, verification, messages or reviews. */
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
 /** Transfer paperwork an owner can file (mirrors OwnerUploadDocumentDto). */
 export const OWNER_DOCUMENT_TYPES = [
   { value: 'TRANSFER_AGREEMENT', label: 'Transfer agreement' },
@@ -404,6 +432,23 @@ export const ownerApi = {
   deleteDocument: (id: string) =>
     apiFetch<{ id: string; deleted: boolean }>(`/owner/documents/${id}`, { method: 'DELETE' }),
   trustProfile: () => apiFetch<TrustProfile>('/owner/trust-profile'),
+
+  profile: () => apiFetch<OwnerProfile>('/owner/profile'),
+  updateProfile: (input: { legalName?: string; companyName?: string; phone?: string }) =>
+    apiFetch<OwnerProfile>('/owner/profile', { method: 'PUT', body: input }),
+
+  notifications: (p = 1, size = 50) =>
+    apiFetch<Paginated<OwnerNotification>>(`/owner/notifications${page(p, size)}`),
+  readNotification: (id: string) =>
+    apiFetch<void>(`/owner/notifications/${id}/read`, { method: 'PATCH' }),
+  readAllNotifications: () => apiFetch<void>('/owner/notifications/read-all', { method: 'POST' }),
+  notificationPreferences: () =>
+    apiFetch<OwnerNotificationPreference[]>('/owner/settings/notifications'),
+  updateNotificationPreferences: (preferences: OwnerNotificationPreference[]) =>
+    apiFetch<OwnerNotificationPreference[]>('/owner/settings/notifications', {
+      method: 'PUT',
+      body: { preferences },
+    }),
   setDocumentShared: (id: string, sharedWithBuyer: boolean) =>
     apiFetch<OwnerDocument>(`/owner/documents/${id}/shared`, {
       method: 'PATCH',

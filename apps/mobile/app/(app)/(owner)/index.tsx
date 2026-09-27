@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BadgeCheck,
   BarChart3,
+  Bell,
   Building2,
   ChevronRight,
   FileSignature,
@@ -16,6 +17,7 @@ import {
 import {
   Card,
   ErrorState,
+  IconButton,
   Price,
   Screen,
   SectionHeader,
@@ -42,12 +44,26 @@ export default function OwnerHome() {
   const { colors, spacing, radius } = useTheme();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
+  // Drives the bell badge; the notifications screen owns the full list.
+  const notifications = useQuery({
+    queryKey: qk.owner.notifications,
+    queryFn: () => ownerApi.notifications(),
+  });
+  const unread = notifications.data?.items.filter((n) => !n.read).length ?? 0;
 
   const header = (
     <DashboardHeader
       eyebrow={greeting()}
       title={firstName(profile?.legalName)}
       subtitle="Your properties, offers and sales"
+      accessory={
+        <IconButton
+          onPress={() => router.push('/(app)/owner-notifications')}
+          accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          badge={unread}
+          icon={<Bell size={21} color={colors.foreground} />}
+        />
+      }
     />
   );
 

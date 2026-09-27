@@ -40,4 +40,11 @@ describe('notification routes', () => {
       '/(app)/(buyer)/offers'
     );
   });
+
+  it('opens the owner screens web links point at', () => {
+    expect(routeForActionUrl('/owner/trust-profile')).toBe('/(app)/owner-trust-profile');
+    expect(routeForActionUrl('https://app.getrentos.com/owner/documents?tab=shared')).toBe(
+      '/(app)/owner-documents'
+    );
+  });
 });

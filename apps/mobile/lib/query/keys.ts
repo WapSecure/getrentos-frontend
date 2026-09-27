@@ -132,9 +132,16 @@ export const qk = {
     ratingSummary: ['owner', 'reviews', 'summary'] as const,
     metrics: ['owner', 'metrics'] as const,
     trustProfile: ['owner', 'trust-profile'] as const,
+    profile: ['owner', 'profile'] as const,
+    notifications: ['owner', 'notifications'] as const,
+    notificationPreferences: ['owner', 'settings', 'notifications'] as const,
     preferences: ['owner', 'preferences'] as const,
     conversations: ['owner', 'conversations'] as const,
     messages: (id: string) => ['owner', 'conversations', id, 'messages'] as const,
+  },
+  seller: {
+    payoutAccount: ['seller', 'payout-account'] as const,
+    payouts: ['seller', 'payouts'] as const,
   },
   buyer: {
     dashboard: ['buyer', 'dashboard'] as const,
