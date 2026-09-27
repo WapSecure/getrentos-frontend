@@ -17,6 +17,7 @@ import { gatemanApi } from '@/lib/api/gateman';
 import { qk } from '@/lib/query/keys';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { SettingsGroup } from '@/components/account/SettingsList';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function GatemanAccount() {
   const { profile, signOut } = useAuth();
@@ -45,6 +46,8 @@ export default function GatemanAccount() {
           </View>
         ) : null}
       </View>
+
+      <WorkspaceSwitcher />
 
       <Card elevated>
         <Text variant="bodyStrong">Your post</Text>

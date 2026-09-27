@@ -11,7 +11,13 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
-import { primaryPortal, usablePortal as resolveUsablePortal, type Portal } from '../roles';
+import {
+  primaryPortal,
+  switchablePortals,
+  usablePortal as resolveUsablePortal,
+  type Portal,
+} from '../roles';
+import { readPreferredPortal, writePreferredPortal } from '../preferredPortal';
 import { unregisterPush } from '../push';
 import { requestAppleCredential } from './apple';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
@@ -34,6 +40,10 @@ interface AuthContextValue {
   portal: Portal | null;
   /** The portal to actually open; `null` when nothing they hold is built. */
   usablePortal: Portal | null;
+  /** Built workspaces this account can open; more than one shows a switcher. */
+  workspaces: Portal[];
+  /** Open another workspace this account holds, and remember it on this device. */
+  switchWorkspace: (portal: Portal) => void;
   pendingTwoFactor: PendingTwoFactor | null;
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
@@ -63,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<AuthContextValue['status']>('loading');
   const [profile, setProfile] = useState<AuthProfile | null>(null);
+  const [preferredPortal, setPreferredPortal] = useState<Portal | null>(null);
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactor | null>(null);
 
   // Access token in a ref so the API client reads the latest value without a
@@ -88,6 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('unauthenticated');
     await clearTokens();
     await clearCachedProfile();
+    setPreferredPortal(null);
+    await writePreferredPortal(null);
     queryClient.clear();
     await persister.removeClient();
   }, [queryClient]);
@@ -243,6 +256,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { requiresTwoFactor: false };
   }, []);
 
+  useEffect(() => {
+    void readPreferredPortal().then(setPreferredPortal);
+  }, []);
+
+  const switchWorkspace = useCallback((portal: Portal) => {
+    setPreferredPortal(portal);
+    void writePreferredPortal(portal);
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     setProfile(await authApi.me());
   }, []);
@@ -266,7 +288,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       profile,
       portal: profile ? primaryPortal(profile.roles) : null,
-      usablePortal: profile ? resolveUsablePortal(profile.roles) : null,
+      usablePortal: profile ? resolveUsablePortal(profile.roles, preferredPortal) : null,
+      workspaces: profile ? switchablePortals(profile.roles) : [],
+      switchWorkspace,
       pendingTwoFactor,
       signIn,
       completeTwoFactor,
@@ -281,6 +305,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [
       status,
       profile,
+      preferredPortal,
+      switchWorkspace,
       pendingTwoFactor,
       signIn,
       completeTwoFactor,

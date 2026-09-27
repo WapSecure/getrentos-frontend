@@ -181,6 +181,15 @@ export const ownerService = {
   archiveProperty: (id: string) =>
     safeCall(() => authFetch(`/owner/properties/${id}`, { method: 'DELETE' })),
 
+  /** Adds the landlord workspace to the account so this property can be rented out. */
+  convertToRental: (id: string) =>
+    safeCall(() =>
+      authFetch<{ propertyId: string; landlordRoleGranted: boolean; roles: string[] }>(
+        `/owner/properties/${id}/convert-to-rental`,
+        { method: 'POST' }
+      )
+    ),
+
   /**
    * Stage a property photo and hand back its storage key.
    *

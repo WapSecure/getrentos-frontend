@@ -20,7 +20,7 @@ describe('step-up', () => {
   const fetchMock = jest.fn();
   beforeEach(() => {
     fetchMock.mockReset();
-    global.fetch = fetchMock as never;
+    globalThis.fetch = fetchMock as never;
     clearStepUpToken();
     registerStepUpPrompt(null);
   });

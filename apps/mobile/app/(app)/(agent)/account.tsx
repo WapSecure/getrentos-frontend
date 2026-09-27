@@ -28,6 +28,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function AgentAccount() {
   const { signOut } = useAuth();
@@ -70,6 +71,8 @@ export default function AgentAccount() {
           </>
         )}
       </View>
+
+      <WorkspaceSwitcher />
 
       <Card elevated padding="none">
         <Row

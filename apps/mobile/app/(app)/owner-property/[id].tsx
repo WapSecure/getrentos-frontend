@@ -35,6 +35,7 @@ import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Sheet } from '@/components/Sheet';
 import { OwnershipProofSheet } from '@/components/owner/OwnershipProofSheet';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 export default function OwnerPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,6 +45,35 @@ export default function OwnerPropertyDetail() {
   const toast = useToast();
   const [listOpen, setListOpen] = useState(false);
   const [proofOpen, setProofOpen] = useState(false);
+  const { refreshProfile, switchWorkspace } = useAuth();
+
+  // Rent it out: adds the landlord workspace; the property is already there,
+  // since owner and landlord properties are the same records.
+  const rentOut = useMutation({
+    mutationFn: () => ownerApi.convertToRental(id),
+    onSuccess: async () => {
+      await refreshProfile();
+      Alert.alert(
+        'Ready to rent out',
+        'This property is in your landlord workspace. Add units, list it for rent and find tenants there. Switch workspaces any time from Account.',
+        [
+          { text: 'Stay here', style: 'cancel' },
+          { text: 'Open landlord workspace', onPress: () => switchWorkspace('landlord') },
+        ]
+      );
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not set this up.', 'error'),
+  });
+  const confirmRentOut = () =>
+    Alert.alert(
+      'Rent this property out?',
+      'Your account gets the landlord workspace alongside this one. Any sale listing stays as it is.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Rent it out', onPress: () => rentOut.mutate() },
+      ]
+    );
 
   const property = useQuery({
     queryKey: qk.owner.property(id),
@@ -235,6 +265,19 @@ export default function OwnerPropertyDetail() {
                   </Card>
                 )}
               </View>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <Text variant="bodyStrong">Rent it out instead</Text>
+                <Text variant="caption" color="mutedForeground">
+                  Manage this property as a rental — units, tenants and rent — from the landlord
+                  workspace.
+                </Text>
+                <Button
+                  label="Rent it out"
+                  variant="secondary"
+                  loading={rentOut.isPending}
+                  onPress={confirmRentOut}
+                />
+              </Card>
             </>
           )}
         </View>

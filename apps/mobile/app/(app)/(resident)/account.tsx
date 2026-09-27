@@ -13,6 +13,7 @@ import {
 } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { SettingsGroup } from '@/components/account/SettingsList';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function ResidentAccount() {
   const { profile, signOut } = useAuth();
@@ -35,6 +36,8 @@ export default function ResidentAccount() {
           </View>
         ) : null}
       </View>
+
+      <WorkspaceSwitcher />
 
       <SettingsGroup
         title="Account"
