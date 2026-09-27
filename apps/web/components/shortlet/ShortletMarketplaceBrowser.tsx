@@ -18,7 +18,16 @@ import {
   Select,
   Skeleton,
 } from '@getrentos/ui';
-import { BedDouble, CalendarCheck, Heart, MapPin, Search, Star, Zap } from 'lucide-react';
+import {
+  BedDouble,
+  CalendarCheck,
+  ClipboardCheck,
+  Heart,
+  MapPin,
+  Search,
+  Star,
+  Zap,
+} from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import { shortletService } from '@/services/shortletService';
@@ -365,6 +374,11 @@ export const ShortletMarketplaceBrowser = () => {
                     </Badge>
                   )}
                   {listing.isVerified && <Badge variant="info">Verified host</Badge>}
+                  {listing.inspection && (
+                    <Badge variant="success">
+                      <ClipboardCheck className="mr-1 h-3 w-3" /> Inspected
+                    </Badge>
+                  )}
                 </div>
                 {wishlist.canUseWishlist && (
                   <button

@@ -71,6 +71,8 @@ export interface ShortletListing {
   seasons: ShortletSeason[];
   /** Confirmed stays the host cancelled on this listing in the last 12 months (detail view). */
   hostCancellations12m?: number;
+  /** Newest inspection by an independent, licensed agent; absent when none qualifies. */
+  inspection?: ShortletInspectionBadge;
   houseRules?: string;
   /** Unset = the host hasn't said. */
   petsAllowed?: boolean;
@@ -539,4 +541,17 @@ export interface ShortletHostPenalty {
   status: 'OUTSTANDING' | 'SETTLED' | 'WAIVED';
   waiverReason?: string;
   createdAt: string;
+}
+
+export type InspectedRoomCondition = 'excellent' | 'good' | 'fair';
+
+/** An inspection that earns the "Inspected" badge (see backend shortlet-inspection.ts). */
+export interface ShortletInspectionBadge {
+  inspectedAt: string;
+  /** First name and initial. */
+  agentName: string;
+  type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
+  rooms: { room: string; condition: InspectedRoomCondition }[];
+  /** The worst room rating. */
+  condition: InspectedRoomCondition;
 }
