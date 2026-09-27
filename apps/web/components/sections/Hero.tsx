@@ -8,7 +8,7 @@ import { ROUTES } from '@/lib/constants/auth';
  */
 const trustItems = [
   { icon: Shield, text: 'IDENTITY VERIFICATION' },
-  { icon: Lock, text: 'ESCROW-PROTECTED PAYMENTS' },
+  { icon: Lock, text: 'PROTECTED PAYMENTS' },
   { icon: FileCheck, text: 'PROPERTY DOCUMENT REVIEW' },
   { icon: Eye, text: 'FRAUD REPORTING & REVIEW' },
 ];

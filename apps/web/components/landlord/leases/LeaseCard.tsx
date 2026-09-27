@@ -91,7 +91,7 @@ export const LeaseCard = ({
         <p className="text-xs text-amber-700 dark:text-amber-400 mt-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
           <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
-            Tenant has signed. Rent is not in escrow yet
+            Tenant has signed. They haven’t paid the first rent to GetRentos yet
             {lease.paymentDueAt
               ? ` — due ${new Date(lease.paymentDueAt).toLocaleDateString('en-NG', {
                   day: 'numeric',
@@ -105,8 +105,8 @@ export const LeaseCard = ({
 
       {lease.status === 'awaiting_landlord' && (
         <p className="text-xs text-green-700 dark:text-green-400 mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg px-2.5 py-1.5">
-          Rent is held in escrow. Countersign to confirm you have handed over — the funds are
-          released to you after the confirmation period.
+          GetRentos is holding the rent. Countersign to confirm you have handed over — the money is
+          paid to you after the confirmation period.
         </p>
       )}
 
@@ -125,7 +125,8 @@ export const LeaseCard = ({
         )}
         {lease.status === 'sent' && (
           <p className="text-xs text-muted-foreground py-2">
-            Waiting for the tenant to sign. You countersign once the rent is in escrow.
+            Waiting for the tenant to sign. You countersign once they have paid the rent to
+            GetRentos.
           </p>
         )}
         {lease.status === 'awaiting_payment' && (

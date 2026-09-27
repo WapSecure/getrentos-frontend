@@ -4,14 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Lock,
-  ShieldAlert,
-  Wallet,
-} from 'lucide-react-native';
+import { Check, ChevronDown, ChevronUp, Lock, ShieldAlert, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -44,12 +37,12 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'deposit_pending',
     label: 'Deposit',
-    description: 'Pay your deposit to move this purchase into escrow.',
+    description: 'Pay your deposit to GetRentos, which holds it safely until the sale completes.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
-    description: 'Your deposit is confirmed and held securely in escrow.',
+    description: 'Your deposit is received and held safely by GetRentos.',
   },
   {
     key: 'verification',
@@ -180,7 +173,7 @@ export default function BuyerTransactions() {
         <DetailHeader
           eyebrow="Buyer finance"
           title="Transactions"
-          subtitle="Deposits, escrow and completion"
+          subtitle="Deposits, payment protection and completion"
           onBack={() => router.back()}
         />
         {all.length > 0 ? (
@@ -222,7 +215,7 @@ export default function BuyerTransactions() {
             description={
               all.length
                 ? 'No transactions match this filter.'
-                : 'Once an offer is accepted, its escrow progress will appear here.'
+                : 'Once an offer is accepted, its payment progress will appear here.'
             }
             action={
               all.length ? (
@@ -317,7 +310,7 @@ function TransactionCard({
           <ShieldAlert size={18} color={colors.destructive} style={{ marginTop: 1 }} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="callout" style={{ color: colors.destructive, fontWeight: '700' }}>
-              Escrow frozen — dispute active
+              Payment on hold — dispute open
             </Text>
             <Text variant="caption" color="mutedForeground">
               {tx.disputeReason ||
@@ -419,7 +412,7 @@ function StageTimeline({ status }: { status: BuyerEscrowStatus }) {
   return (
     <View
       accessible
-      accessibilityLabel={`Escrow stage ${current + 1} of ${STAGES.length}: ${STAGES[current]?.label}. ${STAGES[current]?.description}`}
+      accessibilityLabel={`Payment stage ${current + 1} of ${STAGES.length}: ${STAGES[current]?.label}. ${STAGES[current]?.description}`}
       style={{ gap: 0 }}
     >
       {STAGES.map((stage, i) => {

@@ -47,7 +47,7 @@ export const RentCollectionStats = ({
     },
     {
       icon: Lock,
-      label: 'Escrow Pending',
+      label: 'Held by GetRentos',
       value: formatCurrency(escrowPending, { compact: true }),
       subtitle: 'Awaiting release',
       color: 'blue',

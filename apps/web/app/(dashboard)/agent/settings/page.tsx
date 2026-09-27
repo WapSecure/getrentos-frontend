@@ -36,7 +36,7 @@ export default function AgentSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where proceeds from properties you sell on the marketplace are sent once escrow releases — transfers run through Paystack." />
+          <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once GetRentos pays it out to you — transfers run through Paystack." />
         );
       case 'preferences':
         return <FieldPreferencesSettings />;

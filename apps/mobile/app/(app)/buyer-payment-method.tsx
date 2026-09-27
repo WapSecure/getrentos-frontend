@@ -34,7 +34,7 @@ export default function BuyerPaymentMethod() {
       <DetailScreenHeader
         eyebrow="Buyer finance"
         title="Payment method"
-        subtitle="Manage your escrow funding account"
+        subtitle="The account you pay deposits from"
         onBack={() => router.back()}
       />
 
@@ -88,7 +88,7 @@ function PaymentMethodForm({ data }: { data: BuyerPaymentMethodData }) {
       }}
     >
       <Text variant="caption" color="mutedForeground">
-        The bank account you&apos;ll use to fund deposits and escrow payments.
+        The bank account you&apos;ll use to pay deposits and protected payments.
       </Text>
 
       {data.verified ? (

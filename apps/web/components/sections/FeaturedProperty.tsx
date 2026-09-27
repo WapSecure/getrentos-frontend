@@ -15,7 +15,7 @@ const example = {
   beds: 2,
   baths: 2,
   size: 1200,
-  badges: ['Identity verified', 'Documents reviewed', 'Escrow payment'],
+  badges: ['Identity verified', 'Documents reviewed', 'Protected payment'],
 };
 
 export const FeaturedProperty = () => (

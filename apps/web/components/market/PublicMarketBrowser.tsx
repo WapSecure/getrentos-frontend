@@ -286,7 +286,7 @@ export const PublicMarketBrowser = ({
         <p className="mt-3 text-muted-foreground">
           {market === 'rent'
             ? 'Homes to rent, with verified properties and landlords marked. Sign in to contact a landlord and apply.'
-            : 'Verified homes for sale. Sign in to make an offer and pay through escrow.'}
+            : 'Verified homes for sale. Sign in to make an offer — GetRentos holds your payment until the sale completes.'}
         </p>
       </header>
 

@@ -62,7 +62,7 @@ export const PaymentMethodSettings = () => {
         <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 mb-6">
           <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
           <p className="text-xs text-green-700 dark:text-green-400">
-            Bank account verified and active for escrow payments
+            Bank account verified and active for protected payments
           </p>
         </div>
       ) : (

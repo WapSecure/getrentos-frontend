@@ -24,8 +24,8 @@ const helpArticles: Article[] = [
   },
   {
     id: '2',
-    title: 'Understanding escrow payments',
-    description: 'Learn how escrow protects your transactions',
+    title: 'Understanding payment protection',
+    description: 'Learn how GetRentos holds your money to protect you',
     category: 'payments',
     views: 876,
     helpful: 92,

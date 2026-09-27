@@ -103,7 +103,7 @@ export default function BuyerHome() {
           onPress={() => router.push('/(app)/buyer-transactions')}
           accessibilityRole="button"
           accessibilityLabel={`${dashboard.data.activeTransactions} active ${dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}`}
-          accessibilityHint="Opens escrow transaction progress"
+          accessibilityHint="Opens your purchase payment progress"
         >
           <Card
             elevated
@@ -121,7 +121,7 @@ export default function BuyerHome() {
                 {dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}
               </Text>
               <Text variant="caption" color="mutedForeground">
-                Track your escrow progress
+                Track your purchase payment
               </Text>
             </View>
             <ChevronRight size={18} color={colors.primary} />
@@ -182,7 +182,7 @@ export default function BuyerHome() {
         <View style={{ gap: spacing.md }}>
           <SectionHeader
             title="Recent activity"
-            description="Offers, viewings and escrow updates"
+            description="Offers, viewings and payment updates"
           />
           <Card elevated padding="none">
             {dashboard.data.recentActivity.slice(0, 6).map((a, i) => (

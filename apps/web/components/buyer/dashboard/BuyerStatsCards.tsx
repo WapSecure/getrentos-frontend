@@ -112,7 +112,7 @@ export const BuyerStatsCards = ({
     },
     {
       icon: ShieldCheck,
-      label: 'In Escrow',
+      label: 'Held by GetRentos',
       value: activeTransactions,
       subtitle: 'Active transactions',
       color: 'purple',

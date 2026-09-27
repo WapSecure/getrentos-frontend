@@ -10,7 +10,7 @@ import { buyerService, type BuyerNotificationPreference } from '@/services/buyer
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
   offers: { label: 'Offer Updates & Counters', icon: Handshake },
-  escrow: { label: 'Escrow Milestone Updates', icon: ShieldCheck },
+  escrow: { label: 'Purchase payment updates', icon: ShieldCheck },
   viewings: { label: 'Viewing Confirmations', icon: CalendarClock },
   messages: { label: 'New Messages', icon: MessageCircle },
   saved: { label: 'Price Drops on Saved Properties', icon: Heart },

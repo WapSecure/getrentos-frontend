@@ -46,12 +46,12 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
   {
     key: 'deposit_pending',
     label: 'Deposit Pending',
-    description: 'Awaiting buyer earnest deposit into escrow.',
+    description: 'Waiting for the buyer to pay their deposit to GetRentos.',
   },
   {
     key: 'funds_held',
     label: 'Funds Held',
-    description: 'Deposit confirmed and held securely in escrow.',
+    description: 'Deposit received and held safely by GetRentos.',
   },
   {
     key: 'verification',
@@ -153,7 +153,7 @@ export const EscrowTransactionDetailModal = ({
                   <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-medium text-red-700 dark:text-red-400">
-                      Escrow frozen — dispute active
+                      Payment on hold — dispute open
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-300 mt-0.5">
                       {transaction.disputeReason ||
@@ -165,15 +165,15 @@ export const EscrowTransactionDetailModal = ({
                 <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border flex items-start gap-2">
                   <ShieldAlert className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs font-medium text-foreground">Escrow refunded</p>
+                    <p className="text-xs font-medium text-foreground">Payment refunded</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      The buyer&apos;s escrow funds were refunded and this sale will not progress.
+                      GetRentos refunded the buyer&apos;s payment and this sale will not go ahead.
                     </p>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-3">Escrow Timeline</h4>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Payment progress</h4>
                   <div className="space-y-0">
                     {escrowSteps.map((step, index) => {
                       const isDone = index < activeIndex || transaction.escrowStatus === 'released';
@@ -224,9 +224,9 @@ export const EscrowTransactionDetailModal = ({
               <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
                 <Lock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-700 dark:text-blue-300">
-                  Funds are held and released automatically by GetRentos escrow once all
-                  verification and payment conditions are met. Manual release is not available to
-                  protect both parties.
+                  GetRentos holds the buyer’s money and pays it to you automatically once all
+                  verification and payment conditions are met. It can’t be paid out early, which
+                  protects both parties.
                 </p>
               </div>
 

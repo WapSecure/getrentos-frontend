@@ -14,7 +14,7 @@ const roles = [
     name: 'Landlord',
     icon: Building2,
     description:
-      'List properties, vet tenants, collect rent through escrow, manage units and finance.',
+      'List properties, vet tenants, collect rent safely through GetRentos, manage units and finance.',
   },
   {
     id: 'owner',
@@ -50,7 +50,7 @@ export const Roles = () => {
         <SectionHeading
           badge="ROLES"
           title="Six roles, one shared trust layer."
-          description="Everyone gets a tailored workspace — same verification, escrow and dispute rails underneath."
+          description="Everyone gets a tailored workspace — same verification, payment protection and dispute rails underneath."
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((role) => (

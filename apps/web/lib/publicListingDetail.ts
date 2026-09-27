@@ -195,7 +195,7 @@ export async function fetchPublicListing(
       amenities: s.amenities ?? [],
       facts: [
         ...fact('Property type', humanise(s.propertyType)),
-        ...fact('Payment', 'Escrow-protected'),
+        ...fact('Payment', 'Protected — GetRentos holds it until the deal is done'),
       ],
     };
   }

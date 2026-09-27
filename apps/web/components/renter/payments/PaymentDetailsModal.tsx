@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button } from '@getrentos/ui';
+import { escrowStatusBadges } from '@/lib/statusBadge';
 
 interface Payment {
   id: string;
@@ -153,16 +154,16 @@ export const PaymentDetailsModal = ({
                 </p>
               </div>
 
-              {/* Escrow Status */}
+              {/* Where the money is */}
               <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-blue-600" />
                   <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-                    Escrow Status
+                    Where your money is
                   </span>
                 </div>
-                <p className="text-sm text-blue-700 dark:text-blue-300 capitalize mt-0.5">
-                  {payment.escrowStatus} {payment.escrowStatus === 'held' && '🔒'}
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-0.5">
+                  {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
                 </p>
               </div>
 

@@ -44,7 +44,7 @@ const SLIDES = [
   {
     key: 'escrow',
     eyebrow: 'Protection',
-    title: 'Your money stays safe in escrow',
+    title: 'GetRentos holds your money safely',
     body: 'Rent and deposits are held securely and only released when both sides confirm. No transfers into thin air.',
     Scene: EscrowScene,
   },

@@ -310,7 +310,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           </p>
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             <ArrowUpDown className="h-3.5 w-3.5" />
-            Escrow protection follows accepted offers
+            Payment protection starts once an offer is accepted
           </span>
         </div>
 
@@ -500,7 +500,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                     Protected sale process
                   </p>
                   <p className="mt-1">
-                    Offers, acceptance, escrow deposits, and settlement use the same secure buyer
+                    Offers, acceptance, protected deposits, and settlement use the same secure buyer
                     transaction flow as other verified sale listings.
                   </p>
                 </div>

@@ -65,12 +65,12 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   sale: {
     title: 'Homes for sale',
-    body: 'Make an offer and pay through escrow once you sign in.',
+    body: 'Make an offer once you sign in — GetRentos holds your payment until the sale completes.',
     search: 'Search area, estate or title',
   },
   shortlet: {
     title: 'Shortlets',
-    body: 'Furnished short stays from verified hosts, paid through escrow.',
+    body: 'Furnished short stays from verified hosts — GetRentos holds your payment until you arrive.',
     search: 'Search area or city',
   },
   land: {
@@ -637,7 +637,7 @@ function JoinBar() {
       >
         <ShieldCheck size={20} color={colors.primary} />
         <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-          Create a free account to save homes, enquire, and pay safely through escrow.
+          Create a free account to save homes, enquire, and pay safely through GetRentos.
         </Text>
         <Button
           label="Join free"

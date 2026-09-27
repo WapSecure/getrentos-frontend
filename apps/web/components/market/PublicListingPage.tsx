@@ -46,7 +46,7 @@ export async function publicListingMetadata(
   const path = `${MARKET_PATH[market]}/${id}`;
   const description =
     listing.description?.slice(0, 160) ||
-    `${listing.title} in ${listing.location} — verified listing on GetRentos, paid through escrow.`;
+    `${listing.title} in ${listing.location} — verified listing on GetRentos with payment protection.`;
   return {
     title: `${listing.title} — ${listing.location}`,
     description,
@@ -225,7 +225,7 @@ export async function PublicListingPage({
 
               <p className="flex items-start gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
                 <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                Pay through GetRentos escrow — your money is held until both sides confirm.
+                Pay through GetRentos — we hold your money until both sides confirm.
               </p>
             </div>
           </aside>

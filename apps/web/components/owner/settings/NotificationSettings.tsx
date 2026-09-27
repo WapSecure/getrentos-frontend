@@ -10,7 +10,7 @@ import { ownerService, type OwnerNotificationPreference } from '@/services/owner
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
   offers: { label: 'New Offers & Counters', icon: Handshake },
-  escrow: { label: 'Escrow Milestone Updates', icon: ShieldCheck },
+  escrow: { label: 'Sale payment updates', icon: ShieldCheck },
   verification: { label: 'Verification Status Changes', icon: FileText },
   messages: { label: 'New Messages', icon: MessageCircle },
   reviews: { label: 'New Reviews', icon: Star },

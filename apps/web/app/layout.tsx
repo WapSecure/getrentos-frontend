@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     'renters',
     'landlords',
     'real estate Nigeria',
-    'escrow payments',
+    'protected payments',
     'property verification',
   ],
   alternates: {

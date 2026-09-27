@@ -327,7 +327,7 @@ export function EscrowScene() {
       <Layer depth={1}>
         <EscrowNode
           icon={<ShieldCheck size={19} color={colors.primaryForeground} />}
-          label="Held in escrow"
+          label="Held by GetRentos"
           caption="Neither side can touch it"
           emphasis
         />
