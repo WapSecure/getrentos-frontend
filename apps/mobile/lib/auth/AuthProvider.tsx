@@ -46,6 +46,8 @@ interface AuthContextValue {
   signInWithApple: () => Promise<{ requiresTwoFactor: boolean }>;
   /** Adopt a session obtained elsewhere (signup). */
   applyExternalSession: (session: AuthSession) => void;
+  /** Re-reads who the user is, after a change like a new email or a new role. */
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -241,6 +243,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { requiresTwoFactor: false };
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    setProfile(await authApi.me());
+  }, []);
+
   const signOut = useCallback(async () => {
     // While the session is still valid: stop pushes to this phone.
     await unregisterPush();
@@ -269,6 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithProvider,
       signInWithApple,
       applyExternalSession: applySession,
+      refreshProfile,
       signOut,
     }),
     [
@@ -281,6 +288,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithProvider,
       signInWithApple,
       applySession,
+      refreshProfile,
       signOut,
     ]
   );

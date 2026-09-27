@@ -19,6 +19,7 @@ import { SplashReveal } from '@/components/SplashReveal';
 import { AppLockGate } from '@/components/AppLockGate';
 import { ConnectivityBanner } from '@/components/ConnectivityBanner';
 import { Sentry } from '@/lib/monitoring';
+import { StepUpSheet } from '@/components/StepUpSheet';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -121,6 +122,7 @@ function Gate() {
         <Stack.Screen name="(app)" />
       </Stack>
       <AppLockGate />
+      <StepUpSheet />
       <SplashReveal />
       <ConnectivityBanner />
     </>
