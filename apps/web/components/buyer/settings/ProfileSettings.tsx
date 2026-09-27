@@ -10,6 +10,7 @@ import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
+import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -45,7 +46,6 @@ const ProfileSettingsForm = ({
       unwrap(
         buyerService.updateProfile({
           legalName: formData.fullName,
-          email: formData.email,
           phone: formData.phone,
         })
       ),
@@ -100,9 +100,10 @@ const ProfileSettingsForm = ({
             <LegacyInput
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              readOnly
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
           </div>
         </div>
 

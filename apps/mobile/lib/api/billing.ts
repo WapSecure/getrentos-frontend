@@ -31,6 +31,8 @@ export interface MyBilling {
   cancelAtPeriodEnd: boolean;
   isActive: boolean;
   trialAvailable: boolean;
+  /** Where it's managed: store subscriptions are cancelled in the store. */
+  managedBy?: 'web' | 'app_store' | 'play_store' | null;
 }
 
 export interface SubscriptionInvoice {
@@ -46,9 +48,9 @@ export interface SubscriptionInvoice {
 }
 
 /**
- * Plan status, what Pro includes, receipts and cancelling. Buying Pro is
- * deliberately absent: app-store rules require their own in-app purchase for a
- * digital subscription, so checkout stays out of the app.
+ * Plan status, what Pro includes, receipts and cancelling a web plan. Buying
+ * Pro in the app goes through the App Store / Google Play (lib/purchases), as
+ * store rules require; the API learns about it from RevenueCat.
  */
 export const billingApi = {
   mine: () => apiFetch<MyBilling>('/billing'),

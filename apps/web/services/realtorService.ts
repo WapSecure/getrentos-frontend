@@ -502,7 +502,7 @@ export const realtorService = {
     ),
   updateSettingsProfile: (data: {
     fullName: string;
-    email: string;
+    email?: string;
     phone?: string;
     companyName?: string;
   }) =>

@@ -447,6 +447,12 @@ export const ownerApi = {
   deleteDocument: (id: string) =>
     apiFetch<{ id: string; deleted: boolean }>(`/owner/documents/${id}`, { method: 'DELETE' }),
   trustProfile: () => apiFetch<TrustProfile>('/owner/trust-profile'),
+  /** Adds the landlord workspace to the account so this property can be rented out. */
+  convertToRental: (propertyId: string) =>
+    apiFetch<{ propertyId: string; landlordRoleGranted: boolean; roles: string[] }>(
+      `/owner/properties/${propertyId}/convert-to-rental`,
+      { method: 'POST' }
+    ),
   portfolioTrend: () =>
     apiFetch<{ label: string; value: number }[]>('/owner/analytics/portfolio-trend'),
   marketInsights: (city?: string) =>

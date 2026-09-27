@@ -85,6 +85,9 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
           ? `We'll charge ${price} per ${perPeriod} on ${periodEnd}. Cancel any time and you keep Pro until then.`
           : 'No card charge is scheduled for this plan.';
 
+  const storeManaged = billing.managedBy === 'app_store' || billing.managedBy === 'play_store';
+  const storeName = billing.managedBy === 'play_store' ? 'Google Play' : 'App Store';
+
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <div className="flex items-start gap-3">
@@ -118,43 +121,51 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
         </p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        {isPastDue && !billing.cancelAtPeriodEnd && (
-          <Button
-            variant="primary"
-            disabled={cardUpdate.opening}
-            onClick={cardUpdate.openCardUpdate}
-          >
-            {cardUpdate.opening ? 'Opening…' : 'Update card'}
-          </Button>
-        )}
-
-        {billing.cancelAtPeriodEnd ? (
-          <Button variant="primary" disabled={pending} onClick={() => reactivate.mutate()}>
-            {pending ? 'Resuming…' : 'Resume plan'}
-          </Button>
-        ) : confirming ? (
-          <>
+      {storeManaged ? (
+        // Bought in the mobile app: Apple/Google bill it, so it's changed there.
+        <p className="mt-5 text-sm text-muted-foreground">
+          You subscribed in the {storeName} app. Manage, update payment for or cancel Pro in your{' '}
+          {storeName} subscription settings.
+        </p>
+      ) : (
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {isPastDue && !billing.cancelAtPeriodEnd && (
             <Button
-              variant="danger"
-              disabled={pending}
-              onClick={() => {
-                setConfirming(false);
-                cancel.mutate();
-              }}
+              variant="primary"
+              disabled={cardUpdate.opening}
+              onClick={cardUpdate.openCardUpdate}
             >
-              {pending ? 'Cancelling…' : 'Yes, cancel at period end'}
+              {cardUpdate.opening ? 'Opening…' : 'Update card'}
             </Button>
-            <Button variant="ghost" disabled={pending} onClick={() => setConfirming(false)}>
-              Keep my plan
+          )}
+
+          {billing.cancelAtPeriodEnd ? (
+            <Button variant="primary" disabled={pending} onClick={() => reactivate.mutate()}>
+              {pending ? 'Resuming…' : 'Resume plan'}
             </Button>
-          </>
-        ) : (
-          <Button variant="outline" onClick={() => setConfirming(true)}>
-            Cancel plan
-          </Button>
-        )}
-      </div>
+          ) : confirming ? (
+            <>
+              <Button
+                variant="danger"
+                disabled={pending}
+                onClick={() => {
+                  setConfirming(false);
+                  cancel.mutate();
+                }}
+              >
+                {pending ? 'Cancelling…' : 'Yes, cancel at period end'}
+              </Button>
+              <Button variant="ghost" disabled={pending} onClick={() => setConfirming(false)}>
+                Keep my plan
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" onClick={() => setConfirming(true)}>
+              Cancel plan
+            </Button>
+          )}
+        </div>
+      )}
 
       {confirming && (
         <p className="mt-3 text-xs text-muted-foreground">

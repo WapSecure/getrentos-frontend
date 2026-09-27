@@ -33,6 +33,7 @@ import {
 import { Avatar, Button, Card, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -294,6 +295,8 @@ export default function Account() {
           </Card>
         </Pressable>
       ) : null}
+
+      <WorkspaceSwitcher />
 
       <SettingsGroup title="Your home" items={home} />
       <SettingsGroup title="Money" items={money} />

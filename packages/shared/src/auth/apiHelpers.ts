@@ -1,4 +1,11 @@
 import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
+import {
+  clearStepUpToken,
+  currentStepUpToken,
+  isStepUpRequired,
+  obtainStepUpToken,
+  STEP_UP_HEADER,
+} from './stepUp';
 import { getAuthToken } from './authStorage';
 
 /**
@@ -201,11 +208,12 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
 
 /** Fetches with the Bearer token attached, silently refreshing on 401 once. */
 export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const doFetch = (token: string | null) =>
+  const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) =>
     apiFetch<T>(path, {
       ...options,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
         ...options.headers,
       },
     });
@@ -213,6 +221,12 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
   try {
     return await doFetch(getAuthToken());
   } catch (err) {
+    // A sensitive change: confirm it's the account holder, then replay once.
+    if (isStepUpRequired(err)) {
+      clearStepUpToken();
+      const stepUp = await obtainStepUpToken();
+      if (stepUp) return doFetch(getAuthToken(), stepUp);
+    }
     // The access token expired — exchange the refresh token for a fresh pair
     // and retry the request once. Single-flight refresh prevents the rotation
     // race when many requests 401 at the same moment.

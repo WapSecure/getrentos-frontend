@@ -35,6 +35,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function BuyerAccount() {
   const { signOut } = useAuth();
@@ -68,6 +69,8 @@ export default function BuyerAccount() {
           </>
         )}
       </View>
+
+      <WorkspaceSwitcher />
 
       <Card elevated padding="none">
         <Row

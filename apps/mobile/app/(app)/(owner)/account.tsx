@@ -25,6 +25,7 @@ import {
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -199,6 +200,8 @@ export default function OwnerAccount() {
           Property owner
         </Text>
       </View>
+
+      <WorkspaceSwitcher />
 
       <SettingsGroup title="Selling" items={selling} />
       <SettingsGroup title="Trust & reputation" items={trust} />

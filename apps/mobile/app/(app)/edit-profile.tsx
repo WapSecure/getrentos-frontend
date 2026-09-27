@@ -7,6 +7,7 @@ import { Camera } from 'lucide-react-native';
 import {
   Avatar,
   Button,
+  LinkButton,
   Skeleton,
   Text,
   TextField,
@@ -19,6 +20,7 @@ import { profileApi, type RenterProfile } from '@/lib/api/profile';
 import { pickImage } from '@/lib/filePicker';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 
 export default function EditProfile() {
   const { colors, spacing } = useTheme();
@@ -66,12 +68,12 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
   const toast = useToast();
 
   const [fullName, setFullName] = useState(profile.fullName);
-  const [email, setEmail] = useState(profile.email);
+  const email = profile.email;
   const [phone, setPhone] = useState(profile.phone ?? '');
   const [location, setLocation] = useState(profile.location ?? '');
   const [bio, setBio] = useState(profile.bio ?? '');
 
-  const emailRef = useRef<TextInput>(null);
+  const [emailOpen, setEmailOpen] = useState(false);
   const phoneRef = useRef<TextInput>(null);
   const locationRef = useRef<TextInput>(null);
 
@@ -79,7 +81,6 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
     mutationFn: () =>
       profileApi.update({
         fullName: fullName.trim(),
-        email: email.trim(),
         phone: phone.trim() || undefined,
         location: location.trim() || undefined,
         bio: bio.trim() || undefined,
@@ -166,18 +167,13 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         value={fullName}
         onChangeText={setFullName}
         returnKeyType="next"
-        onSubmitEditing={() => emailRef.current?.focus()}
-      />
-      <TextField
-        ref={emailRef}
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        returnKeyType="next"
         onSubmitEditing={() => phoneRef.current?.focus()}
       />
+      {/* The sign-in email changes through a verified flow, not this form. */}
+      <View style={{ gap: 4 }}>
+        <TextField label="Email" value={email} editable={false} />
+        <LinkButton label="Change sign-in email" onPress={() => setEmailOpen(true)} />
+      </View>
       <TextField
         ref={phoneRef}
         label="Phone"
@@ -207,6 +203,13 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         label="Save changes"
         loading={saveMutation.isPending}
         onPress={() => saveMutation.mutate()}
+      />
+      <ChangeEmailSheet
+        open={emailOpen}
+        onClose={() => {
+          setEmailOpen(false);
+          qc.invalidateQueries({ queryKey: qk.renter.profile });
+        }}
       />
     </ScrollView>
   );

@@ -14,6 +14,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
+import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -66,7 +67,6 @@ const ProfileSettingsForm = ({
       unwrap(
         renterService.updateProfile({
           fullName: formData.fullName,
-          email: formData.email,
           phone: formData.phone,
           location: formData.location,
           bio: formData.bio,
@@ -205,9 +205,10 @@ const ProfileSettingsForm = ({
             <LegacyInput
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              readOnly
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
           </div>
         </div>
 

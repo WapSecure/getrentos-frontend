@@ -1,4 +1,11 @@
 import { env } from '../env';
+import {
+  clearStepUpToken,
+  currentStepUpToken,
+  obtainStepUpToken,
+  STEP_UP_HEADER,
+  STEP_UP_REQUIRED,
+} from '../stepUp';
 
 /**
  * Extra fields a trust or verification gate puts on its 403, e.g.
@@ -38,6 +45,8 @@ export interface ApiRequest extends Omit<RequestInit, 'body' | 'headers'> {
   anonymous?: boolean;
   /** Internal: prevents infinite retry loops after a refresh. */
   _retry?: boolean;
+  /** Internal: the request has already been replayed with a step-up token. */
+  _stepUp?: boolean;
 }
 
 /**
@@ -110,8 +119,9 @@ async function readJson<T>(res: Response): Promise<T> {
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promise<T> {
-  const { body, headers, anonymous, _retry, ...init } = options;
+  const { body, headers, anonymous, _retry, _stepUp, ...init } = options;
   const token = anonymous ? null : hooks.getAccessToken();
+  const stepUp = anonymous ? null : currentStepUpToken();
 
   const res = await send(
     path,
@@ -122,6 +132,7 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
         'Content-Type': 'application/json',
         'x-client-app': env.clientApp,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
         ...headers,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -135,7 +146,23 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
     if (fresh) return apiFetch<T>(path, { ...options, _retry: true });
   }
 
-  return readJson<T>(res);
+  try {
+    return await readJson<T>(res);
+  } catch (err) {
+    // A sensitive change: confirm it's the account holder, then replay once.
+    if (err instanceof ApiError && err.code === STEP_UP_REQUIRED && !_stepUp) {
+      clearStepUpToken();
+      const fresh = await obtainStepUpToken();
+      if (fresh) {
+        return apiFetch<T>(path, {
+          ...options,
+          _stepUp: true,
+          headers: { ...headers, [STEP_UP_HEADER]: fresh },
+        });
+      }
+    }
+    throw err;
+  }
 }
 
 /**

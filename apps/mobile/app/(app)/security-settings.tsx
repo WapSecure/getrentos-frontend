@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Database,
   KeyRound,
+  Mail,
   Phone,
   ScanFace,
   ShieldCheck,
@@ -36,6 +37,7 @@ import {
   type BiometricSupport,
 } from '@/lib/appLock';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -68,6 +70,7 @@ export default function SecuritySettings() {
           <Skeleton height={180} />
         ) : (
           <>
+            <EmailSection />
             <PhoneVerificationSection overview={overview.data} />
             <TwoFactorSection overview={overview.data} />
             {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
@@ -141,6 +144,24 @@ function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }
       {icon}
       <Text variant="bodyStrong">{title}</Text>
     </View>
+  );
+}
+
+function EmailSection() {
+  const { colors, spacing } = useTheme();
+  const { profile } = useAuth();
+  const [open, setOpen] = useState(false);
+  return (
+    <Card elevated>
+      <SectionHeader icon={<Mail size={16} color={colors.primary} />} title="Sign-in email" />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <Text variant="callout" color="mutedForeground" style={{ flex: 1 }} numberOfLines={1}>
+          {profile?.email ?? 'No email on this account'}
+        </Text>
+        <Button label="Change" size="sm" variant="secondary" onPress={() => setOpen(true)} />
+      </View>
+      <ChangeEmailSheet open={open} onClose={() => setOpen(false)} />
+    </Card>
   );
 }
 
