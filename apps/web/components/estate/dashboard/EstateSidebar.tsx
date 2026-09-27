@@ -23,6 +23,7 @@ import {
   Sparkles,
   PieChart,
   UserCheck,
+  Timer,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
@@ -51,6 +52,10 @@ const GATED_ROUTES: Partial<Record<string, PlanTier>> = {
   [ROUTES.ESTATE_MICROSITE]: 'PRO',
   [ROUTES.ESTATE_FINANCIALS]: 'PRO',
   [ROUTES.ESTATE_CONTRACTORS]: 'ENTERPRISE',
+  // Enterprise for the same reason Regular visitors is, and it is the same
+  // purchase: E2 records who is authorised to keep arriving, and this says how
+  // long they actually stay. An estate reviewing one wants the other.
+  [ROUTES.ESTATE_DWELL]: 'ENTERPRISE',
 };
 
 export const navItems: NavItem[] = [
@@ -67,6 +72,10 @@ export const navItems: NavItem[] = [
   // opposite sides: who must not be admitted, and who is already allowed to keep
   // coming back.
   { label: 'Regular visitors', href: ROUTES.ESTATE_CONTRACTORS, icon: UserCheck },
+  // The other half of a standing authorisation, so it sits with the screen that
+  // creates one: E2 records who is allowed to keep arriving, and this says how
+  // long they actually stay. An estate reviewing one wants the other.
+  { label: 'Dwell analytics', href: ROUTES.ESTATE_DWELL, icon: Timer },
   { label: 'Deliveries', href: ROUTES.ESTATE_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
   { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
@@ -90,10 +99,10 @@ export const navItems: NavItem[] = [
 // insertion point silently shifts by one.
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
-  { label: 'Residents and access', items: navItems.slice(3, 10) },
-  { label: 'Safety and operations', items: navItems.slice(10, 14) },
-  { label: 'Community', items: navItems.slice(14, 18) },
-  { label: 'Administration', items: navItems.slice(18) },
+  { label: 'Residents and access', items: navItems.slice(3, 11) },
+  { label: 'Safety and operations', items: navItems.slice(11, 15) },
+  { label: 'Community', items: navItems.slice(15, 19) },
+  { label: 'Administration', items: navItems.slice(19) },
 ];
 
 export const EstateSidebar = () => {

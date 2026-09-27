@@ -34,6 +34,8 @@ import type {
   MusterRollState,
   MusterStatus,
   MusterSummary,
+  AuthorisationDwellReport,
+  OnSiteBoard,
   Incident,
   MaintenanceTicket,
   Poll,
@@ -817,6 +819,39 @@ export const estateService = {
         body: JSON.stringify(closingNote ? { closingNote } : {}),
       })
     );
+  },
+
+  // --- Dwell analytics (Enterprise) -----------------------------------------
+
+  /**
+   * Who the estate believes is still inside, and for how long.
+   *
+   * Enterprise, so a 403 `PLAN_UPGRADE_REQUIRED` is an expected answer rather
+   * than a fault — it carries both the tier required and the one the estate is
+   * on, which is what the upsell needs in order to say what is being bought.
+   *
+   * Every number on the payload was counted server-side. Nothing here recomputes
+   * elapsed time from `admittedAt`: the console and the office's own notification
+   * have to agree about how late somebody is, and two clocks is two answers.
+   */
+  async getOnSiteBoard(estateId: string): Promise<ApiResponse<OnSiteBoard>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dwell/on-site`));
+  },
+
+  /**
+   * How long each standing authorisation's visits actually ran.
+   *
+   * The window is exclusive at the end, so a manager comparing two months back to
+   * back is not shown a visit twice. `sort` is the estate's own choice of what
+   * matters: dwell alone hides a contractor who comes twice a week and never
+   * leaves, and visits alone flatters one who arrives constantly and stays all
+   * day.
+   */
+  async getAuthorisationDwell(
+    estateId: string,
+    query: EstatePageQuery & { from?: string; to?: string; sort?: 'dwell' | 'visits' } = {}
+  ): Promise<ApiResponse<AuthorisationDwellReport>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dwell/authorisations${toQuery(query)}`));
   },
 
   async createAnnouncement(

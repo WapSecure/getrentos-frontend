@@ -526,6 +526,99 @@ export interface ResidentEmergency {
 /** What a resident may say about their own household. */
 export type MusterSelfAnswer = 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
 
+/**
+ * Where the estate's expectation of an end came from. `NONE` is the ordinary
+ * case, not a fault: only a standing authorisation's hours state an end.
+ */
+export type ExpectedOutSource = 'AUTHORISED_WINDOW' | 'NONE';
+
+/**
+ * One person the estate believes is still inside.
+ *
+ * `insideLabel` and `expectationLabel` are composed server-side and shown
+ * verbatim. They carry the distinction this whole feature turns on — an elapsed
+ * time the estate said nothing about versus a visit past a window it wrote down —
+ * and a client that rebuilt those sentences would be free to get the difference
+ * wrong.
+ */
+export interface OnSiteEntry {
+  passId: string;
+  visitorName: string;
+  source: 'RESIDENT' | 'GATE' | 'CONTRACTOR';
+  /** 'Pass from the household' / 'Walk-in admitted at the gate' / … */
+  sourceLabel: string;
+  householdId: string;
+  unitLabel: string;
+  gateName?: string | null;
+  contractorPassId?: string | null;
+  authorisationName?: string | null;
+  admittedAt: string;
+  minutesInside: number;
+  /** 'Inside 3h 20m' / 'Inside 10h — past the end the estate authorised by 2h' */
+  insideLabel: string;
+  expectedOutAt?: string | null;
+  expectedOutSource: ExpectedOutSource;
+  /** 'Authorised until 17:00' / 'No end was stated for this visit' */
+  expectationLabel: string;
+  minutesOver: number;
+  /** Past the authorised end by more than the grace period. */
+  overstaying: boolean;
+  /** When the office was told, so the screen can say the alert has already gone. */
+  reportedAt?: string | null;
+}
+
+export interface OnSiteTally {
+  open: number;
+  overstaying: number;
+  oldestMinutes: number | null;
+  /** '4 inside, 1 past the end the estate authorised' */
+  label: string;
+}
+
+export interface OnSiteBoard {
+  estateId: string;
+  /** The instant every elapsed time on the board is measured to. */
+  asOf: string;
+  /** The grace period the sweep applies, so the screen can state the rule. */
+  graceMinutes: number;
+  tally: OnSiteTally;
+  entries: OnSiteEntry[];
+}
+
+/** One standing authorisation, measured over a period. */
+export interface AuthorisationDwell {
+  contractorPassId: string;
+  name: string;
+  company?: string | null;
+  trade?: string | null;
+  householdLabel?: string | null;
+  status: ContractorPassStatus;
+  statusLabel: string;
+  scheduleLabel: string;
+  visits: number;
+  completed: number;
+  /** Still recorded as inside — the number a completed average hides. */
+  openVisits: number;
+  overstays: number;
+  /** Mean dwell over COMPLETED visits only; null when none finished. */
+  averageMinutes: number | null;
+  longestMinutes: number | null;
+  totalMinutes: number;
+  firstVisitAt?: string | null;
+  lastVisitAt?: string | null;
+  /** One line the screen can print without re-doing any of the arithmetic. */
+  summaryLabel: string;
+}
+
+export interface AuthorisationDwellReport {
+  estateId: string;
+  from: string;
+  /** Exclusive, so adjacent periods never double-count a visit. */
+  to: string;
+  graceMinutes: number;
+  authorisations: AuthorisationDwell[];
+}
+
 export type AnnouncementPriority = 'normal' | 'urgent';
 
 export interface Announcement {

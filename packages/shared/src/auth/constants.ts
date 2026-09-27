@@ -243,6 +243,12 @@ export const ROUTES = {
    * find out. Nothing here is a convenience on top of something already bought.
    */
   ESTATE_EMERGENCY: '/estate/emergency',
+  /**
+   * How long visits run, and who never left. Enterprise — the only gate feature
+   * whose absence makes an estate slower rather than unsafe, which is what makes
+   * it the one that is paid for.
+   */
+  ESTATE_DWELL: '/estate/dwell',
   ESTATE_DELIVERIES: '/estate/deliveries',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
