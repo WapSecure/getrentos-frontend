@@ -46,7 +46,6 @@ const ProfileSettingsForm = ({
       unwrap(
         ownerService.updateProfile({
           legalName: formData.fullName,
-          email: formData.email,
           phone: formData.phone,
           companyName: formData.companyName,
         })
@@ -102,10 +101,15 @@ const ProfileSettingsForm = ({
             <LegacyInput
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              readOnly
+              aria-describedby="owner-email-hint"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-secondary text-muted-foreground cursor-not-allowed"
             />
           </div>
+          {/* The API doesn't change email here; sending it made every save fail validation. */}
+          <p id="owner-email-hint" className="mt-1 text-xs text-muted-foreground">
+            Your sign-in email. Contact support to change it.
+          </p>
         </div>
 
         <div>

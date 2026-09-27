@@ -3,8 +3,18 @@ import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
   BarChart3,
+  Bell,
+  Landmark,
+  UserRound,
   CircleHelp,
   FileStack,
+  Handshake,
+  KeySquare,
+  LandPlot,
+  Sparkles,
+  Trees,
+  Gauge,
+  KeyRound,
   LogOut,
   ShieldCheck,
   SlidersHorizontal,
@@ -46,6 +56,34 @@ export default function OwnerAccount() {
       onPress: go('/(app)/owner-documents'),
     },
     {
+      key: 'land',
+      label: 'Land',
+      description: 'Parcels, title and diligence',
+      icon: LandPlot,
+      onPress: go('/(app)/owner-land'),
+    },
+    {
+      key: 'team',
+      label: 'Realtors & agents',
+      description: 'Approve who represents you and where',
+      icon: Handshake,
+      onPress: go('/(app)/representatives'),
+    },
+    {
+      key: 'estates',
+      label: 'Estate requests',
+      description: 'Estates asking to market your property',
+      icon: Trees,
+      onPress: go('/(app)/estate-agreements'),
+    },
+    {
+      key: 'managed',
+      label: 'Properties I manage',
+      description: 'Authority over other owners’ property',
+      icon: KeySquare,
+      onPress: go('/(app)/managed-properties'),
+    },
+    {
       key: 'analytics',
       label: 'Analytics',
       description: 'Value, growth and return per property',
@@ -55,6 +93,14 @@ export default function OwnerAccount() {
   ];
 
   const trust: SettingsItem[] = [
+    {
+      key: 'trust',
+      label: 'Trust profile',
+      description: 'Your score and what buyers see',
+      icon: Gauge,
+      value: profile ? String(profile.trustScore) : undefined,
+      onPress: go('/(app)/owner-trust-profile'),
+    },
     {
       key: 'identity',
       label: 'Identity verification',
@@ -74,11 +120,46 @@ export default function OwnerAccount() {
 
   const settings: SettingsItem[] = [
     {
+      key: 'profile',
+      label: 'Profile',
+      description: 'Name, company and phone',
+      icon: UserRound,
+      onPress: go('/(app)/owner-profile'),
+    },
+    {
+      key: 'payout',
+      label: 'Payout account',
+      description: 'Where sale proceeds are paid',
+      icon: Landmark,
+      onPress: go('/(app)/seller-payout'),
+    },
+    {
+      key: 'notifications',
+      label: 'Notifications',
+      description: 'Offers, escrow and verification alerts',
+      icon: Bell,
+      onPress: go('/(app)/owner-notification-settings'),
+    },
+    {
       key: 'preferences',
       label: 'Selling preferences',
       description: 'Minimum offers and auto-decline',
       icon: SlidersHorizontal,
       onPress: go('/(app)/owner-settings'),
+    },
+    {
+      key: 'billing',
+      label: 'Plan & billing',
+      description: 'What’s included and your receipts',
+      icon: Sparkles,
+      onPress: go('/(app)/billing'),
+    },
+    {
+      key: 'security',
+      label: 'Security',
+      description: 'Password, two-factor and app lock',
+      icon: KeyRound,
+      onPress: go('/(app)/security-settings'),
     },
     {
       key: 'help',

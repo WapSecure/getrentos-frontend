@@ -9,6 +9,7 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  LinkButton,
   Price,
   Skeleton,
   Text,
@@ -225,10 +226,15 @@ function SaleCard({ t }: { t: OwnerTransaction }) {
       )}
 
       {t.sellerPayoutStatus === 'FAILED' ? (
-        <Text variant="caption" style={{ color: colors.destructive }}>
-          Your payout didn’t go through. Check your payout account on the web dashboard, then
-          contact support.
-        </Text>
+        <View style={{ gap: spacing.xs }}>
+          <Text variant="caption" style={{ color: colors.destructive }}>
+            Your payout didn’t go through. Check your payout account, then contact support.
+          </Text>
+          <LinkButton
+            label="Check payout account"
+            onPress={() => router.push('/(app)/seller-payout')}
+          />
+        </View>
       ) : t.sellerPaidAt ? (
         <Text variant="caption" color="mutedForeground">
           Paid to you {formatDate(t.sellerPaidAt, 'medium')}

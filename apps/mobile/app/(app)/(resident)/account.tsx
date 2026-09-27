@@ -1,5 +1,6 @@
 import { View } from 'react-native';
-import { LogOut, ShieldCheck } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { LogOut, KeyRound, ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -11,6 +12,7 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { SettingsGroup } from '@/components/account/SettingsList';
 
 export default function ResidentAccount() {
   const { profile, signOut } = useAuth();
@@ -33,6 +35,19 @@ export default function ResidentAccount() {
           </View>
         ) : null}
       </View>
+
+      <SettingsGroup
+        title="Account"
+        items={[
+          {
+            key: 'security',
+            label: 'Security',
+            description: 'Password, two-factor and app lock',
+            icon: KeyRound,
+            onPress: () => router.push('/(app)/security-settings'),
+          },
+        ]}
+      />
 
       <Card elevated padding="none">
         <View style={{ padding: spacing.lg, gap: spacing.xs }}>

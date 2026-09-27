@@ -6,6 +6,22 @@ export const qk = {
   auth: {
     me: ['auth', 'me'] as const,
   },
+  security: ['me', 'security'] as const,
+  representatives: {
+    list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
+    assignable: (kind: 'realtor' | 'agent', id: string, search: string) =>
+      ['representatives', kind, id, 'assignable', search] as const,
+  },
+  authority: {
+    managed: ['property-authorities', 'managed'] as const,
+    mine: ['property-authorities', 'mine'] as const,
+  },
+  estateAgreements: ['estate-agreements', 'mine'] as const,
+  billing: {
+    mine: ['billing'] as const,
+    pricing: ['me', 'subscription', 'pricing'] as const,
+    invoices: ['billing', 'invoices'] as const,
+  },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
@@ -23,7 +39,6 @@ export const qk = {
     renewalOffer: ['renter', 'lease', 'renewal-offer'] as const,
     receipts: ['renter', 'payments', 'receipts'] as const,
     profile: ['renter', 'profile'] as const,
-    twoFactorStatus: ['renter', 'settings', '2fa'] as const,
     notificationPreferences: ['renter', 'notifications', 'preferences'] as const,
     trustScore: ['renter', 'trust-score'] as const,
     wishlists: ['renter', 'wishlists'] as const,
@@ -131,9 +146,20 @@ export const qk = {
     reviews: ['owner', 'reviews'] as const,
     ratingSummary: ['owner', 'reviews', 'summary'] as const,
     metrics: ['owner', 'metrics'] as const,
+    trustProfile: ['owner', 'trust-profile'] as const,
+    land: ['owner', 'land'] as const,
+    portfolioTrend: ['owner', 'analytics', 'portfolio-trend'] as const,
+    marketInsights: (city: string) => ['owner', 'analytics', 'market-insights', city] as const,
+    profile: ['owner', 'profile'] as const,
+    notifications: ['owner', 'notifications'] as const,
+    notificationPreferences: ['owner', 'settings', 'notifications'] as const,
     preferences: ['owner', 'preferences'] as const,
     conversations: ['owner', 'conversations'] as const,
     messages: (id: string) => ['owner', 'conversations', id, 'messages'] as const,
+  },
+  seller: {
+    payoutAccount: ['seller', 'payout-account'] as const,
+    payouts: ['seller', 'payouts'] as const,
   },
   buyer: {
     dashboard: ['buyer', 'dashboard'] as const,

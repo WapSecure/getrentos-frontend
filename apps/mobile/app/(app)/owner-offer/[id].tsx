@@ -166,7 +166,10 @@ export default function OwnerOfferDetail() {
 
             {open ? (
               <View style={{ gap: spacing.sm }}>
-                <VerificationGateNotice error={accept.error} scoreHref="/(app)/verify-identity" />
+                <VerificationGateNotice
+                  error={accept.error}
+                  scoreHref="/(app)/owner-trust-profile"
+                />
                 <Button
                   label="Accept offer"
                   loading={accept.isPending}

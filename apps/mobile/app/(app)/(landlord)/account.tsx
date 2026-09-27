@@ -132,6 +132,18 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
+          label="Realtors & agents"
+          description="Approve who represents you and where"
+          onPress={() => router.push('/(app)/representatives')}
+        />
+        <Divider />
+        <AccountRow
+          label="Plan & billing"
+          description="What’s included and your receipts"
+          onPress={() => router.push('/(app)/billing')}
+        />
+        <Divider />
+        <AccountRow
           label="Settings"
           description="Profile, payout, automation, alerts"
           onPress={() => router.push('/(app)/landlord-settings')}
