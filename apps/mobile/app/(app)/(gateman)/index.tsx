@@ -83,7 +83,16 @@ export default function GatemanCheckIn() {
   /** A failed override attempt, kept separate so the guard's typed reason survives it. */
   const [overrideError, setOverrideError] = useState<string | null>(null);
 
-  const { estate, gate, gates, needsGateChoice, isLoading: isPostLoading } = useGatemanPost();
+  const {
+    estate,
+    gate,
+    gates,
+    needsGateChoice,
+    isLoading: isPostLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useGatemanPost();
   const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   const checkInsQuery = useQuery({
