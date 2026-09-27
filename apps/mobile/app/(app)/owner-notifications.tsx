@@ -194,7 +194,7 @@ export default function OwnerNotifications() {
             <EmptyState
               icon={<Bell size={32} color={colors.mutedForeground} />}
               title="Nothing new"
-              description="Offers, escrow milestones and verification updates land here."
+              description="Offers, payment milestones and verification updates land here."
             />
           }
         />

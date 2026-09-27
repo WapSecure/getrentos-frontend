@@ -181,7 +181,7 @@ export default function OwnerHome() {
             onPress={() => router.push('/(app)/owner-leads')}
           />
           <QuickAction
-            label="Sales & escrow"
+            label="Sales in progress"
             Icon={Wallet}
             onPress={() => router.push('/(app)/owner-transactions')}
             badge={d?.activeTransactions}

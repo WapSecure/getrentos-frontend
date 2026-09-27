@@ -136,7 +136,7 @@ export default function OwnerAccount() {
     {
       key: 'notifications',
       label: 'Notifications',
-      description: 'Offers, escrow and verification alerts',
+      description: 'Offers, payments and verification alerts',
       icon: Bell,
       onPress: go('/(app)/owner-notification-settings'),
     },

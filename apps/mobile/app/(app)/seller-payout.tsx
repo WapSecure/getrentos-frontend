@@ -77,7 +77,7 @@ export default function SellerPayout() {
         <DetailHeader
           eyebrow="Getting paid"
           title="Payout account"
-          subtitle="Where sale proceeds go once escrow releases"
+          subtitle="Where your sale money goes once the sale completes"
           onBack={() => router.back()}
         />
 

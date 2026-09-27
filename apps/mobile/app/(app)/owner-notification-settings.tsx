@@ -18,7 +18,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const LABEL: Record<string, string> = {
   offers: 'New offers and counters',
-  escrow: 'Escrow milestones',
+  escrow: 'Payment milestones',
   verification: 'Verification status',
   messages: 'New messages',
   reviews: 'New reviews',
