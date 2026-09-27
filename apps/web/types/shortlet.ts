@@ -131,6 +131,8 @@ export interface ShortletBooking {
   checkInInstructions?: string;
   /** Guest view only. */
   guestPromise?: GuestPromiseStatus;
+  /** Host view only: the guest at a glance. */
+  guestSummary?: GuestSummary;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
   paymentRequired?: boolean;
@@ -554,4 +556,17 @@ export interface ShortletInspectionBadge {
   rooms: { room: string; condition: InspectedRoomCondition }[];
   /** The worst room rating. */
   condition: InspectedRoomCondition;
+}
+
+/** What a host sees about a guest: counts across GetRentos only. */
+export interface GuestSummary {
+  identityVerified: boolean;
+  memberSince: string;
+  completedStays: number;
+  ratingAverage?: number;
+  ratingCount: number;
+  /** Stays the guest cancelled in the last 12 months. */
+  cancellations12m: number;
+  /** Deposit claims upheld against the guest. */
+  damageClaimsUpheld: number;
 }
