@@ -127,6 +127,8 @@ export interface ShortletBooking {
   cancellationReason?: string;
   /** How to get in; only on a confirmed, paid stay. */
   checkInInstructions?: string;
+  /** Guest view only. */
+  guestPromise?: GuestPromiseStatus;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
   paymentRequired?: boolean;
@@ -432,6 +434,30 @@ export interface ShortletDispute {
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
+  /** A Guest Promise report (filed within 24h of check-in). */
+  guestPromise?: boolean;
+  problemType?: GuestPromiseProblem;
+  evidenceUrls?: string[];
+  outcome?: GuestPromiseOutcome;
+  refundAmount?: number;
+}
+
+export type GuestPromiseProblem =
+  | 'NOT_AS_DESCRIBED'
+  | 'NO_ACCESS'
+  | 'UNSAFE_OR_UNCLEAN'
+  | 'MISSING_ESSENTIALS';
+export type GuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
+
+/** The Guest Promise on one of the guest's bookings. */
+export interface GuestPromiseStatus {
+  canReport: boolean;
+  opensAt: string;
+  closesAt: string;
+  reportId?: string;
+  reportStatus?: string;
+  outcome?: GuestPromiseOutcome;
+  refundAmount?: number;
 }
 
 export interface ShortletDisputeMessage {

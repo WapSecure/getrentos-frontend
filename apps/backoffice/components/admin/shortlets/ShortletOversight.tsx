@@ -51,6 +51,7 @@ import { NairaSign } from '@getrentos/ui/NairaSign';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import { HostCancellationFeesPanel } from './HostCancellationFeesPanel';
+import { GuestPromiseDecisionDialog } from './GuestPromiseDecisionDialog';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import type {
@@ -186,6 +187,7 @@ export const ShortletOversight = () => {
   const [disputesPage, setDisputesPage] = useState(1);
   const [disputeStatus, setDisputeStatus] = useState<'all' | AdminShortletDisputeStatus>('all');
   const [activeDispute, setActiveDispute] = useState<AdminShortletDispute | null>(null);
+  const [promiseTarget, setPromiseTarget] = useState<AdminShortletDispute | null>(null);
   const [threadDraft, setThreadDraft] = useState('');
 
   // Deposit claim filters
@@ -245,6 +247,7 @@ export const ShortletOversight = () => {
   const adminUser = useAdminUser();
   const canPayout = hasAdminPermission(adminUser?.roles, 'shortlet.payout');
   const canModerate = hasAdminPermission(adminUser?.roles, 'shortlet.moderate');
+  const canDecidePromise = canPayout && hasAdminPermission(adminUser?.roles, 'disputes.resolve');
 
   const {
     data: overview,
@@ -1197,7 +1200,24 @@ export const ShortletOversight = () => {
           onReply={() => disputeReply.mutate(threadDraft)}
           actionPending={disputeAction.isPending}
           onAction={setPendingDisputeAction}
+          canDecidePromise={canDecidePromise}
+          onDecidePromise={() => setPromiseTarget(activeDispute)}
           onClose={() => setActiveDispute(null)}
+        />
+      )}
+      {promiseTarget && (
+        <GuestPromiseDecisionDialog
+          dispute={promiseTarget}
+          onClose={() => setPromiseTarget(null)}
+          onDecided={() => {
+            setPromiseTarget(null);
+            setActiveDispute(null);
+            queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'disputes'] });
+            setToast({
+              message: 'Report decided. The guest and host have been told.',
+              variant: 'success',
+            });
+          }}
         />
       )}
 
@@ -1872,6 +1892,8 @@ function DisputeThreadModal({
   onReply,
   actionPending,
   onAction,
+  canDecidePromise,
+  onDecidePromise,
   onClose,
 }: {
   dispute: AdminShortletDispute;
@@ -1886,6 +1908,8 @@ function DisputeThreadModal({
   onReply: () => void;
   actionPending: boolean;
   onAction: (action: 'resolve' | 'escalate') => void;
+  canDecidePromise: boolean;
+  onDecidePromise: () => void;
   onClose: () => void;
 }) {
   const resolved = dispute.status === 'RESOLVED';
@@ -1897,7 +1921,11 @@ function DisputeThreadModal({
           <DialogDescription>
             <span className="flex flex-wrap items-center gap-2">
               <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>{dispute.status}</Badge>
-              <Badge variant="neutral">{dispute.category}</Badge>
+              {dispute.guestPromise ? (
+                <Badge variant="warning">Guest Promise</Badge>
+              ) : (
+                <Badge variant="neutral">{dispute.category}</Badge>
+              )}
               <span className="text-sm text-muted-foreground">
                 {dispute.raisedBy} ↔ {dispute.against} · {dispute.listingTitle ?? 'Shortlet'} ·{' '}
                 {formatDate(dispute.createdAt, 'short')}
@@ -1914,7 +1942,35 @@ function DisputeThreadModal({
                 <span className="font-medium">Resolution:</span> {dispute.resolution}
               </p>
             )}
+            {dispute.outcome && (
+              <p className="mt-2">
+                <span className="font-medium">Decision:</span>{' '}
+                {dispute.outcome === 'FULL_REFUND'
+                  ? 'Upheld, full refund'
+                  : dispute.outcome === 'PARTIAL_REFUND'
+                    ? 'Partly upheld, partial refund'
+                    : 'Not upheld'}
+                {dispute.refundAmount ? ` · ${formatCurrency(dispute.refundAmount)} refunded` : ''}
+              </p>
+            )}
           </div>
+          {(dispute.evidenceUrls ?? []).length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium">Guest&rsquo;s photos</p>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {(dispute.evidenceUrls ?? []).map((url, i) => (
+                  <a key={url} href={url} target="_blank" rel="noreferrer" className="block">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={url}
+                      alt={`Guest photo ${i + 1}`}
+                      className="aspect-square w-full rounded-md border border-border object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <p className="text-sm font-medium">Thread</p>
@@ -1975,9 +2031,17 @@ function DisputeThreadModal({
               >
                 Escalate
               </Button>
-              <Button onClick={() => onAction('resolve')} disabled={actionPending}>
-                Resolve
-              </Button>
+              {dispute.guestPromise ? (
+                canDecidePromise && (
+                  <Button onClick={onDecidePromise} disabled={actionPending}>
+                    Decide report
+                  </Button>
+                )
+              ) : (
+                <Button onClick={() => onAction('resolve')} disabled={actionPending}>
+                  Resolve
+                </Button>
+              )}
             </>
           )}
           <Button variant="ghost" onClick={onClose}>

@@ -36,6 +36,8 @@ import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletReviewDialog } from './ShortletReviewDialog';
 import { ShortletWishlistDialog } from './ShortletWishlistDialog';
 import { ShortletDisputesInbox } from './ShortletDisputesInbox';
+import { GuestPromiseReportDialog } from './GuestPromiseReportDialog';
+import { formatDeadline, OUTCOME_LABEL } from '@/lib/shortlet/guestPromise';
 import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
 import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import type {
@@ -151,6 +153,7 @@ export const GuestBookingsWorkspace = () => {
   const [disputesOpen, setDisputesOpen] = useState(false);
   const [claimsOpen, setClaimsOpen] = useState(false);
   const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
+  const [promiseTarget, setPromiseTarget] = useState<ShortletBooking | null>(null);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
@@ -323,6 +326,33 @@ export const GuestBookingsWorkspace = () => {
                   )}
                 </div>
               </div>
+              {b.guestPromise?.canReport && (
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+                  <p className="flex items-start gap-2 text-sm">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>
+                      Something wrong with the place? Report it by{' '}
+                      {formatDeadline(b.guestPromise.closesAt)} and we&rsquo;ll hold the
+                      host&rsquo;s payment while we check.
+                    </span>
+                  </p>
+                  <Button size="sm" onClick={() => setPromiseTarget(b)}>
+                    Report a problem
+                  </Button>
+                </div>
+              )}
+              {b.guestPromise?.reportId && (
+                <p className="mt-3 flex items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2 text-sm">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  {b.guestPromise.outcome
+                    ? `${OUTCOME_LABEL[b.guestPromise.outcome]}${
+                        b.guestPromise.refundAmount
+                          ? ` · ${formatCurrency(b.guestPromise.refundAmount)} refunded`
+                          : ''
+                      }`
+                    : 'You reported a problem. Support is checking and the host’s payment is on hold.'}
+                </p>
+              )}
               {(canCancel(b) || b.paymentRequired || (b.status === 'COMPLETED' && !b.reviewed)) && (
                 <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
                   {b.paymentRequired && (
@@ -403,6 +433,19 @@ export const GuestBookingsWorkspace = () => {
         </DialogContent>
       </Dialog>
       {wishlistOpen && <ShortletWishlistDialog onClose={() => setWishlistOpen(false)} />}
+      {promiseTarget && (
+        <GuestPromiseReportDialog
+          booking={promiseTarget}
+          onClose={() => setPromiseTarget(null)}
+          onReported={() => {
+            setPromiseTarget(null);
+            setToast({
+              message: "Report sent. The host's payment is on hold while support checks.",
+              variant: 'success',
+            });
+          }}
+        />
+      )}
       {disputeTarget && (
         <ShortletOpenDisputeDialog
           booking={disputeTarget}
