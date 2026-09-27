@@ -41,7 +41,17 @@ const PAGE_SIZE = 9;
 type Sort = 'newest' | 'price_asc' | 'price_desc';
 const TODAY = new Date().toISOString().slice(0, 10);
 
-export const ShortletMarketplaceBrowser = () => {
+export const ShortletMarketplaceBrowser = ({
+  initialCheckIn = '',
+  initialCheckOut = '',
+  hideHeader = false,
+}: {
+  /** Pre-filled dates (YYYY-MM-DD), e.g. the Detty December peak. */
+  initialCheckIn?: string;
+  initialCheckOut?: string;
+  /** For pages that bring their own heading. */
+  hideHeader?: boolean;
+} = {}) => {
   const router = useRouter();
   const [isSignedIn] = useState(() => Boolean(getAuthToken()));
   const wishlist = useShortletWishlist();
@@ -62,8 +72,8 @@ export const ShortletMarketplaceBrowser = () => {
   const [guests, setGuests] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
+  const [checkIn, setCheckIn] = useState(initialCheckIn);
+  const [checkOut, setCheckOut] = useState(initialCheckOut);
   const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
   // Arriving from an estate microsite (`?estate=<slug>`). Public and shareable.
@@ -130,17 +140,20 @@ export const ShortletMarketplaceBrowser = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8 flex flex-col items-start gap-2.5 border-b border-border/60 pb-6">
-        <span className="inline-flex items-center rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          Short stays
-        </span>
-        <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
-          Shortlet stays
-        </h1>
-        <p className="text-muted-foreground sm:text-lg">
-          Furnished apartments and homes available for short stays — book by the night or flat rate.
-        </p>
-      </div>
+      {!hideHeader && (
+        <div className="mb-8 flex flex-col items-start gap-2.5 border-b border-border/60 pb-6">
+          <span className="inline-flex items-center rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
+            Short stays
+          </span>
+          <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
+            Shortlet stays
+          </h1>
+          <p className="text-muted-foreground sm:text-lg">
+            Furnished apartments and homes available for short stays — book by the night or flat
+            rate.
+          </p>
+        </div>
+      )}
 
       <div className="mb-3">
         <Input
@@ -374,6 +387,13 @@ export const ShortletMarketplaceBrowser = () => {
                     </Badge>
                   )}
                   {listing.isVerified && <Badge variant="info">Verified host</Badge>}
+                  {listing.fairPrice && (
+                    <span
+                      title={`Typical for ${listing.fairPrice.bedrooms}-bedroom stays in ${listing.fairPrice.city}: ${formatCurrency(listing.fairPrice.typicalNightly)}/night (${listing.fairPrice.comparables} stays)`}
+                    >
+                      <Badge variant="info">Fair price</Badge>
+                    </span>
+                  )}
                   {listing.inspection && (
                     <Badge variant="success">
                       <ClipboardCheck className="mr-1 h-3 w-3" /> Inspected
@@ -410,20 +430,58 @@ export const ShortletMarketplaceBrowser = () => {
                 </p>
                 <div className="mt-3 flex items-end justify-between">
                   <div>
-                    <p className="text-lg font-semibold">
-                      {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
-                      {listing.pricingMode === 'PER_NIGHT' && (
-                        <span className="text-xs font-normal text-muted-foreground"> / night</span>
-                      )}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {listing.pricingMode === 'FLAT_STAY'
-                        ? 'Flat per stay'
-                        : `min ${listing.minNights} night${listing.minNights > 1 ? 's' : ''}`}
-                      {' · '}
-                      up to {listing.maxGuests} guests
-                      {listing.deposit ? ` · ${formatCurrency(listing.deposit)} deposit` : ''}
-                    </p>
+                    {listing.stayQuote?.bookable && listing.stayQuote.quote ? (
+                      <>
+                        <p className="text-lg font-semibold">
+                          {formatCurrency(listing.stayQuote.quote.total)}
+                          <span className="text-xs font-normal text-muted-foreground"> total</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {listing.stayQuote.quote.nights} night
+                          {listing.stayQuote.quote.nights === 1 ? '' : 's'}, incl. cleaning
+                          {listing.stayQuote.quote.taxName
+                            ? ` & ${listing.stayQuote.quote.taxName}`
+                            : ''}
+                          {' · '}
+                          {formatCurrency(listing.stayQuote.quote.perNight)}/night avg
+                          {listing.stayQuote.quote.deposit
+                            ? ` · + ${formatCurrency(listing.stayQuote.quote.deposit)} refundable deposit`
+                            : ''}
+                        </p>
+                      </>
+                    ) : listing.stayQuote && !listing.stayQuote.bookable ? (
+                      <>
+                        <p className="text-lg font-semibold">
+                          {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            {' '}
+                            / night
+                          </span>
+                        </p>
+                        <p className="text-xs text-warning">{listing.stayQuote.reason}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-lg font-semibold">
+                          {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
+                          {listing.pricingMode === 'PER_NIGHT' && (
+                            <span className="text-xs font-normal text-muted-foreground">
+                              {' '}
+                              / night
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {listing.pricingMode === 'FLAT_STAY'
+                            ? 'Flat per stay'
+                            : `min ${listing.minNights} night${listing.minNights > 1 ? 's' : ''}`}
+                          {' · '}
+                          up to {listing.maxGuests} guests
+                          {listing.deposit ? ` · ${formatCurrency(listing.deposit)} deposit` : ''}
+                          {' · pick dates to see the total'}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <Button
                     size="sm"
