@@ -45,6 +45,8 @@ export interface MyBilling {
   latestReference: string | null;
   /** True when the backend is running without a payment gateway (dev). */
   simulated: boolean;
+  /** Where it's managed. Store subscriptions (bought in the mobile app) are changed in the store. */
+  managedBy?: 'web' | 'app_store' | 'play_store' | null;
 }
 
 /**
