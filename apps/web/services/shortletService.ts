@@ -1,4 +1,10 @@
-import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import {
+  authFetch,
+  safeCall,
+  toQuery,
+  type Paginated,
+  type TrustWithheldReason,
+} from '@/lib/apiHelpers';
 import type {
   BlockShortletDatesInput,
   BlockedDateRange,
@@ -107,6 +113,12 @@ export interface ShortletPayoutSummary {
   withdrawTierRequired: number;
   /** False when the host is below `withdrawTierRequired`, so the client can explain first. */
   canWithdraw: boolean;
+  /**
+   * Set when the tier is held back by something other than missing evidence —
+   * an open dispute, a review case, the score floor. Names the real blocker so
+   * the dialog does not send an already-verified host to get verified again.
+   */
+  withdrawWithheldReason?: TrustWithheldReason | null;
 }
 
 export const shortletService = {
