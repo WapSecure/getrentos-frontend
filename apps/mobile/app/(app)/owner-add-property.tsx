@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileText, Upload, X } from 'lucide-react-native';
@@ -34,9 +34,12 @@ export default function OwnerAddProperty() {
   const qc = useQueryClient();
   const toast = useToast();
 
+  // The land portfolio opens this with ?type=LAND so the right type is already chosen.
+  const params = useLocalSearchParams<{ type?: string }>();
   const [name, setName] = useState('');
-  const [propertyType, setPropertyType] =
-    useState<CreateOwnerPropertyInput['propertyType']>('APARTMENT');
+  const [propertyType, setPropertyType] = useState<CreateOwnerPropertyInput['propertyType']>(
+    params.type === 'LAND' ? 'LAND' : 'APARTMENT'
+  );
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -88,7 +91,13 @@ export default function OwnerAddProperty() {
       } else {
         toast.show('Property added. We’ll review your ownership document.', 'success');
       }
-      router.replace(`/(app)/owner-property/${property.id}`);
+      if (propertyType === 'LAND') {
+        // Land needs its parcel record (area, title, survey) before diligence can start.
+        qc.invalidateQueries({ queryKey: qk.owner.land });
+        router.replace({ pathname: '/(app)/owner-land', params: { parcel: property.id } });
+      } else {
+        router.replace(`/(app)/owner-property/${property.id}`);
+      }
     },
     onError: () => haptics.error(),
   });

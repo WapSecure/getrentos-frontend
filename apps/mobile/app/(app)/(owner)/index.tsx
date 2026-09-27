@@ -27,6 +27,7 @@ import {
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -44,6 +45,7 @@ export default function OwnerHome() {
   const { colors, spacing, radius } = useTheme();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
+  const trend = useQuery({ queryKey: qk.owner.portfolioTrend, queryFn: ownerApi.portfolioTrend });
   // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.owner.notifications,
@@ -155,6 +157,12 @@ export default function OwnerHome() {
         <Text variant="caption" color="mutedForeground">
           Estimated from your properties’ recorded values
         </Text>
+        {/* A single point isn't a trend, so the chart waits for two. */}
+        {(trend.data?.length ?? 0) > 1 ? (
+          <View style={{ marginTop: spacing.sm }}>
+            <RevenueTrendChart points={trend.data!} />
+          </View>
+        ) : null}
       </Card>
 
       <MetricGrid metrics={metrics} loading={dashboard.isPending} />

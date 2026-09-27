@@ -263,6 +263,19 @@ export interface OwnerDocument {
   downloadUrl?: string;
 }
 
+export interface OwnerMarketInsights {
+  comparables: {
+    propertyType: string;
+    city: string;
+    soldPrice: number;
+    size: number;
+    soldMonthsAgo: number;
+  }[];
+  lowEstimate: number;
+  highEstimate: number;
+  suggested: number;
+}
+
 export interface OwnerProfile {
   legalName: string;
   email: string;
@@ -369,6 +382,8 @@ export const OWNERSHIP_DOCUMENTS = [
   { value: 'ALLOCATION_LETTER', label: 'Allocation letter' },
   { value: 'EXCISION_GAZETTE', label: 'Excision / Gazette' },
   { value: 'GOVERNMENT_RECEIPT', label: 'Government receipt' },
+  { value: 'SURVEY_PLAN', label: 'Survey plan' },
+  { value: 'LAND_USE_PERMIT', label: 'Land use permit' },
 ] as const;
 export type OwnershipDocumentType = (typeof OWNERSHIP_DOCUMENTS)[number]['value'];
 
@@ -432,6 +447,12 @@ export const ownerApi = {
   deleteDocument: (id: string) =>
     apiFetch<{ id: string; deleted: boolean }>(`/owner/documents/${id}`, { method: 'DELETE' }),
   trustProfile: () => apiFetch<TrustProfile>('/owner/trust-profile'),
+  portfolioTrend: () =>
+    apiFetch<{ label: string; value: number }[]>('/owner/analytics/portfolio-trend'),
+  marketInsights: (city?: string) =>
+    apiFetch<OwnerMarketInsights>(
+      `/owner/analytics/market-insights${city ? `?city=${encodeURIComponent(city)}` : ''}`
+    ),
 
   profile: () => apiFetch<OwnerProfile>('/owner/profile'),
   updateProfile: (input: { legalName?: string; companyName?: string; phone?: string }) =>
