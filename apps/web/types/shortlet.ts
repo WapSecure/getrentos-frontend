@@ -332,6 +332,8 @@ export interface ShortletMessage {
   text: string;
   timestamp: string;
   read: boolean;
+  /** Contact details in this message were hidden (no paid stay yet). */
+  contactMasked?: boolean;
 }
 
 export interface ShortletConversation {

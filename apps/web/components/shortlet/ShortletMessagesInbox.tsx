@@ -11,7 +11,7 @@ import {
   Toast,
   type ToastVariant,
 } from '@getrentos/ui';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send, ShieldCheck } from 'lucide-react';
 import { cn } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
@@ -144,6 +144,17 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                       )}
                     >
                       <p className="break-words">{m.text}</p>
+                      {m.contactMasked && (
+                        <p
+                          className={cn(
+                            'mt-1 flex items-center gap-1 text-[11px] italic',
+                            mine ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                          )}
+                        >
+                          <ShieldCheck className="h-3 w-3 shrink-0" />
+                          Contact details hidden. Share them once the stay is paid.
+                        </p>
+                      )}
                       <p
                         className={cn(
                           'mt-0.5 text-[10px]',
@@ -156,21 +167,27 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                   );
                 })}
               </div>
-              <div className="flex gap-2 border-t border-border p-3">
-                <Input
-                  placeholder="Write a message…"
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      submit();
-                    }
-                  }}
-                />
-                <Button onClick={submit} disabled={!draft.trim() || send.isPending}>
-                  <Send className="h-4 w-4" />
-                </Button>
+              <div className="border-t border-border p-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Write a message…"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submit();
+                      }
+                    }}
+                  />
+                  <Button onClick={submit} disabled={!draft.trim() || send.isPending}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  Phone numbers, emails and chat links are hidden until the stay is booked and paid,
+                  so you’re both covered by GetRentos Payment Protection.
+                </p>
               </div>
             </>
           ) : (
