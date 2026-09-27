@@ -525,6 +525,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           verificationHref={
             role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION
           }
+          trustProfileHref={role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : undefined}
         />
       )}
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>

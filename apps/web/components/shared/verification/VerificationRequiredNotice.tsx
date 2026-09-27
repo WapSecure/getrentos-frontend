@@ -60,15 +60,35 @@ interface NoticeMeta {
 
 /**
  * Copy for a tier requirement that the user already satisfies on evidence but
- * which their trust score is holding back (backend reason
- * SCORE_BELOW_TIER3_MIN). Sending them to verification would be a loop — they
- * are financially verified already — so the CTA points at the score itself.
+ * which something else is holding back (backend `withheldReason`). Sending them
+ * to verification would be a loop — they hold the evidence already — so the CTA
+ * points at the trust profile, which shows what the tier is actually waiting on.
  */
-const SCORE_WITHHELD_COPY: Record<TrustWithheldReason, { message: string; cta: string }> = {
+const WITHHELD_COPY: Record<TrustWithheldReason, { message: string; cta: string }> = {
   SCORE_BELOW_TIER3_MIN: {
     message:
       'Your identity and financial checks are complete, but your trust score is below the threshold this action requires. Nothing is wrong with your account — building up your trust profile restores access automatically.',
     cta: 'See what your score needs',
+  },
+  OPEN_DISPUTE_AS_SUBJECT: {
+    message:
+      'Your identity and financial checks are complete, but a dispute open against you is holding this back until it is resolved.',
+    cta: 'See the dispute holding this',
+  },
+  OPEN_REVIEW_CASE: {
+    message:
+      'Your identity and financial checks are complete, but a trust review on your account is still open. This unlocks once that review closes.',
+    cta: 'See your trust profile',
+  },
+  FAILED_FINANCIAL_CHECK: {
+    message:
+      'An earlier financial check did not pass and has not been cleared since. Re-submit the evidence to restore access.',
+    cta: 'See your trust profile',
+  },
+  ACCOUNT_RESTRICTED: {
+    message:
+      'Your account is restricted, which holds back actions that need this trust tier. Contact support to resolve it.',
+    cta: 'See your trust profile',
   },
 };
 
@@ -89,7 +109,7 @@ function readMeta(error: unknown): NoticeMeta | null {
       tierRequired: maybe.tierRequired,
       currentTier: maybe.currentTier,
       withheldReason: (TRUST_WITHHELD_REASONS as readonly string[]).includes(
-        maybe.withheldReason ?? '',
+        maybe.withheldReason ?? ''
       )
         ? maybe.withheldReason
         : undefined,
@@ -126,7 +146,7 @@ export const VerificationRequiredNotice = ({
   let cta: string;
   let destination: string;
   if (meta.reason === 'TRUST_TIER_REQUIRED' && meta.withheldReason) {
-    const copy = SCORE_WITHHELD_COPY[meta.withheldReason];
+    const copy = WITHHELD_COPY[meta.withheldReason];
     message = copy.message;
     cta = copy.cta;
     destination = scoreHref ?? verificationHref ?? href;

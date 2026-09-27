@@ -32,10 +32,17 @@ const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
 export function ShortletPayoutsDialog({
   onClose,
   verificationHref,
+  trustProfileHref,
 }: {
   onClose: () => void;
   /** Where the 'Verify now' upsell link goes (the persona's Verification Center). */
   verificationHref: string;
+  /**
+   * Where the "something else is holding your tier" upsell goes (the persona's
+   * trust profile). Omitted for personas that have no profile page, in which
+   * case the notice falls back to `verificationHref`.
+   */
+  trustProfileHref?: string;
 }) {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
@@ -102,16 +109,21 @@ export function ShortletPayoutsDialog({
             />
           )}
           {/* The same requirement, shown before the host tries: the balance below is
-              real money they cannot withdraw yet, so say so up front. */}
+              real money they cannot withdraw yet, so say so up front. When the tier
+              is only held back by something else — an open dispute, a review case —
+              the summary says which, because sending an already-verified host to get
+              verified again is a dead end. */}
           {!withdraw.error && summary && !summary.canWithdraw && (
             <VerificationRequiredNotice
               error={{
                 reason: 'TRUST_TIER_REQUIRED',
                 tierRequired: summary.withdrawTierRequired,
                 currentTier: summary.hostTier,
+                withheldReason: summary.withdrawWithheldReason ?? undefined,
               }}
               href={verificationHref}
               verificationHref={verificationHref}
+              scoreHref={trustProfileHref}
             />
           )}
           {/* Balance */}
