@@ -9,6 +9,7 @@ import {
   Calendar,
   ChevronRight,
   CircleHelp,
+  KeyRound,
   CreditCard,
   FileStack,
   Heart,
@@ -167,6 +168,13 @@ export default function BuyerAccount() {
           label="Notifications"
           description="Alerts for offers, escrow and viewings"
           onPress={() => router.push('/(app)/buyer-notifications')}
+        />
+        <Divider />
+        <Row
+          icon={<KeyRound size={18} color={colors.primary} />}
+          label="Security"
+          description="Password, two-factor and app lock"
+          onPress={() => router.push('/(app)/security-settings')}
         />
         <Divider />
         <Row

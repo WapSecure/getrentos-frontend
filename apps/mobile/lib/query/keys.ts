@@ -6,6 +6,7 @@ export const qk = {
   auth: {
     me: ['auth', 'me'] as const,
   },
+  security: ['me', 'security'] as const,
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
@@ -23,7 +24,6 @@ export const qk = {
     renewalOffer: ['renter', 'lease', 'renewal-offer'] as const,
     receipts: ['renter', 'payments', 'receipts'] as const,
     profile: ['renter', 'profile'] as const,
-    twoFactorStatus: ['renter', 'settings', '2fa'] as const,
     notificationPreferences: ['renter', 'notifications', 'preferences'] as const,
     trustScore: ['renter', 'trust-score'] as const,
     wishlists: ['renter', 'wishlists'] as const,
@@ -131,6 +131,7 @@ export const qk = {
     reviews: ['owner', 'reviews'] as const,
     ratingSummary: ['owner', 'reviews', 'summary'] as const,
     metrics: ['owner', 'metrics'] as const,
+    trustProfile: ['owner', 'trust-profile'] as const,
     preferences: ['owner', 'preferences'] as const,
     conversations: ['owner', 'conversations'] as const,
     messages: (id: string) => ['owner', 'conversations', id, 'messages'] as const,

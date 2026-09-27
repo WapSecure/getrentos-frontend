@@ -1,6 +1,7 @@
 import { View } from 'react-native';
+import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, MapPin, ShieldCheck } from 'lucide-react-native';
+import { LogOut, MapPin, KeyRound, ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -15,6 +16,7 @@ import {
 import { gatemanApi } from '@/lib/api/gateman';
 import { qk } from '@/lib/query/keys';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { SettingsGroup } from '@/components/account/SettingsList';
 
 export default function GatemanAccount() {
   const { profile, signOut } = useAuth();
@@ -67,6 +69,19 @@ export default function GatemanAccount() {
           </Text>
         )}
       </Card>
+
+      <SettingsGroup
+        title="Account"
+        items={[
+          {
+            key: 'security',
+            label: 'Security',
+            description: 'Password, two-factor and app lock',
+            icon: KeyRound,
+            onPress: () => router.push('/(app)/security-settings'),
+          },
+        ]}
+      />
 
       <Card elevated padding="none">
         <View style={{ padding: spacing.lg, gap: spacing.xs }}>

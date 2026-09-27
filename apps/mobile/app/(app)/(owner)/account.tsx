@@ -5,6 +5,8 @@ import {
   BarChart3,
   CircleHelp,
   FileStack,
+  Gauge,
+  KeyRound,
   LogOut,
   ShieldCheck,
   SlidersHorizontal,
@@ -56,6 +58,14 @@ export default function OwnerAccount() {
 
   const trust: SettingsItem[] = [
     {
+      key: 'trust',
+      label: 'Trust profile',
+      description: 'Your score and what buyers see',
+      icon: Gauge,
+      value: profile ? String(profile.trustScore) : undefined,
+      onPress: go('/(app)/owner-trust-profile'),
+    },
+    {
       key: 'identity',
       label: 'Identity verification',
       icon: ShieldCheck,
@@ -79,6 +89,13 @@ export default function OwnerAccount() {
       description: 'Minimum offers and auto-decline',
       icon: SlidersHorizontal,
       onPress: go('/(app)/owner-settings'),
+    },
+    {
+      key: 'security',
+      label: 'Security',
+      description: 'Password, two-factor and app lock',
+      icon: KeyRound,
+      onPress: go('/(app)/security-settings'),
     },
     {
       key: 'help',

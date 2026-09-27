@@ -1,6 +1,7 @@
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { TrustProfile } from './buyerTrustProfile';
 
 /**
  * The property-owner portal (sellers). Mirrors the backend's /owner/* routes;
@@ -262,6 +263,16 @@ export interface OwnerDocument {
   downloadUrl?: string;
 }
 
+/** Transfer paperwork an owner can file (mirrors OwnerUploadDocumentDto). */
+export const OWNER_DOCUMENT_TYPES = [
+  { value: 'TRANSFER_AGREEMENT', label: 'Transfer agreement' },
+  { value: 'TITLE_TRANSFER', label: 'Title transfer' },
+  { value: 'PAYMENT_RECEIPT', label: 'Payment receipt' },
+  { value: 'GOVERNMENT_FILING', label: 'Government filing' },
+  { value: 'OTHER', label: 'Other' },
+] as const;
+export type OwnerDocumentType = (typeof OWNER_DOCUMENT_TYPES)[number]['value'];
+
 export interface OwnerReview {
   id: string;
   author: string;
@@ -379,6 +390,20 @@ export const ownerApi = {
 
   documents: (p = 1, size = 50) =>
     apiFetch<Paginated<OwnerDocument>>(`/owner/documents${page(p, size)}`),
+  uploadDocument: (
+    file: PickedFile,
+    input: { name: string; type: OwnerDocumentType; propertyId?: string }
+  ) => {
+    const form = new FormData();
+    form.append('name', input.name);
+    form.append('type', input.type);
+    if (input.propertyId) form.append('propertyId', input.propertyId);
+    appendFile(form, 'file', file);
+    return apiUpload<OwnerDocument>('/owner/documents', form);
+  },
+  deleteDocument: (id: string) =>
+    apiFetch<{ id: string; deleted: boolean }>(`/owner/documents/${id}`, { method: 'DELETE' }),
+  trustProfile: () => apiFetch<TrustProfile>('/owner/trust-profile'),
   setDocumentShared: (id: string, sharedWithBuyer: boolean) =>
     apiFetch<OwnerDocument>(`/owner/documents/${id}/shared`, {
       method: 'PATCH',
