@@ -58,6 +58,7 @@ import { ShortletPeakPricingDialog } from './ShortletPeakPricingDialog';
 import { ShortletCalendarSyncDialog } from './ShortletCalendarSyncDialog';
 import { HostCancelBookingDialog } from './HostCancelBookingDialog';
 import { ShortletEssentialsDialog } from './ShortletEssentialsDialog';
+import { GuestSummaryLine } from './GuestSummaryLine';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import type {
   BlockedDateRange,
@@ -341,23 +342,27 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           {bookings.map((b) => (
             <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0 flex-1">
                   <h3 className="font-medium">{b.propertyTitle}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {b.guestName ?? 'Guest'} · {b.guestCount} guest{b.guestCount > 1 ? 's' : ''} ·{' '}
                     {formatDate(b.checkIn, 'long')} → {formatDate(b.checkOut, 'long')} · {b.nights}{' '}
                     night{b.nights > 1 ? 's' : ''}
                   </p>
-                  {b.guestRatingAverage != null && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      {b.guestRatingAverage.toFixed(1)} guest rating
-                      {b.guestRatingCount != null ? ` (${b.guestRatingCount})` : ''}
-                    </p>
+                  {b.guestSummary ? (
+                    <GuestSummaryLine summary={b.guestSummary} />
+                  ) : (
+                    b.guestRatingAverage != null && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        {b.guestRatingAverage.toFixed(1)} guest rating
+                        {b.guestRatingCount != null ? ` (${b.guestRatingCount})` : ''}
+                      </p>
+                    )
                   )}
                   {b.notes && <p className="mt-1 text-sm text-muted-foreground">“{b.notes}”</p>}
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
                   {b.platformFee != null && b.platformFee > 0 && (
