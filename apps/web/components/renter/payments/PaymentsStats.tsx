@@ -67,7 +67,7 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
     },
     {
       icon: Shield,
-      label: 'In Escrow',
+      label: 'Held by GetRentos',
       value: formatCurrency(escrowAmount),
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/20',

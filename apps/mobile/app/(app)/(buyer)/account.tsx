@@ -121,7 +121,7 @@ export default function BuyerAccount() {
         <Row
           icon={<Wallet size={18} color={colors.primary} />}
           label="Transactions"
-          description="Escrow and closing progress"
+          description="Payment and closing progress"
           onPress={() => router.push('/(app)/buyer-transactions')}
         />
         <Divider />
@@ -165,7 +165,7 @@ export default function BuyerAccount() {
         <Row
           icon={<Bell size={18} color={colors.primary} />}
           label="Notifications"
-          description="Alerts for offers, escrow and viewings"
+          description="Alerts for offers, payments and viewings"
           onPress={() => router.push('/(app)/buyer-notifications')}
         />
         <Divider />

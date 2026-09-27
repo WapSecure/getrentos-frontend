@@ -55,7 +55,7 @@ export default function LandlordPayments() {
         <DetailHeader
           eyebrow="Financials"
           title="Payments"
-          subtitle="Collections, escrow and arrears"
+          subtitle="Collections, payouts and arrears"
           onBack={() => router.back()}
           accessory={
             <IconButton
@@ -82,7 +82,7 @@ export default function LandlordPayments() {
                 ) : (
                   <View style={{ flexDirection: 'row' }}>
                     <Figure label="Collected" amount={stats.data?.totalCollected ?? 0} />
-                    <Figure label="In escrow" amount={stats.data?.escrowPending ?? 0} />
+                    <Figure label="Held by GetRentos" amount={stats.data?.escrowPending ?? 0} />
                     <Figure label="Outstanding" amount={stats.data?.outstandingBalance ?? 0} />
                   </View>
                 )}

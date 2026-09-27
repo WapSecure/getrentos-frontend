@@ -26,7 +26,7 @@ export default function OwnerAccount() {
   const selling: SettingsItem[] = [
     {
       key: 'sales',
-      label: 'Sales & escrow',
+      label: 'Sales in progress',
       description: 'Where each accepted sale stands',
       icon: Wallet,
       onPress: go('/(app)/owner-transactions'),

@@ -114,8 +114,8 @@ export const ApplyFinancingModal = ({
             <div className="flex items-start gap-2 p-3 rounded-lg bg-accent">
               <ShieldCheck className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
               <p className="text-xs text-muted-foreground">
-                Your rent is held in escrow like any other GetRentos payment — financing just
-                changes who fronts the cash and when your landlord gets paid.
+                GetRentos holds your rent like any other payment — financing just changes who fronts
+                the cash and when your landlord gets paid.
               </p>
             </div>
 

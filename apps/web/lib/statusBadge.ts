@@ -41,11 +41,11 @@ export const paymentStatusBadges: Record<RentPaymentStatus, StatusBadgeEntry> = 
 };
 
 export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
-  not_funded: { label: 'Not funded', variant: 'neutral' },
-  held: { label: 'Held in escrow', variant: 'info', icon: Lock },
-  pending_review: { label: 'Pending Review', variant: 'warning', icon: Clock },
-  released: { label: 'Released', variant: 'success', icon: CheckCircle2 },
-  frozen: { label: 'Frozen', variant: 'danger', icon: Ban },
+  not_funded: { label: 'Not paid yet', variant: 'neutral' },
+  held: { label: 'Held by GetRentos', variant: 'info', icon: Lock },
+  pending_review: { label: 'Under review', variant: 'warning', icon: Clock },
+  released: { label: 'Paid to landlord', variant: 'success', icon: CheckCircle2 },
+  frozen: { label: 'On hold — dispute open', variant: 'danger', icon: Ban },
 };
 
 export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {

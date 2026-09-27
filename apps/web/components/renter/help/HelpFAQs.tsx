@@ -20,9 +20,9 @@ const helpFAQs: FAQ[] = [
   },
   {
     id: '2',
-    question: 'How does escrow protection work?',
+    question: 'How does payment protection work?',
     answer:
-      'Escrow protection ensures your funds are held securely by GetRentos until all transaction conditions are met — such as lease signing or move-in confirmation. Funds are only released once both parties confirm satisfaction, protecting you from fraud and disputes.',
+      'With payment protection, GetRentos holds your money until all transaction conditions are met — such as lease signing or move-in confirmation. Funds are only released once both parties confirm satisfaction, protecting you from fraud and disputes.',
     category: 'payments',
   },
   {
@@ -57,7 +57,7 @@ const helpFAQs: FAQ[] = [
     id: '7',
     question: 'How do I split rent with roommates?',
     answer:
-      'In the Roommates tab, add your roommates by email invite, then set up a split arrangement — equal or custom percentages. Each roommate pays their share directly through the platform, and payments are tracked individually in escrow.',
+      'In the Roommates tab, add your roommates by email invite, then set up a split arrangement — equal or custom percentages. Each roommate pays their share directly through the platform, and each payment is held and tracked separately by GetRentos.',
     category: 'account',
   },
   {

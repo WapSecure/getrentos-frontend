@@ -25,8 +25,8 @@ const features = [
   },
   {
     icon: Lock,
-    title: 'Escrow Protection',
-    description: 'Payments are held in escrow until the agreed conditions are met.',
+    title: 'Payment Protection',
+    description: 'GetRentos holds your payment until the agreed conditions are met.',
   },
   {
     icon: Eye,

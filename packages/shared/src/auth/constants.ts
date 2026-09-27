@@ -57,7 +57,7 @@ export const ROLES = {
   LANDLORD: {
     id: 'landlord',
     name: 'Landlord',
-    description: 'List properties, vet tenants, collect rent through escrow.',
+    description: 'List properties, vet tenants, collect rent safely through GetRentos.',
     icon: 'Building2',
     requiresVerification: ['identity', 'property'],
     canAddLater: true,

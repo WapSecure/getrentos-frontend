@@ -84,7 +84,7 @@ export default function OpengraphImage() {
         <span>·</span>
         <span>VERIFIED PROPERTIES</span>
         <span>·</span>
-        <span>ESCROW-SECURED PAYMENTS</span>
+        <span>PROTECTED PAYMENTS</span>
       </div>
     </div>,
     size

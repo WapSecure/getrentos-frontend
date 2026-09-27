@@ -23,9 +23,9 @@ const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
   {
     key: 'deposit_pending',
     label: 'Buyer’s deposit',
-    now: 'Waiting for the buyer to pay the deposit into escrow.',
+    now: 'Waiting for the buyer to pay their deposit to GetRentos.',
   },
-  { key: 'funds_held', label: 'Funds held', now: 'The deposit is held safely in escrow.' },
+  { key: 'funds_held', label: 'Funds held', now: 'The deposit is held safely by GetRentos.' },
   {
     key: 'verification',
     label: 'Verification',
@@ -77,7 +77,7 @@ export default function OwnerTransactions() {
       >
         <DetailHeader
           eyebrow="Selling"
-          title="Sales & escrow"
+          title="Sales in progress"
           subtitle="Where each accepted sale stands"
           onBack={() => router.back()}
         />
@@ -105,7 +105,7 @@ export default function OwnerTransactions() {
             <EmptyState
               icon={<Wallet size={34} color={colors.mutedForeground} />}
               title="No sales yet"
-              description="When you accept an offer, the sale and its escrow show up here."
+              description="When you accept an offer, the sale and its protected payment show up here."
             />
           }
           renderItem={({ item: t }: { item: OwnerTransaction }) => <SaleCard t={t} />}
@@ -151,7 +151,7 @@ function SaleCard({ t }: { t: OwnerTransaction }) {
           <ShieldAlert size={18} color={colors.destructive} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="callout" style={{ color: colors.destructive, fontWeight: '700' }}>
-              Escrow frozen — dispute active
+              Payment on hold — dispute open
             </Text>
             <Text variant="caption" color="mutedForeground">
               {t.disputeReason || 'Funds stay held until the dispute is resolved.'}

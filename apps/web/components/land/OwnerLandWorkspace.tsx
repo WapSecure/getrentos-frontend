@@ -262,7 +262,7 @@ export const OwnerLandWorkspace = () => {
                         <p className="font-medium text-foreground">Ready to list</p>
                         <p className="mt-1 text-sm text-muted-foreground">
                           This land parcel has passed both gates. Continue to the normal sale
-                          listing flow—offers and escrow remain the same.
+                          listing flow—offers and payment protection work the same way.
                         </p>
                         <Button
                           href={ROUTES.OWNER_LISTINGS}

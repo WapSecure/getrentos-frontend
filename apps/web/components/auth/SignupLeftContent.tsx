@@ -21,7 +21,7 @@ const trustFeatures = [
   },
   {
     icon: Lock,
-    title: 'Escrow Protection',
+    title: 'Payment Protection',
     description: 'Your funds are held securely until conditions are met',
   },
   {
@@ -81,7 +81,7 @@ export const SignupLeftContent = () => {
 
             <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
               Unlock the safest property platform on the market. Every transaction is protected by
-              bank-grade escrow and verified identities.
+              payment protection and verified identities.
             </p>
 
             {/* Trust Features Grid */}

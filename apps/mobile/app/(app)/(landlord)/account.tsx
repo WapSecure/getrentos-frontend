@@ -61,7 +61,7 @@ export default function LandlordAccount() {
         <Divider />
         <AccountRow
           label="Payments"
-          description="Rent collected, escrow and arrears"
+          description="Rent collected, payouts and arrears"
           onPress={() => router.push('/(app)/landlord-payments')}
         />
         <Divider />

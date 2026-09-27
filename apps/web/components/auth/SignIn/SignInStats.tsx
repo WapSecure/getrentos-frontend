@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
  * when real usage numbers exist they can go here.
  */
 const highlights = [
-  { headline: 'Escrow', caption: 'Payment protection' },
+  { headline: 'Protected', caption: 'GetRentos holds your payment' },
   { headline: 'Verified', caption: 'Identity checks' },
   { headline: 'Free', caption: 'To get started' },
 ];

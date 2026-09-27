@@ -49,8 +49,8 @@ function DisputePaymentForm({ onClose, payment }: { onClose: () => void; payment
     <View style={{ gap: spacing.lg }}>
       <Text variant="body" color="mutedForeground">
         Tell us what&apos;s wrong with <Text variant="bodyStrong">{payment.description}</Text> (₦
-        {payment.amount.toLocaleString()}). We&apos;ll pause escrow release while it&apos;s
-        reviewed.
+        {payment.amount.toLocaleString()}). We&apos;ll keep holding the money and won&apos;t pay it
+        out while it&apos;s reviewed.
       </Text>
       <TextField
         label="Reason"

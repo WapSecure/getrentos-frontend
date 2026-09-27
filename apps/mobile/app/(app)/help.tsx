@@ -20,7 +20,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'How are payments protected?',
     answer:
-      'Funds are held in escrow until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
+      'GetRentos holds the money until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
   },
   {
     question: 'How do I contact someone about my account?',

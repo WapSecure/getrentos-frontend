@@ -80,7 +80,9 @@ export function PaymentsView() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Payments</h1>
-        <p className="text-muted-foreground mt-1">Track rent collection and escrow status</p>
+        <p className="text-muted-foreground mt-1">
+          Track rent collection and when it is paid out to you
+        </p>
       </div>
 
       <RentCollectionStats

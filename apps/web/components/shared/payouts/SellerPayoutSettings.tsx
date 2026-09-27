@@ -94,7 +94,8 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
         </div>
       ) : (
         <p className="text-xs text-muted-foreground mb-6">
-          No payout account yet. Add one so sale proceeds can be sent to you once escrow releases.
+          No payout account yet. Add one so sale money can be sent to you once GetRentos pays it
+          out.
         </p>
       )}
 
@@ -154,7 +155,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
       <div className="mt-10 pt-6 border-t border-border">
         <h3 className="text-base font-semibold text-foreground">Sale payouts</h3>
         <p className="text-sm text-muted-foreground mt-1 mb-4">
-          Sales whose escrow has released, and whether the money has reached your account.
+          Sales GetRentos has paid out, and whether the money has reached your account.
         </p>
 
         {sales.length === 0 ? (

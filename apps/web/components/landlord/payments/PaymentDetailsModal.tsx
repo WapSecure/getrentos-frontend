@@ -109,8 +109,9 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
 
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                 <p className="text-xs text-muted-foreground">
-                  Funds are held in escrow by GetRentos and released automatically once lease
-                  conditions are verified. Landlords cannot manually release or bypass escrow.
+                  GetRentos holds the tenant’s payment and pays it to you automatically once the
+                  lease conditions are verified. Landlords cannot pay it out early or skip this
+                  step.
                 </p>
               </div>
 

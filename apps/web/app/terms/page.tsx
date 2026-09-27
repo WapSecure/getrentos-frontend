@@ -46,11 +46,12 @@ export default function TermsPage() {
         agree to give truthful information and we may ask for more before we approve something.
       </p>
 
-      <h2 id="payments">Payments and escrow</h2>
+      <h2 id="payments">Payments and payment protection</h2>
       <p>
-        Payments are processed by Paystack. Where a payment is held in escrow, it is released when
-        the conditions for that transaction are met, or returned as our dispute process decides.
-        Fees, if any, are shown before you pay. You agree to pay what you owe on time.
+        Payments are processed by Paystack. Where GetRentos holds a payment for you (payment
+        protection), it is paid out when the conditions for that transaction are met, or returned as
+        our dispute process decides. Fees, if any, are shown before you pay. You agree to pay what
+        you owe on time.
       </p>
 
       <h2 id="plans">Plans</h2>
@@ -87,8 +88,8 @@ export default function TermsPage() {
       <h2 id="ending">Ending your account</h2>
       <p>
         You can stop using GetRentos at any time. We may suspend or close an account that breaks
-        these terms or puts other users at risk. Amounts already owed remain payable, and funds in
-        escrow are handled as described above.
+        these terms or puts other users at risk. Amounts already owed remain payable, and payments
+        GetRentos is holding are handled as described above.
       </p>
 
       <h2 id="changes">Changes</h2>

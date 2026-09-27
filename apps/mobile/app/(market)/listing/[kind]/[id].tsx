@@ -323,7 +323,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         <Lock size={18} color={colors.primary} style={{ marginTop: 2 }} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="callout" style={{ fontWeight: '700', color: colors.accentForeground }}>
-            Pay through GetRentos escrow
+            Pay through GetRentos — we hold the money
           </Text>
           <Text variant="caption" color="mutedForeground">
             Your money is held until both sides confirm — never transferred straight to a stranger.

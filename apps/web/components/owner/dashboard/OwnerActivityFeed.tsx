@@ -32,7 +32,7 @@ const titleFor = (type: string): string => {
     case 'viewing':
       return 'New viewing request';
     case 'transaction':
-      return 'Escrow update';
+      return 'Payment update';
     case 'document':
       return 'Document update';
     default:
@@ -65,7 +65,7 @@ export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Recent Activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Buyer inquiries, offers, escrow, and document updates
+          Buyer inquiries, offers, payments, and document updates
         </p>
       </div>
 

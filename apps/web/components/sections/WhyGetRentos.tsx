@@ -11,7 +11,7 @@ const reasons = [
     icon: Layers,
     title: 'One workspace',
     description:
-      'Renters, landlords, owners, buyers, realtors and agents share one verification, escrow and dispute system.',
+      'Renters, landlords, owners, buyers, realtors and agents share one verification, payment protection and dispute system.',
   },
   {
     icon: Banknote,
@@ -21,7 +21,7 @@ const reasons = [
   },
   {
     icon: Lock,
-    title: 'Escrow on the money that matters',
+    title: 'We hold the money until the deal is done',
     description: 'Rent and sale payments are held until the agreed conditions are met.',
   },
   {

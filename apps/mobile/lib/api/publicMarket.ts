@@ -428,7 +428,7 @@ export const publicMarketApi = {
           longitude: s.longitude,
           facts: [
             ...fact('Property type', humanise(s.propertyType)),
-            ...fact('Payment', 'Escrow-protected'),
+            ...fact('Payment', 'Protected — GetRentos holds it until the deal is done'),
           ],
         };
       }

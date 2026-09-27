@@ -16,7 +16,7 @@ export interface BuyerNotificationPreference {
 
 export const BUYER_NOTIFICATION_CATEGORY_LABEL: Record<string, string> = {
   offers: 'Offers',
-  escrow: 'Escrow updates',
+  escrow: 'Purchase payment updates',
   viewings: 'Viewings',
   messages: 'Messages',
   saved: 'Saved listing alerts',
