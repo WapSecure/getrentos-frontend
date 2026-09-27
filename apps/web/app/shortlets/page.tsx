@@ -6,7 +6,7 @@ import { ShortletMarketplaceBrowser } from '@/components/shortlet/ShortletMarket
 export const metadata: Metadata = {
   title: 'Shortlets — Furnished Short-Stay Apartments',
   description:
-    'Book verified, furnished short-stay apartments and homes. Escrow-secured payments, verified hosts, and instant confirmation on GetRentos.',
+    'Book verified, furnished short-stay apartments and homes. Your payment is held by GetRentos until you arrive, verified hosts, and instant confirmation on GetRentos.',
   alternates: { canonical: '/shortlets' },
   openGraph: {
     title: 'Shortlets — Furnished Short-Stay Apartments',

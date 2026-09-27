@@ -1,7 +1,20 @@
-import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import {
+  authFetch,
+  safeCall,
+  toQuery,
+  type Paginated,
+  type TrustWithheldReason,
+} from '@/lib/apiHelpers';
 import type {
   BlockShortletDatesInput,
   BlockedDateRange,
+  GuestPromiseProblem,
+  HostCancelPreview,
+  ShortletHostPenalty,
+  ShortletCalendarFeed,
+  ShortletCalendarSync,
+  ShortletSeason,
+  ShortletSeasonInput,
   CreateShortletBookingInput,
   CreateShortletListingInput,
   CreateShortletReviewInput,
@@ -26,6 +39,11 @@ import type {
 } from '@/types/shortlet';
 
 export interface ShortletListParams {
+  /** Only stays with all of these amenities. */
+  amenities?: string[];
+  /** Only stays whose host says they have power 24 hours a day. */
+  power24h?: boolean;
+  petsAllowed?: boolean;
   page?: number;
   pageSize?: number;
   city?: string;
@@ -38,6 +56,14 @@ export interface ShortletListParams {
   checkOut?: string;
   /** Estate public slug — limits results to shortlets inside that estate. */
   estate?: string;
+  /** Public browse: title, address, city, state or estate name. */
+  search?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  propertyType?: string;
+  /** Only `true` is sent; unticked means "don't filter". */
+  instantBooking?: boolean;
+  verifiedOnly?: boolean;
 }
 
 const listQuery = (params: ShortletListParams): string =>
@@ -50,6 +76,15 @@ const listQuery = (params: ShortletListParams): string =>
     minPrice: params.minPrice,
     maxPrice: params.maxPrice,
     sort: params.sort,
+    search: params.search,
+    bedrooms: params.bedrooms,
+    bathrooms: params.bathrooms,
+    propertyType: params.propertyType,
+    instantBooking: params.instantBooking ? 'true' : undefined,
+    verifiedOnly: params.verifiedOnly ? 'true' : undefined,
+    amenities: params.amenities?.length ? params.amenities.join(',') : undefined,
+    power24h: params.power24h ? 'true' : undefined,
+    petsAllowed: params.petsAllowed ? 'true' : undefined,
     checkIn: params.checkIn,
     checkOut: params.checkOut,
     estate: params.estate,
@@ -67,11 +102,24 @@ export interface ShortletPayoutSummary {
   inFailedPayout: number;
   /** Sent to the bank and not yet confirmed. */
   inTransit: number;
+  /** Cancellation fees still owed; taken out of the next withdrawals. */
+  penaltiesOutstanding: number;
   /** When the next held earnings unlock. */
   nextReleaseAt: string | null;
   /** Hours earnings are held after check-in (longer for a first payout). */
   holdHours: number;
   accountSet: boolean;
+  /** The host's trust tier, and the tier withdrawing requires. */
+  hostTier: number;
+  withdrawTierRequired: number;
+  /** False when the host is below `withdrawTierRequired`, so the client can explain first. */
+  canWithdraw: boolean;
+  /**
+   * Set when the tier is held back by something other than missing evidence —
+   * an open dispute, a review case, the score floor. Names the real blocker so
+   * the dialog does not send an already-verified host to get verified again.
+   */
+  withdrawWithheldReason?: TrustWithheldReason | null;
 }
 
 export const shortletService = {
@@ -254,6 +302,28 @@ export const shortletService = {
       })
     ),
 
+  uploadPromisePhoto: (bookingId: string, file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return safeCall(() =>
+      authFetch<{ key: string }>(`/shortlets/bookings/${bookingId}/guest-promise/photos`, {
+        method: 'POST',
+        body: fd,
+      })
+    );
+  },
+
+  reportGuestPromise: (
+    bookingId: string,
+    input: { problemType: GuestPromiseProblem; description: string; imageKeys?: string[] }
+  ) =>
+    safeCall(() =>
+      authFetch<ShortletDispute>(`/shortlets/bookings/${bookingId}/guest-promise`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
   uploadMedia: (kind: 'image' | 'video', file: File) => {
     const fd = new FormData();
     fd.append('file', file);
@@ -303,6 +373,76 @@ export const shortletService = {
     safeCall(() =>
       authFetch(`/host/shortlets/blocked-dates/${blockedDateId}`, { method: 'DELETE' })
     ),
+
+  previewHostCancel: (bookingId: string) =>
+    safeCall(() =>
+      authFetch<HostCancelPreview>(`/host/shortlets/bookings/${bookingId}/cancel-preview`)
+    ),
+
+  hostCancelBooking: (bookingId: string, reason: string) =>
+    safeCall(() =>
+      authFetch<ShortletBooking>(`/host/shortlets/bookings/${bookingId}/cancel`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    ),
+
+  hostCancellationFees: (params: { page?: number; pageSize?: number } = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<ShortletHostPenalty>>(
+        `/host/shortlets/cancellation-fees${toQuery(params)}`
+      )
+    ),
+
+  calendarSync: (listingId: string) =>
+    safeCall(() => authFetch<ShortletCalendarSync>(`/host/shortlets/${listingId}/calendar-sync`)),
+
+  resetCalendarExport: (listingId: string) =>
+    safeCall(() =>
+      authFetch<{ exportUrl: string }>(`/host/shortlets/${listingId}/calendar-sync/reset-export`, {
+        method: 'POST',
+      })
+    ),
+
+  addCalendarFeed: (listingId: string, input: { name: string; url: string }) =>
+    safeCall(() =>
+      authFetch<ShortletCalendarFeed>(`/host/shortlets/${listingId}/calendar-feeds`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  syncCalendarFeed: (feedId: string) =>
+    safeCall(() =>
+      authFetch<ShortletCalendarFeed>(`/host/shortlets/calendar-feeds/${feedId}/sync`, {
+        method: 'POST',
+      })
+    ),
+
+  removeCalendarFeed: (feedId: string) =>
+    safeCall(() => authFetch(`/host/shortlets/calendar-feeds/${feedId}`, { method: 'DELETE' })),
+
+  listSeasons: (listingId: string) =>
+    safeCall(() => authFetch<ShortletSeason[]>(`/host/shortlets/${listingId}/seasons`)),
+
+  createSeason: (listingId: string, input: ShortletSeasonInput) =>
+    safeCall(() =>
+      authFetch<ShortletSeason>(`/host/shortlets/${listingId}/seasons`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  updateSeason: (seasonId: string, input: Partial<ShortletSeasonInput>) =>
+    safeCall(() =>
+      authFetch<ShortletSeason>(`/host/shortlets/seasons/${seasonId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  deleteSeason: (seasonId: string) =>
+    safeCall(() => authFetch(`/host/shortlets/seasons/${seasonId}`, { method: 'DELETE' })),
 
   hostEarningsAnalytics: () =>
     safeCall(() => authFetch<ShortletEarningsAnalytics>('/host/shortlets/analytics')),

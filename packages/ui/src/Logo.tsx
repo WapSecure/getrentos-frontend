@@ -16,11 +16,6 @@ const sizeClasses = {
   lg: { mark: 'h-9', text: 'text-2xl' },
 } as const;
 
-/** Official GetRentos mark geometry (roof/G + trust form). Filled with the
- *  current text color so it follows the app palette in both themes. */
-const MARK_PATH =
-  'M16 44 64 14 112 44 112 70 96 70 96 53 64 33 32 53 32 91 64 110 88 96 88 79 68 79 68 63 104 63 104 105 64 129 16 100Z';
-
 export const Logo = ({ href = '/', className = '', size = 'md', showText = true }: LogoProps) => {
   const currentSize = sizeClasses[size];
 
@@ -34,7 +29,21 @@ export const Logo = ({ href = '/', className = '', size = 'md', showText = true 
           currentSize.mark
         )}
       >
-        <path d={MARK_PATH} fill="currentColor" />
+        <path
+          d="M18 122 64 24l46 98"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M64 122V96"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="16"
+          strokeLinecap="round"
+        />
       </svg>
       {showText && (
         <span className={cn('font-bold tracking-tight whitespace-nowrap', currentSize.text)}>

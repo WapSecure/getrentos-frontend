@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, MessageCircle } from 'lucide-react-native';
+import { MessageCircle } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -24,39 +24,22 @@ import {
   type WhatsAppPreferences,
 } from '@/lib/api/preferences';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function WhatsAppSettings() {
   const { colors, spacing, radius } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({ queryKey: qk.renter.preferences, queryFn: preferencesApi.get });
   const saved = query.data?.whatsapp;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          WhatsApp
-        </Text>
-        {saved?.connected ? <Badge label="Connected" tone="success" /> : null}
-      </View>
+      <DetailScreenHeader
+        eyebrow="Communication"
+        title="WhatsApp"
+        subtitle="Manage important updates outside the app"
+        onBack={() => router.back()}
+        accessory={saved?.connected ? <Badge label="Connected" tone="success" /> : null}
+      />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>

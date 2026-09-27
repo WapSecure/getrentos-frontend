@@ -97,7 +97,7 @@ const CapabilityChips = ({
           ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
           : 'bg-muted text-muted-foreground'
       }`}
-      title="May accept offers, release escrow and act on money for this property"
+      title="May accept offers, release held payments and act on money for this property"
     >
       {canTransact ? <Wallet className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
       Money

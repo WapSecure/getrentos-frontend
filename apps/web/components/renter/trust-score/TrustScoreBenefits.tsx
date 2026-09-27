@@ -11,8 +11,8 @@ const benefits = [
   },
   {
     icon: Lock,
-    title: 'Escrow Protection',
-    description: 'Full escrow protection for all transactions',
+    title: 'Payment Protection',
+    description: 'GetRentos holds your money on every transaction until the deal is done',
     level: '60+',
   },
   {

@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bookmark, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react-native';
+import { Bookmark, ChevronRight, Trash2 } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -17,6 +17,7 @@ import { qk } from '@/lib/query/keys';
 import { savedSearchesApi, type SavedSearch } from '@/lib/api/savedSearches';
 import { PROPERTY_TYPE_LABEL } from '@/lib/api/properties';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 function filterSummary(s: SavedSearch): string {
   const parts: string[] = [];
@@ -67,26 +68,12 @@ export default function SavedSearches() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Saved searches</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Property discovery"
+        title="Saved searches"
+        subtitle="Alerts and reusable property filters"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

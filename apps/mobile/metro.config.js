@@ -5,6 +5,7 @@
 // makes the initial Watchman query huge. We watch only the workspace packages
 // this app imports, plus the shared node_modules store.
 const { getDefaultConfig } = require('expo/metro-config');
+const { withSentryConfig } = require('@sentry/react-native/metro');
 const path = require('path');
 const fs = require('fs');
 
@@ -49,4 +50,15 @@ if (!fs.existsSync(watchmanConfigPath)) {
   );
 }
 
-module.exports = config;
+const hasSentryBuildConfig = Boolean(
+  process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT
+);
+
+// The Sentry serializer requires release credentials. Keep local and pull-request
+// exports deterministic; protected EAS builds still receive source-map handling.
+module.exports = hasSentryBuildConfig
+  ? withSentryConfig(config, {
+      annotateReactComponents: false,
+      includeWebReplay: false,
+    })
+  : config;

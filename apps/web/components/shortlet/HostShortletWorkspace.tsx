@@ -27,12 +27,15 @@ import {
 import {
   BarChart3,
   CalendarOff,
+  CalendarSync,
+  ClipboardList,
   Banknote,
   Gavel,
   MessageSquare,
   Plus,
   ShieldAlert,
   Star,
+  Tags,
   Zap,
 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -51,6 +54,12 @@ import { ShortletOpenDisputeDialog } from './ShortletOpenDisputeDialog';
 import { ShortletOpenDepositClaimDialog } from './ShortletOpenDepositClaimDialog';
 import { ShortletDepositClaimsInbox } from './ShortletDepositClaimsInbox';
 import { HostEarningsAnalyticsDialog } from './HostEarningsAnalyticsDialog';
+import { ShortletPeakPricingDialog } from './ShortletPeakPricingDialog';
+import { ShortletCalendarSyncDialog } from './ShortletCalendarSyncDialog';
+import { HostCancelBookingDialog } from './HostCancelBookingDialog';
+import { ShortletEssentialsDialog } from './ShortletEssentialsDialog';
+import { GuestSummaryLine } from './GuestSummaryLine';
+import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import type {
   BlockedDateRange,
   CreateShortletListingInput,
@@ -64,19 +73,6 @@ const PAGE_SIZE = 10;
 type Tab = 'listings' | 'bookings';
 type HostRole = 'owner' | 'landlord';
 const TODAY = new Date().toISOString().slice(0, 10);
-
-const SHORTLET_AMENITIES = [
-  'WiFi',
-  'Parking',
-  'Swimming Pool',
-  'Security',
-  '24/7 Power',
-  'Gym',
-  'Elevator',
-  'Air Conditioning',
-  'Kitchen',
-  'Washer',
-];
 
 const CANCELLATION_POLICIES: { value: ShortletCancellationPolicy; label: string; hint: string }[] =
   [
@@ -113,6 +109,10 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ShortletListing | null>(null);
   const [blockTarget, setBlockTarget] = useState<ShortletListing | null>(null);
+  const [pricingTarget, setPricingTarget] = useState<ShortletListing | null>(null);
+  const [syncTarget, setSyncTarget] = useState<ShortletListing | null>(null);
+  const [essentialsTarget, setEssentialsTarget] = useState<ShortletListing | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<ShortletBooking | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [payoutsOpen, setPayoutsOpen] = useState(false);
   const [disputesOpen, setDisputesOpen] = useState(false);
@@ -268,6 +268,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                       {l.cleaningFee ? ` · ${formatCurrency(l.cleaningFee)} cleaning` : ''}
                       {l.deposit ? ` · ${formatCurrency(l.deposit)} deposit` : ''}
                     </p>
+                    {peakSummary(l) && (
+                      <p className="mt-1 text-xs text-muted-foreground">{peakSummary(l)}</p>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {l.status !== 'CLOSED' && l.status !== 'PENDING_VERIFICATION' && (
@@ -298,8 +301,17 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     <Button variant="outline" size="sm" onClick={() => setEditTarget(l)}>
                       Edit
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => setPricingTarget(l)}>
+                      <Tags className="mr-1.5 h-4 w-4" /> Pricing &amp; seasons
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => setBlockTarget(l)}>
                       <CalendarOff className="mr-1.5 h-4 w-4" /> Block dates
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setEssentialsTarget(l)}>
+                      <ClipboardList className="mr-1.5 h-4 w-4" /> Rules &amp; essentials
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSyncTarget(l)}>
+                      <CalendarSync className="mr-1.5 h-4 w-4" /> Calendar sync
                     </Button>
                   </div>
                 </div>
@@ -330,23 +342,27 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           {bookings.map((b) => (
             <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0 flex-1">
                   <h3 className="font-medium">{b.propertyTitle}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {b.guestName ?? 'Guest'} · {b.guestCount} guest{b.guestCount > 1 ? 's' : ''} ·{' '}
                     {formatDate(b.checkIn, 'long')} → {formatDate(b.checkOut, 'long')} · {b.nights}{' '}
                     night{b.nights > 1 ? 's' : ''}
                   </p>
-                  {b.guestRatingAverage != null && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      {b.guestRatingAverage.toFixed(1)} guest rating
-                      {b.guestRatingCount != null ? ` (${b.guestRatingCount})` : ''}
-                    </p>
+                  {b.guestSummary ? (
+                    <GuestSummaryLine summary={b.guestSummary} />
+                  ) : (
+                    b.guestRatingAverage != null && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        {b.guestRatingAverage.toFixed(1)} guest rating
+                        {b.guestRatingCount != null ? ` (${b.guestRatingCount})` : ''}
+                      </p>
+                    )
                   )}
                   {b.notes && <p className="mt-1 text-sm text-muted-foreground">“{b.notes}”</p>}
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
                   {b.platformFee != null && b.platformFee > 0 && (
@@ -427,7 +443,22 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
                     <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
                   </Button>
+                  {b.status === 'CONFIRMED' && b.checkIn > TODAY && (
+                    <Button variant="ghost" size="sm" onClick={() => setCancelTarget(b)}>
+                      Cancel stay
+                    </Button>
+                  )}
                 </div>
+              )}
+              {b.status === 'CANCELLED' && b.cancelledBy && (
+                <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
+                  {b.cancelledBy === 'HOST'
+                    ? 'You cancelled this stay'
+                    : b.cancelledBy === 'GUEST'
+                      ? 'The guest cancelled this stay'
+                      : 'Support cancelled this stay'}
+                  {b.cancellationReason ? `: “${b.cancellationReason}”` : '.'}
+                </p>
               )}
             </div>
           ))}
@@ -463,6 +494,28 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           }}
         />
       )}
+      {cancelTarget && (
+        <HostCancelBookingDialog
+          booking={cancelTarget}
+          onClose={() => setCancelTarget(null)}
+          onDone={(message) => {
+            setCancelTarget(null);
+            setToast({ message, variant: 'success' });
+          }}
+        />
+      )}
+      {essentialsTarget && (
+        <ShortletEssentialsDialog
+          listing={essentialsTarget}
+          onClose={() => setEssentialsTarget(null)}
+        />
+      )}
+      {syncTarget && (
+        <ShortletCalendarSyncDialog listing={syncTarget} onClose={() => setSyncTarget(null)} />
+      )}
+      {pricingTarget && (
+        <ShortletPeakPricingDialog listing={pricingTarget} onClose={() => setPricingTarget(null)} />
+      )}
       {blockTarget && (
         <BlockDatesDialog listing={blockTarget} onClose={() => setBlockTarget(null)} />
       )}
@@ -477,6 +530,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           verificationHref={
             role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION
           }
+          trustProfileHref={role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : undefined}
         />
       )}
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
@@ -1020,6 +1074,21 @@ function EditListingDialog({
 
 // ---------- Block dates dialog ----------
 
+/** One line naming the peak-season rules in force, or null when there are none. */
+function peakSummary(l: ShortletListing): string | null {
+  const parts: string[] = [];
+  const seasons = l.seasons ?? [];
+  if (seasons.length > 0) {
+    parts.push(seasons.length === 1 ? `Season: ${seasons[0].name}` : `${seasons.length} seasons`);
+  }
+  if (l.weeklyDiscountPct) parts.push(`${l.weeklyDiscountPct}% off 7+ nights`);
+  if (l.monthlyDiscountPct) parts.push(`${l.monthlyDiscountPct}% off 28+ nights`);
+  if (l.lastMinuteDiscountPct) parts.push(`${l.lastMinuteDiscountPct}% last-minute`);
+  if (l.advanceNoticeDays) parts.push(`${l.advanceNoticeDays}d notice`);
+  if (l.prepDays) parts.push(`${l.prepDays}d prep`);
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
+
 function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [startDate, setStartDate] = useState('');
@@ -1116,16 +1185,22 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
                 >
                   <span>
                     {formatDate(b.startDate, 'short')} → {formatDate(b.endDate, 'short')}
-                    {b.reason ? ` · ${b.reason}` : ''}
+                    {b.reason && !b.importedFrom && !b.lockedByCancellation ? ` · ${b.reason}` : ''}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeBlock.mutate(b.id)}
-                    disabled={removeBlock.isPending}
-                  >
-                    Remove
-                  </Button>
+                  {b.importedFrom ? (
+                    <Badge variant="neutral">From {b.importedFrom}</Badge>
+                  ) : b.lockedByCancellation ? (
+                    <Badge variant="neutral">Closed: you cancelled a stay</Badge>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeBlock.mutate(b.id)}
+                      disabled={removeBlock.isPending}
+                    >
+                      Remove
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

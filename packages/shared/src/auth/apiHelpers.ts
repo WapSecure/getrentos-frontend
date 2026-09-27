@@ -1,4 +1,11 @@
 import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
+import {
+  clearStepUpToken,
+  currentStepUpToken,
+  isStepUpRequired,
+  obtainStepUpToken,
+  STEP_UP_HEADER,
+} from './stepUp';
 import { getAuthToken } from './authStorage';
 
 /**
@@ -17,14 +24,22 @@ export type VerificationReason = (typeof VERIFICATION_REASONS)[number];
 /**
  * Why a satisfied tier requirement was still refused. Sent as `reason`
  * alongside a TRUST_TIER_REQUIRED 403: the user DOES hold the evidence for the
- * tier, but the trust SCORE is below the floor the platform set for it.
+ * tier, but something other than missing evidence is holding it back — an open
+ * dispute against them, an unresolved review case, a failed check, a restricted
+ * account, or the trust score floor.
  *
  * Kept separate from VERIFICATION_REASONS on purpose — that list is the
  * `error` code, this is the explanation. Telling someone who is already
  * financially verified to go and get financially verified is a dead end, so
  * the UI has to be able to tell the two apart.
  */
-export const TRUST_WITHHELD_REASONS = ['SCORE_BELOW_TIER3_MIN'] as const;
+export const TRUST_WITHHELD_REASONS = [
+  'SCORE_BELOW_TIER3_MIN',
+  'OPEN_DISPUTE_AS_SUBJECT',
+  'OPEN_REVIEW_CASE',
+  'FAILED_FINANCIAL_CHECK',
+  'ACCOUNT_RESTRICTED',
+] as const;
 export type TrustWithheldReason = (typeof TRUST_WITHHELD_REASONS)[number];
 
 /**
@@ -212,11 +227,12 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
 
 /** Fetches with the Bearer token attached, silently refreshing on 401 once. */
 export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const doFetch = (token: string | null) =>
+  const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) =>
     apiFetch<T>(path, {
       ...options,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
         ...options.headers,
       },
     });
@@ -224,6 +240,12 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
   try {
     return await doFetch(getAuthToken());
   } catch (err) {
+    // A sensitive change: confirm it's the account holder, then replay once.
+    if (isStepUpRequired(err)) {
+      clearStepUpToken();
+      const stepUp = await obtainStepUpToken();
+      if (stepUp) return doFetch(getAuthToken(), stepUp);
+    }
     // The access token expired — exchange the refresh token for a fresh pair
     // and retry the request once. Single-flight refresh prevents the rotation
     // race when many requests 401 at the same moment.

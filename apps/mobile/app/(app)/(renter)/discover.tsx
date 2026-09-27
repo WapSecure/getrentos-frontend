@@ -14,11 +14,12 @@ import {
   X,
 } from 'lucide-react-native';
 import {
+  Button,
   Chip,
   EmptyState,
   ErrorState,
+  IconButton,
   PropertyCard,
-  SegmentedControl,
   Skeleton,
   Text,
   TextField,
@@ -135,68 +136,70 @@ export default function Discover() {
           gap: spacing.sm,
         }}
       >
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Text variant="title">Discover</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-            <Pressable
-              onPress={() => router.push('/(app)/saved-searches')}
-              accessibilityRole="button"
-              accessibilityLabel="Saved searches"
-              hitSlop={10}
-              style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
-            >
-              <BookmarkPlus size={19} color={colors.foreground} />
-            </Pressable>
-            <Pressable
-              onPress={() => router.push('/(app)/saved')}
-              accessibilityRole="button"
-              accessibilityLabel="Saved homes"
-              hitSlop={10}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: savedIds.size ? colors.accent : 'transparent',
-              }}
-            >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Text variant="title" accessibilityRole="header" style={{ flex: 1 }}>
+            Discover
+          </Text>
+          <IconButton
+            onPress={() => {
+              const next = viewMode === 'list' ? 'map' : 'list';
+              setViewMode(next);
+              track('discover_view_mode_changed', { mode: next });
+            }}
+            accessibilityLabel={viewMode === 'list' ? 'Show map' : 'Show list'}
+            icon={
+              viewMode === 'list' ? (
+                <MapIcon size={19} color={colors.foreground} />
+              ) : (
+                <List size={19} color={colors.foreground} />
+              )
+            }
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/saved-searches')}
+            accessibilityLabel="Saved searches"
+            icon={<BookmarkPlus size={19} color={colors.foreground} />}
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/saved')}
+            accessibilityLabel={`Saved homes${savedIds.size ? `, ${savedIds.size} saved` : ''}`}
+            selected={savedIds.size > 0}
+            icon={
               <Heart
                 size={19}
                 color={savedIds.size ? colors.primary : colors.foreground}
                 fill={savedIds.size ? colors.primary : 'transparent'}
               />
-            </Pressable>
-          </View>
+            }
+          />
         </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
             <TextField
               placeholder="Search city, area or title"
+              accessibilityLabel="Search homes"
               leftIcon={<Search size={18} color={colors.mutedForeground} />}
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="search"
               value={searchText}
               onChangeText={setSearchText}
+              rightAccessory={
+                searchText ? (
+                  <Pressable
+                    onPress={() => setSearchText('')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear search"
+                    hitSlop={12}
+                  >
+                    <X size={18} color={colors.mutedForeground} />
+                  </Pressable>
+                ) : null
+              }
             />
           </View>
           <FilterButton count={chips.length} onPress={() => setSheetOpen(true)} />
         </View>
-
-        <SegmentedControl
-          options={[
-            { value: 'list', label: 'List', icon: <List size={14} color={colors.foreground} /> },
-            { value: 'map', label: 'Map', icon: <MapIcon size={14} color={colors.foreground} /> },
-          ]}
-          value={viewMode}
-          onChange={(v) => {
-            setViewMode(v);
-            track('discover_view_mode_changed', { mode: v });
-          }}
-        />
 
         <ScrollView
           horizontal
@@ -228,10 +231,14 @@ export default function Discover() {
               <Pressable
                 key={c.key}
                 onPress={c.clear}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove filter: ${c.label}`}
+                hitSlop={6}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: 5,
+                  minHeight: 32,
                   paddingVertical: 6,
                   paddingHorizontal: 11,
                   borderRadius: 999,
@@ -249,6 +256,9 @@ export default function Discover() {
             ))}
             <Pressable
               onPress={() => setSaveSearchOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Save this search"
+              hitSlop={6}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -304,6 +314,18 @@ export default function Discover() {
           icon={<Search size={34} color={colors.mutedForeground} />}
           title="No listings match"
           description="Try widening your price range or clearing a filter."
+          action={
+            chips.length > 0 || searchText ? (
+              <Button
+                label="Clear search and filters"
+                variant="outline"
+                onPress={() => {
+                  setSearchText('');
+                  setFilters({});
+                }}
+              />
+            ) : undefined
+          }
         />
       ) : (
         <FlashList
@@ -312,6 +334,8 @@ export default function Discover() {
           renderItem={renderItem}
           onEndReached={onEndReached}
           onEndReachedThreshold={0.6}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <Text
               variant="caption"
@@ -328,7 +352,10 @@ export default function Discover() {
           ListFooterComponent={
             query.isFetchingNextPage ? (
               <View style={{ paddingVertical: spacing.xl }}>
-                <ActivityIndicator color={colors.mutedForeground} />
+                <ActivityIndicator
+                  color={colors.mutedForeground}
+                  accessibilityLabel="Loading more homes"
+                />
               </View>
             ) : (
               <View style={{ height: spacing['3xl'] }} />
@@ -368,10 +395,10 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel="Filters"
+      accessibilityLabel={count ? `Filters, ${count} active` : 'Filters'}
       style={{
-        width: 46,
-        height: 46,
+        width: 48,
+        height: 48,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: count ? colors.primary : colors.border,
@@ -383,6 +410,7 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
       <SlidersHorizontal size={18} color={count ? colors.primary : colors.foreground} />
       {count ? (
         <View
+          importantForAccessibility="no-hide-descendants"
           style={{
             position: 'absolute',
             top: -5,
@@ -398,6 +426,7 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
         >
           <Text
             variant="caption"
+            maxFontSizeMultiplier={1.4}
             style={{ fontSize: 10, fontWeight: '800', color: colors.primaryForeground }}
           >
             {count}
@@ -439,8 +468,8 @@ function useActiveFilterChips(
       });
 
     if (filters.minPrice || filters.maxPrice) {
-      const lo = filters.minPrice ? `₦${(filters.minPrice / 1000).toFixed(0)}k` : '₦0';
-      const hi = filters.maxPrice ? `₦${(filters.maxPrice / 1000).toFixed(0)}k` : 'Any';
+      const lo = filters.minPrice ? formatNaira(filters.minPrice, { compact: true }) : '₦0';
+      const hi = filters.maxPrice ? formatNaira(filters.maxPrice, { compact: true }) : 'Any';
       out.push({ key: 'price', label: `${lo}–${hi}`, clear: () => drop(['minPrice', 'maxPrice']) });
     }
     if (filters.bedrooms)

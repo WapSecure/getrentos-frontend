@@ -562,7 +562,7 @@ export type DocumentCategory = (typeof DOCUMENT_CATEGORIES)[number];
 export const DOCUMENT_CATEGORY_LABEL: Record<DocumentCategory, string> = {
   lease_agreements: 'Lease agreements',
   ownership_docs: 'Ownership docs',
-  escrow_contracts: 'Escrow contracts',
+  escrow_contracts: 'Payment protection contracts',
   inspection_reports: 'Inspection reports',
 };
 

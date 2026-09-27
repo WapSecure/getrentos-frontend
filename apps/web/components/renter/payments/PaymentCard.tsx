@@ -151,7 +151,7 @@ export const PaymentCard = ({
             {payment.status === 'paid' && (
               <div className="flex items-center gap-1">
                 <Shield className="w-3 h-3" />
-                <span>Escrow: {escrowLabel(payment.escrowStatus)}</span>
+                <span>Your money: {escrowLabel(payment.escrowStatus)}</span>
               </div>
             )}
           </div>

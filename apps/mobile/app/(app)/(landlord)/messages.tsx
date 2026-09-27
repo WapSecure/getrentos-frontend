@@ -16,6 +16,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordConversation } from '@/lib/api/landlord';
 import { relativeTime } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function LandlordMessages() {
   const { colors, spacing } = useTheme();
@@ -39,7 +40,11 @@ export default function LandlordMessages() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Text variant="title">Messages</Text>
+        <DashboardHeader
+          eyebrow="Landlord workspace"
+          title="Messages"
+          subtitle="Tenants, applicants and agent conversations"
+        />
       </View>
 
       {query.isError ? (

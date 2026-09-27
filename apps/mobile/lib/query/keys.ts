@@ -6,6 +6,22 @@ export const qk = {
   auth: {
     me: ['auth', 'me'] as const,
   },
+  security: ['me', 'security'] as const,
+  representatives: {
+    list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
+    assignable: (kind: 'realtor' | 'agent', id: string, search: string) =>
+      ['representatives', kind, id, 'assignable', search] as const,
+  },
+  authority: {
+    managed: ['property-authorities', 'managed'] as const,
+    mine: ['property-authorities', 'mine'] as const,
+  },
+  estateAgreements: ['estate-agreements', 'mine'] as const,
+  billing: {
+    mine: ['billing'] as const,
+    pricing: ['me', 'subscription', 'pricing'] as const,
+    invoices: ['billing', 'invoices'] as const,
+  },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
@@ -16,12 +32,13 @@ export const qk = {
       ['renter', 'notifications', { page, pageSize }] as const,
     recommended: ['renter', 'recommended'] as const,
     conversations: ['renter', 'conversations'] as const,
+    /** One thread. Lives under `conversations` so invalidating the inbox refreshes it too. */
+    conversation: (id: string) => ['renter', 'conversations', 'one', id] as const,
     viewings: ['renter', 'viewings'] as const,
     pendingLease: ['renter', 'lease', 'pending'] as const,
     renewalOffer: ['renter', 'lease', 'renewal-offer'] as const,
     receipts: ['renter', 'payments', 'receipts'] as const,
     profile: ['renter', 'profile'] as const,
-    twoFactorStatus: ['renter', 'settings', '2fa'] as const,
     notificationPreferences: ['renter', 'notifications', 'preferences'] as const,
     trustScore: ['renter', 'trust-score'] as const,
     wishlists: ['renter', 'wishlists'] as const,
@@ -70,6 +87,13 @@ export const qk = {
     geoInsights: (id: string, destination?: string) =>
       ['listings', 'geo-insights', id, destination ?? null] as const,
   },
+  /** The signed-out marketplace — public data only, safe to persist. */
+  market: {
+    list: (kind: string, filters: Record<string, unknown>) =>
+      ['market', 'list', kind, filters] as const,
+    detail: (kind: string, id: string) => ['market', 'detail', kind, id] as const,
+    estates: (search?: string) => ['market', 'estates', search ?? null] as const,
+  },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,
     profile: ['agent', 'profile'] as const,
@@ -108,6 +132,34 @@ export const qk = {
     bookings: (page = 1, pageSize = 20) => ['shortlets', 'bookings', { page, pageSize }] as const,
     wishlist: ['shortlets', 'wishlist'] as const,
     wishlistIds: ['shortlets', 'wishlist', 'ids'] as const,
+  },
+  owner: {
+    dashboard: ['owner', 'dashboard'] as const,
+    properties: ['owner', 'properties'] as const,
+    property: (id: string) => ['owner', 'properties', id] as const,
+    listings: ['owner', 'listings'] as const,
+    offers: ['owner', 'offers'] as const,
+    offerThread: (id: string) => ['owner', 'offers', id, 'thread'] as const,
+    transactions: ['owner', 'transactions'] as const,
+    leads: ['owner', 'leads'] as const,
+    documents: ['owner', 'documents'] as const,
+    reviews: ['owner', 'reviews'] as const,
+    ratingSummary: ['owner', 'reviews', 'summary'] as const,
+    metrics: ['owner', 'metrics'] as const,
+    trustProfile: ['owner', 'trust-profile'] as const,
+    land: ['owner', 'land'] as const,
+    portfolioTrend: ['owner', 'analytics', 'portfolio-trend'] as const,
+    marketInsights: (city: string) => ['owner', 'analytics', 'market-insights', city] as const,
+    profile: ['owner', 'profile'] as const,
+    notifications: ['owner', 'notifications'] as const,
+    notificationPreferences: ['owner', 'settings', 'notifications'] as const,
+    preferences: ['owner', 'preferences'] as const,
+    conversations: ['owner', 'conversations'] as const,
+    messages: (id: string) => ['owner', 'conversations', id, 'messages'] as const,
+  },
+  seller: {
+    payoutAccount: ['seller', 'payout-account'] as const,
+    payouts: ['seller', 'payouts'] as const,
   },
   buyer: {
     dashboard: ['buyer', 'dashboard'] as const,

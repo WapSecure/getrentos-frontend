@@ -92,9 +92,14 @@ export function Chip({
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
+      accessibilityLabel={typeof count === 'number' && count > 0 ? `${label}, ${count}` : label}
       accessibilityState={{ selected, disabled }}
       hitSlop={6}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      style={({ pressed }) => ({
+        minHeight: 44,
+        justifyContent: 'center',
+        opacity: pressed ? 0.7 : 1,
+      })}
     >
       {body}
     </Pressable>

@@ -3,8 +3,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Lock, Sparkles, Wallet } from 'lucide-react-native';
+import { Lock, Sparkles, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -30,6 +29,7 @@ import {
 } from '@/lib/api/financing';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const PLAN_LENGTHS: FinancingPlanLength[] = [3, 6, 12];
 const INSTALLMENT_STATUS_TONE: Record<
@@ -45,32 +45,16 @@ const INSTALLMENT_STATUS_TONE: Record<
 
 export default function Financing() {
   const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({ queryKey: qk.renter.financing, queryFn: financingApi.getOverview });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">GetRentos Flex</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Flexible rent"
+        title="GetRentos Flex"
+        subtitle="Eligibility, plans and installments"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

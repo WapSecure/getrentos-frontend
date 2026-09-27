@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -10,9 +11,11 @@ import {
   View,
   type TextInput,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { VerificationGateNotice } from '@/components/VerificationGateNotice';
+import { readGate } from '@/lib/verificationGate';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   FadeIn,
@@ -41,6 +44,7 @@ import {
   Text,
   TextField,
   toISODate,
+  useReducedMotion,
   useTheme,
 } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -137,6 +141,7 @@ function validateStep(step: number, data: FormState): FieldErrors {
 export default function ApplyToRent() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const qc = useQueryClient();
@@ -258,6 +263,27 @@ export default function ApplyToRent() {
     onError: () => haptics.error(),
   });
 
+  // Leaving mid-application (swipe back, Android back, header back on step 1)
+  // would silently throw away everything typed — ask first.
+  const navigation = useNavigation();
+  const dirty = step > 0 || !!data.currentAddress || !!data.employer || !!data.monthlyIncome;
+  useEffect(
+    () =>
+      navigation.addListener('beforeRemove', (e) => {
+        if (!dirty || submitted || submitMutation.isPending) return;
+        e.preventDefault();
+        Alert.alert('Discard your application?', 'What you have filled in so far will be lost.', [
+          { text: 'Keep editing', style: 'cancel' },
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ]);
+      }),
+    [navigation, dirty, submitted, submitMutation.isPending]
+  );
+
   const stepErrors = useMemo(() => validateStep(step, data), [step, data]);
   const canAdvance = Object.keys(stepErrors).length === 0;
 
@@ -295,7 +321,8 @@ export default function ApplyToRent() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: colors.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      // Android runs edge-to-edge, so the window no longer resizes for the keyboard.
+      behavior={Platform.OS === 'web' ? undefined : 'padding'}
     >
       <View
         style={{
@@ -319,6 +346,9 @@ export default function ApplyToRent() {
           <Image
             source={{ uri: property.image }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={property.id}
+            accessible={false}
             style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: colors.secondary }}
           />
         ) : null}
@@ -353,8 +383,14 @@ export default function ApplyToRent() {
       >
         <Animated.View
           key={step}
-          entering={(direction === 1 ? SlideInRight : SlideInLeft).duration(240)}
-          exiting={(direction === 1 ? SlideOutLeft : SlideOutRight).duration(180)}
+          entering={
+            reduceMotion ? undefined : (direction === 1 ? SlideInRight : SlideInLeft).duration(240)
+          }
+          exiting={
+            reduceMotion
+              ? undefined
+              : (direction === 1 ? SlideOutLeft : SlideOutRight).duration(180)
+          }
           style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}
         >
           <View style={{ gap: 3 }}>
@@ -915,12 +951,8 @@ function ReviewStep({
                 ? error.message
                 : 'Could not submit your application. Please try again.'}
             </Text>
-            {error instanceof ApiError && error.code === 'IDENTITY_REQUIRED' ? (
-              <Pressable onPress={() => router.push('/(app)/verify-identity')} hitSlop={6}>
-                <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                  Verify identity
-                </Text>
-              </Pressable>
+            {readGate(error) ? (
+              <VerificationGateNotice error={error} scoreHref="/(app)/trust-score" />
             ) : null}
           </View>
         </View>
@@ -971,11 +1003,15 @@ function ReviewSection({
           marginBottom: spacing.sm,
         }}
       >
-        <Text variant="bodyStrong">{title}</Text>
+        <Text variant="bodyStrong" accessibilityRole="header">
+          {title}
+        </Text>
         <Pressable
           onPress={onEdit}
-          hitSlop={8}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+          accessibilityRole="button"
+          accessibilityLabel={`Edit ${title}`}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 32 }}
         >
           <Pencil size={12} color={colors.primary} />
           <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
@@ -1017,6 +1053,7 @@ function SuccessView({
   onKeepBrowsing: () => void;
 }) {
   const { colors, spacing } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -1032,7 +1069,7 @@ function SuccessView({
       }}
     >
       <Animated.View
-        entering={FadeIn.duration(420)}
+        entering={reduceMotion ? undefined : FadeIn.duration(420)}
         style={{
           width: 64,
           height: 64,
@@ -1045,7 +1082,7 @@ function SuccessView({
         <CheckCircle2 size={30} color={colors.success} />
       </Animated.View>
       <Animated.View
-        entering={FadeIn.duration(420).delay(120)}
+        entering={reduceMotion ? undefined : FadeIn.duration(420).delay(120)}
         style={{ alignItems: 'center', gap: spacing.md }}
       >
         <Text variant="heading" center>
@@ -1058,7 +1095,7 @@ function SuccessView({
         </Text>
       </Animated.View>
       <Animated.View
-        entering={FadeIn.duration(420).delay(220)}
+        entering={reduceMotion ? undefined : FadeIn.duration(420).delay(220)}
         style={{ width: '100%', gap: spacing.sm, marginTop: spacing.lg }}
       >
         <Button label="View my application" onPress={onViewApplication} />

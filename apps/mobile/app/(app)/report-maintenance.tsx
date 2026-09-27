@@ -79,11 +79,13 @@ export default function ReportMaintenance() {
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Back"
-          hitSlop={10}
+          style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
         >
           <ChevronLeft size={24} color={colors.foreground} />
         </Pressable>
-        <Text variant="title">Report an issue</Text>
+        <Text variant="title" accessibilityRole="header">
+          Report an issue
+        </Text>
       </View>
 
       <ScrollView
@@ -183,6 +185,9 @@ export default function ReportMaintenance() {
                 />
                 <Pressable
                   onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove photo ${i + 1}`}
+                  hitSlop={11}
                   style={{
                     position: 'absolute',
                     top: -6,
@@ -202,6 +207,8 @@ export default function ReportMaintenance() {
             {photos.length < MAX_PHOTOS ? (
               <Pressable
                 onPress={addPhoto}
+                accessibilityRole="button"
+                accessibilityLabel={`Add a photo, ${photos.length} of ${MAX_PHOTOS} added`}
                 style={{
                   width: 76,
                   height: 76,

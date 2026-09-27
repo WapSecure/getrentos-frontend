@@ -33,6 +33,22 @@ export function getStoredUser<T>() {
 }
 
 /**
+ * Merges fields into the saved user in whichever storage holds it, e.g. new
+ * roles after the account gains a workspace. No-op when nobody is signed in.
+ */
+export function updateStoredUser(patch: Record<string, unknown>) {
+  for (const storage of storages()) {
+    const raw = storage.getItem(STORAGE_KEYS.USER);
+    if (!raw) continue;
+    try {
+      storage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...JSON.parse(raw), ...patch }));
+    } catch {
+      // Unreadable entry: leave it for the next sign-in to replace.
+    }
+  }
+}
+
+/**
  * Persists a login across browser restarts only when the user opts in.
  * NOTE: the refresh token is NOT stored here — it lives in an httpOnly cookie
  * (set by the backend) so it is invisible to JavaScript and immune to XSS.

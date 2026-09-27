@@ -21,6 +21,7 @@ import {
   type AgentClientStatus,
 } from '@/lib/api/agentClients';
 import { InviteClientSheet } from '@/components/agent/InviteClientSheet';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const STATUS_TONE: Record<AgentClientStatus, 'success' | 'warning' | 'danger'> = {
   ACTIVE: 'success',
@@ -51,9 +52,12 @@ export default function AgentClients() {
           paddingBottom: spacing.md,
         }}
       >
-        <Text variant="title" style={{ flex: 1 }}>
-          Clients
-        </Text>
+        <DashboardHeader
+          eyebrow="Field operations"
+          title="Clients"
+          subtitle="Authorized property relationships"
+          style={{ flex: 1 }}
+        />
         <Pressable
           onPress={() => setInviteOpen(true)}
           accessibilityRole="button"

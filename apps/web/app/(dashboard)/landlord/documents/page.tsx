@@ -21,7 +21,7 @@ type DocumentCategory =
 const categoryLabels: Record<DocumentCategory, string> = {
   lease_agreements: 'Lease Agreements',
   ownership_docs: 'Ownership Documents',
-  escrow_contracts: 'Escrow Contracts',
+  escrow_contracts: 'Payment protection contracts',
   inspection_reports: 'Inspection Reports',
 };
 
@@ -29,7 +29,7 @@ const categoryFilters: { value: 'all' | DocumentCategory; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'lease_agreements', label: 'Leases' },
   { value: 'ownership_docs', label: 'Ownership' },
-  { value: 'escrow_contracts', label: 'Escrow' },
+  { value: 'escrow_contracts', label: 'Payment protection' },
   { value: 'inspection_reports', label: 'Inspections' },
 ];
 

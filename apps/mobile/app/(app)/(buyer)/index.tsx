@@ -4,16 +4,29 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ChevronRight,
   FileSignature,
+  FileText,
   Heart,
   Home as HomeIcon,
   ShoppingBag,
   Wallet,
 } from 'lucide-react-native';
-import { Card, Price, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  Price,
+  Screen,
+  SectionHeader,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName } from '@/lib/format';
+import { firstName, relativeTime } from '@/lib/format';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -49,63 +62,49 @@ export default function BuyerHome() {
           onPress: () => router.push('/(app)/buyer-viewings'),
         },
         { label: 'Purchases', value: dashboard.data.completedPurchases, Icon: ShoppingBag },
+        {
+          label: 'Documents',
+          value: dashboard.data.documentsUploaded,
+          Icon: FileText,
+          onPress: () => router.push('/(app)/buyer-documents'),
+        },
       ]
     : [];
 
+  if (dashboard.isError) {
+    return (
+      <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
+        <DashboardHeader
+          eyebrow={greeting()}
+          title={firstName(profile?.legalName)}
+          subtitle="Your property journey, at a glance"
+        />
+        <ErrorState
+          title="We couldn't load your dashboard"
+          description="Check your connection and try again. Your saved homes and offers are safe."
+          onRetry={() => dashboard.refetch()}
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-      <View style={{ gap: spacing.xxs }}>
-        <Text variant="label" color="primary" uppercase>
-          {greeting()}
-        </Text>
-        <Text variant="title">{firstName(profile?.legalName)}</Text>
-      </View>
+      <DashboardHeader
+        eyebrow={greeting()}
+        title={firstName(profile?.legalName)}
+        subtitle="Your property journey, at a glance"
+      />
 
-      <Card elevated padding="none">
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {dashboard.isPending
-            ? [0, 1, 2, 3].map((i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: '50%',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingVertical: spacing.lg,
-                  }}
-                >
-                  <Skeleton height={22} width={22} />
-                </View>
-              ))
-            : metrics.map(({ label, value, Icon, onPress }, i) => (
-                <Pressable
-                  key={label}
-                  onPress={onPress}
-                  disabled={!onPress}
-                  style={{
-                    width: '50%',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingVertical: spacing.lg,
-                    borderLeftWidth: i % 2 === 1 ? 1 : 0,
-                    borderTopWidth: i >= 2 ? 1 : 0,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <Icon size={17} color={colors.mutedForeground} />
-                  <Text variant="title" style={{ fontSize: 20, lineHeight: 24 }}>
-                    {value}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {label}
-                  </Text>
-                </Pressable>
-              ))}
-        </View>
-      </Card>
+      <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
       {dashboard.data?.activeTransactions ? (
-        <Pressable onPress={() => router.push('/(app)/buyer-transactions')}>
+        <Pressable
+          onPress={() => router.push('/(app)/buyer-transactions')}
+          accessibilityRole="button"
+          accessibilityLabel={`${dashboard.data.activeTransactions} active ${dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}`}
+          accessibilityHint="Opens your purchase payment progress"
+        >
           <Card
             elevated
             style={{
@@ -122,7 +121,7 @@ export default function BuyerHome() {
                 {dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}
               </Text>
               <Text variant="caption" color="mutedForeground">
-                Track your escrow progress
+                Track your purchase payment
               </Text>
             </View>
             <ChevronRight size={18} color={colors.primary} />
@@ -131,32 +130,30 @@ export default function BuyerHome() {
       ) : null}
 
       <View style={{ gap: spacing.md }}>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Text variant="heading">Recommended for you</Text>
-          <Pressable
-            onPress={() => router.push('/(app)/(buyer)/discover')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
-          >
-            <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-              See all
-            </Text>
-            <ChevronRight size={15} color={colors.primary} />
-          </Pressable>
-        </View>
+        <SectionHeader
+          title="Recommended for you"
+          description="Verified opportunities matched to your activity"
+          actionLabel="See all"
+          onAction={() => router.push('/(app)/(buyer)/discover')}
+        />
 
         {dashboard.isPending ? (
           <Skeleton height={140} radius={16} />
         ) : !dashboard.data?.recommendations?.length ? (
-          <Card elevated>
-            <Text variant="callout" color="mutedForeground">
-              No recommendations yet — start browsing to help us learn what you like.
-            </Text>
-          </Card>
+          <EmptyState
+            icon={<HomeIcon size={30} color={colors.mutedForeground} />}
+            title="Your recommendations are warming up"
+            description="Browse and save a few properties so we can tailor this space to you."
+          />
         ) : (
           dashboard.data.recommendations.map((r) => (
-            <Pressable key={r.id} onPress={() => router.push(`/(app)/buyer-listing/${r.id}`)}>
+            <Pressable
+              key={r.id}
+              onPress={() => router.push(`/(app)/buyer-listing/${r.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${r.title}, ${r.city}, ${Math.round(r.price).toLocaleString('en-NG')} naira`}
+              accessibilityHint="Opens property details"
+            >
               <Card elevated>
                 <View
                   style={{
@@ -180,6 +177,48 @@ export default function BuyerHome() {
           ))
         )}
       </View>
+
+      {dashboard.data?.recentActivity?.length ? (
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader
+            title="Recent activity"
+            description="Offers, viewings and payment updates"
+          />
+          <Card elevated padding="none">
+            {dashboard.data.recentActivity.slice(0, 6).map((a, i) => (
+              <View
+                key={a.id}
+                accessible
+                accessibilityLabel={`${a.message}, ${relativeTime(a.timestamp)}`}
+                style={{
+                  flexDirection: 'row',
+                  gap: spacing.md,
+                  paddingHorizontal: spacing.lg,
+                  paddingVertical: spacing.md,
+                  borderTopWidth: i ? 1 : 0,
+                  borderTopColor: colors.border,
+                }}
+              >
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    marginTop: 6,
+                    backgroundColor: colors.primary,
+                  }}
+                />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="callout">{a.message}</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {relativeTime(a.timestamp)}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </Card>
+        </View>
+      ) : null}
     </Screen>
   );
 }

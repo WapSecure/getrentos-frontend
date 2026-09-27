@@ -1,10 +1,20 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Megaphone } from 'lucide-react-native';
-import { Badge, Card, EmptyState, Screen, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  ErrorState,
+  Screen,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { relativeTime } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function ResidentAnnouncements() {
   const { colors, spacing } = useTheme();
@@ -15,9 +25,15 @@ export default function ResidentAnnouncements() {
 
   return (
     <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-      <Text variant="title">Announcements</Text>
+      <DashboardHeader
+        eyebrow="Your community"
+        title="Announcements"
+        subtitle="Official updates from your estate team"
+      />
 
-      {query.isLoading ? (
+      {query.isError ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : query.isLoading ? (
         <View style={{ gap: spacing.md }}>
           <Skeleton height={84} radius={16} />
           <Skeleton height={84} radius={16} />

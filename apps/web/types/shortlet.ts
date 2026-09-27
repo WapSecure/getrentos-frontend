@@ -1,4 +1,33 @@
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
+export type ShortletDiscountType = 'WEEKLY' | 'MONTHLY' | 'LAST_MINUTE';
+
+/** A date range with its own nightly rate and/or minimum stay; start/end are the first and last night. */
+export interface ShortletSeason {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  nightlyRate?: number;
+  minNights?: number;
+}
+
+export interface ShortletSeasonInput {
+  name: string;
+  startDate: string;
+  endDate: string;
+  nightlyRate?: number | null;
+  minNights?: number | null;
+}
+
+/** The peak-season rules a host sets on a listing. */
+export interface ShortletPricingRules {
+  weeklyDiscountPct?: number;
+  monthlyDiscountPct?: number;
+  lastMinuteDiscountPct?: number;
+  lastMinuteDays?: number;
+  advanceNoticeDays?: number;
+  prepDays?: number;
+}
 export type ShortletCancellationPolicy = 'FLEXIBLE' | 'MODERATE' | 'STRICT';
 export type ShortletBookingStatus =
   | 'REQUESTED'
@@ -32,6 +61,30 @@ export interface ShortletListing {
   minNights: number;
   maxNights?: number;
   weekendUpliftPct?: number;
+  weeklyDiscountPct: number;
+  monthlyDiscountPct: number;
+  lastMinuteDiscountPct: number;
+  lastMinuteDays: number;
+  advanceNoticeDays: number;
+  prepDays: number;
+  /** Current and upcoming seasons. */
+  seasons: ShortletSeason[];
+  /** Confirmed stays the host cancelled on this listing in the last 12 months (detail view). */
+  hostCancellations12m?: number;
+  /** Newest inspection by an independent, licensed agent; absent when none qualifies. */
+  inspection?: ShortletInspectionBadge;
+  houseRules?: string;
+  /** Unset = the host hasn't said. */
+  petsAllowed?: boolean;
+  smokingAllowed?: boolean;
+  partiesAllowed?: boolean;
+  powerSources?: string[];
+  powerHoursPerDay?: number;
+  waterSupply?: string;
+  internetType?: string;
+  internetSpeedMbps?: number;
+  /** Host view only. */
+  checkInInstructions?: string;
   currency: string;
   instantBooking: boolean;
   maxGuests: number;
@@ -64,9 +117,22 @@ export interface ShortletBooking {
   nights: number;
   nightlyRate?: number;
   cleaningFee?: number;
+  /** Nights after any discount. */
   subtotal: number;
+  discountType?: ShortletDiscountType;
+  discountAmount?: number;
   total: number;
   status: ShortletBookingStatus;
+  /** Who cancelled, when the booking is CANCELLED and it is known. */
+  cancelledBy?: 'GUEST' | 'HOST' | 'ADMIN';
+  /** The host's reason, when the host cancelled. */
+  cancellationReason?: string;
+  /** How to get in; only on a confirmed, paid stay. */
+  checkInInstructions?: string;
+  /** Guest view only. */
+  guestPromise?: GuestPromiseStatus;
+  /** Host view only: the guest at a glance. */
+  guestSummary?: GuestSummary;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
   paymentRequired?: boolean;
@@ -147,13 +213,23 @@ export interface ShortletAvailability {
   estimatedNights?: number;
   estimatedTotal?: number;
   estimatedTax?: number;
+  /** Nights before any discount. */
+  estimatedBaseSubtotal?: number;
+  /** Nights after the discount. */
+  estimatedSubtotal?: number;
+  estimatedCleaningFee?: number;
+  discountType?: ShortletDiscountType;
+  discountPct?: number;
+  discountAmount?: number;
+  /** Nights priced at a season rate. */
+  seasonalNights?: number;
   taxName?: string;
   taxPct?: number;
   /** Booked/blocked nights (`YYYY-MM-DD`); only sent when no range is asked for. */
   unavailableDates?: string[];
 }
 
-export interface CreateShortletListingInput {
+export interface CreateShortletListingInput extends ShortletPricingRules {
   propertyId: string;
   unitId?: string;
   listingTitle?: string;
@@ -178,7 +254,21 @@ export interface CreateShortletListingInput {
   deposit?: number;
 }
 
-export interface UpdateShortletListingInput {
+/** House rules, power, water, internet and check-in instructions; null clears a field. */
+export interface ShortletEssentialsInput {
+  houseRules?: string | null;
+  petsAllowed?: boolean | null;
+  smokingAllowed?: boolean | null;
+  partiesAllowed?: boolean | null;
+  powerSources?: string[];
+  powerHoursPerDay?: number | null;
+  waterSupply?: string | null;
+  internetType?: string | null;
+  internetSpeedMbps?: number | null;
+  checkInInstructions?: string | null;
+}
+
+export interface UpdateShortletListingInput extends ShortletPricingRules, ShortletEssentialsInput {
   pricingMode?: ShortletPricingMode;
   nightlyRate?: number;
   cleaningFee?: number;
@@ -242,6 +332,8 @@ export interface ShortletMessage {
   text: string;
   timestamp: string;
   read: boolean;
+  /** Contact details in this message were hidden (no paid stay yet). */
+  contactMasked?: boolean;
 }
 
 export interface ShortletConversation {
@@ -273,7 +365,10 @@ export interface ShortletPayout {
   id: string;
   hostId: string;
   hostName?: string;
+  /** Sent to the bank, after any cancellation fees. */
   amount: number;
+  /** Cancellation fees taken out of this payout. */
+  penaltyDeducted?: number;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
   paidAt?: string;
@@ -297,6 +392,28 @@ export interface BlockedDateRange {
   startDate: string;
   endDate: string;
   reason?: string;
+  /** Name of the outside calendar these dates came from; the host can't remove them here. */
+  importedFrom?: string;
+  /** Closed because the host cancelled a booking on them; can't be reopened. */
+  lockedByCancellation?: boolean;
+}
+
+/** An outside calendar (Airbnb, Booking.com, ...) whose events block dates here. */
+export interface ShortletCalendarFeed {
+  id: string;
+  name: string;
+  url: string;
+  lastSyncedAt?: string;
+  lastError?: string;
+  eventCount: number;
+  /** Imported stays that overlap a GetRentos booking. */
+  conflictCount: number;
+}
+
+export interface ShortletCalendarSync {
+  /** The link other sites subscribe to. */
+  exportUrl: string;
+  feeds: ShortletCalendarFeed[];
 }
 
 export type ShortletDisputeCategory =
@@ -323,6 +440,30 @@ export interface ShortletDispute {
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
+  /** A Guest Promise report (filed within 24h of check-in). */
+  guestPromise?: boolean;
+  problemType?: GuestPromiseProblem;
+  evidenceUrls?: string[];
+  outcome?: GuestPromiseOutcome;
+  refundAmount?: number;
+}
+
+export type GuestPromiseProblem =
+  | 'NOT_AS_DESCRIBED'
+  | 'NO_ACCESS'
+  | 'UNSAFE_OR_UNCLEAN'
+  | 'MISSING_ESSENTIALS';
+export type GuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
+
+/** The Guest Promise on one of the guest's bookings. */
+export interface GuestPromiseStatus {
+  canReport: boolean;
+  opensAt: string;
+  closesAt: string;
+  reportId?: string;
+  reportStatus?: string;
+  outcome?: GuestPromiseOutcome;
+  refundAmount?: number;
 }
 
 export interface ShortletDisputeMessage {
@@ -373,4 +514,61 @@ export interface ShortletViewsAnalytics {
     uniqueViewers: number;
   }[];
   daily: { date: string; views: number }[];
+}
+
+/** What cancelling a confirmed stay would refund the guest and cost the host. */
+export interface HostCancelPreview {
+  canCancel: boolean;
+  blockedReason?: string;
+  daysBeforeCheckIn: number;
+  guestPaid: boolean;
+  /** Stay, tax and deposit, in naira. */
+  guestRefund: number;
+  feePercent: number;
+  /** Taken from the host's future payouts, in naira. */
+  fee: number;
+}
+
+export interface ShortletHostPenalty {
+  id: string;
+  bookingId: string;
+  listingTitle: string;
+  checkIn: string;
+  checkOut: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+  daysBeforeCheckIn: number;
+  percent: number;
+  amount: number;
+  settledAmount: number;
+  outstanding: number;
+  status: 'OUTSTANDING' | 'SETTLED' | 'WAIVED';
+  waiverReason?: string;
+  createdAt: string;
+}
+
+export type InspectedRoomCondition = 'excellent' | 'good' | 'fair';
+
+/** An inspection that earns the "Inspected" badge (see backend shortlet-inspection.ts). */
+export interface ShortletInspectionBadge {
+  inspectedAt: string;
+  /** First name and initial. */
+  agentName: string;
+  type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
+  rooms: { room: string; condition: InspectedRoomCondition }[];
+  /** The worst room rating. */
+  condition: InspectedRoomCondition;
+}
+
+/** What a host sees about a guest: counts across GetRentos only. */
+export interface GuestSummary {
+  identityVerified: boolean;
+  memberSince: string;
+  completedStays: number;
+  ratingAverage?: number;
+  ratingCount: number;
+  /** Stays the guest cancelled in the last 12 months. */
+  cancellations12m: number;
+  /** Deposit claims upheld against the guest. */
+  damageClaimsUpheld: number;
 }

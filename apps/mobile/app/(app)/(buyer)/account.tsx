@@ -2,12 +2,14 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
+  CalendarCheck,
   BadgeCheck,
   BedDouble,
   Bell,
   Calendar,
   ChevronRight,
   CircleHelp,
+  KeyRound,
   CreditCard,
   FileStack,
   Heart,
@@ -33,6 +35,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function BuyerAccount() {
   const { signOut } = useAuth();
@@ -67,6 +70,8 @@ export default function BuyerAccount() {
         )}
       </View>
 
+      <WorkspaceSwitcher />
+
       <Card elevated padding="none">
         <Row
           icon={<User size={18} color={colors.primary} />}
@@ -97,6 +102,13 @@ export default function BuyerAccount() {
         />
         <Divider />
         <Row
+          icon={<CalendarCheck size={18} color={colors.primary} />}
+          label="My bookings"
+          description="Upcoming and past shortlet stays"
+          onPress={() => router.push('/(app)/shortlet-bookings')}
+        />
+        <Divider />
+        <Row
           icon={<Heart size={18} color={colors.primary} />}
           label="Saved listings"
           description="Properties you're tracking"
@@ -113,7 +125,7 @@ export default function BuyerAccount() {
         <Row
           icon={<Wallet size={18} color={colors.primary} />}
           label="Transactions"
-          description="Escrow and closing progress"
+          description="Payment and closing progress"
           onPress={() => router.push('/(app)/buyer-transactions')}
         />
         <Divider />
@@ -157,8 +169,15 @@ export default function BuyerAccount() {
         <Row
           icon={<Bell size={18} color={colors.primary} />}
           label="Notifications"
-          description="Alerts for offers, escrow and viewings"
+          description="Alerts for offers, payments and viewings"
           onPress={() => router.push('/(app)/buyer-notifications')}
+        />
+        <Divider />
+        <Row
+          icon={<KeyRound size={18} color={colors.primary} />}
+          label="Security"
+          description="Password, two-factor and app lock"
+          onPress={() => router.push('/(app)/security-settings')}
         />
         <Divider />
         <Row

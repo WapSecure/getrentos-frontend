@@ -6,13 +6,20 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
-import { persister, queryClient } from '@/lib/query/client';
+import { queryClient, queryPersistenceOptions } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
 import { portalHref } from '@/lib/roles';
+import { takeListingHref } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
+import { AppLockGate } from '@/components/AppLockGate';
+import { ConnectivityBanner } from '@/components/ConnectivityBanner';
+import { Sentry } from '@/lib/monitoring';
+import { StepUpSheet } from '@/components/StepUpSheet';
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -34,7 +41,9 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     // sees onboarding flash before the welcome screen.
     if (status === 'loading' || onboardingSeen === null) return;
 
-    const root = segments[0]; // '(auth)' | '(app)' | undefined (index)
+    // '(auth)' | '(market)' | '(app)' | undefined (index). The public market is
+    // open to signed-out visitors; signed-in users fall through to their portal.
+    const root = segments[0];
     const inApp = root === '(app)';
     // Route on the portal we can OPEN, not on the user's most senior role —
     // otherwise a role with no screens yet (realtor, owner, estate) hides a
@@ -67,6 +76,12 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     if (target && lastTarget.current !== target) {
       lastTarget.current = target;
       router.replace(target as never);
+      // Signed in from a public listing: land on it, with the portal home
+      // underneath so Back goes somewhere sensible.
+      if (status === 'authenticated' && portalReady && !inApp) {
+        const listing = takeListingHref(usablePortal);
+        if (listing) router.push(listing);
+      }
     }
     if (!target) lastTarget.current = null;
   }, [status, usablePortal, segments, router, onboardingSeen]);
@@ -79,6 +94,8 @@ function Gate() {
   const { colors, scheme } = useTheme();
   const { seen: onboardingSeen } = useOnboardingSeen();
   useMagicLink();
+  usePushNotifications();
+  useOverTheAirUpdates();
   useProtectedRoute(onboardingSeen);
 
   const booting = status === 'loading' || onboardingSeen === null;
@@ -101,18 +118,22 @@ function Gate() {
       <Stack screenOptions={screenOptions}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(market)" />
         <Stack.Screen name="(app)" />
       </Stack>
+      <AppLockGate />
+      <StepUpSheet />
       <SplashReveal />
+      <ConnectivityBanner />
     </>
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={queryPersistenceOptions}>
           <ThemeProvider onPreferenceChange={persistThemePreference}>
             <HydrateThemePreference />
             <ToastProvider>
@@ -126,3 +147,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

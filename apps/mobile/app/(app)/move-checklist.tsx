@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckSquare, ChevronLeft } from 'lucide-react-native';
-import { EmptyState, ErrorState, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { CheckSquare } from 'lucide-react-native';
+import { EmptyState, ErrorState, Skeleton, useTheme, useToast } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { renterApi } from '@/lib/api/renter';
 import { ChecklistSection } from '@/components/checklist/ChecklistSection';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function MoveChecklist() {
   const { colors, spacing } = useTheme();
@@ -63,26 +64,12 @@ export default function MoveChecklist() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Move checklist</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Moving journey"
+        title="Move checklist"
+        subtitle="Stay organized before and after moving day"
+        onBack={() => router.back()}
+      />
 
       {isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

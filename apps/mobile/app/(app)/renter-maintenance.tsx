@@ -4,12 +4,13 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, Ban, ChevronLeft, Plus, Star, Wrench } from 'lucide-react-native';
+import { AlertTriangle, Ban, Plus, Star, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -25,6 +26,7 @@ import {
 } from '@/lib/api/maintenance';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function Maintenance() {
   const { colors, spacing, radius } = useTheme();
@@ -71,44 +73,19 @@ export default function Maintenance() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Maintenance
-        </Text>
-        <Pressable
-          onPress={() => router.push('/(app)/report-maintenance')}
-          accessibilityRole="button"
-          accessibilityLabel="Report an issue"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Home care"
+        title="Maintenance"
+        subtitle="Report and track repair requests"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/report-maintenance')}
+            accessibilityLabel="Report an issue"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
@@ -169,8 +146,10 @@ export default function Maintenance() {
                   {item.status === 'submitted' || item.status === 'assigned' ? (
                     <Pressable
                       onPress={() => confirmCancel(item.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Cancel request: ${item.title}`}
                       hitSlop={8}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 36 }}
                     >
                       <Ban size={13} color={colors.mutedForeground} />
                       <Text variant="caption" color="mutedForeground">
@@ -181,8 +160,10 @@ export default function Maintenance() {
                   {item.status === 'resolved' && !item.vendorRating ? (
                     <Pressable
                       onPress={() => setRatingFor(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Rate the vendor for ${item.title}`}
                       hitSlop={8}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 36 }}
                     >
                       <Star size={13} color={colors.primary} />
                       <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
@@ -201,14 +182,26 @@ export default function Maintenance() {
                 </View>
 
                 {ratingFor?.id === item.id ? (
-                  <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm }}>
+                  <View
+                    accessibilityRole="radiogroup"
+                    accessibilityLabel="Vendor rating"
+                    style={{ flexDirection: 'row', marginTop: spacing.xs }}
+                  >
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Pressable
                         key={n}
                         onPress={() => rateMutation.mutate({ id: item.id, rating: n })}
-                        hitSlop={6}
+                        disabled={rateMutation.isPending}
+                        accessibilityRole="radio"
+                        accessibilityLabel={`${n} star${n === 1 ? '' : 's'}`}
+                        style={{
+                          width: 44,
+                          height: 44,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
                       >
-                        <Star size={22} color={colors.warning} fill="transparent" />
+                        <Star size={24} color={colors.warning} fill="transparent" />
                       </Pressable>
                     ))}
                   </View>

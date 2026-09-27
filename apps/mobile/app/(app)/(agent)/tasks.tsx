@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ import {
   type AgentTaskStatus,
 } from '@/lib/api/agent';
 import { formatDate } from '@/lib/format';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function AgentTasks() {
   const { colors, spacing, radius } = useTheme();
@@ -46,9 +48,14 @@ export default function AgentTasks() {
           gap: spacing.md,
         }}
       >
-        <Text variant="title">Tasks</Text>
+        <DashboardHeader
+          eyebrow="Field operations"
+          title="Tasks"
+          subtitle="Assignments organized by status and deadline"
+        />
         <ScrollView
           horizontal
+          accessibilityLabel="Filter tasks by status"
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: spacing.xs }}
         >
@@ -84,13 +91,15 @@ export default function AgentTasks() {
           }
         />
       ) : (
-        <ScrollView
+        <FlashList
+          data={items}
+          keyExtractor={(task) => task.id}
           contentContainerStyle={{
             padding: spacing.xl,
             paddingTop: spacing.md,
-            gap: spacing.md,
             paddingBottom: insets.bottom + spacing['3xl'],
           }}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           refreshControl={
             <RefreshControl
               refreshing={query.isRefetching}
@@ -98,9 +107,12 @@ export default function AgentTasks() {
               tintColor={colors.mutedForeground}
             />
           }
-        >
-          {items.map((task: AgentTask) => (
-            <Pressable key={task.id} onPress={() => router.push(`/(app)/agent-task/${task.id}`)}>
+          renderItem={({ item: task }: { item: AgentTask }) => (
+            <Pressable
+              onPress={() => router.push(`/(app)/agent-task/${task.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${task.title}, ${AGENT_TASK_STATUS_LABEL[task.status]}, due ${formatDate(task.dueAt, 'short')}`}
+            >
               <Card elevated>
                 <View
                   style={{
@@ -128,8 +140,8 @@ export default function AgentTasks() {
                 </View>
               </Card>
             </Pressable>
-          ))}
-        </ScrollView>
+          )}
+        />
       )}
     </View>
   );

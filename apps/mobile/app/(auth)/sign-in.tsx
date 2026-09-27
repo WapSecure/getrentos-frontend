@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, View, type TextInput } from 'react-native';
+import { View, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, Sparkles, Lock, Check } from 'lucide-react-native';
+import { AtSign, Sparkles, Lock, ShieldCheck } from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
-  PressableScale,
+  Checkbox,
+  FormAlert,
+  LinkButton,
   SegmentedControl,
   Text,
   TextField,
+  useReducedMotion,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -26,6 +29,10 @@ import {
   rememberIdentifier,
 } from '@/lib/auth/rememberedIdentifier';
 import { haptics } from '@/lib/haptics';
+import { openLegal } from '@/lib/links';
+import { GoogleMark } from '@/components/auth/GoogleMark';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { AppleSignInCancelled, appleSignInAvailable } from '@/lib/auth/apple';
 import { signInSchema, type SignInValues } from '@/lib/validation';
 
 type Method = 'password' | 'magic';
@@ -35,8 +42,28 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
 export default function SignIn() {
-  const { signIn, signInWithProvider } = useAuth();
-  const { colors, spacing, radius } = useTheme();
+  const { signIn, signInWithProvider, signInWithApple } = useAuth();
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  useEffect(() => {
+    appleSignInAvailable().then(setAppleAvailable);
+  }, []);
+
+  const signInApple = async () => {
+    setFormError(null);
+    try {
+      const { requiresTwoFactor } = await signInWithApple();
+      await haptics.success();
+      if (requiresTwoFactor) router.push('/(auth)/two-factor');
+    } catch (err) {
+      if (err instanceof AppleSignInCancelled) return;
+      await haptics.error();
+      setFormError(
+        err instanceof ApiError ? err.message : 'Could not sign in with Apple. Try again.'
+      );
+    }
+  };
+  const { colors, spacing, scheme } = useTheme();
+  const reduceMotion = useReducedMotion();
   const toast = useToast();
   const passwordRef = useRef<TextInput>(null);
   const [method, setMethod] = useState<Method>('password');
@@ -137,13 +164,17 @@ export default function SignIn() {
     setOauthBusy(true);
     setFormError(null);
     try {
-      await signInWithProvider('google');
+      const { requiresTwoFactor } = await signInWithProvider('google');
       await haptics.success();
+      if (requiresTwoFactor) router.push('/(auth)/two-factor');
     } catch (err) {
       if (!(err instanceof OAuthCancelled)) {
         await haptics.error();
         setFormError(
-          err instanceof ApiError ? err.message : 'Could not sign in with Google. Try again.'
+          // Includes the API's own refusal (e.g. a suspended account), sent on the redirect.
+          err instanceof Error && err.message
+            ? err.message
+            : 'Could not sign in with Google. Try again.'
         );
       }
     } finally {
@@ -174,7 +205,7 @@ export default function SignIn() {
       kicker="Welcome back"
       title="Sign in"
       subtitle="Pick up where you left off."
-      onBack={() => router.back()}
+      onBack={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/welcome'))}
       footer={
         method === 'password' ? (
           <>
@@ -183,11 +214,10 @@ export default function SignIn() {
               <Text variant="callout" color="mutedForeground">
                 New to GetRentos?{' '}
               </Text>
-              <PressableScale haptic={false} onPress={() => router.replace('/(auth)/sign-up')}>
-                <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                  Create an account
-                </Text>
-              </PressableScale>
+              <LinkButton
+                label="Create an account"
+                onPress={() => router.replace('/(auth)/sign-up')}
+              />
             </Row>
           </>
         ) : magicSent ? (
@@ -203,6 +233,7 @@ export default function SignIn() {
     >
       <View style={{ gap: spacing.xl }}>
         <SegmentedControl<Method>
+          accessibilityLabel="Sign-in method"
           value={method}
           onChange={(m) => {
             setMethod(m);
@@ -224,23 +255,19 @@ export default function SignIn() {
         />
 
         {locked ? (
-          <View
-            style={{
-              padding: spacing.md,
-              borderRadius: radius.md,
-              backgroundColor: colors.warningSubtle,
-              borderWidth: 1,
-              borderColor: colors.warning,
-            }}
-          >
-            <Text variant="callout" style={{ color: colors.warning, fontWeight: '600' }}>
-              Account temporarily locked. Try again in {lockLabel}.
-            </Text>
-          </View>
+          <FormAlert
+            tone="warning"
+            title="Account temporarily locked"
+            message={`Too many attempts. Try again in ${lockLabel}.`}
+          />
         ) : null}
 
         {method === 'password' ? (
-          <Animated.View key="pw" entering={FadeIn.duration(180)} style={{ gap: spacing.lg }}>
+          <Animated.View
+            key="pw"
+            entering={reduceMotion ? undefined : FadeIn.duration(180)}
+            style={{ gap: spacing.lg }}
+          >
             <Controller
               control={control}
               name="identifier"
@@ -252,6 +279,7 @@ export default function SignIn() {
                   autoCapitalize="none"
                   autoCorrect={false}
                   autoComplete="username"
+                  textContentType="username"
                   keyboardType="email-address"
                   returnKeyType="next"
                   editable={!locked}
@@ -272,7 +300,8 @@ export default function SignIn() {
                   label="Password"
                   placeholder="Your password"
                   secure
-                  autoComplete="password"
+                  autoComplete="current-password"
+                  textContentType="password"
                   returnKeyType="go"
                   editable={!locked}
                   value={value}
@@ -284,54 +313,37 @@ export default function SignIn() {
               )}
             />
             <Row style={{ justifyContent: 'space-between' }}>
-              <Pressable
-                onPress={() => setRememberMe((v) => !v)}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: rememberMe }}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
-              >
-                <View
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: radius.sm - 3,
-                    borderWidth: 1.5,
-                    borderColor: rememberMe ? colors.primary : colors.border,
-                    backgroundColor: rememberMe ? colors.primary : 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {rememberMe ? (
-                    <Check size={12} color={colors.primaryForeground} strokeWidth={3} />
-                  ) : null}
-                </View>
-                <Text variant="callout" color="mutedForeground">
-                  Remember me
-                </Text>
-              </Pressable>
-              <PressableScale haptic={false} onPress={() => router.push('/(auth)/forgot-password')}>
-                <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-                  Forgot password?
-                </Text>
-              </PressableScale>
+              <Checkbox checked={rememberMe} onChange={setRememberMe} label="Remember me" />
+              <LinkButton
+                label="Forgot password?"
+                onPress={() => router.push('/(auth)/forgot-password')}
+              />
             </Row>
           </Animated.View>
         ) : (
-          <Animated.View key="magic" entering={FadeIn.duration(180)} style={{ gap: spacing.md }}>
+          <Animated.View
+            key="magic"
+            entering={reduceMotion ? undefined : FadeIn.duration(180)}
+            style={{ gap: spacing.md }}
+          >
             {magicSent ? (
-              <Text variant="body">
-                Link sent to <Text variant="bodyStrong">{magicEmail.trim()}</Text>. Open it on this
-                device to sign in.
-              </Text>
+              <FormAlert
+                tone="success"
+                title="Check your inbox"
+                message={`We sent a sign-in link to ${magicEmail.trim()}. Open it on this device.`}
+              />
             ) : (
               <TextField
                 label="Email"
                 placeholder="you@example.com"
+                hint="We’ll email you a one-tap sign-in link — no password needed."
                 leftIcon={<AtSign size={18} color={colors.mutedForeground} />}
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
                 keyboardType="email-address"
+                returnKeyType="send"
                 value={magicEmail}
                 onChangeText={setMagicEmail}
                 onSubmitEditing={sendMagic}
@@ -340,33 +352,85 @@ export default function SignIn() {
           </Animated.View>
         )}
 
-        {formError ? (
-          <Animated.View entering={FadeIn.duration(160)}>
-            <Text variant="callout" color="destructive">
-              {formError}
-            </Text>
-          </Animated.View>
-        ) : null}
+        <FormAlert message={formError} />
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <View
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+        >
           <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
           <Text variant="caption" color="mutedForeground">
-            or continue with
+            or
           </Text>
           <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
         </View>
 
+        {appleAvailable ? (
+          // Apple's own button, as their guidelines require.
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+            buttonStyle={
+              scheme === 'dark'
+                ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={14}
+            style={{ height: 50 }}
+            onPress={signInApple}
+          />
+        ) : null}
+
         <Button
           label="Continue with Google"
           variant="outline"
+          icon={<GoogleMark />}
           loading={oauthBusy}
           onPress={signInGoogle}
         />
-        <Text variant="caption" color="mutedForeground" center>
-          By continuing you agree to our Terms & Privacy Policy.
-        </Text>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <ShieldCheck size={16} color={colors.success} />
+          <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+            Encrypted sessions and optional 2-step verification keep your account yours.
+          </Text>
+        </View>
+        <LegalNote />
       </View>
     </AuthScaffold>
+  );
+}
+
+function LegalNote() {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text variant="caption" color="mutedForeground">
+        By continuing you agree to our{' '}
+      </Text>
+      <LinkButton
+        label="Terms"
+        accessibilityRole="link"
+        onPress={() => openLegal('terms')}
+        style={{ minHeight: 32 }}
+      />
+      <Text variant="caption" color="mutedForeground">
+        {' '}
+        and{' '}
+      </Text>
+      <LinkButton
+        label="Privacy Policy"
+        accessibilityRole="link"
+        onPress={() => openLegal('privacy')}
+        style={{ minHeight: 32 }}
+      />
+    </View>
   );
 }
 

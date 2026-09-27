@@ -1094,9 +1094,12 @@ export const renterService = {
     );
   },
 
-  async downloadLeasePdf(): Promise<ApiResponse<void>> {
+  /** A specific lease (e.g. one awaiting signature) or, without an id, the current one. */
+  async downloadLeasePdf(leaseId?: string): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const blob = await authDownload('/renter/lease/pdf');
+      const blob = await authDownload(
+        leaseId ? `/renter/lease/${leaseId}/pdf` : '/renter/lease/pdf'
+      );
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

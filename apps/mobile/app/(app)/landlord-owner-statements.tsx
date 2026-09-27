@@ -4,13 +4,14 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, RotateCcw, Send, Wallet, Plus } from 'lucide-react-native';
+import { RotateCcw, Send, Wallet, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
   Divider,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -22,6 +23,7 @@ import { GenerateStatementSheet } from '@/components/landlord/SmallFormSheets';
 import { landlordApi, PAYOUT_TONE, type OwnerStatement } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordOwnerStatements() {
   const { colors, spacing, radius } = useTheme();
@@ -66,36 +68,19 @@ export default function LandlordOwnerStatements() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Owner statements
-        </Text>
-        <Pressable
-          onPress={() => setCreating(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Generate a statement"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Owner reporting"
+        title="Owner statements"
+        subtitle="Payout summaries and issued reports"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setCreating(true)}
+            accessibilityLabel="Generate a statement"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

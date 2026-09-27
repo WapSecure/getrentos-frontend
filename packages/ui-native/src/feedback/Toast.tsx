@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle2, Info, XCircle, AlertTriangle } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from '../primitives/Text';
+import { useReducedMotion } from '../accessibility';
 
 export type ToastTone = 'success' | 'error' | 'info' | 'warning';
 
@@ -58,16 +59,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 function ToastView({ toast, onDismiss }: { toast: ToastState; onDismiss: () => void }) {
   const { colors, radius, shadows } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   const y = useRef(new Animated.Value(-24)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (reduceMotion) {
+      y.setValue(0);
+      opacity.setValue(1);
+      return;
+    }
     Animated.parallel([
       Animated.spring(y, { toValue: 0, useNativeDriver: true, bounciness: 6 }),
       Animated.timing(opacity, { toValue: 1, duration: 160, useNativeDriver: true }),
     ]).start();
-  }, [y, opacity]);
+  }, [y, opacity, reduceMotion]);
 
   const tone = {
     success: { color: colors.success, Icon: CheckCircle2 },
@@ -84,6 +91,8 @@ function ToastView({ toast, onDismiss }: { toast: ToastState; onDismiss: () => v
       <Pressable
         onPress={onDismiss}
         accessibilityRole="alert"
+        accessibilityLabel={`${toast.tone}: ${toast.message}. Double tap to dismiss.`}
+        accessibilityLiveRegion="polite"
         style={[
           styles.toast,
           shadows.md,

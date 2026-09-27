@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer } from 'react';
 import { PanResponder, View, type GestureResponderEvent } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Eraser } from 'lucide-react-native';
@@ -11,6 +11,36 @@ export interface SignaturePadProps {
   onChange: (dataUri: string | null) => void;
 }
 
+interface SignatureState {
+  strokes: string[];
+  currentPath: string;
+}
+
+type SignatureAction =
+  | { type: 'start'; x: number; y: number }
+  | { type: 'move'; x: number; y: number }
+  | { type: 'commit' }
+  | { type: 'clear' };
+
+function signatureReducer(state: SignatureState, action: SignatureAction): SignatureState {
+  switch (action.type) {
+    case 'start':
+      return { ...state, currentPath: `M ${action.x.toFixed(1)} ${action.y.toFixed(1)}` };
+    case 'move':
+      if (!state.currentPath) return state;
+      return {
+        ...state,
+        currentPath: `${state.currentPath} L ${action.x.toFixed(1)} ${action.y.toFixed(1)}`,
+      };
+    case 'commit':
+      return state.currentPath
+        ? { strokes: [...state.strokes, state.currentPath], currentPath: '' }
+        : state;
+    case 'clear':
+      return { strokes: [], currentPath: '' };
+  }
+}
+
 /**
  * Touch-drawn signature capture, built on `react-native-svg` (already a
  * dependency) + core RN `PanResponder` rather than a native gesture library
@@ -21,9 +51,10 @@ export interface SignaturePadProps {
  */
 export function SignaturePad({ width = 320, height = 160, onChange }: SignaturePadProps) {
   const { colors, spacing, radius } = useTheme();
-  const [strokes, setStrokes] = useState<string[]>([]);
-  const currentPath = useRef('');
-  const [, forceRender] = useState(0);
+  const [{ strokes, currentPath }, dispatch] = useReducer(signatureReducer, {
+    strokes: [],
+    currentPath: '',
+  });
 
   // Side effect (calling the parent's onChange, which is its own setState)
   // belongs here, not inside setStrokes's updater — calling one component's
@@ -50,31 +81,21 @@ export function SignaturePad({ width = 320, height = 160, onChange }: SignatureP
         onMoveShouldSetPanResponder: () => true,
         onPanResponderGrant: (e: GestureResponderEvent) => {
           const { locationX, locationY } = e.nativeEvent;
-          currentPath.current = `M ${locationX.toFixed(1)} ${locationY.toFixed(1)}`;
-          forceRender((n) => n + 1);
+          dispatch({ type: 'start', x: locationX, y: locationY });
         },
         onPanResponderMove: (e: GestureResponderEvent) => {
           const { locationX, locationY } = e.nativeEvent;
-          currentPath.current += ` L ${locationX.toFixed(1)} ${locationY.toFixed(1)}`;
-          forceRender((n) => n + 1);
+          dispatch({ type: 'move', x: locationX, y: locationY });
         },
         onPanResponderRelease: () => {
-          // Capture and reset the ref before calling setStrokes — React can
-          // defer running the updater until after this handler returns, by
-          // which point a ref read inside it would see the reset value.
-          const finished = currentPath.current;
-          currentPath.current = '';
-          if (!finished) return;
-          setStrokes((prev) => [...prev, finished]);
+          dispatch({ type: 'commit' });
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const clear = () => {
-    setStrokes([]);
-    currentPath.current = '';
+    dispatch({ type: 'clear' });
   };
 
   return (
@@ -103,9 +124,9 @@ export function SignaturePad({ width = 320, height = 160, onChange }: SignatureP
               strokeLinejoin="round"
             />
           ))}
-          {currentPath.current ? (
+          {currentPath ? (
             <Path
-              d={currentPath.current}
+              d={currentPath}
               stroke="#1d1d1f"
               strokeWidth={2.5}
               fill="none"

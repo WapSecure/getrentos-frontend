@@ -24,7 +24,14 @@ const BACKEND_ROLE_TO_PORTAL: Record<string, Portal> = {
   GATEMAN: 'gateman',
   RESIDENT: 'resident',
   BACKOFFICE_ADMIN: 'admin',
+  VERIFICATION_OFFICER: 'admin',
   SUPER_ADMIN: 'admin',
+  FRAUD_ANALYST: 'admin',
+  DISPUTE_OFFICER: 'admin',
+  ESCROW_OFFICER: 'admin',
+  FINANCE_APPROVER: 'admin',
+  COMPLIANCE_MANAGER: 'admin',
+  SUPPORT_AGENT: 'admin',
 };
 
 const PORTAL_PRIORITY: Portal[] = [
@@ -60,6 +67,7 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
   'buyer',
   'landlord',
   'gateman',
+  'owner',
 ];
 
 /**
@@ -74,11 +82,31 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
  * Returns `null` only when nothing they hold is built — the one case that
  * should show the holding screen.
  */
-export function usablePortal(roles: BackendRole[]): Portal | null {
-  // `portalsForRoles` already returns them in PORTAL_PRIORITY order, so the
-  // first implemented entry is the most senior one that actually opens.
-  return portalsForRoles(roles).find((p) => IMPLEMENTED_PORTALS.includes(p)) ?? null;
+export function usablePortal(roles: BackendRole[], preferred?: Portal | null): Portal | null {
+  const open = switchablePortals(roles);
+  // A workspace the person chose wins, as long as they still hold it and it's
+  // built; otherwise the most senior one (PORTAL_PRIORITY order) opens.
+  if (preferred && open.includes(preferred)) return preferred;
+  return open[0] ?? null;
 }
+
+/** Every built workspace this person can open, most senior first. */
+export function switchablePortals(roles: BackendRole[]): Portal[] {
+  return portalsForRoles(roles).filter((p) => IMPLEMENTED_PORTALS.includes(p));
+}
+
+export const PORTAL_LABEL: Record<Portal, string> = {
+  renter: 'Renting',
+  landlord: 'Landlord',
+  owner: 'Property owner',
+  buyer: 'Buying',
+  realtor: 'Realtor',
+  agent: 'Field agent',
+  estate: 'Estate manager',
+  gateman: 'Gate',
+  resident: 'Resident',
+  admin: 'Back office',
+};
 export const portalHref = (p: Portal) => `/(app)/(${p})` as const;
 
 /* --------------------- signup role catalogue --------------------------- */
@@ -122,7 +150,7 @@ export const SIGNUP_ROLES: SignupRole[] = [
   {
     id: 'landlord',
     name: 'Landlord',
-    tagline: 'List properties, vet tenants, collect rent through escrow.',
+    tagline: 'List properties, vet tenants, collect rent safely through GetRentos.',
     icon: 'Building2',
     requires: ['identity', 'property'],
   },

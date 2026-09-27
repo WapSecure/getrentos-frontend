@@ -129,14 +129,21 @@ export default function Shortlets() {
             const saved = wishlisted.has(item.id);
             return (
               <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-                <Pressable onPress={() => router.push(`/(app)/shortlet/${item.id}`)}>
+                <Pressable
+                  onPress={() => router.push(`/(app)/shortlet/${item.id}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View ${item.title}`}
+                >
                   <Card elevated padding="none" style={{ overflow: 'hidden' }}>
                     <View>
                       {item.coverImageUrl ? (
                         <Image
                           source={{ uri: item.coverImageUrl }}
                           contentFit="cover"
+                          cachePolicy="memory-disk"
+                          recyclingKey={item.id}
                           transition={200}
+                          accessible={false}
                           style={{ width: '100%', height: 170 }}
                         />
                       ) : (
@@ -153,7 +160,10 @@ export default function Shortlets() {
                         </View>
                       )}
                       <Pressable
-                        onPress={() => wishlistMutation.mutate({ id: item.id, next: !saved })}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          wishlistMutation.mutate({ id: item.id, next: !saved });
+                        }}
                         accessibilityRole="button"
                         accessibilityLabel={saved ? 'Remove from wishlist' : 'Save to wishlist'}
                         hitSlop={8}
@@ -161,15 +171,19 @@ export default function Shortlets() {
                           position: 'absolute',
                           top: spacing.md,
                           right: spacing.md,
-                          width: 34,
-                          height: 34,
-                          borderRadius: 17,
+                          width: 44,
+                          height: 44,
+                          borderRadius: 22,
                           alignItems: 'center',
                           justifyContent: 'center',
                           backgroundColor: 'rgba(0,0,0,0.35)',
                         }}
                       >
-                        <Heart size={17} color="#fff" fill={saved ? '#fff' : 'transparent'} />
+                        <Heart
+                          size={19}
+                          color={colors.primaryForeground}
+                          fill={saved ? colors.primaryForeground : 'transparent'}
+                        />
                       </Pressable>
                     </View>
 

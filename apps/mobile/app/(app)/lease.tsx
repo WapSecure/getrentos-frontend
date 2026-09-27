@@ -1,17 +1,10 @@
 import { useState } from 'react';
-import { Linking, Pressable, View } from 'react-native';
+import { Alert, Linking, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Calendar, ChevronRight, FileText, Home, ShieldCheck } from 'lucide-react-native';
 import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Home,
-  ShieldCheck,
-} from 'lucide-react-native';
-import {
+  Checkbox,
   Badge,
   Button,
   Card,
@@ -32,12 +25,12 @@ import { SignaturePad } from '@/components/lease/SignaturePad';
 import { DownloadLeaseButton } from '@/components/lease/DownloadLeaseButton';
 import { LeaseTerminationSheet } from '@/components/lease/LeaseTerminationSheet';
 import { formatDate, formatNaira } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const LEASE_STATUS_TONE = { active: 'success', expiring: 'warning', expired: 'danger' } as const;
 const PAYMENT_ROW_TONE = { paid: 'success', pending: 'warning', overdue: 'danger' } as const;
 
 export default function LeaseScreen() {
-  const insets = useSafeAreaInsets();
   const { colors, spacing } = useTheme();
   const [terminationSheetOpen, setTerminationSheetOpen] = useState(false);
 
@@ -72,26 +65,12 @@ export default function LeaseScreen() {
   });
 
   const header = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingTop: insets.top + 8,
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.sm,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">Lease</Text>
-    </View>
+    <DetailScreenHeader
+      eyebrow="Your tenancy"
+      title="Lease"
+      subtitle="Agreement, payments and renewal"
+      onBack={() => router.back()}
+    />
   );
 
   if (leaseQuery.isLoading || (noActiveLease && pendingQuery.isLoading)) {
@@ -216,6 +195,8 @@ export default function LeaseScreen() {
                 {i > 0 ? <Divider /> : null}
                 <Pressable
                   onPress={() => Linking.openURL(doc.url)}
+                  accessibilityRole="link"
+                  accessibilityLabel={`Open ${doc.name}`}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -238,9 +219,14 @@ export default function LeaseScreen() {
           <View
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
           >
-            <Text variant="heading">Payments</Text>
+            <Text variant="heading" accessibilityRole="header">
+              Payments
+            </Text>
             <Pressable
               onPress={() => router.push('/(app)/payments')}
+              accessibilityRole="button"
+              accessibilityLabel="See all payments"
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
             >
               <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
@@ -357,7 +343,9 @@ export default function LeaseScreen() {
         {lease.status !== 'expired' ? (
           <Pressable
             onPress={() => setTerminationSheetOpen(true)}
-            style={{ alignItems: 'center', paddingVertical: spacing.sm }}
+            accessibilityRole="button"
+            accessibilityLabel="Request lease termination"
+            style={{ alignItems: 'center', justifyContent: 'center', minHeight: 44 }}
           >
             <Text variant="callout" color="destructive">
               Request lease termination
@@ -415,15 +403,39 @@ function RenewalOfferCard({
           <Button
             label="Decline"
             variant="secondary"
-            loading={mutation.isPending}
-            onPress={() => mutation.mutate('decline')}
+            loading={mutation.isPending && mutation.variables === 'decline'}
+            disabled={mutation.isPending}
+            onPress={() =>
+              Alert.alert(
+                'Decline this renewal?',
+                'Your landlord will be told you are not renewing on these terms.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Decline renewal',
+                    style: 'destructive',
+                    onPress: () => mutation.mutate('decline'),
+                  },
+                ]
+              )
+            }
           />
         </View>
         <View style={{ flex: 1 }}>
           <Button
             label="Accept"
-            loading={mutation.isPending}
-            onPress={() => mutation.mutate('accept')}
+            loading={mutation.isPending && mutation.variables === 'accept'}
+            disabled={mutation.isPending}
+            onPress={() =>
+              Alert.alert(
+                'Accept this renewal?',
+                `You're agreeing to the new rent and a lease ending ${formatDate(offer.newEndDate, 'short')}.`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Accept renewal', onPress: () => mutation.mutate('accept') },
+                ]
+              )
+            }
           />
         </View>
       </View>
@@ -432,10 +444,12 @@ function RenewalOfferCard({
 }
 
 function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').PendingLease }) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [signature, setSignature] = useState<string | null>(null);
+  const [hasOpened, setHasOpened] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const signMutation = useMutation({
     mutationFn: () => leaseApi.sign(pending.id, signature!),
@@ -482,6 +496,28 @@ function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').Pend
         </Text>
       </Card>
 
+      <View style={{ gap: spacing.sm }}>
+        <Text variant="callout" color="mutedForeground">
+          Read the whole agreement before you sign — it is what you are agreeing to, not the summary
+          above.
+        </Text>
+        <DownloadLeaseButton
+          leaseId={pending.id}
+          label={hasOpened ? 'Open the lease again' : 'Read the full lease'}
+          onOpened={() => setHasOpened(true)}
+        />
+        <Checkbox
+          checked={agreed}
+          onChange={setAgreed}
+          disabled={!hasOpened}
+          label={
+            hasOpened
+              ? 'I have read the lease and agree to its terms'
+              : 'Open the lease first to confirm you have read it'
+          }
+        />
+      </View>
+
       <Card elevated>
         <Text variant="bodyStrong" style={{ marginBottom: spacing.sm }}>
           Your signature
@@ -491,7 +527,7 @@ function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').Pend
 
       {pending.landlordSigned ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <ShieldCheck size={14} color="#16a34a" />
+          <ShieldCheck size={14} color={colors.success} />
           <Text variant="caption" color="mutedForeground">
             Your landlord has already signed
           </Text>
@@ -500,9 +536,26 @@ function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').Pend
 
       <Button
         label="Sign lease"
-        disabled={!signature}
+        disabled={!signature || !agreed}
         loading={signMutation.isPending}
-        onPress={() => signMutation.mutate()}
+        accessibilityHint={
+          !agreed
+            ? 'Read the lease and tick the box first'
+            : signature
+              ? undefined
+              : 'Draw your signature above first'
+        }
+        onPress={() =>
+          // A signature is a legal commitment: make it a deliberate second step.
+          Alert.alert(
+            'Sign this lease?',
+            `You're agreeing to rent ${pending.propertyName} from ${formatDate(pending.startDate, 'short')} to ${formatDate(pending.endDate, 'short')} on the terms shown.`,
+            [
+              { text: 'Review again', style: 'cancel' },
+              { text: 'Sign lease', onPress: () => signMutation.mutate() },
+            ]
+          )
+        }
       />
     </Screen>
   );

@@ -11,16 +11,27 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
-import { primaryPortal, usablePortal as resolveUsablePortal, type Portal } from '../roles';
+import {
+  primaryPortal,
+  switchablePortals,
+  usablePortal as resolveUsablePortal,
+  type Portal,
+} from '../roles';
+import { readPreferredPortal, writePreferredPortal } from '../preferredPortal';
+import { forgetPurchaser, identifyPurchaser } from '../purchases';
+import { unregisterPush } from '../push';
+import { requestAppleCredential } from './apple';
 import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
 import { clearCachedProfile, readCachedProfile, writeCachedProfile } from './profileCache';
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
 import { identify, reset as resetAnalytics } from '../analytics';
+import { persister } from '../query/client';
 
 interface PendingTwoFactor {
   challengeToken: string;
-  profile: AuthProfile;
+  /** Absent when the challenge came from Google (the redirect carries only the token). */
+  profile?: AuthProfile;
 }
 
 interface AuthContextValue {
@@ -30,15 +41,24 @@ interface AuthContextValue {
   portal: Portal | null;
   /** The portal to actually open; `null` when nothing they hold is built. */
   usablePortal: Portal | null;
+  /** Built workspaces this account can open; more than one shows a switcher. */
+  workspaces: Portal[];
+  /** Open another workspace this account holds, and remember it on this device. */
+  switchWorkspace: (portal: Portal) => void;
   pendingTwoFactor: PendingTwoFactor | null;
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
   signInWithMagicLink: (token: string) => Promise<void>;
   /** Provider sign-in (system browser). Throws `OAuthCancelled` if dismissed. */
-  signInWithProvider: (provider: 'google') => Promise<void>;
+  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  signInWithProvider: (provider: 'google') => Promise<{ requiresTwoFactor: boolean }>;
+  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  signInWithApple: () => Promise<{ requiresTwoFactor: boolean }>;
   /** Adopt a session obtained elsewhere (signup). */
   applyExternalSession: (session: AuthSession) => void;
+  /** Re-reads who the user is, after a change like a new email or a new role. */
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -54,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<AuthContextValue['status']>('loading');
   const [profile, setProfile] = useState<AuthProfile | null>(null);
+  const [preferredPortal, setPreferredPortal] = useState<Portal | null>(null);
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactor | null>(null);
 
   // Access token in a ref so the API client reads the latest value without a
@@ -79,7 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('unauthenticated');
     await clearTokens();
     await clearCachedProfile();
+    setPreferredPortal(null);
+    await writePreferredPortal(null);
     queryClient.clear();
+    await persister.removeClient();
   }, [queryClient]);
 
   const refresh = useCallback(async (): Promise<string | null> => {
@@ -186,6 +210,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession]
   );
 
+  const signInWithApple = useCallback(async () => {
+    const { identityToken, nonce, fullName } = await requestAppleCredential();
+    const result = await authApi.appleSignIn(identityToken, nonce, fullName);
+    if (isTwoFactorChallenge(result)) {
+      const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
+      setPendingTwoFactor({ challengeToken, profile: prof });
+      return { requiresTwoFactor: true };
+    }
+    applySession(result);
+    return { requiresTwoFactor: false };
+  }, [applySession]);
+
   const completeTwoFactor = useCallback(
     async (code: string) => {
       if (!pendingTwoFactor) throw new Error('No two-factor challenge in progress');
@@ -205,7 +241,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signInWithProvider = useCallback(async (provider: 'google') => {
-    const { accessToken, refreshToken } = await startOAuth(provider);
+    const result = await startOAuth(provider);
+    if (result.kind === 'challenge') {
+      setPendingTwoFactor({ challengeToken: result.challengeToken });
+      return { requiresTwoFactor: true };
+    }
+    const { accessToken, refreshToken } = result;
     accessTokenRef.current = accessToken;
     refreshTokenRef.current = refreshToken;
     await writeTokens({ accessToken, refreshToken });
@@ -213,9 +254,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const prof = await authApi.me();
     setProfile(prof);
     setStatus('authenticated');
+    return { requiresTwoFactor: false };
+  }, []);
+
+  useEffect(() => {
+    void readPreferredPortal().then(setPreferredPortal);
+  }, []);
+
+  // In-app purchases are tied to the signed-in account (see lib/purchases).
+  const userId = profile?.id;
+  useEffect(() => {
+    if (userId) void identifyPurchaser(userId);
+  }, [userId]);
+
+  const switchWorkspace = useCallback((portal: Portal) => {
+    setPreferredPortal(portal);
+    void writePreferredPortal(portal);
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    setProfile(await authApi.me());
   }, []);
 
   const signOut = useCallback(async () => {
+    // While the session is still valid: stop pushes to this phone.
+    await unregisterPush();
+    await forgetPurchaser();
     const rt = refreshTokenRef.current;
     if (rt) {
       try {
@@ -232,25 +296,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       profile,
       portal: profile ? primaryPortal(profile.roles) : null,
-      usablePortal: profile ? resolveUsablePortal(profile.roles) : null,
+      usablePortal: profile ? resolveUsablePortal(profile.roles, preferredPortal) : null,
+      workspaces: profile ? switchablePortals(profile.roles) : [],
+      switchWorkspace,
       pendingTwoFactor,
       signIn,
       completeTwoFactor,
       cancelTwoFactor: () => setPendingTwoFactor(null),
       signInWithMagicLink,
       signInWithProvider,
+      signInWithApple,
       applyExternalSession: applySession,
+      refreshProfile,
       signOut,
     }),
     [
       status,
       profile,
+      preferredPortal,
+      switchWorkspace,
       pendingTwoFactor,
       signIn,
       completeTwoFactor,
       signInWithMagicLink,
       signInWithProvider,
+      signInWithApple,
       applySession,
+      refreshProfile,
       signOut,
     ]
   );

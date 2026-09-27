@@ -25,6 +25,8 @@ export function RecentlyViewedStrip() {
           <Pressable
             key={p.id}
             onPress={() => router.push(`/(app)/property/${p.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`${p.title}, ${formatNaira(p.price, { compact: true })} per month`}
             style={{ width: 120 }}
           >
             <View
@@ -36,7 +38,14 @@ export function RecentlyViewedStrip() {
               }}
             >
               {p.image ? (
-                <Image source={{ uri: p.image }} contentFit="cover" style={{ flex: 1 }} />
+                <Image
+                  source={{ uri: p.image }}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  recyclingKey={p.id}
+                  accessible={false}
+                  style={{ flex: 1 }}
+                />
               ) : null}
             </View>
             <Text variant="caption" numberOfLines={1} style={{ marginTop: 4, fontWeight: '600' }}>

@@ -96,7 +96,7 @@ export function QrScannerSheet({ open, onClose, onScan }: QrScannerSheetProps) {
               onBarcodeScanned={latched ? undefined : handleScan}
             />
             <View pointerEvents="none" style={styles.reticle}>
-              <ScanLine size={34} color="#fff" />
+              <ScanLine size={34} color={colors.primaryForeground} />
             </View>
           </View>
         )}

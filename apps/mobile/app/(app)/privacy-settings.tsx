@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Globe, Lock, Users } from 'lucide-react-native';
+import { Globe, Lock, Users } from 'lucide-react-native';
 import {
   Button,
   Card,
@@ -22,6 +22,7 @@ import {
   type ProfileVisibility,
 } from '@/lib/api/preferences';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const VISIBILITY: { id: ProfileVisibility; label: string; icon: typeof Globe }[] = [
   { id: 'public', label: 'Public', icon: Globe },
@@ -39,34 +40,16 @@ const TOGGLES: { key: keyof PrivacyPreferences; title: string; description: stri
 
 export default function PrivacySettings() {
   const { colors, spacing, radius } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({ queryKey: qk.renter.preferences, queryFn: preferencesApi.get });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Privacy
-        </Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Your data"
+        title="Privacy"
+        subtitle="Control visibility and information sharing"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>

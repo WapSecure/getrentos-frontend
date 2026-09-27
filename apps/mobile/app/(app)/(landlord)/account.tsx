@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { ChevronRight, LogOut, ShieldCheck } from 'lucide-react-native';
 import { Avatar, Card, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function LandlordAccount() {
   const { colors, spacing } = useTheme();
@@ -16,7 +18,13 @@ export default function LandlordAccount() {
 
   return (
     <Screen>
-      <Text variant="title">Account</Text>
+      <DashboardHeader
+        eyebrow="Landlord workspace"
+        title="Account"
+        subtitle="Profile, preferences and property tools"
+      />
+
+      <WorkspaceSwitcher />
 
       <Card padding={spacing.lg}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -56,7 +64,7 @@ export default function LandlordAccount() {
         <Divider />
         <AccountRow
           label="Payments"
-          description="Rent collected, escrow and arrears"
+          description="Rent collected, payouts and arrears"
           onPress={() => router.push('/(app)/landlord-payments')}
         />
         <Divider />
@@ -124,6 +132,18 @@ export default function LandlordAccount() {
           label="Vendors"
           description="Tradespeople you assign to repairs"
           onPress={() => router.push('/(app)/landlord-vendors')}
+        />
+        <Divider />
+        <AccountRow
+          label="Realtors & agents"
+          description="Approve who represents you and where"
+          onPress={() => router.push('/(app)/representatives')}
+        />
+        <Divider />
+        <AccountRow
+          label="Plan & billing"
+          description="What’s included and your receipts"
+          onPress={() => router.push('/(app)/billing')}
         />
         <Divider />
         <AccountRow

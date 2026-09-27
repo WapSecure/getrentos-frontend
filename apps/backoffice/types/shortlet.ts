@@ -67,7 +67,10 @@ export interface AdminShortletPayout {
   id: string;
   hostId: string;
   hostName?: string;
+  /** Sent to the bank, after any cancellation fees. */
   amount: number;
+  /** Host cancellation fees taken out of this payout. */
+  penaltyDeducted?: number;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
   paidAt?: string;
@@ -172,7 +175,15 @@ export interface AdminShortletDispute {
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
+  /** A Guest Promise report: decided with a money outcome, not a plain resolve. */
+  guestPromise?: boolean;
+  problemType?: string;
+  evidenceUrls?: string[];
+  outcome?: AdminGuestPromiseOutcome;
+  refundAmount?: number;
 }
+
+export type AdminGuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
 
 export interface AdminShortletDisputeMessage {
   id: string;
@@ -211,4 +222,28 @@ export interface AdminShortletFeeConfig {
   taxName?: string;
   taxPct: number;
   updatedAt: string;
+}
+
+export type AdminHostPenaltyStatus = 'OUTSTANDING' | 'SETTLED' | 'WAIVED';
+
+/** A fee a host owes for cancelling a paid, confirmed stay; taken from their payouts. */
+export interface AdminHostPenalty {
+  id: string;
+  hostId: string;
+  hostName?: string;
+  bookingId: string;
+  listingTitle: string;
+  checkIn: string;
+  checkOut: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+  daysBeforeCheckIn: number;
+  percent: number;
+  amount: number;
+  settledAmount: number;
+  outstanding: number;
+  status: AdminHostPenaltyStatus;
+  waiverReason?: string;
+  waivedAt?: string;
+  createdAt: string;
 }

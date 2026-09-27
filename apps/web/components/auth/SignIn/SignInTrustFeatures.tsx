@@ -11,7 +11,7 @@ const trustFeatures = [
   },
   {
     icon: Lock,
-    title: 'Escrow-protected transactions',
+    title: 'Protected payments',
     description: 'Your funds are always secure',
   },
   {

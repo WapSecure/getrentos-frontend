@@ -60,13 +60,17 @@ export function PropertyGallery({
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScroll}
         scrollEventThrottle={16}
+        accessibilityLabel={`Property photos, image ${page + 1} of ${images.length}`}
       >
         {images.map((uri, i) => (
           <Image
             key={`${i}-${uri}`}
             source={{ uri }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={uri}
             transition={200}
+            accessible={false}
             style={{ width: SCREEN_WIDTH, height }}
           />
         ))}
@@ -91,7 +95,8 @@ export function PropertyGallery({
                 width: i === page ? 18 : 6,
                 height: 6,
                 borderRadius: 3,
-                backgroundColor: i === page ? '#fff' : 'rgba(255,255,255,0.55)',
+                backgroundColor: colors.primaryForeground,
+                opacity: i === page ? 1 : 0.55,
               }}
             />
           ))}

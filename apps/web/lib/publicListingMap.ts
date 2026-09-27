@@ -34,14 +34,27 @@ export interface PublicListingCard {
 export type PublicMarket = 'rent' | 'sale';
 
 export interface PublicMarketFilters {
+  /** Free text — title, address, city, state or estate name, on both markets. */
+  search?: string;
   location?: string;
   estate?: string;
   minPrice?: number;
   maxPrice?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  propertyType?: string;
+  verifiedOnly?: boolean;
+  /** Rentals only. */
+  furnished?: boolean;
+  petsAllowed?: boolean;
+  monthlyPayment?: boolean;
   sort?: string;
   page?: number;
   pageSize?: number;
 }
+
+/** Only `true` goes on the wire: an unticked filter means "don't filter", not "only false". */
+const onlyTrue = (value?: boolean) => (value ? true : undefined);
 
 export interface RentApiItem {
   id: string;
@@ -110,20 +123,33 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
 
 /** Only the parameters each endpoint declares — extras are rejected by the global whitelist. */
 export const rentalQuery = (filters: PublicMarketFilters) => ({
+  search: filters.search || undefined,
   location: filters.location || undefined,
   estate: filters.estate || undefined,
   minPrice: filters.minPrice,
   maxPrice: filters.maxPrice,
+  bedrooms: filters.bedrooms,
+  bathrooms: filters.bathrooms,
+  propertyType: filters.propertyType || undefined,
+  verifiedOnly: onlyTrue(filters.verifiedOnly),
+  furnished: onlyTrue(filters.furnished),
+  petsAllowed: onlyTrue(filters.petsAllowed),
+  monthlyPayment: onlyTrue(filters.monthlyPayment),
   sortBy: filters.sort,
   page: filters.page,
   pageSize: filters.pageSize,
 });
 
 export const saleQuery = (filters: PublicMarketFilters) => ({
+  search: filters.search || undefined,
   city: filters.location || undefined,
   estate: filters.estate || undefined,
   minPrice: filters.minPrice,
   maxPrice: filters.maxPrice,
+  bedrooms: filters.bedrooms,
+  bathrooms: filters.bathrooms,
+  propertyType: filters.propertyType || undefined,
+  verifiedOnly: onlyTrue(filters.verifiedOnly),
   sort: filters.sort,
   page: filters.page,
   pageSize: filters.pageSize,

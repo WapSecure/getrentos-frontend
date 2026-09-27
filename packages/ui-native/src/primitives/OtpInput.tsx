@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { useTheme } from '../theme';
 
@@ -8,6 +8,8 @@ export interface OtpInputProps {
   length?: number;
   disabled?: boolean;
   autoFocus?: boolean;
+  /** Paints every cell in the error colour, e.g. after a rejected code. */
+  invalid?: boolean;
   onComplete?: (value: string) => void;
 }
 
@@ -22,10 +24,12 @@ export function OtpInput({
   length = 6,
   disabled = false,
   autoFocus = false,
+  invalid = false,
   onComplete,
 }: OtpInputProps) {
   const { colors, radius } = useTheme();
   const inputs = useRef<Array<TextInput | null>>([]);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const digits = value.replace(/\D/g, '').slice(0, length).split('');
 
   const setAt = (index: number, raw: string) => {
@@ -56,6 +60,12 @@ export function OtpInput({
     <View style={styles.row} accessibilityLabel="Verification code">
       {Array.from({ length }).map((_, i) => {
         const filled = !!digits[i];
+        const focused = focusedIndex === i;
+        const borderColor = invalid
+          ? colors.destructive
+          : focused || filled
+            ? colors.primary
+            : colors.border;
         return (
           <TextInput
             key={i}
@@ -70,6 +80,12 @@ export function OtpInput({
             autoComplete="sms-otp"
             maxLength={length}
             selectTextOnFocus
+            caretHidden
+            accessibilityLabel={`Digit ${i + 1} of ${length}`}
+            accessibilityHint={invalid ? 'The code was not accepted' : undefined}
+            selectionColor={colors.primary}
+            onFocus={() => setFocusedIndex(i)}
+            onBlur={() => setFocusedIndex((f) => (f === i ? null : f))}
             onChangeText={(t) => setAt(i, t)}
             onKeyPress={({ nativeEvent }) => {
               if (nativeEvent.key === 'Backspace' && !digits[i] && i > 0) {
@@ -84,9 +100,9 @@ export function OtpInput({
               {
                 borderRadius: radius.md,
                 color: colors.foreground,
-                backgroundColor: colors.card,
-                borderColor: filled ? colors.primary : colors.border,
-                borderWidth: filled ? 2 : StyleSheet.hairlineWidth * 2,
+                backgroundColor: focused ? colors.card : filled ? colors.card : colors.secondary,
+                borderColor,
+                borderWidth: focused || filled || invalid ? 2 : StyleSheet.hairlineWidth * 2,
               },
             ]}
           />

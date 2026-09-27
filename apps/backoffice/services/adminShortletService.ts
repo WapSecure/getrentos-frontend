@@ -2,6 +2,9 @@ import { authFetch, safeCall, toQuery } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
+  AdminGuestPromiseOutcome,
+  AdminHostPenalty,
+  AdminHostPenaltyStatus,
   AdminShortletBooking,
   AdminShortletBookingDetail,
   AdminShortletDepositClaim,
@@ -160,6 +163,24 @@ export const adminShortletService = {
     );
   },
 
+  listHostPenalties(
+    params: { status?: AdminHostPenaltyStatus; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminHostPenalty>>> {
+    const query = toQuery({ status: params.status, page: params.page, pageSize: params.pageSize });
+    return safeCall(() =>
+      authFetch<Paginated<AdminHostPenalty>>(`/admin/shortlets/host-penalties${query}`)
+    );
+  },
+
+  waiveHostPenalty(penaltyId: string, reason: string): Promise<ApiResponse<AdminHostPenalty>> {
+    return safeCall(() =>
+      authFetch<AdminHostPenalty>(`/admin/shortlets/host-penalties/${penaltyId}/waive`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
   payoutDetail(payoutId: string): Promise<ApiResponse<AdminShortletPayoutDetail>> {
     return safeCall(() =>
       authFetch<AdminShortletPayoutDetail>(`/admin/shortlets/payouts/${payoutId}`)
@@ -298,6 +319,21 @@ export const adminShortletService = {
         method: 'POST',
         body: JSON.stringify({ text }),
       })
+    );
+  },
+
+  decideGuestPromise(
+    disputeId: string,
+    input: { outcome: AdminGuestPromiseOutcome; resolution: string; refundAmount?: number }
+  ): Promise<ApiResponse<AdminShortletDispute>> {
+    return safeCall(() =>
+      authFetch<AdminShortletDispute>(
+        `/admin/shortlets/disputes/${disputeId}/guest-promise/decide`,
+        {
+          method: 'POST',
+          body: JSON.stringify(input),
+        }
+      )
     );
   },
 

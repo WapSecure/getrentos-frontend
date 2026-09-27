@@ -4,11 +4,12 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, FileStack, FileText, Plus, Trash2 } from 'lucide-react-native';
+import { FileStack, FileText, Plus, Trash2 } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Skeleton,
   Text,
   useTheme,
@@ -22,6 +23,7 @@ import {
 } from '@/lib/api/buyerDocuments';
 import { UploadBuyerDocumentSheet } from '@/components/buyer/UploadBuyerDocumentSheet';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function BuyerDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -61,41 +63,28 @@ export default function BuyerDocuments() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Documents
-        </Text>
-        <Pressable
-          onPress={() => setUploadOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Upload a document"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
+        <DetailHeader
+          eyebrow="Buyer workspace"
+          title="Documents"
+          subtitle={
+            query.data
+              ? `${items.length} secure file${items.length === 1 ? '' : 's'}`
+              : 'Proof of funds and purchase files'
+          }
+          onBack={() => router.back()}
+          accessory={
+            <IconButton
+              onPress={() => setUploadOpen(true)}
+              accessibilityLabel="Upload a document"
+              icon={<Plus size={20} color={colors.primary} />}
+            />
+          }
+        />
       </View>
 
       {query.isError ? (

@@ -3,10 +3,11 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, RotateCcw, ShieldCheck, Smartphone, WifiOff } from 'lucide-react-native';
+import { RotateCcw, ShieldCheck, Smartphone, WifiOff } from 'lucide-react-native';
 import { Badge, Card, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ussdApi } from '@/lib/api/ussd';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 const BENEFITS = [
   {
@@ -49,17 +50,13 @@ export default function Ussd() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Dial-in access
-        </Text>
+        <DetailHeader
+          eyebrow="Low-data access"
+          title="Dial-in access"
+          subtitle="Preview GetRentos services over USSD"
+          onBack={() => router.back()}
+          style={{ flex: 1 }}
+        />
         <Badge label="Coming soon" tone="info" />
       </View>
 

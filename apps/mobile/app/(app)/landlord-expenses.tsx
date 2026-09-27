@@ -4,12 +4,13 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react-native';
+import { Plus, ReceiptText, Trash2, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -21,6 +22,7 @@ import { landlordApi, EXPENSE_CATEGORY_LABEL, type LandlordExpense } from '@/lib
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { AddExpenseSheet } from '@/components/landlord/AddExpenseSheet';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordExpenses() {
   const { colors, spacing, radius } = useTheme();
@@ -50,41 +52,23 @@ export default function LandlordExpenses() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Expenses</Text>
-          {items.length > 0 ? (
-            <Text variant="caption" color="mutedForeground">
-              {items.length} logged on this page
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={() => setAdding(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Log an expense"
-          hitSlop={10}
-        >
-          <Plus size={22} color={colors.primary} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Financials"
+        title="Expenses"
+        subtitle={
+          items.length > 0
+            ? `${items.length} logged on this page`
+            : 'Track property operating costs'
+        }
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={() => setAdding(true)}
+            accessibilityLabel="Log an expense"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

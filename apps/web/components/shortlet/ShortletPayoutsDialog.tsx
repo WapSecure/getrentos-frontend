@@ -32,10 +32,17 @@ const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
 export function ShortletPayoutsDialog({
   onClose,
   verificationHref,
+  trustProfileHref,
 }: {
   onClose: () => void;
   /** Where the 'Verify now' upsell link goes (the persona's Verification Center). */
   verificationHref: string;
+  /**
+   * Where the "something else is holding your tier" upsell goes (the persona's
+   * trust profile). Omitted for personas that have no profile page, in which
+   * case the notice falls back to `verificationHref`.
+   */
+  trustProfileHref?: string;
 }) {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
@@ -101,6 +108,24 @@ export function ShortletPayoutsDialog({
               verificationHref={verificationHref}
             />
           )}
+          {/* The same requirement, shown before the host tries: the balance below is
+              real money they cannot withdraw yet, so say so up front. When the tier
+              is only held back by something else — an open dispute, a review case —
+              the summary says which, because sending an already-verified host to get
+              verified again is a dead end. */}
+          {!withdraw.error && summary && !summary.canWithdraw && (
+            <VerificationRequiredNotice
+              error={{
+                reason: 'TRUST_TIER_REQUIRED',
+                tierRequired: summary.withdrawTierRequired,
+                currentTier: summary.hostTier,
+                withheldReason: summary.withdrawWithheldReason ?? undefined,
+              }}
+              href={verificationHref}
+              verificationHref={verificationHref}
+              scoreHref={trustProfileHref}
+            />
+          )}
           {/* Balance */}
           <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2">
@@ -112,7 +137,17 @@ export function ShortletPayoutsDialog({
             </div>
             <Button
               onClick={() => withdraw.mutate()}
-              disabled={!summary?.accountSet || !summary.available || withdraw.isPending}
+              disabled={
+                !summary?.accountSet ||
+                !summary.available ||
+                summary?.canWithdraw === false ||
+                withdraw.isPending
+              }
+              title={
+                summary?.canWithdraw === false
+                  ? `Withdrawing needs Trust Tier ${summary.withdrawTierRequired}.`
+                  : undefined
+              }
             >
               <Banknote className="mr-1.5 h-4 w-4" />
               {withdraw.isPending ? 'Withdrawing…' : 'Withdraw'}
@@ -124,7 +159,8 @@ export function ShortletPayoutsDialog({
             (summary.upcoming > 0 ||
               summary.frozen > 0 ||
               summary.inTransit > 0 ||
-              summary.inFailedPayout > 0) && (
+              summary.inFailedPayout > 0 ||
+              (summary.penaltiesOutstanding ?? 0) > 0) && (
               <ul className="space-y-2 rounded-lg border border-border p-4 text-sm">
                 {summary.upcoming > 0 && (
                   <li className="flex items-start justify-between gap-3">
@@ -157,6 +193,16 @@ export function ShortletPayoutsDialog({
                       In a payout that failed — support will retry it
                     </span>
                     <span className="font-medium">{formatCurrency(summary.inFailedPayout)}</span>
+                  </li>
+                )}
+                {(summary.penaltiesOutstanding ?? 0) > 0 && (
+                  <li className="flex items-start justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      Cancellation fees you owe — taken out of your next withdrawal
+                    </span>
+                    <span className="whitespace-nowrap font-medium text-destructive">
+                      −{formatCurrency(summary.penaltiesOutstanding)}
+                    </span>
                   </li>
                 )}
               </ul>
@@ -235,6 +281,8 @@ export function ShortletPayoutsDialog({
                       <p className="mt-1 text-xs text-muted-foreground">
                         {p.bookingCount} booking{p.bookingCount === 1 ? '' : 's'} ·{' '}
                         {formatDate(p.createdAt, 'short')}
+                        {(p.penaltyDeducted ?? 0) > 0 &&
+                          ` · ${formatCurrency(p.penaltyDeducted ?? 0)} cancellation fees taken out`}
                       </p>
                     </div>
                     <p className="font-semibold">{formatCurrency(p.amount)}</p>

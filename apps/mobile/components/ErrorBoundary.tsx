@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import Constants from 'expo-constants';
 import type { ErrorBoundaryProps } from 'expo-router';
+import { getPalette } from '@getrentos/tokens';
 import { report } from '@/lib/analytics';
 
 /**
@@ -12,20 +13,26 @@ import { report } from '@/lib/analytics';
  */
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const isDev = Constants.executionEnvironment !== 'standalone' && __DEV__;
+  const colors = getPalette(useColorScheme() === 'dark' ? 'dark' : 'light');
 
   useEffect(() => {
     report(error, { boundary: 'root' });
   }, [error]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={styles.emoji}>⚠️</Text>
-      <Text style={styles.title}>Something went wrong</Text>
-      <Text style={styles.body}>
+      <Text style={[styles.title, { color: colors.foreground }]}>Something went wrong</Text>
+      <Text style={[styles.body, { color: colors.mutedForeground }]}>
         {isDev ? error.message : 'An unexpected error occurred. Please try again.'}
       </Text>
-      <Pressable style={styles.button} onPress={retry} accessibilityRole="button">
-        <Text style={styles.buttonText}>Try again</Text>
+      <Pressable
+        style={[styles.button, { backgroundColor: colors.primary }]}
+        onPress={retry}
+        accessibilityRole="button"
+        accessibilityLabel="Try loading GetRentos again"
+      >
+        <Text style={[styles.buttonText, { color: colors.primaryForeground }]}>Try again</Text>
       </Pressable>
     </View>
   );
@@ -38,14 +45,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     gap: 12,
-    backgroundColor: '#f6f7f9',
   },
   emoji: { fontSize: 40 },
-  title: { fontSize: 22, fontWeight: '800', color: '#161b22', textAlign: 'center' },
+  title: { fontSize: 22, fontWeight: '800', textAlign: 'center' },
   body: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#667085',
     textAlign: 'center',
     maxWidth: 320,
   },
@@ -54,9 +59,8 @@ const styles = StyleSheet.create({
     height: 48,
     paddingHorizontal: 24,
     borderRadius: 12,
-    backgroundColor: '#0071e3',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
+  buttonText: { fontSize: 15, fontWeight: '600' },
 });

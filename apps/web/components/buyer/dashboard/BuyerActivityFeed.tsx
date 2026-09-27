@@ -61,7 +61,7 @@ export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Recent Activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Offers, viewings, escrow, and saved property updates
+          Offers, viewings, payments, and saved property updates
         </p>
       </div>
 

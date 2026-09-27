@@ -14,6 +14,7 @@ import {
   Wrench,
 } from 'lucide-react-native';
 import { Card, Divider, Screen, Text, useTheme } from '@getrentos/ui-native';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const ROWS = [
   {
@@ -78,19 +79,27 @@ export default function ResidentCommunity() {
 
   return (
     <Screen>
-      <Text variant="title">Community</Text>
+      <DashboardHeader
+        eyebrow="Your community"
+        title="Services"
+        subtitle="Everything your household needs around the estate"
+      />
 
       <Card padding="none">
         {ROWS.map((row, i) => (
           <View key={row.href}>
             <Pressable
               onPress={() => router.push(row.href)}
-              style={{
+              accessibilityRole="button"
+              accessibilityLabel={row.label}
+              accessibilityHint={row.description}
+              style={({ pressed }) => ({
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: spacing.md,
                 padding: spacing.lg,
-              }}
+                backgroundColor: pressed ? colors.secondary : colors.card,
+              })}
             >
               <View
                 style={{

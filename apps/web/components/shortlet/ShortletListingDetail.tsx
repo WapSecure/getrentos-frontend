@@ -10,6 +10,9 @@ import {
   Armchair,
   BedDouble,
   CalendarCheck,
+  CalendarX,
+  ClipboardCheck,
+  Droplets,
   Clock,
   Heart,
   Image as ImageIcon,
@@ -22,6 +25,7 @@ import {
   Star,
   Users,
   Video,
+  Wifi,
   Zap,
 } from 'lucide-react';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
@@ -30,6 +34,13 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { GUEST_PROMISE_TEXT } from '@/lib/shortlet/guestPromise';
+import {
+  INTERNET_TYPE_LABEL,
+  POWER_SOURCE_LABEL,
+  powerHoursLabel,
+  WATER_SUPPLY_LABEL,
+} from '@/lib/shortlet/essentials';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
 import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
 import type {
@@ -45,6 +56,24 @@ const CANCELLATION_RULE: Record<ShortletCancellationPolicy, string> = {
   MODERATE: 'Full refund 5+ days before; 50% up to 1 day before check-in.',
   STRICT: 'Full refund 7+ days before; 50% from 3 days; no refund within 3 days.',
 };
+
+const CONDITION_LABEL: Record<'excellent' | 'good' | 'fair', string> = {
+  excellent: 'Excellent',
+  good: 'Good',
+  fair: 'Fair',
+};
+
+const hasUtilities = (l: ShortletListing) =>
+  l.powerHoursPerDay != null ||
+  (l.powerSources ?? []).length > 0 ||
+  Boolean(l.waterSupply) ||
+  Boolean(l.internetType);
+
+const hasRules = (l: ShortletListing) =>
+  l.petsAllowed != null ||
+  l.smokingAllowed != null ||
+  l.partiesAllowed != null ||
+  Boolean(l.houseRules);
 
 export function ShortletListingDetail({
   listingId,
@@ -368,6 +397,109 @@ export function ShortletListingDetail({
             </section>
           )}
 
+          {listing.inspection && (
+            <section>
+              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold">
+                <ClipboardCheck className="h-5 w-5 text-success" /> Inspected
+              </h2>
+              <p className="mb-3 text-sm text-muted-foreground">
+                A licensed agent, {listing.inspection.agentName}, inspected this property on{' '}
+                {formatDate(listing.inspection.inspectedAt, 'long')} and rated it{' '}
+                <span className="font-medium text-foreground">
+                  {CONDITION_LABEL[listing.inspection.condition].toLowerCase()}
+                </span>{' '}
+                overall.
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {listing.inspection.rooms.map((r, i) => (
+                  <div
+                    key={`${r.room}-${i}`}
+                    className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <span>{r.room}</span>
+                    <Badge variant={r.condition === 'fair' ? 'warning' : 'success'}>
+                      {CONDITION_LABEL[r.condition]}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                The host arranged this inspection. GetRentos checked the agent&rsquo;s licence and
+                identity, and only shows inspections from the last 12 months with no room rated
+                poor.
+              </p>
+            </section>
+          )}
+
+          {hasUtilities(listing) && (
+            <section>
+              <h2 className="mb-1 text-lg font-semibold">Power, water &amp; internet</h2>
+              <p className="mb-2 text-xs text-muted-foreground">As described by the host.</p>
+              <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                {(listing.powerHoursPerDay != null || (listing.powerSources ?? []).length > 0) && (
+                  <div className="flex items-start gap-2">
+                    <Zap className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span>
+                      {listing.powerHoursPerDay != null && (
+                        <span className="font-medium">
+                          {powerHoursLabel(listing.powerHoursPerDay)}
+                        </span>
+                      )}
+                      {(listing.powerSources ?? []).length > 0 && (
+                        <span className="block text-muted-foreground">
+                          {(listing.powerSources ?? [])
+                            .map((s) => POWER_SOURCE_LABEL[s] ?? s)
+                            .join(' · ')}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                )}
+                {listing.waterSupply && (
+                  <div className="flex items-center gap-2">
+                    <Droplets className="h-4 w-4 text-muted-foreground" />
+                    {WATER_SUPPLY_LABEL[listing.waterSupply] ?? listing.waterSupply}
+                  </div>
+                )}
+                {listing.internetType && (
+                  <div className="flex items-center gap-2">
+                    <Wifi className="h-4 w-4 text-muted-foreground" />
+                    {INTERNET_TYPE_LABEL[listing.internetType] ?? listing.internetType}
+                    {listing.internetSpeedMbps ? ` · about ${listing.internetSpeedMbps} Mbps` : ''}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {hasRules(listing) && (
+            <section>
+              <h2 className="mb-2 text-lg font-semibold">House rules</h2>
+              <div className="mb-2 flex flex-wrap gap-2">
+                {listing.petsAllowed != null && (
+                  <Badge variant={listing.petsAllowed ? 'success' : 'neutral'}>
+                    {listing.petsAllowed ? 'Pets allowed' : 'No pets'}
+                  </Badge>
+                )}
+                {listing.smokingAllowed != null && (
+                  <Badge variant={listing.smokingAllowed ? 'success' : 'neutral'}>
+                    {listing.smokingAllowed ? 'Smoking allowed' : 'No smoking'}
+                  </Badge>
+                )}
+                {listing.partiesAllowed != null && (
+                  <Badge variant={listing.partiesAllowed ? 'success' : 'neutral'}>
+                    {listing.partiesAllowed ? 'Parties & events allowed' : 'No parties or events'}
+                  </Badge>
+                )}
+              </div>
+              {listing.houseRules && (
+                <p className="whitespace-pre-line text-sm text-muted-foreground">
+                  {listing.houseRules}
+                </p>
+              )}
+            </section>
+          )}
+
           <section>
             <h2 className="mb-2 text-lg font-semibold">Good to know</h2>
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -484,7 +616,68 @@ export function ShortletListingDetail({
                   <span>+{listing.weekendUpliftPct}%</span>
                 </div>
               ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.weeklyDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Stays of 7+ nights</span>
+                  <span className="text-success">{listing.weeklyDiscountPct}% off</span>
+                </div>
+              ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.monthlyDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Stays of 28+ nights</span>
+                  <span className="text-success">{listing.monthlyDiscountPct}% off</span>
+                </div>
+              ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.lastMinuteDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Check-in within {listing.lastMinuteDays} day
+                    {listing.lastMinuteDays === 1 ? '' : 's'}
+                  </span>
+                  <span className="text-success">{listing.lastMinuteDiscountPct}% off</span>
+                </div>
+              ) : null}
+              {listing.advanceNoticeDays ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Book ahead</span>
+                  <span>
+                    {listing.advanceNoticeDays === 1
+                      ? '1 day’s notice'
+                      : `${listing.advanceNoticeDays} days’ notice`}
+                  </span>
+                </div>
+              ) : null}
             </div>
+            <p className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
+              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+              <span>
+                <span className="font-medium text-foreground">GetRentos Guest Promise.</span>{' '}
+                {GUEST_PROMISE_TEXT}
+              </span>
+            </p>
+            {(listing.hostCancellations12m ?? 0) > 0 && (
+              <p className="mt-3 flex items-start gap-1.5 rounded-md bg-secondary/50 px-3 py-2 text-xs">
+                <CalendarX className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
+                The host cancelled {listing.hostCancellations12m} confirmed stay
+                {listing.hostCancellations12m === 1 ? '' : 's'} here in the last 12 months. If your
+                host cancels, you get back everything you paid.
+              </p>
+            )}
+            {(listing.seasons ?? []).length > 0 && (
+              <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
+                <p className="font-medium">Peak seasons</p>
+                {(listing.seasons ?? []).map((season) => (
+                  <div key={season.id} className="text-muted-foreground">
+                    <span className="text-foreground">{season.name}</span>:{' '}
+                    {formatDate(season.startDate, 'short')} to {formatDate(season.endDate, 'short')}
+                    {season.nightlyRate != null
+                      ? ` · ${formatCurrency(season.nightlyRate)} / night`
+                      : ''}
+                    {season.minNights != null ? ` · min ${season.minNights} nights` : ''}
+                  </div>
+                ))}
+              </div>
+            )}
             <Button className="mt-4 w-full" onClick={openBooking}>
               <PlayCircle className="mr-1.5 h-4 w-4" />
               {listing.instantBooking ? 'Book now — instant confirmation' : 'Request to book'}

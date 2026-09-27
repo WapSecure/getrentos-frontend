@@ -15,8 +15,10 @@ import {
   Button,
   Card,
   EmptyState,
+  ErrorState,
   OtpInput,
   Screen,
+  SectionHeader,
   Skeleton,
   Text,
   useTheme,
@@ -36,6 +38,7 @@ import { gateOfflineQueue, replayGateQueue, useGateQueue } from '@/lib/gateOffli
 import { qk } from '@/lib/query/keys';
 import { formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function GatemanCheckIn() {
   const { colors, spacing } = useTheme();
@@ -358,6 +361,18 @@ export default function GatemanCheckIn() {
     );
   }
 
+  if (isError) {
+    return (
+      <Screen refreshing={isRefetching} onRefresh={refetch}>
+        <ErrorState
+          title="We couldn't load your gate assignment"
+          description="Check your connection and try again. Offline check-ins already stored on this device remain safe."
+          onRetry={refetch}
+        />
+      </Screen>
+    );
+  }
+
   if (!estate) {
     return (
       <Screen>
@@ -396,27 +411,34 @@ export default function GatemanCheckIn() {
   return (
     <>
       <Screen refreshing={checkInsQuery.isRefetching} onRefresh={checkInsQuery.refetch}>
-        <View style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.md }}>
-          <View
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: colors.accent,
-              marginBottom: spacing.xs,
-            }}
-          >
-            <KeyRound size={26} color={colors.primary} />
-          </View>
-          <Text variant="title" center>
-            {estate.name}
-          </Text>
+        <DashboardHeader
+          eyebrow="Gate operations"
+          title={estate.name}
+          /* The concrete instruction, not a slogan: this is the one line a guard
+             reads at the start of a shift, and "scan the QR or enter the PIN" is
+             what they have to do next. */
+          subtitle="Scan the visitor's QR code, or enter their 6-digit PIN."
+          accessory={
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.accent,
+              }}
+            >
+              <KeyRound size={22} color={colors.primary} />
+            </View>
+          }
+        />
 
-          {/* Where this guard is, as a fact they can correct. A guard on two
-              estates was previously shown the oldest one with nothing on screen
-              to suggest the other existed. */}
+        {/* Where this guard is, as a fact they can correct. A guard on two
+            estates was previously shown the oldest one with nothing on screen to
+            suggest the other existed. It sits under the header rather than inside
+            it because it is an action, not a label. */}
+        <View style={{ alignItems: 'center' }}>
           <Pressable
             onPress={() => setPostSheetOpen(true)}
             accessibilityRole="button"
@@ -440,10 +462,6 @@ export default function GatemanCheckIn() {
                   : `${gates.length} gates — tap to say which`}
             </Text>
           </Pressable>
-
-          <Text variant="callout" color="mutedForeground" center>
-            Scan the visitor&apos;s QR code, or enter their 6-digit PIN.
-          </Text>
         </View>
 
         {/* Entries are recorded against the gate, so an estate can answer which
@@ -641,7 +659,10 @@ export default function GatemanCheckIn() {
             the barrier right now, and that is the most urgent thing on screen. */}
         {awaiting.length > 0 || readyToAdmit.length > 0 || decided.length > 0 ? (
           <View style={{ gap: spacing.md }}>
-            <Text variant="bodyStrong">At the gate</Text>
+            <SectionHeader
+              title="At the gate"
+              description="Requests that need a clear decision now"
+            />
 
             {/* Answered requests come first: the guard is holding the visitor and
                 needs to know whether to open the barrier or turn them away. */}
@@ -730,17 +751,18 @@ export default function GatemanCheckIn() {
         ) : null}
 
         <View style={{ gap: spacing.md }}>
-          <Text variant="bodyStrong">
-            Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
-          </Text>
+          <SectionHeader
+            title={`Inside now${inside.length > 0 ? ` (${inside.length})` : ''}`}
+            description="Visitors currently recorded on the estate"
+          />
           {checkInsQuery.isLoading ? (
             <Skeleton height={64} radius={16} />
           ) : inside.length === 0 ? (
-            <Card>
-              <Text variant="caption" color="mutedForeground">
-                No visitors are on the estate right now.
-              </Text>
-            </Card>
+            <EmptyState
+              icon={<KeyRound size={28} color={colors.mutedForeground} />}
+              title="The estate is clear"
+              description="Checked-in visitors will appear here."
+            />
           ) : (
             inside.map((pass) => (
               <Card key={pass.id} elevated>

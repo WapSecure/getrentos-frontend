@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Heart, ImageOff } from 'lucide-react-native';
+import { Heart, ImageOff } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -16,6 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function ShortletWishlist() {
   const { colors, spacing, radius } = useTheme();
@@ -38,26 +39,12 @@ export default function ShortletWishlist() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Saved stays</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Shortlet shortlist"
+        title="Saved stays"
+        subtitle="Favorite stays ready for comparison"
+        onBack={() => router.back()}
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
@@ -79,14 +66,21 @@ export default function ShortletWishlist() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: ShortletListing }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/shortlet/${item.id}`)}>
+              <Pressable
+                onPress={() => router.push(`/(app)/shortlet/${item.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`View ${item.title}`}
+              >
                 <Card elevated padding="none" style={{ overflow: 'hidden' }}>
                   <View>
                     {item.coverImageUrl ? (
                       <Image
                         source={{ uri: item.coverImageUrl }}
                         contentFit="cover"
+                        cachePolicy="memory-disk"
+                        recyclingKey={item.id}
                         transition={200}
+                        accessible={false}
                         style={{ width: '100%', height: 150 }}
                       />
                     ) : (
@@ -103,7 +97,10 @@ export default function ShortletWishlist() {
                       </View>
                     )}
                     <Pressable
-                      onPress={() => removeMutation.mutate(item.id)}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        removeMutation.mutate(item.id);
+                      }}
                       accessibilityRole="button"
                       accessibilityLabel="Remove from wishlist"
                       hitSlop={8}
@@ -111,15 +108,19 @@ export default function ShortletWishlist() {
                         position: 'absolute',
                         top: spacing.md,
                         right: spacing.md,
-                        width: 34,
-                        height: 34,
-                        borderRadius: 17,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: 'rgba(0,0,0,0.35)',
                       }}
                     >
-                      <Heart size={17} color="#fff" fill="#fff" />
+                      <Heart
+                        size={19}
+                        color={colors.primaryForeground}
+                        fill={colors.primaryForeground}
+                      />
                     </Pressable>
                   </View>
                   <View style={{ padding: spacing.lg, gap: 2 }}>

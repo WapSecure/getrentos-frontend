@@ -73,21 +73,6 @@ export interface OwnerMessage {
   read: boolean;
 }
 
-export interface OwnerPayoutAccount {
-  bankCode: string;
-  bankName: string;
-  accountNumber: string;
-  accountName: string;
-  verified: boolean;
-}
-
-export interface OwnerSalePayoutStatus {
-  transactionId: string;
-  amount: number;
-  payoutStatus: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
-  paidAt?: string;
-}
-
 export interface OwnerNotificationPreference {
   id: string;
   email: boolean;
@@ -195,6 +180,15 @@ export const ownerService = {
     ),
   archiveProperty: (id: string) =>
     safeCall(() => authFetch(`/owner/properties/${id}`, { method: 'DELETE' })),
+
+  /** Adds the landlord workspace to the account so this property can be rented out. */
+  convertToRental: (id: string) =>
+    safeCall(() =>
+      authFetch<{ propertyId: string; landlordRoleGranted: boolean; roles: string[] }>(
+        `/owner/properties/${id}/convert-to-rental`,
+        { method: 'POST' }
+      )
+    ),
 
   /**
    * Stage a property photo and hand back its storage key.
@@ -313,24 +307,6 @@ export const ownerService = {
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/owner/trust-profile')),
   updateProfile: (data: Partial<OwnerProfile>) =>
     safeCall(() => authFetch('/owner/profile', { method: 'PUT', body: JSON.stringify(data) })),
-
-  // Payout account — sale proceeds. Backed by the marketplace seller's own
-  // payout account (real bank resolution and a Paystack transfer recipient),
-  // not the old owner/settings/payout endpoint, which only stored free-text
-  // bank details and never actually paid anyone.
-  getPayoutSettings: () =>
-    safeCall(() => authFetch<OwnerPayoutAccount>('/marketplace/seller/payout-account')),
-  updatePayoutSettings: (data: { bankCode: string; accountNumber: string }) =>
-    safeCall(() =>
-      authFetch<OwnerPayoutAccount>('/marketplace/seller/payout-account', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-    ),
-  getSalePayoutStatus: (transactionId: string) =>
-    safeCall(() =>
-      authFetch<OwnerSalePayoutStatus>(`/marketplace/seller/transactions/${transactionId}/payout`)
-    ),
 
   // Notification preferences
   getNotificationPreferences: () =>

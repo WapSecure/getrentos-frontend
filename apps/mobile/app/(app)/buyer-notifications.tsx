@@ -1,8 +1,7 @@
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -19,6 +18,7 @@ import {
   type BuyerNotificationPreference,
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function BuyerNotificationSettings() {
   const { colors, spacing } = useTheme();
@@ -59,26 +59,12 @@ export default function BuyerNotificationSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Notifications</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Buyer alerts"
+        title="Notifications"
+        subtitle="Choose how purchase updates reach you"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>

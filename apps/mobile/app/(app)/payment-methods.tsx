@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Building2,
   Check,
-  ChevronLeft,
   CreditCard,
   Plus,
   Trash2,
@@ -31,6 +30,7 @@ import {
 } from '@/lib/api/payments';
 import { ApiError } from '@/lib/api/client';
 import { AddPaymentMethodSheet } from '@/components/payments/AddPaymentMethodSheet';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const TYPE_ICON: Record<SavedPaymentMethod['type'], typeof CreditCard> = {
   card: CreditCard,
@@ -81,28 +81,12 @@ export default function PaymentMethods() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Payment methods
-        </Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Wallet"
+        title="Payment methods"
+        subtitle="Cards, bank accounts and preferred checkout"
+        onBack={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={{

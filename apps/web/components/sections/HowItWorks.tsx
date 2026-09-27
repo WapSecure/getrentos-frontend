@@ -43,7 +43,7 @@ const steps = [
   },
   {
     number: '06',
-    title: 'Escrow',
+    title: 'Protected payment',
     icon: Coins,
     description: 'Funds held securely until conditions met.',
   },

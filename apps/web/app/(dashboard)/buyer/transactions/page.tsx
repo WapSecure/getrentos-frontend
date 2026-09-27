@@ -77,7 +77,7 @@ export default function BuyerTransactionsPage() {
         <p className="text-muted-foreground mt-1">
           {isLoading
             ? 'Loading…'
-            : `${total} purchase transaction${total === 1 ? '' : 's'} in escrow`}
+            : `${total} purchase${total === 1 ? '' : 's'} protected by GetRentos`}
         </p>
       </div>
 
@@ -125,7 +125,7 @@ export default function BuyerTransactionsPage() {
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
             {total === 0
-              ? 'Once an owner accepts your offer, the escrow transaction will appear here.'
+              ? 'Once an owner accepts your offer, the purchase and its protected payment will appear here.'
               : 'Choose another page to view more transactions.'}
           </p>
         </div>

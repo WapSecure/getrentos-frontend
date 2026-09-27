@@ -1,12 +1,13 @@
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Building2, ShieldCheck } from 'lucide-react-native';
+import { Building2, ShieldCheck } from 'lucide-react-native';
 import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentAssignedProperty } from '@/lib/api/agent';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function AgentProperties() {
   const { colors, spacing, radius } = useTheme();
@@ -22,23 +23,21 @@ export default function AgentProperties() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">My properties</Text>
+        <DetailHeader
+          eyebrow="Agent portfolio"
+          title="My properties"
+          subtitle={
+            query.data
+              ? `${items.length} assigned propert${items.length === 1 ? 'y' : 'ies'}`
+              : 'Client properties under your care'
+          }
+          onBack={() => router.back()}
+        />
       </View>
 
       {query.isError ? (

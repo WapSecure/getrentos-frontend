@@ -17,7 +17,7 @@ const steps = [
     icon: Zap,
     title: 'We pay your landlord today',
     description:
-      'The full amount lands in escrow and releases to your landlord immediately — no waiting.',
+      'The full amount is paid to GetRentos and passed on to your landlord straight away — no waiting.',
   },
   {
     icon: Clock,

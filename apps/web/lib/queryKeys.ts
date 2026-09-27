@@ -143,7 +143,6 @@ export const realtorKeys = {
   commissions: ['realtor', 'commissions'] as const,
   commissionTrend: ['realtor', 'commissions', 'trend'] as const,
   settingsProfile: ['realtor', 'settings', 'profile'] as const,
-  settingsPayout: ['realtor', 'settings', 'payout'] as const,
   settingsNotifications: ['realtor', 'settings', 'notifications'] as const,
   settingsPreferences: ['realtor', 'settings', 'preferences'] as const,
   notifications: ['realtor', 'notifications'] as const,
@@ -240,6 +239,9 @@ export const shortletKeys = {
   hostBookings: ['shortlets', 'host', 'bookings'] as const,
   hostBlockedDates: (listingId: string) =>
     ['shortlets', 'host', listingId, 'blocked-dates'] as const,
+  hostSeasons: (listingId: string) => ['shortlets', 'host', listingId, 'seasons'] as const,
+  hostCalendarSync: (listingId: string) =>
+    ['shortlets', 'host', listingId, 'calendar-sync'] as const,
   guestMessages: ['shortlets', 'messages'] as const,
   hostMessages: ['shortlets', 'host', 'messages'] as const,
   hostPayouts: ['shortlets', 'host', 'payouts'] as const,
@@ -383,4 +385,10 @@ export const billingKeys = {
   mine: ['billing', 'mine'] as const,
   /** Payment history — the customer's receipts. */
   invoices: (page: number) => ['billing', 'invoices', page] as const,
+};
+
+/** Marketplace seller payouts — shared by Owner, Realtor and Agent. */
+export const sellerPayoutKeys = {
+  account: ['marketplace', 'seller', 'payout-account'] as const,
+  payouts: ['marketplace', 'seller', 'payouts'] as const,
 };

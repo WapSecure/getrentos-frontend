@@ -1,9 +1,9 @@
-import { Alert, Pressable, RefreshControl, View } from 'react-native';
+import { Alert, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Calendar, ChevronLeft } from 'lucide-react-native';
+import { Calendar } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -24,6 +24,7 @@ import {
 } from '@/lib/api/buyerViewings';
 import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function BuyerViewings() {
   const { colors, spacing, radius } = useTheme();
@@ -62,23 +63,21 @@ export default function BuyerViewings() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Viewings</Text>
+        <DetailHeader
+          eyebrow="Buyer journey"
+          title="Viewings"
+          subtitle={
+            query.data
+              ? `${items.length} scheduled request${items.length === 1 ? '' : 's'}`
+              : 'Your property tour schedule'
+          }
+          onBack={() => router.back()}
+        />
       </View>
 
       {query.isError ? (

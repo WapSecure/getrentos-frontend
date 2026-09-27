@@ -18,6 +18,7 @@ export default function LandlordEvictionsPage() {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { data } = useQuery({
     queryKey: [...landlordKeys.evictions, { page, pageSize: PAGE_SIZE }],
@@ -28,9 +29,26 @@ export default function LandlordEvictionsPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: landlordKeys.evictions });
 
+  // Every lifecycle transition is validated server-side (wrong state, terminal case, …),
+  // so a rejected action has to be shown — otherwise the button just looks dead.
+  const clearActionError = () => setActionError(null);
+  const reportActionError = (error: unknown) =>
+    setActionError(
+      error instanceof Error && error.message
+        ? error.message
+        : 'That action could not be completed. Please try again.'
+    );
+  const closeModals = () => {
+    clearActionError();
+    setIsModalOpen(false);
+    setActiveCaseId(null);
+  };
+
   const initiate = useMutation({
     mutationFn: ({ leaseId, reason }: { leaseId: string; reason: string }) =>
       unwrap(landlordService.initiateEviction(leaseId, reason)),
+    onMutate: clearActionError,
+    onError: reportActionError,
     onSuccess: () => {
       invalidate();
       setIsModalOpen(false);
@@ -40,17 +58,23 @@ export default function LandlordEvictionsPage() {
   const issueNotice = useMutation({
     mutationFn: ({ id, cureDays }: { id: string; cureDays: number }) =>
       unwrap(landlordService.issueEvictionNotice(id, cureDays)),
+    onMutate: clearActionError,
+    onError: reportActionError,
     onSuccess: invalidate,
   });
 
   const markFiled = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.markEvictionFiled(id)),
+    onMutate: clearActionError,
+    onError: reportActionError,
     onSuccess: invalidate,
   });
 
   const resolve = useMutation({
     mutationFn: ({ id, resolutionNotes }: { id: string; resolutionNotes?: string }) =>
       unwrap(landlordService.resolveEviction(id, resolutionNotes)),
+    onMutate: clearActionError,
+    onError: reportActionError,
     onSuccess: () => {
       invalidate();
       setActiveCaseId(null);
@@ -59,6 +83,8 @@ export default function LandlordEvictionsPage() {
 
   const withdraw = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.withdrawEviction(id)),
+    onMutate: clearActionError,
+    onError: reportActionError,
     onSuccess: () => {
       invalidate();
       setActiveCaseId(null);
@@ -129,14 +155,15 @@ export default function LandlordEvictionsPage() {
 
       <InitiateEvictionModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModals}
         onSubmit={(leaseId, reason) => initiate.mutate({ leaseId, reason })}
         isSubmitting={initiate.isPending}
+        error={actionError}
       />
 
       <EvictionCaseDetailModal
         evictionCase={activeCase}
-        onClose={() => setActiveCaseId(null)}
+        onClose={closeModals}
         onIssueNotice={(id, cureDays) => issueNotice.mutate({ id, cureDays })}
         onMarkFiled={(id) => markFiled.mutate(id)}
         onResolve={(id, resolutionNotes) => resolve.mutate({ id, resolutionNotes })}
@@ -144,6 +171,7 @@ export default function LandlordEvictionsPage() {
         onDownloadPdf={(id) => downloadNotice.mutate(id)}
         isDownloading={downloadNotice.isPending}
         downloadError={downloadNotice.error instanceof Error ? downloadNotice.error.message : null}
+        actionError={actionError}
         isActing={isActing}
       />
     </>

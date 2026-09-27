@@ -19,11 +19,15 @@ import {
 } from 'lucide-react-native';
 import {
   Badge,
+  Button,
   Card,
+  describeProperty,
+  IconButton,
   Price,
   Progress,
   PropertyCard,
   Screen,
+  SectionHeader,
   Skeleton,
   Text,
   useTheme,
@@ -132,6 +136,8 @@ export default function RenterHome() {
         listings.refetch();
         applications.refetch();
         moveInChecklist.refetch();
+        notifications.refetch();
+        kyc.refetch();
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -141,40 +147,20 @@ export default function RenterHome() {
           </Text>
           <Text variant="title">{firstName(profile?.legalName)}</Text>
         </View>
-        <Pressable
+        <IconButton
           onPress={() => router.push('/(app)/notifications')}
-          accessibilityRole="button"
-          accessibilityLabel={
-            unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
-          }
-          hitSlop={10}
-        >
-          <Bell size={22} color={colors.foreground} />
-          {unreadCount > 0 ? (
-            <View
-              style={{
-                position: 'absolute',
-                top: -3,
-                right: -3,
-                minWidth: 16,
-                height: 16,
-                paddingHorizontal: 4,
-                borderRadius: 8,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colors.destructive,
-              }}
-            >
-              <Text variant="caption" style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </Text>
-            </View>
-          ) : null}
-        </Pressable>
+          accessibilityLabel="Notifications"
+          badge={unreadCount}
+          icon={<Bell size={21} color={colors.foreground} />}
+        />
       </View>
 
       {showVerifyNudge ? (
-        <Pressable onPress={() => router.push('/(app)/verify-identity')}>
+        <Pressable
+          onPress={() => router.push('/(app)/verify-identity')}
+          accessibilityRole="button"
+          accessibilityLabel="Verify your identity. Unlocks applications and offers."
+        >
           <Card
             elevated
             style={{
@@ -197,7 +183,11 @@ export default function RenterHome() {
           </Card>
         </Pressable>
       ) : activeApplication ? (
-        <Pressable onPress={() => router.push(`/(app)/application/${activeApplication.id}`)}>
+        <Pressable
+          onPress={() => router.push(`/(app)/application/${activeApplication.id}`)}
+          accessibilityRole="button"
+          accessibilityLabel={`Open application ${activeApplication.title}`}
+        >
           <Card elevated padding="none">
             <View
               style={{
@@ -231,7 +221,11 @@ export default function RenterHome() {
       ) : null}
 
       {moveInItems.length > 0 ? (
-        <Pressable onPress={() => router.push('/(app)/move-checklist')}>
+        <Pressable
+          onPress={() => router.push('/(app)/move-checklist')}
+          accessibilityRole="button"
+          accessibilityLabel={`Move-in checklist, ${moveInDone} of ${moveInItems.length} complete`}
+        >
           <Card elevated>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
               <CheckSquare size={20} color={colors.primary} />
@@ -260,14 +254,19 @@ export default function RenterHome() {
               key={key}
               onPress={onPress}
               disabled={!onPress}
-              style={{
+              accessibilityRole="button"
+              accessibilityLabel={
+                stats.isPending ? `${label}, loading` : `${label}: ${stats.data?.[key] ?? 0}`
+              }
+              style={({ pressed }) => ({
                 flex: 1,
                 alignItems: 'center',
                 gap: 6,
                 paddingVertical: spacing.lg,
                 borderLeftWidth: i > 0 ? 1 : 0,
                 borderLeftColor: colors.border,
-              }}
+                backgroundColor: pressed ? colors.secondary : 'transparent',
+              })}
             >
               <Icon size={17} color={colors.mutedForeground} />
               {stats.isPending ? (
@@ -286,32 +285,44 @@ export default function RenterHome() {
       </Card>
 
       {stats.isError ? (
-        <Card elevated>
+        <Card elevated style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Couldn’t load your dashboard</Text>
-          <Text variant="callout" color="mutedForeground" style={{ marginTop: 4 }}>
-            Pull down to try again.
+          <Text variant="callout" color="mutedForeground">
+            Check your connection, then try again.
           </Text>
+          <Button
+            label="Try again"
+            variant="secondary"
+            size="sm"
+            fullWidth={false}
+            onPress={() => stats.refetch()}
+          />
         </Card>
       ) : null}
 
       <View style={{ gap: spacing.md }}>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Text variant="heading">Featured for you</Text>
-          <Pressable
-            onPress={() => router.push('/(app)/(renter)/discover')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
-          >
-            <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-              See all
-            </Text>
-            <ChevronRight size={15} color={colors.primary} />
-          </Pressable>
-        </View>
+        <SectionHeader
+          title="Featured for you"
+          description="Verified homes matched to your activity"
+          actionLabel="See all"
+          onAction={() => router.push('/(app)/(renter)/discover')}
+        />
 
         {listings.isPending ? (
           <Skeleton height={220} radius={16} />
+        ) : listings.isError && !hero ? (
+          <Card elevated style={{ gap: spacing.sm }}>
+            <Text variant="callout" color="mutedForeground">
+              We couldn’t load recommendations right now.
+            </Text>
+            <Button
+              label="Try again"
+              variant="secondary"
+              size="sm"
+              fullWidth={false}
+              onPress={() => listings.refetch()}
+            />
+          </Card>
         ) : hero ? (
           <HeroCard property={hero} saved={savedIds.has(hero.id)} onToggleSave={toggle} />
         ) : (
@@ -359,24 +370,37 @@ function HeroCard({
 }) {
   const { colors, radius } = useTheme();
   return (
-    <Pressable onPress={() => router.push(`/(app)/property/${property.id}`)}>
-      <View
+    <View
+      style={{
+        height: 220,
+        borderRadius: radius.lg,
+        overflow: 'hidden',
+        backgroundColor: colors.secondary,
+      }}
+    >
+      <Pressable
+        onPress={() => router.push(`/(app)/property/${property.id}`)}
+        accessibilityRole="button"
+        accessibilityLabel={describeProperty(property)}
         style={{
-          height: 220,
-          borderRadius: radius.lg,
-          overflow: 'hidden',
-          backgroundColor: colors.secondary,
+          flex: 1,
         }}
       >
         {property.image ? (
           <Image
             source={{ uri: property.image }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={property.id}
             transition={250}
+            accessible={false}
             style={StyleSheet.absoluteFill}
           />
         ) : (
-          <LinearGradient colors={['#1f74e6', '#0a4fb0']} style={StyleSheet.absoluteFill} />
+          <LinearGradient
+            colors={[colors.primaryHover, colors.primary]}
+            style={StyleSheet.absoluteFill}
+          />
         )}
         <LinearGradient
           colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.05)', 'rgba(0,0,0,0.85)']}
@@ -406,36 +430,22 @@ function HeroCard({
                 backgroundColor: 'rgba(9,32,66,0.72)',
               }}
             >
-              <ShieldCheck size={12} color="#fff" />
-              <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }}>
+              <ShieldCheck size={12} color={colors.primaryForeground} />
+              <Text
+                variant="caption"
+                style={{ color: colors.primaryForeground, fontWeight: '700' }}
+              >
                 Verified
               </Text>
             </View>
           ) : (
             <View />
           )}
-          <Pressable
-            onPress={() => onToggleSave(property.id)}
-            hitSlop={8}
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 15,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(9,32,66,0.4)',
-            }}
-          >
-            <Heart
-              size={14}
-              color={saved ? colors.destructive : '#fff'}
-              fill={saved ? colors.destructive : 'transparent'}
-            />
-          </Pressable>
+          <View style={{ width: 36 }} />
         </View>
 
         <View style={{ position: 'absolute', left: 16, right: 16, bottom: 14, gap: 3 }}>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ color: '#fff' }}>
+          <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.primaryForeground }}>
             {property.title}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -448,11 +458,37 @@ function HeroCard({
             amount={property.price}
             period={property.period}
             variant="callout"
-            style={{ color: '#fff', fontWeight: '700' }}
+            style={{ color: colors.primaryForeground, fontWeight: '700' }}
             periodColor="rgba(255,255,255,0.75)"
           />
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+      <Pressable
+        onPress={() => onToggleSave(property.id)}
+        hitSlop={7}
+        accessibilityRole="button"
+        accessibilityLabel={
+          saved ? `Remove ${property.title} from saved` : `Save ${property.title}`
+        }
+        accessibilityState={{ selected: saved }}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(9,32,66,0.54)',
+        }}
+      >
+        <Heart
+          size={16}
+          color={saved ? colors.destructive : colors.primaryForeground}
+          fill={saved ? colors.destructive : 'transparent'}
+        />
+      </Pressable>
+    </View>
   );
 }

@@ -3,11 +3,12 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ChevronRight, Download, ReceiptText, Wallet } from 'lucide-react-native';
+import { ChevronRight, Download, ReceiptText, Wallet } from 'lucide-react-native';
 import {
   Card,
   Divider,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -19,6 +20,7 @@ import { landlordApi } from '@/lib/api/landlord';
 import { IncomeExpenseChart } from '@/components/landlord/IncomeExpenseChart';
 import { ApiError } from '@/lib/api/client';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordFinancials() {
   const { colors, spacing } = useTheme();
@@ -51,38 +53,22 @@ export default function LandlordFinancials() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text variant="title">Financials</Text>
-        </View>
-        <Pressable
-          onPress={exportCsv}
-          disabled={exporting}
-          accessibilityRole="button"
-          accessibilityLabel="Export as CSV"
-          accessibilityState={{ busy: exporting }}
-          hitSlop={10}
-        >
-          <Download size={20} color={exporting ? colors.mutedForeground : colors.foreground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Portfolio performance"
+        title="Financials"
+        subtitle="Income, expenses and net returns"
+        onBack={() => router.back()}
+        accessory={
+          <IconButton
+            onPress={exportCsv}
+            disabled={exporting}
+            accessibilityLabel="Export as CSV"
+            icon={
+              <Download size={20} color={exporting ? colors.mutedForeground : colors.foreground} />
+            }
+          />
+        }
+      />
 
       {stats.isError ? (
         <ErrorState onRetry={() => stats.refetch()} />

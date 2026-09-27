@@ -1,19 +1,41 @@
 import { env } from '../env';
+import {
+  clearStepUpToken,
+  currentStepUpToken,
+  obtainStepUpToken,
+  STEP_UP_HEADER,
+  STEP_UP_REQUIRED,
+} from '../stepUp';
+
+/**
+ * Extra fields a trust or verification gate puts on its 403, e.g.
+ * `{ error: 'TRUST_TIER_REQUIRED', tierRequired: 3, currentTier: 2 }`.
+ */
+export interface ApiErrorDetails {
+  tierRequired?: number;
+  currentTier?: number;
+  /** Why a tier the user holds was still refused, e.g. `SCORE_BELOW_TIER3_MIN`. */
+  reason?: string;
+  /**
+   * The rest of the envelope, verbatim.
+   *
+   * The named fields above are the two or three a gate puts on its 403, but some
+   * refusals carry structure the caller has to act on rather than print: an
+   * estate's watch list answers with the entries that fired and the reason on
+   * file, and a guard can only judge whether to override it if they can see it.
+   * Without this every such caller would be casting `unknown` and re-declaring
+   * the shape it already had.
+   */
+  [key: string]: unknown;
+}
 
 export class ApiError extends Error {
   status: number;
   /** Machine-readable code from the API envelope, e.g. `DATABASE_ERROR`. */
   code?: string;
-  /**
-   * The raw response body, when there was one.
-   *
-   * `unknown` because its shape is the endpoint's own, but some refusals carry
-   * structure the UI has to act on rather than print — an estate's watch list
-   * answers 403 with the entries that fired and the reason on file, and a guard
-   * can only judge whether to override it if they can see it.
-   */
-  details?: unknown;
-  constructor(message: string, status: number, code?: string, details?: unknown) {
+  /** The whole response body, with the named gate fields above lifted out of it. */
+  details: ApiErrorDetails;
+  constructor(message: string, status: number, code?: string, details: ApiErrorDetails = {}) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -35,6 +57,8 @@ export interface ApiRequest extends Omit<RequestInit, 'body' | 'headers'> {
   anonymous?: boolean;
   /** Internal: prevents infinite retry loops after a refresh. */
   _retry?: boolean;
+  /** Internal: the request has already been replayed with a step-up token. */
+  _stepUp?: boolean;
 }
 
 /**
@@ -76,14 +100,25 @@ async function readJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     let code: string | undefined;
-    let details: unknown;
+    const details: ApiErrorDetails = {};
     try {
-      const payload = (await res.json()) as { message?: string; error?: string };
+      const payload = (await res.json()) as {
+        message?: string;
+        error?: string;
+        // The API's exception filter names these `required` and `tier`.
+        required?: unknown;
+        tier?: unknown;
+        reason?: unknown;
+      };
       message = payload.message || message;
       code = payload.error;
-      // The whole envelope, not only the two fields read above: a caller that
-      // needs to act on a refusal rather than echo it has nowhere else to look.
-      details = payload;
+      // The named gate fields first, because the API spells them differently on
+      // the wire. Then the whole envelope as well, so a caller that has to act
+      // on a refusal rather than echo it has somewhere to look.
+      if (typeof payload.required === 'number') details.tierRequired = payload.required;
+      if (typeof payload.tier === 'number') details.currentTier = payload.tier;
+      if (typeof payload.reason === 'string') details.reason = payload.reason;
+      Object.assign(details, payload);
     } catch {
       // non-JSON body
     }
@@ -100,8 +135,9 @@ async function readJson<T>(res: Response): Promise<T> {
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promise<T> {
-  const { body, headers, anonymous, _retry, ...init } = options;
+  const { body, headers, anonymous, _retry, _stepUp, ...init } = options;
   const token = anonymous ? null : hooks.getAccessToken();
+  const stepUp = anonymous ? null : currentStepUpToken();
 
   const res = await send(
     path,
@@ -112,6 +148,7 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
         'Content-Type': 'application/json',
         'x-client-app': env.clientApp,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
         ...headers,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -125,7 +162,23 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
     if (fresh) return apiFetch<T>(path, { ...options, _retry: true });
   }
 
-  return readJson<T>(res);
+  try {
+    return await readJson<T>(res);
+  } catch (err) {
+    // A sensitive change: confirm it's the account holder, then replay once.
+    if (err instanceof ApiError && err.code === STEP_UP_REQUIRED && !_stepUp) {
+      clearStepUpToken();
+      const fresh = await obtainStepUpToken();
+      if (fresh) {
+        return apiFetch<T>(path, {
+          ...options,
+          _stepUp: true,
+          headers: { ...headers, [STEP_UP_HEADER]: fresh },
+        });
+      }
+    }
+    throw err;
+  }
 }
 
 /**

@@ -31,6 +31,17 @@ export interface GatemanPost {
   selectEstate: (estateId: string) => void;
   selectGate: (gateId: string) => void;
   isLoading: boolean;
+  /**
+   * The post could not be resolved at all — almost always no network.
+   *
+   * Worth surfacing rather than leaving the console to render an empty
+   * assignment: a guard who cannot load their estate needs to know that is why,
+   * and that the check-ins already queued on the device are still safe.
+   */
+  isError: boolean;
+  /** Retries the assignment. Used by the error state's Retry and pull-to-refresh. */
+  refetch: () => void;
+  isRefetching: boolean;
 }
 
 const GatemanPostContext = createContext<GatemanPost | null>(null);
@@ -157,6 +168,15 @@ export function GatemanPostProvider({ children }: { children: ReactNode }) {
       selectEstate,
       selectGate,
       isLoading: !restored || estatesQuery.isLoading || (!!estate && gatesQuery.isLoading),
+      // A failed gate lookup is only fatal when the estate itself loaded: a
+      // guard at a single-estate posting whose gates call failed can still work,
+      // and blocking them at the barrier would be worse than a missing gate.
+      isError: estatesQuery.isError,
+      refetch: () => {
+        void estatesQuery.refetch();
+        void gatesQuery.refetch();
+      },
+      isRefetching: estatesQuery.isRefetching || gatesQuery.isRefetching,
     }),
     [
       estates,
@@ -167,7 +187,12 @@ export function GatemanPostProvider({ children }: { children: ReactNode }) {
       selectGate,
       restored,
       estatesQuery.isLoading,
+      estatesQuery.isError,
+      estatesQuery.isRefetching,
+      estatesQuery.refetch,
       gatesQuery.isLoading,
+      gatesQuery.isRefetching,
+      gatesQuery.refetch,
     ]
   );
 

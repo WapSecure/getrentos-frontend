@@ -85,7 +85,7 @@ export const LeaseView = () => {
       setToast({
         message:
           updated.status === 'awaiting_payment'
-            ? 'Signature recorded. The lease now depends on your first payment into escrow.'
+            ? 'Signature recorded. The lease now depends on your first payment, which GetRentos holds until you have the keys.'
             : 'Your signature was recorded.',
         variant: 'success',
       });

@@ -13,7 +13,15 @@ import {
   Check,
   type LucideIcon,
 } from 'lucide-react-native';
-import { AuthScaffold, Button, PressableScale, Text, useTheme } from '@getrentos/ui-native';
+import {
+  AuthScaffold,
+  Button,
+  FormAlert,
+  PressableScale,
+  Text,
+  useReducedMotion,
+  useTheme,
+} from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
@@ -31,6 +39,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 export default function SignUpRoles() {
   const { colors, spacing, radius } = useTheme();
+  const reduceMotion = useReducedMotion();
   const { draft, selectedRoles, multiRole, toggleRole, setMultiRole, createAccount, reset } =
     useSignup();
   const [busy, setBusy] = useState(false);
@@ -61,12 +70,16 @@ export default function SignUpRoles() {
       title="How will you use GetRentos?"
       subtitle="Pick what fits today — you can add more roles later, with supporting documents."
       progress={1}
+      progressLabel="Sign-up step 3 of 3"
       onBack={() => router.back()}
       footer={
         <>
           <PressableScale
             haptic
             onPress={() => setMultiRole(!multiRole)}
+            accessibilityRole="switch"
+            accessibilityLabel="Use GetRentos in more than one way"
+            accessibilityState={{ checked: multiRole }}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -103,11 +116,7 @@ export default function SignUpRoles() {
             disabled={selectedRoles.length === 0}
             onPress={submit}
           />
-          {error ? (
-            <Text variant="callout" color="destructive" center>
-              {error}
-            </Text>
-          ) : null}
+          <FormAlert message={error} />
           <PressableScale
             haptic={false}
             onPress={() => {
@@ -128,9 +137,20 @@ export default function SignUpRoles() {
           const Icon = ICONS[role.icon] ?? Home;
           const selected = selectedRoles.includes(role.id as SignupRoleId);
           return (
-            <Animated.View key={role.id} entering={FadeInDown.duration(280).delay(i * 45)}>
+            <Animated.View
+              key={role.id}
+              entering={reduceMotion ? undefined : FadeInDown.duration(280).delay(i * 45)}
+            >
               <PressableScale
                 onPress={() => toggleRole(role.id)}
+                accessibilityRole={multiRole ? 'checkbox' : 'radio'}
+                accessibilityLabel={`${role.name}. ${role.tagline}`}
+                accessibilityHint={
+                  role.requires.length
+                    ? `Verification required: ${role.requires.map((req) => VERIFICATION_LABEL[req]).join(', ')}`
+                    : undefined
+                }
+                accessibilityState={{ checked: selected }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -173,7 +193,7 @@ export default function SignUpRoles() {
                           backgroundColor: colors.secondary,
                         }}
                       >
-                        <Text variant="caption" color="mutedForeground" style={{ fontSize: 10.5 }}>
+                        <Text variant="caption" color="mutedForeground">
                           {VERIFICATION_LABEL[req]}
                         </Text>
                       </View>

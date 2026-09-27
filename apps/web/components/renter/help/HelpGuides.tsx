@@ -43,13 +43,13 @@ const helpGuides: Guide[] = [
   },
   {
     id: '3',
-    title: 'Understanding your escrow payment',
+    title: 'Understanding payment protection',
     description: 'How your rent payments are protected from start to finish',
     category: 'payments',
     duration: '4 min',
     steps: [
       'Select your payment method on the Payments tab',
-      'Funds are transferred into secure escrow, not directly to the landlord',
+      'Your money goes to GetRentos to hold, not straight to the landlord',
       'GetRentos verifies lease conditions are met',
       'Funds are automatically released to your landlord',
       'A receipt and transaction record is generated for your records',

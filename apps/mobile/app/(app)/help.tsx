@@ -2,17 +2,10 @@ import { useState } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronUp,
-  Clock,
-  Mail,
-  MessageCircle,
-  Phone,
-} from 'lucide-react-native';
+import { ChevronDown, ChevronUp, Clock, Mail, MessageCircle, Phone } from 'lucide-react-native';
 import { Card, Divider, Text, useTheme } from '@getrentos/ui-native';
 import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const SUPPORT_EMAIL = 'support@getrentos.test';
 const SUPPORT_PHONE = '+2348000000000';
@@ -27,7 +20,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'How are payments protected?',
     answer:
-      'Funds are held in escrow until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
+      'GetRentos holds the money until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
   },
   {
     question: 'How do I contact someone about my account?',
@@ -50,26 +43,12 @@ export default function HelpCenter() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Help</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Help centre"
+        title="Help"
+        subtitle="Answers and ways to reach the GetRentos team"
+        onBack={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={{

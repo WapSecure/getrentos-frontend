@@ -4,19 +4,13 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  AlertTriangle,
-  ChevronLeft,
-  FileStack,
-  Receipt as ReceiptIcon,
-  Wallet,
-} from 'lucide-react-native';
+import { AlertTriangle, FileStack, Receipt as ReceiptIcon, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -33,10 +27,10 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function Payments() {
   const { colors, spacing, radius } = useTheme();
-  const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
   const [disputePayment, setDisputePayment] = useState<Payment | null>(null);
@@ -76,45 +70,26 @@ export default function Payments() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Payments
-        </Text>
-        <Pressable
-          onPress={() => router.push('/(app)/payment-methods')}
-          accessibilityRole="button"
-          accessibilityLabel="Payment methods"
-          hitSlop={10}
-          style={{ marginRight: spacing.lg }}
-        >
-          <Wallet size={20} color={colors.foreground} />
-        </Pressable>
-        <Pressable
-          onPress={() => router.push('/(app)/receipts')}
-          accessibilityRole="button"
-          accessibilityLabel="Receipts"
-          hitSlop={10}
-        >
-          <FileStack size={20} color={colors.foreground} />
-        </Pressable>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Renter finance"
+        title="Payments"
+        subtitle="Rent, receipts and payment history"
+        onBack={() => router.back()}
+        accessory={
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <IconButton
+              onPress={() => router.push('/(app)/payment-methods')}
+              accessibilityLabel="Payment methods"
+              icon={<Wallet size={19} color={colors.foreground} />}
+            />
+            <IconButton
+              onPress={() => router.push('/(app)/receipts')}
+              accessibilityLabel="Receipts"
+              icon={<FileStack size={19} color={colors.foreground} />}
+            />
+          </View>
+        }
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
@@ -215,7 +190,12 @@ function PaymentRow({
           <Pressable
             onPress={onPay}
             disabled={paying}
+            accessibilityRole="button"
+            accessibilityLabel={paying ? 'Paying' : 'Pay now'}
+            accessibilityState={{ disabled: paying, busy: paying }}
             style={{
+              minHeight: 44,
+              justifyContent: 'center',
               paddingVertical: 8,
               paddingHorizontal: 16,
               borderRadius: 999,
@@ -230,7 +210,9 @@ function PaymentRow({
         ) : p.receiptUrl ? (
           <Pressable
             onPress={() => Linking.openURL(p.receiptUrl!)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            accessibilityRole="link"
+            accessibilityLabel="Open receipt"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 44 }}
           >
             <ReceiptIcon size={14} color={colors.primary} />
             <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
@@ -248,7 +230,12 @@ function PaymentRow({
           </Text>
         </View>
       ) : disputable ? (
-        <Pressable onPress={onDispute} style={{ marginTop: spacing.sm }}>
+        <Pressable
+          onPress={onDispute}
+          accessibilityRole="button"
+          accessibilityLabel="Dispute this payment"
+          style={{ marginTop: spacing.xs, minHeight: 44, justifyContent: 'center' }}
+        >
           <Text
             variant="caption"
             color="mutedForeground"

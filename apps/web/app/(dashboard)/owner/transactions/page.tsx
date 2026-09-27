@@ -69,9 +69,9 @@ export default function OwnerTransactionsPage() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Escrow & Transactions</h1>
+        <h1 className="text-2xl font-bold text-foreground">Sales in progress</h1>
         <p className="text-muted-foreground mt-1">
-          {isLoading ? 'Loading…' : `${total} sale transaction${total === 1 ? '' : 's'} in escrow`}
+          {isLoading ? 'Loading…' : `${total} sale${total === 1 ? '' : 's'} protected by GetRentos`}
         </p>
       </div>
 
@@ -116,7 +116,7 @@ export default function OwnerTransactionsPage() {
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
             {total === 0
-              ? 'Once you accept a buyer offer, the escrow transaction will appear here.'
+              ? 'Once you accept a buyer offer, the sale and its protected payment will appear here.'
               : 'Try adjusting your search or filter.'}
           </p>
         </div>

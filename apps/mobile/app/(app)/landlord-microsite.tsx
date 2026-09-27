@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Camera, ChevronLeft, Globe, ImageIcon } from 'lucide-react-native';
+import { Camera, Globe, ImageIcon } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -20,43 +20,28 @@ import { qk } from '@/lib/query/keys';
 import { landlordApi, type MicrositeSettings } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordMicrosite() {
   const { colors, spacing, radius } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const query = useQuery({ queryKey: qk.landlord.microsite, queryFn: landlordApi.microsite });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Microsite
-        </Text>
-        {query.data ? (
-          <Badge
-            label={query.data.enabled ? 'Live' : 'Off'}
-            tone={query.data.enabled ? 'success' : 'neutral'}
-          />
-        ) : null}
-      </View>
+      <DetailScreenHeader
+        eyebrow="Public presence"
+        title="Microsite"
+        subtitle="Your branded property portfolio page"
+        onBack={() => router.back()}
+        accessory={
+          query.data ? (
+            <Badge
+              label={query.data.enabled ? 'Live' : 'Off'}
+              tone={query.data.enabled ? 'success' : 'neutral'}
+            />
+          ) : null
+        }
+      />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
@@ -143,6 +128,9 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
             source={{ uri: initial.bannerUrl }}
             style={{ width: '100%', height: '100%' }}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            recyclingKey={initial.bannerUrl}
+            accessible={false}
           />
         ) : (
           <View style={{ alignItems: 'center', gap: 6 }}>
@@ -168,8 +156,8 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
             backgroundColor: colors.scrim,
           }}
         >
-          <Camera size={13} color="#fff" />
-          <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
+          <Camera size={13} color={colors.primaryForeground} />
+          <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '600' }}>
             {uploadBanner.isPending ? 'Uploading…' : initial.bannerUrl ? 'Change' : 'Add'}
           </Text>
         </View>

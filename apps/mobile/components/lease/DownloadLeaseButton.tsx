@@ -12,7 +12,17 @@ import { ApiError } from '@/lib/api/client';
  * how a file reaches the user's own storage on both platforms. The endpoint
  * streams bytes behind the bearer token, so it cannot be opened as a plain URL.
  */
-export function DownloadLeaseButton() {
+export function DownloadLeaseButton({
+  leaseId,
+  label = 'Download lease PDF',
+  onOpened,
+}: {
+  /** A specific lease; defaults to the current one. */
+  leaseId?: string;
+  label?: string;
+  /** Called once the document has been handed to the viewer. */
+  onOpened?: () => void;
+} = {}) {
   const { colors, spacing, radius } = useTheme();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -20,7 +30,7 @@ export function DownloadLeaseButton() {
   const download = async () => {
     setBusy(true);
     try {
-      const { bytes } = await leaseApi.downloadPdf();
+      const { bytes } = await leaseApi.downloadPdf(leaseId);
       const file = new File(Paths.cache, 'lease.pdf');
       file.create({ overwrite: true });
       file.write(bytes);
@@ -31,8 +41,10 @@ export function DownloadLeaseButton() {
           dialogTitle: 'Your lease',
           UTI: 'com.adobe.pdf',
         });
+        onOpened?.();
       } else {
         Alert.alert('Lease saved', 'The PDF was saved to this device.');
+        onOpened?.();
       }
     } catch (err) {
       toast.show(err instanceof ApiError ? err.message : 'Could not download the lease.', 'error');
@@ -46,7 +58,7 @@ export function DownloadLeaseButton() {
       onPress={download}
       disabled={busy}
       accessibilityRole="button"
-      accessibilityLabel="Download lease PDF"
+      accessibilityLabel={label}
       accessibilityState={{ busy }}
     >
       <View
@@ -64,7 +76,7 @@ export function DownloadLeaseButton() {
       >
         <Download size={17} color={colors.primary} />
         <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-          {busy ? 'Preparing…' : 'Download lease PDF'}
+          {busy ? 'Preparing…' : label}
         </Text>
       </View>
     </Pressable>

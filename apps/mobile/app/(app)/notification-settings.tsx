@@ -1,8 +1,7 @@
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
 import {
   Card,
   Divider,
@@ -23,6 +22,7 @@ import {
   type NotificationPreference,
 } from '@/lib/api/notificationPreferences';
 import { ApiError } from '@/lib/api/client';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const CHANNELS: { key: 'email' | 'push' | 'inApp'; label: string }[] = [
   { key: 'push', label: 'Push' },
@@ -73,26 +73,12 @@ export default function NotificationSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Notifications</Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Communication"
+        title="Notifications"
+        subtitle="Choose what reaches you and where"
+        onBack={() => router.back()}
+      />
 
       {query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>

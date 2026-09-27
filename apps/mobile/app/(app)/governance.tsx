@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, Check, ChevronLeft, FileText } from 'lucide-react-native';
+import { BookOpen, Check, FileText } from 'lucide-react-native';
 import {
   Badge,
   type BadgeTone,
@@ -22,39 +21,13 @@ import { SignaturePad } from '@/components/SignaturePad';
 import { residentApi, type GovernanceRecord, type GovernanceRecordType } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 const TYPE_LABEL: Record<GovernanceRecordType, string> = {
   bylaws: 'Bylaws',
   meeting_minutes: 'Meeting Minutes',
   other: 'Document',
 };
-
-function BackHeader({ title }: { title: string }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">{title}</Text>
-    </View>
-  );
-}
 
 export default function ResidentGovernance() {
   const { colors, spacing } = useTheme();
@@ -81,7 +54,12 @@ export default function ResidentGovernance() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader title="Governance" />
+      <DetailScreenHeader
+        eyebrow="Community records"
+        title="Governance"
+        subtitle="Bylaws, minutes and required signatures"
+        onBack={() => router.back()}
+      />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         {query.isLoading ? (
           <View style={{ gap: spacing.md }}>
@@ -214,7 +192,7 @@ function SignForm({
   return (
     <View style={{ gap: spacing.lg, alignItems: 'center' }}>
       <Text variant="callout" color="mutedForeground" center>
-        Sign below to confirm you've read and agree to this document.
+        Sign below to confirm you&apos;ve read and agree to this document.
       </Text>
       <SignaturePad onChange={setSignature} />
       <Button

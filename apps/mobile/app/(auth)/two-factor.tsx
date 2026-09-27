@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { ShieldCheck } from 'lucide-react-native';
-import { AuthScaffold, Button, OtpInput, Text, useTheme } from '@getrentos/ui-native';
+import { AuthScaffold, Button, FormAlert, OtpInput, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { haptics } from '@/lib/haptics';
@@ -57,6 +56,8 @@ export default function TwoFactor() {
     >
       <View style={{ gap: spacing['2xl'], alignItems: 'center' }}>
         <View
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
           style={{
             width: 56,
             height: 56,
@@ -70,16 +71,22 @@ export default function TwoFactor() {
         </View>
 
         <View style={{ alignSelf: 'stretch' }}>
-          <OtpInput value={code} onChange={setCode} onComplete={submit} autoFocus />
+          <OtpInput
+            value={code}
+            onChange={(v) => {
+              setCode(v);
+              if (error) setError(null);
+            }}
+            onComplete={submit}
+            invalid={!!error}
+            disabled={submitting}
+            autoFocus
+          />
         </View>
 
-        {error ? (
-          <Animated.View entering={FadeIn.duration(160)}>
-            <Text variant="callout" color="destructive" center>
-              {error}
-            </Text>
-          </Animated.View>
-        ) : null}
+        <View style={{ alignSelf: 'stretch' }}>
+          <FormAlert message={error} />
+        </View>
       </View>
     </AuthScaffold>
   );

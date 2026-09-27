@@ -3,10 +3,6 @@ import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 
-/** Official GetRentos mark geometry — do not alter. */
-const MARK_PATH =
-  'M16 44 64 14 112 44 112 70 96 70 96 53 64 33 32 53 32 91 64 110 88 96 88 79 68 79 68 63 104 63 104 105 64 129 16 100Z';
-
 export interface BrandLogoProps {
   /** Height of the mark in px. Default 24. */
   size?: number;
@@ -94,7 +90,15 @@ export function BrandMark({
           </LinearGradient>
         </Defs>
       ) : null}
-      <Path d={MARK_PATH} fill={fill} />
+      <Path
+        d="M18 122 64 24l46 98"
+        fill="none"
+        stroke={fill}
+        strokeWidth={24}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path d="M64 122V96" fill="none" stroke={fill} strokeWidth={16} strokeLinecap="round" />
     </Svg>
   );
 }

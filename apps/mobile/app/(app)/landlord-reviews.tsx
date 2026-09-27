@@ -1,14 +1,15 @@
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Star } from 'lucide-react-native';
+import { Star } from 'lucide-react-native';
 import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordReview } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
 import { StarRating } from '@/components/reviews/StarRating';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function LandlordReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -28,28 +29,12 @@ export default function LandlordReviews() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
-          paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          Reviews
-        </Text>
-      </View>
+      <DetailScreenHeader
+        eyebrow="Reputation"
+        title="Reviews"
+        subtitle="Tenant feedback and performance trends"
+        onBack={() => router.back()}
+      />
 
       {query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />

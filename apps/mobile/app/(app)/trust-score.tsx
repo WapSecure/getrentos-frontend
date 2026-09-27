@@ -1,9 +1,8 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  ChevronLeft,
   CheckCircle,
   Crown,
   Mail,
@@ -28,6 +27,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { trustScoreApi, type TrustBadge, type VerificationItem } from '@/lib/api/trustScore';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 const ICONS: Record<string, typeof Shield> = {
   User,
@@ -63,15 +63,13 @@ export default function TrustScore() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Trust score</Text>
+        <DetailHeader
+          eyebrow="Renter reputation"
+          title="Trust score"
+          subtitle="Verification, payment behavior and earned badges"
+          onBack={() => router.back()}
+          style={{ flex: 1 }}
+        />
       </View>
 
       {query.isLoading ? (

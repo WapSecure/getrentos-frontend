@@ -2,7 +2,7 @@ import { Pressable, Share, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Gift, Share2, Users } from 'lucide-react-native';
+import { Gift, Share2, Users } from 'lucide-react-native';
 import {
   Card,
   Divider,
@@ -17,6 +17,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { referralsApi, type ReferredUser } from '@/lib/api/referrals';
 import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function Referrals() {
   const { colors, spacing, radius } = useTheme();
@@ -43,15 +44,13 @@ export default function Referrals() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title">Referrals</Text>
+        <DetailHeader
+          eyebrow="Rewards"
+          title="Referrals"
+          subtitle="Invite trusted people and track earnings"
+          onBack={() => router.back()}
+          style={{ flex: 1 }}
+        />
       </View>
 
       {query.isLoading ? (

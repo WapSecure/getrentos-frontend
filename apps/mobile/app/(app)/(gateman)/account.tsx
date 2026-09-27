@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import { useState } from 'react';
-import { LogOut, MapPin, ShieldCheck } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { LogOut, MapPin, KeyRound, ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -14,6 +15,8 @@ import {
 } from '@getrentos/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { SettingsGroup } from '@/components/account/SettingsList';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 
 export default function GatemanAccount() {
@@ -41,6 +44,10 @@ export default function GatemanAccount() {
             </View>
           ) : null}
         </View>
+
+        {/* Portals, not posts: for an account that is also a landlord or a buyer.
+            Renders nothing for a single-workspace guard. */}
+        <WorkspaceSwitcher />
 
         <Card elevated>
           <Text variant="bodyStrong">Your post</Text>
@@ -78,6 +85,19 @@ export default function GatemanAccount() {
             </Text>
           )}
         </Card>
+
+        <SettingsGroup
+          title="Account"
+          items={[
+            {
+              key: 'security',
+              label: 'Security',
+              description: 'Password, two-factor and app lock',
+              icon: KeyRound,
+              onPress: () => router.push('/(app)/security-settings'),
+            },
+          ]}
+        />
 
         <Card elevated padding="none">
           <View style={{ padding: spacing.lg, gap: spacing.xs }}>

@@ -1,0 +1,38 @@
+name: Mobile quality
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/ui-native/**'
+      - 'packages/tokens/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/mobile-quality.yml'
+  push:
+    branches: [dev]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/ui-native/**'
+      - 'packages/tokens/**'
+      - 'packages/shared/**'
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm quality:mobile
+      - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/getrentos-mobile-web

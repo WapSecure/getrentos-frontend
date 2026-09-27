@@ -22,14 +22,34 @@ export const LeaseTerminationRequest = ({
   const [noticeDate, setNoticeDate] = useState('');
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const open = () => {
+    setError(null);
+    setIsOpen(true);
+  };
+
+  const close = () => {
+    setError(null);
+    setIsOpen(false);
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await onSubmit(noticeDate, reason);
-    setIsSubmitting(false);
-    setIsOpen(false);
-    setNoticeDate('');
-    setReason('');
+    setError(null);
+    try {
+      await onSubmit(noticeDate, reason);
+      setIsOpen(false);
+      setNoticeDate('');
+      setReason('');
+    } catch (err) {
+      // The API refuses a second notice while one is already awaiting a decision.
+      // Letting the rejection escape left the button spinning on "Submitting…"
+      // with the modal open and nothing said about why.
+      setError(err instanceof Error ? err.message : 'Unable to submit this request.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,7 +69,7 @@ export const LeaseTerminationRequest = ({
               <p className="text-sm text-muted-foreground mt-0.5">
                 Request to terminate your lease before the end date
               </p>
-              <Button variant="danger" size="sm" className="mt-2" onClick={() => setIsOpen(true)}>
+              <Button variant="danger" size="sm" className="mt-2" onClick={open}>
                 Request Termination
               </Button>
             </div>
@@ -79,7 +99,7 @@ export const LeaseTerminationRequest = ({
                 <h3 className="font-semibold text-foreground">Request Early Termination</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{propertyName}</p>
               </div>
-              <button onClick={() => setIsOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
+              <button onClick={close} className="p-1 rounded-lg hover:bg-gray-100">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -109,6 +129,16 @@ export const LeaseTerminationRequest = ({
                 />
               </div>
 
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-900/20"
+                >
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                  <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <Button
                   variant="primary"
@@ -119,7 +149,7 @@ export const LeaseTerminationRequest = ({
                 >
                   Submit Request
                 </Button>
-                <Button variant="ghost" fullWidth onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" fullWidth onClick={close}>
                   Cancel
                 </Button>
               </div>
