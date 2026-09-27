@@ -11,6 +11,7 @@ import {
   BedDouble,
   CalendarCheck,
   CalendarX,
+  ClipboardCheck,
   Droplets,
   Clock,
   Heart,
@@ -54,6 +55,12 @@ const CANCELLATION_RULE: Record<ShortletCancellationPolicy, string> = {
   FLEXIBLE: 'Full refund up to 1 day before check-in.',
   MODERATE: 'Full refund 5+ days before; 50% up to 1 day before check-in.',
   STRICT: 'Full refund 7+ days before; 50% from 3 days; no refund within 3 days.',
+};
+
+const CONDITION_LABEL: Record<'excellent' | 'good' | 'fair', string> = {
+  excellent: 'Excellent',
+  good: 'Good',
+  fair: 'Fair',
 };
 
 const hasUtilities = (l: ShortletListing) =>
@@ -387,6 +394,40 @@ export function ShortletListingDetail({
                   </Badge>
                 ))}
               </div>
+            </section>
+          )}
+
+          {listing.inspection && (
+            <section>
+              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold">
+                <ClipboardCheck className="h-5 w-5 text-success" /> Inspected
+              </h2>
+              <p className="mb-3 text-sm text-muted-foreground">
+                A licensed agent, {listing.inspection.agentName}, inspected this property on{' '}
+                {formatDate(listing.inspection.inspectedAt, 'long')} and rated it{' '}
+                <span className="font-medium text-foreground">
+                  {CONDITION_LABEL[listing.inspection.condition].toLowerCase()}
+                </span>{' '}
+                overall.
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {listing.inspection.rooms.map((r, i) => (
+                  <div
+                    key={`${r.room}-${i}`}
+                    className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <span>{r.room}</span>
+                    <Badge variant={r.condition === 'fair' ? 'warning' : 'success'}>
+                      {CONDITION_LABEL[r.condition]}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                The host arranged this inspection. GetRentos checked the agent&rsquo;s licence and
+                identity, and only shows inspections from the last 12 months with no room rated
+                poor.
+              </p>
             </section>
           )}
 
