@@ -3,6 +3,7 @@ import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
   BarChart3,
+  BedDouble,
   Bell,
   Landmark,
   UserRound,
@@ -55,6 +56,13 @@ export default function OwnerAccount() {
       description: 'Transfer papers, shared with buyers',
       icon: FileStack,
       onPress: go('/(app)/owner-documents'),
+    },
+    {
+      key: 'host',
+      label: 'Short-stay hosting',
+      description: 'Nightly stays, bookings and payouts',
+      icon: BedDouble,
+      onPress: go('/(app)/host'),
     },
     {
       key: 'land',

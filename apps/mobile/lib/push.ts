@@ -98,6 +98,8 @@ export interface PushData {
   notificationId?: string;
   type?: string;
   actionUrl?: string;
+  /** The booking a shortlet notification is about, so a tap can open it. */
+  bookingId?: string;
 }
 
 export function readPushData(response: Notifications.NotificationResponse | null): PushData | null {
