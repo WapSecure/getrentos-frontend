@@ -90,8 +90,8 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                   value={formatCurrency(data.platformFees)}
                   hint={
                     data.commissionPct != null && data.commissionPct > 0
-                      ? `${data.commissionPct}% commission`
-                      : 'No commission set'
+                      ? `${data.commissionPct}% on new bookings`
+                      : 'No fee on new bookings'
                   }
                 />
                 <StatCard icon={Wallet} label="Paid out" value={formatCurrency(data.paidOut)} />

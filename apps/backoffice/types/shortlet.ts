@@ -218,10 +218,24 @@ export interface AdminShortletDepositClaim {
 }
 
 export interface AdminShortletFeeConfig {
+  /** Standard commission percent. */
   commissionPct: number;
+  /** Launch rate used instead, for bookings made before introEndsAt. */
+  introCommissionPct?: number;
+  introEndsAt?: string;
+  /** What a booking made right now pays. */
+  currentCommissionPct: number;
   taxName?: string;
   taxPct: number;
   updatedAt: string;
+}
+
+export interface AdminShortletFeeConfigInput {
+  commissionPct: number;
+  taxName?: string;
+  taxPct: number;
+  introCommissionPct: number | null;
+  introEndsAt: string | null;
 }
 
 export type AdminHostPenaltyStatus = 'OUTSTANDING' | 'SETTLED' | 'WAIVED';

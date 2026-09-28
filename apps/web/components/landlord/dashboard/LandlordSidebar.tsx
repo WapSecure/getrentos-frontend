@@ -34,11 +34,7 @@ import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 /** Nav items whose destination page is gated behind the Pro plan (see Batch 7b). */
-const PRO_GATED_ROUTES = new Set<string>([
-  ROUTES.LANDLORD_SHORTLETS,
-  ROUTES.LANDLORD_MICROSITE,
-  ROUTES.LANDLORD_FINANCIALS,
-]);
+const PRO_GATED_ROUTES = new Set<string>([ROUTES.LANDLORD_MICROSITE, ROUTES.LANDLORD_FINANCIALS]);
 
 interface NavItem {
   labelKey: TranslationKey;
