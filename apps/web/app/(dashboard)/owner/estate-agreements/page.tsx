@@ -137,15 +137,17 @@ export default function OwnerEstateAgreementsPage() {
               onChange={(event) => setReason(event.target.value)}
               placeholder={
                 isPending
-                  ? 'Optional: tell the estate why you are declining'
-                  : 'Optional: why you are withdrawing'
+                  ? 'Tell the estate why you are declining (at least 10 characters)'
+                  : 'Optional: why you are withdrawing (at least 10 characters if given)'
               }
             />
             <div className="flex gap-2">
               {isPending ? (
                 <Button
                   variant="outline"
-                  disabled={decline.isPending}
+                  // The API requires a reason of at least 10 characters; an empty
+                  // one used to be sent and refused.
+                  disabled={decline.isPending || reason.trim().length < 10}
                   onClick={() => decline.mutate(agreement.id)}
                 >
                   Confirm decline
@@ -153,7 +155,9 @@ export default function OwnerEstateAgreementsPage() {
               ) : (
                 <Button
                   variant="outline"
-                  disabled={revoke.isPending}
+                  disabled={
+                    revoke.isPending || (reason.trim().length > 0 && reason.trim().length < 10)
+                  }
                   onClick={() => revoke.mutate(agreement.id)}
                 >
                   Confirm withdraw
@@ -226,7 +230,9 @@ export default function OwnerEstateAgreementsPage() {
         </Card>
       )}
 
-      {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { shortletService } from '@/services/shortletService';
 import { formatDeadline, PROBLEM_OPTIONS } from '@/lib/shortlet/guestPromise';
+import { SupportContact } from '@/components/shared/support/SupportContact';
 import type { GuestPromiseProblem, ShortletBooking } from '@/types/shortlet';
 
 const MAX_PHOTOS = 6;
@@ -145,6 +146,10 @@ export function GuestPromiseReportDialog({
             />
           </div>
 
+          <SupportContact
+            lead="Stuck at the gate or need help right now? Talk to us:"
+            context={`Guest Promise, booking ${booking.paymentReference ?? booking.id}`}
+          />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose} disabled={send.isPending}>

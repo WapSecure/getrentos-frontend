@@ -1,4 +1,11 @@
 import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
+import {
+  clearStepUpToken,
+  currentStepUpToken,
+  isStepUpRequired,
+  obtainStepUpToken,
+  STEP_UP_HEADER,
+} from './stepUp';
 import { getAuthToken } from './authStorage';
 
 /**
@@ -50,6 +57,23 @@ export interface ApiResponse<T = unknown> {
   message?: string;
   status?: number;
   requestId?: string;
+  /**
+   * The backend's machine-readable code (`body.error`), when there was one.
+   *
+   * `error` below is a *sentence* — `ApiError.message`, already softened for a
+   * human — so it cannot be branched on. A caller that has to act on a refusal
+   * rather than print it needs the code.
+   */
+  code?: string;
+  /**
+   * The error body as the API sent it.
+   *
+   * Carried through `unwrap` so a refusal that ships structured detail survives
+   * the trip. An estate's watch list answers 403 with the entries that fired and
+   * the reason on file, and a guard can only judge whether to override it if
+   * they can see them.
+   */
+  details?: unknown;
   /** Set when a 403 was rejected by a verification/trust guard — see VERIFICATION_REASONS. */
   reason?: VerificationReason;
   /** TRUST_TIER_REQUIRED only: the minimum tier the action requires (backend `required`). */
@@ -181,6 +205,8 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
         message: err.message,
         status: err.status,
         requestId: err.requestId,
+        code: err.code,
+        details: err.details,
         reason,
         tierRequired: tier?.tierRequired,
         currentTier: tier?.currentTier,
@@ -201,11 +227,12 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
 
 /** Fetches with the Bearer token attached, silently refreshing on 401 once. */
 export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const doFetch = (token: string | null) =>
+  const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) =>
     apiFetch<T>(path, {
       ...options,
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
         ...options.headers,
       },
     });
@@ -213,6 +240,12 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
   try {
     return await doFetch(getAuthToken());
   } catch (err) {
+    // A sensitive change: confirm it's the account holder, then replay once.
+    if (isStepUpRequired(err)) {
+      clearStepUpToken();
+      const stepUp = await obtainStepUpToken();
+      if (stepUp) return doFetch(getAuthToken(), stepUp);
+    }
     // The access token expired — exchange the refresh token for a fresh pair
     // and retry the request once. Single-flight refresh prevents the rotation
     // race when many requests 401 at the same moment.
@@ -267,10 +300,18 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
         current: response.planGateCurrent,
         limit: response.planGateLimit,
       });
-    throw new ApiError(response.status ?? 0, message, {
-      error: response.error,
-      requestId: response.requestId,
-    });
+    // The API's own body where there was one, rather than a two-field stub: the
+    // code and any structured detail are what let a caller tell a refusal it can
+    // act on from a failure it can only report. Falling back to the stub keeps
+    // the old shape for the errors that never had a body.
+    throw new ApiError(
+      response.status ?? 0,
+      message,
+      response.details ?? {
+        error: response.code ?? response.error,
+        requestId: response.requestId,
+      }
+    );
   }
   return response.data as T;
 }

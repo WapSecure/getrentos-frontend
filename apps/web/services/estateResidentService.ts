@@ -12,6 +12,8 @@ import type {
   AmenityBooking,
   CommitteeMember,
   GovernanceRecord,
+  MusterSelfAnswer,
+  ResidentEmergency,
   ResidentHousehold,
   Violation,
   VisitorPass,
@@ -177,6 +179,37 @@ export const estateResidentService = {
       authFetch(`/estate/resident/governance/${recordId}/sign`, {
         method: 'POST',
         body: JSON.stringify({ signatureData }),
+      })
+    );
+  },
+
+  /**
+   * The roll call in progress, or null.
+   *
+   * Null is the ordinary answer and not an error: most of the time the estate is
+   * not on fire. No estate or household id is sent — the household is resolved
+   * from the signed-in user, so there is nothing here to tamper with to read
+   * another household's lines.
+   */
+  async getMyEmergency(): Promise<ApiResponse<ResidentEmergency | null>> {
+    return safeCall(() => authFetch('/estate/resident/emergency'));
+  },
+
+  /**
+   * Answers for your own household.
+   *
+   * Moves this household's residents only. A visitor line stays with the marshal:
+   * the person the estate admitted is not necessarily the person holding the
+   * phone, and a household cannot honestly mark somebody else as accounted for.
+   */
+  async answerMyRollCall(data: {
+    state: MusterSelfAnswer;
+    stateNote?: string;
+  }): Promise<ApiResponse<ResidentEmergency>> {
+    return safeCall(() =>
+      authFetch('/estate/resident/emergency/answer', {
+        method: 'POST',
+        body: JSON.stringify(data),
       })
     );
   },

@@ -53,7 +53,7 @@ export default function OwnerSettings() {
 }
 
 function Form({ initial }: { initial: OwnerPreferences }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [prefs, setPrefs] = useState(initial);
@@ -114,14 +114,6 @@ function Form({ initial }: { initial: OwnerPreferences }) {
         loading={save.isPending}
         onPress={() => save.mutate()}
       />
-      <Text
-        variant="caption"
-        color="mutedForeground"
-        center
-        style={{ color: colors.mutedForeground }}
-      >
-        Password, two-factor and payout settings are on the web dashboard for now.
-      </Text>
     </>
   );
 }

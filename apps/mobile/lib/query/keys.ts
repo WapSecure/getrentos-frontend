@@ -6,6 +6,55 @@ export const qk = {
   auth: {
     me: ['auth', 'me'] as const,
   },
+  security: ['me', 'security'] as const,
+  representatives: {
+    list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
+    assignable: (kind: 'realtor' | 'agent', id: string, search: string) =>
+      ['representatives', kind, id, 'assignable', search] as const,
+  },
+  authority: {
+    managed: ['property-authorities', 'managed'] as const,
+    mine: ['property-authorities', 'mine'] as const,
+  },
+  estateAgreements: ['estate-agreements', 'mine'] as const,
+  host: {
+    listings: ['host', 'listings'] as const,
+    bookings: (view: string) => ['host', 'bookings', view] as const,
+    booking: (id: string) => ['host', 'booking', id] as const,
+    listingBookings: (listingId: string) => ['host', 'listing', listingId, 'bookings'] as const,
+    blocked: (listingId: string) => ['host', 'listing', listingId, 'blocked'] as const,
+    seasons: (listingId: string) => ['host', 'listing', listingId, 'seasons'] as const,
+    sync: (listingId: string) => ['host', 'listing', listingId, 'sync'] as const,
+    conversations: ['host', 'conversations'] as const,
+    earnings: ['host', 'earnings'] as const,
+    fees: ['host', 'fees'] as const,
+    views: ['host', 'views'] as const,
+    payoutAccount: ['host', 'payout-account'] as const,
+    payouts: ['host', 'payouts'] as const,
+    payoutSummary: ['host', 'payout-summary'] as const,
+    penalties: ['host', 'penalties'] as const,
+    disputes: ['host', 'disputes'] as const,
+    disputeMessages: (id: string) => ['host', 'dispute', id, 'messages'] as const,
+    depositClaims: ['host', 'deposit-claims'] as const,
+  },
+  homeCare: {
+    dashboard: ['home-care', 'dashboard'] as const,
+    workOrders: (view: string) => ['home-care', 'work-orders', view] as const,
+    workOrder: (id: string) => ['home-care', 'work-order', id] as const,
+    quotes: (id: string) => ['home-care', 'work-order', id, 'quotes'] as const,
+    invoices: (id: string) => ['home-care', 'work-order', id, 'invoices'] as const,
+    vendors: ['home-care', 'vendors'] as const,
+    units: (propertyId: string) => ['home-care', 'units', propertyId] as const,
+    assets: (propertyId: string) => ['home-care', 'assets', propertyId] as const,
+    plans: ['home-care', 'plans'] as const,
+    sla: (propertyId: string) => ['home-care', 'sla', propertyId] as const,
+    timeline: ['home-care', 'timeline'] as const,
+  },
+  billing: {
+    mine: ['billing'] as const,
+    pricing: ['me', 'subscription', 'pricing'] as const,
+    invoices: ['billing', 'invoices'] as const,
+  },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
@@ -23,7 +72,6 @@ export const qk = {
     renewalOffer: ['renter', 'lease', 'renewal-offer'] as const,
     receipts: ['renter', 'payments', 'receipts'] as const,
     profile: ['renter', 'profile'] as const,
-    twoFactorStatus: ['renter', 'settings', '2fa'] as const,
     notificationPreferences: ['renter', 'notifications', 'preferences'] as const,
     trustScore: ['renter', 'trust-score'] as const,
     wishlists: ['renter', 'wishlists'] as const,
@@ -132,9 +180,20 @@ export const qk = {
     reviews: ['owner', 'reviews'] as const,
     ratingSummary: ['owner', 'reviews', 'summary'] as const,
     metrics: ['owner', 'metrics'] as const,
+    trustProfile: ['owner', 'trust-profile'] as const,
+    land: ['owner', 'land'] as const,
+    portfolioTrend: ['owner', 'analytics', 'portfolio-trend'] as const,
+    marketInsights: (city: string) => ['owner', 'analytics', 'market-insights', city] as const,
+    profile: ['owner', 'profile'] as const,
+    notifications: ['owner', 'notifications'] as const,
+    notificationPreferences: ['owner', 'settings', 'notifications'] as const,
     preferences: ['owner', 'preferences'] as const,
     conversations: ['owner', 'conversations'] as const,
     messages: (id: string) => ['owner', 'conversations', id, 'messages'] as const,
+  },
+  seller: {
+    payoutAccount: ['seller', 'payout-account'] as const,
+    payouts: ['seller', 'payouts'] as const,
   },
   buyer: {
     dashboard: ['buyer', 'dashboard'] as const,
@@ -221,6 +280,13 @@ export const qk = {
     maintenance: ['resident', 'maintenance'] as const,
     dues: ['resident', 'dues'] as const,
     governance: ['resident', 'governance'] as const,
+    /**
+     * The roll call this household is being asked to answer, or null.
+     *
+     * Shared by the banner on the resident home screen and the answer screen, so
+     * answering on one cannot leave a stale banner on the other.
+     */
+    emergency: ['resident', 'emergency'] as const,
   },
   gateman: {
     /**
@@ -231,6 +297,8 @@ export const qk = {
     all: ['gateman'] as const,
     /** The guard's own post; every other gateman key hangs off its estate id. */
     myEstate: ['gateman', 'estate'] as const,
+    /** Every estate this guard can open, for the switcher. */
+    myEstates: ['gateman', 'estates'] as const,
     gates: (estateId: string) => ['gateman', estateId, 'gates'] as const,
     households: (estateId: string) => ['gateman', estateId, 'households'] as const,
     /** Visitors currently on the estate — anyone CHECKED_IN, however long ago. */

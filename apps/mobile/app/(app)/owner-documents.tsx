@@ -1,12 +1,15 @@
-import { Linking, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Linking, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileStack, FileText } from 'lucide-react-native';
+import { FileStack, FileText, Plus, Trash2 } from 'lucide-react-native';
 import {
+  Button,
   Card,
   EmptyState,
+  IconButton,
   ErrorState,
   Skeleton,
   Text,
@@ -19,6 +22,7 @@ import type { Paginated } from '@/lib/api/properties';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { UploadOwnerDocumentSheet } from '@/components/owner/UploadOwnerDocumentSheet';
 
 export default function OwnerDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -26,6 +30,34 @@ export default function OwnerDocuments() {
   const qc = useQueryClient();
   const toast = useToast();
   const query = useQuery({ queryKey: qk.owner.documents, queryFn: () => ownerApi.documents() });
+  const [uploading, setUploading] = useState(false);
+
+  const remove = useMutation({
+    mutationFn: (id: string) => ownerApi.deleteDocument(id),
+    onSuccess: (_r, id) => {
+      qc.setQueryData<Paginated<OwnerDocument>>(qk.owner.documents, (old) =>
+        old ? { ...old, items: old.items.filter((d) => d.id !== id) } : old
+      );
+      toast.show('Document deleted.', 'success');
+    },
+    onError: (err) =>
+      toast.show(
+        err instanceof ApiError ? err.message : 'Could not delete this document.',
+        'error'
+      ),
+  });
+
+  const confirmRemove = (d: OwnerDocument) =>
+    Alert.alert(
+      'Delete document?',
+      d.sharedWithBuyer
+        ? `${d.name} is shared with your buyer. They will lose access to it.`
+        : `${d.name} will be removed.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => remove.mutate(d.id) },
+      ]
+    );
 
   // Optimistic: the switch moves at once, and snaps back if the API refuses.
   const share = useMutation({
@@ -75,6 +107,13 @@ export default function OwnerDocuments() {
           title="Documents"
           subtitle="Share transfer papers with your buyer"
           onBack={() => router.back()}
+          accessory={
+            <IconButton
+              accessibilityLabel="Upload a document"
+              icon={<Plus size={20} color={colors.primary} />}
+              onPress={() => setUploading(true)}
+            />
+          }
         />
       </View>
       {query.isError && !query.data ? (
@@ -100,7 +139,8 @@ export default function OwnerDocuments() {
             <EmptyState
               icon={<FileStack size={34} color={colors.mutedForeground} />}
               title="No documents yet"
-              description="Upload transfer documents from the web dashboard; you can manage sharing here."
+              description="Upload transfer agreements, receipts and filings, then share them with your buyer when you’re ready."
+              action={<Button label="Upload a document" onPress={() => setUploading(true)} />}
             />
           }
           renderItem={({ item: d }: { item: OwnerDocument }) => {
@@ -151,11 +191,17 @@ export default function OwnerDocuments() {
                     {d.sharedWithBuyer ? 'Shared' : 'Private'}
                   </Text>
                 </View>
+                <IconButton
+                  accessibilityLabel={`Delete ${d.name}`}
+                  icon={<Trash2 size={18} color={colors.mutedForeground} />}
+                  onPress={() => confirmRemove(d)}
+                />
               </Card>
             );
           }}
         />
       )}
+      <UploadOwnerDocumentSheet open={uploading} onClose={() => setUploading(false)} />
     </View>
   );
 }

@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { ApiError } from './api/client';
 import { gatemanApi } from './api/gateman';
+import { WATCHLIST_BLOCKED } from './gateman/watchlistRefusal';
+import { CONTRACTOR_NOT_PERMITTED } from './gateman/contractorRefusal';
 
 /**
  * A durable queue for the gate writes that must never be lost.
@@ -39,14 +41,20 @@ export type GateWriteType = 'check-in' | 'check-out' | 'admit';
  * id would tell them nothing.
  */
 export type GateWritePayloads = {
-  'check-in': { estateId: string; pin: string; occurredAt: string; label: string };
-  'check-out': { estateId: string; passId: string; occurredAt: string; label: string };
+  'check-in': { estateId: string; pin: string; occurredAt: string; gateId?: string; label: string };
+  'check-out': {
+    estateId: string;
+    passId: string;
+    occurredAt: string;
+    gateId?: string;
+    label: string;
+  };
   /**
    * An approved walk-in the guard admitted while the connection was down. The
    * household's consent is already on the server, so the barrier decision is
    * still the guard's to record — only the network is missing.
    */
-  admit: { estateId: string; passId: string; occurredAt: string; label: string };
+  admit: { estateId: string; passId: string; occurredAt: string; gateId?: string; label: string };
 };
 
 export type GateWrite = {
@@ -175,6 +183,20 @@ export const gateOfflineQueue = {
 type Outcome = 'sent' | 'already-applied' | 'unconfirmed' | 'rejected' | 'retry';
 
 /**
+ * 403s that are the estate's own decision, never a lapsed session.
+ *
+ * The queue holds arrivals the network dropped. Replaying one of these gets the
+ * same answer forever, and the drain STOPS at the first write it cannot settle —
+ * so a refusal left sitting in the queue strands every arrival behind it.
+ * Anything added here has to be final: a code that could succeed on a later
+ * retry does not belong in this set.
+ */
+const FINAL_REFUSAL_CODES: ReadonlySet<string> = new Set([
+  WATCHLIST_BLOCKED,
+  CONTRACTOR_NOT_PERMITTED,
+]);
+
+/**
  * Decides whether a failed replay should be retried, trusted, or handed to a
  * human. A queue that retries forever behind one poison item never drains, so
  * only genuinely transient problems are allowed to hold the queue up.
@@ -184,6 +206,15 @@ function classify(item: GateWrite, error: unknown): Outcome {
 
   // Offline or timed out: the normal case, try again on the next signal.
   if (error.isNetwork) return 'retry';
+
+  // The estate itself refused this write — its watch list said no, or the
+  // person's standing authorisation does not cover now. The answer is final, so
+  // it has to be told apart from the 403 below, which means something else
+  // entirely (a lapsed session). Classifying one of these as `retry` would do
+  // real damage: the replay loop `break`s on the first write it cannot settle,
+  // so a single refusal would strand every later arrival behind it and the queue
+  // would never drain again. A person decides instead.
+  if (error.code !== undefined && FINAL_REFUSAL_CODES.has(error.code)) return 'rejected';
 
   // Auth: the token is gone. Retrying without a login can't succeed, but the
   // write is not the user's fault either, so hold it until they sign in.
@@ -221,24 +252,25 @@ function classify(item: GateWrite, error: unknown): Outcome {
 
 function dispatch(item: GateWrite): Promise<unknown> {
   switch (item.type) {
+    // The gate travels with the write. By replay time the guard may have moved
+    // to another estate or another barrier, so reading "where am I now" would
+    // attribute the arrival to the wrong place — the record has to say where it
+    // actually happened.
     case 'check-in':
-      return gatemanApi.verifyVisitorPass(
-        item.payload.estateId,
-        item.payload.pin,
-        item.payload.occurredAt
-      );
+      return gatemanApi.verifyVisitorPass(item.payload.estateId, item.payload.pin, {
+        occurredAt: item.payload.occurredAt,
+        gateId: item.payload.gateId,
+      });
     case 'check-out':
-      return gatemanApi.checkOutVisitorPass(
-        item.payload.estateId,
-        item.payload.passId,
-        item.payload.occurredAt
-      );
+      return gatemanApi.checkOutVisitorPass(item.payload.estateId, item.payload.passId, {
+        occurredAt: item.payload.occurredAt,
+        gateId: item.payload.gateId,
+      });
     case 'admit':
-      return gatemanApi.admitWalkIn(
-        item.payload.estateId,
-        item.payload.passId,
-        item.payload.occurredAt
-      );
+      return gatemanApi.admitWalkIn(item.payload.estateId, item.payload.passId, {
+        occurredAt: item.payload.occurredAt,
+        gateId: item.payload.gateId,
+      });
   }
 }
 

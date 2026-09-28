@@ -4,12 +4,15 @@ import dynamic from 'next/dynamic';
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
 import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
+import { updateStoredUser } from '@/lib/authStorage';
+import { getDashboardRoute } from '@/lib/constants/auth';
 import { ownerKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import type { InvestmentMetrics } from '@/types/owner';
@@ -35,6 +38,20 @@ export default function OwnerAnalyticsPage() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
   const [convertingProperty, setConvertingProperty] = useState<InvestmentMetrics | null>(null);
+  const router = useRouter();
+  const convert = useMutation({
+    mutationFn: (propertyId: string) => unwrap(ownerService.convertToRental(propertyId)),
+    // The workspace switcher reads roles from the saved user, so refresh them.
+    onSuccess: (res) => updateStoredUser({ roles: res.roles }),
+  });
+  const closeConvert = () => {
+    setConvertingProperty(null);
+    convert.reset();
+  };
+  const openLandlordWorkspace = () => {
+    updateStoredUser({ role: 'landlord' });
+    router.push(getDashboardRoute('landlord'));
+  };
   const [exported, setExported] = useState(false);
 
   const toggleCompare = (propertyId: string) => {
@@ -197,7 +214,7 @@ export default function OwnerAnalyticsPage() {
                         onClick={() => setConvertingProperty(m)}
                       >
                         <RefreshCcw className="w-3.5 h-3.5" />
-                        Convert to Rental
+                        Rent it out
                       </Button>
                     </td>
                   </tr>
@@ -208,39 +225,65 @@ export default function OwnerAnalyticsPage() {
         </div>
 
         {convertingProperty && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="convert-title"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
             <div className="bg-card rounded-xl max-w-sm w-full overflow-hidden">
               <div className="p-4 border-b border-border flex justify-between items-center">
-                <h3 className="font-semibold text-foreground">Convert to Rental</h3>
+                <h3 id="convert-title" className="font-semibold text-foreground">
+                  {convert.isSuccess ? 'Ready to rent out' : 'Rent this property out'}
+                </h3>
                 <button
-                  onClick={() => setConvertingProperty(null)}
+                  onClick={closeConvert}
+                  aria-label="Close"
                   className="p-1 rounded-lg hover:bg-secondary"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="p-4">
-                <p className="text-sm text-muted-foreground">
-                  Convert <strong>{convertingProperty.propertyName}</strong> into a rental listing?
-                  This will make the property available to manage under your Landlord workspace,
-                  alongside any active sale listing.
-                </p>
+              <div className="p-4 space-y-2">
+                {convert.isSuccess ? (
+                  <p className="text-sm text-muted-foreground">
+                    <strong>{convertingProperty.propertyName}</strong> is in your landlord
+                    workspace. Add units, list it for rent and find tenants there. Switch between
+                    workspaces any time from your profile menu.
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Manage <strong>{convertingProperty.propertyName}</strong> as a rental from the
+                    landlord workspace. Your account gets the landlord workspace alongside this one,
+                    and any sale listing stays as it is.
+                  </p>
+                )}
+                {convert.error ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {convert.error instanceof Error
+                      ? convert.error.message
+                      : 'Could not set this up. Try again.'}
+                  </p>
+                ) : null}
               </div>
               <div className="p-4 border-t border-border flex gap-3">
-                <Button
-                  variant="ghost"
-                  className="flex-1"
-                  onClick={() => setConvertingProperty(null)}
-                >
-                  Cancel
+                <Button variant="ghost" className="flex-1" onClick={closeConvert}>
+                  {convert.isSuccess ? 'Stay here' : 'Cancel'}
                 </Button>
-                <Button
-                  variant="primary"
-                  className="flex-1"
-                  onClick={() => setConvertingProperty(null)}
-                >
-                  Convert
-                </Button>
+                {convert.isSuccess ? (
+                  <Button variant="primary" className="flex-1" onClick={openLandlordWorkspace}>
+                    Open landlord workspace
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    className="flex-1"
+                    isLoading={convert.isPending}
+                    onClick={() => convert.mutate(convertingProperty.propertyId)}
+                  >
+                    Rent it out
+                  </Button>
+                )}
               </div>
             </div>
           </div>

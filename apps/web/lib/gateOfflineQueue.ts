@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
+import { WATCHLIST_BLOCKED } from '@/lib/gateman/watchlistRefusal';
+import { CONTRACTOR_NOT_PERMITTED } from '@/lib/gateman/contractorRefusal';
 import { estateService } from '@/services/estateService';
 
 /**
@@ -28,14 +30,20 @@ const KEY = 'getrentos.gate.offline-queue';
 export type GateWriteType = 'check-in' | 'check-out' | 'admit';
 
 export type GateWritePayloads = {
-  'check-in': { estateId: string; pin: string; occurredAt: string; label: string };
-  'check-out': { estateId: string; passId: string; occurredAt: string; label: string };
+  'check-in': { estateId: string; pin: string; occurredAt: string; gateId?: string; label: string };
+  'check-out': {
+    estateId: string;
+    passId: string;
+    occurredAt: string;
+    gateId?: string;
+    label: string;
+  };
   /**
    * An approved walk-in the guard admitted while the connection was down. The
    * household's consent is already on the server, so the barrier decision is
    * still the guard's to record — only the network is missing.
    */
-  admit: { estateId: string; passId: string; occurredAt: string; label: string };
+  admit: { estateId: string; passId: string; occurredAt: string; gateId?: string; label: string };
 };
 
 export type GateWrite = {
@@ -134,6 +142,20 @@ export const gateOfflineQueue = {
   remove: (id: string) => commit(list().filter((item) => item.id !== id)),
 };
 
+/**
+ * 403s that are the estate's own decision, never a lapsed session.
+ *
+ * The queue holds arrivals the network dropped. Replaying one of these gets the
+ * same answer forever, and `replayGateQueue` STOPS at the first write it cannot
+ * settle — so a refusal left sitting in the queue strands every arrival behind
+ * it. Anything added here has to be final: a code that could succeed on a later
+ * retry does not belong in this set.
+ */
+const FINAL_REFUSAL_CODES: ReadonlySet<string> = new Set([
+  WATCHLIST_BLOCKED,
+  CONTRACTOR_NOT_PERMITTED,
+]);
+
 /** True when a failure means "no connection", not "the estate said no". */
 export function isOfflineFailure(error: unknown): boolean {
   return error instanceof ApiError && error.status === 0;
@@ -149,6 +171,15 @@ type Outcome = 'sent' | 'already-applied' | 'unconfirmed' | 'rejected' | 'retry'
 function classify(item: GateWrite, error: unknown): Outcome {
   if (!(error instanceof ApiError)) return 'retry';
   if (error.status === 0) return 'retry';
+
+  // The estate itself refused this write — its watch list said no, or the
+  // person's standing authorisation does not cover now. The answer is final, so
+  // it has to be told apart from the 403 below, which means something else
+  // entirely (a lapsed session). Classifying one of these as `retry` would do
+  // real damage: the replay loop `break`s on the first write it cannot settle,
+  // so a single refusal would strand every later arrival behind it and the queue
+  // would never drain again. A person decides instead.
+  if (error.code !== undefined && FINAL_REFUSAL_CODES.has(error.code)) return 'rejected';
 
   // Auth: the session lapsed. Hold the write until the user is signed in again.
   if (error.status === 401 || error.status === 403) return 'retry';
@@ -181,29 +212,30 @@ function classify(item: GateWrite, error: unknown): Outcome {
 
 function dispatch(item: GateWrite): Promise<unknown> {
   switch (item.type) {
+    // The gate travels with the write. By replay time the guard may have moved
+    // to another estate or another barrier, so reading "where am I now" would
+    // attribute the arrival to the wrong place — the record has to say where it
+    // actually happened.
     case 'check-in':
       return unwrap(
-        estateService.verifyVisitorPass(
-          item.payload.estateId,
-          item.payload.pin,
-          item.payload.occurredAt
-        )
+        estateService.verifyVisitorPass(item.payload.estateId, item.payload.pin, {
+          occurredAt: item.payload.occurredAt,
+          gateId: item.payload.gateId,
+        })
       );
     case 'check-out':
       return unwrap(
-        estateService.checkOutVisitorPass(
-          item.payload.estateId,
-          item.payload.passId,
-          item.payload.occurredAt
-        )
+        estateService.checkOutVisitorPass(item.payload.estateId, item.payload.passId, {
+          occurredAt: item.payload.occurredAt,
+          gateId: item.payload.gateId,
+        })
       );
     case 'admit':
       return unwrap(
-        estateService.admitWalkInVisitorPass(
-          item.payload.estateId,
-          item.payload.passId,
-          item.payload.occurredAt
-        )
+        estateService.admitWalkInVisitorPass(item.payload.estateId, item.payload.passId, {
+          occurredAt: item.payload.occurredAt,
+          gateId: item.payload.gateId,
+        })
       );
   }
 }

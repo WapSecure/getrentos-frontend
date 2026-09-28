@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google';
 import { ThemeProvider } from '@getrentos/ui/providers/ThemeProvider';
 import { QueryProvider } from '@getrentos/ui/providers/QueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
+import { StepUpDialog } from '@/components/shared/security/StepUpDialog';
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -91,7 +92,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-background antialiased">
         <ThemeProvider>
           <QueryProvider>
-            <LanguageProvider>{children}</LanguageProvider>
+            <LanguageProvider>
+              {children}
+              <StepUpDialog />
+            </LanguageProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

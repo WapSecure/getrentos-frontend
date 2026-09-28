@@ -41,11 +41,7 @@ interface NavItem {
  * own subscription regardless of role) but never got the lock-icon treatment
  * on this sidebar — fixed here alongside the new Analytics gate.
  */
-const PRO_GATED_ROUTES = new Set<string>([
-  ROUTES.OWNER_ANALYTICS,
-  ROUTES.OWNER_HOME_MANAGEMENT,
-  ROUTES.OWNER_SHORTLETS,
-]);
+const PRO_GATED_ROUTES = new Set<string>([ROUTES.OWNER_ANALYTICS, ROUTES.OWNER_HOME_MANAGEMENT]);
 
 export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },

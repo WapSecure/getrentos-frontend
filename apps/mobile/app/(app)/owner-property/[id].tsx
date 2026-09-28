@@ -10,6 +10,7 @@ import {
   Card,
   ErrorState,
   FormAlert,
+  LinkButton,
   Price,
   Skeleton,
   Text,
@@ -28,11 +29,13 @@ import {
 } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Sheet } from '@/components/Sheet';
+import { OwnershipProofSheet } from '@/components/owner/OwnershipProofSheet';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 export default function OwnerPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -43,6 +46,36 @@ export default function OwnerPropertyDetail() {
   const qc = useQueryClient();
   const toast = useToast();
   const [listOpen, setListOpen] = useState(false);
+  const [proofOpen, setProofOpen] = useState(false);
+  const { refreshProfile, switchWorkspace } = useAuth();
+
+  // Rent it out: adds the landlord workspace; the property is already there,
+  // since owner and landlord properties are the same records.
+  const rentOut = useMutation({
+    mutationFn: () => ownerApi.convertToRental(id),
+    onSuccess: async () => {
+      await refreshProfile();
+      Alert.alert(
+        'Ready to rent out',
+        'This property is in your landlord workspace. Add units, list it for rent and find tenants there. Switch workspaces any time from Account.',
+        [
+          { text: 'Stay here', style: 'cancel' },
+          { text: 'Open landlord workspace', onPress: () => switchWorkspace('landlord') },
+        ]
+      );
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not set this up.', 'error'),
+  });
+  const confirmRentOut = () =>
+    Alert.alert(
+      'Rent this property out?',
+      'Your account gets the landlord workspace alongside this one. Any sale listing stays as it is.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Rent it out', onPress: () => rentOut.mutate() },
+      ]
+    );
 
   const property = useQuery({
     queryKey: qk.owner.property(id),
@@ -125,6 +158,17 @@ export default function OwnerPropertyDetail() {
               </View>
 
               <VerificationState property={p} />
+              {p.verificationStatus !== 'verified' ? (
+                <Button
+                  label={
+                    p.verificationStatus === 'pending_review'
+                      ? 'Add another ownership document'
+                      : 'Upload ownership document'
+                  }
+                  variant={p.verificationStatus === 'pending_review' ? 'ghost' : 'secondary'}
+                  onPress={() => setProofOpen(true)}
+                />
+              ) : null}
 
               <Card elevated style={{ gap: spacing.sm }}>
                 <Fact
@@ -235,11 +279,31 @@ export default function OwnerPropertyDetail() {
                   </Card>
                 )}
               </View>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <Text variant="bodyStrong">Rent it out instead</Text>
+                <Text variant="caption" color="mutedForeground">
+                  Manage this property as a rental — units, tenants and rent — from the landlord
+                  workspace.
+                </Text>
+                <Button
+                  label="Rent it out"
+                  variant="secondary"
+                  loading={rentOut.isPending}
+                  onPress={confirmRentOut}
+                />
+              </Card>
             </>
           )}
         </View>
       </ScrollView>
 
+      {p ? (
+        <OwnershipProofSheet
+          propertyId={p.id}
+          open={proofOpen}
+          onClose={() => setProofOpen(false)}
+        />
+      ) : null}
       <Sheet open={listOpen} onClose={() => setListOpen(false)} title="List for sale">
         {p ? (
           <ListForm
@@ -301,6 +365,14 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
     property.estimatedValue ? String(property.estimatedValue) : ''
   );
   const value = Number(price.replace(/\D/g, ''));
+  // Recent completed sales in the same city. The API doesn't match on property
+  // type, so it's shown as context and only suggested when there are a few.
+  const insights = useQuery({
+    queryKey: qk.owner.marketInsights(property.city),
+    queryFn: () => ownerApi.marketInsights(property.city),
+    staleTime: 30 * 60_000,
+  });
+  const m = insights.data;
 
   const create = useMutation({
     mutationFn: () =>
@@ -332,6 +404,22 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
         onChangeText={setPrice}
         hint="Buyers can offer above or below this."
       />
+      {m && m.comparables.length >= 3 && m.suggested > 0 ? (
+        <View
+          accessible
+          accessibilityLabel={`Recent sales in ${property.city} ranged from ${formatNaira(m.lowEstimate)} to ${formatNaira(m.highEstimate)}. Average ${formatNaira(m.suggested)}.`}
+          style={{ gap: spacing.xs }}
+        >
+          <Text variant="caption" color="mutedForeground">
+            Recent sales in {property.city}: {formatNaira(m.lowEstimate, { compact: true })} –{' '}
+            {formatNaira(m.highEstimate, { compact: true })}
+          </Text>
+          <LinkButton
+            label={`Use their average, ${formatNaira(m.suggested, { compact: true })}`}
+            onPress={() => setPrice(String(Math.round(m.suggested)))}
+          />
+        </View>
+      ) : null}
       <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
         <AlertTriangle size={16} color={colors.warning} style={{ marginTop: 2 }} />
         <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>

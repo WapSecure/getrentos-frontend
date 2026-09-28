@@ -33,6 +33,24 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/owner/transactions': '/(app)/owner-transactions',
   '/owner/messages': '/(app)/(owner)/messages',
   '/owner/leads': '/(app)/owner-leads',
+  '/owner/documents': '/(app)/owner-documents',
+  '/owner/reviews': '/(app)/owner-reviews',
+  '/owner/analytics': '/(app)/owner-analytics',
+  '/owner/trust-profile': '/(app)/owner-trust-profile',
+  '/owner/verification': '/(app)/verify-identity',
+  '/owner/settings': '/(app)/owner-profile',
+  '/owner/dashboard': '/(app)/(owner)',
+  '/owner/billing': '/(app)/billing',
+  '/owner/realtors': '/(app)/representatives',
+  '/owner/land': '/(app)/owner-land',
+  '/owner/managed': '/(app)/managed-properties',
+  '/owner/estate-agreements': '/(app)/estate-agreements',
+  '/owner/shortlets': '/(app)/host',
+  '/owner/home-management': '/(app)/home-care',
+  '/landlord/home-management': '/(app)/home-care',
+  '/landlord/shortlets': '/(app)/host',
+  '/landlord/billing': '/(app)/billing',
+  '/landlord/realtors': '/(app)/representatives',
   '/resident/visitor-passes': '/(app)/visitor-passes',
   '/resident/dues': '/(app)/dues',
   '/resident/deliveries': '/(app)/deliveries',
@@ -58,6 +76,16 @@ const OWNER_FALLBACK: [prefix: string, route: string][] = [
   ['ESCROW_', '/(app)/owner-transactions'],
 ];
 
+/** Portals that host short stays; their shortlet notifications are the host's side. */
+const HOST_PORTALS = new Set<Portal>(['owner', 'landlord']);
+
+/**
+ * Shortlet notifications only ever sent to the host. Others (confirmed,
+ * cancelled) go to whichever side didn't act, so they can't be routed by
+ * type alone.
+ */
+const HOST_ONLY_TYPES = new Set(['SHORTLET_BOOKING_REQUEST', 'SHORTLET_REVIEW_RECEIVED']);
+
 /** Portals whose tab bar has a Messages tab. */
 const PORTALS_WITH_INBOX = new Set<Portal>(['renter', 'buyer', 'landlord', 'agent', 'owner']);
 
@@ -75,11 +103,21 @@ export function routeForActionUrl(url?: string | null): string | null {
 
 /** Where tapping a push notification should land. Always returns a real route. */
 export function routeForNotification(
-  { actionUrl, type }: { actionUrl?: string | null; type?: string | null },
+  {
+    actionUrl,
+    type,
+    bookingId,
+  }: { actionUrl?: string | null; type?: string | null; bookingId?: string | null },
   portal: Portal | null
 ): string {
   const direct = routeForActionUrl(actionUrl);
   if (direct) return direct;
+  // A host is told about a request on their listing: open that booking.
+  if (portal && HOST_PORTALS.has(portal) && type && HOST_ONLY_TYPES.has(type)) {
+    return bookingId && type === 'SHORTLET_BOOKING_REQUEST'
+      ? `/(app)/host/booking/${bookingId}`
+      : '/(app)/host';
+  }
   // Sellers see offers and escrow from the other side of the table.
   const portalFallback =
     portal === 'owner' && type

@@ -21,6 +21,21 @@ import type {
   DeliveryLog,
   DeliveryLogStatus,
   Gate,
+  WatchlistEntry,
+  WatchlistSeverity,
+  WatchlistStatus,
+  WatchlistSubjectType,
+  WatchlistScreening,
+  ContractorPass,
+  ContractorPassStatus,
+  IssuedContractorPass,
+  EmergencyKind,
+  EmergencyMuster,
+  MusterRollState,
+  MusterStatus,
+  MusterSummary,
+  AuthorisationDwellReport,
+  OnSiteBoard,
   Incident,
   MaintenanceTicket,
   Poll,
@@ -37,6 +52,35 @@ type EstatePageQuery = {
   page?: number;
   pageSize?: number;
 };
+
+/** Extra fields the gate sends alongside a visitor-pass write. */
+export type GateWriteOptions = {
+  /** ISO time the guard acted, for a write queued offline. */
+  occurredAt?: string;
+  /** The barrier the guard is standing at. */
+  gateId?: string;
+  /**
+   * A guard's stated reason for admitting somebody the estate has blocked.
+   *
+   * Only ever set on a deliberate override, never on the first attempt: the
+   * reason is the whole point of the override, and it is what the estate office
+   * is told when they are woken by the notification.
+   */
+  overrideReason?: string;
+};
+
+/**
+ * Drops absent fields so the gate never sends `gateId: ''` or `occurredAt: null`
+ * — either would be rejected as an invalid id, and the write would be lost for a
+ * reason the guard cannot see or fix. Returns undefined when nothing is set, so a
+ * write with no extra fields is sent with no body at all.
+ */
+function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unknown> | undefined {
+  const body = Object.fromEntries(
+    Object.entries(extra).filter(([, value]) => value !== undefined && value !== '')
+  );
+  return Object.keys(body).length > 0 ? body : undefined;
+}
 
 export const estateService = {
   async createEstate(data: {
@@ -304,16 +348,20 @@ export const estateService = {
    * `occurredAt` is only sent by the offline queue. Without it a check-in that
    * waited in the queue is judged against the clock at replay, so a pass that
    * expired while the connection was down is refused and the arrival is lost.
+   *
+   * `gateId` is the barrier the guard is standing at. It is optional on purpose:
+   * refusing an arrival because the console had not been told which gate it is
+   * at would put a real person behind a data-quality problem.
    */
   async verifyVisitorPass(
     estateId: string,
     pin: string,
-    occurredAt?: string
+    options: GateWriteOptions = {}
   ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/verify`, {
         method: 'POST',
-        body: JSON.stringify(occurredAt ? { pin, occurredAt } : { pin }),
+        body: JSON.stringify(buildGateWriteBody({ pin, ...options })),
       })
     );
   },
@@ -323,17 +371,20 @@ export const estateService = {
    * checked in forever, so "who is inside?" was unanswerable for people.
    *
    * `occurredAt` carries the same meaning as on check-in: the time the guard
-   * actually let the visitor out, not the time the queue got to send it.
+   * actually let the visitor out, not the time the queue got to send it. The
+   * gate is recorded as an *exit* gate, because a visitor may well walk out of a
+   * different barrier than the one they came in by.
    */
   async checkOutVisitorPass(
     estateId: string,
     passId: string,
-    occurredAt?: string
+    options: GateWriteOptions = {}
   ): Promise<ApiResponse<VisitorPass>> {
+    const body = buildGateWriteBody(options);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
         method: 'PATCH',
-        ...(occurredAt ? { body: JSON.stringify({ occurredAt }) } : {}),
+        ...(body ? { body: JSON.stringify(body) } : {}),
       })
     );
   },
@@ -347,7 +398,14 @@ export const estateService = {
    */
   async requestWalkInVisitorPass(
     estateId: string,
-    data: { householdId: string; visitorName: string; visitorPhone?: string; purpose?: string }
+    data: {
+      householdId: string;
+      visitorName: string;
+      visitorPhone?: string;
+      purpose?: string;
+      gateId?: string;
+      overrideReason?: string;
+    }
   ): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/walk-in`, {
@@ -366,12 +424,13 @@ export const estateService = {
   async admitWalkInVisitorPass(
     estateId: string,
     passId: string,
-    occurredAt?: string
+    options: GateWriteOptions = {}
   ): Promise<ApiResponse<VisitorPass>> {
+    const body = buildGateWriteBody(options);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/visitor-passes/${passId}/admit`, {
         method: 'PATCH',
-        ...(occurredAt ? { body: JSON.stringify({ occurredAt }) } : {}),
+        ...(body ? { body: JSON.stringify(body) } : {}),
       })
     );
   },
@@ -394,6 +453,8 @@ export const estateService = {
       driverName?: string;
       purpose?: 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER';
       gateId?: string;
+      /** Set only when the guard is admitting a vehicle the estate has blocked. */
+      overrideReason?: string;
       photo?: File;
     }
   ): Promise<ApiResponse<VehicleLog>> {
@@ -403,6 +464,7 @@ export const estateService = {
     if (data.driverName) formData.append('driverName', data.driverName);
     if (data.purpose) formData.append('purpose', data.purpose);
     if (data.gateId) formData.append('gateId', data.gateId);
+    if (data.overrideReason) formData.append('overrideReason', data.overrideReason);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/vehicle-logs`, { method: 'POST', body: formData })
@@ -500,6 +562,296 @@ export const estateService = {
 
   async deleteGate(estateId: string, gateId: string): Promise<ApiResponse<void>> {
     return safeCall(() => authFetch(`/estate/${estateId}/gates/${gateId}`, { method: 'DELETE' }));
+  },
+
+  // --- Watch list -----------------------------------------------------------
+
+  /**
+   * The estate's do-not-admit list.
+   *
+   * Managing a rule, not enforcing one: the screen itself runs server-side at
+   * every point somebody can enter, so nothing here has to be remembered at a
+   * barrier for the list to work.
+   */
+  async listWatchlist(
+    estateId: string,
+    query: EstatePageQuery & {
+      status?: WatchlistStatus;
+      subjectType?: WatchlistSubjectType;
+      severity?: WatchlistSeverity;
+    } = {}
+  ): Promise<ApiResponse<Paginated<WatchlistEntry>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/watchlist${toQuery(query)}`));
+  },
+
+  /**
+   * Adds somebody to the list.
+   *
+   * Multipart because a photo is the only thing here that helps a guard
+   * recognise a person, and an estate usually has one. The reason is required by
+   * the API — an entry nobody can explain is one nobody can review.
+   */
+  async addWatchlistEntry(
+    estateId: string,
+    data: {
+      label: string;
+      reason: string;
+      subjectType?: WatchlistSubjectType;
+      severity?: WatchlistSeverity;
+      phone?: string;
+      plateNumber?: string;
+      /** ISO date; omit for an entry that stays until somebody lifts it. */
+      expiresAt?: string;
+      photo?: File;
+    }
+  ): Promise<ApiResponse<WatchlistEntry>> {
+    const formData = new FormData();
+    formData.append('label', data.label);
+    formData.append('reason', data.reason);
+    if (data.subjectType) formData.append('subjectType', data.subjectType);
+    if (data.severity) formData.append('severity', data.severity);
+    if (data.phone) formData.append('phone', data.phone);
+    if (data.plateNumber) formData.append('plateNumber', data.plateNumber);
+    if (data.expiresAt) formData.append('expiresAt', data.expiresAt);
+    if (data.photo) formData.append('file', data.photo);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/watchlist`, { method: 'POST', body: formData })
+    );
+  },
+
+  /** Takes an entry off the list. The row stays, so the record of the decision survives. */
+  async liftWatchlistEntry(
+    estateId: string,
+    entryId: string,
+    liftReason: string
+  ): Promise<ApiResponse<WatchlistEntry>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/watchlist/${entryId}/lift`, {
+        method: 'PATCH',
+        body: JSON.stringify({ liftReason }),
+      })
+    );
+  },
+
+  // --- Contractor passes (Enterprise) --------------------------------------
+
+  /**
+   * The estate's standing authorisations.
+   *
+   * The status filter is translated server-side, so "active" means still in
+   * force rather than still ACTIVE in a column — a lapsed authorisation must not
+   * be able to hide in that list where nobody looks at it again.
+   */
+  async listContractorPasses(
+    estateId: string,
+    query: EstatePageQuery & { status?: ContractorPassStatus } = {}
+  ): Promise<ApiResponse<Paginated<ContractorPass>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/contractor-passes${toQuery(query)}`));
+  },
+
+  /**
+   * Authorises somebody to arrive repeatedly.
+   *
+   * Enterprise-only, so a 403 `PLAN_UPGRADE_REQUIRED` is an expected answer
+   * rather than a fault — it carries both the tier required and the one the
+   * estate is on, which is what the upsell needs to say what they are buying.
+   */
+  async createContractorPass(
+    estateId: string,
+    data: {
+      householdId: string;
+      name: string;
+      phone?: string;
+      company?: string;
+      trade?: string;
+      validFrom: string;
+      validUntil: string;
+      /** Omit or empty for every day. */
+      daysOfWeek?: number[];
+      dailyFrom?: string;
+      dailyTo?: string;
+    }
+  ): Promise<ApiResponse<IssuedContractorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/contractor-passes`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /** Withdraws an authorisation. The row stays, so the decision survives it. */
+  async revokeContractorPass(
+    estateId: string,
+    passId: string,
+    reason: string
+  ): Promise<ApiResponse<ContractorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/contractor-passes/${passId}/revoke`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  /**
+   * Checks details against the list instead of attempting a write.
+   *
+   * For a guard who would rather find out before they have told a visitor they
+   * are asking the household. Answering "nobody matched" tells the asker who the
+   * estate is watching, so it is access-checked like everything else here.
+   */
+  async screenWatchlist(
+    estateId: string,
+    query: { name?: string; phone?: string; plateNumber?: string }
+  ): Promise<ApiResponse<WatchlistScreening>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/watchlist/screen`, {
+        method: 'POST',
+        body: JSON.stringify(query),
+      })
+    );
+  },
+
+  // --- Emergency mustering ---------------------------------------------------
+
+  /**
+   * Raises the alarm and takes the roll.
+   *
+   * The roll is built server-side in the same transaction that records the
+   * muster: everybody the estate believes is inside at this moment, taken once.
+   * A client that assembled the list itself would be assembling it from however
+   * old its cache happened to be, and the whole value of a roll call is that it
+   * is a snapshot taken at a stated time.
+   */
+  async declareMuster(
+    estateId: string,
+    data: { kind: EmergencyKind; description: string; assemblyPoint?: string }
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /** The roll call in progress, or null — which is the ordinary case. */
+  async getActiveMuster(estateId: string): Promise<ApiResponse<EmergencyMuster | null>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters/active`));
+  },
+
+  /**
+   * Every roll call the estate has raised, newest first.
+   *
+   * Summaries only: a roll holds a person per line, so a page of ten of them is
+   * not something to fetch to draw a list.
+   */
+  async listMusters(
+    estateId: string,
+    query: EstatePageQuery & { status?: MusterStatus } = {}
+  ): Promise<ApiResponse<Paginated<MusterSummary>>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters${toQuery(query)}`));
+  },
+
+  /** One roll call with its roll, for the console that is answering it. */
+  async getMuster(estateId: string, musterId: string): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters/${musterId}`));
+  },
+
+  /**
+   * A marshal's answer about one person.
+   *
+   * Returns the whole muster, not just the line, so the tally on screen always
+   * matches the roll beneath it — the numbers are the reason a marshal trusts
+   * the screen, and a locally-adjusted count would be the one thing they cannot
+   * check.
+   */
+  async updateRollEntry(
+    estateId: string,
+    musterId: string,
+    entryId: string,
+    data: { state: MusterRollState; stateNote?: string }
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters/${musterId}/roll/${entryId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /**
+   * Re-reads the gate and adds anybody who came in since the roll was taken.
+   *
+   * Only ever adds: the roll call that does not know about the courier admitted
+   * at 14:05 will report the building clear while he is still in it. Existing
+   * lines, answered or not, are left alone.
+   */
+  async addMusterArrivals(
+    estateId: string,
+    musterId: string
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters/${musterId}/roll/arrivals`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  /**
+   * Stands the roll down.
+   *
+   * A note is required by the API whenever somebody is still unaccounted for.
+   * The form asks for it up front for that case rather than letting the manager
+   * find out from a 400 — an estate that searched and did not find somebody has
+   * to be able to stop, and the refusal would otherwise arrive at the worst
+   * possible moment.
+   */
+  async closeMuster(
+    estateId: string,
+    musterId: string,
+    closingNote?: string
+  ): Promise<ApiResponse<EmergencyMuster>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/emergency-musters/${musterId}/close`, {
+        method: 'POST',
+        body: JSON.stringify(closingNote ? { closingNote } : {}),
+      })
+    );
+  },
+
+  // --- Dwell analytics (Enterprise) -----------------------------------------
+
+  /**
+   * Who the estate believes is still inside, and for how long.
+   *
+   * Enterprise, so a 403 `PLAN_UPGRADE_REQUIRED` is an expected answer rather
+   * than a fault — it carries both the tier required and the one the estate is
+   * on, which is what the upsell needs in order to say what is being bought.
+   *
+   * Every number on the payload was counted server-side. Nothing here recomputes
+   * elapsed time from `admittedAt`: the console and the office's own notification
+   * have to agree about how late somebody is, and two clocks is two answers.
+   */
+  async getOnSiteBoard(estateId: string): Promise<ApiResponse<OnSiteBoard>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dwell/on-site`));
+  },
+
+  /**
+   * How long each standing authorisation's visits actually ran.
+   *
+   * The window is exclusive at the end, so a manager comparing two months back to
+   * back is not shown a visit twice. `sort` is the estate's own choice of what
+   * matters: dwell alone hides a contractor who comes twice a week and never
+   * leaves, and visits alone flatters one who arrives constantly and stays all
+   * day.
+   */
+  async getAuthorisationDwell(
+    estateId: string,
+    query: EstatePageQuery & { from?: string; to?: string; sort?: 'dwell' | 'visits' } = {}
+  ): Promise<ApiResponse<AuthorisationDwellReport>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/dwell/authorisations${toQuery(query)}`));
   },
 
   async createAnnouncement(

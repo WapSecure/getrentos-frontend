@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Database,
   KeyRound,
+  Mail,
   Phone,
   ScanFace,
   ShieldCheck,
@@ -17,6 +18,7 @@ import {
   Button,
   Card,
   Divider,
+  ErrorState,
   PasswordField,
   Skeleton,
   Text,
@@ -25,7 +27,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { profileApi, type TwoFactorEnrollment } from '@/lib/api/profile';
+import { securityApi, type SecurityOverview, type TwoFactorEnrollment } from '@/lib/api/security';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
@@ -35,10 +37,15 @@ import {
   type BiometricSupport,
 } from '@/lib/appLock';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const { profile } = useAuth();
+  const overview = useQuery({ queryKey: qk.security, queryFn: securityApi.overview });
+  // The export covers renting data (applications, leases, payments) and is renter-only.
+  const isRenter = profile?.roles.includes('RENTER') ?? false;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -57,11 +64,20 @@ export default function SecuritySettings() {
         }}
       >
         <AppLockSection />
-        <PhoneVerificationSection />
-        <TwoFactorSection />
-        <PasswordSection />
-        <DataExportSection />
-        <DangerSection />
+        {overview.isError && !overview.data ? (
+          <ErrorState onRetry={() => overview.refetch()} />
+        ) : !overview.data ? (
+          <Skeleton height={180} />
+        ) : (
+          <>
+            <EmailSection />
+            <PhoneVerificationSection overview={overview.data} />
+            <TwoFactorSection overview={overview.data} />
+            {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
+            {isRenter ? <DataExportSection /> : null}
+            {overview.data.hasPassword ? <DangerSection /> : null}
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -131,16 +147,33 @@ function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }
   );
 }
 
-function PhoneVerificationSection() {
+function EmailSection() {
+  const { colors, spacing } = useTheme();
+  const { profile } = useAuth();
+  const [open, setOpen] = useState(false);
+  return (
+    <Card elevated>
+      <SectionHeader icon={<Mail size={16} color={colors.primary} />} title="Sign-in email" />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <Text variant="callout" color="mutedForeground" style={{ flex: 1 }} numberOfLines={1}>
+          {profile?.email ?? 'No email on this account'}
+        </Text>
+        <Button label="Change" size="sm" variant="secondary" onPress={() => setOpen(true)} />
+      </View>
+      <ChangeEmailSheet open={open} onClose={() => setOpen(false)} />
+    </Card>
+  );
+}
+
+function PhoneVerificationSection({ overview }: { overview: SecurityOverview }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
   const qc = useQueryClient();
-  const query = useQuery({ queryKey: qk.renter.profile, queryFn: profileApi.get });
   const [reference, setReference] = useState<string | null>(null);
   const [otp, setOtp] = useState('');
 
   const sendMutation = useMutation({
-    mutationFn: profileApi.sendPhoneVerification,
+    mutationFn: securityApi.sendPhoneVerification,
     onSuccess: (res) => {
       setReference(res.reference);
       toast.show('Verification code sent.', 'success');
@@ -153,9 +186,9 @@ function PhoneVerificationSection() {
   });
 
   const confirmMutation = useMutation({
-    mutationFn: () => profileApi.confirmPhoneVerification(reference!, otp),
+    mutationFn: () => securityApi.confirmPhoneVerification(reference!, otp),
     onSuccess: () => {
-      qc.setQueryData(qk.renter.profile, (old: typeof query.data) =>
+      qc.setQueryData<SecurityOverview>(qk.security, (old) =>
         old ? { ...old, phoneVerified: true } : old
       );
       setReference(null);
@@ -166,17 +199,16 @@ function PhoneVerificationSection() {
       toast.show(err instanceof ApiError ? err.message : 'That code is incorrect.', 'error'),
   });
 
-  if (query.isLoading) return <Skeleton height={90} />;
-  if (!query.data?.phone) return null;
+  if (!overview.phone) return null;
 
   return (
     <Card elevated>
       <SectionHeader icon={<Phone size={16} color={colors.primary} />} title="Phone number" />
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text variant="callout" color="mutedForeground">
-          {query.data.phone}
+          {overview.phone}
         </Text>
-        {query.data.phoneVerified ? (
+        {overview.phoneVerified ? (
           <Badge label="Verified" tone="success" />
         ) : reference ? null : (
           <Button
@@ -188,7 +220,7 @@ function PhoneVerificationSection() {
           />
         )}
       </View>
-      {!query.data.phoneVerified && reference ? (
+      {!overview.phoneVerified && reference ? (
         <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
           <TextField
             label="6-digit code"
@@ -209,21 +241,21 @@ function PhoneVerificationSection() {
   );
 }
 
-function TwoFactorSection() {
+function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
   const qc = useQueryClient();
-  const query = useQuery({
-    queryKey: qk.renter.twoFactorStatus,
-    queryFn: profileApi.getTwoFactorStatus,
-  });
+  const setTwoFactor = (enabled: boolean) =>
+    qc.setQueryData<SecurityOverview>(qk.security, (old) =>
+      old ? { ...old, twoFactor: { enrolled: enabled, enabled } } : old
+    );
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollment | null>(null);
   const [token, setToken] = useState('');
   const [disableToken, setDisableToken] = useState('');
   const [showDisable, setShowDisable] = useState(false);
 
   const enrollMutation = useMutation({
-    mutationFn: profileApi.enrollTwoFactor,
+    mutationFn: securityApi.enrollTwoFactor,
     onSuccess: setEnrollment,
     onError: (err) =>
       toast.show(
@@ -233,9 +265,9 @@ function TwoFactorSection() {
   });
 
   const enableMutation = useMutation({
-    mutationFn: () => profileApi.enableTwoFactor(token),
+    mutationFn: () => securityApi.enableTwoFactor(token),
     onSuccess: () => {
-      qc.setQueryData(qk.renter.twoFactorStatus, { enrolled: true, enabled: true });
+      setTwoFactor(true);
       setEnrollment(null);
       setToken('');
       toast.show('Two-factor authentication enabled.', 'success');
@@ -245,9 +277,9 @@ function TwoFactorSection() {
   });
 
   const disableMutation = useMutation({
-    mutationFn: () => profileApi.disableTwoFactor(disableToken),
+    mutationFn: () => securityApi.disableTwoFactor(disableToken),
     onSuccess: () => {
-      qc.setQueryData(qk.renter.twoFactorStatus, { enrolled: false, enabled: false });
+      setTwoFactor(false);
       setShowDisable(false);
       setDisableToken('');
       toast.show('Two-factor authentication disabled.', 'success');
@@ -256,8 +288,6 @@ function TwoFactorSection() {
       toast.show(err instanceof ApiError ? err.message : 'That code is incorrect.', 'error'),
   });
 
-  if (query.isLoading) return <Skeleton height={90} />;
-
   return (
     <Card elevated>
       <SectionHeader
@@ -265,7 +295,7 @@ function TwoFactorSection() {
         title="Two-factor authentication"
       />
 
-      {query.data?.enabled ? (
+      {overview.twoFactor.enabled ? (
         showDisable ? (
           <View style={{ gap: spacing.sm }}>
             <Text variant="caption" color="mutedForeground">
@@ -365,7 +395,7 @@ function PasswordSection() {
   const [newPassword, setNewPassword] = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => profileApi.updatePassword(currentPassword, newPassword),
+    mutationFn: () => securityApi.updatePassword(currentPassword, newPassword),
     onSuccess: () => {
       setCurrentPassword('');
       setNewPassword('');
@@ -399,6 +429,23 @@ function PasswordSection() {
   );
 }
 
+/**
+ * Google/Apple-only accounts have no password to change or confirm with. The
+ * reset flow sets one, which then unlocks password change and deactivation.
+ */
+function SocialOnlyNote() {
+  const { colors } = useTheme();
+  return (
+    <Card elevated>
+      <SectionHeader icon={<KeyRound size={16} color={colors.primary} />} title="Password" />
+      <Text variant="callout" color="mutedForeground">
+        You sign in with Google or Apple, so there’s no password on this account. To add one, sign
+        out and use “Forgot password” with your email.
+      </Text>
+    </Card>
+  );
+}
+
 function DataExportSection() {
   const { colors, spacing } = useTheme();
   return (
@@ -427,7 +474,7 @@ function DangerSection() {
   const [confirming, setConfirming] = useState(false);
 
   const mutation = useMutation({
-    mutationFn: () => profileApi.deleteAccount(password),
+    mutationFn: () => securityApi.deactivate(password),
     onSuccess: async () => {
       toast.show('Your account has been deactivated.', 'success');
       await signOut();

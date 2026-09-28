@@ -27,6 +27,7 @@ import type {
   ShortletDispute,
   ShortletDisputeMessage,
   ShortletEarningsAnalytics,
+  HostShortletFees,
   ShortletGuestReview,
   ShortletListing,
   ShortletPayResponse,
@@ -443,6 +444,8 @@ export const shortletService = {
 
   deleteSeason: (seasonId: string) =>
     safeCall(() => authFetch(`/host/shortlets/seasons/${seasonId}`, { method: 'DELETE' })),
+
+  hostFees: () => safeCall(() => authFetch<HostShortletFees>('/host/shortlets/fees')),
 
   hostEarningsAnalytics: () =>
     safeCall(() => authFetch<ShortletEarningsAnalytics>('/host/shortlets/analytics')),

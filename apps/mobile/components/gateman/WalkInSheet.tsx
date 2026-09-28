@@ -4,7 +4,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserPlus } from 'lucide-react-native';
 import { Button, Card, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistCheckResult } from '@/components/gateman/WatchlistCheckResult';
 import { gatemanApi, type Household, type VisitorPass } from '@/lib/api/gateman';
+import {
+  readWatchlistRefusal,
+  type WatchlistRefusal,
+  type WatchlistScreening,
+} from '@/lib/gateman/watchlistRefusal';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 
@@ -12,6 +19,8 @@ export interface WalkInSheetProps {
   open: boolean;
   onClose: () => void;
   estateId: string;
+  /** The barrier the visitor is standing at, when the console knows it. */
+  gateId?: string;
   /** Fired once the household has been asked, so the caller can show the result. */
   onRaised: (pass: VisitorPass) => void;
 }
@@ -29,7 +38,7 @@ export interface WalkInSheetProps {
  * guard would spend the decision window discovering that. Saying so up front is
  * kinder than a rejection ten minutes later.
  */
-export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetProps) {
+export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkInSheetProps) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -39,6 +48,21 @@ export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetPr
   const [visitorName, setVisitorName] = useState('');
   const [visitorPhone, setVisitorPhone] = useState('');
   const [purpose, setPurpose] = useState('');
+  /**
+   * Set when the estate's watch list refused the visitor.
+   *
+   * Held here rather than toasted, because it is the estate's answer and not a
+   * failure: everything the guard typed stays exactly as it is, and the only
+   * thing that changes the outcome is a stated reason to admit them.
+   */
+  const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * What the estate's list said when the guard asked before attempting the
+   * raise. Set only for an answer that is not a refusal — a refusal is not an
+   * advisory and belongs to the notice below, which owns the decision.
+   */
+  const [screening, setScreening] = useState<WatchlistScreening | null>(null);
 
   const householdsQuery = useQuery({
     queryKey: qk.gateman.households(estateId),
@@ -64,15 +88,25 @@ export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetPr
     setVisitorName('');
     setVisitorPhone('');
     setPurpose('');
+    setRefusal(null);
+    setOverrideError(null);
+    setScreening(null);
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
   const request = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ overrideReason }: { overrideReason?: string } = {}) =>
       gatemanApi.requestWalkIn(estateId, {
         householdId: household!.id,
         visitorName: visitorName.trim(),
         visitorPhone: visitorPhone.trim() || undefined,
         purpose: purpose.trim() || undefined,
+        gateId,
+        overrideReason,
       }),
     onSuccess: (pass) => {
       void haptics.success();
@@ -84,32 +118,94 @@ export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetPr
       reset();
       onClose();
     },
-    onError: (error) => {
+    onError: (error, input) => {
+      const blocked = readWatchlistRefusal(error);
+      if (blocked) {
+        setOverrideError(null);
+        setRefusal(blocked);
+        void haptics.error();
+        return;
+      }
+      const message = error instanceof Error ? error.message : 'Could not raise that request.';
+      if (input?.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
       void haptics.error();
-      toast.show(error instanceof Error ? error.message : 'Could not raise that request.', 'error');
+      toast.show(message, 'error');
     },
   });
 
   const canSubmit = !!household && visitorName.trim().length > 1 && !request.isPending;
 
+  /**
+   * Asks about this visitor before anything is attempted.
+   *
+   * Needs the household first, because the question is "this visitor, coming to
+   * see this unit" — and because if the answer refuses them, the only way
+   * forward is the override, which raises the request.
+   */
+  const canCheck =
+    !!household &&
+    !request.isPending &&
+    (visitorName.trim().length > 0 || visitorPhone.replace(/\D/g, '').length >= 7);
+
+  const check = useMutation({
+    mutationFn: () =>
+      gatemanApi.screenWatchlist(estateId, {
+        name: visitorName.trim() || undefined,
+        phone: visitorPhone.trim() || undefined,
+      }),
+    onSuccess: (result) => {
+      setOverrideError(null);
+      if (result.blocked) {
+        // The same answer the raise would give, reached earlier: before the
+        // guard has promised the visitor anything, and without a household being
+        // asked to consent to somebody the estate has already refused.
+        setScreening(null);
+        setRefusal({ message: result.message ?? '', matches: result.matches });
+        return;
+      }
+      setRefusal(null);
+      setScreening(result);
+    },
+    onError: (error) => {
+      void haptics.error();
+      toast.show(
+        error instanceof Error ? error.message : 'Could not check the watch list.',
+        'error'
+      );
+    },
+  });
+
   return (
     <Sheet
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       title="Visitor with no pass"
       snapPoints={['85%']}
       footer={
         <View style={{ gap: spacing.xs }}>
-          <Button
-            label={request.isPending ? 'Asking…' : 'Ask for approval'}
-            loading={request.isPending}
-            fullWidth
-            disabled={!canSubmit}
-            onPress={() => request.mutate()}
-          />
-          <Text variant="caption" color="mutedForeground" center>
-            The gate stays closed until the household answers. They have 10 minutes.
-          </Text>
+          {/* Once the estate has refused, the primary action is gone on purpose.
+              Leaving "Ask for approval" here would invite a retry that returns
+              the same refusal while the visitor waits — the only route forward
+              is the stated override inside the notice. */}
+          {refusal ? (
+            <Button label="Close" variant="outline" fullWidth onPress={handleClose} />
+          ) : (
+            <>
+              <Button
+                label={request.isPending ? 'Asking…' : 'Ask for approval'}
+                loading={request.isPending}
+                fullWidth
+                disabled={!canSubmit}
+                onPress={() => request.mutate({})}
+              />
+              <Text variant="caption" color="mutedForeground" center>
+                The gate stays closed until the household answers. They have 10 minutes.
+              </Text>
+            </>
+          )}
         </View>
       }
     >
@@ -200,6 +296,33 @@ export function WalkInSheet({ open, onClose, estateId, onRaised }: WalkInSheetPr
             </View>
           </Card>
         ) : null}
+
+        {refusal ? (
+          <WatchlistBlockedNotice
+            message={refusal.message}
+            matches={refusal.matches}
+            onOverride={(reason) => request.mutate({ overrideReason: reason })}
+            isOverriding={request.isPending}
+            error={overrideError}
+          />
+        ) : null}
+
+        {/* Last thing before the footer, because it is the last thing worth
+            knowing before a household is asked. */}
+        <View style={{ gap: spacing.xs }}>
+          <Button
+            label={check.isPending ? 'Checking…' : 'Check the watch list'}
+            variant="outline"
+            loading={check.isPending}
+            fullWidth
+            disabled={!canCheck}
+            onPress={() => {
+              setScreening(null);
+              check.mutate();
+            }}
+          />
+          {screening ? <WatchlistCheckResult screening={screening} /> : null}
+        </View>
       </ScrollView>
     </Sheet>
   );

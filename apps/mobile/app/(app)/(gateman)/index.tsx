@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Pressable, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
   Clock,
   CloudOff,
   KeyRound,
+  MapPin,
   ScanLine,
   UserPlus,
   XCircle,
@@ -24,8 +25,14 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
+import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 import { WalkInSheet } from '@/components/gateman/WalkInSheet';
+import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedSheet';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { ApiError } from '@/lib/api/client';
+import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import { describeStandingPass } from '@/lib/gateman/standingPass';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type VisitorPass } from '@/lib/api/gateman';
 import { gateOfflineQueue, replayGateQueue, useGateQueue } from '@/lib/gateOfflineQueue';
 import { qk } from '@/lib/query/keys';
@@ -49,15 +56,44 @@ export default function GatemanCheckIn() {
     queued?: string;
     /** Set when a walk-in request has just been sent to the household. */
     requested?: string;
+    /**
+     * The estate's note about somebody it matched but did not refuse.
+     *
+     * Carried beside the outcome rather than inside it: the visitor was let in,
+     * and a guard who reads this as a failure starts second-guessing an
+     * admission the estate already decided to allow.
+     */
+    warning?: string;
   } | null>(null);
 
   const queue = useGateQueue();
 
-  const estateQuery = useQuery({
-    queryKey: qk.gateman.myEstate,
-    queryFn: () => gatemanApi.getMyEstate(),
-  });
-  const estate = estateQuery.data ?? null;
+  /**
+   * The write an estate's watch list refused.
+   *
+   * Kept whole so an override resends exactly what was refused. Re-deriving it
+   * from the current form would let an override land on a different visitor than
+   * the one who was refused — with two people at a barrier, that is not a
+   * theoretical risk.
+   */
+  const [blocked, setBlocked] = useState<{
+    refusal: WatchlistRefusal;
+    write: { kind: 'check-in'; code: string } | { kind: 'admit'; pass: VisitorPass };
+  } | null>(null);
+  /** A failed override attempt, kept separate so the guard's typed reason survives it. */
+  const [overrideError, setOverrideError] = useState<string | null>(null);
+
+  const {
+    estate,
+    gate,
+    gates,
+    needsGateChoice,
+    isLoading: isPostLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useGatemanPost();
+  const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   const checkInsQuery = useQuery({
     queryKey: qk.gateman.visitorsInside(estate?.id ?? ''),
@@ -84,36 +120,65 @@ export default function GatemanCheckIn() {
   });
 
   const verify = useMutation({
-    mutationFn: (code: string) => gatemanApi.verifyVisitorPass(estate!.id, code),
+    mutationFn: ({ code, overrideReason }: { code: string; overrideReason?: string }) =>
+      gatemanApi.verifyVisitorPass(estate!.id, code, { gateId: gate?.id, overrideReason }),
     onSuccess: (pass) => {
-      setResult({ pass });
+      setResult({ pass, warning: pass.watchlistWarning });
+      setBlocked(null);
+      setOverrideError(null);
       setPin('');
       void haptics.success();
       if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.visitorsInside(estate.id) });
     },
-    onError: async (error, code) => {
+    onError: async (error, input) => {
+      // The estate's watch list refused them. Not a fault and not a connection
+      // problem, so it must not fall into either branch below: resending gives
+      // the same answer, and the guard is offered the one thing that does change
+      // it — a stated reason to admit them anyway.
+      const refusal = readWatchlistRefusal(error);
+      if (refusal) {
+        setResult(null);
+        setOverrideError(null);
+        setBlocked({ refusal, write: { kind: 'check-in', code: input.code } });
+        void haptics.error();
+        return;
+      }
+
       // No signal at the barrier. The visitor is standing there and the resident
       // has already approved them, so refusing the entry would be the wrong
       // answer — record the arrival on the device and send it later.
-      if (error instanceof ApiError && error.isNetwork && estate) {
+      //
+      // An override is deliberately NOT queued. The queue carries no reason, so
+      // replaying it would refuse somebody the guard had deliberately admitted,
+      // and the estate's record would then say the visitor never entered at all.
+      // Saying "not sent" is honest; a silently rewritten refusal is not.
+      if (!input.overrideReason && error instanceof ApiError && error.isNetwork && estate) {
         await gateOfflineQueue.enqueue('check-in', {
           estateId: estate.id,
-          pin: code,
+          pin: input.code,
           occurredAt: new Date().toISOString(),
-          label: `PIN ${code}`,
+          gateId: gate?.id,
+          label: `PIN ${input.code}`,
         });
-        setResult({ queued: `PIN ${code}` });
+        setResult({ queued: `PIN ${input.code}` });
         setPin('');
         void haptics.success();
         return;
       }
-      setResult({ error: error instanceof Error ? error.message : 'Could not verify that code.' });
+
+      const message = error instanceof Error ? error.message : 'Could not verify that code.';
+      if (input.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
+      setResult({ error: message });
       void haptics.error();
     },
   });
 
   const checkOut = useMutation({
-    mutationFn: (pass: VisitorPass) => gatemanApi.checkOutVisitorPass(estate!.id, pass.id),
+    mutationFn: (pass: VisitorPass) =>
+      gatemanApi.checkOutVisitorPass(estate!.id, pass.id, { gateId: gate?.id }),
     onSuccess: (pass) => {
       void haptics.success();
       toast.show(`${pass.visitorName} checked out.`, 'success');
@@ -125,6 +190,7 @@ export default function GatemanCheckIn() {
           estateId: estate.id,
           passId: pass.id,
           occurredAt: new Date().toISOString(),
+          gateId: gate?.id,
           label: `${pass.visitorName} (${pass.unitLabel})`,
         });
         void haptics.success();
@@ -141,33 +207,56 @@ export default function GatemanCheckIn() {
 
   /** Opens the barrier for a walk-in the household has already approved. */
   const admit = useMutation({
-    mutationFn: (pass: VisitorPass) => gatemanApi.admitWalkIn(estate!.id, pass.id),
+    mutationFn: ({ pass, overrideReason }: { pass: VisitorPass; overrideReason?: string }) =>
+      gatemanApi.admitWalkIn(estate!.id, pass.id, { gateId: gate?.id, overrideReason }),
     onSuccess: (pass) => {
       void haptics.success();
-      setResult({ pass });
+      setResult({ pass, warning: pass.watchlistWarning });
+      setBlocked(null);
+      setOverrideError(null);
       toast.show(`${pass.visitorName} admitted.`, 'success');
       if (estate) {
         void qc.invalidateQueries({ queryKey: qk.gateman.visitorsInside(estate.id) });
         void qc.invalidateQueries({ queryKey: qk.gateman.walkIns(estate.id) });
       }
     },
-    onError: async (error, pass) => {
+    onError: async (error, input) => {
+      const refusal = readWatchlistRefusal(error);
+      if (refusal) {
+        setResult(null);
+        setOverrideError(null);
+        setBlocked({ refusal, write: { kind: 'admit', pass: input.pass } });
+        void haptics.error();
+        return;
+      }
+
       // The household already consented, so this is still the guard's decision to
       // record. Only the network is missing, so queue it rather than make the
-      // visitor wait for a signal.
-      if (error instanceof ApiError && error.isNetwork && estate) {
+      // visitor wait for a signal — but never an override, for the same reason as
+      // a queued check-in above.
+      if (!input.overrideReason && error instanceof ApiError && error.isNetwork && estate) {
         await gateOfflineQueue.enqueue('admit', {
           estateId: estate.id,
-          passId: pass.id,
+          passId: input.pass.id,
           occurredAt: new Date().toISOString(),
-          label: `${pass.visitorName} (${pass.unitLabel})`,
+          gateId: gate?.id,
+          label: `${input.pass.visitorName} (${input.pass.unitLabel})`,
         });
         void haptics.success();
-        toast.show(`${pass.visitorName} admitted — saved, will send when back online.`, 'info');
+        toast.show(
+          `${input.pass.visitorName} admitted — saved, will send when back online.`,
+          'info'
+        );
+        return;
+      }
+
+      const message = error instanceof Error ? error.message : 'Could not admit that visitor.';
+      if (input.overrideReason) {
+        setOverrideError(message);
         return;
       }
       void haptics.error();
-      toast.show(error instanceof Error ? error.message : 'Could not admit that visitor.', 'error');
+      toast.show(message, 'error');
     },
   });
 
@@ -261,11 +350,16 @@ export default function GatemanCheckIn() {
   const handleScan = (scanned: string) => {
     setScannerOpen(false);
     setResult(null);
+    setBlocked(null);
     setPin(scanned);
-    verify.mutate(scanned);
+    verify.mutate({ code: scanned });
   };
 
-  if (estateQuery.isLoading) {
+  // Null for every ordinary arrival, so the confirmation below is unchanged for
+  // them. Derived once rather than twice so the two conditionals cannot drift.
+  const standingPassNote = result?.pass ? describeStandingPass(result.pass) : null;
+
+  if (isPostLoading) {
     return (
       <Screen>
         <View style={{ gap: spacing.md, marginTop: spacing['6xl'] }}>
@@ -276,13 +370,13 @@ export default function GatemanCheckIn() {
     );
   }
 
-  if (estateQuery.isError) {
+  if (isError) {
     return (
-      <Screen refreshing={estateQuery.isRefetching} onRefresh={() => estateQuery.refetch()}>
+      <Screen refreshing={isRefetching} onRefresh={refetch}>
         <ErrorState
           title="We couldn't load your gate assignment"
           description="Check your connection and try again. Offline check-ins already stored on this device remain safe."
-          onRetry={() => estateQuery.refetch()}
+          onRetry={refetch}
         />
       </Screen>
     );
@@ -303,7 +397,24 @@ export default function GatemanCheckIn() {
   const submit = () => {
     if (pin.length !== 6 || verify.isPending) return;
     setResult(null);
-    verify.mutate(pin);
+    setBlocked(null);
+    verify.mutate({ code: pin });
+  };
+
+  /**
+   * Admits somebody the estate listed, on a guard's stated reason.
+   *
+   * Resends the refused write rather than a fresh one, so the override cannot
+   * land on a different visitor than the one who was refused.
+   */
+  const overrideWatchlist = (reason: string) => {
+    if (!blocked) return;
+    setOverrideError(null);
+    if (blocked.write.kind === 'check-in') {
+      verify.mutate({ code: blocked.write.code, overrideReason: reason });
+      return;
+    }
+    admit.mutate({ pass: blocked.write.pass, overrideReason: reason });
   };
 
   return (
@@ -312,7 +423,10 @@ export default function GatemanCheckIn() {
         <DashboardHeader
           eyebrow="Gate operations"
           title={estate.name}
-          subtitle="Verify arrivals and keep the estate moving safely"
+          /* The concrete instruction, not a slogan: this is the one line a guard
+             reads at the start of a shift, and "scan the QR or enter the PIN" is
+             what they have to do next. */
+          subtitle="Scan the visitor's QR code, or enter their 6-digit PIN."
           accessory={
             <View
               style={{
@@ -328,6 +442,58 @@ export default function GatemanCheckIn() {
             </View>
           }
         />
+
+        {/* Where this guard is, as a fact they can correct. A guard on two
+            estates was previously shown the oldest one with nothing on screen to
+            suggest the other existed. It sits under the header rather than inside
+            it because it is an action, not a label. */}
+        <View style={{ alignItems: 'center' }}>
+          <Pressable
+            onPress={() => setPostSheetOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Change your estate or gate"
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.xs,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+              borderRadius: 999,
+              backgroundColor: colors.accent,
+            }}
+          >
+            <MapPin size={14} color={colors.primary} />
+            <Text variant="caption" style={{ color: colors.primary }}>
+              {gate
+                ? gate.name
+                : gates.length === 0
+                  ? 'No gates named'
+                  : `${gates.length} gates — tap to say which`}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Entries are recorded against the gate, so an estate can answer which
+            barrier a visitor came through. Left unpicked rather than guessed:
+            a confident wrong gate is worse than a missing one, and only the
+            guard knows which barrier they are standing at. */}
+        {needsGateChoice ? (
+          <Card elevated>
+            <View style={{ gap: spacing.sm }}>
+              <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                <MapPin size={20} color={colors.destructive} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyStrong">Which gate are you at?</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    This estate has {gates.length} gates. Entries you record will not be attributed
+                    to one until you pick, so the estate cannot tell where someone came through.
+                  </Text>
+                </View>
+              </View>
+              <Button label="Choose my gate" fullWidth onPress={() => setPostSheetOpen(true)} />
+            </View>
+          </Card>
+        ) : null}
 
         <Card elevated>
           <Button
@@ -387,6 +553,7 @@ export default function GatemanCheckIn() {
             disabled={verify.isPending}
             onPress={() => {
               setResult(null);
+              setBlocked(null);
               setWalkInOpen(true);
             }}
             style={{ marginTop: spacing.sm }}
@@ -407,6 +574,11 @@ export default function GatemanCheckIn() {
                 <Text variant="caption" color="mutedForeground">
                   Hosted by {result.pass.residentName}
                 </Text>
+                {standingPassNote ? (
+                  <Text variant="caption" color="mutedForeground">
+                    {standingPassNote}
+                  </Text>
+                ) : null}
               </View>
             </View>
           </Card>
@@ -425,6 +597,8 @@ export default function GatemanCheckIn() {
             </View>
           </Card>
         ) : null}
+
+        {result?.warning ? <WatchlistWarning warning={result.warning} /> : null}
 
         {result?.queued ? (
           <Card elevated>
@@ -549,7 +723,7 @@ export default function GatemanCheckIn() {
                     label="Admit"
                     fullWidth
                     loading={admit.isPending}
-                    onPress={() => admit.mutate(pass)}
+                    onPress={() => admit.mutate({ pass })}
                   />
                 </View>
               </Card>
@@ -642,6 +816,29 @@ export default function GatemanCheckIn() {
         onScan={handleScan}
       />
 
+      {estate ? (
+        <PostSwitcherSheet open={postSheetOpen} onClose={() => setPostSheetOpen(false)} />
+      ) : null}
+
+      {/* Held on screen rather than toasted: an estate refusing somebody is a
+          decision the guard has to act on, with the reason in front of them and
+          one question to answer. */}
+      {blocked ? (
+        <WatchlistBlockedSheet
+          open
+          onClose={() => {
+            setBlocked(null);
+            setOverrideError(null);
+            setPin('');
+          }}
+          message={blocked.refusal.message}
+          matches={blocked.refusal.matches}
+          onOverride={overrideWatchlist}
+          isOverriding={verify.isPending || admit.isPending}
+          error={overrideError}
+        />
+      ) : null}
+
       {/* Remount on open so the form starts clean each time — resetting it from
           an effect would trip react-hooks/set-state-in-effect.
 
@@ -654,12 +851,14 @@ export default function GatemanCheckIn() {
           open={walkInOpen}
           onClose={() => setWalkInOpen(false)}
           estateId={estate.id}
+          gateId={gate?.id}
           onRaised={(pass) =>
             // Phrased without promising an approval: this card stays until the
             // guard leaves the screen, and a refusal must not leave it claiming
             // "admit them once they approve" — which is what it used to say.
             setResult({
               requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. ${pass.residentName}'s answer appears under "At the gate".`,
+              warning: pass.watchlistWarning,
             })
           }
         />

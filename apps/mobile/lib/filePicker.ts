@@ -96,3 +96,22 @@ export async function capturePhoto(): Promise<PickedFile | null> {
   const asset = result.assets[0];
   return { uri: asset.uri, name: 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg' };
 }
+
+/** Opens the photo library for several photos at once (e.g. a listing gallery). Empty if cancelled. */
+export async function pickPhotos(limit = 10): Promise<PickedFile[]> {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) return [];
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsMultipleSelection: true,
+    selectionLimit: limit,
+    orderedSelection: true,
+    quality: 0.8,
+  });
+  if (result.canceled || !result.assets?.length) return [];
+  return result.assets.map((asset, i) => {
+    const name = asset.fileName || asset.uri.split('/').pop() || `photo-${i + 1}.jpg`;
+    return { uri: asset.uri, name, mimeType: resolveMimeType(name, asset.mimeType) };
+  });
+}

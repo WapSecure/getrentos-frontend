@@ -1,6 +1,7 @@
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { WatchlistScreening } from '@/lib/gateman/watchlistRefusal';
 import type { VisitorPass, VisitorPassStatus } from './visitor-pass';
 
 export type { VisitorPass, VisitorPassSource, VisitorPassStatus } from './visitor-pass';
@@ -27,6 +28,20 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
   }
   const s = q.toString();
   return s ? `?${s}` : '';
+}
+
+/**
+ * Builds the body for a gate write, omitting what the gate does not know.
+ *
+ * Sends nothing at all when there is nothing to say, rather than an object full
+ * of `undefined` — and an absent `gateId` means "no gate recorded", which is a
+ * different claim from an empty one. The API validates whichever fields arrive.
+ */
+function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unknown> | undefined {
+  const body = Object.fromEntries(
+    Object.entries(extra).filter(([, value]) => value !== undefined && value !== '')
+  );
+  return Object.keys(body).length > 0 ? body : undefined;
 }
 
 /** The estate a guard is posted to. `gateCount` can be 0 before gates are named. */
@@ -93,6 +108,8 @@ export interface VehicleLog {
   gateName?: string;
   enteredAt: string;
   exitedAt?: string;
+  /** Set only on the write that logged this vehicle — see `VisitorPass`. */
+  watchlistWarning?: string;
   createdAt: string;
 }
 
@@ -112,11 +129,61 @@ export interface Incident {
   createdAt: string;
 }
 
+/**
+ * The optional facts a gate write can carry, both of which are about the same
+ * thing: what actually happened at the barrier, and where it is.
+ *
+ * A `type` rather than an `interface` deliberately — only a type alias gets an
+ * implicit index signature, which is what lets it be spread into the request
+ * body builder below.
+ */
+export type GateWriteOptions = {
+  /** ISO time the guard acted, for a write queued offline. */
+  occurredAt?: string;
+  /** The barrier the guard is standing at. */
+  gateId?: string;
+  /**
+   * A guard's stated reason for admitting somebody the estate has blocked.
+   *
+   * Only ever set on a deliberate override, never on the first attempt: the
+   * reason is the whole point of the override, and it is what the estate office
+   * is told when they are woken by the notification.
+   */
+  overrideReason?: string;
+};
+
 export const gatemanApi = {
   /** The estate this guard is posted to; `null` when they hold no post yet. */
   getMyEstate: () => apiFetch<GatemanEstate | null>('/estate/me'),
 
+  /**
+   * Every estate this guard can open.
+   *
+   * `/estate/me` answers with one estate and offers no way to ask for another,
+   * so a guard posted to two estates was locked to whichever came back — always
+   * the oldest, with nothing on screen to say another existed.
+   */
+  listMyEstates: () => apiFetch<GatemanEstate[]>('/estate/mine'),
+
   listGates: (estateId: string) => apiFetch<Gate[]>(`/estate/${estateId}/gates`),
+
+  /**
+   * Asks the estate's watch list about somebody, instead of attempting a write.
+   *
+   * For a guard who would rather find out before they have told a visitor they
+   * are asking the household — and so a household is never asked to consent to
+   * somebody the estate has already refused. Answering "nobody matched" reveals
+   * who the estate is watching, so the endpoint is access-checked like every
+   * other estate route.
+   */
+  screenWatchlist: (
+    estateId: string,
+    query: { name?: string; phone?: string; plateNumber?: string }
+  ) =>
+    apiFetch<WatchlistScreening>(`/estate/${estateId}/watchlist/screen`, {
+      method: 'POST',
+      body: query,
+    }),
 
   listHouseholds: (estateId: string, page = 1, pageSize = 20) =>
     apiFetch<Paginated<Household>>(
@@ -150,10 +217,10 @@ export const gatemanApi = {
    * expired while the network was down is refused and the arrival is lost — the
    * guest is standing at the gate but the estate has no record of them.
    */
-  verifyVisitorPass: (estateId: string, pin: string, occurredAt?: string) =>
+  verifyVisitorPass: (estateId: string, pin: string, options: GateWriteOptions = {}) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/verify`, {
       method: 'POST',
-      body: occurredAt ? { pin, occurredAt } : { pin },
+      body: buildGateWriteBody({ pin, ...options }),
     }),
 
   /**
@@ -163,10 +230,10 @@ export const gatemanApi = {
    * `occurredAt` carries the same meaning as on check-in: the time the guard
    * actually let the visitor out, not the time the queue got to send it.
    */
-  checkOutVisitorPass: (estateId: string, passId: string, occurredAt?: string) =>
+  checkOutVisitorPass: (estateId: string, passId: string, options: GateWriteOptions = {}) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
       method: 'PATCH',
-      body: occurredAt ? { occurredAt } : undefined,
+      body: buildGateWriteBody(options),
     }),
 
   /**
@@ -178,7 +245,15 @@ export const gatemanApi = {
    */
   requestWalkIn: (
     estateId: string,
-    data: { householdId: string; visitorName: string; visitorPhone?: string; purpose?: string }
+    data: {
+      householdId: string;
+      visitorName: string;
+      visitorPhone?: string;
+      purpose?: string;
+      gateId?: string;
+      /** Set only when a guard is admitting somebody the estate has blocked. */
+      overrideReason?: string;
+    }
   ) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/walk-in`, {
       method: 'POST',
@@ -192,10 +267,10 @@ export const gatemanApi = {
    * connection drops between the approval and the barrier gets their admission
    * queued, and it must be recorded as happening when they acted.
    */
-  admitWalkIn: (estateId: string, passId: string, occurredAt?: string) =>
+  admitWalkIn: (estateId: string, passId: string, options: GateWriteOptions = {}) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/admit`, {
       method: 'PATCH',
-      body: occurredAt ? { occurredAt } : undefined,
+      body: buildGateWriteBody(options),
     }),
 
   /** Withdraws a walk-in the gate raised — wrong unit, or the visitor left. */
@@ -245,6 +320,8 @@ export const gatemanApi = {
       driverName?: string;
       purpose?: Uppercase<VehiclePurpose>;
       gateId?: string;
+      /** Set only when the guard is admitting a vehicle the estate has blocked. */
+      overrideReason?: string;
       photo?: PickedFile;
     }
   ) => {
@@ -254,6 +331,7 @@ export const gatemanApi = {
     if (data.driverName) form.append('driverName', data.driverName);
     if (data.purpose) form.append('purpose', data.purpose);
     if (data.gateId) form.append('gateId', data.gateId);
+    if (data.overrideReason) form.append('overrideReason', data.overrideReason);
     if (data.photo) appendFile(form, 'file', data.photo);
     return apiUpload<VehicleLog>(`/estate/${estateId}/vehicle-logs`, form);
   },

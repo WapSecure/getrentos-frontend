@@ -22,7 +22,13 @@ export function VerificationGateNotice({
   const gate = readGate(error);
   if (!gate) return null;
 
-  const destination = gate.scoreWithheld && scoreHref ? scoreHref : verifyHref;
+  // Assigned in two statements rather than as one ternary: `expo-router`'s typed
+  // routes expand `Href` to a union with one member per screen, and a ternary
+  // between two of them makes TypeScript materialise the pair and give up once
+  // the app has a few hundred routes (TS2590, "union type that is too complex to
+  // represent"). Assigning each candidate on its own never builds that union.
+  let destination: Href = verifyHref;
+  if (gate.scoreWithheld && scoreHref) destination = scoreHref;
 
   return (
     <View

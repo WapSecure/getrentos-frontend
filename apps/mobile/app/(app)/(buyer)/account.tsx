@@ -9,6 +9,7 @@ import {
   Calendar,
   ChevronRight,
   CircleHelp,
+  KeyRound,
   CreditCard,
   FileStack,
   Heart,
@@ -34,6 +35,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function BuyerAccount() {
   const { signOut } = useAuth();
@@ -67,6 +69,8 @@ export default function BuyerAccount() {
           </>
         )}
       </View>
+
+      <WorkspaceSwitcher />
 
       <Card elevated padding="none">
         <Row
@@ -167,6 +171,13 @@ export default function BuyerAccount() {
           label="Notifications"
           description="Alerts for offers, payments and viewings"
           onPress={() => router.push('/(app)/buyer-notifications')}
+        />
+        <Divider />
+        <Row
+          icon={<KeyRound size={18} color={colors.primary} />}
+          label="Security"
+          description="Password, two-factor and app lock"
+          onPress={() => router.push('/(app)/security-settings')}
         />
         <Divider />
         <Row

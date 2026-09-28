@@ -15,6 +15,10 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
+import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
+import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { gatemanApi, type VehiclePurpose } from '@/lib/api/gateman';
 import type { PickedFile } from '@/lib/api/documents';
 import { qk } from '@/lib/query/keys';
@@ -49,12 +53,22 @@ export default function GatemanVehicles() {
   const [purpose, setPurpose] = useState<VehiclePurpose>('visitor');
   const [gateId, setGateId] = useState('');
   const [photo, setPhoto] = useState<PickedFile | null>(null);
+  /**
+   * Set when the estate's watch list refused this vehicle.
+   *
+   * Kept apart from a toast on purpose: a blocked registration is the estate's
+   * answer, and the guard needs the plate and the reason in front of them to
+   * decide whether they are looking at the car the estate meant.
+   */
+  const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * The estate's note about a vehicle it matched but did not refuse. The log
+   * went through, on purpose.
+   */
+  const [warning, setWarning] = useState<string | null>(null);
 
-  const estateQuery = useQuery({
-    queryKey: qk.gateman.myEstate,
-    queryFn: () => gatemanApi.getMyEstate(),
-  });
-  const estate = estateQuery.data ?? null;
+  const { estate, isLoading: isPostLoading } = useGatemanPost();
 
   const gatesQuery = useQuery({
     queryKey: qk.gateman.gates(estate?.id ?? ''),
@@ -71,16 +85,17 @@ export default function GatemanVehicles() {
   const inside = insideQuery.data?.items ?? [];
 
   const logEntry = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ overrideReason }: { overrideReason?: string } = {}) =>
       gatemanApi.logVehicleEntry(estate!.id, {
         plateNumber: plateNumber.trim().toUpperCase(),
         vehicleDescription: vehicleDescription.trim() || undefined,
         driverName: driverName.trim() || undefined,
         purpose: purpose.toUpperCase() as Uppercase<VehiclePurpose>,
         gateId: gateId || undefined,
+        overrideReason,
         photo: photo ?? undefined,
       }),
-    onSuccess: () => {
+    onSuccess: (log) => {
       void haptics.success();
       setPlateNumber('');
       setVehicleDescription('');
@@ -88,10 +103,27 @@ export default function GatemanVehicles() {
       setPurpose('visitor');
       setGateId('');
       setPhoto(null);
+      setRefusal(null);
+      setOverrideError(null);
+      setWarning(log.watchlistWarning ?? null);
       if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.vehicleLogs(estate.id) });
     },
-    onError: (error) =>
-      toast.show(error instanceof Error ? error.message : 'Could not log that vehicle.', 'error'),
+    onError: (error, input) => {
+      const blocked = readWatchlistRefusal(error);
+      if (blocked) {
+        setOverrideError(null);
+        setRefusal(blocked);
+        void haptics.error();
+        return;
+      }
+      const message = error instanceof Error ? error.message : 'Could not log that vehicle.';
+      if (input?.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
+      void haptics.error();
+      toast.show(message, 'error');
+    },
   });
 
   const markExited = useMutation({
@@ -107,7 +139,7 @@ export default function GatemanVehicles() {
     if (picked) setPhoto(picked);
   };
 
-  if (estateQuery.isLoading) {
+  if (isPostLoading) {
     return (
       <Screen>
         <Skeleton height={280} radius={16} />
@@ -251,9 +283,26 @@ export default function GatemanVehicles() {
           loading={logEntry.isPending}
           fullWidth
           disabled={!plateNumber.trim()}
-          onPress={() => logEntry.mutate()}
+          onPress={() => {
+            setRefusal(null);
+            setOverrideError(null);
+            setWarning(null);
+            logEntry.mutate({});
+          }}
           style={{ marginTop: spacing.xs }}
         />
+
+        {warning ? <WatchlistWarning warning={warning} /> : null}
+
+        {refusal ? (
+          <WatchlistBlockedNotice
+            message={refusal.message}
+            matches={refusal.matches}
+            onOverride={(reason) => logEntry.mutate({ overrideReason: reason })}
+            isOverriding={logEntry.isPending}
+            error={overrideError}
+          />
+        ) : null}
       </Card>
 
       <View style={{ gap: spacing.md }}>

@@ -228,6 +228,27 @@ export const ROUTES = {
   ESTATE_VIOLATIONS: '/estate/violations',
   ESTATE_GOVERNANCE: '/estate/governance',
   ESTATE_VEHICLES: '/estate/vehicles',
+  /** The estate's do-not-admit list, screened at every way in. */
+  ESTATE_WATCHLIST: '/estate/watchlist',
+  /**
+   * Standing authorisations for people who keep arriving — a cleaner on
+   * Tuesdays, a contractor on site for six weeks. Enterprise-gated.
+   */
+  ESTATE_CONTRACTORS: '/estate/contractors',
+  /**
+   * Raising the alarm and calling the roll.
+   *
+   * Free on every plan, and deliberately so: an estate that has to pay to find
+   * out whether the people in its building are safe is an estate that will not
+   * find out. Nothing here is a convenience on top of something already bought.
+   */
+  ESTATE_EMERGENCY: '/estate/emergency',
+  /**
+   * How long visits run, and who never left. Enterprise — the only gate feature
+   * whose absence makes an estate slower rather than unsafe, which is what makes
+   * it the one that is paid for.
+   */
+  ESTATE_DWELL: '/estate/dwell',
   ESTATE_DELIVERIES: '/estate/deliveries',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
@@ -246,6 +267,13 @@ export const ROUTES = {
   RESIDENT_ANNOUNCEMENTS: '/resident/announcements',
   RESIDENT_VISITOR_PASSES: '/resident/visitor-passes',
   RESIDENT_VIOLATIONS: '/resident/violations',
+  /**
+   * Where a resident answers the estate's roll call.
+   *
+   * Reached from a banner rather than browsed to, because an emergency screen
+   * that is only found by looking for it is one that is not found at all.
+   */
+  RESIDENT_EMERGENCY: '/resident/emergency',
   RESIDENT_DELIVERIES: '/resident/deliveries',
   RESIDENT_DIRECTORY: '/resident/directory',
   RESIDENT_MAINTENANCE: '/resident/maintenance',

@@ -71,6 +71,12 @@ export interface ShortletListing {
   seasons: ShortletSeason[];
   /** Confirmed stays the host cancelled on this listing in the last 12 months (detail view). */
   hostCancellations12m?: number;
+  /** Newest inspection by an independent, licensed agent; absent when none qualifies. */
+  inspection?: ShortletInspectionBadge;
+  /** Search with dates: the all-in price for those dates, or why they can't be booked. */
+  stayQuote?: StayQuoteResult;
+  /** Present when the nightly rate is at or below the typical rate of 5+ comparable stays. */
+  fairPrice?: FairPrice;
   houseRules?: string;
   /** Unset = the host hasn't said. */
   petsAllowed?: boolean;
@@ -129,6 +135,8 @@ export interface ShortletBooking {
   checkInInstructions?: string;
   /** Guest view only. */
   guestPromise?: GuestPromiseStatus;
+  /** Host view only: the guest at a glance. */
+  guestSummary?: GuestSummary;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
   paymentRequired?: boolean;
@@ -328,6 +336,8 @@ export interface ShortletMessage {
   text: string;
   timestamp: string;
   read: boolean;
+  /** Contact details in this message were hidden (no paid stay yet). */
+  contactMasked?: boolean;
 }
 
 export interface ShortletConversation {
@@ -539,4 +549,65 @@ export interface ShortletHostPenalty {
   status: 'OUTSTANDING' | 'SETTLED' | 'WAIVED';
   waiverReason?: string;
   createdAt: string;
+}
+
+export type InspectedRoomCondition = 'excellent' | 'good' | 'fair';
+
+/** An inspection that earns the "Inspected" badge (see backend shortlet-inspection.ts). */
+export interface ShortletInspectionBadge {
+  inspectedAt: string;
+  /** First name and initial. */
+  agentName: string;
+  type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
+  rooms: { room: string; condition: InspectedRoomCondition }[];
+  /** The worst room rating. */
+  condition: InspectedRoomCondition;
+}
+
+/** What a host sees about a guest: counts across GetRentos only. */
+export interface GuestSummary {
+  identityVerified: boolean;
+  memberSince: string;
+  completedStays: number;
+  ratingAverage?: number;
+  ratingCount: number;
+  /** Stays the guest cancelled in the last 12 months. */
+  cancellations12m: number;
+  /** Deposit claims upheld against the guest. */
+  damageClaimsUpheld: number;
+}
+
+/** The all-in price for given dates, as the checkout will charge it. */
+/** The GetRentos fee on a booking made now; taken from the host payout, never charged to guests. */
+export interface HostShortletFees {
+  commissionPct: number;
+  standardCommissionPct: number;
+  /** When the launch rate ends, if one is running. */
+  introEndsAt?: string;
+}
+
+export interface StayQuote {
+  nights: number;
+  nightsTotal: number;
+  cleaningFee: number;
+  tax: number;
+  taxName?: string;
+  /** Excludes the refundable deposit. */
+  total: number;
+  perNight: number;
+  discountAmount?: number;
+  deposit?: number;
+}
+
+export interface StayQuoteResult {
+  bookable: boolean;
+  quote?: StayQuote;
+  reason?: string;
+}
+
+export interface FairPrice {
+  typicalNightly: number;
+  comparables: number;
+  city: string;
+  bedrooms: number;
 }

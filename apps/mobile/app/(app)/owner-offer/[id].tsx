@@ -68,7 +68,10 @@ export default function OwnerOfferDetail() {
     onSuccess: () => {
       haptics.success();
       refresh();
-      toast.show('Offer accepted. The buyer can now pay the deposit into escrow.', 'success');
+      toast.show(
+        'Offer accepted. The buyer can now pay the deposit to GetRentos, which holds it until the sale completes.',
+        'success'
+      );
     },
     onError: (err) => {
       haptics.error();
@@ -181,7 +184,10 @@ export default function OwnerOfferDetail() {
 
             {open ? (
               <View style={{ gap: spacing.sm }}>
-                <VerificationGateNotice error={accept.error} scoreHref="/(app)/verify-identity" />
+                <VerificationGateNotice
+                  error={accept.error}
+                  scoreHref="/(app)/owner-trust-profile"
+                />
                 <Button
                   label="Accept offer"
                   loading={accept.isPending}
@@ -226,7 +232,7 @@ export default function OwnerOfferDetail() {
               </View>
             ) : offer.status === 'accepted' ? (
               <Button
-                label="Follow the sale in escrow"
+                label="Follow the sale"
                 variant="outline"
                 onPress={() => router.push('/(app)/owner-transactions')}
               />

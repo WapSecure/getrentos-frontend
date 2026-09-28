@@ -10,6 +10,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 import { nameOnly } from '@/lib/validations/input';
+import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -50,7 +51,6 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       unwrap(
         realtorService.updateSettingsProfile({
           fullName,
-          email,
           phone,
           companyName: companyName || undefined,
         })
@@ -130,9 +130,10 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           <LegacyInput
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            readOnly
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          <ChangeEmailButton onChanged={setEmail} />
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>

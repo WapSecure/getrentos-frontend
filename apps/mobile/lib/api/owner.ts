@@ -1,6 +1,7 @@
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { TrustProfile } from './buyerTrustProfile';
 
 /**
  * The property-owner portal (sellers). Mirrors the backend's /owner/* routes;
@@ -262,6 +263,57 @@ export interface OwnerDocument {
   downloadUrl?: string;
 }
 
+export interface OwnerMarketInsights {
+  comparables: {
+    propertyType: string;
+    city: string;
+    soldPrice: number;
+    size: number;
+    soldMonthsAgo: number;
+  }[];
+  lowEstimate: number;
+  highEstimate: number;
+  suggested: number;
+}
+
+export interface OwnerProfile {
+  legalName: string;
+  email: string;
+  phone?: string;
+  phoneVerified: boolean;
+  companyName?: string;
+  avatarUrl?: string;
+  trustScore: number;
+  verificationStatus: string;
+}
+
+export interface OwnerNotification {
+  id: string;
+  /** Lower-cased NotificationType, e.g. "offer_received". */
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface OwnerNotificationPreference {
+  /** Category: offers, escrow, verification, messages or reviews. */
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
+/** Transfer paperwork an owner can file (mirrors OwnerUploadDocumentDto). */
+export const OWNER_DOCUMENT_TYPES = [
+  { value: 'TRANSFER_AGREEMENT', label: 'Transfer agreement' },
+  { value: 'TITLE_TRANSFER', label: 'Title transfer' },
+  { value: 'PAYMENT_RECEIPT', label: 'Payment receipt' },
+  { value: 'GOVERNMENT_FILING', label: 'Government filing' },
+  { value: 'OTHER', label: 'Other' },
+] as const;
+export type OwnerDocumentType = (typeof OWNER_DOCUMENT_TYPES)[number]['value'];
+
 export interface OwnerReview {
   id: string;
   author: string;
@@ -330,6 +382,8 @@ export const OWNERSHIP_DOCUMENTS = [
   { value: 'ALLOCATION_LETTER', label: 'Allocation letter' },
   { value: 'EXCISION_GAZETTE', label: 'Excision / Gazette' },
   { value: 'GOVERNMENT_RECEIPT', label: 'Government receipt' },
+  { value: 'SURVEY_PLAN', label: 'Survey plan' },
+  { value: 'LAND_USE_PERMIT', label: 'Land use permit' },
 ] as const;
 export type OwnershipDocumentType = (typeof OWNERSHIP_DOCUMENTS)[number]['value'];
 
@@ -379,6 +433,49 @@ export const ownerApi = {
 
   documents: (p = 1, size = 50) =>
     apiFetch<Paginated<OwnerDocument>>(`/owner/documents${page(p, size)}`),
+  uploadDocument: (
+    file: PickedFile,
+    input: { name: string; type: OwnerDocumentType; propertyId?: string }
+  ) => {
+    const form = new FormData();
+    form.append('name', input.name);
+    form.append('type', input.type);
+    if (input.propertyId) form.append('propertyId', input.propertyId);
+    appendFile(form, 'file', file);
+    return apiUpload<OwnerDocument>('/owner/documents', form);
+  },
+  deleteDocument: (id: string) =>
+    apiFetch<{ id: string; deleted: boolean }>(`/owner/documents/${id}`, { method: 'DELETE' }),
+  trustProfile: () => apiFetch<TrustProfile>('/owner/trust-profile'),
+  /** Adds the landlord workspace to the account so this property can be rented out. */
+  convertToRental: (propertyId: string) =>
+    apiFetch<{ propertyId: string; landlordRoleGranted: boolean; roles: string[] }>(
+      `/owner/properties/${propertyId}/convert-to-rental`,
+      { method: 'POST' }
+    ),
+  portfolioTrend: () =>
+    apiFetch<{ label: string; value: number }[]>('/owner/analytics/portfolio-trend'),
+  marketInsights: (city?: string) =>
+    apiFetch<OwnerMarketInsights>(
+      `/owner/analytics/market-insights${city ? `?city=${encodeURIComponent(city)}` : ''}`
+    ),
+
+  profile: () => apiFetch<OwnerProfile>('/owner/profile'),
+  updateProfile: (input: { legalName?: string; companyName?: string; phone?: string }) =>
+    apiFetch<OwnerProfile>('/owner/profile', { method: 'PUT', body: input }),
+
+  notifications: (p = 1, size = 50) =>
+    apiFetch<Paginated<OwnerNotification>>(`/owner/notifications${page(p, size)}`),
+  readNotification: (id: string) =>
+    apiFetch<void>(`/owner/notifications/${id}/read`, { method: 'PATCH' }),
+  readAllNotifications: () => apiFetch<void>('/owner/notifications/read-all', { method: 'POST' }),
+  notificationPreferences: () =>
+    apiFetch<OwnerNotificationPreference[]>('/owner/settings/notifications'),
+  updateNotificationPreferences: (preferences: OwnerNotificationPreference[]) =>
+    apiFetch<OwnerNotificationPreference[]>('/owner/settings/notifications', {
+      method: 'PUT',
+      body: { preferences },
+    }),
   setDocumentShared: (id: string, sharedWithBuyer: boolean) =>
     apiFetch<OwnerDocument>(`/owner/documents/${id}/shared`, {
       method: 'PATCH',

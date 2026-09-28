@@ -249,6 +249,7 @@ export const shortletKeys = {
   guestMessages: ['shortlets', 'messages'] as const,
   hostMessages: ['shortlets', 'host', 'messages'] as const,
   hostPayouts: ['shortlets', 'host', 'payouts'] as const,
+  hostFees: ['shortlets', 'host', 'fees'] as const,
   hostAnalytics: ['shortlets', 'host', 'analytics'] as const,
   hostAnalyticsViews: ['shortlets', 'host', 'analytics-views'] as const,
   disputes: ['shortlets', 'disputes'] as const,
@@ -307,6 +308,39 @@ export const estateKeys = {
   deliveries: (estateId: string, filter?: string) =>
     ['estate', estateId, 'deliveries', filter ?? 'all'] as const,
   gates: (estateId: string) => ['estate', estateId, 'gates'] as const,
+  watchlist: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'watchlist', filter ?? 'all'] as const,
+  contractorPasses: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'contractor-passes', filter ?? 'all'] as const,
+  /**
+   * The roll call in progress, or null.
+   *
+   * Its own key rather than a filter on the list, because the console polls this
+   * one during an emergency and the history can be a hundred rows long.
+   */
+  activeMuster: (estateId: string) => ['estate', estateId, 'emergency-musters', 'active'] as const,
+  emergencyMusters: (estateId: string, filter?: string) =>
+    ['estate', estateId, 'emergency-musters', 'list', filter ?? 'all'] as const,
+  emergencyMuster: (estateId: string, musterId: string) =>
+    ['estate', estateId, 'emergency-musters', musterId] as const,
+  /**
+   * Who is inside right now.
+   *
+   * One key, not one per read: the board is polled while somebody is watching
+   * it, and keying on the instant it was taken would grow the cache by an entry
+   * every refresh and never reuse one.
+   */
+  onSiteBoard: (estateId: string) => ['estate', estateId, 'dwell', 'on-site'] as const,
+  authorisationDwell: (estateId: string, from?: string, to?: string, sort?: string) =>
+    [
+      'estate',
+      estateId,
+      'dwell',
+      'authorisations',
+      from ?? 'default',
+      to ?? 'default',
+      sort ?? 'dwell',
+    ] as const,
   incidents: (estateId: string, status?: string) =>
     ['estate', estateId, 'incidents', status ?? 'all'] as const,
   maintenanceTickets: (estateId: string, status?: string) =>
@@ -345,6 +379,13 @@ export const estateResidentKeys = {
   amenityBookings: ['estate', 'resident', 'amenityBookings'] as const,
   committee: ['estate', 'resident', 'committee'] as const,
   governance: ['estate', 'resident', 'governance'] as const,
+  /**
+   * The roll call this household is being asked to answer, or null.
+   *
+   * Shared by the banner on the dashboard and the answer screen, so a resident
+   * who answers on one does not leave a stale banner on the other.
+   */
+  emergency: ['estate', 'resident', 'emergency'] as const,
 };
 
 /** Not persona-scoped — every signed-in user has at most one subscription. */

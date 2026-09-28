@@ -50,6 +50,10 @@ export function ShortletMessageHostDialog({
             rows={4}
             maxLength={2000}
           />
+          <p className="text-xs text-muted-foreground">
+            Phone numbers, emails and chat links are hidden until the stay is booked and paid, so
+            you’re both covered by GetRentos Payment Protection.
+          </p>
           <Button
             className="w-full"
             disabled={!text.trim() || send.isPending}

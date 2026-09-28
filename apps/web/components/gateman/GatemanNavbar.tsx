@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, KeyRound, Car, Package, Siren } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
+import { PostSwitcher } from '@/components/gateman/PostSwitcher';
 import { ThemeToggle } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
@@ -52,6 +53,7 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
               );
             })}
             <span className="hidden lg:block text-sm text-muted-foreground">{user?.fullName}</span>
+            <PostSwitcher />
             <ThemeToggle />
             <button
               onClick={handleSignOut}

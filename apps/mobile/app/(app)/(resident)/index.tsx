@@ -30,6 +30,7 @@ import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { EmergencyBanner } from '@/components/resident/EmergencyBanner';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
@@ -76,6 +77,11 @@ export default function ResidentHome() {
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>
+      {/* First, above even the greeting: if the estate is calling the roll,
+          nothing else on this screen matters as much. Renders nothing when there
+          is no emergency, which is almost always. */}
+      <EmergencyBanner />
+
       <DashboardHeader
         eyebrow="Your community"
         title={`Hi, ${firstName(profile?.legalName)}`}

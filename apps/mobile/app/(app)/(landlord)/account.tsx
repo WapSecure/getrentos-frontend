@@ -4,6 +4,7 @@ import { ChevronRight, LogOut, ShieldCheck } from 'lucide-react-native';
 import { Avatar, Card, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function LandlordAccount() {
   const { colors, spacing } = useTheme();
@@ -22,6 +23,8 @@ export default function LandlordAccount() {
         title="Account"
         subtitle="Profile, preferences and property tools"
       />
+
+      <WorkspaceSwitcher />
 
       <Card padding={spacing.lg}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -120,8 +123,20 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
-          label="Shortlet stays"
-          description="Browse and manage short stays"
+          label="Home care"
+          description="Work orders, assets, servicing and response times"
+          onPress={() => router.push('/(app)/home-care')}
+        />
+        <Divider />
+        <AccountRow
+          label="Short-stay hosting"
+          description="Nightly stays, bookings and payouts"
+          onPress={() => router.push('/(app)/host')}
+        />
+        <Divider />
+        <AccountRow
+          label="Browse short stays"
+          description="Book a stay as a guest"
           onPress={() => router.push('/(app)/shortlets')}
         />
         <Divider />
@@ -129,6 +144,18 @@ export default function LandlordAccount() {
           label="Vendors"
           description="Tradespeople you assign to repairs"
           onPress={() => router.push('/(app)/landlord-vendors')}
+        />
+        <Divider />
+        <AccountRow
+          label="Realtors & agents"
+          description="Approve who represents you and where"
+          onPress={() => router.push('/(app)/representatives')}
+        />
+        <Divider />
+        <AccountRow
+          label="Plan & billing"
+          description="What’s included and your receipts"
+          onPress={() => router.push('/(app)/billing')}
         />
         <Divider />
         <AccountRow

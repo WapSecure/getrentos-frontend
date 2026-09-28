@@ -6,7 +6,11 @@ import { Car, LogOut as ExitIcon } from 'lucide-react';
 import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
+import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
+import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
+import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { estateKeys } from '@/lib/queryKeys';
+import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
 const purposeOptions = [
   { value: 'VISITOR', label: 'Visitor' },
@@ -25,14 +29,33 @@ export default function GatemanVehiclesPage() {
   const [vehicleDescription, setVehicleDescription] = useState('');
   const [driverName, setDriverName] = useState('');
   const [purpose, setPurpose] = useState('VISITOR');
-  const [gateId, setGateId] = useState('');
+  /**
+   * `null` means the guard has not touched the gate field, so it follows the
+   * console's post. An explicit `''` means they chose "Not specified" for this
+   * vehicle, which is a real answer and must not be overwritten.
+   */
+  const [gateId, setGateId] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * Set when the estate's watch list refused this vehicle.
+   *
+   * Kept apart from `error` on purpose: a blocked registration is the estate's
+   * answer, and the guard needs the plate and the reason in front of them to
+   * decide whether they are looking at the car the estate meant.
+   */
+  const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
+  /**
+   * The estate's note about a vehicle it matched but did not refuse.
+   *
+   * The log went through, on purpose. A guard who reads this as a problem starts
+   * second-guessing an entry the estate already decided to allow.
+   */
+  const [warning, setWarning] = useState<string | null>(null);
 
-  const { data: estate, isLoading: isEstateLoading } = useQuery({
-    queryKey: estateKeys.myEstate,
-    queryFn: () => unwrap(estateService.getMyEstate()),
-  });
+  const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
+  const effectiveGateId = gateId ?? gate?.id ?? '';
 
   const { data: gates } = useQuery({
     queryKey: estateKeys.gates(estate?.id ?? ''),
@@ -50,28 +73,48 @@ export default function GatemanVehiclesPage() {
   const inside = insideData?.items ?? [];
 
   const logEntry = useMutation({
-    mutationFn: () =>
+    mutationFn: ({ overrideReason }: { overrideReason?: string } = {}) =>
       unwrap(
         estateService.logVehicleEntry(estate!.id, {
           plateNumber: plateNumber.trim().toUpperCase(),
           vehicleDescription: vehicleDescription.trim() || undefined,
           driverName: driverName.trim() || undefined,
           purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
-          gateId: gateId || undefined,
+          gateId: effectiveGateId || undefined,
+          overrideReason,
           photo: photo ?? undefined,
         })
       ),
-    onSuccess: () => {
+    onSuccess: (log) => {
       setPlateNumber('');
       setVehicleDescription('');
       setDriverName('');
       setPurpose('VISITOR');
-      setGateId('');
+      // Back to following the console's post, so the next vehicle does not have
+      // to re-pick the barrier the guard is still standing at.
+      setGateId(null);
       setPhoto(null);
       setError(null);
+      setRefusal(null);
+      setOverrideError(null);
+      setWarning(log.watchlistWarning ?? null);
       queryClient.invalidateQueries({ queryKey: ['estate', estate?.id, 'vehicleLogs'] });
     },
-    onError: (err) => setError(err instanceof Error ? err.message : 'Unable to log this vehicle.'),
+    onError: (err, input) => {
+      const blocked = readWatchlistRefusal(err);
+      if (blocked) {
+        setError(null);
+        setOverrideError(null);
+        setRefusal(blocked);
+        return;
+      }
+      const message = err instanceof Error ? err.message : 'Unable to log this vehicle.';
+      if (input?.overrideReason) {
+        setOverrideError(message);
+        return;
+      }
+      setError(message);
+    },
   });
 
   const markExited = useMutation({
@@ -149,7 +192,7 @@ export default function GatemanVehiclesPage() {
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
             <Select
-              value={gateId}
+              value={effectiveGateId}
               onValueChange={setGateId}
               options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
             />
@@ -175,13 +218,33 @@ export default function GatemanVehiclesPage() {
           disabled={!plateNumber.trim() || logEntry.isPending}
           onClick={() => {
             setError(null);
-            logEntry.mutate();
+            setRefusal(null);
+            setOverrideError(null);
+            setWarning(null);
+            logEntry.mutate({});
           }}
         >
           {logEntry.isPending ? 'Logging…' : 'Log Vehicle'}
         </Button>
 
+        {refusal && (
+          <WatchlistBlockedNotice
+            message={refusal.message}
+            matches={refusal.matches}
+            onOverride={(reason) => logEntry.mutate({ overrideReason: reason })}
+            onDefer={() => {
+              setRefusal(null);
+              setOverrideError(null);
+              setPlateNumber('');
+            }}
+            isOverriding={logEntry.isPending}
+            error={overrideError}
+          />
+        )}
+
         {error && <p className="text-sm text-destructive">{error}</p>}
+
+        <WatchlistWarning warning={warning ?? undefined} />
       </div>
 
       <div>

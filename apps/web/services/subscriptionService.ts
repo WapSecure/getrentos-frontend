@@ -1,7 +1,16 @@
 import { authFetch, safeCall } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
+import type { PlanTier } from '@getrentos/shared';
 
-export type PlanTier = 'FREE' | 'PRO';
+/**
+ * The ladder is defined once, in `@getrentos/shared`.
+ *
+ * This used to be a local `'FREE' | 'PRO'`, which is how the client came to
+ * believe an ENTERPRISE subscriber — someone on the *most* expensive plan — was
+ * not a Pro customer. Re-exported so nothing that already imports the name has
+ * to change.
+ */
+export type { PlanTier };
 export type BillingCycle = 'MONTHLY' | 'ANNUAL';
 export type PlanPersona = 'landlord' | 'estate' | 'owner' | 'realtor';
 

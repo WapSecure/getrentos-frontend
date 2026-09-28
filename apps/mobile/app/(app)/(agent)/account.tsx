@@ -6,6 +6,7 @@ import {
   Building2,
   ChevronRight,
   CircleHelp,
+  KeyRound,
   ClipboardCheck,
   FileStack,
   LogOut,
@@ -27,6 +28,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 export default function AgentAccount() {
   const { signOut } = useAuth();
@@ -69,6 +71,8 @@ export default function AgentAccount() {
           </>
         )}
       </View>
+
+      <WorkspaceSwitcher />
 
       <Card elevated padding="none">
         <Row
@@ -125,6 +129,13 @@ export default function AgentAccount() {
           label="Sync status"
           description="Field records and their sync state"
           onPress={() => router.push('/(app)/agent-sync')}
+        />
+        <Divider />
+        <Row
+          icon={<KeyRound size={18} color={colors.primary} />}
+          label="Security"
+          description="Password, two-factor and app lock"
+          onPress={() => router.push('/(app)/security-settings')}
         />
         <Divider />
         <Row
