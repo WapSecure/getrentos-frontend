@@ -27,6 +27,7 @@ export const qk = {
     sync: (listingId: string) => ['host', 'listing', listingId, 'sync'] as const,
     conversations: ['host', 'conversations'] as const,
     earnings: ['host', 'earnings'] as const,
+    fees: ['host', 'fees'] as const,
     views: ['host', 'views'] as const,
     payoutAccount: ['host', 'payout-account'] as const,
     payouts: ['host', 'payouts'] as const,

@@ -18,7 +18,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { HostProGate, ListingRow, isUpgradeError } from '@/components/host/HostUI';
+import { ListingRow } from '@/components/host/HostUI';
 
 type Filter = 'all' | 'live' | 'paused' | 'other';
 
@@ -98,11 +98,7 @@ export default function HostListings() {
         ) : null}
       </View>
 
-      {isUpgradeError(query.error) ? (
-        <View style={{ padding: spacing.xl }}>
-          <HostProGate />
-        </View>
-      ) : query.isError && !query.data ? (
+      {query.isError && !query.data ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
           <ErrorState onRetry={() => query.refetch()} />
         </ScrollView>

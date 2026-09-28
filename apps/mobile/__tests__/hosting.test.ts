@@ -2,6 +2,7 @@ import {
   BOOKING_VIEW_QUERY,
   daysUntil,
   dettyDecember,
+  feeNote,
   relativeDay,
   rulesSummary,
   stayRange,
@@ -90,5 +91,30 @@ describe('pricing rules summary', () => {
         prepDays: 1,
       })
     ).toBe('Detty December · 10% weekly · 1d prep');
+  });
+});
+
+describe('host fee note', () => {
+  it('names the last Lagos day of a launch rate, then the standard rate', () => {
+    // Ends at midnight Lagos on 1 Feb 2027 = 23:00 UTC on 31 Jan.
+    const note = feeNote({
+      commissionPct: 3,
+      standardCommissionPct: 8,
+      introEndsAt: '2027-01-31T23:00:00.000Z',
+    });
+    expect(note).toContain('GetRentos fee: 3% of each stay');
+    expect(note).toContain('bookings made by 31 Jan 2027, then 8%');
+    expect(note).toContain('Guests don’t pay it');
+  });
+
+  it('says nothing about a launch rate when none runs', () => {
+    const note = feeNote({ commissionPct: 8, standardCommissionPct: 8 });
+    expect(note).toMatch(/^GetRentos fee: 8% of each stay, taken from your payout\. Guests/);
+  });
+
+  it('says so when there is no fee', () => {
+    expect(feeNote({ commissionPct: 0, standardCommissionPct: 0 })).toMatch(
+      /^GetRentos takes no fee/
+    );
   });
 });

@@ -35,7 +35,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
-import { HostProGate, isUpgradeError } from '@/components/host/HostUI';
+import { HostFeeNote } from '@/components/host/HostUI';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -101,9 +101,7 @@ export default function HostEarnings() {
     >
       <DetailHeader eyebrow="Hosting" title="Earnings & payouts" onBack={() => router.back()} />
 
-      {isUpgradeError(summary.error) ? (
-        <HostProGate />
-      ) : summary.isError && !summary.data ? (
+      {summary.isError && !summary.data ? (
         <ErrorState onRetry={() => summary.refetch()} />
       ) : !summary.data ? (
         <Skeleton height={200} radius={radius.xl} />
@@ -115,6 +113,7 @@ export default function HostEarnings() {
             onSetAccount={() => setAccountOpen(true)}
           />
           <Breakdown s={summary.data} />
+          <HostFeeNote />
 
           <View style={{ gap: spacing.sm }}>
             <Text variant="heading" accessibilityRole="header">

@@ -1,10 +1,14 @@
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { BadgeCheck, ChevronRight, Home, Minus, Plus, Sparkles, Star } from 'lucide-react-native';
-import { Button, Card, Price, Text, useTheme } from '@getrentos/ui-native';
+import { useQuery } from '@tanstack/react-query';
+import { BadgeCheck, ChevronRight, Home, Minus, Plus, Receipt, Star } from 'lucide-react-native';
+import { Card, Price, Text, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
+import { qk } from '@/lib/query/keys';
 import {
+  feeNote,
+  hostShortletsApi,
   relativeDay,
   stayRange,
   type HostBooking,
@@ -349,44 +353,26 @@ export function Stepper({
   );
 }
 
-/* --------------------------------- Pro gate ------------------------------- */
+/* ------------------------------ plans and fees ---------------------------- */
 
 export const isUpgradeError = (err: unknown) =>
   err instanceof ApiError && (err.status === 402 || err.code === 'PLAN_UPGRADE_REQUIRED');
 
-/** Hosting is Pro: explain the value instead of showing an error. */
-export function HostProGate() {
+/** What GetRentos takes from each stay. Quiet until the rate has loaded. */
+export function HostFeeNote() {
   const { colors, spacing } = useTheme();
-  const perks = [
-    'List furnished apartments for nightly stays',
-    'Instant booking, seasonal pricing and calendar sync with Airbnb',
-    'Guests pay upfront; payouts straight to your bank',
-    'Deposits, damage claims and dispute support',
-  ];
+  const fees = useQuery({
+    queryKey: qk.host.fees,
+    queryFn: hostShortletsApi.fees,
+    staleTime: 10 * 60 * 1000,
+  });
+  if (!fees.data) return null;
   return (
-    <Card elevated style={{ gap: spacing.md }}>
-      <View
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: colors.infoSubtle,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Sparkles size={22} color={colors.primary} />
-      </View>
-      <Text variant="heading">Short-stay hosting is part of Pro</Text>
-      {perks.map((p) => (
-        <View key={p} style={{ flexDirection: 'row', gap: spacing.sm }}>
-          <BadgeCheck size={16} color={colors.success} style={{ marginTop: 2 }} />
-          <Text variant="callout" style={{ flex: 1 }}>
-            {p}
-          </Text>
-        </View>
-      ))}
-      <Button label="See Pro" onPress={() => router.push('/(app)/billing')} />
-    </Card>
+    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+      <Receipt size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+      <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+        {feeNote(fees.data)}
+      </Text>
+    </View>
   );
 }

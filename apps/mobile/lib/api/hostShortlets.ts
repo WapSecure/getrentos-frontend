@@ -5,8 +5,8 @@ import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortl
 
 /**
  * Hosting short stays: the host's side of /host/shortlets. Owners, landlords,
- * realtors and agents with a mandate all host through the same API; it is a
- * Pro feature (402 PLAN_UPGRADE_REQUIRED otherwise).
+ * realtors and agents with a mandate all host through the same API, on any
+ * plan. GetRentos takes a percentage of each stay from the host payout.
  */
 
 export type PricingMode = 'PER_NIGHT' | 'FLAT_STAY';
@@ -369,6 +369,32 @@ export const BOOKING_VIEW_QUERY: Record<BookingView, string> = {
 const page = (p: number, size: number, extra = '') =>
   `?page=${p}&pageSize=${size}${extra ? `&${extra}` : ''}`;
 
+/** The GetRentos fee on a booking made now; taken from the host payout, never charged to guests. */
+export interface HostFees {
+  commissionPct: number;
+  standardCommissionPct: number;
+  /** When the launch rate ends, if one is running. */
+  introEndsAt?: string;
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** The fee in words: the rate now, and the last day (Lagos) a launch rate applies. */
+export function feeNote(f: HostFees): string {
+  const now =
+    f.commissionPct === 0
+      ? 'GetRentos takes no fee on new bookings right now'
+      : `GetRentos fee: ${f.commissionPct}% of each stay, taken from your payout`;
+  let launch = '';
+  if (f.introEndsAt && f.standardCommissionPct !== f.commissionPct) {
+    // The launch rate ends at midnight Lagos (UTC+1, no DST); name the last day it applies.
+    const d = new Date(Date.parse(f.introEndsAt) - 1 + 60 * 60 * 1000);
+    const day = `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+    launch = ` — launch rate for bookings made by ${day}, then ${f.standardCommissionPct}%`;
+  }
+  return `${now}${launch}. Guests don’t pay it, and each booking keeps the rate it was made at.`;
+}
+
 export const hostShortletsApi = {
   // ---- listings ----
   // The API caps pages at 100; screens find a listing in this one page.
@@ -499,6 +525,7 @@ export const hostShortletsApi = {
   payouts: (p = 1, size = 20) =>
     apiFetch<Paginated<HostPayout>>(`/host/shortlets/payouts${page(p, size)}`),
   payoutSummary: () => apiFetch<PayoutSummary>('/host/shortlets/payouts/summary'),
+  fees: () => apiFetch<HostFees>('/host/shortlets/fees'),
   requestPayout: () => apiFetch<HostPayout>('/host/shortlets/payouts/request', { method: 'POST' }),
   penalties: (p = 1, size = 20) =>
     apiFetch<Paginated<HostPenalty>>(`/host/shortlets/cancellation-fees${page(p, size)}`),

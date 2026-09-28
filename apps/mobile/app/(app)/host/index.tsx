@@ -26,7 +26,7 @@ import { qk } from '@/lib/query/keys';
 import { hostShortletsApi } from '@/lib/api/hostShortlets';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { HostProGate, StayCard, isUpgradeError } from '@/components/host/HostUI';
+import { HostFeeNote, StayCard } from '@/components/host/HostUI';
 
 /**
  * The host's morning view: what needs a reply, who's arriving, and what's
@@ -39,8 +39,7 @@ export default function HostingHome() {
     queryKey: qk.host.listings,
     queryFn: () => hostShortletsApi.listings(),
   });
-  const gated = isUpgradeError(listings.error);
-  const ready = !!listings.data && !gated;
+  const ready = !!listings.data;
   const requests = useQuery({
     queryKey: qk.host.bookings('requests'),
     queryFn: () => hostShortletsApi.bookings('requests'),
@@ -112,9 +111,7 @@ export default function HostingHome() {
         }
       />
 
-      {gated ? (
-        <HostProGate />
-      ) : listings.isError && !listings.data ? (
+      {listings.isError && !listings.data ? (
         <ErrorState onRetry={() => listings.refetch()} />
       ) : !listings.data ? (
         <View style={{ gap: spacing.md }}>
@@ -398,6 +395,7 @@ function FirstListing() {
           </View>
         </View>
       ))}
+      <HostFeeNote />
       <Button label="Create a listing" onPress={() => router.push('/(app)/host/listing-editor')} />
     </Card>
   );
