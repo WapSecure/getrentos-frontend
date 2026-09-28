@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { HostFeeNote } from './HostFeeNote';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
@@ -177,6 +178,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           <p className="mt-1 text-muted-foreground">
             Publish short-stay listings and manage bookings.
           </p>
+          <HostFeeNote />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setMessagesOpen(true)}>

@@ -12,6 +12,7 @@ import {
   DialogDescription,
   DialogTitle,
   EmptyState,
+  DatePicker,
   Field,
   FilePreviewDialog,
   Input,
@@ -62,6 +63,7 @@ import type {
   AdminShortletDisputeMessage,
   AdminShortletDisputeStatus,
   AdminShortletFeeConfig,
+  AdminShortletFeeConfigInput,
   AdminShortletGuestReview,
   AdminShortletListing,
   AdminShortletPayout,
@@ -544,7 +546,7 @@ export const ShortletOversight = () => {
   });
 
   const saveFees = useMutation({
-    mutationFn: (input: { commissionPct: number; taxName?: string; taxPct: number }) =>
+    mutationFn: (input: AdminShortletFeeConfigInput) =>
       unwrap(adminShortletService.updateFeeConfig(input)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'fees'] });
@@ -2277,6 +2279,21 @@ function AdjudicateClaimModal({
   );
 }
 
+/** Last Lagos day a launch rate applies to, from the instant it ends (`YYYY-MM-DD`). */
+const lastLaunchDay = (endsAt?: string) =>
+  endsAt
+    ? new Date(new Date(endsAt).getTime() - 1).toLocaleDateString('en-CA', {
+        timeZone: 'Africa/Lagos',
+      })
+    : '';
+
+/** The launch rate runs through the whole of `day` in Lagos, so it ends at the next midnight there. */
+const launchEndsAfter = (day: string) => {
+  const next = new Date(`${day}T00:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return `${next.toISOString().slice(0, 10)}T00:00:00+01:00`;
+};
+
 function FeeConfigForm({
   feeConfig,
   saving,
@@ -2284,30 +2301,48 @@ function FeeConfigForm({
 }: {
   feeConfig: AdminShortletFeeConfig;
   saving: boolean;
-  onSave: (input: { commissionPct: number; taxName?: string; taxPct: number }) => void;
+  onSave: (input: AdminShortletFeeConfigInput) => void;
 }) {
   const [commission, setCommission] = useState(String(feeConfig.commissionPct));
+  const [introPct, setIntroPct] = useState(
+    feeConfig.introCommissionPct != null ? String(feeConfig.introCommissionPct) : ''
+  );
+  const [introLastDay, setIntroLastDay] = useState(lastLaunchDay(feeConfig.introEndsAt));
   const [taxName, setTaxName] = useState(feeConfig.taxName ?? '');
   const [taxPct, setTaxPct] = useState(String(feeConfig.taxPct));
-  const [pendingInput, setPendingInput] = useState<{
-    commissionPct: number;
-    taxName?: string;
-    taxPct: number;
-  } | null>(null);
+  const [pendingInput, setPendingInput] = useState<AdminShortletFeeConfigInput | null>(null);
 
-  const nextInput = {
-    commissionPct: Math.min(100, Math.max(0, Number(commission) || 0)),
+  const commissionPct = Math.min(100, Math.max(0, Number(commission) || 0));
+  const hasIntro = introPct.trim() !== '';
+  const introValue = hasIntro ? Math.min(100, Math.max(0, Number(introPct) || 0)) : null;
+  const introRateError =
+    introValue != null && introValue > commissionPct
+      ? 'The launch rate cannot be higher than the standard commission.'
+      : null;
+  const introDayError =
+    hasIntro && !introLastDay ? 'Pick the last day of the launch rate, or clear the rate.' : null;
+  const introError = introRateError ?? introDayError;
+
+  const nextInput: AdminShortletFeeConfigInput = {
+    commissionPct,
     taxName: taxName.trim() || undefined,
     taxPct: Math.min(100, Math.max(0, Number(taxPct) || 0)),
+    introCommissionPct: introValue,
+    introEndsAt: hasIntro && introLastDay ? launchEndsAfter(introLastDay) : null,
   };
   const isDirty =
     nextInput.commissionPct !== feeConfig.commissionPct ||
     (nextInput.taxName ?? '') !== (feeConfig.taxName ?? '') ||
-    nextInput.taxPct !== feeConfig.taxPct;
+    nextInput.taxPct !== feeConfig.taxPct ||
+    nextInput.introCommissionPct !== (feeConfig.introCommissionPct ?? null) ||
+    (hasIntro ? introLastDay : '') !== lastLaunchDay(feeConfig.introEndsAt);
 
   const submit = () => {
-    if (isDirty) setPendingInput(nextInput);
+    if (isDirty && !introError) setPendingInput(nextInput);
   };
+
+  const launchRunning =
+    feeConfig.introEndsAt != null && feeConfig.currentCommissionPct !== feeConfig.commissionPct;
 
   return (
     <>
@@ -2320,11 +2355,12 @@ function FeeConfigForm({
           <p className="mt-1 text-sm text-muted-foreground">
             A commission is withheld from each host payout; a tax (e.g. VAT) is added to the guest
             charge. Both are snapshotted at booking time, so changes apply to new bookings only.
+            Hosts see the fee on their shortlet page.
           </p>
         </div>
         <div className="grid gap-5 p-5 md:grid-cols-3">
           <Field
-            label="Platform commission (%)"
+            label="Standard commission (%)"
             hint="Withheld from the host payout. Hosts see net earnings."
           >
             <NumberInput
@@ -2332,7 +2368,32 @@ function FeeConfigForm({
               max={100}
               value={commission}
               onValueChange={setCommission}
-              placeholder="e.g. 10"
+              placeholder="e.g. 8"
+            />
+          </Field>
+          <Field
+            label="Launch commission (%)"
+            hint="Optional lower rate for bookings made up to the last day set. Empty = none."
+            error={introRateError ?? undefined}
+          >
+            <NumberInput
+              min={0}
+              max={100}
+              value={introPct}
+              onValueChange={setIntroPct}
+              placeholder="e.g. 3"
+            />
+          </Field>
+          <Field
+            label="Launch rate's last day"
+            hint="Bookings made up to the end of this day (Lagos time) get the launch rate."
+            error={introDayError ?? undefined}
+          >
+            <DatePicker
+              value={introLastDay || undefined}
+              onChange={setIntroLastDay}
+              placeholder="Pick a day"
+              disabled={!hasIntro}
             />
           </Field>
           <Field label="Tax label" hint="Shown at checkout, e.g. VAT. Empty clears it.">
@@ -2345,24 +2406,26 @@ function FeeConfigForm({
           </Field>
           <Field label="Tax (%)" hint="Added to the guest charge on top of the stay total.">
             <NumberInput
-              integer={false}
               min={0}
               max={100}
               value={taxPct}
               onValueChange={setTaxPct}
-              placeholder="e.g. 7.5"
+              placeholder="e.g. 7"
             />
           </Field>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border p-4">
           <p className="text-xs text-muted-foreground">
-            Current: {feeConfig.commissionPct}% commission
+            New bookings now pay {feeConfig.currentCommissionPct}%
+            {launchRunning
+              ? ` (launch rate until ${formatDate(lastLaunchDay(feeConfig.introEndsAt), 'short')}, then ${feeConfig.commissionPct}%)`
+              : ''}
             {feeConfig.taxPct > 0
               ? ` · ${feeConfig.taxName ?? 'Tax'} ${feeConfig.taxPct}%`
               : ' · no tax'}{' '}
             · updated {formatDate(feeConfig.updatedAt, 'short')}
           </p>
-          <Button onClick={submit} disabled={saving || !isDirty} isLoading={saving}>
+          <Button onClick={submit} disabled={saving || !isDirty || !!introError} isLoading={saving}>
             {saving ? 'Saving…' : 'Save fees & taxes'}
           </Button>
         </div>
@@ -2373,7 +2436,11 @@ function FeeConfigForm({
         title="Apply new shortlet fees?"
         description={
           pendingInput
-            ? `New bookings will use ${pendingInput.commissionPct}% commission and ${pendingInput.taxPct}% ${pendingInput.taxName ?? 'tax'}. Existing bookings keep their original fee snapshot.`
+            ? `New bookings will use ${
+                pendingInput.introCommissionPct != null
+                  ? `${pendingInput.introCommissionPct}% commission until ${formatDate(introLastDay, 'short')}, then ${pendingInput.commissionPct}%`
+                  : `${pendingInput.commissionPct}% commission`
+              } and ${pendingInput.taxPct}% ${pendingInput.taxName ?? 'tax'}. Existing bookings keep their original fee snapshot.`
             : ''
         }
         confirmLabel="Apply fee changes"

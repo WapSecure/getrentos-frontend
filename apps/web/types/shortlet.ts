@@ -578,6 +578,14 @@ export interface GuestSummary {
 }
 
 /** The all-in price for given dates, as the checkout will charge it. */
+/** The GetRentos fee on a booking made now; taken from the host payout, never charged to guests. */
+export interface HostShortletFees {
+  commissionPct: number;
+  standardCommissionPct: number;
+  /** When the launch rate ends, if one is running. */
+  introEndsAt?: string;
+}
+
 export interface StayQuote {
   nights: number;
   nightsTotal: number;

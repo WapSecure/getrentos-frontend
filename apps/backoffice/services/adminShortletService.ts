@@ -11,6 +11,7 @@ import type {
   AdminShortletDispute,
   AdminShortletDisputeMessage,
   AdminShortletFeeConfig,
+  AdminShortletFeeConfigInput,
   AdminShortletGuestReview,
   AdminShortletListing,
   AdminShortletOverview,
@@ -399,11 +400,9 @@ export const adminShortletService = {
     return safeCall(() => authFetch<AdminShortletFeeConfig>('/admin/shortlets/fees'));
   },
 
-  updateFeeConfig(input: {
-    commissionPct: number;
-    taxName?: string;
-    taxPct: number;
-  }): Promise<ApiResponse<AdminShortletFeeConfig>> {
+  updateFeeConfig(
+    input: AdminShortletFeeConfigInput
+  ): Promise<ApiResponse<AdminShortletFeeConfig>> {
     return safeCall(() =>
       authFetch<AdminShortletFeeConfig>('/admin/shortlets/fees', {
         method: 'PUT',
