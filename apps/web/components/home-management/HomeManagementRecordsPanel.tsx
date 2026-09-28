@@ -166,9 +166,9 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
         )}
       </div>
 
-      {role === 'landlord' && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span className="mr-1 text-muted-foreground">Continue operations:</span>
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <span className="mr-1 text-muted-foreground">Continue operations:</span>
+        {role === 'landlord' && (
           <Button
             href={ROUTES.LANDLORD_MAINTENANCE}
             size="xs"
@@ -178,18 +178,18 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
           >
             Maintenance
           </Button>
-          <Button
-            href={ROUTES.LANDLORD_VENDORS}
-            size="xs"
-            variant="ghost"
-            rounded="md"
-            icon={<ArrowUpRight className="h-3.5 w-3.5" />}
-            iconPosition="right"
-          >
-            Vendor directory
-          </Button>
-        </div>
-      )}
+        )}
+        <Button
+          href={role === 'owner' ? ROUTES.OWNER_VENDORS : ROUTES.LANDLORD_VENDORS}
+          size="xs"
+          variant="ghost"
+          rounded="md"
+          icon={<ArrowUpRight className="h-3.5 w-3.5" />}
+          iconPosition="right"
+        >
+          Vendor directory
+        </Button>
+      </div>
     </section>
   );
 }
