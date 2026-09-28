@@ -21,7 +21,7 @@ export default function OwnerReviews() {
       style={{ flex: 1, backgroundColor: colors.background }}
       refreshControl={
         <RefreshControl
-          refreshing={reviews.isRefetching}
+          refreshing={reviews.isRefetching || summary.isRefetching}
           onRefresh={() => {
             summary.refetch();
             reviews.refetch();

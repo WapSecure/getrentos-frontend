@@ -731,6 +731,7 @@ export interface UpdatePropertyInput {
   address?: string;
   city?: string;
   state?: string;
+  country?: string;
   description?: string;
   /** Storage keys from uploadPropertyMedia; null clears the cover. */
   coverImageKey?: string | null;

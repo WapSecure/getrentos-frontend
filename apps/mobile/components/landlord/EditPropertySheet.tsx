@@ -11,6 +11,7 @@ import {
   type PropertyType,
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
+import { LocationFields } from '@/components/forms/LocationFields';
 
 interface Props {
   open: boolean;
@@ -39,6 +40,7 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
       : 'apartment'
   );
   const [address, setAddress] = useState(property.address);
+  const [country, setCountry] = useState(property.country || 'Nigeria');
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
   const [description, setDescription] = useState(property.description ?? '');
@@ -49,6 +51,7 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
         name: name.trim(),
         type,
         address: address.trim(),
+        country,
         city: city.trim(),
         state: state.trim(),
         description: description.trim() || undefined,
@@ -102,14 +105,14 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
 
       <TextField label="Address" value={address} onChangeText={setAddress} />
 
-      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <View style={{ flex: 1 }}>
-          <TextField label="City" value={city} onChangeText={setCity} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <TextField label="State" value={state} onChangeText={setState} />
-        </View>
-      </View>
+      <LocationFields
+        country={country}
+        state={state}
+        city={city}
+        onCountryChange={setCountry}
+        onStateChange={setState}
+        onCityChange={setCity}
+      />
 
       <TextField
         label="Description (optional)"

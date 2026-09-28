@@ -31,6 +31,8 @@ import { qk } from '@/lib/query/keys';
 import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
+import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const QUICK_LINKS = [
   { href: '/(app)/maintenance', label: 'Maintenance', icon: Wrench },
@@ -45,6 +47,7 @@ const QUICK_LINKS = [
 
 export default function ResidentHome() {
   const { colors, spacing, radius } = useTheme();
+  const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const { profile } = useAuth();
 
   const household = useQuery({
@@ -76,6 +79,7 @@ export default function ResidentHome() {
       <DashboardHeader
         eyebrow="Your community"
         title={`Hi, ${firstName(profile?.legalName)}`}
+        roleBadge="RS"
         subtitle={
           household.data
             ? `${household.data.estate.name} · Unit ${household.data.unitLabel}`
@@ -97,10 +101,13 @@ export default function ResidentHome() {
         <Card elevated>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             <Receipt size={18} color={colors.primary} />
-            <Text variant="bodyStrong">Outstanding dues</Text>
+            <Text variant="bodyStrong" style={{ flex: 1 }}>
+              Outstanding dues
+            </Text>
+            <BalanceVisibilityButton visible={showMoney} onToggle={toggleMoney} />
           </View>
           <Text variant="title" style={{ marginTop: spacing.sm }}>
-            {formatNaira(outstanding)}
+            {showMoney ? formatNaira(outstanding) : '••••••'}
           </Text>
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
             {outstanding > 0 ? (

@@ -1,8 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Building2, Megaphone, Users, Handshake, Wallet, CheckCircle2 } from 'lucide-react';
+import {
+  Building2,
+  Megaphone,
+  Users,
+  Handshake,
+  Wallet,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
+import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -12,6 +22,8 @@ interface StatCardProps {
   color: string;
   delay: number;
   isCurrency?: boolean;
+  moneyVisible?: boolean;
+  onToggleMoney?: () => void;
 }
 
 const colorClasses = {
@@ -40,9 +52,15 @@ const StatCard = ({
   color,
   delay,
   isCurrency,
+  moneyVisible = true,
+  onToggleMoney,
 }: StatCardProps) => {
   const formattedValue =
-    isCurrency && typeof value === 'number' ? formatCurrency(value, { compact: true }) : value;
+    isCurrency && !moneyVisible
+      ? '••••••'
+      : isCurrency && typeof value === 'number'
+        ? formatCurrency(value, { compact: true })
+        : value;
   const valueStr = String(formattedValue);
   const valueSize = valueStr.length > 10 ? 'text-lg' : valueStr.length > 8 ? 'text-xl' : 'text-2xl';
   const colors = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
@@ -57,6 +75,16 @@ const StatCard = ({
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-primary/5 to-transparent" />
 
       <div className="relative p-4">
+        {isCurrency && onToggleMoney ? (
+          <button
+            type="button"
+            onClick={onToggleMoney}
+            aria-label={moneyVisible ? 'Hide monetary values' : 'Show monetary values'}
+            className="absolute right-3 top-3 rounded-lg p-2 text-muted-foreground hover:bg-secondary"
+          >
+            {moneyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        ) : null}
         <div
           className={`inline-flex p-2.5 rounded-xl ${colors.bg} transition-all duration-300 group-hover:scale-110 mb-3`}
         >
@@ -94,6 +122,7 @@ export const OwnerStatsCards = ({
   totalPortfolioValue,
   completedSales,
 }: OwnerStatsCardsProps) => {
+  const { visible: moneyVisible, toggle: onToggleMoney } = useMonetaryVisibility();
   const stats = [
     {
       icon: Building2,
@@ -149,7 +178,12 @@ export const OwnerStatsCards = ({
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
       {stats.map((stat) => (
-        <StatCard key={stat.label} {...stat} />
+        <StatCard
+          key={stat.label}
+          {...stat}
+          moneyVisible={moneyVisible}
+          onToggleMoney={onToggleMoney}
+        />
       ))}
     </div>
   );

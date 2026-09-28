@@ -1,7 +1,15 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
-import { BedDouble, Bath, Maximize, MapPin, ShieldCheck, Heart } from 'lucide-react-native';
+import {
+  BedDouble,
+  Bath,
+  Maximize,
+  MapPin,
+  ShieldCheck,
+  Heart,
+  Columns3,
+} from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Price } from './Price';
@@ -50,6 +58,10 @@ export interface PropertyCardProps {
   /** Renders the save heart when provided. */
   onToggleSave?: (id: string) => void;
   saved?: boolean;
+  /** Renders a comparison action below the card when provided. */
+  onToggleCompare?: (id: string) => void;
+  compared?: boolean;
+  compareDisabled?: boolean;
   /** `full` = image on top (default). `row` = compact horizontal (saved list, map). */
   layout?: 'full' | 'row';
 }
@@ -118,6 +130,9 @@ function PropertyCardBase({
   onPress,
   onToggleSave,
   saved = false,
+  onToggleCompare,
+  compared = false,
+  compareDisabled = false,
   layout = 'full',
 }: PropertyCardProps) {
   const { colors, radius, shadows, spacing } = useTheme();
@@ -127,7 +142,7 @@ function PropertyCardBase({
     <View
       style={{
         width: row ? 116 : '100%',
-        height: row ? 116 : 176,
+        height: row ? 116 : 196,
         backgroundColor: colors.secondary,
       }}
     >
@@ -135,6 +150,7 @@ function PropertyCardBase({
         source={property.image ? { uri: property.image } : undefined}
         placeholder={{ blurhash: BLURHASH }}
         contentFit="cover"
+        cachePolicy="memory-disk"
         transition={200}
         recyclingKey={property.id}
         accessible={false}
@@ -142,8 +158,8 @@ function PropertyCardBase({
       />
       {property.verified ? (
         <View style={[styles.badge, { backgroundColor: 'rgba(9,32,66,0.72)' }]}>
-          <ShieldCheck size={12} color="#fff" />
-          <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }}>
+          <ShieldCheck size={12} color={colors.primaryForeground} />
+          <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '700' }}>
             Verified
           </Text>
         </View>
@@ -156,8 +172,10 @@ function PropertyCardBase({
       style={[
         {
           backgroundColor: colors.card,
-          borderRadius: radius.lg,
+          borderRadius: radius.xl,
           overflow: 'hidden',
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: colors.border,
         },
         shadows.sm,
       ]}
@@ -216,6 +234,33 @@ function PropertyCardBase({
             color={saved ? colors.destructive : colors.primaryForeground}
             fill={saved ? colors.destructive : 'transparent'}
           />
+        </Pressable>
+      ) : null}
+      {onToggleCompare ? (
+        <Pressable
+          onPress={() => onToggleCompare(property.id)}
+          disabled={compareDisabled}
+          accessibilityRole="button"
+          accessibilityState={{ selected: compared, disabled: compareDisabled }}
+          accessibilityLabel={
+            compared ? `Remove ${property.title} from comparison` : `Compare ${property.title}`
+          }
+          style={({ pressed }) => ({
+            minHeight: 44,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 7,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.border,
+            backgroundColor: compared ? colors.accent : colors.card,
+            opacity: compareDisabled ? 0.45 : pressed ? 0.75 : 1,
+          })}
+        >
+          <Columns3 size={15} color={compared ? colors.primary : colors.mutedForeground} />
+          <Text variant="caption" color={compared ? 'primary' : 'mutedForeground'}>
+            {compared ? 'Selected for comparison' : 'Add to comparison'}
+          </Text>
         </Pressable>
       ) : null}
     </View>

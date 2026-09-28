@@ -6,7 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Bath,
   BedDouble,
+  Check,
   ChevronLeft,
+  Heart,
   Lock,
   MapPin,
   Maximize,
@@ -24,6 +26,7 @@ import {
   IconButton,
   LinkButton,
   Price,
+  PropertyCard,
   SectionHeader,
   Skeleton,
   Text,
@@ -43,6 +46,7 @@ import { track } from '@/lib/analytics';
 import { rememberListing } from '@/lib/pendingListing';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { useMarketSaved } from '@/hooks/useMarketSaved';
 
 const CTA: Record<MarketKind, string> = {
   rent: 'Sign in to enquire',
@@ -56,6 +60,7 @@ export default function PublicListing() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const valid = isMarketKind(kind) && !!id;
+  const saved = useMarketSaved(isMarketKind(kind) ? kind : 'rent');
 
   const query = useQuery({
     queryKey: qk.market.detail(String(kind), String(id)),
@@ -126,11 +131,27 @@ export default function PublicListing() {
           icon={<ChevronLeft size={22} color={colors.foreground} />}
         />
         {p ? (
-          <IconButton
-            onPress={share}
-            accessibilityLabel="Share listing"
-            icon={<Share2 size={19} color={colors.foreground} />}
-          />
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <IconButton
+              onPress={() => saved.toggle(p.id)}
+              accessibilityLabel={
+                saved.savedIds.has(p.id) ? 'Remove listing from saved' : 'Save listing'
+              }
+              accessibilityState={{ selected: saved.savedIds.has(p.id) }}
+              icon={
+                <Heart
+                  size={19}
+                  color={saved.savedIds.has(p.id) ? colors.destructive : colors.foreground}
+                  fill={saved.savedIds.has(p.id) ? colors.destructive : 'transparent'}
+                />
+              }
+            />
+            <IconButton
+              onPress={share}
+              accessibilityLabel="Share listing"
+              icon={<Share2 size={19} color={colors.foreground} />}
+            />
+          </View>
         ) : null}
       </View>
 
@@ -149,7 +170,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
 
   return (
     <>
-      <View style={{ gap: spacing.sm }}>
+      <View style={{ gap: spacing.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Badge label={MARKET_LABEL[p.kind]} tone="neutral" />
           {p.verified ? <Badge label="Verified" tone="success" /> : null}
@@ -163,7 +184,18 @@ function Body({ listing: p }: { listing: MarketDetail }) {
             {p.address ? `${p.address}, ${p.location}` : p.location}
           </Text>
         </View>
-        <Price amount={p.price} period={p.period} variant="heading" />
+        <Card
+          style={{
+            gap: spacing.xs,
+            backgroundColor: colors.accent,
+            borderColor: colors.primary,
+          }}
+        >
+          <Text variant="caption" color="primary" uppercase>
+            {p.kind === 'rent' || p.kind === 'shortlet' ? 'Price' : 'Asking price'}
+          </Text>
+          <Price amount={p.price} period={p.period} variant="heading" />
+        </Card>
       </View>
 
       {p.bedrooms || p.bathrooms || p.size || p.highlight ? (
@@ -189,6 +221,8 @@ function Body({ listing: p }: { listing: MarketDetail }) {
           {p.highlight ? <Chip label={p.highlight} /> : null}
         </View>
       ) : null}
+
+      <CostContext listing={p} />
 
       {p.host ? (
         <Card
@@ -235,7 +269,14 @@ function Body({ listing: p }: { listing: MarketDetail }) {
               </View>
             ) : null}
           </View>
-          {p.host.verified ? <ShieldCheck size={20} color={colors.success} /> : null}
+          {p.host.verified ? (
+            <View style={{ alignItems: 'center', gap: 2 }}>
+              <ShieldCheck size={20} color={colors.success} accessibilityLabel="Verified account" />
+              <Text variant="caption" color="success">
+                Verified
+              </Text>
+            </View>
+          ) : null}
         </Card>
       ) : null}
 
@@ -293,7 +334,30 @@ function Body({ listing: p }: { listing: MarketDetail }) {
           <SectionHeader title="Amenities" />
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
             {p.amenities.map((a) => (
-              <Chip key={a} label={a} size="sm" />
+              <View
+                key={a}
+                accessible
+                accessibilityLabel={a}
+                style={{
+                  width: '48%',
+                  minHeight: 48,
+                  flexGrow: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.sm,
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.sm,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  borderRadius: radius.lg,
+                  backgroundColor: colors.card,
+                }}
+              >
+                <Check size={16} color={colors.success} />
+                <Text variant="callout" style={{ flex: 1 }}>
+                  {a}
+                </Text>
+              </View>
             ))}
           </View>
         </View>
@@ -312,32 +376,167 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         </View>
       ) : null}
 
-      <Card
-        style={{
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          gap: spacing.md,
-          backgroundColor: colors.accent,
-        }}
-      >
-        <Lock size={18} color={colors.primary} style={{ marginTop: 2 }} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="callout" style={{ fontWeight: '700', color: colors.accentForeground }}>
-            Pay through GetRentos — we hold the money
+      <Card style={{ gap: spacing.md, backgroundColor: colors.accent }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: radius.full,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.background,
+            }}
+          >
+            <Lock size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text variant="caption" color="primary" uppercase>
+              GetRentos protection
+            </Text>
+            <Text variant="bodyStrong">A safer way to transact</Text>
+          </View>
+        </View>
+        <Text variant="callout" color="mutedForeground">
+          Pay only through GetRentos. We hold your money until both sides confirm and never ask you
+          to send funds directly to a stranger.
+        </Text>
+      </Card>
+
+      <SimilarListings listing={p} />
+    </>
+  );
+}
+
+function CostContext({ listing }: { listing: MarketDetail }) {
+  const { colors, spacing } = useTheme();
+  const monthlyEquivalent =
+    listing.kind === 'rent' && listing.period === 'year' ? listing.price / 12 : undefined;
+  const annualEquivalent =
+    listing.kind === 'rent' && listing.period === 'month' ? listing.price * 12 : undefined;
+
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <SectionHeader title="Cost overview" description="Know what the displayed price includes" />
+      <Card padding="none">
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: spacing.lg,
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.md,
+          }}
+        >
+          <Text variant="callout" color="mutedForeground">
+            Listed price
           </Text>
+          <Price amount={listing.price} period={listing.period} variant="bodyStrong" />
+        </View>
+        {monthlyEquivalent || annualEquivalent ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              gap: spacing.lg,
+              paddingHorizontal: spacing.lg,
+              paddingVertical: spacing.md,
+              borderTopWidth: 1,
+              borderTopColor: colors.border,
+            }}
+          >
+            <Text variant="callout" color="mutedForeground">
+              {monthlyEquivalent ? 'Monthly equivalent' : 'Annual equivalent'}
+            </Text>
+            <Price
+              amount={monthlyEquivalent ?? annualEquivalent ?? 0}
+              period={monthlyEquivalent ? 'month' : 'year'}
+              variant="bodyStrong"
+            />
+          </View>
+        ) : null}
+        <View
+          style={{
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.md,
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+          }}
+        >
           <Text variant="caption" color="mutedForeground">
-            Your money is held until both sides confirm — never transferred straight to a stranger.
+            Legal, agency, service, inspection or transaction fees are not included unless the
+            listing details explicitly say otherwise. Confirm the full breakdown before paying.
           </Text>
         </View>
       </Card>
-    </>
+    </View>
+  );
+}
+
+function SimilarListings({ listing }: { listing: MarketDetail }) {
+  const { spacing } = useTheme();
+  const saved = useMarketSaved(listing.kind);
+  const query = useQuery({
+    queryKey: [
+      ...qk.market.list(listing.kind, {}),
+      'similar',
+      listing.id,
+      listing.price,
+      listing.bedrooms,
+    ],
+    queryFn: () =>
+      publicMarketApi.list(
+        listing.kind,
+        {
+          minPrice: Math.max(0, Math.round(listing.price * 0.7)),
+          maxPrice: Math.round(listing.price * 1.3),
+          bedrooms: listing.bedrooms,
+          sort: 'newest',
+        },
+        1,
+        6
+      ),
+    staleTime: 5 * 60_000,
+  });
+  const similar = (query.data?.items ?? []).filter((item) => item.id !== listing.id).slice(0, 4);
+  if (!similar.length) return null;
+
+  return (
+    <View style={{ gap: spacing.md }}>
+      <SectionHeader
+        title="Similar listings"
+        description="Comparable options in the same market and price range"
+      />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginHorizontal: -spacing.xl }}
+        contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.md }}
+      >
+        {similar.map((item) => (
+          <View key={item.id} style={{ width: 286 }}>
+            <PropertyCard
+              property={{ ...item, tag: item.highlight }}
+              saved={saved.savedIds.has(item.id)}
+              onToggleSave={saved.toggle}
+              onPress={(id) =>
+                router.push({
+                  pathname: '/(market)/listing/[kind]/[id]',
+                  params: { kind: listing.kind, id },
+                })
+              }
+            />
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 /* -------------------------------- footer -------------------------------- */
 
 function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, shadows } = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -355,6 +554,7 @@ function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) 
         backgroundColor: colors.card,
         borderTopWidth: 1,
         borderTopColor: colors.border,
+        ...shadows.lg,
       }}
     >
       <View style={{ flex: 1 }}>

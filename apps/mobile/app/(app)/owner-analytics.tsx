@@ -75,7 +75,12 @@ export default function OwnerAnalytics() {
         />
       ) : (
         <>
-          <Card elevated style={{ gap: spacing.sm }}>
+          <Card
+            elevated
+            accessible
+            accessibilityLabel={`Portfolio today, ${Math.round(totals.now).toLocaleString('en-NG')} naira${totals.bought ? `, ${pct(((totals.now - totals.bought) / totals.bought) * 100)} since purchase` : ''}`}
+            style={{ gap: spacing.sm }}
+          >
             <Text variant="caption" color="mutedForeground">
               Portfolio today
             </Text>

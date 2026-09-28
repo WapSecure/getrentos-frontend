@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, useWindowDimensions, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -38,6 +38,8 @@ export default function OwnerPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width, fontScale } = useWindowDimensions();
+  const stackActions = width < 380 || fontScale > 1.15;
   const qc = useQueryClient();
   const toast = useToast();
   const [listOpen, setListOpen] = useState(false);
@@ -82,13 +84,17 @@ export default function OwnerPropertyDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing['3xl'] }}>
-        <PropertyGallery
-          images={[p?.coverImageUrl, ...(p?.galleryImageUrls ?? [])].filter(
-            (x): x is string => !!x
-          )}
-          height={240}
-          emptyLabel="No photos added yet"
-        />
+        {p ? (
+          <PropertyGallery
+            images={[p.coverImageUrl, ...(p.galleryImageUrls ?? [])].filter(
+              (x): x is string => !!x
+            )}
+            height={240}
+            emptyLabel="No photos added yet"
+          />
+        ) : property.isPending ? (
+          <Skeleton height={240} radius={0} />
+        ) : null}
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
           <DetailHeader
             eyebrow="Your property"
@@ -141,7 +147,13 @@ export default function OwnerPropertyDetail() {
                 <Text variant="heading" accessibilityRole="header">
                   Sale listing
                 </Text>
-                {listings.isPending ? (
+                {listings.isError && !listings.data ? (
+                  <ErrorState
+                    title="We couldn't load this property's listing"
+                    description="Your property is safe. Try loading its sale status again."
+                    onRetry={() => listings.refetch()}
+                  />
+                ) : listings.isPending ? (
                   <Skeleton height={90} radius={radius.lg} />
                 ) : listing && listing.status !== 'closed' ? (
                   <Card elevated style={{ gap: spacing.sm }}>
@@ -161,7 +173,9 @@ export default function OwnerPropertyDetail() {
                       />
                     </View>
                     <Price amount={listing.askingPrice} variant="heading" />
-                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <View
+                      style={{ flexDirection: stackActions ? 'column' : 'row', gap: spacing.sm }}
+                    >
                       {listing.status === 'published' ? (
                         <Button
                           label="Pause"

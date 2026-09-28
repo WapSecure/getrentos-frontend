@@ -18,19 +18,39 @@ import {
 export type { PublicListingCard, PublicMarket, PublicMarketFilters } from '@/lib/publicListingMap';
 
 export const publicMarketService = {
-  async rentals(filters: PublicMarketFilters = {}): Promise<ApiResponse<Paginated<PublicListingCard>>> {
+  savedListingIds: () => safeCall(() => authFetch<string[]>('/marketplace/saved-listing-ids')),
+
+  saveListing: (listingId: string) =>
+    safeCall(() =>
+      authFetch<{ saved: boolean }>(`/marketplace/listings/${listingId}/save`, {
+        method: 'POST',
+      })
+    ),
+
+  unsaveListing: (listingId: string) =>
+    safeCall(() =>
+      authFetch<{ saved: boolean }>(`/marketplace/listings/${listingId}/save`, {
+        method: 'DELETE',
+      })
+    ),
+
+  async rentals(
+    filters: PublicMarketFilters = {}
+  ): Promise<ApiResponse<Paginated<PublicListingCard>>> {
     return safeCall(async () => {
       const response = await authFetch<Paginated<RentApiItem>>(
-        `/rentals${toQueryString(rentalQuery(filters))}`,
+        `/rentals${toQueryString(rentalQuery(filters))}`
       );
       return { ...response, items: response.items.map(rentToCard) };
     });
   },
 
-  async sales(filters: PublicMarketFilters = {}): Promise<ApiResponse<Paginated<PublicListingCard>>> {
+  async sales(
+    filters: PublicMarketFilters = {}
+  ): Promise<ApiResponse<Paginated<PublicListingCard>>> {
     return safeCall(async () => {
       const response = await authFetch<Paginated<SaleApiItem>>(
-        `/marketplace/listings${toQueryString(saleQuery(filters))}`,
+        `/marketplace/listings${toQueryString(saleQuery(filters))}`
       );
       return { ...response, items: response.items.map(saleToCard) };
     });

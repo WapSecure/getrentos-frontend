@@ -1,0 +1,62 @@
+export const NIGERIA_STATE_CITIES: Record<string, string[]> = {
+  Abia: ['Umuahia', 'Aba', 'Ohafia', 'Arochukwu'],
+  Adamawa: ['Yola', 'Jimeta', 'Mubi', 'Numan'],
+  'Akwa Ibom': ['Uyo', 'Eket', 'Ikot Ekpene', 'Oron'],
+  Anambra: ['Awka', 'Onitsha', 'Nnewi', 'Ekwulobia'],
+  Bauchi: ['Bauchi', 'Azare', 'Misau', "Jama'are"],
+  Bayelsa: ['Yenagoa', 'Brass', 'Sagbama', 'Ogbia'],
+  Benue: ['Makurdi', 'Otukpo', 'Gboko', 'Katsina-Ala'],
+  Borno: ['Maiduguri', 'Biu', 'Bama', 'Dikwa'],
+  'Cross River': ['Calabar', 'Ugep', 'Ikom', 'Ogoja'],
+  Delta: ['Asaba', 'Warri', 'Sapele', 'Ughelli', 'Agbor', 'Effurun'],
+  Ebonyi: ['Abakaliki', 'Afikpo', 'Onueke', 'Ishiagu'],
+  Edo: ['Benin City', 'Auchi', 'Ekpoma', 'Uromi'],
+  Ekiti: ['Ado-Ekiti', 'Ikere-Ekiti', 'Ijero-Ekiti', 'Efon-Alaaye'],
+  Enugu: ['Enugu', 'Nsukka', 'Awgu', 'Oji River'],
+  'FCT (Abuja)': ['Abuja', 'Gwagwalada', 'Kubwa', 'Bwari', 'Karu', 'Kuje', 'Lugbe', 'Maitama'],
+  Gombe: ['Gombe', 'Kumo', 'Billiri', 'Dukku'],
+  Imo: ['Owerri', 'Orlu', 'Okigwe', 'Mbaise', 'Oguta'],
+  Jigawa: ['Dutse', 'Hadejia', 'Gumel', 'Birnin Kudu'],
+  Kaduna: ['Kaduna', 'Zaria', 'Kafanchan', 'Sabon Gari'],
+  Kano: ['Kano', 'Dala', 'Fagge', 'Wudil'],
+  Katsina: ['Katsina', 'Daura', 'Funtua', 'Malumfashi'],
+  Kebbi: ['Birnin Kebbi', 'Argungu', 'Yauri', 'Zuru'],
+  Kogi: ['Lokoja', 'Okene', 'Idah', 'Kabba'],
+  Kwara: ['Ilorin', 'Offa', 'Lafiagi', 'Patigi'],
+  Lagos: [
+    'Ikeja',
+    'Lekki',
+    'Victoria Island',
+    'Surulere',
+    'Yaba',
+    'Ajah',
+    'Badagry',
+    'Epe',
+    'Ikorodu',
+    'Ikoyi',
+  ],
+  Nasarawa: ['Lafia', 'Keffi', 'Akwanga', 'Karu'],
+  Niger: ['Minna', 'Bida', 'Suleja', 'Kontagora'],
+  Ogun: ['Abeokuta', 'Ijebu Ode', 'Sagamu', 'Ota', 'Ilaro', 'Ifo'],
+  Ondo: ['Akure', 'Ondo', 'Okitipupa', 'Ore', 'Owo'],
+  Osun: ['Osogbo', 'Ile-Ife', 'Ilesa', 'Ede', 'Iwo'],
+  Oyo: ['Ibadan', 'Ogbomoso', 'Oyo', 'Iseyin', 'Saki'],
+  Plateau: ['Jos', 'Bukuru', 'Pankshin', 'Barkin Ladi'],
+  Rivers: ['Port Harcourt', 'Bonny', 'Okrika', 'Eleme', 'Obio-Akpor', 'Ahoada'],
+  Sokoto: ['Sokoto', 'Tambuwal', 'Gwadabawa', 'Wurno'],
+  Taraba: ['Jalingo', 'Wukari', 'Bali', 'Gembu'],
+  Yobe: ['Damaturu', 'Potiskum', 'Gashua', 'Nguru'],
+  Zamfara: ['Gusau', 'Kaura Namoda', 'Talata Mafara', 'Anka'],
+};
+
+export const COUNTRY_MAJOR_CITIES: Record<string, string[]> = {
+  Ghana: ['Accra', 'Kumasi', 'Tamale', 'Takoradi', 'Cape Coast'],
+  Kenya: ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret'],
+  'South Africa': ['Johannesburg', 'Cape Town', 'Durban', 'Pretoria'],
+  Egypt: ['Cairo', 'Alexandria', 'Giza', 'Luxor'],
+};
+
+export const getCitiesFor = (country: string, state: string) =>
+  country === 'Nigeria'
+    ? (NIGERIA_STATE_CITIES[state] ?? [])
+    : (COUNTRY_MAJOR_CITIES[country] ?? []);

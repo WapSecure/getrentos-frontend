@@ -77,6 +77,7 @@ export default function BuyerHome() {
         <DashboardHeader
           eyebrow={greeting()}
           title={firstName(profile?.legalName)}
+          roleBadge="BY"
           subtitle="Your property journey, at a glance"
         />
         <ErrorState
@@ -93,6 +94,7 @@ export default function BuyerHome() {
       <DashboardHeader
         eyebrow={greeting()}
         title={firstName(profile?.legalName)}
+        roleBadge="BY"
         subtitle="Your property journey, at a glance"
       />
 

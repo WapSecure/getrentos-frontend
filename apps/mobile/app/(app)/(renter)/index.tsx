@@ -145,7 +145,17 @@ export default function RenterHome() {
           <Text variant="label" color="primary" uppercase>
             {greeting()}
           </Text>
-          <Text variant="title">{firstName(profile?.legalName)}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: spacing.sm,
+            }}
+          >
+            <Text variant="title">{firstName(profile?.legalName)}</Text>
+            <Badge label="RT" tone="info" />
+          </View>
         </View>
         <IconButton
           onPress={() => router.push('/(app)/notifications')}

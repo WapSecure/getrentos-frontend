@@ -7,6 +7,7 @@ import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-NG', {
@@ -37,6 +38,7 @@ const quickLinks = [
 ] as const;
 
 export default function ResidentDashboardPage() {
+  const { visible: moneyVisible } = useMonetaryVisibility();
   const { data: household, isLoading: isHouseholdLoading } = useQuery({
     queryKey: estateResidentKeys.myHousehold,
     queryFn: () => unwrap(estateResidentService.getMyHousehold()),
@@ -95,7 +97,9 @@ export default function ResidentDashboardPage() {
             <Receipt className="w-4 h-4" />
             Outstanding dues
           </div>
-          <p className="text-2xl font-bold text-foreground">{formatCurrency(pendingTotal)}</p>
+          <p className="text-2xl font-bold text-foreground">
+            {moneyVisible ? formatCurrency(pendingTotal) : '••••••'}
+          </p>
         </Link>
 
         <Link

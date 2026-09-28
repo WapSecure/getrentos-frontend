@@ -46,6 +46,8 @@ import {
 import { track } from '@/lib/analytics';
 import { forgetListing } from '@/lib/pendingListing';
 import { MarketFilterSheet, type MarketRefinements } from '@/components/market/MarketFilterSheet';
+import { useMarketSaved } from '@/hooks/useMarketSaved';
+import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet';
 
 type Tab = MarketKind | 'estates';
 
@@ -204,7 +206,7 @@ export default function Marketplace() {
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: 6,
-                  minHeight: 40,
+                  minHeight: 44,
                   paddingHorizontal: 14,
                   borderRadius: 999,
                   borderWidth: 1,
@@ -278,8 +280,11 @@ function Listings({
   intro: { title: string; body: string };
 }) {
   const { colors, spacing } = useTheme();
+  const saved = useMarketSaved(kind);
   const [refine, setRefine] = useState<MarketRefinements>({});
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [compared, setCompared] = useState<MarketCard[]>([]);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
   const refineCount = activeFilterCount(kind, refine);
   const filters = useMemo(
     () => ({ ...refine, search: search || undefined, sort, estate: estate?.slug }),
@@ -306,25 +311,67 @@ function Listings({
     [kind]
   );
 
+  const toggleCompare = useCallback((listing: MarketCard) => {
+    setCompared((current) =>
+      current.some((item) => item.id === listing.id)
+        ? current.filter((item) => item.id !== listing.id)
+        : current.length < 3
+          ? [...current, listing]
+          : current
+    );
+  }, []);
+
   const renderItem = useCallback(
     ({ item }: { item: MarketCard }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-        <PropertyCard property={{ ...item, tag: item.highlight }} onPress={open} />
+        <PropertyCard
+          property={{ ...item, tag: item.highlight }}
+          onPress={open}
+          onToggleSave={saved.toggle}
+          saved={saved.savedIds.has(item.id)}
+          onToggleCompare={() => toggleCompare(item)}
+          compared={compared.some((listing) => listing.id === item.id)}
+          compareDisabled={
+            compared.length >= 3 && !compared.some((listing) => listing.id === item.id)
+          }
+        />
       </View>
     ),
-    [open, spacing.xl, spacing.md]
+    [compared, open, saved.savedIds, saved.toggle, spacing.xl, spacing.md, toggleCompare]
   );
 
   const header = (
     <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.sm, gap: spacing.md }}>
-      <View style={{ gap: spacing.xxs }}>
-        <Text variant="title" accessibilityRole="header">
-          {intro.title}
-        </Text>
-        <Text variant="callout" color="mutedForeground">
-          {intro.body}
-        </Text>
-      </View>
+      <Card
+        elevated
+        style={{ gap: spacing.md, backgroundColor: colors.accent, borderColor: colors.primary }}
+      >
+        <View style={{ gap: spacing.xs }}>
+          <Text variant="label" color="primary" uppercase>
+            Trusted property marketplace
+          </Text>
+          <Text variant="title" accessibilityRole="header">
+            {intro.title}
+          </Text>
+          <Text variant="callout" color="mutedForeground">
+            {intro.body}
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <ShieldCheck size={15} color={colors.success} />
+            <Text variant="caption" style={{ fontWeight: '600' }}>
+              Verified identities
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <KeyRound size={15} color={colors.primary} />
+            <Text variant="caption" style={{ fontWeight: '600' }}>
+              Protected transactions
+            </Text>
+          </View>
+        </View>
+      </Card>
 
       {estate ? (
         <Card
@@ -475,7 +522,59 @@ function Listings({
           />
         }
       />
+      {compared.length > 0 ? (
+        <View
+          style={{
+            position: 'absolute',
+            left: spacing.lg,
+            right: spacing.lg,
+            bottom: 96,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            padding: spacing.md,
+            borderRadius: 18,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.card,
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">{compared.length} of 3 selected</Text>
+            <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+              {compared.map((item) => item.title).join(' · ')}
+            </Text>
+          </View>
+          <Button
+            label="Clear"
+            variant="ghost"
+            size="sm"
+            fullWidth={false}
+            onPress={() => setCompared([])}
+          />
+          <Button
+            label="Compare"
+            size="sm"
+            fullWidth={false}
+            disabled={compared.length < 2}
+            onPress={() => setComparisonOpen(true)}
+          />
+        </View>
+      ) : null}
       {sheet}
+      <MarketComparisonSheet
+        open={comparisonOpen}
+        listings={compared}
+        onClose={() => setComparisonOpen(false)}
+        onRemove={(id) => {
+          setCompared((current) => current.filter((item) => item.id !== id));
+          if (compared.length <= 2) setComparisonOpen(false);
+        }}
+        onOpenListing={(id) => {
+          setComparisonOpen(false);
+          open(id);
+        }}
+      />
     </>
   );
 }
@@ -509,12 +608,23 @@ function EstatesDirectory({
         gap: spacing.xxs,
       }}
     >
-      <Text variant="title" accessibilityRole="header">
-        {intro.title}
-      </Text>
-      <Text variant="callout" color="mutedForeground">
-        {intro.body}
-      </Text>
+      <Card elevated style={{ gap: spacing.sm, backgroundColor: colors.accent }}>
+        <Text variant="label" color="primary" uppercase>
+          Curated communities
+        </Text>
+        <Text variant="title" accessibilityRole="header">
+          {intro.title}
+        </Text>
+        <Text variant="callout" color="mutedForeground">
+          {intro.body}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+          <ShieldCheck size={15} color={colors.success} />
+          <Text variant="caption" style={{ fontWeight: '600' }}>
+            Verified estate information
+          </Text>
+        </View>
+      </Card>
     </View>
   );
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, useWindowDimensions, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import {
   Card,
   Divider,
   EmptyState,
+  ErrorState,
   Price,
   Skeleton,
   Text,
@@ -42,6 +43,8 @@ export default function OwnerOfferDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width, fontScale } = useWindowDimensions();
+  const stackActions = width < 380 || fontScale > 1.15;
   const qc = useQueryClient();
   const toast = useToast();
   const [counterOpen, setCounterOpen] = useState(false);
@@ -104,7 +107,13 @@ export default function OwnerOfferDetail() {
           onBack={() => router.back()}
         />
 
-        {offers.isPending ? (
+        {offers.isError && !offers.data ? (
+          <ErrorState
+            title="We couldn't load this offer"
+            description="Check your connection and try again."
+            onRetry={() => offers.refetch()}
+          />
+        ) : offers.isPending ? (
           <Skeleton height={180} radius={radius.lg} />
         ) : !offer ? (
           <EmptyState title="Offer not found" description="It may have been withdrawn." />
@@ -125,7 +134,13 @@ export default function OwnerOfferDetail() {
                 />
               </View>
               <Divider />
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View
+                style={{
+                  flexDirection: stackActions ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  gap: spacing.md,
+                }}
+              >
                 <View>
                   <Text variant="caption" color="mutedForeground">
                     Offer
@@ -138,7 +153,7 @@ export default function OwnerOfferDetail() {
                     {offerGap(offer.offerAmount, offer.askingPrice)}
                   </Text>
                 </View>
-                <View style={{ alignItems: 'flex-end' }}>
+                <View style={{ alignItems: stackActions ? 'flex-start' : 'flex-end' }}>
                   <Text variant="caption" color="mutedForeground">
                     Your asking price
                   </Text>
@@ -182,7 +197,7 @@ export default function OwnerOfferDetail() {
                     )
                   }
                 />
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                <View style={{ flexDirection: stackActions ? 'column' : 'row', gap: spacing.sm }}>
                   <Button
                     label="Counter"
                     variant="outline"
@@ -221,7 +236,13 @@ export default function OwnerOfferDetail() {
               <Text variant="heading" accessibilityRole="header">
                 Negotiation
               </Text>
-              {thread.isPending ? (
+              {thread.isError && !thread.data ? (
+                <ErrorState
+                  title="We couldn't load the negotiation"
+                  description="Your offer is safe. Try loading the conversation again."
+                  onRetry={() => thread.refetch()}
+                />
+              ) : thread.isPending ? (
                 <Skeleton height={60} radius={radius.md} />
               ) : !thread.data?.length ? (
                 <Text variant="callout" color="mutedForeground">

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import {
   ErrorState,
   IconButton,
   Price,
+  PressableScale,
   Skeleton,
   Text,
   useTheme,
@@ -140,8 +141,9 @@ function PropertyRow({
 }) {
   const { colors, spacing, radius, shadows } = useTheme();
   return (
-    <Pressable
+    <PressableScale
       onPress={() => router.push(`/(app)/owner-property/${p.id}`)}
+      haptic={false}
       accessibilityRole="button"
       accessibilityLabel={[
         p.name,
@@ -149,14 +151,13 @@ function PropertyRow({
         OWNER_VERIFICATION_LABEL[p.verificationStatus],
         listing ? `listing ${OWNER_LISTING_LABEL[listing.status]}` : 'not listed',
       ].join(', ')}
-      style={({ pressed }) => [
+      style={[
         {
           flexDirection: 'row',
           gap: spacing.md,
           padding: spacing.md,
           borderRadius: radius.lg,
           backgroundColor: colors.card,
-          opacity: pressed ? 0.92 : 1,
         },
         shadows.sm,
       ]}
@@ -209,6 +210,6 @@ function PropertyRow({
         </View>
         {listing ? <Price amount={listing.askingPrice} variant="callout" /> : null}
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }

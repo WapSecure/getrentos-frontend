@@ -12,6 +12,7 @@ import {
   Wrench,
 } from 'lucide-react-native';
 import {
+  Badge,
   Card,
   Divider,
   ErrorState,
@@ -28,6 +29,8 @@ import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName, relativeTime } from '@/lib/format';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
+import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
+import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const ACTIVITY_ICON: Record<LandlordActivity['type'], typeof Banknote> = {
   payment: Banknote,
@@ -48,6 +51,7 @@ function greeting(): string {
 export default function LandlordOverview() {
   const { colors, spacing, radius } = useTheme();
   const { profile } = useAuth();
+  const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
 
   const stats = useQuery({
     queryKey: qk.landlord.dashboardStats,
@@ -86,7 +90,17 @@ export default function LandlordOverview() {
           <Text variant="label" color="primary" uppercase>
             {greeting()}
           </Text>
-          <Text variant="title">{firstName(profile?.legalName)}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: spacing.sm,
+            }}
+          >
+            <Text variant="title">{firstName(profile?.legalName)}</Text>
+            <Badge label="LL" tone="info" />
+          </View>
         </View>
         <IconButton
           onPress={() => router.push('/(app)/landlord-notifications')}
@@ -112,10 +126,17 @@ export default function LandlordOverview() {
         ) : (
           <View style={{ gap: spacing.md }}>
             <View style={{ gap: 2 }}>
-              <Text variant="caption" color="mutedForeground">
-                Annual rent roll
-              </Text>
-              <Price amount={s?.annualRentRoll ?? 0} variant="display" />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                  Annual rent roll
+                </Text>
+                <BalanceVisibilityButton visible={showMoney} onToggle={toggleMoney} />
+              </View>
+              {showMoney ? (
+                <Price amount={s?.annualRentRoll ?? 0} variant="display" />
+              ) : (
+                <Text variant="display">••••••</Text>
+              )}
             </View>
 
             {s && s.outstandingAmount > 0 ? (
@@ -136,7 +157,11 @@ export default function LandlordOverview() {
                 <Text variant="caption" style={{ flex: 1, color: colors.destructive }}>
                   {s.outstandingPayments} outstanding payment
                   {s.outstandingPayments === 1 ? '' : 's'} · {}
-                  <Price amount={s.outstandingAmount} variant="caption" color="destructive" />
+                  {showMoney ? (
+                    <Price amount={s.outstandingAmount} variant="caption" color="destructive" />
+                  ) : (
+                    '••••••'
+                  )}
                 </Text>
               </Pressable>
             ) : null}

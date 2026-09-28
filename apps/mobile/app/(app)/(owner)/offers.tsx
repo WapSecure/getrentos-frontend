@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import {
   EmptyState,
   ErrorState,
   Price,
+  PressableScale,
   Skeleton,
   Text,
   useTheme,
@@ -124,8 +125,9 @@ export default function OwnerOffers() {
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           refreshControl={refresh}
           renderItem={({ item: o }: { item: OwnerOffer }) => (
-            <Pressable
+            <PressableScale
               onPress={() => router.push(`/(app)/owner-offer/${o.id}`)}
+              haptic={false}
               accessibilityRole="button"
               accessibilityLabel={`${o.buyerName} offered ${Math.round(o.offerAmount).toLocaleString('en-NG')} naira for ${o.propertyName}, ${offerGap(o.offerAmount, o.askingPrice)}, ${OWNER_OFFER_LABEL[o.status]}`}
             >
@@ -151,7 +153,7 @@ export default function OwnerOffers() {
                   </Text>
                 </View>
               </Card>
-            </Pressable>
+            </PressableScale>
           )}
         />
       )}

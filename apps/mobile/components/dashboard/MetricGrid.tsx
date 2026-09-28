@@ -34,33 +34,35 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
             </>
           ) : metric ? (
             <>
-              <View
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: radius.md,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.accent,
-                }}
-              >
-                <metric.Icon size={17} color={colors.primary} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: radius.md,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: colors.accent,
+                  }}
+                >
+                  <metric.Icon size={18} color={colors.primary} />
+                </View>
+                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                  {metric.label}
+                </Text>
               </View>
               <Text variant="title" style={{ fontSize: 21, lineHeight: 25 }}>
                 {metric.value}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                {metric.label}
               </Text>
             </>
           ) : null;
 
           const style = {
             width: '50%' as const,
-            minHeight: 112,
+            minHeight: 104,
             alignItems: 'flex-start' as const,
             justifyContent: 'center' as const,
-            gap: 6,
+            gap: spacing.sm,
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.md,
             borderLeftWidth: row.index % 2 === 1 ? 1 : 0,

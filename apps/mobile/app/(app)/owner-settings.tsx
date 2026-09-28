@@ -87,6 +87,7 @@ function Form({ initial }: { initial: OwnerPreferences }) {
               key={f}
               label={`${f}%`}
               selected={prefs.minOfferPercent === f}
+              disabled={save.isPending}
               onPress={() => setPrefs((p) => ({ ...p, minOfferPercent: f }))}
             />
           ))}
@@ -94,6 +95,7 @@ function Form({ initial }: { initial: OwnerPreferences }) {
         <Row
           label="Decline offers below that automatically"
           value={prefs.autoDeclineLowOffers}
+          disabled={save.isPending}
           onChange={(v) => setPrefs((p) => ({ ...p, autoDeclineLowOffers: v }))}
         />
       </Card>
@@ -102,6 +104,7 @@ function Form({ initial }: { initial: OwnerPreferences }) {
           label="Open to renting the property out instead"
           hint="Buyers and agents may suggest a rental arrangement."
           value={prefs.allowRentalConversion}
+          disabled={save.isPending}
           onChange={(v) => setPrefs((p) => ({ ...p, allowRentalConversion: v }))}
         />
       </Card>
@@ -127,11 +130,13 @@ function Row({
   label,
   hint,
   value,
+  disabled = false,
   onChange,
 }: {
   label: string;
   hint?: string;
   value: boolean;
+  disabled?: boolean;
   onChange: (v: boolean) => void;
 }) {
   const { colors, spacing } = useTheme();
@@ -148,7 +153,9 @@ function Row({
       <Switch
         value={value}
         onValueChange={onChange}
+        disabled={disabled}
         accessibilityLabel={label}
+        accessibilityState={{ disabled }}
         trackColor={{ true: colors.primary, false: colors.border }}
       />
     </View>

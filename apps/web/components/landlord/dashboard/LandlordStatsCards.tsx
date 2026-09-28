@@ -1,8 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { AlertTriangle, Banknote, Building2, Clock, DoorClosed, DoorOpen, Wrench } from 'lucide-react';
+import {
+  AlertTriangle,
+  Banknote,
+  Building2,
+  Clock,
+  DoorClosed,
+  DoorOpen,
+  Wrench,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
+import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -102,6 +111,7 @@ export const LandlordStatsCards = ({
   outstandingAmount,
   activeMaintenanceRequests,
 }: LandlordStatsCardsProps) => {
+  const { visible: moneyVisible } = useMonetaryVisibility();
   const stats = [
     {
       icon: Building2,
@@ -143,7 +153,7 @@ export const LandlordStatsCards = ({
       // Rent here is contracted and paid by the year. A "monthly revenue"
       // figure invited the reader to expect twelve payments and understated
       // the tenancy twelvefold.
-      value: annualRentRoll,
+      value: moneyVisible ? annualRentRoll : '••••••',
       subtitle: 'Contracted across let units, per year',
       color: 'emerald',
       delay: 0.15,
@@ -152,7 +162,7 @@ export const LandlordStatsCards = ({
     {
       icon: AlertTriangle,
       label: 'Outstanding Rent',
-      value: outstandingAmount,
+      value: moneyVisible ? outstandingAmount : '••••••',
       subtitle:
         outstandingPayments === 1
           ? 'Across 1 unpaid charge'

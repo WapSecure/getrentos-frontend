@@ -61,6 +61,7 @@ export default function AgentHome() {
         <DashboardHeader
           eyebrow={greeting()}
           title={firstName(profile?.legalName)}
+          roleBadge="AG"
           subtitle="Field operations and property work"
         />
         <ErrorState
@@ -77,6 +78,7 @@ export default function AgentHome() {
       <DashboardHeader
         eyebrow={greeting()}
         title={firstName(profile?.legalName)}
+        roleBadge="AG"
         subtitle="Field operations and property work"
       />
 

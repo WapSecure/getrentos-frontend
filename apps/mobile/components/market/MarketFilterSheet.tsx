@@ -70,6 +70,8 @@ export function MarketFilterSheet({
     setDraft((d) => ({ ...d, [key]: d[key] === v ? undefined : v }));
 
   const count = activeFilterCount(kind, draft);
+  const priceRangeInvalid =
+    draft.minPrice !== undefined && draft.maxPrice !== undefined && draft.minPrice > draft.maxPrice;
 
   return (
     <Sheet
@@ -89,6 +91,7 @@ export function MarketFilterSheet({
           <View style={{ flex: 1 }}>
             <Button
               label={count ? `Apply ${count} filter${count === 1 ? '' : 's'}` : 'Show results'}
+              disabled={priceRangeInvalid}
               onPress={() => {
                 onApply(draft);
                 onClose();
@@ -109,6 +112,7 @@ export function MarketFilterSheet({
                 label="Minimum"
                 value={draft.minPrice}
                 onChange={(v) => set('minPrice', v)}
+                error={priceRangeInvalid ? 'Must be below maximum' : undefined}
               />
             </View>
             <View style={{ flex: 1 }}>
@@ -116,6 +120,7 @@ export function MarketFilterSheet({
                 label="Maximum"
                 value={draft.maxPrice}
                 onChange={(v) => set('maxPrice', v)}
+                error={priceRangeInvalid ? 'Must be above minimum' : undefined}
               />
             </View>
           </View>
@@ -283,10 +288,12 @@ function NairaField({
   label,
   value,
   onChange,
+  error,
 }: {
   label: string;
   value?: number;
   onChange: (v: number | undefined) => void;
+  error?: string;
 }) {
   return (
     <TextField
@@ -294,6 +301,7 @@ function NairaField({
       placeholder="₦ Any"
       keyboardType="number-pad"
       value={value ? value.toLocaleString('en-NG') : ''}
+      error={error}
       onChangeText={(t) => {
         const digits = t.replace(/\D/g, '');
         onChange(digits ? Number(digits) : undefined);

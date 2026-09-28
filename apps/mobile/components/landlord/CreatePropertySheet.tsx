@@ -14,6 +14,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
+import { LocationFields } from '@/components/forms/LocationFields';
 
 interface Props {
   open: boolean;
@@ -37,6 +38,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState('');
   const [type, setType] = useState<PropertyType>('apartment');
   const [address, setAddress] = useState('');
+  const [country, setCountry] = useState('Nigeria');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [description, setDescription] = useState('');
@@ -69,7 +71,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         address: address.trim(),
         city: city.trim(),
         state: state.trim(),
-        country: 'Nigeria',
+        country,
         description: description.trim() || undefined,
         coverImageKey: cover?.key,
       }),
@@ -165,14 +167,14 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         onChangeText={setAddress}
       />
 
-      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <View style={{ flex: 1 }}>
-          <TextField label="City" placeholder="Lagos" value={city} onChangeText={setCity} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <TextField label="State" placeholder="Lagos" value={state} onChangeText={setState} />
-        </View>
-      </View>
+      <LocationFields
+        country={country}
+        state={state}
+        city={city}
+        onCountryChange={setCountry}
+        onStateChange={setState}
+        onCityChange={setCity}
+      />
 
       <TextField
         label="Description (optional)"

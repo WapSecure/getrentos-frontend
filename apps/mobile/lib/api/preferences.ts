@@ -48,6 +48,7 @@ export const WHATSAPP_TOPIC_LABEL: { id: string; label: string }[] = [
  * the web settings panels share this endpoint.
  */
 export interface RenterPreferences {
+  hideMonetaryValues?: boolean;
   privacy?: Partial<PrivacyPreferences>;
   whatsapp?: Partial<WhatsAppPreferences>;
   security?: { biometricEnabled?: boolean };
@@ -56,9 +57,9 @@ export interface RenterPreferences {
 }
 
 export const preferencesApi = {
-  get: () => apiFetch<RenterPreferences>('/renter/settings/preferences'),
+  get: () => apiFetch<RenterPreferences>('/users/me/preferences'),
 
   /** Merged server-side into the existing bag — send only what changed. */
   update: (patch: RenterPreferences) =>
-    apiFetch<RenterPreferences>('/renter/settings/preferences', { method: 'PUT', body: patch }),
+    apiFetch<RenterPreferences>('/users/me/preferences', { method: 'PUT', body: patch }),
 };

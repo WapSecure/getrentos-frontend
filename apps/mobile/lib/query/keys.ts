@@ -78,6 +78,7 @@ export const qk = {
       ['market', 'list', kind, filters] as const,
     detail: (kind: string, id: string) => ['market', 'detail', kind, id] as const,
     estates: (search?: string) => ['market', 'estates', search ?? null] as const,
+    saved: ['market', 'saved'] as const,
   },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,

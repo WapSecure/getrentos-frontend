@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +25,7 @@ import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { LocationFields } from '@/components/forms/LocationFields';
 
 const TYPES: { value: CreateOwnerPropertyInput['propertyType']; label: string }[] = [
   { value: 'APARTMENT', label: 'Apartment' },
@@ -31,6 +40,8 @@ const digits = (s: string) => Number(s.replace(/\D/g, '')) || undefined;
 export default function OwnerAddProperty() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width, fontScale } = useWindowDimensions();
+  const stackFieldPairs = width < 380 || fontScale > 1.15;
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -38,6 +49,7 @@ export default function OwnerAddProperty() {
   const [propertyType, setPropertyType] =
     useState<CreateOwnerPropertyInput['propertyType']>('APARTMENT');
   const [address, setAddress] = useState('');
+  const [country, setCountry] = useState('Nigeria');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [estimatedValue, setEstimatedValue] = useState('');
@@ -63,7 +75,7 @@ export default function OwnerAddProperty() {
         address: address.trim(),
         city: city.trim(),
         state: state.trim(),
-        country: 'Nigeria',
+        country,
         estimatedValue: digits(estimatedValue),
         purchasePrice: digits(purchasePrice),
       });
@@ -153,15 +165,16 @@ export default function OwnerAddProperty() {
           autoComplete="street-address"
           error={err('address')}
         />
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-          <View style={{ flex: 1 }}>
-            <TextField label="City" value={city} onChangeText={setCity} error={err('city')} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <TextField label="State" value={state} onChangeText={setState} error={err('state')} />
-          </View>
-        </View>
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <LocationFields
+          country={country}
+          state={state}
+          city={city}
+          onCountryChange={setCountry}
+          onStateChange={setState}
+          onCityChange={setCity}
+          errors={{ state: err('state'), city: err('city') }}
+        />
+        <View style={{ flexDirection: stackFieldPairs ? 'column' : 'row', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
             <TextField
               label="Estimated value (₦)"

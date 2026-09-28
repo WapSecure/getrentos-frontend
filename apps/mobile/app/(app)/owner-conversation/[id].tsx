@@ -10,9 +10,10 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertCircle, ChevronLeft, Send } from 'lucide-react-native';
+import { AlertCircle, ChevronLeft, MessageCircle, Send } from 'lucide-react-native';
 import {
   Avatar,
+  EmptyState,
   ErrorState,
   IconButton,
   Skeleton,
@@ -150,8 +151,20 @@ export default function OwnerConversation() {
           data={rows}
           inverted
           keyExtractor={(r) => (r.kind === 'sent' ? r.m.id : `p-${r.key}`)}
-          contentContainerStyle={{ padding: spacing.lg, gap: spacing.sm }}
+          contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, gap: spacing.sm }}
           keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
+          initialNumToRender={20}
+          maxToRenderPerBatch={12}
+          windowSize={9}
+          removeClippedSubviews={Platform.OS === 'android'}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<MessageCircle size={34} color={colors.mutedForeground} />}
+              title="Start the conversation"
+              description="Send a message about this property or offer."
+            />
+          }
           renderItem={({ item }) => {
             const mine = item.kind === 'pending' || item.m.senderId === profile?.id;
             const body = item.kind === 'sent' ? item.m.text : item.text;
@@ -198,6 +211,8 @@ export default function OwnerConversation() {
                   </Text>
                 ) : failed ? (
                   <View
+                    accessibilityRole="alert"
+                    accessibilityLiveRegion="polite"
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
@@ -219,7 +234,7 @@ export default function OwnerConversation() {
                       }}
                       accessibilityRole="button"
                       accessibilityLabel="Retry sending"
-                      hitSlop={12}
+                      style={{ minHeight: 44, justifyContent: 'center' }}
                     >
                       <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
                         Retry

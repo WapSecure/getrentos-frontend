@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -17,6 +17,7 @@ import {
   Card,
   ErrorState,
   Price,
+  PressableScale,
   Screen,
   SectionHeader,
   Skeleton,
@@ -25,6 +26,8 @@ import {
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
+import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -40,6 +43,7 @@ function greeting(): string {
 export default function OwnerHome() {
   const { profile } = useAuth();
   const { colors, spacing, radius } = useTheme();
+  const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
 
@@ -47,6 +51,7 @@ export default function OwnerHome() {
     <DashboardHeader
       eyebrow={greeting()}
       title={firstName(profile?.legalName)}
+      roleBadge="PO"
       subtitle="Your properties, offers and sales"
     />
   );
@@ -99,7 +104,7 @@ export default function OwnerHome() {
 
       {/* What needs you first: offers waiting on an answer. */}
       {d?.pendingOffers ? (
-        <Pressable
+        <PressableScale
           onPress={() => router.push('/(app)/(owner)/offers')}
           accessibilityRole="button"
           accessibilityLabel={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer is' : 'offers are'} waiting for your answer`}
@@ -124,17 +129,34 @@ export default function OwnerHome() {
             </View>
             <ChevronRight size={18} color={colors.primary} />
           </Card>
-        </Pressable>
+        </PressableScale>
       ) : null}
 
-      <Card elevated style={{ gap: spacing.xs }}>
-        <Text variant="caption" color="mutedForeground">
-          Portfolio value
-        </Text>
+      <Card
+        elevated
+        accessible
+        accessibilityLabel={
+          dashboard.isPending
+            ? 'Loading portfolio value'
+            : showMoney
+              ? `Portfolio value, ${Math.round(d?.portfolioValue ?? 0).toLocaleString('en-NG')} naira. Estimated from your properties recorded values.`
+              : 'Portfolio value hidden'
+        }
+        accessibilityState={{ busy: dashboard.isPending }}
+        style={{ gap: spacing.xs }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+            Portfolio value
+          </Text>
+          <BalanceVisibilityButton visible={showMoney} onToggle={toggleMoney} />
+        </View>
         {dashboard.isPending ? (
           <Skeleton height={30} width="60%" />
-        ) : (
+        ) : showMoney ? (
           <Price amount={d?.portfolioValue ?? 0} variant="title" />
+        ) : (
+          <Text variant="title">••••••</Text>
         )}
         <Text variant="caption" color="mutedForeground">
           Estimated from your properties’ recorded values
@@ -225,11 +247,12 @@ function QuickAction({
 }) {
   const { colors, spacing, radius } = useTheme();
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
+      haptic={false}
       accessibilityRole="button"
       accessibilityLabel={badge ? `${label}, ${badge} active` : label}
-      style={({ pressed }) => ({
+      style={{
         flexBasis: '48%',
         flexGrow: 1,
         minHeight: 56,
@@ -240,8 +263,8 @@ function QuickAction({
         borderRadius: radius.lg,
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: pressed ? colors.secondary : colors.card,
-      })}
+        backgroundColor: colors.card,
+      }}
     >
       <Icon size={18} color={colors.primary} />
       <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
@@ -252,6 +275,6 @@ function QuickAction({
           {badge}
         </Text>
       ) : null}
-    </Pressable>
+    </PressableScale>
   );
 }

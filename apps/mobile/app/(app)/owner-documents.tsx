@@ -103,44 +103,57 @@ export default function OwnerDocuments() {
               description="Upload transfer documents from the web dashboard; you can manage sharing here."
             />
           }
-          renderItem={({ item: d }: { item: OwnerDocument }) => (
-            <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Pressable
-                onPress={() => d.downloadUrl && Linking.openURL(d.downloadUrl)}
-                disabled={!d.downloadUrl}
-                accessibilityRole="link"
-                accessibilityLabel={`Open ${d.name}, ${d.propertyName}`}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.md,
-                  minHeight: 44,
-                }}
+          renderItem={({ item: d }: { item: OwnerDocument }) => {
+            const sharingThis = share.isPending && share.variables?.id === d.id;
+            return (
+              <Card
+                elevated
+                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
               >
-                <FileText size={20} color={colors.primary} />
-                <View style={{ flex: 1 }}>
-                  <Text variant="bodyStrong" numberOfLines={1}>
-                    {d.name}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                    {d.propertyName} · {d.sizeLabel} · {formatDate(d.uploadedAt, 'short')}
+                <Pressable
+                  onPress={() => d.downloadUrl && Linking.openURL(d.downloadUrl)}
+                  disabled={!d.downloadUrl}
+                  accessibilityRole="link"
+                  accessibilityLabel={
+                    d.downloadUrl
+                      ? `Open ${d.name}, ${d.propertyName}`
+                      : `${d.name}, ${d.propertyName}, download unavailable`
+                  }
+                  accessibilityState={{ disabled: !d.downloadUrl }}
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.md,
+                    minHeight: 44,
+                  }}
+                >
+                  <FileText size={20} color={colors.primary} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyStrong" numberOfLines={1}>
+                      {d.name}
+                    </Text>
+                    <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                      {d.propertyName} · {d.sizeLabel} · {formatDate(d.uploadedAt, 'short')}
+                    </Text>
+                  </View>
+                </Pressable>
+                <View style={{ alignItems: 'center' }}>
+                  <Switch
+                    value={d.sharedWithBuyer}
+                    onValueChange={(v) => share.mutate({ id: d.id, shared: v })}
+                    disabled={sharingThis}
+                    accessibilityLabel={`Share ${d.name} with the buyer`}
+                    accessibilityState={{ busy: sharingThis, disabled: sharingThis }}
+                    trackColor={{ true: colors.primary, false: colors.border }}
+                  />
+                  <Text variant="caption" color="mutedForeground">
+                    {d.sharedWithBuyer ? 'Shared' : 'Private'}
                   </Text>
                 </View>
-              </Pressable>
-              <View style={{ alignItems: 'center' }}>
-                <Switch
-                  value={d.sharedWithBuyer}
-                  onValueChange={(v) => share.mutate({ id: d.id, shared: v })}
-                  accessibilityLabel={`Share ${d.name} with the buyer`}
-                  trackColor={{ true: colors.primary, false: colors.border }}
-                />
-                <Text variant="caption" color="mutedForeground">
-                  {d.sharedWithBuyer ? 'Shared' : 'Private'}
-                </Text>
-              </View>
-            </Card>
-          )}
+              </Card>
+            );
+          }}
         />
       )}
     </View>
