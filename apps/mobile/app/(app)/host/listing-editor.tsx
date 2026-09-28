@@ -29,10 +29,8 @@ import {
   type PricingMode,
 } from '@/lib/api/hostShortlets';
 import type { ShortletCancellationPolicy } from '@/lib/api/shortlets';
-import { ownerApi } from '@/lib/api/owner';
-import { landlordApi } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
-import { useAuth } from '@/lib/auth/AuthProvider';
+import { useMyHomes } from '@/hooks/useMyHomes';
 import { readGate } from '@/lib/verificationGate';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -256,24 +254,7 @@ function CreateFlow() {
 
 function HomeStep({ d, patch }: { d: Draft; patch: (p: Partial<Draft>) => void }) {
   const { colors, spacing, radius } = useTheme();
-  const { usablePortal } = useAuth();
-  const homes = useQuery({
-    queryKey: ['host', 'homes', usablePortal],
-    queryFn: async () =>
-      usablePortal === 'landlord'
-        ? (await landlordApi.properties(1, 100)).items.map((p) => ({
-            id: p.id,
-            name: p.name,
-            city: p.city,
-            image: p.coverImage,
-          }))
-        : (await ownerApi.properties(1, 100)).items.map((p) => ({
-            id: p.id,
-            name: p.name,
-            city: p.city,
-            image: p.coverImageUrl,
-          })),
-  });
+  const homes = useMyHomes();
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">

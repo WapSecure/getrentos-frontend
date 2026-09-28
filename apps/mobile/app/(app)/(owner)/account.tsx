@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import {
   BarChart3,
   BedDouble,
+  Wrench,
   Bell,
   Landmark,
   UserRound,
@@ -63,6 +64,13 @@ export default function OwnerAccount() {
       description: 'Nightly stays, bookings and payouts',
       icon: BedDouble,
       onPress: go('/(app)/host'),
+    },
+    {
+      key: 'home-care',
+      label: 'Home care',
+      description: 'Repairs, assets and servicing',
+      icon: Wrench,
+      onPress: go('/(app)/home-care'),
     },
     {
       key: 'land',
