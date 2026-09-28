@@ -252,7 +252,8 @@ export default function NewWorkOrder() {
             <View style={{ flex: 1 }}>
               <Text variant="body">Needs spend approval</Text>
               <Text variant="caption" color="mutedForeground">
-                Another manager approves the budget before work starts. You can’t approve your own.
+                Work can’t start until you approve a budget or a vendor’s quote. Good for bigger
+                jobs.
               </Text>
             </View>
             <Switch

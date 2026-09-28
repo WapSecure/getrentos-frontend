@@ -45,10 +45,9 @@ describe('work order clock', () => {
 });
 
 describe('next step', () => {
-  it('won’t tell the person who logged it to approve their own spend', () => {
+  it('asks the owner to approve spend, even on a job they logged', () => {
     const w = { ...base, approvalRequired: true, createdById: 'me' } as WorkOrder;
-    expect(nextStep(w, 'me')).toMatch(/another manager/);
-    expect(nextStep(w, 'someone-else')).toMatch(/Approve the spend/);
+    expect(nextStep(w)).toMatch(/Approve the spend/);
   });
 
   it('asks for a vendor first, then the start, then the fix', () => {

@@ -37,8 +37,6 @@ import {
   type HomeManagementWorkOrderQuote,
 } from '@/services/homeManagementService';
 
-type QuoteRole = 'owner' | 'landlord';
-
 type QuoteForm = {
   vendorId: string;
   amount: string;
@@ -100,7 +98,6 @@ const toValidUntilIso = (dateValue: string) => {
 };
 
 interface HomeManagementWorkOrderQuotesProps {
-  role: QuoteRole;
   workOrder: HomeManagementWorkOrder;
   vendors?: HomeManagementVendor[];
 }
@@ -110,7 +107,6 @@ interface HomeManagementWorkOrderQuotesProps {
  * the broader work-order lifecycle controls.
  */
 export function HomeManagementWorkOrderQuotes({
-  role,
   workOrder,
   vendors = [],
 }: HomeManagementWorkOrderQuotesProps) {
@@ -147,22 +143,13 @@ export function HomeManagementWorkOrderQuotes({
   const validScope = form.scopeOfWork.trim().length >= 3;
   const validExpiry = !form.validUntil || Boolean(formExpiry && timestamp(formExpiry)! > now);
   const canCreateQuote = isWorkOrderOpen(workOrder) && validAmount && validScope && validExpiry;
-  const workOrderCreatedByCurrentUser = Boolean(
-    currentUserId && workOrder.createdById && currentUserId === workOrder.createdById
-  );
-  const approvalAuthorityIsLoading = Boolean(workOrder.createdById) && currentUserId === undefined;
+  const approvalAuthorityIsLoading = currentUserId === undefined;
   /**
-   * Whether a quote can still be selected.
-   *
-   * The four-eyes control is a budget control: it blocks the creator of a work
-   * order that opted into approval from also approving its spend. A renter-raised
-   * request has no operator creator, and a work order that never opted in has
-   * nothing to separate — selecting a quote there is what locks the approved cost
-   * that an invoice is later checked against, so it must stay possible.
+   * Whether a quote can still be selected. Selecting one locks the approved
+   * cost an invoice is later checked against. Only the owner operates home
+   * management, so they select quotes on jobs they logged too.
    */
-  const workOrderOpenForQuoteSelection = isWorkOrderOpen(workOrder) && !workOrder.approvedAt;
-  const canApproveQuotes =
-    workOrderOpenForQuoteSelection && !(workOrder.approvalRequired && workOrderCreatedByCurrentUser);
+  const canApproveQuotes = isWorkOrderOpen(workOrder) && !workOrder.approvedAt;
 
   const invalidateQuoteViews = async () => {
     await Promise.all([
@@ -269,7 +256,7 @@ export function HomeManagementWorkOrderQuotes({
     if (!canCreateQuote) return;
 
     createQuote.mutate({
-      vendorId: role === 'landlord' && form.vendorId ? form.vendorId : undefined,
+      vendorId: form.vendorId || undefined,
       amount,
       scopeOfWork: form.scopeOfWork.trim(),
       validUntil: form.validUntil ? formExpiry : undefined,
@@ -467,11 +454,6 @@ export function HomeManagementWorkOrderQuotes({
                             <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
                               Checking approval authority…
                             </p>
-                          ) : workOrder.approvalRequired && workOrderCreatedByCurrentUser ? (
-                            <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
-                              A different authorised operator must select a quote for controlled
-                              spend you created.
-                            </p>
                           ) : !canApproveQuotes ? (
                             <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
                               This work order does not currently need quote approval.
@@ -551,41 +533,32 @@ export function HomeManagementWorkOrderQuotes({
             </DialogDescription>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {role === 'landlord' && (
-                <Field
-                  className="sm:col-span-2"
-                  label="Vendor"
-                  hint={
-                    vendors.length > 0
-                      ? 'Optional, but a linked vendor is required before this quote can be selected.'
-                      : 'No active vendors are available. You can record an unlinked estimate, but it cannot be approved until a vendor is linked to a new quote.'
-                  }
-                >
-                  <Select
-                    ariaLabel="Quote vendor"
-                    value={form.vendorId}
-                    disabled={createQuote.isPending || vendors.length === 0}
-                    placeholder={vendors.length > 0 ? 'Select a vendor' : 'No active vendors'}
-                    onValueChange={(vendorId) => setForm((current) => ({ ...current, vendorId }))}
-                    options={[
-                      { value: '', label: 'Record an unlinked estimate' },
-                      ...vendors.map((vendor) => ({
-                        value: vendor.id,
-                        label: vendor.serviceType
-                          ? `${vendor.name} · ${vendor.serviceType}`
-                          : vendor.name,
-                      })),
-                    ]}
-                  />
-                </Field>
-              )}
-
-              {role === 'owner' && (
-                <p className="sm:col-span-2 rounded-xl bg-secondary/70 px-3 py-2 text-xs leading-5 text-muted-foreground">
-                  This quote will be recorded as an unlinked estimate. A landlord vendor directory
-                  entry is required before a quote can be selected to assign work.
-                </p>
-              )}
+              <Field
+                className="sm:col-span-2"
+                label="Vendor"
+                hint={
+                  vendors.length > 0
+                    ? 'Optional, but a linked vendor is required before this quote can be selected.'
+                    : 'No active vendors are available. You can record an unlinked estimate, but it cannot be approved until a vendor is linked to a new quote.'
+                }
+              >
+                <Select
+                  ariaLabel="Quote vendor"
+                  value={form.vendorId}
+                  disabled={createQuote.isPending || vendors.length === 0}
+                  placeholder={vendors.length > 0 ? 'Select a vendor' : 'No active vendors'}
+                  onValueChange={(vendorId) => setForm((current) => ({ ...current, vendorId }))}
+                  options={[
+                    { value: '', label: 'Record an unlinked estimate' },
+                    ...vendors.map((vendor) => ({
+                      value: vendor.id,
+                      label: vendor.serviceType
+                        ? `${vendor.name} · ${vendor.serviceType}`
+                        : vendor.name,
+                    })),
+                  ]}
+                />
+              </Field>
 
               <Field
                 label="Quoted amount"

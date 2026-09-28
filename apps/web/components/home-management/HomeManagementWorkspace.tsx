@@ -103,8 +103,8 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
+  // Owners and landlords both keep a vendor directory (/owner|landlord/vendors).
   const vendorsQuery = useQuery({
-    enabled: role === 'landlord',
     queryKey: homeManagementKeys.vendors,
     queryFn: async (): Promise<HomeManagementVendor[]> => {
       const res = await unwrap(landlordService.listVendors({ page: 1, pageSize: 100 }));
@@ -192,7 +192,6 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
       />
 
       <HomeManagementWorkOrderQueue
-        role={role}
         workOrders={workOrders}
         properties={properties}
         vendors={vendors}

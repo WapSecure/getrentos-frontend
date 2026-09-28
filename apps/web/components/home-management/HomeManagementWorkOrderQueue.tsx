@@ -27,7 +27,6 @@ import { Toast, type ToastVariant } from '@getrentos/ui';
 import { HomeManagementWorkOrderInvoices } from '@/components/home-management/HomeManagementWorkOrderInvoices';
 import { HomeManagementWorkOrderQuotes } from '@/components/home-management/HomeManagementWorkOrderQuotes';
 import { unwrap } from '@/lib/apiHelpers';
-import { getStoredUser } from '@/lib/authStorage';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import {
@@ -184,7 +183,6 @@ const isOptionalWholeNumber = (value: string) =>
 const toOptionalWholeNumber = (value: string) => (value.trim() === '' ? undefined : Number(value));
 
 interface HomeManagementWorkOrderQueueProps {
-  role: 'owner' | 'landlord';
   workOrders: HomeManagementWorkOrder[];
   properties: HomeManagementProperty[];
   vendors?: HomeManagementVendor[];
@@ -198,7 +196,6 @@ interface HomeManagementWorkOrderQueueProps {
 }
 
 export function HomeManagementWorkOrderQueue({
-  role,
   workOrders,
   properties,
   vendors = [],
@@ -220,9 +217,6 @@ export function HomeManagementWorkOrderQueue({
   const [lifecycleDialog, setLifecycleDialog] = useState<WorkOrderLifecycleDialog | null>(null);
   const [lifecycleNote, setLifecycleNote] = useState('');
   const [lifecycleCost, setLifecycleCost] = useState('');
-  const [currentUserId] = useState<string | null | undefined>(
-    () => getStoredUser<{ id?: string }>()?.id ?? null
-  );
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const unitsQuery = useQuery({
@@ -478,8 +472,7 @@ export function HomeManagementWorkOrderQueue({
       dueAt: form.dueAt || undefined,
       estimatedCost: form.estimatedCost.trim() === '' ? undefined : estimatedCost,
       approvalRequired: form.approvalRequired,
-      assignedVendorId:
-        role === 'landlord' && form.assignedVendorId ? form.assignedVendorId : undefined,
+      assignedVendorId: form.assignedVendorId || undefined,
     });
   };
 
@@ -626,7 +619,7 @@ export function HomeManagementWorkOrderQueue({
                 const approvalPending = isApprovalPending(workOrder);
                 const currentVendorId = workOrder.assignedVendor?.id ?? '';
                 const selectedVendorId = vendorSelections[workOrder.id] ?? currentVendorId;
-                const vendorAssignmentAvailable = role === 'landlord' && canAssignVendor(workOrder);
+                const vendorAssignmentAvailable = canAssignVendor(workOrder);
                 const vendorOptions = [
                   ...(currentVendorId && !vendors.some((vendor) => vendor.id === currentVendorId)
                     ? [
@@ -649,11 +642,6 @@ export function HomeManagementWorkOrderQueue({
                 const canStart = canStartWorkOrder(workOrder);
                 const canResolve = canResolveWorkOrder(workOrder);
                 const slaBreached = hasSlaBreach(workOrder);
-                const createdByCurrentUser = Boolean(
-                  currentUserId && workOrder.createdById && currentUserId === workOrder.createdById
-                );
-                const approvalAuthorityCheckPending =
-                  Boolean(workOrder.createdById) && currentUserId === undefined;
                 const isThisWorkOrderMutationPending =
                   (approve.isPending && approve.variables?.id === workOrder.id) ||
                   (assignVendor.isPending && assignVendor.variables?.id === workOrder.id) ||
@@ -786,45 +774,32 @@ export function HomeManagementWorkOrderQueue({
                                   ? `Estimated cost: ${formatCurrency(workOrder.estimatedCost)}`
                                   : 'Set the budget that this work is approved to spend.'}
                               </p>
-                              {approvalAuthorityCheckPending ? (
-                                <p className="mt-3 rounded-xl bg-card px-3 py-2 text-xs leading-5 text-muted-foreground">
-                                  Checking whether you can approve this work order…
-                                </p>
-                              ) : createdByCurrentUser ? (
-                                <p className="mt-3 rounded-xl bg-card px-3 py-2 text-xs leading-5 text-muted-foreground">
-                                  A different authorised operator must approve work that you
-                                  created.
-                                </p>
-                              ) : (
-                                <div className="mt-3 flex items-center gap-2">
-                                  <CurrencyInput
-                                    aria-label={`Approved cost for ${workOrder.issueTitle}`}
-                                    prefix="₦"
-                                    min={0}
-                                    value={currentCost}
-                                    disabled={isThisWorkOrderMutationPending}
-                                    onValueChange={(v) =>
-                                      setCosts((current) => ({
-                                        ...current,
-                                        [workOrder.id]: v === 0 ? '' : String(v),
-                                      }))
-                                    }
-                                  />
-                                  <Button
-                                    size="sm"
-                                    rounded="md"
-                                    isLoading={
-                                      approve.isPending && approve.variables?.id === workOrder.id
-                                    }
-                                    disabled={!canApprove || isThisWorkOrderMutationPending}
-                                    onClick={() =>
-                                      approve.mutate({ id: workOrder.id, approvedCost })
-                                    }
-                                  >
-                                    Approve
-                                  </Button>
-                                </div>
-                              )}
+                              <div className="mt-3 flex items-center gap-2">
+                                <CurrencyInput
+                                  aria-label={`Approved cost for ${workOrder.issueTitle}`}
+                                  prefix="₦"
+                                  min={0}
+                                  value={currentCost}
+                                  disabled={isThisWorkOrderMutationPending}
+                                  onValueChange={(v) =>
+                                    setCosts((current) => ({
+                                      ...current,
+                                      [workOrder.id]: v === 0 ? '' : String(v),
+                                    }))
+                                  }
+                                />
+                                <Button
+                                  size="sm"
+                                  rounded="md"
+                                  isLoading={
+                                    approve.isPending && approve.variables?.id === workOrder.id
+                                  }
+                                  disabled={!canApprove || isThisWorkOrderMutationPending}
+                                  onClick={() => approve.mutate({ id: workOrder.id, approvedCost })}
+                                >
+                                  Approve
+                                </Button>
+                              </div>
                             </div>
                           ) : workOrder.approvedCost !== null &&
                             workOrder.approvedCost !== undefined ? (
@@ -963,11 +938,7 @@ export function HomeManagementWorkOrderQueue({
                     </div>
 
                     <div className="mt-4 grid gap-4 2xl:grid-cols-2">
-                      <HomeManagementWorkOrderQuotes
-                        role={role}
-                        workOrder={workOrder}
-                        vendors={role === 'landlord' ? vendors : undefined}
-                      />
+                      <HomeManagementWorkOrderQuotes workOrder={workOrder} vendors={vendors} />
                       <HomeManagementWorkOrderInvoices workOrder={workOrder} />
                     </div>
                   </article>
@@ -1321,33 +1292,30 @@ export function HomeManagementWorkOrderQueue({
                   placeholder="e.g. 85000"
                 />
               </Field>
-
-              {role === 'landlord' && (
-                <Field
-                  label="Assign vendor"
-                  hint="Optional. The request can remain unassigned until the right provider is selected."
-                >
-                  <Select
-                    ariaLabel="Assigned vendor"
-                    value={form.assignedVendorId}
-                    onValueChange={(assignedVendorId) =>
-                      setForm((current) => ({ ...current, assignedVendorId }))
-                    }
-                    options={[
-                      {
-                        value: '',
-                        label: vendors.length > 0 ? 'Assign later' : 'No active vendors',
-                      },
-                      ...vendors.map((vendor) => ({
-                        value: vendor.id,
-                        label: vendor.serviceType
-                          ? `${vendor.name} · ${vendor.serviceType}`
-                          : vendor.name,
-                      })),
-                    ]}
-                  />
-                </Field>
-              )}
+              <Field
+                label="Assign vendor"
+                hint="Optional. The request can remain unassigned until the right provider is selected."
+              >
+                <Select
+                  ariaLabel="Assigned vendor"
+                  value={form.assignedVendorId}
+                  onValueChange={(assignedVendorId) =>
+                    setForm((current) => ({ ...current, assignedVendorId }))
+                  }
+                  options={[
+                    {
+                      value: '',
+                      label: vendors.length > 0 ? 'Assign later' : 'No active vendors',
+                    },
+                    ...vendors.map((vendor) => ({
+                      value: vendor.id,
+                      label: vendor.serviceType
+                        ? `${vendor.name} · ${vendor.serviceType}`
+                        : vendor.name,
+                    })),
+                  ]}
+                />
+              </Field>
 
               <div className="sm:col-span-2 flex items-start justify-between gap-4 rounded-2xl border border-border bg-secondary/35 p-4">
                 <div>

@@ -398,13 +398,10 @@ export function slaState(
 }
 
 /** What the next useful step on a work order is, in words. */
-export function nextStep(w: WorkOrder, myId?: string): string {
+export function nextStep(w: WorkOrder): string {
   if (w.status === 'RESOLVED') return 'Done. Invoice the vendor if you haven’t.';
   if (w.status === 'CANCELLED') return 'Cancelled.';
-  if (w.approvalRequired && !w.approvedAt)
-    return w.createdById === myId
-      ? 'Waiting for another manager to approve the spend.'
-      : 'Approve the spend so work can go ahead.';
+  if (w.approvalRequired && !w.approvedAt) return 'Approve the spend so work can go ahead.';
   if (!w.assignedVendor) return 'Assign a vendor.';
   if (w.status === 'ASSIGNED') return 'Start the job when the vendor begins.';
   return 'Resolve it when the work is done.';

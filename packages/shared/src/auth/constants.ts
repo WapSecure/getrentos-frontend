@@ -355,6 +355,7 @@ export const ROUTES = {
   OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
   OWNER_HOME_MANAGEMENT: '/owner/home-management',
+  OWNER_VENDORS: '/owner/vendors',
   OWNER_LAND: '/owner/land',
   OWNER_SHORTLETS: '/owner/shortlets',
   OWNER_BILLING: '/owner/billing',

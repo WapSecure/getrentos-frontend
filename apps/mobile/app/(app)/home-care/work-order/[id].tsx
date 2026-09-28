@@ -37,7 +37,6 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill } from '@/components/host/HostUI';
@@ -60,7 +59,6 @@ const dt = (iso?: string | null) =>
 
 export default function WorkOrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { profile } = useAuth();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
@@ -121,7 +119,6 @@ export default function WorkOrderDetail() {
 
   const open = w && w.status !== 'RESOLVED' && w.status !== 'CANCELLED';
   const needsApproval = !!w && w.approvalRequired && !w.approvedAt;
-  const canApprove = needsApproval && w?.createdById !== profile?.id;
   const sla = w ? slaState(w) : null;
 
   return (
@@ -211,7 +208,7 @@ export default function WorkOrderDetail() {
                   ) : null}
                 </View>
                 <Text variant="caption" color="mutedForeground">
-                  {nextStep(w, profile?.id)}
+                  {nextStep(w)}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                   {!w.acknowledgedAt ? (
@@ -291,14 +288,7 @@ export default function WorkOrderDetail() {
                 )}
               </View>
               {needsApproval ? (
-                canApprove ? (
-                  <Button label="Approve spend" onPress={() => setPanel('approve')} />
-                ) : (
-                  <FormAlert
-                    tone="info"
-                    message="You logged this job, so another manager has to approve its spend. Record a quote and they’ll see it."
-                  />
-                )
+                <Button label="Approve spend" onPress={() => setPanel('approve')} />
               ) : null}
             </Card>
 

@@ -14,6 +14,7 @@ import {
   BadgeCheck,
   UserRoundCheck,
   Wrench,
+  HardHat,
   Settings,
   MapPinned,
   BedDouble,
@@ -54,6 +55,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.transactions', href: ROUTES.OWNER_TRANSACTIONS, icon: ShieldCheck },
   { labelKey: 'sidebar.investment_analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },
   { labelKey: 'sidebar.home_management', href: ROUTES.OWNER_HOME_MANAGEMENT, icon: Wrench },
+  { labelKey: 'sidebar.vendors', href: ROUTES.OWNER_VENDORS, icon: HardHat },
   { labelKey: 'sidebar.documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
@@ -75,9 +77,9 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Portfolio and listings', items: navItems.slice(1, 5) },
-  { label: 'Sales and investment', items: navItems.slice(5, 10) },
-  { label: 'Communication', items: navItems.slice(10, 13) },
-  { label: 'Trust and account', items: navItems.slice(13) },
+  { label: 'Sales and investment', items: navItems.slice(5, 11) },
+  { label: 'Communication', items: navItems.slice(11, 14) },
+  { label: 'Trust and account', items: navItems.slice(14) },
 ];
 
 export const OwnerSidebar = () => {
