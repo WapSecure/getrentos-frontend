@@ -48,3 +48,22 @@ describe('notification routes', () => {
     );
   });
 });
+
+describe('hosting notifications', () => {
+  it('opens the booking a new request is about, for owners and landlords', () => {
+    expect(
+      routeForNotification({ type: 'SHORTLET_BOOKING_REQUEST', bookingId: 'b1' }, 'landlord')
+    ).toBe('/(app)/host/booking/b1');
+    expect(routeForNotification({ type: 'SHORTLET_BOOKING_REQUEST' }, 'owner')).toBe('/(app)/host');
+  });
+
+  it('leaves guests on their own bookings', () => {
+    expect(routeForNotification({ type: 'SHORTLET_BOOKING_CONFIRMED' }, 'renter')).toBe(
+      '/(app)/shortlet-bookings'
+    );
+  });
+
+  it('opens hosting from the web’s shortlet links', () => {
+    expect(routeForActionUrl('/landlord/shortlets')).toBe('/(app)/host');
+  });
+});

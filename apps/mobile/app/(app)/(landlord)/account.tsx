@@ -123,8 +123,20 @@ export default function LandlordAccount() {
         />
         <Divider />
         <AccountRow
-          label="Shortlet stays"
-          description="Browse and manage short stays"
+          label="Home care"
+          description="Work orders, assets, servicing and response times"
+          onPress={() => router.push('/(app)/home-care')}
+        />
+        <Divider />
+        <AccountRow
+          label="Short-stay hosting"
+          description="Nightly stays, bookings and payouts"
+          onPress={() => router.push('/(app)/host')}
+        />
+        <Divider />
+        <AccountRow
+          label="Browse short stays"
+          description="Book a stay as a guest"
           onPress={() => router.push('/(app)/shortlets')}
         />
         <Divider />
