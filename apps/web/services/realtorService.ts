@@ -9,6 +9,11 @@ import type {
   RealtorReview,
   RealtorDocument,
   Commission,
+  RealtorCommissionSummary,
+  RealtorPayout,
+  RealtorPayoutAccount,
+  RealtorPayoutDetail,
+  RealtorPayoutSummary,
   OfferThreadMessage,
 } from '@/types/realtor';
 import type { TrustProfile } from '@/types/trust-score';
@@ -436,13 +441,30 @@ export const realtorService = {
       authFetch<Paginated<Commission>>(`/realtor/commissions${toQuery({ ...params })}`)
     ),
   getCommissionsSummary: () =>
+    safeCall(() => authFetch<RealtorCommissionSummary>('/realtor/commissions/summary')),
+
+  // -------- Payouts --------
+
+  getPayoutAccount: () =>
+    safeCall(() => authFetch<RealtorPayoutAccount | null>('/realtor/commissions/payout-account')),
+  savePayoutAccount: (data: { bankCode: string; accountNumber: string }) =>
     safeCall(() =>
-      authFetch<{
-        totalEarned: number;
-        pending: number;
-        paid: number;
-        dealsClosed: number;
-      }>('/realtor/commissions/summary')
+      authFetch<RealtorPayoutAccount>('/realtor/commissions/payout-account', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    ),
+  getPayoutSummary: () =>
+    safeCall(() => authFetch<RealtorPayoutSummary>('/realtor/commissions/payouts/summary')),
+  listPayouts: (params: RealtorPageParams = {}) =>
+    safeCall(() =>
+      authFetch<Paginated<RealtorPayout>>(`/realtor/commissions/payouts${toQuery({ ...params })}`)
+    ),
+  getPayout: (id: string) =>
+    safeCall(() => authFetch<RealtorPayoutDetail>(`/realtor/commissions/payouts/${id}`)),
+  requestPayout: () =>
+    safeCall(() =>
+      authFetch<RealtorPayout>('/realtor/commissions/payouts/request', { method: 'POST' })
     ),
   listConversations: (params: RealtorConversationsParams = {}) =>
     safeCall(() =>

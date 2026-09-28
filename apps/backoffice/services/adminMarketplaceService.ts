@@ -11,6 +11,9 @@ import type {
   AdminMarketplaceOverview,
   AdminRealtor,
   AdminRealtorDetail,
+  AdminRealtorCommissionPayout,
+  RealtorCommissionRates,
+  RealtorPayoutFilterStatus,
 } from '@/types/marketplace';
 
 export interface ListMarketplaceListingsParams {
@@ -169,6 +172,64 @@ export const adminMarketplaceService = {
       pageSize: params.pageSize,
     });
     return authDownload(`/admin/realtors/export${query}`);
+  },
+
+  // ---------------- Realtor commission payouts ----------------
+
+  /**
+   * Every realtor's payouts. `status` is the stored enum value (uppercase) —
+   * the list response lowercases it, which is why the two differ.
+   */
+  listRealtorPayouts(
+    params: {
+      status?: RealtorPayoutFilterStatus;
+      realtorId?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
+  ): Promise<ApiResponse<Paginated<AdminRealtorCommissionPayout>>> {
+    const query = toQuery({
+      status: params.status,
+      realtorId: params.realtorId,
+      page: params.page,
+      pageSize: params.pageSize,
+    });
+    return safeCall(() =>
+      authFetch<Paginated<AdminRealtorCommissionPayout>>(`/admin/realtors/payouts${query}`)
+    );
+  },
+
+  /**
+   * Sends a failed payout again. This is the only way its money moves: a failed
+   * payout keeps its claim on the commissions, so a fresh withdrawal cannot
+   * touch them.
+   */
+  retryRealtorPayout(id: string) {
+    return safeCall(() =>
+      authFetch<AdminRealtorCommissionPayout>(`/admin/realtors/payouts/${id}/retry`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  /** The split applied to every sale that closes from now on. */
+  getRealtorCommissionRates(): Promise<ApiResponse<RealtorCommissionRates>> {
+    return safeCall(() => authFetch<RealtorCommissionRates>('/admin/realtors/commission-rates'));
+  },
+
+  /**
+   * Changes the split for future sales only. Commissions already earned keep
+   * the rate they were earned at, so this never restates money already owed.
+   */
+  setRealtorCommissionRates(
+    input: RealtorCommissionRates
+  ): Promise<ApiResponse<RealtorCommissionRates>> {
+    return safeCall(() =>
+      authFetch<RealtorCommissionRates>('/admin/realtors/commission-rates', {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
+    );
   },
 
   // ---------------- Agent register ----------------

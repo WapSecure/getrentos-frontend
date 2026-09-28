@@ -11,7 +11,18 @@ export type LeadStage =
   | 'closed_lost';
 export type ViewingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type RealtorOfferStatus = 'submitted' | 'countered' | 'accepted' | 'rejected' | 'closed';
-export type CommissionStatus = 'pending' | 'invoiced' | 'paid';
+
+/**
+ * The ledger's own states. There is no "invoiced": commission becomes real when
+ * the sale's escrow releases, and a sale reversed before any payout claimed it
+ * is voided with a reason rather than quietly disappearing.
+ */
+export type CommissionStatus = 'available' | 'paid' | 'void';
+
+/** Which side of the deal earned the commission. */
+export type CommissionSide = 'listing' | 'buyer';
+
+export type RealtorPayoutStatus = 'pending' | 'success' | 'failed';
 
 export interface RealtorClient {
   id: string;
@@ -89,14 +100,65 @@ export interface OfferThreadMessage {
 
 export interface Commission {
   id: string;
-  listingTitle: string;
+  side: CommissionSide;
+  propertyTitle: string;
   clientName: string;
   dealValue: number;
-  commissionRate: number;
-  commissionAmount: number;
+  /** The rate snapshotted when this was earned — later config changes never restate it. */
+  ratePct: number;
+  amount: number;
   status: CommissionStatus;
-  closedDate: string;
-  paidDate?: string;
+  /** When the sale settled: the moment this became real. */
+  earnedAt: string;
+  paidAt?: string;
+  voidReason?: string;
+}
+
+export interface RealtorCommissionSummary {
+  /** Earned and withdrawable right now. */
+  available: number;
+  /** Commission on deals still under escrow — not owed yet. */
+  pending: number;
+  /** Already settled to the bank. */
+  paid: number;
+  totalEarned: number;
+  dealsClosed: number;
+}
+
+export interface RealtorPayoutSummary extends RealtorCommissionSummary {
+  accountSet: boolean;
+  tier: number;
+  withdrawTierRequired: number;
+  canWithdraw: boolean;
+  /** Set when the tier is held back by something other than missing evidence. */
+  withdrawWithheldReason?: string | null;
+}
+
+export interface RealtorPayoutAccount {
+  id: string;
+  bankCode: string;
+  bankName: string;
+  /** Masked: only the last four digits are ever returned. */
+  accountNumber: string;
+  accountName: string;
+}
+
+export interface RealtorPayout {
+  id: string;
+  realtorId: string;
+  realtorName?: string;
+  amount: number;
+  status: RealtorPayoutStatus;
+  transferRef?: string | null;
+  paidAt?: string | null;
+  failureReason?: string | null;
+  /** How many commission rows this batch settled. */
+  commissionCount: number;
+  createdAt: string;
+}
+
+export interface RealtorPayoutDetail extends RealtorPayout {
+  commissions: Commission[];
 }
 
 export interface RealtorDocument {

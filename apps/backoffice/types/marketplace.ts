@@ -223,6 +223,35 @@ export interface AdminRealtorReviewSummary {
   reviewCount: number;
 }
 
+/** A commission payout on its way to a realtor's bank. */
+export interface AdminRealtorCommissionPayout {
+  id: string;
+  realtorId: string;
+  realtorName?: string;
+  amount: number;
+  /**
+   * Lowercased by the API, unlike the list filter, which takes the stored enum
+   * value. The two deliberately differ because the filter is validated against
+   * the enum while the response is shaped for display.
+   */
+  status: 'pending' | 'success' | 'failed';
+  transferRef?: string | null;
+  paidAt?: string | null;
+  failureReason?: string | null;
+  /** How many commission rows this batch settled. */
+  commissionCount: number;
+  createdAt: string;
+}
+
+/** The status filter, in the form the API validates. */
+export type RealtorPayoutFilterStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
+
+/** The split the platform pays on a sale that closes. */
+export interface RealtorCommissionRates {
+  listingSidePct: number;
+  buyerSidePct: number;
+}
+
 export interface AdminRealtorDetail {
   id: string;
   legalName: string;

@@ -17,7 +17,7 @@ import {
 } from '@getrentos/ui';
 import { Banknote, Wallet } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
@@ -55,7 +55,9 @@ export function ShortletPayoutsDialog({
   });
   const { data: account } = useQuery({
     queryKey: ['shortlets', 'host', 'payout-account'],
-    queryFn: () => unwrap(shortletService.payoutAccount()),
+    // No account yet comes back as 200 with no body, and an undefined query
+    // result makes react-query throw "Query data cannot be undefined".
+    queryFn: () => unwrapOptional(shortletService.payoutAccount(), null),
   });
   const { data: payouts } = useQuery({
     queryKey: shortletKeys.hostPayouts,
