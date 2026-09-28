@@ -29,6 +29,7 @@ const MARKETPLACE_LINKS: NavLink[] = [
   { label: 'Buy', href: '/buy', hint: 'Homes for sale' },
   { label: 'Land', href: ROUTES.LAND_MARKETPLACE, hint: 'Verified land listings' },
   { label: 'Shortlets', href: ROUTES.SHORTLET_MARKETPLACE, hint: 'Short stays' },
+  { label: 'Detty December', href: '/detty-december', hint: 'Peak-season stays, Dec 20 – Jan 3' },
   {
     label: 'Estates',
     href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY,

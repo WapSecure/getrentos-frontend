@@ -35,6 +35,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { GUEST_PROMISE_TEXT } from '@/lib/shortlet/guestPromise';
+import { SupportContact } from '@/components/shared/support/SupportContact';
 import {
   INTERNET_TYPE_LABEL,
   POWER_SOURCE_LABEL,
@@ -655,6 +656,15 @@ export function ShortletListingDetail({
                 {GUEST_PROMISE_TEXT}
               </span>
             </p>
+            {listing.fairPrice && (
+              <p className="mt-3 rounded-md bg-secondary/50 px-3 py-2 text-xs">
+                <span className="font-medium">Fair price.</span> The typical rate for{' '}
+                {listing.fairPrice.bedrooms}-bedroom stays in {listing.fairPrice.city} is{' '}
+                {formatCurrency(listing.fairPrice.typicalNightly)}/night (
+                {listing.fairPrice.comparables} stays on GetRentos). This one is at or below it.
+              </p>
+            )}
+            <SupportContact className="mt-3" context={`Question about ${listing.title}`} />
             {(listing.hostCancellations12m ?? 0) > 0 && (
               <p className="mt-3 flex items-start gap-1.5 rounded-md bg-secondary/50 px-3 py-2 text-xs">
                 <CalendarX className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />

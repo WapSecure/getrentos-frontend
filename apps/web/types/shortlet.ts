@@ -73,6 +73,10 @@ export interface ShortletListing {
   hostCancellations12m?: number;
   /** Newest inspection by an independent, licensed agent; absent when none qualifies. */
   inspection?: ShortletInspectionBadge;
+  /** Search with dates: the all-in price for those dates, or why they can't be booked. */
+  stayQuote?: StayQuoteResult;
+  /** Present when the nightly rate is at or below the typical rate of 5+ comparable stays. */
+  fairPrice?: FairPrice;
   houseRules?: string;
   /** Unset = the host hasn't said. */
   petsAllowed?: boolean;
@@ -571,4 +575,31 @@ export interface GuestSummary {
   cancellations12m: number;
   /** Deposit claims upheld against the guest. */
   damageClaimsUpheld: number;
+}
+
+/** The all-in price for given dates, as the checkout will charge it. */
+export interface StayQuote {
+  nights: number;
+  nightsTotal: number;
+  cleaningFee: number;
+  tax: number;
+  taxName?: string;
+  /** Excludes the refundable deposit. */
+  total: number;
+  perNight: number;
+  discountAmount?: number;
+  deposit?: number;
+}
+
+export interface StayQuoteResult {
+  bookable: boolean;
+  quote?: StayQuote;
+  reason?: string;
+}
+
+export interface FairPrice {
+  typicalNightly: number;
+  comparables: number;
+  city: string;
+  bedrooms: number;
 }

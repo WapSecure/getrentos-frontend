@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
-import { Twitter, Mail, MapPin } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Phone, Twitter } from 'lucide-react';
+import { SUPPORT, whatsappLink } from '@/lib/support';
 import { ROUTES } from '@/lib/constants/auth';
 import { SITE_NAME, SITE_TWITTER_HANDLE } from '@/lib/site';
 
@@ -94,6 +95,33 @@ export const Footer = () => (
                 support@getrentos.com
               </a>
             </li>
+            {SUPPORT.phone && (
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                <a
+                  href={`tel:${SUPPORT.phone.replace(/\s/g, '')}`}
+                  className="transition-colors duration-200 hover:text-foreground"
+                >
+                  {SUPPORT.phone}
+                </a>
+              </li>
+            )}
+            {SUPPORT.whatsapp && (
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
+                <a
+                  href={whatsappLink(SUPPORT.whatsapp)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors duration-200 hover:text-foreground"
+                >
+                  WhatsApp support
+                </a>
+              </li>
+            )}
+            {SUPPORT.hours && (SUPPORT.phone || SUPPORT.whatsapp) && (
+              <li className="pl-7 text-xs text-muted-foreground">{SUPPORT.hours}</li>
+            )}
             <li className="flex items-center gap-3 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4 shrink-0 text-primary" />
               <span>Lagos, Nigeria</span>
