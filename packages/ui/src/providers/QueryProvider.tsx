@@ -70,12 +70,6 @@ export function QueryProvider({ children, loginPath = '/login' }: QueryProviderP
       })
   );
 
-  useEffect(() => {
-    if (!mutationError) return;
-    const timeout = window.setTimeout(() => setMutationError(null), 6_000);
-    return () => window.clearTimeout(timeout);
-  }, [mutationError]);
-
   return (
     <QueryClientProvider client={queryClient}>
       {children}
