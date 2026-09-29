@@ -94,6 +94,28 @@ export interface DeliveryLog {
   createdAt: string;
 }
 
+/**
+ * The gate's answer to a code the household sent its courier.
+ *
+ * There is no reason field, and that is the point: one wording covers a wrong,
+ * expired, spent, withdrawn or another-estate code, so this screen cannot be
+ * used to work out whether a household exists here.
+ */
+export interface DeliveryCodeScreen {
+  matched: boolean;
+  householdId?: string;
+  unitLabel?: string;
+  residentName?: string;
+  courier?: string;
+  description?: string | null;
+  expiresAt?: string;
+  declaredAt?: string;
+  /** What this means, for the guard. */
+  message: string;
+  /** What to do next, for the guard. */
+  instruction: string;
+}
+
 export type VehiclePurpose = 'visitor' | 'resident' | 'delivery' | 'staff' | 'other';
 
 export interface VehicleLog {
@@ -284,10 +306,28 @@ export const gatemanApi = {
       `/estate/${estateId}/deliveries${toQuery({ status, page, pageSize })}`
     ),
 
+  /**
+   * Ask whether a code names a delivery this estate is expecting.
+   *
+   * Writes nothing, so checking a code does not use it up — a guard may check
+   * one, find the van is carrying a different parcel, and check another.
+   */
+  verifyDeliveryCode: (estateId: string, code: string) =>
+    apiFetch<DeliveryCodeScreen>(`/estate/${estateId}/deliveries/verify`, {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
+
   logDelivery: (
     estateId: string,
     data: {
-      householdId: string;
+      householdId?: string;
+      /**
+       * The code the household gave the courier. When present the server derives
+       * the household from it and ignores `householdId`, so a guard holding a
+       * code cannot redirect the parcel to somebody the code does not name.
+       */
+      code?: string;
       courier?: string;
       recipientName?: string;
       gateId?: string;
@@ -295,7 +335,8 @@ export const gatemanApi = {
     }
   ) => {
     const form = new FormData();
-    form.append('householdId', data.householdId);
+    if (data.householdId) form.append('householdId', data.householdId);
+    if (data.code) form.append('code', data.code);
     if (data.courier) form.append('courier', data.courier);
     if (data.recipientName) form.append('recipientName', data.recipientName);
     if (data.gateId) form.append('gateId', data.gateId);

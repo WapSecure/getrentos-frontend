@@ -279,6 +279,7 @@ export const qk = {
     violations: ['resident', 'violations'] as const,
     deliveries: (page = 1, pageSize = 20) =>
       ['resident', 'deliveries', { page, pageSize }] as const,
+    expectedDeliveries: ['resident', 'deliveries', 'expected'] as const,
     committee: ['resident', 'committee'] as const,
     polls: ['resident', 'polls'] as const,
     visitorPasses: ['resident', 'visitor-passes'] as const,

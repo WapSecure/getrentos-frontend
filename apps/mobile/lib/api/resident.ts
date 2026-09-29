@@ -66,6 +66,48 @@ export interface Violation {
 
 export type DeliveryLogStatus = 'received' | 'collected';
 
+/**
+ * A parcel this household has said is coming, and the code that proves it.
+ *
+ * Every label is written server-side and rendered verbatim: the difference
+ * between an expiry and a withdrawal is decided once, in `delivery.util.ts`, so
+ * the household's own screen cannot drift into saying something the guard's
+ * refusal would contradict.
+ */
+export type ExpectedDeliveryStatus = 'AWAITING' | 'RECEIVED' | 'CANCELLED' | 'EXPIRED';
+
+export interface ExpectedDelivery {
+  id: string;
+  courier: string;
+  description?: string | null;
+  status: ExpectedDeliveryStatus;
+  /** 'Waiting for the courier' / 'Handed over at the gate' / … */
+  statusLabel: string;
+  /** Whether the code can still be presented at the gate. */
+  live: boolean;
+  expiresAt: string;
+  /** 'Amazon — a phone case, until Tuesday 15:00' */
+  summary: string;
+  createdAt: string;
+  receivedAt?: string | null;
+  receivedAtGateName?: string | null;
+  deliveryLogId?: string | null;
+}
+
+/**
+ * The declaration's reply, and the only time the code exists outside the app.
+ *
+ * It is stored hashed and cannot be retrieved again, so a household that loses
+ * it declares again — deliberate, because a code anybody can look up later is one
+ * the estate office can read out to a courier who is not carrying anything.
+ */
+export interface IssuedExpectedDelivery extends ExpectedDelivery {
+  /** The six digits to give the courier. Present only in this response. */
+  code: string;
+  /** What to tell the household about it, worded server-side. */
+  guidance: string;
+}
+
 export interface DeliveryLog {
   id: string;
   householdId: string;
@@ -320,6 +362,30 @@ export const residentApi = {
 
   listDeliveries: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<DeliveryLog>>(`/estate/resident/deliveries${toQuery({ page, pageSize })}`),
+
+  /**
+   * Declare a parcel, and get the code that proves it at the gate.
+   *
+   * The reply is the only time the code exists, so the caller must show it
+   * before the response is dropped.
+   */
+  declareExpectedDelivery: (data: { courier: string; description?: string }) =>
+    apiFetch<IssuedExpectedDelivery>('/estate/resident/deliveries/expected', {
+      method: 'POST',
+      body: data,
+    }),
+
+  listExpectedDeliveries: () =>
+    apiFetch<ExpectedDelivery[]>('/estate/resident/deliveries/expected'),
+
+  cancelExpectedDelivery: (expectedDeliveryId: string) =>
+    apiFetch<ExpectedDelivery>(
+      `/estate/resident/deliveries/expected/${expectedDeliveryId}/cancel`,
+      {
+        method: 'PATCH',
+        body: {},
+      }
+    ),
 
   listCommittee: () => apiFetch<CommitteeMember[]>('/estate/resident/committee'),
 
