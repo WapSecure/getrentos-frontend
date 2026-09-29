@@ -54,8 +54,12 @@ export default function EstatePatrolPage() {
    */
   const entitled = !estate?.planTier || tierAtLeast(estate.planTier, 'ENTERPRISE');
 
+  // The key reads `estate?.id ?? ''` rather than `estate!.id`: the hooks run
+  // before the `!estate` guard below, so on the first render the assertion is a
+  // lie and the render throws "Cannot read properties of null (reading 'id')".
+  // `enabled` is what stops the request; the key only has to be stable.
   const reportQuery = useQuery({
-    queryKey: estateKeys.patrolReport(estate!.id),
+    queryKey: estateKeys.patrolReport(estate?.id ?? ''),
     queryFn: () => unwrap(estateService.getPatrolReport(estate!.id, {})),
     enabled: !!estate && entitled,
   });

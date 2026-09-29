@@ -88,7 +88,12 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
 
       {report && (
         <div className="grid gap-3 sm:grid-cols-3">
-          <Stat label="Rounds due" value={report.tally.closed} hint={report.tally.label} />
+          {/*
+           * Every round in the period, open ones included. `tally.closed` is the
+           * DECIDED count, so using it here said "0 rounds due" directly above a
+           * round listed underneath it.
+           */}
+          <Stat label="Rounds due" value={rounds.length} hint={report.tally.label} />
           <Stat label="Walked" value={report.tally.walked} tone="success" />
           <Stat
             label="Not walked"
@@ -202,7 +207,7 @@ const RoundCard = ({ round }: { round: PatrolRound }) => {
         </div>
       </div>
 
-      {round.missing.length > 0 && (
+      {round.status === 'MISSED' && round.missing.length > 0 && (
         <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2">
           <p className="text-sm text-foreground">
             Nobody reached{' '}

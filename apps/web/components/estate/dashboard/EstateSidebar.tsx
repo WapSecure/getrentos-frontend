@@ -111,9 +111,12 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
   { label: 'Residents and access', items: navItems.slice(3, 11) },
-  { label: 'Safety and operations', items: navItems.slice(11, 15) },
-  { label: 'Community', items: navItems.slice(15, 19) },
-  { label: 'Administration', items: navItems.slice(19) },
+  // Boundaries moved by one when Patrols was inserted after Deliveries: the
+  // groups are slices of the list above, so an insert without this puts
+  // Emergency in Community and shifts everything after it.
+  { label: 'Safety and operations', items: navItems.slice(11, 16) },
+  { label: 'Community', items: navItems.slice(16, 20) },
+  { label: 'Administration', items: navItems.slice(20) },
 ];
 
 export const EstateSidebar = () => {
