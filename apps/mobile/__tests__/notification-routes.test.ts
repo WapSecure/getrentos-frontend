@@ -63,6 +63,19 @@ describe('hosting notifications', () => {
     );
   });
 
+  it('opens the exact stay a guest notification is about', () => {
+    expect(
+      routeForNotification({ type: 'SHORTLET_BOOKING_CONFIRMED', bookingId: 'b9' }, 'renter')
+    ).toBe('/(app)/shortlet-stay/b9');
+    expect(
+      routeForNotification({ type: 'SHORTLET_BOOKING_CANCELLED', bookingId: 'b9' }, 'buyer')
+    ).toBe('/(app)/shortlet-stay/b9');
+    // Hosts keep their own booking screen.
+    expect(
+      routeForNotification({ type: 'SHORTLET_BOOKING_CONFIRMED', bookingId: 'b9' }, 'landlord')
+    ).not.toBe('/(app)/shortlet-stay/b9');
+  });
+
   it('opens hosting from the web’s shortlet links', () => {
     expect(routeForActionUrl('/landlord/shortlets')).toBe('/(app)/host');
   });

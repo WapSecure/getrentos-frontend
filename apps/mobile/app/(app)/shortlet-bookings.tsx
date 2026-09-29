@@ -1,280 +1,256 @@
-import { useState } from 'react';
-import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { Image } from 'expo-image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarCheck, ChevronLeft, Heart } from 'lucide-react-native';
+import { useQuery } from '@tanstack/react-query';
 import {
-  Badge,
+  CalendarCheck,
+  ChevronRight,
+  Gavel,
+  Heart,
+  MessageSquare,
+  Star,
+} from 'lucide-react-native';
+import {
   Button,
   Card,
-  Divider,
   EmptyState,
   ErrorState,
+  IconButton,
+  PressableScale,
   Price,
+  SegmentedControl,
   Skeleton,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
+import { StatusPill, Thumb } from '@/components/host/HostUI';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { useMyStays } from '@/components/shortlet/useMyStays';
+import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
 import { qk } from '@/lib/query/keys';
-import {
-  shortletsApi,
-  SHORTLET_BOOKING_STATUS_LABEL,
-  SHORTLET_BOOKING_STATUS_TONE,
-  type ShortletBooking,
-} from '@/lib/api/shortlets';
-import { ReviewStaySheet } from '@/components/shortlet/ReviewStaySheet';
 import { formatDate } from '@/lib/format';
-import { ApiError } from '@/lib/api/client';
+import { isoDay } from '@/lib/hostDates';
+import {
+  guestTotal,
+  guestsLabel,
+  nightsLabel,
+  seasonRange,
+  stayHeadline,
+  stayTab,
+  type StayTab,
+} from '@/lib/stays';
 
-export default function ShortletBookings() {
+const TABS: { value: StayTab; label: string }[] = [
+  { value: 'upcoming', label: 'Upcoming' },
+  { value: 'past', label: 'Past' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
+const EMPTY: Record<StayTab, { title: string; description: string }> = {
+  upcoming: { title: 'No trips booked yet', description: 'When you book a stay, it lives here.' },
+  past: { title: 'No past stays', description: 'Stays you’ve completed will show up here.' },
+  cancelled: { title: 'Nothing cancelled', description: 'Cancelled and declined stays show here.' },
+};
+
+/** Every stay the guest has, split the way trips are remembered. */
+export default function MyStays() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
-  const toast = useToast();
-  const [reviewing, setReviewing] = useState<ShortletBooking | null>(null);
+  const [tab, setTab] = useState<StayTab>('upcoming');
+  const stays = useMyStays();
+  const today = isoDay(new Date());
 
-  const query = useQuery({
-    queryKey: qk.shortlets.bookings(1, 50),
-    queryFn: () => shortletsApi.myBookings(1, 50),
-  });
-  const items = query.data?.items ?? [];
-
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['shortlets', 'bookings'] });
-
-  const payMutation = useMutation({
-    mutationFn: (id: string) => shortletsApi.payBooking(id),
-    onSuccess: (res) => {
-      invalidate();
-      if (res.authorizationUrl) Linking.openURL(res.authorizationUrl);
-      else toast.show('Payment initiated.', 'success');
-    },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not start this payment.', 'error'),
-  });
-
-  const cancelMutation = useMutation({
-    mutationFn: (id: string) => shortletsApi.cancelBooking(id),
-    onSuccess: () => {
-      invalidate();
-      toast.show('Booking cancelled.', 'success');
-    },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not cancel this booking.', 'error'),
-  });
-
-  const confirmCancel = (b: ShortletBooking) => {
-    Alert.alert(
-      'Cancel booking',
-      `Cancel your stay at ${b.propertyTitle}? Your refund follows the ${b.cancellationPolicy.toLowerCase()} cancellation policy.`,
-      [
-        { text: 'Keep booking', style: 'cancel' },
-        {
-          text: 'Cancel booking',
-          style: 'destructive',
-          onPress: () => cancelMutation.mutate(b.id),
-        },
-      ]
-    );
-  };
+  const groups = useMemo(() => {
+    const g: Record<StayTab, ShortletBooking[]> = { upcoming: [], past: [], cancelled: [] };
+    for (const b of stays.data ?? []) g[stayTab(b, today)].push(b);
+    g.upcoming.sort((a, b) => a.checkIn.localeCompare(b.checkIn));
+    return g;
+  }, [stays.data, today]);
+  const items = groups[tab];
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          paddingTop: insets.top + 8,
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.sm,
+          paddingBottom: insets.bottom + spacing['3xl'],
+          gap: spacing.lg,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={stays.isRefetching}
+            onRefresh={() => stays.refetch()}
+            tintColor={colors.mutedForeground}
+          />
+        }
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text variant="title" style={{ flex: 1 }}>
-          My stays
-        </Text>
-        <Pressable
-          onPress={() => router.push('/(app)/shortlet-wishlist')}
-          accessibilityRole="button"
-          accessibilityLabel="Wishlist"
-          hitSlop={10}
-        >
-          <Heart size={21} color={colors.foreground} />
-        </Pressable>
-      </View>
-
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={180} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<CalendarCheck size={34} color={colors.mutedForeground} />}
-          title="No stays booked"
-          description="Bookings you make will appear here."
-          action={
-            <Button
-              label="Browse shortlets"
-              fullWidth={false}
-              onPress={() => router.push('/(app)/shortlets')}
-            />
-          }
-        />
-      ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: ShortletBooking }) => (
-            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Card elevated padding="none" style={{ overflow: 'hidden' }}>
-                <Pressable
-                  onPress={() => router.push(`/(app)/shortlet/${item.listingId}`)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`View ${item.propertyTitle}`}
-                >
-                  {item.coverImageUrl ? (
-                    <Image
-                      source={{ uri: item.coverImageUrl }}
-                      contentFit="cover"
-                      cachePolicy="memory-disk"
-                      recyclingKey={item.id}
-                      transition={200}
-                      accessible={false}
-                      style={{ width: '100%', height: 130 }}
-                    />
-                  ) : null}
-                </Pressable>
-
-                <View style={{ padding: spacing.lg, gap: 4 }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      justifyContent: 'space-between',
-                      gap: spacing.sm,
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {item.propertyTitle}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {formatDate(item.checkIn, 'short')} → {formatDate(item.checkOut, 'short')} ·{' '}
-                        {item.nights} {item.nights === 1 ? 'night' : 'nights'} · {item.guestCount}{' '}
-                        {item.guestCount === 1 ? 'guest' : 'guests'}
-                      </Text>
-                    </View>
-                    <Badge
-                      label={SHORTLET_BOOKING_STATUS_LABEL[item.status]}
-                      tone={SHORTLET_BOOKING_STATUS_TONE[item.status]}
-                    />
-                  </View>
-
-                  <Divider style={{ marginVertical: spacing.sm }} />
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Price amount={item.total} variant="bodyStrong" />
-                    <Text
-                      variant="caption"
-                      color={item.paymentStatus === 'PAID' ? 'success' : 'mutedForeground'}
-                    >
-                      {item.paymentStatus === 'PAID'
-                        ? 'Paid'
-                        : item.paymentStatus === 'REFUNDED'
-                          ? 'Refunded'
-                          : 'Unpaid'}
-                    </Text>
-                  </View>
-
-                  {item.deposit ? (
-                    <Text variant="caption" color="mutedForeground">
-                      Deposit ₦{item.deposit.toLocaleString()} ·{' '}
-                      {item.depositStatus === 'REFUNDED'
-                        ? 'refunded'
-                        : item.depositStatus.toLowerCase()}
-                      {item.depositClaimDeducted
-                        ? ` · ₦${item.depositClaimDeducted.toLocaleString()} deducted`
-                        : ''}
-                    </Text>
-                  ) : null}
-
-                  {item.refundAmount ? (
-                    <Text variant="caption" color="mutedForeground">
-                      Refund ₦{item.refundAmount.toLocaleString()}
-                      {item.refundedAt ? ` on ${formatDate(item.refundedAt, 'short')}` : ''}
-                    </Text>
-                  ) : null}
-
-                  <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
-                    {item.paymentRequired ? (
-                      <Button
-                        label="Pay now"
-                        size="sm"
-                        style={{ flex: 1 }}
-                        loading={payMutation.isPending}
-                        onPress={() => payMutation.mutate(item.id)}
-                      />
-                    ) : null}
-                    {item.status === 'REQUESTED' || item.status === 'CONFIRMED' ? (
-                      <Button
-                        label="Cancel"
-                        variant="outline"
-                        size="sm"
-                        style={{ flex: 1 }}
-                        loading={cancelMutation.isPending}
-                        onPress={() => confirmCancel(item)}
-                      />
-                    ) : null}
-                    {item.status === 'COMPLETED' && !item.reviewed ? (
-                      <Button
-                        label="Leave review"
-                        variant="outline"
-                        size="sm"
-                        style={{ flex: 1 }}
-                        onPress={() => setReviewing(item)}
-                      />
-                    ) : null}
-                  </View>
-                </View>
-              </Card>
+        <DetailHeader
+          eyebrow="Short stays"
+          title="My stays"
+          onBack={() => router.back()}
+          accessory={
+            <View style={{ flexDirection: 'row' }}>
+              <IconButton
+                accessibilityLabel="Messages with hosts"
+                onPress={() => router.push('/(app)/shortlet-messages')}
+                icon={<MessageSquare size={19} color={colors.foreground} />}
+                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+              />
+              <IconButton
+                accessibilityLabel="Disputes and deposit claims"
+                onPress={() => router.push('/(app)/shortlet-disputes')}
+                icon={<Gavel size={19} color={colors.foreground} />}
+                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+              />
+              <IconButton
+                accessibilityLabel="Wishlist"
+                onPress={() => router.push('/(app)/shortlet-wishlist')}
+                icon={<Heart size={19} color={colors.foreground} />}
+                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+              />
             </View>
-          )}
-          contentContainerStyle={{
-            paddingTop: spacing.sm,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
           }
         />
-      )}
 
-      <ReviewStaySheet open={!!reviewing} onClose={() => setReviewing(null)} booking={reviewing} />
+        <SegmentedControl
+          accessibilityLabel="Which stays"
+          options={TABS}
+          value={tab}
+          onChange={setTab}
+        />
+
+        {stays.isError && !stays.data ? (
+          <ErrorState onRetry={() => stays.refetch()} />
+        ) : stays.isPending ? (
+          [0, 1].map((i) => <Skeleton key={i} height={150} radius={radius.lg} />)
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={<CalendarCheck size={34} color={colors.mutedForeground} />}
+            title={EMPTY[tab].title}
+            description={EMPTY[tab].description}
+            action={
+              tab === 'upcoming' ? (
+                <Button
+                  label="Find a stay"
+                  fullWidth={false}
+                  onPress={() => router.push('/(app)/shortlets')}
+                />
+              ) : undefined
+            }
+          />
+        ) : (
+          items.map((b) => <StayRow key={b.id} b={b} today={today} />)
+        )}
+
+        {tab === 'past' ? <HostsOnYou /> : null}
+      </ScrollView>
     </View>
+  );
+}
+
+/** What hosts have said about this guest — the record hosts see when you book. */
+function HostsOnYou() {
+  const { colors, spacing } = useTheme();
+  const reviews = useQuery({
+    queryKey: qk.shortlets.reviewsOfMe,
+    queryFn: () => shortletsApi.reviewsOfMe(),
+  });
+  const items = reviews.data?.items ?? [];
+  if (!items.length) return null;
+  const avg = items.reduce((t, r) => t + r.rating, 0) / items.length;
+  return (
+    <View style={{ gap: spacing.md, marginTop: spacing.lg }}>
+      <View style={{ gap: 2 }}>
+        <Text variant="heading" accessibilityRole="header">
+          What hosts say about you
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <Star size={14} color={colors.foreground} fill={colors.foreground} />
+          <Text variant="callout" color="mutedForeground">
+            {avg.toFixed(1)} from {items.length} {items.length === 1 ? 'host' : 'hosts'} · hosts see
+            this when you book
+          </Text>
+        </View>
+      </View>
+      {items.slice(0, 10).map((r) => (
+        <Card key={r.id} elevated style={{ gap: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
+              {r.hostName}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 1 }}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star
+                  key={n}
+                  size={12}
+                  color={colors.foreground}
+                  fill={n <= r.rating ? colors.foreground : 'transparent'}
+                />
+              ))}
+            </View>
+          </View>
+          <Text variant="caption" color="mutedForeground">
+            {r.listingTitle ? `${r.listingTitle} · ` : ''}
+            {formatDate(r.createdAt, 'short')}
+          </Text>
+          {r.comment ? (
+            <Text variant="callout" color="mutedForeground">
+              {r.comment}
+            </Text>
+          ) : null}
+        </Card>
+      ))}
+    </View>
+  );
+}
+
+function StayRow({ b, today }: { b: ShortletBooking; today: string }) {
+  const { colors, spacing } = useTheme();
+  const h = stayHeadline(b, today);
+  return (
+    <PressableScale
+      onPress={() => router.push({ pathname: '/(app)/shortlet-stay/[id]', params: { id: b.id } })}
+      activeScale={0.985}
+      accessibilityRole="button"
+      accessibilityLabel={`${b.propertyTitle}, ${seasonRange(b.checkIn, b.checkOut)}, ${h.pill}. ${h.title}`}
+    >
+      <Card elevated style={{ gap: spacing.md }}>
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <Thumb uri={b.coverImageUrl} size={72} />
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {b.propertyTitle}
+            </Text>
+            <Text variant="callout" color="mutedForeground" numberOfLines={1}>
+              {b.city} · {seasonRange(b.checkIn, b.checkOut)}
+            </Text>
+            <Text variant="caption" color="mutedForeground">
+              {nightsLabel(b.nights)} · {guestsLabel(b.guestCount)}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.mutedForeground} style={{ alignSelf: 'center' }} />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <StatusPill label={h.pill} tone={h.tone} />
+          <View style={{ flex: 1 }} />
+          <Price amount={guestTotal(b)} variant="bodyStrong" />
+        </View>
+        {h.title ? (
+          <Text
+            variant="callout"
+            style={{
+              color:
+                h.action === 'pay' || h.action === 'report'
+                  ? colors.warning
+                  : colors.mutedForeground,
+            }}
+          >
+            {h.title}
+          </Text>
+        ) : null}
+      </Card>
+    </PressableScale>
   );
 }

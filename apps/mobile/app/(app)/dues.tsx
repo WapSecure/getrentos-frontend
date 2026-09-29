@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Receipt, Repeat } from 'lucide-react-native';
+import { ReceiptText, Repeat } from 'lucide-react-native';
 import {
   Badge,
   type BadgeTone,
@@ -92,7 +92,7 @@ export default function ResidentDues() {
           ))
         ) : (
           <EmptyState
-            icon={<Receipt size={34} color={colors.mutedForeground} />}
+            icon={<ReceiptText size={34} color={colors.mutedForeground} />}
             title="No dues yet"
             description="Your estate manager hasn't charged any dues to your household."
           />

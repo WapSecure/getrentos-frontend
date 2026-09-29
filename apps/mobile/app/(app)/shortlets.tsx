@@ -1,281 +1,298 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
-import { Image } from 'expo-image';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FlashList } from '@shopify/flash-list';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  BedDouble,
+  ArrowRight,
+  CalendarDays,
   CalendarCheck,
   ChevronLeft,
   Heart,
-  ImageOff,
+  MessageSquare,
   Search,
-  Star,
-  Zap,
+  SlidersHorizontal,
+  Sparkles,
+  Users,
 } from 'lucide-react-native';
+import { Chip, IconButton, Text, TextField, useTheme } from '@getrentos/ui-native';
+import type { ShortletFilters } from '@/lib/api/shortlets';
+import { guestsLabel, isDettySeason, seasonRange } from '@/lib/stays';
+import { haptics } from '@/lib/haptics';
+import { StayResults } from '@/components/shortlet/StayResults';
+import { StayDatesSheet, type StayDates } from '@/components/shortlet/StayDatesSheet';
+import { GuestsSheet } from '@/components/shortlet/GuestsSheet';
 import {
-  Card,
-  EmptyState,
-  ErrorState,
-  Price,
-  Skeleton,
-  Text,
-  TextField,
-  useTheme,
-} from '@getrentos/ui-native';
-import { qk } from '@/lib/query/keys';
-import { shortletsApi, type ShortletFilters, type ShortletListing } from '@/lib/api/shortlets';
+  QUICK_TOGGLES,
+  StayFiltersSheet,
+  refinementCount,
+  type StayRefinements,
+} from '@/components/shortlet/StayFiltersSheet';
 
-const PAGE_SIZE = 20;
-
+/** Short stays: where, when, who — then every result priced for exactly that. */
 export default function Shortlets() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
+  const params = useLocalSearchParams<{ checkIn?: string; checkOut?: string; guests?: string }>();
+
   const [searchText, setSearchText] = useState('');
-  const [filters, setFilters] = useState<ShortletFilters>({});
+  const [search, setSearch] = useState<string | undefined>();
+  const [dates, setDates] = useState<StayDates | null>(
+    params.checkIn && params.checkOut
+      ? { checkIn: params.checkIn, checkOut: params.checkOut }
+      : null
+  );
+  const [guests, setGuests] = useState<number | undefined>(
+    params.guests ? Number(params.guests) || undefined : undefined
+  );
+  const [refine, setRefine] = useState<StayRefinements>({});
+  const [sheet, setSheet] = useState<'dates' | 'guests' | 'filters' | null>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      const next = searchText.trim();
-      setFilters((f) =>
-        f.search === (next || undefined) ? f : { ...f, search: next || undefined }
-      );
-    }, 350);
+    const t = setTimeout(() => setSearch(searchText.trim() || undefined), 350);
     return () => clearTimeout(t);
   }, [searchText]);
 
-  const query = useInfiniteQuery({
-    queryKey: qk.shortlets.list({ ...filters }),
-    queryFn: ({ pageParam }) => shortletsApi.list(filters, pageParam, PAGE_SIZE),
-    initialPageParam: 1,
-    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
-  });
+  const filters = useMemo<ShortletFilters>(
+    () => ({ ...refine, search, guests, checkIn: dates?.checkIn, checkOut: dates?.checkOut }),
+    [refine, search, guests, dates]
+  );
+  const activeCount = refinementCount(refine);
 
-  const wishlistQuery = useQuery({
-    queryKey: qk.shortlets.wishlistIds,
-    queryFn: shortletsApi.wishlistIds,
-  });
-  const wishlisted = new Set(wishlistQuery.data ?? []);
+  const header = (
+    <View style={{ paddingTop: spacing.sm, gap: spacing.lg, paddingBottom: spacing.lg }}>
+      {/* Where · when · who */}
+      <View
+        style={{
+          marginHorizontal: spacing.xl,
+          borderRadius: radius.xl,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.card,
+          overflow: 'hidden',
+        }}
+      >
+        <View style={{ padding: spacing.sm }}>
+          <TextField
+            placeholder="Search area, city or stay"
+            accessibilityLabel="Search stays"
+            leftIcon={<Search size={18} color={colors.mutedForeground} />}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: colors.border }}>
+          <SearchCell
+            icon={<CalendarDays size={17} color={colors.foreground} />}
+            label="When"
+            value={dates ? seasonRange(dates.checkIn, dates.checkOut) : 'Add dates'}
+            placeholder={!dates}
+            onPress={() => setSheet('dates')}
+          />
+          <View style={{ width: 1, backgroundColor: colors.border }} />
+          <SearchCell
+            icon={<Users size={17} color={colors.foreground} />}
+            label="Who"
+            value={guests ? guestsLabel(guests) : 'Add guests'}
+            placeholder={!guests}
+            onPress={() => setSheet('guests')}
+          />
+        </View>
+      </View>
 
-  const wishlistMutation = useMutation({
-    mutationFn: ({ id, next }: { id: string; next: boolean }) =>
-      next ? shortletsApi.addToWishlist(id) : shortletsApi.removeFromWishlist(id),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlistIds });
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlist });
-    },
-  });
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}
+      >
+        <Chip
+          label="Filters"
+          leadingIcon={<SlidersHorizontal size={14} color={colors.foreground} />}
+          count={activeCount || undefined}
+          selected={activeCount > 0}
+          onPress={() => setSheet('filters')}
+        />
+        {QUICK_TOGGLES.map((t) => (
+          <Chip
+            key={t.key}
+            label={t.label}
+            selected={!!refine[t.key]}
+            onPress={() => setRefine((r) => ({ ...r, [t.key]: !r[t.key] || undefined }))}
+          />
+        ))}
+      </ScrollView>
 
-  const items = query.data?.pages.flatMap((p) => p.items) ?? [];
-  const total = query.data?.pages[0]?.total ?? 0;
+      {isDettySeason() && !dates ? <DettyBanner /> : null}
+    </View>
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ paddingHorizontal: spacing.xl, paddingTop: insets.top + 8, gap: spacing.sm }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Pressable
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel="Back"
-            hitSlop={10}
-          >
-            <ChevronLeft size={24} color={colors.foreground} />
-          </Pressable>
-          <Text variant="title" style={{ flex: 1 }}>
-            Shortlets
-          </Text>
-          <Pressable
-            onPress={() => router.push('/(app)/shortlet-bookings')}
-            accessibilityRole="button"
-            accessibilityLabel="My bookings"
-            hitSlop={10}
-          >
-            <CalendarCheck size={21} color={colors.foreground} />
-          </Pressable>
-        </View>
-
-        <TextField
-          placeholder="Search city or stay"
-          leftIcon={<Search size={18} color={colors.mutedForeground} />}
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={searchText}
-          onChangeText={setSearchText}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.xs,
+          paddingTop: insets.top + spacing.xs,
+          paddingHorizontal: spacing.md,
+          paddingBottom: spacing.xs,
+        }}
+      >
+        <IconButton
+          accessibilityLabel="Go back"
+          onPress={() => router.back()}
+          icon={<ChevronLeft size={22} color={colors.foreground} />}
+          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+        />
+        <Text variant="title" style={{ flex: 1 }} accessibilityRole="header">
+          Stays
+        </Text>
+        <IconButton
+          accessibilityLabel="Messages with hosts"
+          onPress={() => router.push('/(app)/shortlet-messages')}
+          icon={<MessageSquare size={20} color={colors.foreground} />}
+          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+        />
+        <IconButton
+          accessibilityLabel="Wishlist"
+          onPress={() => router.push('/(app)/shortlet-wishlist')}
+          icon={<Heart size={20} color={colors.foreground} />}
+          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+        />
+        <IconButton
+          accessibilityLabel="My stays"
+          onPress={() => router.push('/(app)/shortlet-bookings')}
+          icon={<CalendarCheck size={20} color={colors.foreground} />}
+          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
         />
       </View>
 
-      {query.isError && items.length === 0 ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={230} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<BedDouble size={34} color={colors.mutedForeground} />}
-          title="No stays found"
-          description="Try a different search."
-        />
-      ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: ShortletListing }) => {
-            const saved = wishlisted.has(item.id);
-            return (
-              <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-                <Pressable
-                  onPress={() => router.push(`/(app)/shortlet/${item.id}`)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`View ${item.title}`}
-                >
-                  <Card elevated padding="none" style={{ overflow: 'hidden' }}>
-                    <View>
-                      {item.coverImageUrl ? (
-                        <Image
-                          source={{ uri: item.coverImageUrl }}
-                          contentFit="cover"
-                          cachePolicy="memory-disk"
-                          recyclingKey={item.id}
-                          transition={200}
-                          accessible={false}
-                          style={{ width: '100%', height: 170 }}
-                        />
-                      ) : (
-                        <View
-                          style={{
-                            width: '100%',
-                            height: 170,
-                            backgroundColor: colors.secondary,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <ImageOff size={22} color={colors.mutedForeground} />
-                        </View>
-                      )}
-                      <Pressable
-                        onPress={(event) => {
-                          event.stopPropagation();
-                          wishlistMutation.mutate({ id: item.id, next: !saved });
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={saved ? 'Remove from wishlist' : 'Save to wishlist'}
-                        hitSlop={8}
-                        style={{
-                          position: 'absolute',
-                          top: spacing.md,
-                          right: spacing.md,
-                          width: 44,
-                          height: 44,
-                          borderRadius: 22,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: 'rgba(0,0,0,0.35)',
-                        }}
-                      >
-                        <Heart
-                          size={19}
-                          color={colors.primaryForeground}
-                          fill={saved ? colors.primaryForeground : 'transparent'}
-                        />
-                      </Pressable>
-                    </View>
+      <StayResults filters={filters} header={header} />
 
-                    <View style={{ padding: spacing.lg, gap: 3 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-                        <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
-                          {item.title}
-                        </Text>
-                        {item.reviewCount > 0 && item.ratingAverage ? (
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                            <Star size={12} color={colors.warning} fill={colors.warning} />
-                            <Text variant="caption">{item.ratingAverage.toFixed(1)}</Text>
-                          </View>
-                        ) : null}
-                      </View>
-                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                        {item.address}, {item.city}
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'baseline',
-                          gap: 4,
-                          marginTop: 2,
-                        }}
-                      >
-                        <Price amount={item.nightlyRate} variant="bodyStrong" />
-                        <Text variant="caption" color="mutedForeground">
-                          / night
-                        </Text>
-                      </View>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: spacing.md,
-                          marginTop: 2,
-                        }}
-                      >
-                        <Text variant="caption" color="mutedForeground">
-                          Up to {item.maxGuests} {item.maxGuests === 1 ? 'guest' : 'guests'}
-                        </Text>
-                        {item.instantBooking ? (
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                            <Zap size={12} color={colors.primary} />
-                            <Text variant="caption" color="primary">
-                              Instant book
-                            </Text>
-                          </View>
-                        ) : null}
-                      </View>
-                    </View>
-                  </Card>
-                </Pressable>
-              </View>
-            );
-          }}
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
-          }}
-          onEndReachedThreshold={0.6}
-          ListHeaderComponent={
-            <Text
-              variant="caption"
-              color="mutedForeground"
-              style={{
-                paddingHorizontal: spacing.xl,
-                paddingTop: spacing.sm,
-                paddingBottom: spacing.md,
-              }}
-            >
-              {total} {total === 1 ? 'stay' : 'stays'}
-            </Text>
-          }
-          ListFooterComponent={
-            query.isFetchingNextPage ? (
-              <View style={{ paddingVertical: spacing.xl }}>
-                <ActivityIndicator color={colors.mutedForeground} />
-              </View>
-            ) : (
-              <View style={{ height: insets.bottom + spacing['3xl'] }} />
-            )
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching && !query.isFetchingNextPage}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        />
-      )}
+      <StayDatesSheet
+        open={sheet === 'dates'}
+        onClose={() => setSheet(null)}
+        value={dates}
+        onChange={setDates}
+      />
+      <GuestsSheet
+        open={sheet === 'guests'}
+        onClose={() => setSheet(null)}
+        value={guests}
+        onChange={setGuests}
+      />
+      <StayFiltersSheet
+        open={sheet === 'filters'}
+        onClose={() => setSheet(null)}
+        value={refine}
+        onApply={setRefine}
+      />
     </View>
+  );
+}
+
+function SearchCell({
+  icon,
+  label,
+  value,
+  placeholder,
+  onPress,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  placeholder: boolean;
+  onPress: () => void;
+}) {
+  const { spacing } = useTheme();
+  return (
+    <Pressable
+      onPress={() => {
+        void haptics.tap();
+        onPress();
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}: ${value}`}
+      style={({ pressed }) => ({
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      {icon}
+      <View style={{ flex: 1 }}>
+        <Text variant="label" color="mutedForeground">
+          {label.toUpperCase()}
+        </Text>
+        <Text
+          variant="bodyStrong"
+          numberOfLines={1}
+          color={placeholder ? 'mutedForeground' : 'foreground'}
+        >
+          {value}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+/** Fixed night-sky colours: the banner looks the same in light and dark mode. */
+const NIGHT = { bg: '#121823', border: 'rgba(255,255,255,0.08)', amber: '#ffb454' };
+
+/** The season's front door: dark, quiet, one line of promise. */
+function DettyBanner() {
+  const { spacing, radius } = useTheme();
+  return (
+    <Pressable
+      onPress={() => {
+        void haptics.tap();
+        router.push('/(app)/detty-december');
+      }}
+      accessibilityRole="button"
+      accessibilityLabel="Detty December: peak-season stays you can trust, 20 December to 3 January"
+      style={({ pressed }) => ({
+        marginHorizontal: spacing.xl,
+        borderRadius: radius.xl,
+        padding: spacing.lg,
+        backgroundColor: NIGHT.bg,
+        borderWidth: 1,
+        borderColor: NIGHT.border,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+        opacity: pressed ? 0.92 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(255,180,84,0.18)',
+        }}
+      >
+        <Sparkles size={20} color={NIGHT.amber} />
+      </View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text variant="label" style={{ color: NIGHT.amber }}>
+          DETTY DECEMBER
+        </Text>
+        <Text variant="bodyStrong" style={{ color: '#ffffff' }}>
+          Book a stay you can trust
+        </Text>
+        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.72)' }}>
+          20 Dec – 3 Jan · money held until you arrive
+        </Text>
+      </View>
+      <ArrowRight size={18} color="#ffffff" />
+    </Pressable>
   );
 }

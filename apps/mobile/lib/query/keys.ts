@@ -166,6 +166,13 @@ export const qk = {
     bookings: (page = 1, pageSize = 20) => ['shortlets', 'bookings', { page, pageSize }] as const,
     wishlist: ['shortlets', 'wishlist'] as const,
     wishlistIds: ['shortlets', 'wishlist', 'ids'] as const,
+    /** Every booking the guest has (the stay screens read one from here). */
+    myStays: ['shortlets', 'bookings', 'all'] as const,
+    conversations: ['shortlets', 'conversations'] as const,
+    disputes: ['shortlets', 'disputes'] as const,
+    disputeMessages: (id: string) => ['shortlets', 'disputes', id, 'messages'] as const,
+    depositClaims: ['shortlets', 'deposit-claims'] as const,
+    reviewsOfMe: ['shortlets', 'reviews-of-me'] as const,
   },
   owner: {
     dashboard: ['owner', 'dashboard'] as const,

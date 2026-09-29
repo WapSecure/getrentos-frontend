@@ -86,6 +86,9 @@ const HOST_PORTALS = new Set<Portal>(['owner', 'landlord']);
  */
 const HOST_ONLY_TYPES = new Set(['SHORTLET_BOOKING_REQUEST', 'SHORTLET_REVIEW_RECEIVED']);
 
+/** Portals that book short stays as guests. */
+const GUEST_PORTALS = new Set<Portal>(['renter', 'buyer']);
+
 /** Portals whose tab bar has a Messages tab. */
 const PORTALS_WITH_INBOX = new Set<Portal>(['renter', 'buyer', 'landlord', 'agent', 'owner']);
 
@@ -110,6 +113,16 @@ export function routeForNotification(
   }: { actionUrl?: string | null; type?: string | null; bookingId?: string | null },
   portal: Portal | null
 ): string {
+  // A guest's stay notification opens that stay: status, money and what to do next.
+  if (
+    bookingId &&
+    type?.startsWith('SHORTLET_') &&
+    !HOST_ONLY_TYPES.has(type) &&
+    portal &&
+    GUEST_PORTALS.has(portal)
+  ) {
+    return `/(app)/shortlet-stay/${bookingId}`;
+  }
   const direct = routeForActionUrl(actionUrl);
   if (direct) return direct;
   // A host is told about a request on their listing: open that booking.
