@@ -2317,6 +2317,7 @@ function FeeConfigForm({
   const [introLastDay, setIntroLastDay] = useState(lastLaunchDay(feeConfig.introEndsAt));
   const [taxName, setTaxName] = useState(feeConfig.taxName ?? '');
   const [taxPct, setTaxPct] = useState(String(feeConfig.taxPct));
+  const [depositWindow, setDepositWindow] = useState(String(feeConfig.depositClaimWindowHours));
   const [pendingInput, setPendingInput] = useState<AdminShortletFeeConfigInput | null>(null);
 
   const commissionPct = Math.min(100, Math.max(0, Number(commission) || 0));
@@ -2336,12 +2337,18 @@ function FeeConfigForm({
     taxPct: Math.min(100, Math.max(0, Number(taxPct) || 0)),
     introCommissionPct: introValue,
     introEndsAt: hasIntro && introLastDay ? launchEndsAfter(introLastDay) : null,
+    depositClaimWindowHours: Math.max(
+      1,
+      // Mirrors the API's 1..30-day rule so the form can't submit something it will reject.
+      Math.min(720, Number(depositWindow) || feeConfig.depositClaimWindowHours)
+    ),
   };
   const isDirty =
     nextInput.commissionPct !== feeConfig.commissionPct ||
     (nextInput.taxName ?? '') !== (feeConfig.taxName ?? '') ||
     nextInput.taxPct !== feeConfig.taxPct ||
     nextInput.introCommissionPct !== (feeConfig.introCommissionPct ?? null) ||
+    nextInput.depositClaimWindowHours !== feeConfig.depositClaimWindowHours ||
     (hasIntro ? introLastDay : '') !== lastLaunchDay(feeConfig.introEndsAt);
 
   const submit = () => {
@@ -2420,6 +2427,18 @@ function FeeConfigForm({
               placeholder="e.g. 7"
             />
           </Field>
+          <Field
+            label="Deposit claim window (hours)"
+            hint="After check-out, how long a host has to claim a held deposit before it goes back to the guest. A listing can override this."
+          >
+            <NumberInput
+              min={1}
+              max={720}
+              value={depositWindow}
+              onValueChange={setDepositWindow}
+              placeholder="e.g. 72"
+            />
+          </Field>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border p-4">
           <p className="text-xs text-muted-foreground">
@@ -2447,7 +2466,9 @@ function FeeConfigForm({
                 pendingInput.introCommissionPct != null
                   ? `${pendingInput.introCommissionPct}% commission until ${formatDate(introLastDay, 'short')}, then ${pendingInput.commissionPct}%`
                   : `${pendingInput.commissionPct}% commission`
-              } and ${pendingInput.taxPct}% ${pendingInput.taxName ?? 'tax'}. Existing bookings keep their original fee snapshot.`
+              } and ${pendingInput.taxPct}% ${pendingInput.taxName ?? 'tax'}. Hosts will have ${
+                pendingInput.depositClaimWindowHours
+              } hours after check-out to claim a held deposit, unless a listing overrides it. Existing bookings keep their original fee snapshot.`
             : ''
         }
         confirmLabel="Apply fee changes"

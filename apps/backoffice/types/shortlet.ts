@@ -231,6 +231,8 @@ export interface AdminShortletFeeConfig {
   currentCommissionPct: number;
   taxName?: string;
   taxPct: number;
+  /** Platform default hours after check-out that a held deposit stays claimable. */
+  depositClaimWindowHours: number;
   updatedAt: string;
 }
 
@@ -240,6 +242,7 @@ export interface AdminShortletFeeConfigInput {
   taxPct: number;
   introCommissionPct: number | null;
   introEndsAt: string | null;
+  depositClaimWindowHours: number;
 }
 
 export type AdminHostPenaltyStatus = 'OUTSTANDING' | 'SETTLED' | 'WAIVED';

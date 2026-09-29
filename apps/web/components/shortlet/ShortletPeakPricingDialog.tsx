@@ -55,6 +55,10 @@ export function ShortletPeakPricingDialog({
   const [lastMinuteDays, setLastMinuteDays] = useState(String(listing.lastMinuteDays || 3));
   const [notice, setNotice] = useState(String(listing.advanceNoticeDays || ''));
   const [prep, setPrep] = useState(String(listing.prepDays || ''));
+  // Empty = use the platform default set by GetRentos.
+  const [claimWindow, setClaimWindow] = useState(
+    listing.depositClaimWindowHours != null ? String(listing.depositClaimWindowHours) : ''
+  );
 
   const [seasonName, setSeasonName] = useState('');
   const [seasonStart, setSeasonStart] = useState('');
@@ -83,6 +87,8 @@ export function ShortletPeakPricingDialog({
           lastMinuteDays: Math.max(1, toNum(lastMinuteDays)),
           advanceNoticeDays: toNum(notice),
           prepDays: toNum(prep),
+          // null clears the override, so the platform default applies again.
+          depositClaimWindowHours: claimWindow.trim() === '' ? null : toNum(claimWindow),
         })
       ),
     onSuccess: () => {
@@ -297,6 +303,20 @@ export function ShortletPeakPricingDialog({
               <Field label="Prep time (days)" hint="Kept free before and after each stay">
                 <NumberInput min={0} max={7} value={prep} onValueChange={setPrep} />
               </Field>
+              {listing.deposit ? (
+                <Field
+                  label="Deposit claim window (hours)"
+                  hint="After check-out, how long you have to claim the security deposit for damage. Blank uses the GetRentos default."
+                >
+                  <NumberInput
+                    min={1}
+                    max={720}
+                    value={claimWindow}
+                    onValueChange={setClaimWindow}
+                    placeholder="GetRentos default"
+                  />
+                </Field>
+              ) : null}
             </div>
             <Button
               className="w-full"
