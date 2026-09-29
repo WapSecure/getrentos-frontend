@@ -174,6 +174,10 @@ export interface ShortletDepositClaim {
   listingTitle?: string;
   claimedBy: string;
   guestName: string;
+  /** First night of the stay the claim is against. */
+  checkIn?: string;
+  /** Checkout of the stay the claim is against. */
+  checkOut?: string;
   amount: number;
   reason: string;
   evidence: string[];

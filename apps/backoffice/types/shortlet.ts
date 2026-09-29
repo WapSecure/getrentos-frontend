@@ -202,6 +202,10 @@ export interface AdminShortletDepositClaim {
   listingTitle?: string;
   claimedBy: string;
   guestName: string;
+  /** First night of the stay the claim is against. */
+  checkIn?: string;
+  /** Checkout of the stay the claim is against — a claim can only be filed after this. */
+  checkOut?: string;
   amount: number;
   reason: string;
   evidence: string[];

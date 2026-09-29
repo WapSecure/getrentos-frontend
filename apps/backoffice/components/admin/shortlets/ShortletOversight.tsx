@@ -2172,6 +2172,13 @@ function AdjudicateClaimModal({
               {claim.listingTitle ?? 'this stay'} (guest: {claim.guestName}). Choosing a deduction
               refunds the guest the remainder of their deposit.
             </DialogDescription>
+            {claim.checkOut && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Stay {formatDate(claim.checkIn ?? claim.checkOut, 'short')} →{' '}
+                {formatDate(claim.checkOut, 'short')} · filed {formatDate(claim.createdAt, 'short')}
+                . A claim can only be filed after checkout.
+              </p>
+            )}
           </div>
           <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
             <div className="rounded-lg border border-border bg-secondary/40 p-3 text-sm">
