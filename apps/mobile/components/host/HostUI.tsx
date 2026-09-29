@@ -2,7 +2,15 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
-import { BadgeCheck, ChevronRight, Home, Minus, Plus, Receipt, Star } from 'lucide-react-native';
+import {
+  BadgeCheck,
+  ChevronRight,
+  Home,
+  Minus,
+  Plus,
+  ReceiptText,
+  Star,
+} from 'lucide-react-native';
 import { Card, Price, Text, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';
@@ -369,7 +377,7 @@ export function HostFeeNote() {
   if (!fees.data) return null;
   return (
     <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-      <Receipt size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+      <ReceiptText size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
       <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
         {feeNote(fees.data)}
       </Text>

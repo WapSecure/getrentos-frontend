@@ -35,6 +35,13 @@ export default function AppLayout() {
       <Stack.Screen name="shortlet/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="shortlet-bookings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="shortlet-wishlist" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="shortlet-stay/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="shortlet-report/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="shortlet-messages" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="shortlet-conversation/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="shortlet-disputes" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="shortlet-dispute/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="detty-december" options={DETAIL_OPTIONS} />
       <Stack.Screen name="(buyer)" />
       <Stack.Screen name="buyer-listing/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="buyer-offer/[id]" options={DETAIL_OPTIONS} />
