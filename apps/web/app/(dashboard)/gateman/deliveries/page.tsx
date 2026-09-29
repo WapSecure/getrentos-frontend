@@ -135,6 +135,7 @@ export default function GatemanDeliveriesPage() {
 
       <LogDeliveryModal
         isOpen={isModalOpen}
+        estateId={estate.id}
         households={households}
         householdTotal={householdsTotal}
         householdPage={householdPage}

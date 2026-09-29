@@ -6,6 +6,7 @@ import { Badge, EmptyState } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
+import { ExpectedDeliveriesPanel } from '@/components/estate/deliveries/ExpectedDeliveriesPanel';
 import type { DeliveryLog } from '@/types/estate';
 
 const statusVariant: Record<DeliveryLog['status'], 'warning' | 'success'> = {
@@ -41,6 +42,12 @@ export default function ResidentDeliveriesPage() {
           {data?.total ?? 0} deliveries for your household
         </p>
       </div>
+
+      <div className="mb-8">
+        <ExpectedDeliveriesPanel />
+      </div>
+
+      <h2 className="mb-3 text-sm font-semibold text-foreground">At the gate</h2>
 
       {isLoading ? (
         <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />

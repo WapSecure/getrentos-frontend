@@ -5,6 +5,8 @@ import type {
   DeliveryLog,
   DirectoryEntry,
   Due,
+  ExpectedDelivery,
+  IssuedExpectedDelivery,
   IssuedVisitorPass,
   MaintenanceTicket,
   Poll,
@@ -118,6 +120,42 @@ export const estateResidentService = {
     query: PageQuery & { status?: string } = {}
   ): Promise<ApiResponse<Paginated<DeliveryLog>>> {
     return safeCall(() => authFetch(`/estate/resident/deliveries${toQuery(query)}`));
+  },
+
+  /**
+   * Declare a parcel, and get the code that proves it at the gate.
+   *
+   * The reply is the only time the code exists — it is stored hashed and there is
+   * no endpoint that will show it again, so the caller must present it before the
+   * response is dropped.
+   */
+  async declareExpectedDelivery(data: {
+    courier: string;
+    description?: string;
+    expiresAt?: string;
+  }): Promise<ApiResponse<IssuedExpectedDelivery>> {
+    return safeCall(() =>
+      authFetch('/estate/resident/deliveries/expected', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async listMyExpectedDeliveries(): Promise<ApiResponse<ExpectedDelivery[]>> {
+    return safeCall(() => authFetch('/estate/resident/deliveries/expected'));
+  },
+
+  async cancelMyExpectedDelivery(
+    expectedDeliveryId: string,
+    reason?: string
+  ): Promise<ApiResponse<ExpectedDelivery>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/deliveries/expected/${expectedDeliveryId}/cancel`, {
+        method: 'PATCH',
+        body: JSON.stringify(reason ? { reason } : {}),
+      })
+    );
   },
 
   async listMyVisitorPasses(

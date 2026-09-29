@@ -20,6 +20,7 @@ import type {
   VehicleLogPurpose,
   DeliveryLog,
   DeliveryLogStatus,
+  DeliveryCodeScreen,
   Gate,
   WatchlistEntry,
   WatchlistSeverity,
@@ -494,7 +495,13 @@ export const estateService = {
   async logDelivery(
     estateId: string,
     data: {
-      householdId: string;
+      householdId?: string;
+      /**
+       * The code the household gave the courier. When present the server derives
+       * the household from it and ignores `householdId`, so a guard holding a code
+       * cannot redirect the parcel to somebody the code does not name.
+       */
+      code?: string;
       courier?: string;
       recipientName?: string;
       gateId?: string;
@@ -502,13 +509,33 @@ export const estateService = {
     }
   ): Promise<ApiResponse<DeliveryLog>> {
     const formData = new FormData();
-    formData.append('householdId', data.householdId);
+    if (data.householdId) formData.append('householdId', data.householdId);
+    if (data.code) formData.append('code', data.code);
     if (data.courier) formData.append('courier', data.courier);
     if (data.recipientName) formData.append('recipientName', data.recipientName);
     if (data.gateId) formData.append('gateId', data.gateId);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/deliveries`, { method: 'POST', body: formData })
+    );
+  },
+
+  /**
+   * Ask whether a code names a delivery this estate is expecting, BEFORE the
+   * parcel is taken in.
+   *
+   * Writes nothing, so a code is not spent by being checked — a guard may check
+   * one code, find the van is carrying a different parcel, and check another.
+   */
+  async verifyDeliveryCode(
+    estateId: string,
+    code: string
+  ): Promise<ApiResponse<DeliveryCodeScreen>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/deliveries/verify`, {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      })
     );
   },
 

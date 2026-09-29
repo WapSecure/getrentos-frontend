@@ -372,6 +372,7 @@ export const estateResidentKeys = {
   visitorPasses: (status?: string) =>
     ['estate', 'resident', 'visitorPasses', status ?? 'all'] as const,
   deliveries: (status?: string) => ['estate', 'resident', 'deliveries', status ?? 'all'] as const,
+  expectedDeliveries: ['estate', 'resident', 'deliveries', 'expected'] as const,
   directory: ['estate', 'resident', 'directory'] as const,
   maintenanceTickets: ['estate', 'resident', 'maintenanceTickets'] as const,
   polls: ['estate', 'resident', 'polls'] as const,

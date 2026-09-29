@@ -190,6 +190,7 @@ export default function EstateDeliveriesPage() {
 
       <LogDeliveryModal
         isOpen={isModalOpen}
+        estateId={estate?.id ?? ''}
         households={households}
         householdTotal={householdsTotal}
         householdPage={householdPage}

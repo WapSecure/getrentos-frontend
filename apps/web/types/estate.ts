@@ -242,6 +242,72 @@ export interface DeliveryLog {
   createdAt: string;
 }
 
+export type ExpectedDeliveryStatus = 'AWAITING' | 'RECEIVED' | 'CANCELLED' | 'EXPIRED';
+
+/**
+ * A parcel a household has said is coming.
+ *
+ * Every label here is written server-side and rendered verbatim. The rule the
+ * resident reads, in their own words, is the same one the guard is refused by —
+ * the two cannot be allowed to drift into different sentences about the same
+ * code.
+ */
+export interface ExpectedDelivery {
+  id: string;
+  courier: string;
+  description?: string | null;
+  status: ExpectedDeliveryStatus;
+  /** 'Waiting for the courier' / 'Handed over at the gate' / … */
+  statusLabel: string;
+  /** Whether the code can still be presented at the gate. */
+  live: boolean;
+  expiresAt: string;
+  /** 'Amazon — a phone case, until Tuesday 15:00' */
+  summary: string;
+  createdAt: string;
+  /** Set when it was handed over, so the household can see it was taken in. */
+  receivedAt?: string | null;
+  receivedAtGateName?: string | null;
+  /** The parcel record this expectation produced, so it can be followed to collection. */
+  deliveryLogId?: string | null;
+}
+
+/**
+ * The declaration's reply, and the ONLY place the code ever exists.
+ *
+ * It is not stored in plaintext and cannot be asked for again — a household that
+ * loses it declares again. That is deliberate: a retrievable code is one the
+ * estate office can read out to a courier who is not carrying anything.
+ */
+export interface IssuedExpectedDelivery extends ExpectedDelivery {
+  /** The six digits to give the courier. Present only in this response. */
+  code: string;
+  /** What to tell the household about it, worded server-side. */
+  guidance: string;
+}
+
+/**
+ * The gate's answer to a code, in the shape a screening decision takes.
+ *
+ * There is no reason field, because a screen that distinguished "no such code"
+ * from "that code expired" would be a way to ask whether a named household exists
+ * in this estate, answerable by anybody standing at the barrier.
+ */
+export interface DeliveryCodeScreen {
+  matched: boolean;
+  householdId?: string;
+  unitLabel?: string;
+  residentName?: string;
+  courier?: string;
+  description?: string | null;
+  expiresAt?: string;
+  declaredAt?: string;
+  /** What this means, for the guard. */
+  message: string;
+  /** What to do next, for the guard. */
+  instruction: string;
+}
+
 export type VehicleLogPurpose = 'visitor' | 'resident' | 'delivery' | 'staff' | 'other';
 
 export interface VehicleLog {
