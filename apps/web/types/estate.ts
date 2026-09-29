@@ -854,3 +854,151 @@ export interface EstateMicrositeSettings {
   bannerUrl?: string;
   enabled: boolean;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Patrols                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A point on a patrol, and the place the code lives.
+ *
+ * There is deliberately no code on this type. The code is returned exactly once,
+ * when it is minted or re-issued, and no list endpoint ever carries one — a
+ * checkpoint whose code the booth could read is one that certifies nothing, and
+ * a guard could scan the whole register without walking it.
+ */
+export interface PatrolCheckpoint {
+  id: string;
+  name: string;
+  location?: string | null;
+  active: boolean;
+  /** How many routes this checkpoint sits on, so retiring one can warn. */
+  routeCount: number;
+  /** How many times it has ever been scanned. Retiring keeps these. */
+  scanCount: number;
+  createdAt: string;
+}
+
+/**
+ * The reply to minting a code — the only moment it exists in readable form.
+ *
+ * `guidance` says where the code belongs, worded server-side, because the whole
+ * mechanism depends on somebody printing it and putting it up at the right
+ * place, and the console is the last chance to say so.
+ */
+export interface IssuedPatrolCheckpoint extends PatrolCheckpoint {
+  code: string;
+  guidance: string;
+}
+
+/** A checkpoint in a route's walk order. `position` is the intended order. */
+export interface PatrolRouteCheckpoint {
+  id: string;
+  name: string;
+  location?: string | null;
+  position: number;
+  active: boolean;
+}
+
+export interface PatrolRoute {
+  id: string;
+  name: string;
+  /** 0 = Sunday. Empty means every day. */
+  daysOfWeek: number[];
+  /** 'HH:MM' local, on the estate's own clock. */
+  startTime: string;
+  windowMinutes: number;
+  active: boolean;
+  checkpoints: PatrolRouteCheckpoint[];
+  /** 'Every day, from 22:00, within 1h 30m' — rendered verbatim. */
+  scheduleLabel: string;
+  createdAt: string;
+}
+
+export type PatrolRoundStatus = 'OPEN' | 'COMPLETE' | 'MISSED';
+
+export interface PatrolScan {
+  id: string;
+  checkpointId: string;
+  checkpointName: string;
+  /** Where this checkpoint sat in the route, so out-of-order walks are visible. */
+  expectedPosition: number | null;
+  scannedAt: string;
+  scannedBy: string;
+  /** Scanned after the window had closed. Recorded, not refused. */
+  late: boolean;
+}
+
+/**
+ * One night's patrol, whether or not it happened.
+ *
+ * A round is a row rather than something inferred from scans, because the thing
+ * an estate is buying is the night nobody walked — which by definition has no
+ * scans to infer from. `expected` and `missing` are judged against the roster
+ * frozen when the round opened, so editing a route today cannot rewrite last
+ * night.
+ */
+export interface PatrolRound {
+  id: string;
+  routeId: string;
+  routeName: string;
+  scheduledFor: string;
+  windowEndsAt: string;
+  status: PatrolRoundStatus;
+  /** 'Walked' / 'Not walked' / 'Incomplete — 2 of 6 missed' / '3 of 6 so far'. */
+  statusLabel: string;
+  expected: number;
+  scanned: number;
+  /** The checkpoints nobody reached, named, so the office knows where to send somebody. */
+  missing: { id: string; name: string; position: number | null }[];
+  late: number;
+  /** Whether they were reached in the order the route states. */
+  inOrder: boolean;
+  scans: PatrolScan[];
+  /** When the office was told, if it has been. Null means it never happened. */
+  reportedAt?: string | null;
+}
+
+export interface PatrolReport {
+  estateId: string;
+  asOf: string;
+  from: string;
+  to: string;
+  rounds: PatrolRound[];
+  tally: {
+    closed: number;
+    walked: number;
+    missed: number;
+    open: number;
+    missedScans: number;
+    /** '3 rounds, 1 not walked' */
+    label: string;
+  };
+}
+
+/**
+ * The guard's answer to a code, and every failure shares ONE sentence.
+ *
+ * A screen that distinguished "no such code" from "that checkpoint is not on a
+ * round tonight" would be a way to map an estate's patrol points by trying
+ * codes. `instruction` says what to do next, which in every failing case is the
+ * same thing: fall back to what you can see.
+ */
+export interface PatrolScanResult {
+  accepted: boolean;
+  checkpointId?: string;
+  checkpointName?: string;
+  position?: number;
+  total?: number;
+  routeName?: string;
+  roundId?: string;
+  scheduledFor?: string;
+  scannedAt?: string;
+  /** True when this scan arrived after the window closed but was still recorded. */
+  late?: boolean;
+  /** True when this checkpoint was already scanned on this round. */
+  alreadyScanned?: boolean;
+  message: string;
+  instruction: string;
+}
+

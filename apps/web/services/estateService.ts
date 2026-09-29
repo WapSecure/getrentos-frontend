@@ -47,6 +47,11 @@ import type {
   EstateMicrositeSettings,
   EstateStatement,
   EstatePayoutAccount,
+  PatrolCheckpoint,
+  IssuedPatrolCheckpoint,
+  PatrolRoute,
+  PatrolReport,
+  PatrolScanResult,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -879,6 +884,137 @@ export const estateService = {
     query: EstatePageQuery & { from?: string; to?: string; sort?: 'dwell' | 'visits' } = {}
   ): Promise<ApiResponse<AuthorisationDwellReport>> {
     return safeCall(() => authFetch(`/estate/${estateId}/dwell/authorisations${toQuery(query)}`));
+  },
+
+  /**
+   * The estate's patrol checkpoints. Never their codes — the API does not send
+   * them, so there is nothing here that could leak one into a list render.
+   */
+  async listPatrolCheckpoints(estateId: string): Promise<ApiResponse<PatrolCheckpoint[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/patrol-checkpoints`));
+  },
+
+  /**
+   * Add a checkpoint. The reply is the only time the code is ever readable, so
+   * the caller has to show it; nothing can fetch it back afterwards.
+   */
+  async createPatrolCheckpoint(
+    estateId: string,
+    data: { name: string; location?: string }
+  ): Promise<ApiResponse<IssuedPatrolCheckpoint>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/patrol-checkpoints`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async updatePatrolCheckpoint(
+    estateId: string,
+    checkpointId: string,
+    data: { name?: string; location?: string; active?: boolean }
+  ): Promise<ApiResponse<PatrolCheckpoint>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/patrol-checkpoints/${checkpointId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /**
+   * Mint a new code for a checkpoint, invalidating the one on the wall.
+   *
+   * The whole security story rests on this being one call: a code photographed
+   * off the wall and texted to a colleague defeats the checkpoint, so a missing
+   * label or a guard who has left has to be cheap to answer.
+   */
+  async reissuePatrolCheckpointCode(
+    estateId: string,
+    checkpointId: string
+  ): Promise<ApiResponse<IssuedPatrolCheckpoint>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/patrol-checkpoints/${checkpointId}/reissue-code`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  async listPatrolRoutes(estateId: string): Promise<ApiResponse<PatrolRoute[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/patrol-routes`));
+  },
+
+  async createPatrolRoute(
+    estateId: string,
+    data: {
+      name: string;
+      daysOfWeek?: number[];
+      startTime: string;
+      windowMinutes: number;
+      checkpointIds: string[];
+    }
+  ): Promise<ApiResponse<PatrolRoute>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/patrol-routes`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async updatePatrolRoute(
+    estateId: string,
+    routeId: string,
+    data: {
+      name?: string;
+      daysOfWeek?: number[];
+      startTime?: string;
+      windowMinutes?: number;
+      checkpointIds?: string[];
+      active?: boolean;
+    }
+  ): Promise<ApiResponse<PatrolRoute>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/patrol-routes/${routeId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  /**
+   * Which rounds were due, and which of them nobody walked.
+   *
+   * Counted server-side against the roster frozen when each round opened, so the
+   * report cannot disagree with the notice the office was already sent about the
+   * same night.
+   */
+  async getPatrolReport(
+    estateId: string,
+    query: { from?: string; to?: string; routeId?: string } = {}
+  ): Promise<ApiResponse<PatrolReport>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/patrols/rounds${toQuery(query)}`));
+  },
+
+  /**
+   * Record reaching a checkpoint, by the code printed at it.
+   *
+   * Deliberately not plan-gated on the API side: a guard at a checkpoint at
+   * 02:00 is the wrong person to hear about a billing state, and refusing the
+   * scan would lose the patrol record over it.
+   */
+  async scanPatrolCheckpoint(
+    estateId: string,
+    code: string,
+    options: GateWriteOptions = {}
+  ): Promise<ApiResponse<PatrolScanResult>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/patrols/scan`, {
+        method: 'POST',
+        body: JSON.stringify({ code, ...options }),
+      })
+    );
   },
 
   async createAnnouncement(

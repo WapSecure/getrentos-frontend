@@ -343,6 +343,32 @@ export const estateKeys = {
     ] as const,
   incidents: (estateId: string, status?: string) =>
     ['estate', estateId, 'incidents', status ?? 'all'] as const,
+  /**
+   * The checkpoint register, and the routes that walk it.
+   *
+   * Two keys rather than one, because the route planner's picker reads the
+   * register and a new checkpoint must show up there without the routes being
+   * refetched — they cannot change as a result of adding one.
+   */
+  patrolCheckpoints: (estateId: string) => ['estate', estateId, 'patrol-checkpoints'] as const,
+  patrolRoutes: (estateId: string) => ['estate', estateId, 'patrol-routes'] as const,
+  /**
+   * Which rounds were due and which nobody walked.
+   *
+   * The window is in the key because the report is a period, and keying only on
+   * the estate would make switching period show the previous period's answer
+   * until the new one arrived.
+   */
+  patrolReport: (estateId: string, from?: string, to?: string, routeId?: string) =>
+    [
+      'estate',
+      estateId,
+      'patrols',
+      'rounds',
+      from ?? 'default',
+      to ?? 'default',
+      routeId ?? 'all',
+    ] as const,
   maintenanceTickets: (estateId: string, status?: string) =>
     ['estate', estateId, 'maintenanceTickets', status ?? 'all'] as const,
   polls: (estateId: string) => ['estate', estateId, 'polls'] as const,

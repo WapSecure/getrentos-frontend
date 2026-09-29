@@ -116,6 +116,31 @@ export interface DeliveryCodeScreen {
   instruction: string;
 }
 
+/**
+ * The gate's answer to a patrol checkpoint's code.
+ *
+ * Same shape of contract as `DeliveryCodeScreen`, and the same reasoning: every
+ * failure shares one sentence, so trying codes cannot map an estate's patrol
+ * points. The difference is that a patrol scan WRITES — it is the record that
+ * the round was walked — so `accepted` is the thing the guard is waiting for.
+ */
+export interface PatrolScanResult {
+  accepted: boolean;
+  checkpointName?: string;
+  position?: number;
+  total?: number;
+  routeName?: string;
+  roundId?: string;
+  scheduledFor?: string;
+  scannedAt?: string;
+  /** Recorded, but after the round's window had closed. */
+  late?: boolean;
+  /** This checkpoint was already recorded on this round; the first scan is kept. */
+  alreadyScanned?: boolean;
+  message: string;
+  instruction: string;
+}
+
 export type VehiclePurpose = 'visitor' | 'resident' | 'delivery' | 'staff' | 'other';
 
 export interface VehicleLog {
@@ -316,6 +341,24 @@ export const gatemanApi = {
     apiFetch<DeliveryCodeScreen>(`/estate/${estateId}/deliveries/verify`, {
       method: 'POST',
       body: JSON.stringify({ code }),
+    }),
+
+  /**
+   * Record reaching a patrol checkpoint, by the code printed at it.
+   *
+   * Unlike the visitor-pass writes this answers a refusal with 200 and a
+   * sentence rather than an error: a guard's screen must not become a way to map
+   * an estate's patrol points by trying codes, so every failure shares one
+   * wording and the caller reads `accepted`.
+   *
+   * `occurredAt` is what makes the queued version honest — a scan taken at 22:10
+   * inside a window that shut at 22:30 must not be judged late because the
+   * connection came back at 23:00.
+   */
+  scanPatrolCheckpoint: (estateId: string, code: string, options: { occurredAt?: string } = {}) =>
+    apiFetch<PatrolScanResult>(`/estate/${estateId}/patrols/scan`, {
+      method: 'POST',
+      body: JSON.stringify({ code, ...options }),
     }),
 
   logDelivery: (

@@ -32,7 +32,7 @@ import { CONTRACTOR_NOT_PERMITTED } from './gateman/contractorRefusal';
 
 const KEY = 'getrentos.gate.offline-queue';
 
-export type GateWriteType = 'check-in' | 'check-out' | 'admit';
+export type GateWriteType = 'check-in' | 'check-out' | 'admit' | 'patrol-scan';
 
 /**
  * Each write carries exactly what its API call needs, so a replay can switch on
@@ -55,6 +55,15 @@ export type GateWritePayloads = {
    * still the guard's to record — only the network is missing.
    */
   admit: { estateId: string; passId: string; occurredAt: string; gateId?: string; label: string };
+  /**
+   * Reaching a patrol checkpoint while the connection was down.
+   *
+   * Text-only, so a replay reconstructs the record exactly, and a missing record
+   * is both a security and an audit problem: the difference between "the patrol
+   * happened" and the estate being told nobody walked it. No `gateId` — a
+   * checkpoint is not a barrier.
+   */
+  'patrol-scan': { estateId: string; code: string; occurredAt: string; label: string };
 };
 
 export type GateWrite = {
@@ -120,6 +129,14 @@ function newId() {
  */
 function writeKey(write: GateWrite): string {
   if (write.type === 'check-in') return `check-in:${write.payload.estateId}:${write.payload.pin}`;
+  if (write.type === 'patrol-scan') {
+    // Keyed by the LOCAL DAY of the scan, not by the code alone: a guard whose
+    // send failed taps again minutes later and must not queue a second scan of
+    // the same checkpoint — but the same checkpoint is scanned again the next
+    // night, with the same code, and that is a different patrol.
+    const { estateId, code, occurredAt } = write.payload;
+    return `patrol-scan:${estateId}:${code}:${occurredAt.slice(0, 10)}`;
+  }
   return `${write.type}:${write.payload.estateId}:${write.payload.passId}`;
 }
 
@@ -183,6 +200,22 @@ export const gateOfflineQueue = {
 type Outcome = 'sent' | 'already-applied' | 'unconfirmed' | 'rejected' | 'retry';
 
 /**
+ * A patrol scan the estate answered with a sentence rather than an error.
+ *
+ * `POST /patrols/scan` deliberately answers a refusal with 200 and a message, so
+ * that a guard's screen cannot be used to map an estate's patrol points by trying
+ * codes. That means a refused scan RESOLVES rather than rejects, and without this
+ * it would be counted as sent and dropped in silence — telling the guard nothing
+ * about a patrol that is not recorded anywhere.
+ */
+class GateWriteRefused extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'GateWriteRefused';
+  }
+}
+
+/**
  * 403s that are the estate's own decision, never a lapsed session.
  *
  * The queue holds arrivals the network dropped. Replaying one of these gets the
@@ -202,6 +235,10 @@ const FINAL_REFUSAL_CODES: ReadonlySet<string> = new Set([
  * only genuinely transient problems are allowed to hold the queue up.
  */
 function classify(item: GateWrite, error: unknown): Outcome {
+  // A refusal that arrived as a 200 with a sentence. Final: the estate has no
+  // round for that checkpoint, and asking again gets the same answer.
+  if (error instanceof GateWriteRefused) return 'rejected';
+
   if (!(error instanceof ApiError)) return 'retry';
 
   // Offline or timed out: the normal case, try again on the next signal.
@@ -250,7 +287,7 @@ function classify(item: GateWrite, error: unknown): Outcome {
   return 'rejected';
 }
 
-function dispatch(item: GateWrite): Promise<unknown> {
+async function dispatch(item: GateWrite): Promise<unknown> {
   switch (item.type) {
     // The gate travels with the write. By replay time the guard may have moved
     // to another estate or another barrier, so reading "where am I now" would
@@ -271,6 +308,18 @@ function dispatch(item: GateWrite): Promise<unknown> {
         occurredAt: item.payload.occurredAt,
         gateId: item.payload.gateId,
       });
+    case 'patrol-scan': {
+      const result = await gatemanApi.scanPatrolCheckpoint(
+        item.payload.estateId,
+        item.payload.code,
+        { occurredAt: item.payload.occurredAt }
+      );
+      // A refusal is an answer, not a failure of the send — but it is still a
+      // patrol that did not get recorded, so it is handed to a person rather
+      // than counted as sent.
+      if (!result.accepted) throw new GateWriteRefused(`${result.message} ${result.instruction}`);
+      return result;
+    }
   }
 }
 
