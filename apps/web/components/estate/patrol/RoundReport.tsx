@@ -129,7 +129,7 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
       {missed.length > 0 && (
         <p className="text-xs text-muted-foreground">
           A missed round was reported to the office when its window closed. A scan proves that
-          somebody holding the code reached the checkpoint: the code is what makes that true, so
+          somebody holding the code reached the checkpoint — the code is what makes that true, so
           give a checkpoint a new one whenever a label goes missing.
         </p>
       )}

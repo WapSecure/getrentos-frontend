@@ -1001,4 +1001,3 @@ export interface PatrolScanResult {
   message: string;
   instruction: string;
 }
-

@@ -232,172 +232,188 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
         </div>
       )}
 
+      {/* Cleared by `close` on dismiss rather than by remounting, for the reason
+          recorded on the checkpoint dialog: `Dialog` unmounts its children when
+          `open` goes false, but this component's draft state would survive it. */}
       <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : close())}>
-        <DialogContent>
-          {isOpen && (
-            <div className="space-y-4">
-              <div>
-                <DialogTitle>{editingId ? 'Edit round' : 'Add a round'}</DialogTitle>
-                <DialogDescription>
-                  The time is the estate&apos;s own clock. The window is how long the round may take
-                  before it counts as late.
-                </DialogDescription>
-              </div>
+        <DialogContent className="max-w-2xl p-6">
+          <DialogTitle className="pr-8 text-xl font-semibold tracking-[-0.02em] text-foreground">
+            {editingId ? 'Edit round' : 'Add a round'}
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm leading-6 text-muted-foreground">
+            The time is the estate&apos;s own clock. The window is how long the round may take
+            before it counts as late.
+          </DialogDescription>
 
-              <Field label="Name" required htmlFor="route-name">
-                <Input
-                  id="route-name"
-                  value={draft.name}
-                  onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-                  placeholder="Night perimeter round"
+          <form
+            className="mt-6 space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              saveMutation.mutate();
+            }}
+          >
+            <Field label="Name" required htmlFor="route-name">
+              <Input
+                id="route-name"
+                value={draft.name}
+                onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+                placeholder="Night perimeter round"
+              />
+            </Field>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Starts at" required hint="On the estate's clock.">
+                <TimePicker
+                  value={draft.startTime}
+                  onChange={(value) => setDraft({ ...draft, startTime: value })}
+                  step={15}
                 />
               </Field>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Starts at" required hint="On the estate's clock.">
-                  <TimePicker
-                    value={draft.startTime}
-                    onChange={(value) => setDraft({ ...draft, startTime: value })}
-                    step={15}
-                  />
-                </Field>
-
-                <Field label="Must finish within" required>
-                  <Select
-                    value={draft.windowMinutes}
-                    onValueChange={(value) => setDraft({ ...draft, windowMinutes: value })}
-                    options={WINDOW_OPTIONS}
-                  />
-                </Field>
-              </div>
-
-              <Field label="Which days" hint="Leave all off for every day.">
-                <div className="flex flex-wrap gap-2">
-                  {DAYS.map((day) => {
-                    const on = draft.daysOfWeek.includes(day.value);
-                    return (
-                      <button
-                        key={day.value}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            daysOfWeek: on
-                              ? draft.daysOfWeek.filter((value) => value !== day.value)
-                              : [...draft.daysOfWeek, day.value].sort((a, b) => a - b),
-                          })
-                        }
-                        className={`min-h-9 rounded-xl border px-3 text-sm transition-colors ${
-                          on
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border bg-card text-foreground hover:border-foreground/20'
-                        }`}
-                      >
-                        {day.label}
-                      </button>
-                    );
-                  })}
-                </div>
+              <Field label="Must finish within" required>
+                <Select
+                  value={draft.windowMinutes}
+                  onValueChange={(value) => setDraft({ ...draft, windowMinutes: value })}
+                  options={WINDOW_OPTIONS}
+                />
               </Field>
+            </div>
 
-              <Field
-                label="Checkpoints, in the order they should be walked"
-                required
-                hint="The order is recorded, not enforced: a round walked out of sequence is shown as such rather than refused."
-              >
-                {draft.checkpointIds.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
-                    Nothing chosen yet.
-                  </p>
-                ) : (
-                  <ol className="space-y-1.5">
-                    {draft.checkpointIds.map((id, index) => (
-                      <li
-                        key={id}
-                        className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2"
-                      >
-                        <span className="w-4 text-xs text-muted-foreground">{index + 1}</span>
-                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-                          {nameOf(id)}
-                        </span>
-                        <button
-                          type="button"
-                          aria-label={`Move ${nameOf(id)} earlier`}
-                          onClick={() => move(index, -1)}
-                          disabled={index === 0}
-                          className="rounded-md p-1 text-muted-foreground disabled:opacity-40"
-                        >
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Move ${nameOf(id)} later`}
-                          onClick={() => move(index, 1)}
-                          disabled={index === draft.checkpointIds.length - 1}
-                          className="rounded-md p-1 text-muted-foreground disabled:opacity-40"
-                        >
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Remove ${nameOf(id)}`}
-                          onClick={() =>
-                            setDraft({
-                              ...draft,
-                              checkpointIds: draft.checkpointIds.filter((value) => value !== id),
-                            })
-                          }
-                          className="rounded-md p-1 text-muted-foreground"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </Field>
-
-              <div className="space-y-1.5">
-                {active
-                  .filter((checkpoint) => !chosen.has(checkpoint.id))
-                  .map((checkpoint) => (
+            <Field label="Which days" hint="Leave all off for every day.">
+              <div className="flex flex-wrap gap-2">
+                {DAYS.map((day) => {
+                  const on = draft.daysOfWeek.includes(day.value);
+                  return (
                     <button
-                      key={checkpoint.id}
+                      key={day.value}
                       type="button"
+                      aria-pressed={on}
                       onClick={() =>
                         setDraft({
                           ...draft,
-                          checkpointIds: [...draft.checkpointIds, checkpoint.id],
+                          daysOfWeek: on
+                            ? draft.daysOfWeek.filter((value) => value !== day.value)
+                            : [...draft.daysOfWeek, day.value].sort((a, b) => a - b),
                         })
                       }
-                      className="flex w-full items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-left text-sm text-foreground hover:border-foreground/20"
+                      className={`rounded-lg border px-3 py-1.5 text-sm ${
+                        on
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-border text-muted-foreground'
+                      }`}
                     >
-                      <Plus className="h-3.5 w-3.5 text-muted-foreground" />
-                      {checkpoint.name}
+                      {day.label}
                     </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            <Field
+              label="Checkpoints, in the order they should be walked"
+              required
+              hint="The order is recorded, not enforced: a round walked out of sequence is shown as such rather than refused."
+            >
+              {draft.checkpointIds.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">
+                  Nothing chosen yet.
+                </p>
+              ) : (
+                <ol className="space-y-2">
+                  {draft.checkpointIds.map((id, index) => (
+                    <li
+                      key={id}
+                      className="flex items-center gap-2 rounded-xl border border-border bg-secondary/40 px-3 py-2"
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-card text-xs font-medium text-muted-foreground">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                        {nameOf(id)}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label={`Move ${nameOf(id)} earlier`}
+                        onClick={() => move(index, -1)}
+                        disabled={index === 0}
+                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-40 disabled:hover:bg-transparent"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Move ${nameOf(id)} later`}
+                        onClick={() => move(index, 1)}
+                        disabled={index === draft.checkpointIds.length - 1}
+                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-40 disabled:hover:bg-transparent"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${nameOf(id)}`}
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            checkpointIds: draft.checkpointIds.filter((value) => value !== id),
+                          })
+                        }
+                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
                   ))}
-              </div>
-
-              {saveMutation.error && (
-                <p className="text-sm text-destructive">{(saveMutation.error as Error).message}</p>
+                </ol>
               )}
+            </Field>
 
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={close}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => saveMutation.mutate()}
-                  disabled={
-                    !draft.name.trim() || draft.checkpointIds.length === 0 || saveMutation.isPending
-                  }
-                >
-                  {saveMutation.isPending ? 'Saving…' : editingId ? 'Save round' : 'Add round'}
-                </Button>
+            {active.some((checkpoint) => !chosen.has(checkpoint.id)) && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Add a checkpoint</p>
+                <div className="flex flex-wrap gap-2">
+                  {active
+                    .filter((checkpoint) => !chosen.has(checkpoint.id))
+                    .map((checkpoint) => (
+                      <button
+                        key={checkpoint.id}
+                        type="button"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            checkpointIds: [...draft.checkpointIds, checkpoint.id],
+                          })
+                        }
+                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        {checkpoint.name}
+                      </button>
+                    ))}
+                </div>
               </div>
+            )}
+
+            {saveMutation.error && (
+              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
+                {(saveMutation.error as Error).message}
+              </p>
+            )}
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" rounded="md" onClick={close}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                rounded="md"
+                isLoading={saveMutation.isPending}
+                disabled={!draft.name.trim() || draft.checkpointIds.length === 0}
+              >
+                {editingId ? 'Save round' : 'Add round'}
+              </Button>
             </div>
-          )}
+          </form>
         </DialogContent>
       </Dialog>
     </div>

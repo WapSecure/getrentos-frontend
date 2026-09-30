@@ -28,7 +28,7 @@ import type { IssuedPatrolCheckpoint, PatrolCheckpoint } from '@/types/estate';
  * The screen leads with adding a checkpoint rather than with the list, because
  * a register with nothing in it is the normal starting state and the code is the
  * only thing that has to be dealt with carefully: it is shown once, here, and
- * never again. That is not a limitation to apologise for: a code the office
+ * never again. That is not a limitation to apologise for — a code the office
  * could read back is one it could read out to somebody who is not at the
  * checkpoint, and the whole mechanism is that the code is proof of presence.
  */
@@ -137,7 +137,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         <EmptyState
           icon={MapPin}
           title="No checkpoints yet"
-          description="Add the places a patrol has to reach: the gate, the generator house, the back fence. Each one gets a code you print and put up there."
+          description="Add the places a patrol has to reach — the gate, the generator house, the back fence. Each one gets a code you print and put up there."
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -202,62 +202,68 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         </div>
       )}
 
-      {/* Mounted only while open, so a second checkpoint cannot inherit the
-          first one's name: the same trap that has caught three dialogs in this
-          programme already. */}
+      {/* The fields are cleared by `reset` on close rather than by remounting:
+          `Dialog` already unmounts its children when `open` goes false, and this
+          parent's state would survive that regardless — which is the trap that
+          has caught three dialogs in this programme already. */}
       <Dialog open={isAddOpen} onOpenChange={(open) => (open ? setIsAddOpen(true) : reset())}>
-        <DialogContent>
-          {isAddOpen && (
-            <div className="space-y-4">
-              <div>
-                <DialogTitle>Add a checkpoint</DialogTitle>
-                <DialogDescription>
-                  A place a patrol has to reach. You will get a code once, to print and put up
-                  there.
-                </DialogDescription>
-              </div>
+        <DialogContent className="max-w-lg p-6">
+          <DialogTitle className="pr-8 text-xl font-semibold tracking-[-0.02em] text-foreground">
+            Add a checkpoint
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm leading-6 text-muted-foreground">
+            A place a patrol has to reach. You will get a code once, to print and put up there.
+          </DialogDescription>
 
-              <Field label="Name" required htmlFor="checkpoint-name">
-                <Input
-                  id="checkpoint-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Main gate"
-                />
-              </Field>
+          <form
+            className="mt-6 space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              createMutation.mutate();
+            }}
+          >
+            <Field label="Name" required htmlFor="checkpoint-name">
+              <Input
+                id="checkpoint-name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Main gate"
+              />
+            </Field>
 
-              <Field
-                label="Where it is"
-                htmlFor="checkpoint-location"
-                hint="In your own words, so a guard comparing it to what they see knows they are in the right place."
+            <Field
+              label="Where it is"
+              htmlFor="checkpoint-location"
+              hint="In your own words, so a guard comparing it to what they see knows they are in the right place."
+            >
+              <Input
+                id="checkpoint-location"
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                placeholder="Beside the boom, facing the road"
+              />
+            </Field>
+
+            {createMutation.error && (
+              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
+                {(createMutation.error as Error).message}
+              </p>
+            )}
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" rounded="md" onClick={reset}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                rounded="md"
+                isLoading={createMutation.isPending}
+                disabled={!name.trim()}
               >
-                <Input
-                  id="checkpoint-location"
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  placeholder="Beside the boom, facing the road"
-                />
-              </Field>
-
-              {createMutation.error && (
-                <p className="text-sm text-destructive">
-                  {(createMutation.error as Error).message}
-                </p>
-              )}
-
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={reset}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => createMutation.mutate()}
-                  disabled={!name.trim() || createMutation.isPending}
-                >
-                  {createMutation.isPending ? 'Adding…' : 'Add checkpoint'}
-                </Button>
-              </div>
+                Add checkpoint
+              </Button>
             </div>
-          )}
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -283,7 +289,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         }
         description={
           retiring?.active
-            ? 'It stops counting towards rounds, and its code stops working. Every scan it has ever recorded is kept: retiring a checkpoint never erases the patrols that visited it.'
+            ? 'It stops counting towards rounds, and its code stops working. Every scan it has ever recorded is kept — retiring a checkpoint never erases the patrols that visited it.'
             : 'It starts counting towards rounds again. Its old code still works, so give it a new one if that code may have been seen.'
         }
         confirmLabel={retiring?.active ? 'Retire' : 'Put back in use'}
