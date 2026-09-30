@@ -11,6 +11,14 @@ import type { PatrolRound } from '@/types/estate';
 
 const DAY_MS = 24 * 60 * 60_000;
 
+/**
+ * The window the report covers, in the shape the API and the query key both
+ * want. A module-level helper rather than an inline `Date.now()` for the same
+ * reason the dwell page keeps one: the window is computed when the reader picks
+ * a range, never during render.
+ */
+const windowStart = (days: string) => new Date(Date.now() - Number(days) * DAY_MS).toISOString();
+
 const RANGES = [
   { value: '7', label: 'Last 7 nights' },
   { value: '14', label: 'Last 14 nights' },
@@ -38,11 +46,11 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
    * render body is a different instant every time, and it is in the query key,
    * so react-query would see a new window on every render and fetch forever.
    */
-  const [from, setFrom] = useState(() => new Date(Date.now() - 14 * DAY_MS).toISOString());
+  const [from, setFrom] = useState(() => windowStart('14'));
 
   const selectRange = (days: string) => {
     setRangeDays(days);
-    setFrom(new Date(Date.now() - Number(days) * DAY_MS).toISOString());
+    setFrom(windowStart(days));
   };
 
   const reportQuery = useQuery({

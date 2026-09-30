@@ -198,61 +198,68 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         </div>
       )}
 
-      {/* Mounted only while open, so a second checkpoint cannot inherit the
-          first one's name — the same trap that has caught three dialogs in this
-          programme already. */}
+      {/* The fields are cleared by `reset` on close rather than by remounting:
+          `Dialog` already unmounts its children when `open` goes false, and this
+          parent's state would survive that regardless — which is the trap that
+          has caught three dialogs in this programme already. */}
       <Dialog open={isAddOpen} onOpenChange={(open) => (open ? setIsAddOpen(true) : reset())}>
-        <DialogContent>
-          {isAddOpen && (
-            <div className="space-y-4">
-              <div>
-                <DialogTitle>Add a checkpoint</DialogTitle>
-                <DialogDescription>
-                  A place a patrol has to reach. You will get a code once, to print and put up there.
-                </DialogDescription>
-              </div>
+        <DialogContent className="max-w-lg p-6">
+          <DialogTitle className="pr-8 text-xl font-semibold tracking-[-0.02em] text-foreground">
+            Add a checkpoint
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm leading-6 text-muted-foreground">
+            A place a patrol has to reach. You will get a code once, to print and put up there.
+          </DialogDescription>
 
-              <Field label="Name" required htmlFor="checkpoint-name">
-                <Input
-                  id="checkpoint-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Main gate"
-                />
-              </Field>
+          <form
+            className="mt-6 space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              createMutation.mutate();
+            }}
+          >
+            <Field label="Name" required htmlFor="checkpoint-name">
+              <Input
+                id="checkpoint-name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Main gate"
+              />
+            </Field>
 
-              <Field
-                label="Where it is"
-                htmlFor="checkpoint-location"
-                hint="In your own words, so a guard comparing it to what they see knows they are in the right place."
+            <Field
+              label="Where it is"
+              htmlFor="checkpoint-location"
+              hint="In your own words, so a guard comparing it to what they see knows they are in the right place."
+            >
+              <Input
+                id="checkpoint-location"
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                placeholder="Beside the boom, facing the road"
+              />
+            </Field>
+
+            {createMutation.error && (
+              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
+                {(createMutation.error as Error).message}
+              </p>
+            )}
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" rounded="md" onClick={reset}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                rounded="md"
+                isLoading={createMutation.isPending}
+                disabled={!name.trim()}
               >
-                <Input
-                  id="checkpoint-location"
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  placeholder="Beside the boom, facing the road"
-                />
-              </Field>
-
-              {createMutation.error && (
-                <p className="text-sm text-destructive">
-                  {(createMutation.error as Error).message}
-                </p>
-              )}
-
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={reset}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => createMutation.mutate()}
-                  disabled={!name.trim() || createMutation.isPending}
-                >
-                  {createMutation.isPending ? 'Adding…' : 'Add checkpoint'}
-                </Button>
-              </div>
+                Add checkpoint
+              </Button>
             </div>
-          )}
+          </form>
         </DialogContent>
       </Dialog>
 
