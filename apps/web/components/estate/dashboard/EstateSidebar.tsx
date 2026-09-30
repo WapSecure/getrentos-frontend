@@ -24,6 +24,7 @@ import {
   PieChart,
   UserCheck,
   Timer,
+  Footprints,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
@@ -56,6 +57,12 @@ const GATED_ROUTES: Partial<Record<string, PlanTier>> = {
   // purchase: E2 records who is authorised to keep arriving, and this says how
   // long they actually stay. An estate reviewing one wants the other.
   [ROUTES.ESTATE_DWELL]: 'ENTERPRISE',
+  // The same purchase again: dwell says how long a contractor stays, and this
+  // says whether the patrol went out at all. Both are the estate's own
+  // management, not a barrier's decision — the guard's scan is not gated, which
+  // is why a locked nav item here means "you cannot change the schedule", never
+  // "your guards cannot scan".
+  [ROUTES.ESTATE_PATROL]: 'ENTERPRISE',
 };
 
 export const navItems: NavItem[] = [
@@ -77,6 +84,10 @@ export const navItems: NavItem[] = [
   // long they actually stay. An estate reviewing one wants the other.
   { label: 'Dwell analytics', href: ROUTES.ESTATE_DWELL, icon: Timer },
   { label: 'Deliveries', href: ROUTES.ESTATE_DELIVERIES, icon: Package },
+  // Beside the gate features rather than with the estate's records: a patrol is
+  // what an estate promises and the checkpoint is what checks it, which is the
+  // same promise the visitor passes and the watch list are making.
+  { label: 'Patrols', href: ROUTES.ESTATE_PATROL, icon: Footprints },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
   { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
   // Not in GATED_ROUTES, and deliberately not: raising the alarm and calling the
@@ -100,9 +111,12 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
   { label: 'Residents and access', items: navItems.slice(3, 11) },
-  { label: 'Safety and operations', items: navItems.slice(11, 15) },
-  { label: 'Community', items: navItems.slice(15, 19) },
-  { label: 'Administration', items: navItems.slice(19) },
+  // Boundaries moved by one when Patrols was inserted after Deliveries: the
+  // groups are slices of the list above, so an insert without this puts
+  // Emergency in Community and shifts everything after it.
+  { label: 'Safety and operations', items: navItems.slice(11, 16) },
+  { label: 'Community', items: navItems.slice(16, 20) },
+  { label: 'Administration', items: navItems.slice(20) },
 ];
 
 export const EstateSidebar = () => {

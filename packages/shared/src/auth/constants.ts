@@ -250,6 +250,15 @@ export const ROUTES = {
    */
   ESTATE_DWELL: '/estate/dwell',
   ESTATE_DELIVERIES: '/estate/deliveries',
+  /**
+   * Whether the rounds an estate set up actually happen.
+   *
+   * Enterprise like dwell, and for the same reason: an estate without it makes a
+   * slower decision rather than an unsafe one. The GUARD's scan is deliberately
+   * not gated — see `docs/estate-gate-programme.md` — so this is the office's
+   * screen, not the checkpoint's.
+   */
+  ESTATE_PATROL: '/estate/patrol',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
   ESTATE_POLLS: '/estate/polls',
