@@ -5,7 +5,7 @@ import type { MusterTally } from '@/types/estate';
 
 interface MusterTallyStripProps {
   tally: MusterTally;
-  /** The sentence the API composed. Shown verbatim — it is what residents were sent. */
+  /** The sentence the API composed. Shown verbatim: it is what residents were sent. */
   tallyLabel: string;
 }
 
@@ -17,7 +17,7 @@ interface MusterTallyStripProps {
  * same figures, and three independent sums of the same roll is three chances to
  * disagree at the one moment somebody is relying on them.
  *
- * Zeros are shown as tiles — "0 needing help" is worth knowing. The *sentence*
+ * Zeros are shown as tiles: "0 needing help" is worth knowing. The *sentence*
  * beneath is the API's, and it deliberately skips empty buckets, so the two
  * never contradict each other: one is a table, the other is a claim.
  */

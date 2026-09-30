@@ -100,8 +100,8 @@ export const RenterSupportPage = () => {
           Contact support
         </h1>
         <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          Chat with the GetRentOS team. You get one active thread — resolving it closes it, and a
-          new message opens it again.
+          Chat with the GetRentOS team. You get one active thread: resolving it closes it, and a new
+          message opens it again.
         </p>
       </div>
 
@@ -117,7 +117,7 @@ export const RenterSupportPage = () => {
           </div>
           {threads.length === 0 ? (
             <p className="rounded-xl border border-border/80 bg-card p-4 text-sm text-muted-foreground">
-              No support conversations yet — start one below.
+              No support conversations yet: start one below.
             </p>
           ) : (
             threads.map((thread) => (

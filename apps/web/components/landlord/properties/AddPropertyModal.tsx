@@ -308,7 +308,7 @@ export const AddPropertyModal = ({
                       />
                       <Upload className="w-4 h-4" />
                       {form.galleryImages.length > 0
-                        ? `${form.galleryImages.length} image(s) selected — add more`
+                        ? `${form.galleryImages.length} image(s) selected: add more`
                         : 'Add gallery images'}
                     </label>
                     {form.galleryImages.length > 0 && (
@@ -497,7 +497,7 @@ const UploadField = ({
 const MediaPreview = ({ file }: { file: File }) => {
   // Created inside the effect, not a useState initialiser: under React
   // StrictMode the effect runs, is cleaned up (revoking the URL), then runs
-  // again — an initialiser-created URL stays revoked and the preview renders
+  // again: an initialiser-created URL stays revoked and the preview renders
   // as a broken image in dev.
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {

@@ -41,7 +41,7 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
-          {due.unitLabel} — {due.residentName}
+          {due.unitLabel}: {due.residentName}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
           {categoryLabels[due.category]} · Due {formatDate(due.dueDate)}

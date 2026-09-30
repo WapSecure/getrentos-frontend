@@ -40,7 +40,7 @@ function resolveHeight(snapPoints?: (string | number)[]): number | undefined {
 
 /**
  * Themed bottom sheet. Built on React Native's `Modal` so the sheet is a real
- * native overlay — a portal-based sheet renders *underneath* the native
+ * native overlay: a portal-based sheet renders *underneath* the native
  * `react-native-screens` views that expo-router mounts, and never becomes visible.
  *
  * Driven by `open`; `onClose` fires on backdrop press and Android back.

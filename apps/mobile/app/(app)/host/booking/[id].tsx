@@ -705,7 +705,7 @@ function ReviewForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
     mutationFn: () => hostShortletsApi.reviewGuest(b.id, rating, comment.trim() || undefined),
     onSuccess: () => {
       void haptics.success();
-      toast.show('Thanks — other hosts will see your rating.', 'success');
+      toast.show('Thanks: other hosts will see your rating.', 'success');
       onDone();
     },
   });

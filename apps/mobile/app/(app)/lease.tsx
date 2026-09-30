@@ -498,7 +498,7 @@ function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').Pend
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="callout" color="mutedForeground">
-          Read the whole agreement before you sign — it is what you are agreeing to, not the summary
+          Read the whole agreement before you sign: it is what you are agreeing to, not the summary
           above.
         </Text>
         <DownloadLeaseButton

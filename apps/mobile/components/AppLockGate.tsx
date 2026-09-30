@@ -11,7 +11,7 @@ const RELOCK_AFTER_MS = 60_000;
 
 /**
  * Covers the app until the owner unlocks it, when app lock is on. Locks on a
- * cold start and after a minute in the background — not right after the user
+ * cold start and after a minute in the background: not right after the user
  * signs in with a password or switches the lock on, which already prove it's them.
  */
 export function AppLockGate() {

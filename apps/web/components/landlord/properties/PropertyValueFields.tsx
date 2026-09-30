@@ -12,7 +12,7 @@ interface PropertyValueFieldsProps {
 const inputClass =
   'w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary';
 
-/** What the property is worth and what it cost — the two numbers Portfolio needs for cap rate and yield. */
+/** What the property is worth and what it cost: the two numbers Portfolio needs for cap rate and yield. */
 export const PropertyValueFields = ({
   estimatedValue,
   purchasePrice,

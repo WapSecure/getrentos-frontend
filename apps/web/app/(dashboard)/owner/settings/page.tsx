@@ -29,7 +29,7 @@ export default function OwnerSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where your marketplace sale money is sent once GetRentos pays it out to you — transfers run through Paystack." />
+          <SellerPayoutSettings description="Where your marketplace sale money is sent once GetRentos pays it out to you: transfers run through Paystack." />
         );
       case 'preferences':
         return <PreferencesSettings />;

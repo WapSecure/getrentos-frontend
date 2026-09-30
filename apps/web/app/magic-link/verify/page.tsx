@@ -30,7 +30,7 @@ function MagicLinkVerifyContent() {
         const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
 
         // Magic-link sign-in is session-only by default (the refresh token is
-        // an httpOnly session cookie) — consistent with an unchecked
+        // an httpOnly session cookie): consistent with an unchecked
         // "Remember me" checkbox.
         saveAuthSession(
           {

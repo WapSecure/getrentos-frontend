@@ -20,7 +20,7 @@ interface TrustProfileViewProps {
 
 /**
  * Renders a role trust & verification profile entirely from real backend data
- * (score, headline stats, verifications and badges) — no fabricated values.
+ * (score, headline stats, verifications and badges): no fabricated values.
  */
 export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustProfileViewProps) => {
   const { data, isLoading } = useQuery({

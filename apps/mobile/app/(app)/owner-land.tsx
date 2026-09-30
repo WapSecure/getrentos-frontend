@@ -162,7 +162,7 @@ function LandCard({ r, onPress }: { r: OwnerLandRecord; onPress: () => void }) {
         ) : null}
         {!r.ownershipProofCount ? (
           <Text variant="caption" color="mutedForeground">
-            No title evidence yet — upload it from the property page.
+            No title evidence yet: upload it from the property page.
           </Text>
         ) : null}
       </Card>

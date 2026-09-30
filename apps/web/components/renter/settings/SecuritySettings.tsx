@@ -178,7 +178,7 @@ export const SecuritySettings = () => {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground mb-4">
-                  Your secret is already stored — enter a code from your authenticator app to finish
+                  Your secret is already stored: enter a code from your authenticator app to finish
                   enabling two-factor authentication.
                 </p>
               )}

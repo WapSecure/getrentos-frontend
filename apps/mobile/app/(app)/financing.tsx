@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Lock, Sparkles, Wallet } from 'lucide-react-native';
+import { Lock, BadgeCheck, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -87,11 +87,11 @@ function EligibilityCard({ overview }: { overview: FinancingOverview }) {
     <>
       <Card elevated>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Sparkles size={20} color={colors.primary} />
+          <BadgeCheck size={20} color={colors.primary} />
           <Text variant="heading">Split your rent into monthly payments</Text>
         </View>
         <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-          We pay your landlord {overview.propertyName} in full today, and you repay us monthly —
+          We pay your landlord {overview.propertyName} in full today, and you repay us monthly:
           building your trust score along the way.
         </Text>
 
@@ -167,7 +167,7 @@ function ApplyPanel({ rentAmount, onClose }: { rentAmount: number; onClose: () =
     mutationFn: () => financingApi.apply(months),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.financing });
-      toast.show('Flex plan approved — your landlord has been paid.', 'success');
+      toast.show('Flex plan approved: your landlord has been paid.', 'success');
       onClose();
     },
     onError: (err) =>

@@ -150,7 +150,7 @@ export const VirtualTourViewerModal = ({
                   Viewing request sent for {formattedRequest}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {host} will confirm your requested time — you&apos;ll see it in your viewing
+                  {host} will confirm your requested time: you&apos;ll see it in your viewing
                   requests once confirmed.
                 </p>
               </div>

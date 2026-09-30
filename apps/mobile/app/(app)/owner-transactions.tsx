@@ -152,7 +152,7 @@ function SaleCard({ t }: { t: OwnerTransaction }) {
           <ShieldAlert size={18} color={colors.destructive} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="callout" style={{ color: colors.destructive, fontWeight: '700' }}>
-              Payment on hold — dispute open
+              Payment on hold: dispute open
             </Text>
             <Text variant="caption" color="mutedForeground">
               {t.disputeReason || 'Funds stay held until the dispute is resolved.'}

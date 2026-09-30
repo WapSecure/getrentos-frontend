@@ -48,7 +48,7 @@ export const RealtorPayoutSection = () => {
   const { data: account } = useQuery({
     queryKey: realtorKeys.payoutAccount,
     // The API answers 200 with no body when there is no account yet, which
-    // axios turns into `undefined` — a value react-query rejects outright.
+    // axios turns into `undefined`: a value react-query rejects outright.
     queryFn: () => unwrapOptional(realtorService.getPayoutAccount(), null),
   });
 

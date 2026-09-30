@@ -126,7 +126,7 @@ export const EmailSignIn = ({
   // Prefill the identifier when the user previously signed in with "Remember me",
   // and surface a notice when the previous session expired.
   useEffect(() => {
-    // Mount-time sync with persisted storage — intentional synchronous setState.
+    // Mount-time sync with persisted storage: intentional synchronous setState.
     /* eslint-disable react-hooks/set-state-in-effect */
     const remembered = getRememberedIdentifier();
     if (remembered) {

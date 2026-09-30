@@ -24,7 +24,7 @@ import {
 import { estateKeys } from '@/lib/queryKeys';
 import type { VisitorPass } from '@/types/estate';
 
-/** Decodes a QR code from a captured photo — draws it to an off-screen canvas so jsQR can read the pixel data. */
+/** Decodes a QR code from a captured photo: draws it to an off-screen canvas so jsQR can read the pixel data. */
 async function decodeQrFromFile(file: File): Promise<string | null> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -89,7 +89,7 @@ export default function GatemanVerifyPage() {
   /**
    * Set when the estate's watch list refused something, with the write to resend
    * if a guard overrides it. Held outside `result` because it is not a failure
-   * to report — it is a decision to act on.
+   * to report: it is a decision to act on.
    */
   const [blocked, setBlocked] = useState<{
     refusal: WatchlistRefusal;
@@ -181,7 +181,7 @@ export default function GatemanVerifyPage() {
    *
    * Measured from the moment the list was fetched rather than from the clock: a
    * query response carries its own timestamp, and reading `Date.now()` during
-   * render is impure — React may render twice, and the two passes would then
+   * render is impure: React may render twice, and the two passes would then
    * disagree about what is on screen. The list polls, so the window still moves.
    */
   const asOf = walkInsAsOf;
@@ -209,7 +209,7 @@ export default function GatemanVerifyPage() {
       // The estate's watch list refused them. Not a fault and not a connection
       // problem, so it must not fall into either of the branches below: resending
       // gives the same answer, and the guard is offered the one thing that does
-      // change it — a stated reason to admit them anyway.
+      // change it: a stated reason to admit them anyway.
       const refusal = readWatchlistRefusal(error);
       if (refusal) {
         setResult(null);
@@ -220,7 +220,7 @@ export default function GatemanVerifyPage() {
 
       // No connection at the barrier. The visitor is standing there and the
       // resident has already approved them, so refusing the entry would be the
-      // wrong answer — record the arrival here and send it later.
+      // wrong answer: record the arrival here and send it later.
       //
       // An override is deliberately NOT queued. The queue carries no reason, so
       // replaying it would refuse somebody the guard had deliberately admitted,
@@ -295,7 +295,7 @@ export default function GatemanVerifyPage() {
 
       // The household already consented, so this is still the guard's decision to
       // record. Only the network is missing, so queue rather than leave the
-      // visitor waiting for a signal — but never an override, for the same reason
+      // visitor waiting for a signal: but never an override, for the same reason
       // as a queued check-in above.
       if (!input.overrideReason && isOfflineFailure(error)) {
         gateOfflineQueue.enqueue('admit', {
@@ -351,7 +351,7 @@ export default function GatemanVerifyPage() {
    * Admits somebody the estate listed, on a guard's stated reason.
    *
    * Resends the refused write rather than a fresh one, so the override cannot
-   * land on a different visitor than the one who was refused — with two people
+   * land on a different visitor than the one who was refused: with two people
    * at a barrier and a queue of writes, that is not a theoretical risk.
    */
   const overrideWatchlist = (reason: string) => {
@@ -371,7 +371,7 @@ export default function GatemanVerifyPage() {
       const decoded = await decodeQrFromFile(file);
       if (!decoded) {
         setResult({
-          error: "Couldn't read a QR code in that photo — try again or enter the PIN manually.",
+          error: "Couldn't read a QR code in that photo: try again or enter the PIN manually.",
         });
         return;
       }
@@ -414,7 +414,7 @@ export default function GatemanVerifyPage() {
       </div>
 
       {/* The barrier is part of the record, so a guard who has not said which one
-          they are at is told plainly — but is never blocked from recording an
+          they are at is told plainly: but is never blocked from recording an
           arrival, because a real person is standing in front of them. */}
       {needsGateChoice && (
         <div className="rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/20 p-4">
@@ -478,7 +478,7 @@ export default function GatemanVerifyPage() {
         </Button>
 
         {/* The visitor who has nothing arranged. Raising a request is not the
-            same as letting them in — the household is asked first. */}
+            same as letting them in: the household is asked first. */}
         <Button
           variant="outline"
           fullWidth
@@ -573,8 +573,8 @@ export default function GatemanVerifyPage() {
                   </p>
                   <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">
                     {pass.status === 'denied'
-                      ? 'Refused — do not admit them.'
-                      : 'No answer — do not admit them.'}
+                      ? 'Refused: do not admit them.'
+                      : 'No answer: do not admit them.'}
                   </p>
                   {pass.status === 'denied' && pass.denialReason && (
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -600,7 +600,7 @@ export default function GatemanVerifyPage() {
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
                     Approved
-                    {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''} — let them in
+                    {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''}: let them in
                   </p>
                 </div>
               </div>
@@ -753,7 +753,7 @@ export default function GatemanVerifyPage() {
         onRaised={(pass) =>
           // Phrased without promising an approval: this card stays until the
           // guard leaves the screen, and a refusal must not leave it claiming
-          // "admit them once they approve" — which is what it used to say.
+          // "admit them once they approve": which is what it used to say.
           setResult({
             requested: `${pass.visitorName} is waiting on ${pass.unitLabel}. ${pass.residentName}'s answer appears under "At the gate".`,
             warning: pass.watchlistWarning,

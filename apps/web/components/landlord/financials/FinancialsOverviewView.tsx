@@ -16,7 +16,7 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
-// recharts is heavy — load it only when the financials tab is rendered.
+// recharts is heavy: load it only when the financials tab is rendered.
 const FinancialChart = dynamic(
   () => import('@/components/landlord/financials/FinancialChart').then((m) => m.FinancialChart),
   {

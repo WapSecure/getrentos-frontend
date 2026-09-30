@@ -26,7 +26,6 @@ import {
   Ruler,
   Search,
   ShieldCheck,
-  Sparkles,
   Trees,
 } from 'lucide-react';
 import { landService } from '@/services/landService';
@@ -176,7 +175,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   /**
    * Who is looking at the parcels. `mode` only says which surface rendered the
    * marketplace, so on the public page the CTAs used to tell a signed-in visitor
-   * to "sign in" — and sent them to a sign-in form they had already passed.
+   * to "sign in": and sent them to a sign-in form they had already passed.
    */
   const [viewer] = useState<LandViewer>(() =>
     viewerHasRole('buyer') ? 'buyer' : viewerIsSignedIn() ? 'member' : 'anonymous'
@@ -197,7 +196,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
       <div className={mode === 'public' ? 'mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8' : ''}>
         <div className="mb-8 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-xs font-semibold text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
+            <BadgeCheck className="h-3.5 w-3.5" />
             Verified land marketplace
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">

@@ -28,13 +28,14 @@ export const TrustScoreBreakdownCard = ({ breakdown }: TrustScoreBreakdownCardPr
         <span className="text-xs text-muted-foreground">{breakdown.version}</span>
       </div>
       <p className="text-sm text-muted-foreground mb-4">
-        Points are weighted by how hard each signal is to fake — a verified identity outweighs
+        Points are weighted by how hard each signal is to fake: a verified identity outweighs
         activity, which is the easiest to farm.
       </p>
 
       <ul className="space-y-3">
         {dimensions.map((dimension) => {
-          const percent = dimension.weight > 0 ? Math.round((dimension.earned / dimension.weight) * 100) : 0;
+          const percent =
+            dimension.weight > 0 ? Math.round((dimension.earned / dimension.weight) * 100) : 0;
           return (
             <li key={dimension.id}>
               <div className="flex items-baseline justify-between mb-1.5">

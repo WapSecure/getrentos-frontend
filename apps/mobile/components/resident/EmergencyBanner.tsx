@@ -15,7 +15,7 @@ import {
  * The estate is calling the roll, and this household owes an answer.
  *
  * Owns its own query on the shared `qk.resident.emergency` key, so the home
- * banner and the answer screen always agree — a banner still saying "you have not
+ * banner and the answer screen always agree: a banner still saying "you have not
  * answered" beside a screen that has just been answered is worse than no banner.
  *
  * Renders nothing when the estate is not in the middle of an emergency, which is
@@ -42,8 +42,8 @@ export function EmergencyBanner() {
   /**
    * What to say about where this household stands.
    *
-   * A household of three can genuinely be half-answered — one flat empty, one
-   * inside — so "your household has not answered" would be false and "your
+   * A household of three can genuinely be half-answered: one flat empty, one
+   * inside: so "your household has not answered" would be false and "your
    * household has answered" would hide the line a marshal still has to chase.
    */
   const standing =
@@ -73,14 +73,14 @@ export function EmergencyBanner() {
           <Siren size={22} color={colors.destructive} />
           <View style={{ flex: 1 }}>
             <Text variant="bodyStrong">
-              {data.muster.kindLabel} — the estate is calling the roll
+              {data.muster.kindLabel}: the estate is calling the roll
             </Text>
             <Text variant="body" style={{ marginTop: spacing.xs }}>
               {data.muster.assemblyInstruction}
             </Text>
             <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
               {standing}
-              {needsHelp ? ' Somebody in your household needs help — a marshal has been told.' : ''}
+              {needsHelp ? ' Somebody in your household needs help: a marshal has been told.' : ''}
             </Text>
             <Text variant="callout" style={{ marginTop: spacing.sm, color: colors.primary }}>
               {answered ? 'Change your answer' : 'Tell the estate you are safe'}

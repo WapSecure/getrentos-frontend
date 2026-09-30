@@ -25,7 +25,7 @@ interface CloseMusterDialogProps {
  * estate that searched and could not find somebody has to be able to stop, and a
  * system that refused would teach managers to tick names they cannot verify.
  * What is not allowed is closing that way *silently*, so the note is required
- * here exactly when the API will require it — the manager finds that out from
+ * here exactly when the API will require it: the manager finds that out from
  * this screen rather than from a 400 at the end of an incident.
  *
  * A roll may close with somebody marked as needing help and no note at all. That
@@ -71,7 +71,7 @@ export const CloseMusterDialog = ({
 
             <p className="text-sm text-muted-foreground mt-1">
               The roll is frozen and every household is told the estate has stood down. Nobody can
-              be marked afterwards — the record says what the estate knew at the time, and a line
+              be marked afterwards: the record says what the estate knew at the time, and a line
               added later is indistinguishable from a correction to a mistake nobody made.
             </p>
 

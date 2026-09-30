@@ -36,7 +36,7 @@ export const DeliveryLogRow = ({
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
-          {log.unitLabel} — {log.residentName}
+          {log.unitLabel}: {log.residentName}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {log.courier ? `${log.courier} · ` : ''}

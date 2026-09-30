@@ -132,7 +132,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
         <div>
           <h2 className="font-semibold text-foreground">Expenses</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Utilities, insurance, tax, and repairs — subtracted from net profit above.
+            Utilities, insurance, tax, and repairs: subtracted from net profit above.
           </p>
         </div>
         <Button

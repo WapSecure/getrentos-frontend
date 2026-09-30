@@ -28,7 +28,7 @@ import type { IssuedPatrolCheckpoint, PatrolCheckpoint } from '@/types/estate';
  * The screen leads with adding a checkpoint rather than with the list, because
  * a register with nothing in it is the normal starting state and the code is the
  * only thing that has to be dealt with carefully: it is shown once, here, and
- * never again. That is not a limitation to apologise for — a code the office
+ * never again. That is not a limitation to apologise for: a code the office
  * could read back is one it could read out to somebody who is not at the
  * checkpoint, and the whole mechanism is that the code is proof of presence.
  */
@@ -55,7 +55,9 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
 
   const createMutation = useMutation({
     mutationFn: () =>
-      unwrap(estateService.createPatrolCheckpoint(estateId, { name, location: location || undefined })),
+      unwrap(
+        estateService.createPatrolCheckpoint(estateId, { name, location: location || undefined })
+      ),
     onSuccess: (checkpoint) => {
       setIssued(checkpoint);
       setCopied(false);
@@ -80,7 +82,9 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
   const retireMutation = useMutation({
     mutationFn: (checkpoint: PatrolCheckpoint) =>
       unwrap(
-        estateService.updatePatrolCheckpoint(estateId, checkpoint.id, { active: !checkpoint.active })
+        estateService.updatePatrolCheckpoint(estateId, checkpoint.id, {
+          active: !checkpoint.active,
+        })
       ),
     onSuccess: () => {
       setRetiring(null);
@@ -133,7 +137,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         <EmptyState
           icon={MapPin}
           title="No checkpoints yet"
-          description="Add the places a patrol has to reach — the gate, the generator house, the back fence. Each one gets a code you print and put up there."
+          description="Add the places a patrol has to reach: the gate, the generator house, the back fence. Each one gets a code you print and put up there."
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -199,7 +203,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
       )}
 
       {/* Mounted only while open, so a second checkpoint cannot inherit the
-          first one's name — the same trap that has caught three dialogs in this
+          first one's name: the same trap that has caught three dialogs in this
           programme already. */}
       <Dialog open={isAddOpen} onOpenChange={(open) => (open ? setIsAddOpen(true) : reset())}>
         <DialogContent>
@@ -208,7 +212,8 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
               <div>
                 <DialogTitle>Add a checkpoint</DialogTitle>
                 <DialogDescription>
-                  A place a patrol has to reach. You will get a code once, to print and put up there.
+                  A place a patrol has to reach. You will get a code once, to print and put up
+                  there.
                 </DialogDescription>
               </div>
 
@@ -278,7 +283,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         }
         description={
           retiring?.active
-            ? 'It stops counting towards rounds, and its code stops working. Every scan it has ever recorded is kept — retiring a checkpoint never erases the patrols that visited it.'
+            ? 'It stops counting towards rounds, and its code stops working. Every scan it has ever recorded is kept: retiring a checkpoint never erases the patrols that visited it.'
             : 'It starts counting towards rounds again. Its old code still works, so give it a new one if that code may have been seen.'
         }
         confirmLabel={retiring?.active ? 'Retire' : 'Put back in use'}
@@ -313,9 +318,7 @@ const IssuedCodeNotice = ({
     <div className="flex items-start gap-3">
       <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-foreground">
-          Code for {checkpoint.name} — shown once
-        </p>
+        <p className="font-medium text-foreground">Code for {checkpoint.name}: shown once</p>
         <div className="mt-2 flex items-center gap-2">
           <code className="rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-2xl tracking-[0.3em] text-foreground">
             {checkpoint.code}

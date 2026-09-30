@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, BadgeCheck } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { SignInTrustFeatures } from './SignInTrustFeatures';
 import { SignInStats } from './SignInStats';
@@ -23,7 +23,7 @@ export const SignInLeftContent = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-              <Sparkles className="h-3 w-3" />
+              <BadgeCheck className="h-3 w-3" />
               Welcome back
             </div>
 

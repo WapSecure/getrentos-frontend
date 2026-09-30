@@ -33,8 +33,7 @@ export const Footer = () => (
         <div className="space-y-4">
           <Logo size="md" />
           <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-            The trust-driven property operating system. One workspace for renters, landlords,
-            owners, buyers, realtors and agents.
+            Property services for renters, landlords, owners, buyers, realtors and agents.
           </p>
           <div className="flex items-center gap-3 pt-2">
             <a

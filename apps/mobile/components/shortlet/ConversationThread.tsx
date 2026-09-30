@@ -116,7 +116,7 @@ export function ConversationThread<C extends ThreadConversation>({
       const error =
         err instanceof ApiError
           ? err.isNetwork
-            ? 'Not sent — you’re offline.'
+            ? 'Not sent: you’re offline.'
             : err.message
           : 'Not sent.';
       setPending((rows) => rows.map((x) => (x.key === p.key ? { ...x, error } : x)));

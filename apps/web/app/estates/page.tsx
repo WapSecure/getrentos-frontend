@@ -6,13 +6,14 @@ import type { EstateDirectoryEntry } from '@/types/estate-marketplace';
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
-  title: 'Estates — Browse Properties by Estate',
+  title: 'Estates: Browse Properties by Estate',
   description:
-    'Browse homes marketed by estates across Nigeria. See every property inside an estate — those its own team lists and those its residents own — and who is marketing each one.',
+    'Browse homes marketed by estates across Nigeria. See every property inside an estate: those its own team lists and those its residents own: and who is marketing each one.',
   alternates: { canonical: '/estates' },
   openGraph: {
     title: 'Estates on GetRentos',
-    description: 'Browse homes marketed by estates across Nigeria, and see who is marketing each one.',
+    description:
+      'Browse homes marketed by estates across Nigeria, and see who is marketing each one.',
     url: '/estates',
     type: 'website',
   },
@@ -26,7 +27,7 @@ const FIRST_PAGE_SIZE = 12;
  * This is a public directory, so the point of it is to be found: rendering the
  * estate names and cities into the HTML is what lets a crawler index them. It
  * also means the first paint already has content instead of a skeleton.
- * Failures return null — the client refetches, so a directory page should
+ * Failures return null: the client refetches, so a directory page should
  * degrade to "loading" rather than error.
  */
 async function fetchFirstPage(): Promise<Paginated<EstateDirectoryEntry> | null> {

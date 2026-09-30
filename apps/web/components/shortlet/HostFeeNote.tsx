@@ -38,7 +38,7 @@ export function HostFeeNote() {
         </>
       )}
       {lastIntroDay && data.standardCommissionPct !== data.commissionPct
-        ? ` — launch rate for bookings made by ${lastIntroDay}, then ${data.standardCommissionPct}%.`
+        ? `: launch rate for bookings made by ${lastIntroDay}, then ${data.standardCommissionPct}%.`
         : '.'}{' '}
       Guests don&apos;t pay it, and each booking keeps the rate it was made at.
     </p>

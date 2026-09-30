@@ -188,7 +188,7 @@ export const GuestBookingsWorkspace = () => {
           : 0);
       if (totalRefund > 0) {
         setToast({
-          message: `Booking cancelled — ${formatCurrency(totalRefund)} refunded.`,
+          message: `Booking cancelled: ${formatCurrency(totalRefund)} refunded.`,
           variant: 'success',
         });
       } else {
@@ -202,12 +202,12 @@ export const GuestBookingsWorkspace = () => {
     mutationFn: (bookingId: string) => unwrap(shortletService.payBooking(bookingId)),
     onSuccess: (res) => {
       if (res.authorizationUrl) {
-        // Real gateway flow — redirect to Paystack checkout.
+        // Real gateway flow: redirect to Paystack checkout.
         window.location.href = res.authorizationUrl;
         return;
       }
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
-      setToast({ message: 'Payment received — your stay is confirmed.', variant: 'success' });
+      setToast({ message: 'Payment received: your stay is confirmed.', variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -470,7 +470,7 @@ export const GuestBookingsWorkspace = () => {
             setDisputeTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
             setToast({
-              message: 'Dispute opened — the other party has been notified.',
+              message: 'Dispute opened: the other party has been notified.',
               variant: 'success',
             });
           }}

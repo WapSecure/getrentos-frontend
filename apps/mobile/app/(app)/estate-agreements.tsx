@@ -216,7 +216,7 @@ function ReasonForm({ closing, onDone }: { closing: Closing; onDone: () => void 
       toast.show(
         action === 'decline'
           ? 'Request declined.'
-          : 'Withdrawn — their listings for this property are paused.',
+          : 'Withdrawn: their listings for this property are paused.',
         'success'
       );
       onDone();

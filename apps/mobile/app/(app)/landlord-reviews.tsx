@@ -110,7 +110,7 @@ export default function LandlordReviews() {
   );
 }
 
-/** A single facet score as a thin bar — magnitude out of five. */
+/** A single facet score as a thin bar: magnitude out of five. */
 function Facet({ label, value }: { label: string; value: number }) {
   const { colors, spacing, radius } = useTheme();
   const pct = Math.max(0, Math.min(1, value / 5));

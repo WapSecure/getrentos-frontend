@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { CalendarDays, FileText, ArrowRight, Sparkles } from 'lucide-react';
+import { CalendarDays, FileText, ArrowRight, BadgeCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -28,7 +28,7 @@ export const RenterLeaseRenewal = () => {
   const { data: renewalOffer = null } = useQuery({
     queryKey: renterKeys.renewalOffer,
     // The API answers "no offer" with an empty 200 body, which the shared
-    // client turns into `undefined` — and React Query rejects that. Coalescing
+    // client turns into `undefined`: and React Query rejects that. Coalescing
     // to null matches the declared `RenewalOffer | null`.
     queryFn: async () => (await unwrap(renterService.getRenewalOffer())) ?? null,
     enabled: lease?.status === 'expiring',
@@ -68,7 +68,7 @@ export const RenterLeaseRenewal = () => {
         <div className="mb-5 rounded-2xl border border-primary/20 bg-primary/5 p-4">
           <div className="flex items-start gap-3">
             <div className="rounded-xl bg-primary/10 p-2 text-primary">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              <BadgeCheck className="h-4 w-4" aria-hidden="true" />
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">

@@ -59,7 +59,7 @@ function QuickReplyForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Expands to"
-        placeholder="Thanks — I'll get back to you shortly."
+        placeholder="Thanks: I'll get back to you shortly."
         multiline
         numberOfLines={3}
         maxLength={500}

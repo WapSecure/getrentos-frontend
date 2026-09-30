@@ -32,7 +32,7 @@ const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: Badge
 
 /**
  * Where the platform is actually holding the buyer's money, so release/refund have
- * something to move. Mirrors `HOLDABLE_ESCROW_STATUSES` on the API — a deposit that
+ * something to move. Mirrors `HOLDABLE_ESCROW_STATUSES` on the API: a deposit that
  * has not been paid cannot be released or refunded, and offering the button for it
  * would only produce a rejection.
  */

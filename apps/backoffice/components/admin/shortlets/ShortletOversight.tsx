@@ -526,10 +526,10 @@ export const ShortletOversight = () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'deposit-claims'] });
       const label =
         input.decision === 'APPROVED'
-          ? 'Claim approved — deposit withheld from the guest refund.'
+          ? 'Claim approved: deposit withheld from the guest refund.'
           : input.decision === 'PARTIAL'
-            ? 'Claim partially approved — remainder refunded to the guest.'
-            : 'Claim rejected — deposit released to the guest.';
+            ? 'Claim partially approved: remainder refunded to the guest.'
+            : 'Claim rejected: deposit released to the guest.';
       setToast({ message: label, variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
@@ -551,7 +551,7 @@ export const ShortletOversight = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'fees'] });
       setToast({
-        message: 'Platform fees & taxes saved — new bookings will use them.',
+        message: 'Platform fees & taxes saved: new bookings will use them.',
         variant: 'success',
       });
     },

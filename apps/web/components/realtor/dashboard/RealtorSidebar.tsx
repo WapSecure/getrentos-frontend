@@ -13,7 +13,6 @@ import {
   Star,
   BadgeCheck,
   Settings,
-  Sparkles,
   KeyRound,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -46,7 +45,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.trust_profile', href: ROUTES.REALTOR_TRUST_PROFILE, icon: BadgeCheck },
   { label: 'Managed properties', href: ROUTES.REALTOR_MANAGED, icon: KeyRound },
   { labelKey: 'sidebar.settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
-  { label: 'Billing', href: ROUTES.REALTOR_BILLING, icon: Sparkles },
+  { label: 'Billing', href: ROUTES.REALTOR_BILLING, icon: BadgeCheck },
   { label: 'Verification', href: ROUTES.REALTOR_VERIFICATION, icon: BadgeCheck },
 ];
 

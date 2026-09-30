@@ -13,7 +13,7 @@ import {
   Handshake,
   KeySquare,
   LandPlot,
-  Sparkles,
+  BadgeCheck,
   Trees,
   Gauge,
   KeyRound,
@@ -168,7 +168,7 @@ export default function OwnerAccount() {
       key: 'billing',
       label: 'Plan & billing',
       description: 'What’s included and your receipts',
-      icon: Sparkles,
+      icon: BadgeCheck,
       onPress: go('/(app)/billing'),
     },
     {

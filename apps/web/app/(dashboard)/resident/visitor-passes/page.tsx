@@ -83,7 +83,7 @@ export default function ResidentVisitorPassesPage() {
 
   /**
    * Consenting to a walk-in. Somebody is standing at the gate, so the outcome is
-   * always reported — staying silent here leaves a visitor waiting with no idea
+   * always reported: staying silent here leaves a visitor waiting with no idea
    * whether anyone is deciding.
    */
   const approveMutation = useMutation({
@@ -237,8 +237,8 @@ export default function ResidentVisitorPassesPage() {
       <VisitorPinDialog pass={issuedPass} onClose={() => setIssuedPass(null)} />
 
       {/*
-        Collects why a visitor was refused. The reason is optional — somebody
-        declining a visitor should not have to justify it to reach the button —
+        Collects why a visitor was refused. The reason is optional: somebody
+        declining a visitor should not have to justify it to reach the button:
         but when it is given the guard reads it out loud, so it is framed as
         something to say to the person at the barrier rather than as a note for
         the record.

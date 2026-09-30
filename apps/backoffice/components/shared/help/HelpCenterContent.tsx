@@ -12,22 +12,22 @@ const faqs: FAQItem[] = [
   {
     question: 'How do I escalate a case above my permission level?',
     answer:
-      'Open the case and use "Escalate" — it routes to the next role up in the staff hierarchy (see Access & Roles for the reporting chain) and logs the handoff in the audit trail.',
+      'Open the case and use "Escalate": it routes to the next role up in the staff hierarchy (see Access & Roles for the reporting chain) and logs the handoff in the audit trail.',
   },
   {
-    question: 'A verification or dispute needs a second opinion — what do I do?',
+    question: 'A verification or dispute needs a second opinion: what do I do?',
     answer:
       'Leave a note on the case for context, then reassign or escalate it. Every action you take is attributed to your staff account in the audit log, so handoffs stay traceable.',
   },
   {
     question: 'How do I request a new staff role or permission change?',
     answer:
-      'Staff role changes go through Access & Roles and require approval from a Super Admin or your direct supervisor — self-service role changes are intentionally not permitted.',
+      'Staff role changes go through Access & Roles and require approval from a Super Admin or your direct supervisor: self-service role changes are intentionally not permitted.',
   },
   {
     question: 'Where can I see my own recent actions?',
     answer:
-      'Audit Logs is filterable by actor, so you can review everything attributed to your account — useful for confirming a change went through as expected.',
+      'Audit Logs is filterable by actor, so you can review everything attributed to your account: useful for confirming a change went through as expected.',
   },
 ];
 

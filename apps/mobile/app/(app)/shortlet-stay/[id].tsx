@@ -242,7 +242,7 @@ export default function StayDetail() {
                   {b.checkInInstructions}
                 </Text>
                 <Text variant="caption" color="mutedForeground">
-                  Only you and the host can see these — don’t share them.
+                  Only you and the host can see these: don’t share them.
                 </Text>
               </Card>
             ) : (

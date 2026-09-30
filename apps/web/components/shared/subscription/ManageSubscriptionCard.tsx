@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CalendarClock, Sparkles } from 'lucide-react';
+import { AlertTriangle, CalendarClock, BadgeCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import type { MyBilling } from '@/services/billingService';
@@ -23,7 +23,7 @@ const asDate = (iso: string | null | undefined) =>
  * Shows the live state of the customer's Pro plan and lets them stop or resume
  * the renewal.
  *
- * Cancelling never removes access early — the copy states the exact date and
+ * Cancelling never removes access early: the copy states the exact date and
  * amount so there is no ambiguity about what happens next.
  */
 export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
@@ -44,7 +44,7 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
   /**
    * A Pro plan can be active without ever going through checkout: a comped or
    * simulated grant has no cycle, price or period end at all. The copy must not
-   * promise a charge or a date it does not have — and must never interpolate a
+   * promise a charge or a date it does not have: and must never interpolate a
    * raw `null` into a sentence.
    */
   const isBilled = Boolean(price && periodEnd);
@@ -73,10 +73,10 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
       : "We couldn't take your last payment. Update the card on file to keep Pro."
     : billing.cancelAtPeriodEnd
       ? isTrialing
-        ? `Cancelled — your trial won't convert and nothing will be charged.${trialEnd ? ` You keep Pro until ${trialEnd}.` : ''}`
+        ? `Cancelled: your trial won't convert and nothing will be charged.${trialEnd ? ` You keep Pro until ${trialEnd}.` : ''}`
         : periodEnd
-          ? `Your plan won't renew — you keep Pro until ${periodEnd}, then move to Free.`
-          : "Your plan won't renew — you'll move to Free when the current period ends."
+          ? `Your plan won't renew: you keep Pro until ${periodEnd}, then move to Free.`
+          : "Your plan won't renew: you'll move to Free when the current period ends."
       : isTrialing
         ? trialEnd
           ? `We'll charge ${price ?? 'the plan price'} on ${trialEnd}. Cancel before then and you won't be charged.`
@@ -109,7 +109,7 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
           <p className="mt-0.5 text-sm text-muted-foreground">{detail}</p>
           {billing.simulated && (
             <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
-              <Sparkles className="h-3 w-3" /> Test mode — no real payment is taken
+              <BadgeCheck className="h-3 w-3" /> Test mode: no real payment is taken
             </p>
           )}
         </div>
@@ -169,7 +169,7 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
 
       {confirming && (
         <p className="mt-3 text-xs text-muted-foreground">
-          You&apos;ll keep Pro until {accessEnds} — nothing is charged after that.
+          You&apos;ll keep Pro until {accessEnds}: nothing is charged after that.
         </p>
       )}
     </div>

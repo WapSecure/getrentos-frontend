@@ -65,7 +65,7 @@ export default function Messages() {
     isArchived: !c.isArchived,
   }));
 
-  // Refresh on return to the tab so read state stays current — skipping the
+  // Refresh on return to the tab so read state stays current: skipping the
   // first focus, which the initial fetch already covers.
   const focusedOnce = useRef(false);
   useFocusEffect(

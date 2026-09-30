@@ -102,7 +102,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
       setToast({
         message:
           agreement.status === 'ACTIVE'
-            ? 'Added — this estate owns the property, so it can market it straight away.'
+            ? 'Added: this estate owns the property, so it can market it straight away.'
             : 'Added, and the owner has been asked for marketing rights.',
         variant: 'success',
       });
@@ -124,7 +124,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
           id="estate-property-search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by street, area or title — e.g. Alexander Avenue"
+          placeholder="Search by street, area or title: e.g. Alexander Avenue"
           leadingIcon={<Search className="w-4 h-4" />}
         />
         <p className="text-xs text-muted-foreground mt-1.5">
@@ -221,7 +221,7 @@ const NewListingPanel = ({
       setToast({
         message:
           listing.status === 'PUBLISHED'
-            ? 'Published — it is live in the market and on the estate page.'
+            ? 'Published: it is live in the market and on the estate page.'
             : 'Saved as a draft. Publish it when you are ready.',
         variant: 'success',
       });
@@ -237,7 +237,7 @@ const NewListingPanel = ({
       <div className="border-t border-border pt-4">
         <p className="text-sm text-muted-foreground">
           This estate has no property it is cleared to market yet. Add a property and wait for the
-          owner to approve — then listings can be published here.
+          owner to approve: then listings can be published here.
         </p>
       </div>
     );
@@ -257,7 +257,7 @@ const NewListingPanel = ({
             { value: '', label: 'Choose a property…' },
             ...marketable.map((agreement) => ({
               value: agreement.propertyId,
-              label: `${agreement.propertyTitle} — ${agreement.propertyAddress}`,
+              label: `${agreement.propertyTitle}: ${agreement.propertyAddress}`,
             })),
           ]}
         />
@@ -334,7 +334,7 @@ export default function EstateMarketplacePage() {
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  /** Which listing's photo panel is open. One at a time — the list is long. */
+  /** Which listing's photo panel is open. One at a time: the list is long. */
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
 
   const inventory = useQuery({

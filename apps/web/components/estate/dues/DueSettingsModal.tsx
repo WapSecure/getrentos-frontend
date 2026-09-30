@@ -86,12 +86,12 @@ export const DueSettingsModal = ({
               />
               <p className="text-xs text-muted-foreground">
                 {graceDays === 0
-                  ? 'A due is flagged the moment its date passes — no grace at all.'
+                  ? 'A due is flagged the moment its date passes: no grace at all.'
                   : `A due may run ${graceDays} day${graceDays === 1 ? '' : 's'} past its date before it is flagged overdue and the late fee applies.`}
               </p>
               {isBeyondGraceLimit && (
                 <p className="text-xs text-destructive">
-                  {MAX_GRACE_DAYS} days is the maximum — beyond that a due would never be flagged.
+                  {MAX_GRACE_DAYS} days is the maximum: beyond that a due would never be flagged.
                 </p>
               )}
             </div>

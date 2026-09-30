@@ -53,7 +53,7 @@ export const CreateListingModal = ({
       setAskingRent(String(unit.askingRent));
     }
     if (unit?.askingRentPeriod) setRentPeriod(unit.askingRentPeriod);
-    if (unit && !listingTitle) setListingTitle(`${unit.propertyName} — ${unit.unitName}`);
+    if (unit && !listingTitle) setListingTitle(`${unit.propertyName}: ${unit.unitName}`);
   };
 
   const reset = () => {
@@ -81,8 +81,7 @@ export const CreateListingModal = ({
     );
   };
 
-  const isValid =
-    selectedUnit && listingTitle.trim() && Number(askingRent) > 0 && availabilityDate;
+  const isValid = selectedUnit && listingTitle.trim() && Number(askingRent) > 0 && availabilityDate;
 
   const handlePublish = () => {
     if (!selectedUnit || !isValid) return;
@@ -143,7 +142,7 @@ export const CreateListingModal = ({
                       placeholder="Select a vacant unit"
                       options={vacantUnits.map((unit) => ({
                         value: unit.id,
-                        label: `${unit.propertyName} — ${unit.unitName}`,
+                        label: `${unit.propertyName}: ${unit.unitName}`,
                       }))}
                     />
                   </div>

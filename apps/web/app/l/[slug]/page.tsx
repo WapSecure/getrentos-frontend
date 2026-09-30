@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: MicrositePageProps): Promise<
   const result = await fetchProfile(slug);
 
   if (result.kind !== 'ok') {
-    // Brand omitted on purpose — the root layout's title template appends it.
+    // Brand omitted on purpose: the root layout's title template appends it.
     //
     // `noindex` is load-bearing: `app/loading.tsx`'s root Suspense boundary
     // flushes the shell (with a 200 status) before notFound() can run, so the

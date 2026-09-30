@@ -86,7 +86,7 @@ function OptInView({ profile }: { profile: CreditReportingProfile }) {
     onSuccess: (updated) => {
       qc.setQueryData(qk.renter.creditReporting, updated);
       toast.show(
-        `You're now enrolled — ${updated.totalPaymentsReported} months will be reported.`,
+        `You're now enrolled: ${updated.totalPaymentsReported} months will be reported.`,
         'success'
       );
     },

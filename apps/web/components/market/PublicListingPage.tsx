@@ -49,13 +49,13 @@ export async function publicListingMetadata(
   const path = `${MARKET_PATH[market]}/${id}`;
   const description =
     listing.description?.slice(0, 160) ||
-    `${listing.title} in ${listing.location} — verified listing on GetRentos with payment protection.`;
+    `${listing.title} in ${listing.location}: verified listing on GetRentos with payment protection.`;
   return {
-    title: `${listing.title} — ${listing.location}`,
+    title: `${listing.title}: ${listing.location}`,
     description,
     alternates: { canonical: path },
     openGraph: {
-      title: `${listing.title} — ${listing.location}`,
+      title: `${listing.title}: ${listing.location}`,
       description,
       url: `${SITE_URL}${path}`,
       type: 'website',
@@ -66,8 +66,8 @@ export async function publicListingMetadata(
 
 /**
  * A public listing page: server-rendered so a shared link previews properly and
- * a crawler sees the listing, with the one thing a visitor can't do signed out —
- * contact or pay — handed to sign-in.
+ * a crawler sees the listing, with the one thing a visitor can't do signed out:
+ * contact or pay: handed to sign-in.
  */
 export async function PublicListingPage({
   market,
@@ -268,7 +268,7 @@ export async function PublicListingPage({
               <div className="space-y-3 border-t border-border pt-5 text-xs text-muted-foreground">
                 <p className="flex items-start gap-2">
                   <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                  Pay through GetRentos — we hold your money until both sides confirm.
+                  Pay through GetRentos: we hold your money until both sides confirm.
                 </p>
                 <p className="flex items-start gap-2">
                   <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />

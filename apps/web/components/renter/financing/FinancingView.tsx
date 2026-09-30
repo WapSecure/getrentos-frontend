@@ -34,7 +34,7 @@ export const FinancingView = () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
       setIsApplyModalOpen(false);
       setToast(
-        `Approved! Your landlord has been paid in full — repay in interest-free installments.`
+        `Approved! Your landlord has been paid in full: repay in interest-free installments.`
       );
     },
   });
@@ -44,7 +44,7 @@ export const FinancingView = () => {
       unwrap(renterService.payFinancingInstallment(installmentId)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
-        // Real gateway flow — the installment is PROCESSING until the
+        // Real gateway flow: the installment is PROCESSING until the
         // renter completes checkout, so redirect instead of claiming success.
         window.location.href = updated.authorizationUrl;
         return;

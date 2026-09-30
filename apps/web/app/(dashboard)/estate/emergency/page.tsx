@@ -44,7 +44,7 @@ const rollFilters: { value: RollFilter; label: string }[] = [
  * to pay to find out whether the people inside its building are safe is an
  * estate that will not find out. Nothing on this page is sold.
  *
- * The screen has one job — the numbers at the top have to be the estate's own,
+ * The screen has one job: the numbers at the top have to be the estate's own,
  * counted by the server, and every name beneath them has to be answerable in a
  * single tap. A marshal working through a roll in a stairwell has one hand free.
  */
@@ -63,7 +63,7 @@ export default function EstateEmergencyPage() {
     queryKey: estateKeys.activeMuster(estate?.id ?? ''),
     // `unwrapOptional`, not `unwrap`: "no roll call is running" comes back as a
     // 200 with an empty body, which `unwrap` casts to null while the runtime
-    // value is undefined — and react-query rejects an undefined result outright,
+    // value is undefined: and react-query rejects an undefined result outright,
     // replacing the whole console with an error state.
     queryFn: () => unwrapOptional(estateService.getActiveMuster(estate!.id), null),
     enabled: !!estate,
@@ -161,7 +161,7 @@ export default function EstateEmergencyPage() {
           <h1 className="text-2xl font-bold text-foreground">Emergency roll call</h1>
           <p className="text-muted-foreground mt-1">
             {active
-              ? `${active.kindLabel} at ${estate.name} — ${active.statusLabel.toLowerCase()}`
+              ? `${active.kindLabel} at ${estate.name}: ${active.statusLabel.toLowerCase()}`
               : `Nobody is being called at ${estate.name}`}
           </p>
         </div>
@@ -191,7 +191,7 @@ export default function EstateEmergencyPage() {
               <p className="font-medium text-foreground">No roll call is in progress</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Raising the alarm tells every household immediately and takes the roll as it stands
-                — everybody the estate believes is inside, plus every visitor the gate has admitted
+                : everybody the estate believes is inside, plus every visitor the gate has admitted
                 and not logged out. You can refresh that list while the emergency is open, because
                 people keep arriving.
               </p>
@@ -269,8 +269,8 @@ export default function EstateEmergencyPage() {
             {isLive && (
               <p className="text-xs text-muted-foreground mt-2">
                 Nobody standing this down marks it as timed out and stops asking. &ldquo;Check the
-                gate again&rdquo; adds anybody admitted since the roll was taken — nothing else on
-                it moves.
+                gate again&rdquo; adds anybody admitted since the roll was taken: nothing else on it
+                moves.
               </p>
             )}
 
@@ -331,7 +331,7 @@ export default function EstateEmergencyPage() {
         </div>
       )}
 
-      {/* History — hidden while somebody is answering a live roll, so the page has
+      {/* History: hidden while somebody is answering a live roll, so the page has
           one thing on it at a time. */}
       {!active && !selectedMusterId && (
         <>
@@ -377,7 +377,7 @@ export default function EstateEmergencyPage() {
       )}
 
       {/* Keyed on open, so the form starts empty every time. Without this the
-          modal keeps its state between openings — and a second declaration would
+          modal keeps its state between openings: and a second declaration would
           inherit the first one's assembly point, which is then broadcast to every
           household as where to go. A stale "gather at the car park" is worse than
           no instruction at all. */}
@@ -411,7 +411,7 @@ export default function EstateEmergencyPage() {
  * One row of history.
  *
  * The description leads rather than the kind, because "Smoke on the third floor"
- * is what identifies a roll call a year later — the kind is only ever one of six.
+ * is what identifies a roll call a year later: the kind is only ever one of six.
  */
 const HistoryRow = ({ summary, onOpen }: { summary: MusterSummary; onOpen: () => void }) => (
   <button

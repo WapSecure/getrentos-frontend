@@ -5,8 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: SITE_NAME,
     short_name: 'GetRentos',
-    description:
-      'Trust-driven property operating system for renters, landlords, owners, buyers, realtors and agents.',
+    description: 'Property services for renters, landlords, owners, buyers, realtors and agents.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

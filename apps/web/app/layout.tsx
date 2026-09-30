@@ -15,7 +15,7 @@ import './globals.css';
 
 // The shared UI theme resolves typography through the `--font-ui` CSS variable
 // (see packages/ui/src/styles/index.css), so next/font is wired directly to it
-// — no duplicate font stacks, no layout shift from late-loaded fonts.
+//: no duplicate font stacks, no layout shift from late-loaded fonts.
 const geist = Geist({
   subsets: ['latin'],
   variable: '--font-ui',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: '/',
-    // Both locales (en + Nigerian Pidgin) share the same URL — the language
+    // Both locales (en + Nigerian Pidgin) share the same URL: the language
     // switch is a client-side preference, so only the default is advertised.
     languages: {
       'x-default': '/',
@@ -82,8 +82,8 @@ export const viewport: Viewport = {
 
 /**
  * This layout must not read request data (cookies, headers). Doing so makes every
- * page in the app dynamic — rendered per visitor, sent `no-store`, and impossible
- * to serve from a CDN — including the public marketing and marketplace pages.
+ * page in the app dynamic: rendered per visitor, sent `no-store`, and impossible
+ * to serve from a CDN: including the public marketing and marketplace pages.
  * The saved language is therefore restored in the browser by LanguageProvider.
  */
 export default function RootLayout({ children }: { children: React.ReactNode }) {

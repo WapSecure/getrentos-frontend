@@ -34,7 +34,7 @@ const benefits = [
     icon: ShieldCheck,
     title: 'Only positive history, ever',
     description:
-      'Only your on-time payment streak is tracked — this can never lower an existing score.',
+      'Only your on-time payment streak is tracked: this can never lower an existing score.',
   },
 ];
 
@@ -55,7 +55,7 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
             Turn your rent into a credit history
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-lg">
-            Paying rent on time is proof you pay your bills — but it has never counted toward your
+            Paying rent on time is proof you pay your bills: but it has never counted toward your
             credit score. Start tracking your on-time rent payments now, and we&apos;ll submit that
             history to Nigeria&apos;s credit bureaus as soon as reporting goes live.
           </p>
@@ -90,7 +90,7 @@ export const CreditReportingOptIn = ({ onEnroll, isEnrolling }: CreditReportingO
               ))}
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Live reporting to these bureaus hasn&apos;t launched yet — turning this on today only
+              Live reporting to these bureaus hasn&apos;t launched yet: turning this on today only
               starts building your track record inside GetRentos.
             </p>
           </div>

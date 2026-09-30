@@ -27,8 +27,8 @@ import type { ExpectedDelivery, IssuedExpectedDelivery } from '@/types/estate';
  * that prevents that rather than with what has already arrived.
  *
  * Every label shown here comes from the server. The difference between "expired"
- * and "cancelled" — two genuinely different things that happened to this
- * household — is decided once, in `delivery.util.ts`, so this screen cannot drift
+ * and "cancelled": two genuinely different things that happened to this
+ * household: is decided once, in `delivery.util.ts`, so this screen cannot drift
  * into saying something the guard's own refusal would contradict.
  */
 export const ExpectedDeliveriesPanel = () => {

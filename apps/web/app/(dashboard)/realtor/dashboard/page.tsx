@@ -13,7 +13,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
-// recharts is heavy — load it only when this dashboard mounts.
+// recharts is heavy: load it only when this dashboard mounts.
 const RealtorCommissionChart = dynamic(
   () =>
     import('@/components/realtor/dashboard/RealtorCommissionChart').then(
@@ -33,7 +33,7 @@ export default function RealtorDashboardPage() {
     queryFn: () => unwrap(realtorService.getDashboard()),
   });
   // Commissions sit behind a class-level @RequiresPlan('PRO') controller, so a
-  // Free realtor must not fetch them — they'd 403 and log console errors.
+  // Free realtor must not fetch them: they'd 403 and log console errors.
   const { data: commissionSummary } = useQuery({
     queryKey: realtorKeys.commissions,
     queryFn: () => unwrap(realtorService.getCommissionsSummary()),

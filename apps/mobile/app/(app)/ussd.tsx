@@ -13,7 +13,7 @@ const BENEFITS = [
   {
     icon: WifiOff,
     title: 'Works with zero data',
-    description: 'USSD runs over your carrier signal — no internet connection needed, ever.',
+    description: 'USSD runs over your carrier signal: no internet connection needed, ever.',
   },
   {
     icon: Smartphone,
@@ -23,7 +23,7 @@ const BENEFITS = [
   {
     icon: ShieldCheck,
     title: 'Same secure GetRentos account',
-    description: 'Sessions are tied to your verified number — no separate signup needed.',
+    description: 'Sessions are tied to your verified number: no separate signup needed.',
   },
 ];
 
@@ -76,10 +76,10 @@ export default function Ussd() {
             <Text variant="body" color="mutedForeground">
               We&apos;re building dial-in access on <Text variant="bodyStrong">{menu?.code}</Text>{' '}
               so you can check your balance, pay rent, see your trust score or report an issue from
-              any phone — no app, no data. Here&apos;s how it will work.
+              any phone: no app, no data. Here&apos;s how it will work.
             </Text>
 
-            {/* Simulated handset. Deliberately not a tel: link — the code is not live yet. */}
+            {/* Simulated handset. Deliberately not a tel: link: the code is not live yet. */}
             <Card padding="none" elevated>
               <View
                 style={{
@@ -94,7 +94,7 @@ export default function Ussd() {
               >
                 <Smartphone size={16} color={colors.mutedForeground} />
                 <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  Preview — nothing is sent
+                  Preview: nothing is sent
                 </Text>
                 {screenId === 'root' ? null : (
                   <Pressable

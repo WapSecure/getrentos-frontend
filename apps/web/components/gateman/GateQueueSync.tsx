@@ -9,7 +9,7 @@ import { replayGateQueue } from '@/lib/gateOfflineQueue';
  *
  * Mounted inside the gate console rather than at the app root: a guard is the
  * only person who records these writes, and the console is where they will be
- * looking when the connection returns. Rendering nothing is the point — the
+ * looking when the connection returns. Rendering nothing is the point: the
  * queue's state and the drain's outcome are shown on the verify screen where the
  * guard acts, not as a banner across every screen in the app.
  *

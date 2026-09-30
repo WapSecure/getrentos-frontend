@@ -45,7 +45,7 @@ export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
   held: { label: 'Held by GetRentos', variant: 'info', icon: Lock },
   pending_review: { label: 'Under review', variant: 'warning', icon: Clock },
   released: { label: 'Paid to landlord', variant: 'success', icon: CheckCircle2 },
-  frozen: { label: 'On hold — dispute open', variant: 'danger', icon: Ban },
+  frozen: { label: 'On hold: dispute open', variant: 'danger', icon: Ban },
 };
 
 export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {

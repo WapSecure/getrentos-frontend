@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, Sparkles } from 'lucide-react';
+import { TrendingUp, BadgeCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
@@ -76,7 +76,7 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
           className="gap-1"
           onClick={() => onUseSuggestedPrice(suggested)}
         >
-          <Sparkles className="w-3 h-3" />
+          <BadgeCheck className="w-3 h-3" />
           Use {formatCurrency(suggested, { compact: true })}
         </Button>
       </div>

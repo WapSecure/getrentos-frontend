@@ -135,7 +135,7 @@ export function ShortletListingDetail({
       }
       setBookingOpen(false);
       setToast({
-        message: 'Booking request sent — the host will confirm shortly.',
+        message: 'Booking request sent: the host will confirm shortly.',
         variant: 'success',
       });
     },
@@ -157,7 +157,7 @@ export function ShortletListingDetail({
       setBookingOpen(false);
       setCreatedBooking(null);
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
-      setToast({ message: 'Payment received — your stay is confirmed.', variant: 'success' });
+      setToast({ message: 'Payment received: your stay is confirmed.', variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
@@ -171,7 +171,7 @@ export function ShortletListingDetail({
   };
 
   // `isError` may be true after a failed background refresh even though the
-  // ISR-rendered `listing` is still present — only treat it as missing when
+  // ISR-rendered `listing` is still present: only treat it as missing when
   // there is genuinely no listing to show.
   if (isLoading) {
     return (
@@ -524,7 +524,7 @@ export function ShortletListingDetail({
                 <span className="capitalize">
                   {listing.cancellationPolicy.toLowerCase()} cancellation
                 </span>
-                — {CANCELLATION_RULE[listing.cancellationPolicy]}
+                : {CANCELLATION_RULE[listing.cancellationPolicy]}
               </div>
               {listing.deposit != null && listing.deposit > 0 && (
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -552,7 +552,7 @@ export function ShortletListingDetail({
               <Skeleton className="h-24 w-full rounded-lg" />
             ) : reviews.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No reviews yet — be the first to stay and share your experience.
+                No reviews yet: be the first to stay and share your experience.
               </p>
             ) : (
               <div className="space-y-3">
@@ -690,7 +690,7 @@ export function ShortletListingDetail({
             )}
             <Button className="mt-4 w-full" onClick={openBooking}>
               <PlayCircle className="mr-1.5 h-4 w-4" />
-              {listing.instantBooking ? 'Book now — instant confirmation' : 'Request to book'}
+              {listing.instantBooking ? 'Book now: instant confirmation' : 'Request to book'}
             </Button>
             {isSignedIn && (
               <Button

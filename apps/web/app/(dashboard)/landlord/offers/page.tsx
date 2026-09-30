@@ -195,7 +195,7 @@ export default function LandlordOffersPage() {
         </p>
       </div>
 
-      {/* Accepting an offer opens an escrow/payout obligation — financially verified (tier 3) landlords only. */}
+      {/* Accepting an offer opens an escrow/payout obligation: financially verified (tier 3) landlords only. */}
       {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (
         <div className="mb-6">
           <VerificationRequiredNotice

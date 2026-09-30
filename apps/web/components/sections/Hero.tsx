@@ -19,17 +19,17 @@ export const Hero = () => (
       <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent/80 px-4 py-1.5 shadow-sm backdrop-blur">
         <Shield className="h-3.5 w-3.5 text-primary" />
         <span className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          Trust-driven platform
+          Property services in one place
         </span>
       </div>
 
       <h1 className="mb-6 text-4xl font-bold tracking-[-0.03em] text-foreground sm:text-6xl lg:text-7xl">
-        The trust-driven
-        <span className="block text-primary">property operating system.</span>
+        Rent, buy and manage property
+        <span className="block text-primary">with fewer surprises.</span>
       </h1>
       <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
         One workspace for renters, landlords, owners, buyers, realtors and agents. Verified
-        identities, verified properties, escrow-secured payments — from first search to final
+        identities, verified properties and protected payments, from first search to final
         signature.
       </p>
       <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">

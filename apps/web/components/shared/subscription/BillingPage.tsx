@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { useProCheckout } from '@/hooks/useProCheckout';
@@ -51,7 +51,7 @@ export function BillingPage({
       <div className="bg-card rounded-2xl border border-border p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
-            <Sparkles className="h-5 w-5" />
+            <BadgeCheck className="h-5 w-5" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Your current plan</p>

@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Check, Circle, Sparkles } from 'lucide-react-native';
+import { Check, Circle, BadgeCheck } from 'lucide-react-native';
 import { Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { applicationAssistantApi, type AssistantStep } from '@/lib/api/applicationAssistant';
@@ -21,7 +21,7 @@ export function ApplicationAssistantCard() {
   return (
     <Card elevated>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Sparkles size={17} color={colors.primary} />
+        <BadgeCheck size={17} color={colors.primary} />
         <Text variant="bodyStrong" style={{ flex: 1 }}>
           Get application-ready
         </Text>

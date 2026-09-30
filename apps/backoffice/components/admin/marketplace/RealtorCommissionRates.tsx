@@ -15,7 +15,7 @@ import { adminMarketplaceService } from '@/services/adminMarketplaceService';
  * is simply not paid, so a zero buyer-side rate is a valid, common setting.
  *
  * This is the *platform* split, not a realtor's own default rate on their
- * business settings — that one only pre-fills their own paperwork.
+ * business settings: that one only pre-fills their own paperwork.
  */
 export const RealtorCommissionRates = () => {
   const client = useQueryClient();
@@ -133,8 +133,8 @@ export const RealtorCommissionRates = () => {
                 value.
                 {tooMuch && (
                   <span className="block mt-1 text-red-600 dark:text-red-400">
-                    The two sides together cannot exceed 100% — that would pay out more than the
-                    sale was worth.
+                    The two sides together cannot exceed 100%: that would pay out more than the sale
+                    was worth.
                   </span>
                 )}
                 <span className="mt-1 block">

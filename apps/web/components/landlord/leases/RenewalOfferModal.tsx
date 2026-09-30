@@ -63,7 +63,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
               <div>
                 <h3 className="font-semibold text-foreground">Send Renewal Offer</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  To {lease.tenantName} — {lease.unitName}
+                  To {lease.tenantName}: {lease.unitName}
                 </p>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
@@ -81,7 +81,9 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  New {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)
+                  New{' '}
+                  {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()}{' '}
+                  (₦)
                 </label>
                 <CurrencyInput
                   prefix="₦"

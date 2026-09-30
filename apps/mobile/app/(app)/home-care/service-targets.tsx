@@ -195,7 +195,7 @@ export default function ServiceTargets() {
                         <Text variant="callout">
                           {policy
                             ? `Respond in ${minutesLabel(policy.responseTargetMinutes)} · fix in ${minutesLabel(policy.resolutionTargetMinutes)}`
-                            : 'No targets yet — tap to set them'}
+                            : 'No targets yet: tap to set them'}
                         </Text>
                         {policy ? (
                           <Text variant="caption" color="mutedForeground">

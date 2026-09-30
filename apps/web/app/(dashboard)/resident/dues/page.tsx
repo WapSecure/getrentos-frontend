@@ -49,7 +49,7 @@ export default function ResidentDuesPage() {
     mutationFn: (dueId: string) => unwrap(estateResidentService.payMyDue(dueId)),
     onSuccess: (updated) => {
       setPayError(null);
-      // A real gateway checkout was started — send the resident to Paystack to complete it.
+      // A real gateway checkout was started: send the resident to Paystack to complete it.
       // The webhook confirms payment server-side once they finish there.
       if (updated.authorizationUrl) {
         window.location.href = updated.authorizationUrl;

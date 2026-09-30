@@ -52,7 +52,7 @@ export const PayoutSettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Payout Account</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Where escrow-released rent payments are sent — transfers run through Paystack.
+        Where escrow-released rent payments are sent: transfers run through Paystack.
       </p>
 
       {savedAccountNumber && (
@@ -69,7 +69,7 @@ export const PayoutSettings = () => {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground mt-2">
-              Not yet verified — save it again to resolve it against your bank.
+              Not yet verified: save it again to resolve it against your bank.
             </p>
           )}
           <p className="mt-2 text-xs text-muted-foreground">

@@ -2,14 +2,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import {
-  ArrowRight,
-  BadgeCheck,
-  Building2,
-  Search,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react-native';
+import { ArrowRight, BadgeCheck, Building2, Search, ShieldCheck } from 'lucide-react-native';
 import {
   BrandLogo,
   Button,
@@ -72,9 +65,9 @@ export default function Welcome() {
               marginBottom: spacing.lg,
             }}
           >
-            <Sparkles size={13} color={colors.primary} />
+            <BadgeCheck size={13} color={colors.primary} />
             <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
-              NIGERIA&apos;S TRUSTED PROPERTY OS
+              PROPERTY SERVICES YOU CAN VERIFY
             </Text>
           </View>
           <Text
@@ -89,8 +82,8 @@ export default function Welcome() {
             color="mutedForeground"
             style={{ marginTop: spacing.md, maxWidth: 340 }}
           >
-            Verified homes, protected payments, and every property relationship in one beautifully
-            simple place.
+            Find verified homes, make protected payments and manage your property relationships in
+            one place.
           </Text>
         </Animated.View>
 
@@ -115,7 +108,7 @@ export default function Welcome() {
               <View style={{ flex: 1 }}>
                 <Text variant="bodyStrong">A safer way to find home</Text>
                 <Text variant="caption" color="mutedForeground">
-                  Renting, buying and managing—connected
+                  Renting, buying and managing in one place
                 </Text>
               </View>
               <BadgeCheck size={21} color={colors.success} />
@@ -134,7 +127,7 @@ export default function Welcome() {
                 icon={<ShieldCheck size={14} color={colors.primary} />}
                 label="Protected"
               />
-              <TrustPoint icon={<Sparkles size={14} color={colors.purple} />} label="Effortless" />
+              <TrustPoint icon={<BadgeCheck size={14} color={colors.primary} />} label="Clear" />
             </View>
           </Card>
         </Animated.View>

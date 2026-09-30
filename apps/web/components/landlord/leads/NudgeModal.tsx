@@ -7,7 +7,7 @@ import { Button, Textarea } from '@getrentos/ui';
 import type { LandlordLead } from '@/types/landlord';
 
 const defaultMessage = (lead: LandlordLead) =>
-  `Hi ${lead.leadName.split(' ')[0]}, just following up on your interest in ${lead.propertyName} — still looking?`;
+  `Hi ${lead.leadName.split(' ')[0]}, just following up on your interest in ${lead.propertyName}: still looking?`;
 
 interface NudgeModalProps {
   lead: LandlordLead | null;

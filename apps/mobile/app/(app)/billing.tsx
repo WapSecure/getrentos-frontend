@@ -3,7 +3,7 @@ import { Alert, Platform, RefreshControl, ScrollView, View } from 'react-native'
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, Minus, Sparkles } from 'lucide-react-native';
+import { Check, Minus, BadgeCheck } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -175,7 +175,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
   return (
     <Card elevated style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Sparkles size={20} color={pro ? colors.primary : colors.mutedForeground} />
+        <BadgeCheck size={20} color={pro ? colors.primary : colors.mutedForeground} />
         <Text variant="heading" style={{ flex: 1 }}>
           {pro ? 'Pro' : 'Free'}
         </Text>

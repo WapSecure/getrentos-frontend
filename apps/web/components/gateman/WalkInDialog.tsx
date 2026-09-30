@@ -28,7 +28,7 @@ interface WalkInDialogProps {
  *
  * The household is chosen from the estate's own list rather than typed, so the
  * request cannot be addressed to a unit that does not exist. Submitting asks the
- * household and does not admit anyone — the barrier stays shut until they answer.
+ * household and does not admit anyone: the barrier stays shut until they answer.
  *
  * Households with no linked app account are shown but disabled. Only their
  * resident can consent, so a request to them could never be answered, and saying
@@ -59,7 +59,7 @@ export const WalkInDialog = ({
   const [overrideError, setOverrideError] = useState<string | null>(null);
   /**
    * What the estate's list said when the guard asked before attempting the
-   * raise. Set only for an answer that is not a refusal — a refusal is not an
+   * raise. Set only for an answer that is not a refusal: a refusal is not an
    * advisory and belongs to the panel below, which owns the decision.
    */
   const [screening, setScreening] = useState<WatchlistScreening | null>(null);
@@ -140,7 +140,7 @@ export const WalkInDialog = ({
    * Asks about this visitor before anything is attempted.
    *
    * Needs the household first, because the question is "this visitor, coming to
-   * see this unit" — and because if the answer refuses them, the only way
+   * see this unit": and because if the answer refuses them, the only way
    * forward is the override, which raises the request.
    */
   const canCheck =
@@ -232,7 +232,7 @@ export const WalkInDialog = ({
                           {h.residentName}
                           {reachable
                             ? ''
-                            : ' · nobody here uses the app, so they cannot approve — ask the estate office'}
+                            : ' · nobody here uses the app, so they cannot approve: ask the estate office'}
                         </p>
                       </button>
                     );
@@ -316,7 +316,7 @@ export const WalkInDialog = ({
             <div className="p-4 border-t border-border shrink-0 space-y-2">
               {/* Once the estate has refused, the primary action is gone on
                   purpose. Leaving "Ask for approval" here would invite a retry
-                  that returns the same refusal while the visitor waits — the
+                  that returns the same refusal while the visitor waits: the
                   only route forward is the stated override inside the notice. */}
               {refusal ? (
                 <Button variant="outline" fullWidth onClick={handleClose}>

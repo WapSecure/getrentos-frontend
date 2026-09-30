@@ -153,7 +153,7 @@ export const EscrowTransactionDetailModal = ({
                   <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-medium text-red-700 dark:text-red-400">
-                      Payment on hold — dispute open
+                      Payment on hold: dispute open
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-300 mt-0.5">
                       {transaction.disputeReason ||

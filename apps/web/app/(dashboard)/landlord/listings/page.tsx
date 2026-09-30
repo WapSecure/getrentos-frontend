@@ -158,7 +158,7 @@ export default function LandlordListingsPage() {
             We couldn&apos;t load your listings
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            This was a connection problem — nothing was lost. Try again.
+            This was a connection problem: nothing was lost. Try again.
           </p>
           <Button variant="primary" className="mt-6" onClick={() => refetchListings()}>
             Try again

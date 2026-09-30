@@ -12,7 +12,7 @@ import { ROLES } from '@/lib/constants/auth';
 
 /**
  * Role cards are always clickable. With multi-role off, picking another card
- * swaps the selection (see `addRole`), and with it on, the pick is added — so
+ * swaps the selection (see `addRole`), and with it on, the pick is added: so
  * there is no state where a card should silently ignore a click. Signup starts
  * with Renter pre-selected, so a disabled gate here used to make every other
  * role look broken: clicking Landlord did nothing and the account was created
@@ -33,7 +33,7 @@ export default function RoleSelectionPage() {
   const handleContinue = async () => {
     if (signupData.selectedRoles.length === 0) return;
     // Every account is created immediately, with no upfront document/facial
-    // verification — identity/license/ownership checks happen later, at the
+    // verification: identity/license/ownership checks happen later, at the
     // point of use, for the specific actions that need them.
     await createAccount();
   };
@@ -42,7 +42,7 @@ export default function RoleSelectionPage() {
     router.back();
   };
 
-  // Admin/BackOffice, Gateman, and Resident are provisioned out of band —
+  // Admin/BackOffice, Gateman, and Resident are provisioned out of band:
   // never offered as a self-serve signup option (gateman and resident are
   // both granted by an estate manager, not chosen at signup).
   const roleList = Object.values(ROLES)
@@ -112,7 +112,7 @@ export default function RoleSelectionPage() {
         </div>
       </div>
 
-      {/* Persistent action bar — toggle + Create Account stay on screen while
+      {/* Persistent action bar: toggle + Create Account stay on screen while
           the role grid scrolls behind them. */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}

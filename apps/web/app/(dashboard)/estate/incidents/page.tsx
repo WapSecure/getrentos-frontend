@@ -126,7 +126,7 @@ export default function EstateIncidentsPage() {
           <EmptyState
             icon={Siren}
             title="No incidents reported"
-            description="Reports from the gate — including panic alerts — will show up here."
+            description="Reports from the gate: including panic alerts: will show up here."
           />
         </div>
       ) : (

@@ -41,7 +41,7 @@ const SelectedEstateContext = createContext<SelectedEstateValue | null>(null);
 /**
  * A manager's currently-selected estate out of their whole portfolio.
  * Every manager-facing estate page should read from this instead of
- * calling estateService.getMyEstate() directly — that endpoint only
+ * calling estateService.getMyEstate() directly: that endpoint only
  * resolves a single ("first") estate and stays reserved for the
  * gateman/resident personas, who are always tied to exactly one.
  */
@@ -70,7 +70,7 @@ function SelectedEstateProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(SELECTED_ESTATE_STORAGE_KEY, id);
     } catch {
-      // ignore — the in-memory selection still works for this session
+      // ignore: the in-memory selection still works for this session
     }
   };
 

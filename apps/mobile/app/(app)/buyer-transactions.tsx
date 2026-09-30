@@ -32,7 +32,7 @@ import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
-/** The happy path, in order — the same five stages the web shows. */
+/** The happy path, in order: the same five stages the web shows. */
 const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] = [
   {
     key: 'deposit_pending',
@@ -131,7 +131,7 @@ export default function BuyerTransactions() {
     onError: fail('Could not request a refund.'),
   });
 
-  // Releasing pays the seller and cannot be undone — always ask first.
+  // Releasing pays the seller and cannot be undone: always ask first.
   const confirmRelease = (tx: BuyerTransaction) =>
     Alert.alert(
       'Release funds to the seller?',
@@ -310,7 +310,7 @@ function TransactionCard({
           <ShieldAlert size={18} color={colors.destructive} style={{ marginTop: 1 }} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="callout" style={{ color: colors.destructive, fontWeight: '700' }}>
-              Payment on hold — dispute open
+              Payment on hold: dispute open
             </Text>
             <Text variant="caption" color="mutedForeground">
               {tx.disputeReason ||

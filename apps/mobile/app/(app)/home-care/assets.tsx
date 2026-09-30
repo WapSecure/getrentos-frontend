@@ -65,7 +65,7 @@ function warranty(a: Asset): { text: string; warn: boolean } | null {
   return { text: `Warranty to ${formatDate(a.warrantyExpiresAt, 'medium')}`, warn: false };
 }
 
-/** The things in each home that break: ACs, generators, pumps — with warranties and servicing. */
+/** The things in each home that break: ACs, generators, pumps: with warranties and servicing. */
 export default function Assets() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

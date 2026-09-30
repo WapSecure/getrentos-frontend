@@ -56,7 +56,7 @@ export default function ConversationThread() {
   const [attachment, setAttachment] = useState<PickedFile | null>(null);
   const [outgoing, setOutgoing] = useState<Outgoing[]>([]);
 
-  // Just this thread — polled lightly while open (React Query pauses it when
+  // Just this thread: polled lightly while open (React Query pauses it when
   // the app is in the background or the screen is not focused).
   const query = useQuery({
     queryKey: qk.renter.conversation(id),
@@ -66,7 +66,7 @@ export default function ConversationThread() {
   });
   const conversation = query.data;
 
-  // Mark read whenever unread messages are showing — including replies that
+  // Mark read whenever unread messages are showing: including replies that
   // arrive while the thread is open, not just the first time it loads.
   const marking = useRef(false);
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function ConversationThread() {
       const error =
         err instanceof ApiError
           ? err.isNetwork
-            ? 'Not sent — you’re offline.'
+            ? 'Not sent: you’re offline.'
             : err.message
           : 'Not sent.';
       setOutgoing((list) =>
@@ -223,7 +223,7 @@ export default function ConversationThread() {
           ListEmptyComponent={
             <View style={{ padding: spacing.xl, transform: [{ scaleY: -1 }] }}>
               <Text variant="callout" color="mutedForeground" center>
-                No messages yet — say hello.
+                No messages yet: say hello.
               </Text>
             </View>
           }

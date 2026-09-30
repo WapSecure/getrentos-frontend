@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, BadgeCheck } from 'lucide-react';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
@@ -17,7 +17,7 @@ const PERSONAS: { key: PlanPersona; label: string }[] = [
 ];
 
 /**
- * Public pricing page — the surface prospective customers see before signing
+ * Public pricing page: the surface prospective customers see before signing
  * up. Price and entitlements come from the backend catalog so what we show is
  * exactly what we charge.
  */
@@ -38,14 +38,14 @@ export default function PricingPage() {
 
         <div className="mt-8 text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-            <Sparkles className="h-3 w-3" /> Pricing
+            <BadgeCheck className="h-3 w-3" /> Pricing
           </span>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
             Simple pricing that scales with you
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Start free. Upgrade to Pro when you need unlimited scale, automation and analytics —
-            with a {pricing?.trialDays ?? 14}-day free trial.
+            Start free. Upgrade to Pro when you need unlimited scale, automation and analytics: with
+            a {pricing?.trialDays ?? 14}-day free trial.
           </p>
         </div>
 
@@ -86,7 +86,7 @@ export default function PricingPage() {
             { title: 'Cancel anytime', body: 'No lock-in. Downgrade to Free whenever you like.' },
             {
               title: 'VAT included',
-              body: 'The price you see is exactly what you pay — no surprises at checkout.',
+              body: 'The price you see is exactly what you pay: no surprises at checkout.',
             },
             {
               title: 'Secure payments',

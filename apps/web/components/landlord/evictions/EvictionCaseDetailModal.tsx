@@ -70,7 +70,7 @@ export const EvictionCaseDetailModal = ({
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
                 <h3 className="font-semibold text-foreground">
-                  {evictionCase.tenantName} — {evictionCase.propertyName}
+                  {evictionCase.tenantName}: {evictionCase.propertyName}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {evictionCase.unitName} · Created {formatDate(evictionCase.createdAt)}
@@ -125,7 +125,7 @@ export const EvictionCaseDetailModal = ({
                   <p className="text-sm font-medium text-foreground mb-1">Resolved</p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(evictionCase.resolvedAt)}
-                    {evictionCase.resolutionNotes ? ` — ${evictionCase.resolutionNotes}` : ''}
+                    {evictionCase.resolutionNotes ? `: ${evictionCase.resolutionNotes}` : ''}
                   </p>
                 </div>
               )}

@@ -30,7 +30,7 @@ interface CreateListingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (listing: CreateRealtorListingInput) => void;
-  /** Caught error from the parent's create mutation — renders a trust upsell when it's a verification/tier gate. */
+  /** Caught error from the parent's create mutation: renders a trust upsell when it's a verification/tier gate. */
   error?: unknown;
 }
 

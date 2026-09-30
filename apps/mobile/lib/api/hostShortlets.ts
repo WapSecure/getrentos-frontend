@@ -390,7 +390,7 @@ export function feeNote(f: HostFees): string {
     // The launch rate ends at midnight Lagos (UTC+1, no DST); name the last day it applies.
     const d = new Date(Date.parse(f.introEndsAt) - 1 + 60 * 60 * 1000);
     const day = `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-    launch = ` — launch rate for bookings made by ${day}, then ${f.standardCommissionPct}%`;
+    launch = `: launch rate for bookings made by ${day}, then ${f.standardCommissionPct}%`;
   }
   return `${now}${launch}. Guests don’t pay it, and each booking keeps the rate it was made at.`;
 }

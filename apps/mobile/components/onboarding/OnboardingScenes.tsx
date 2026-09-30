@@ -25,7 +25,7 @@ import { Card, Text, useTheme } from '@getrentos/ui-native';
 
 /**
  * Onboarding illustrations. Each is a miniature of something the product
- * actually does, composed from design-system tokens — no stock art, no
+ * actually does, composed from design-system tokens: no stock art, no
  * one-off colours.
  */
 
@@ -44,7 +44,7 @@ const LAYER_TRAVEL = 36;
 
 /**
  * A card that travels a little further than the page per unit of `depth`, so a
- * scene's pieces fan out and settle one after another as the finger drags —
+ * scene's pieces fan out and settle one after another as the finger drags:
  * cheap, UI-thread parallax that tracks the gesture instead of a timer.
  */
 function Layer({
@@ -199,7 +199,7 @@ export function FindPropertiesScene() {
         </Layer>
       ))}
 
-      {/* map strip — takes whatever height is left so the panel always fills */}
+      {/* map strip: takes whatever height is left so the panel always fills */}
       <Layer depth={4} style={{ flex: 1, minHeight: 84 }}>
         <View
           style={{
@@ -225,7 +225,7 @@ export function FindPropertiesScene() {
   );
 }
 
-/** Scattered pin positions for the map strip — fixed so the layout never jitters. */
+/** Scattered pin positions for the map strip: fixed so the layout never jitters. */
 const PIN_SPOTS = [
   { left: '16%' as const, top: '12%' as const, size: 17, opacity: 0.85 },
   { left: '62%' as const, top: '8%' as const, size: 19, opacity: 0.9 },

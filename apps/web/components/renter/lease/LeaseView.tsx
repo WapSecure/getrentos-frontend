@@ -26,7 +26,7 @@ export const LeaseView = () => {
 
   // A renter whose lease is still awaiting signature has no active lease, no
   // renewal offer, no increases and no reminders yet: the API answers those with
-  // 404. They are "nothing to report", not an outage — treating them as failures
+  // 404. They are "nothing to report", not an outage: treating them as failures
   // replaced this whole tab with an error and hid the sign-your-lease card.
   const leaseQuery = useQuery({
     queryKey: renterKeys.lease,
@@ -37,7 +37,7 @@ export const LeaseView = () => {
     queryKey: renterKeys.pendingLease,
     queryFn: () => unwrapOptional(renterService.getPendingLease(), null),
     // Always fetch this. It used to be gated on `!lease`, so as soon as the
-    // renter's active lease resolved the query was disabled — and a disabled
+    // renter's active lease resolved the query was disabled: and a disabled
     // query cannot refetch. Invalidation then marked it stale with no way to
     // refresh, leaving the sign-your-lease card showing the pre-signature state
     // for a tenant who had already signed.
@@ -107,7 +107,7 @@ export const LeaseView = () => {
 
   // Rendered by both branches below. It used to live only in the no-active-lease
   // branch, so a tenant signing a second lease got no success or failure feedback
-  // at all — including the error when a signature is rejected.
+  // at all: including the error when a signature is rejected.
   const toastNode = toast ? (
     <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
   ) : null;

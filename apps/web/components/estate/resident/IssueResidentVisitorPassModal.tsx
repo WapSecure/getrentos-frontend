@@ -96,7 +96,7 @@ export const IssueResidentVisitorPassModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Expires{' '}
                   <span className="text-gray-400 font-normal">
-                    (optional — defaults to 24 hours)
+                    (optional: defaults to 24 hours)
                   </span>
                 </label>
                 <DatePicker value={expiresAt} onChange={setExpiresAt} />

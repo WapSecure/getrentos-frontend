@@ -24,7 +24,7 @@ interface DiscoverPropertyGridProps {
     propertyType: string;
     verifiedOnly: boolean;
     search?: string;
-    /** Estate public slug — set when arriving from an estate microsite. */
+    /** Estate public slug: set when arriving from an estate microsite. */
     estate?: string;
   };
   savedProperties: string[];

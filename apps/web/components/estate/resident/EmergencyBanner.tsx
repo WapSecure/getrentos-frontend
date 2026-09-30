@@ -18,7 +18,7 @@ import {
  *
  * Owns its own query on the shared `estateResidentKeys.emergency` key, so it can
  * be dropped onto any resident screen and the dashboard and the answer page
- * always agree — a banner that still says "you have not answered" beside a page
+ * always agree: a banner that still says "you have not answered" beside a page
  * that has just been answered is worse than no banner.
  *
  * Renders nothing when the estate is not in the middle of an emergency, which is
@@ -29,7 +29,7 @@ export const EmergencyBanner = () => {
   const { data } = useQuery({
     queryKey: estateResidentKeys.emergency,
     // `unwrapOptional`: no emergency is a 200 with an empty body, and react-query
-    // rejects an undefined query result. Null is the answer this screen expects —
+    // rejects an undefined query result. Null is the answer this screen expects:
     // it is what "nothing is happening" looks like.
     queryFn: () => unwrapOptional(estateResidentService.getMyEmergency(), null),
     // While an emergency is open this is the most important thing on the screen,
@@ -51,8 +51,8 @@ export const EmergencyBanner = () => {
   /**
    * What to say about where this household stands.
    *
-   * A household of three can genuinely be half-answered — one flat empty, one
-   * inside — so "your household has not answered" would be false, and
+   * A household of three can genuinely be half-answered: one flat empty, one
+   * inside: so "your household has not answered" would be false, and
    * "your household has answered" would hide the line a marshal still has to
    * chase. Both are avoided by saying which it is.
    */
@@ -78,12 +78,12 @@ export const EmergencyBanner = () => {
         <Siren className="w-6 h-6 text-destructive shrink-0 mt-0.5" />
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-foreground">
-            {muster.kindLabel} — the estate is calling the roll
+            {muster.kindLabel}: the estate is calling the roll
           </p>
           <p className="text-sm text-foreground mt-1">{muster.assemblyInstruction}</p>
           <p className="text-sm text-muted-foreground mt-2">
             {standing}
-            {needsHelp && ' Somebody in your household needs help — a marshal has been told.'}
+            {needsHelp && ' Somebody in your household needs help: a marshal has been told.'}
           </p>
           <Link
             href={ROUTES.RESIDENT_EMERGENCY}

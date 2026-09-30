@@ -84,7 +84,7 @@ export const InitiateEvictionModal = ({
                   placeholder="Select a signed lease"
                   options={leases.map((lease) => ({
                     value: lease.id,
-                    label: `${lease.tenantName} — ${lease.propertyName} (${lease.unitName})`,
+                    label: `${lease.tenantName}: ${lease.propertyName} (${lease.unitName})`,
                   }))}
                 />
                 {leases.length === 0 && (

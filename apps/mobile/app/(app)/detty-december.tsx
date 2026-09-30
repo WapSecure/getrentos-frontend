@@ -117,7 +117,7 @@ export default function DettyDecember() {
           Detty December, sorted.
         </Text>
         <Text variant="body" style={{ color: NIGHT.soft }}>
-          Flying home or hosting the whole family? Book a stay you can trust — your money is held
+          Flying home or hosting the whole family? Book a stay you can trust: your money is held
           until you walk in, and the price you see is the price you pay. Popular places go early,
           and many hosts ask for a minimum stay over the peak.
         </Text>
@@ -186,7 +186,7 @@ export default function DettyDecember() {
         filters={range}
         header={header}
         emptyTitle="Nothing free for these dates yet"
-        emptyDescription="Try the other week, or check back — hosts add December dates all autumn."
+        emptyDescription="Try the other week, or check back: hosts add December dates all autumn."
       />
     </View>
   );

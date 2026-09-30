@@ -125,8 +125,8 @@ export const AdminEstateOverview = () => {
       setToast({
         message:
           result.flagged > 0 || result.generated > 0
-            ? `Scan complete — ${result.flagged} due(s) flagged overdue, ${result.generated} recurring due(s) generated.`
-            : 'Scan complete — no overdue flags or recurring dues to generate.',
+            ? `Scan complete: ${result.flagged} due(s) flagged overdue, ${result.generated} recurring due(s) generated.`
+            : 'Scan complete: no overdue flags or recurring dues to generate.',
         variant: 'success',
       });
       queryClient.invalidateQueries({ queryKey: ['admin', 'estates'] });
@@ -160,7 +160,7 @@ export const AdminEstateOverview = () => {
             Estates, households &amp; community ops
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Platform-wide gated communities — households, dues, incidents, polls and governance.
+            Platform-wide gated communities: households, dues, incidents, polls and governance.
           </p>
         </div>
         {canScan && (

@@ -107,7 +107,7 @@ function WhatsAppForm({ initial }: { initial: WhatsAppPreferences }) {
           <View style={{ flex: 1 }}>
             <Text variant="bodyStrong">Get updates on WhatsApp</Text>
             <Text variant="caption" color="mutedForeground">
-              Rent reminders and landlord messages reach you without opening the app — useful when
+              Rent reminders and landlord messages reach you without opening the app: useful when
               data is tight.
             </Text>
           </View>

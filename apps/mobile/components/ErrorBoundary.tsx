@@ -7,8 +7,8 @@ import { report } from '@/lib/analytics';
 
 /**
  * Branded fallback for uncaught render errors, wired via expo-router's
- * `ErrorBoundary` export in the root layout. Deliberately self-contained — no
- * theme/provider hooks — so it still renders when the failure is high in the
+ * `ErrorBoundary` export in the root layout. Deliberately self-contained: no
+ * theme/provider hooks: so it still renders when the failure is high in the
  * tree. In dev it shows the message; in production it stays generic.
  */
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {

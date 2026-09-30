@@ -29,7 +29,7 @@ export const CreditReportingDashboard = ({ profile }: CreditReportingDashboardPr
               </div>
               <h1 className="text-xl font-bold text-foreground">Building your credit history</h1>
               <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                Live bureau reporting hasn&apos;t launched yet — this history will be submitted as
+                Live bureau reporting hasn&apos;t launched yet: this history will be submitted as
                 soon as it does.
               </p>
             </div>
@@ -73,7 +73,7 @@ export const CreditReportingDashboard = ({ profile }: CreditReportingDashboardPr
               ))}
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Nothing has been sent to these bureaus yet — your history moves the moment live
+              Nothing has been sent to these bureaus yet: your history moves the moment live
               reporting launches.
             </p>
           </div>

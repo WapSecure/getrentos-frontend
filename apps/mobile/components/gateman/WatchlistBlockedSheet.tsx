@@ -19,7 +19,7 @@ export interface WatchlistBlockedSheetProps {
  * The watchlist refusal, held on screen at the gate.
  *
  * A sheet rather than a card because the notice can appear from anywhere on the
- * console — a check-in, admitting an approved walk-in — and it has to be read
+ * console: a check-in, admitting an approved walk-in: and it has to be read
  * and answered, not scrolled past. The refusal itself is
  * `WatchlistBlockedNotice`, shared with the walk-in sheet so a guard sees the
  * same thing whichever route they took to it.

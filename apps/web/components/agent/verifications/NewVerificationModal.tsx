@@ -92,7 +92,7 @@ export const NewVerificationModal = ({
                   <option value="">Select a verification task</option>
                   {tasks.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.title} — {t.propertyAddress}
+                      {t.title}: {t.propertyAddress}
                     </option>
                   ))}
                 </LegacySelect>

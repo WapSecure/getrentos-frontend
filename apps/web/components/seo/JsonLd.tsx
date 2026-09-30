@@ -1,6 +1,6 @@
 /**
  * Renders a JSON-LD structured-data script.
- * Server Component only — no client JS is shipped for the script itself.
+ * Server Component only: no client JS is shipped for the script itself.
  *
  * Usage: <JsonLd data={organizationJsonLd} />
  */

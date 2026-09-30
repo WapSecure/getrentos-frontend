@@ -14,7 +14,7 @@ type SafeImageProps = Omit<ImageProps, 'src' | 'alt'> & {
 /**
  * Catches `next/image` failures so one bad URL cannot take down a whole page.
  *
- * This is not defensive padding — it is a real failure mode. `next/image`
+ * This is not defensive padding: it is a real failure mode. `next/image`
  * throws *synchronously during render* when a remote URL's host is not in
  * `images.remotePatterns` (or, on Next 16, resolves to a private IP). Public
  * pages render inside an error boundary, so that single throw replaces the
@@ -23,7 +23,7 @@ type SafeImageProps = Omit<ImageProps, 'src' | 'alt'> & {
  *
  * Two separate guards, because they catch different things:
  * - a render-time boundary, for the throw above (an `onError` handler never
- *   fires — the failure happens before an <img> exists);
+ *   fires: the failure happens before an <img> exists);
  * - an `onError` handler, for a URL that is configured correctly but fails to
  *   load (expired signature, deleted object).
  *

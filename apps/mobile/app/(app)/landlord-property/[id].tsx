@@ -62,7 +62,7 @@ export default function LandlordPropertyDetail() {
   const [bulkPricing, setBulkPricing] = useState(false);
   const { isPro } = usePlanTier();
 
-  // The API has no single-property route — the list is the source of truth,
+  // The API has no single-property route: the list is the source of truth,
   // and sharing its query key means arriving from the list costs no refetch.
   const property = useQuery({
     queryKey: qk.landlord.properties(),

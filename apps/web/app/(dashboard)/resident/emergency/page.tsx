@@ -41,7 +41,7 @@ export default function ResidentEmergencyPage() {
   const { data, isLoading } = useQuery({
     queryKey: estateResidentKeys.emergency,
     // "Your estate is not calling the roll" arrives as a 200 with an empty body.
-    // `unwrap` would hand react-query an undefined result, which it rejects — so
+    // `unwrap` would hand react-query an undefined result, which it rejects: so
     // the calm, ordinary case would render as a broken page.
     queryFn: () => unwrapOptional(estateResidentService.getMyEmergency(), null),
     refetchInterval: (query) => (query.state.data ? 15_000 : false),
@@ -74,7 +74,7 @@ export default function ResidentEmergencyPage() {
   }
 
   const { muster, myEntries } = data;
-  // The people who live here — the lines this household's answer covers. Visitor
+  // The people who live here: the lines this household's answer covers. Visitor
   // lines are shown, but a marshal answers for them.
   const mine = residentLines(myEntries);
   const visitorEntries = myEntries.filter((entry) => entry.basis !== 'RESIDENT');
@@ -89,7 +89,7 @@ export default function ResidentEmergencyPage() {
           <Siren className="w-6 h-6 text-destructive shrink-0 mt-0.5" />
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-foreground">
-              {muster.kindLabel} — the estate has raised the alarm
+              {muster.kindLabel}: the estate has raised the alarm
             </h1>
             <p className="text-sm text-foreground mt-2">{muster.assemblyInstruction}</p>
             {muster.assemblyPoint && (
@@ -98,7 +98,7 @@ export default function ResidentEmergencyPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground mt-2">
-              Raised {new Date(muster.declaredAt).toLocaleString()} — {muster.statusLabel}
+              Raised {new Date(muster.declaredAt).toLocaleString()}: {muster.statusLabel}
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function ResidentEmergencyPage() {
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
           {answered
-            ? `${describeMyHouseholdAnswer(states[0])}. You can change it — an answer given in a hurry is worth correcting.`
+            ? `${describeMyHouseholdAnswer(states[0])}. You can change it: an answer given in a hurry is worth correcting.`
             : someAnswered
               ? 'Some of your household has answered. Answering again covers everybody who lives here.'
               : 'One answer covers everybody who lives here. Tell a marshal anything you cannot say here.'}
@@ -233,8 +233,8 @@ export default function ResidentEmergencyPage() {
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {visitorEntries.length === 1
-                ? 'One visitor is still on site. A marshal answers for them — the person who let them in is not always the person holding this phone.'
-                : `${visitorEntries.length} visitors are still on site. A marshal answers for them — the person who let them in is not always the person holding this phone.`}
+                ? 'One visitor is still on site. A marshal answers for them: the person who let them in is not always the person holding this phone.'
+                : `${visitorEntries.length} visitors are still on site. A marshal answers for them: the person who let them in is not always the person holding this phone.`}
             </p>
             <div className="mt-2 space-y-2">
               {visitorEntries.map((entry) => (

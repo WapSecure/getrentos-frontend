@@ -15,7 +15,7 @@ export interface SettingsItem {
   tone?: 'default' | 'success' | 'warning';
 }
 
-/** A titled group of navigation rows — the building block of every account screen. */
+/** A titled group of navigation rows: the building block of every account screen. */
 export function SettingsGroup({
   title,
   items,

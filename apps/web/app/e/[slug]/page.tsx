@@ -12,14 +12,14 @@ interface EstateMicrositePageProps {
 /**
  * The API answers 404 for a slug that is switched off, suspended, or whose
  * owner no longer holds a plan that grants a microsite. Each of those is a real
- * "gone", so it has to reach the client as Next's notFound() — resolving it to
+ * "gone", so it has to reach the client as Next's notFound(): resolving it to
  * a null profile instead made the page answer 200 with a not-found body, which
  * invites search engines to index a dead page.
  *
  * A failure that is NOT a 404 is a different thing and must not be reported as
  * "this does not exist": it resolves to `error` so the segment error boundary
  * can offer a retry. Previously every failure collapsed into null, which meant
- * error.tsx could never fire — a timeout was indistinguishable from a dead
+ * error.tsx could never fire: a timeout was indistinguishable from a dead
  * estate.
  */
 type ProfileResult =
@@ -32,7 +32,7 @@ async function fetchProfile(slug: string): Promise<ProfileResult> {
   try {
     // One canonical public estate endpoint. /estate-microsites/:slug returned a
     // strict subset of this from a second service, so the same "is this estate
-    // visible?" rule lived in two places — and this page had to merge two
+    // visible?" rule lived in two places: and this page had to merge two
     // shapes for the same estate.
     const res = await fetch(`${apiUrl}/estate-storefronts/${slug}`, { cache: 'no-store' });
     if (res.status === 404) return { kind: 'missing' };
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: EstateMicrositePageProps): Pr
     // it, so including it produced "Estate not found | GetRentos | GetRentos".
     //
     // `noindex` is load-bearing, not belt-and-braces. `app/loading.tsx` puts a
-    // Suspense boundary at the root, so the shell — and its 200 status — is
+    // Suspense boundary at the root, so the shell: and its 200 status: is
     // flushed before this page can reach notFound(). The body is the 404 page
     // but the code stays 200, so this directive is what actually keeps a dead
     // estate out of search results.

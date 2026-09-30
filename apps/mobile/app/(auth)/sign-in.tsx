@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, Sparkles, Lock, ShieldCheck } from 'lucide-react-native';
+import { AtSign, BadgeCheck, Lock, ShieldCheck } from 'lucide-react-native';
 import {
   AuthScaffold,
   Button,
@@ -249,7 +249,7 @@ export default function SignIn() {
             {
               value: 'magic',
               label: 'Magic link',
-              icon: <Sparkles size={15} color={colors.mutedForeground} />,
+              icon: <BadgeCheck size={15} color={colors.mutedForeground} />,
             },
           ]}
         />
@@ -336,7 +336,7 @@ export default function SignIn() {
               <TextField
                 label="Email"
                 placeholder="you@example.com"
-                hint="We’ll email you a one-tap sign-in link — no password needed."
+                hint="We’ll email you a one-tap sign-in link: no password needed."
                 leftIcon={<AtSign size={18} color={colors.mutedForeground} />}
                 autoCapitalize="none"
                 autoCorrect={false}

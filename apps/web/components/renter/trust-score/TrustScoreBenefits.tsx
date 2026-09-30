@@ -1,6 +1,15 @@
 'use client';
 
-import { Shield, Lock, Star, Users, TrendingUp, Award, CheckCircle, Sparkles } from 'lucide-react';
+import {
+  Shield,
+  Lock,
+  Star,
+  Users,
+  TrendingUp,
+  Award,
+  CheckCircle,
+  BadgeCheck,
+} from 'lucide-react';
 
 const benefits = [
   {
@@ -46,7 +55,7 @@ export const TrustScoreBenefits = () => {
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
+          <BadgeCheck className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Trust Score Benefits</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">

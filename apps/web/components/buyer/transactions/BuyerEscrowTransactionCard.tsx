@@ -19,7 +19,7 @@ const statusLabels: Record<BuyerEscrowStatus, string> = {
   verification: 'Verification',
   final_payment: 'Final Payment',
   released: 'Completed',
-  frozen: 'Frozen — Dispute',
+  frozen: 'Frozen: Dispute',
   disputed: 'Dispute Open',
   refunded: 'Refunded',
 };

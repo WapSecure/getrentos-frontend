@@ -38,7 +38,7 @@ type AdminFormData = z.infer<typeof adminSchema>;
 /**
  * Dedicated administrator sign-in. Uses the same credential store as the
  * public login, but only accounts that hold an admin role are allowed to
- * proceed — a hardened surface separate from end-user authentication.
+ * proceed: a hardened surface separate from end-user authentication.
  */
 export const AdminSignInForm = () => {
   const router = useRouter();
@@ -69,7 +69,7 @@ export const AdminSignInForm = () => {
 
   // Prefill the identifier if it was remembered, and explain an expired session.
   useEffect(() => {
-    // Mount-time sync with persisted storage — intentional synchronous setState.
+    // Mount-time sync with persisted storage: intentional synchronous setState.
     /* eslint-disable react-hooks/set-state-in-effect */
     const remembered = getRememberedIdentifier();
     if (remembered) {
@@ -167,7 +167,7 @@ export const AdminSignInForm = () => {
         <Logo href={ROUTES.ADMIN_LOGIN} size="lg" className="mx-auto mb-4 w-fit" />
         <h1 className="text-2xl font-bold text-foreground">Administrator Sign In</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Restricted access — for GetRentos staff only
+          Restricted access: for GetRentos staff only
         </p>
       </div>
 

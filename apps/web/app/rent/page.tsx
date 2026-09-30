@@ -2,7 +2,12 @@ import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
-import { firstPagePath, rentToCard, type PublicListingCard, type RentApiItem } from '@/lib/publicListingMap';
+import {
+  firstPagePath,
+  rentToCard,
+  type PublicListingCard,
+  type RentApiItem,
+} from '@/lib/publicListingMap';
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
@@ -12,7 +17,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/rent' },
   openGraph: {
     title: 'Homes to Rent in Nigeria',
-    description: 'Browse rental homes across Nigeria — verified properties, verified landlords, escrow-protected.',
+    description:
+      'Browse rental homes across Nigeria: verified properties, verified landlords, escrow-protected.',
     url: '/rent',
     type: 'website',
   },
@@ -21,7 +27,7 @@ export const metadata: Metadata = {
 /**
  * Pre-render the first page on the server.
  *
- * A public market exists to be found, so the listings — not just the heading —
+ * A public market exists to be found, so the listings: not just the heading:
  * need to be in the HTML a crawler receives. The mapping is shared with the
  * client service, so the server-rendered cards and the hydrated ones are built by
  * the same code. A failure returns null and the client refetches, so this

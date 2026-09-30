@@ -5,7 +5,7 @@ const PORTAL_UNAVAILABLE_OPTIONS = { presentation: 'modal' } as const;
 const DETAIL_OPTIONS = { animation: 'slide_from_right' } as const;
 
 /**
- * Authenticated shell. No redirect here — the root `useProtectedRoute` keeps an
+ * Authenticated shell. No redirect here: the root `useProtectedRoute` keeps an
  * anonymous user out and routes unbuilt portals to the holding screen. This
  * layout just declares the navigator.
  */

@@ -132,7 +132,7 @@ export const CreateLeaseModal = ({
                       <option value="">Select a vacant unit</option>
                       {vacantUnits.map((u) => (
                         <option key={u.id} value={u.id}>
-                          {u.propertyName} — {u.unitName}
+                          {u.propertyName}: {u.unitName}
                         </option>
                       ))}
                     </LegacySelect>
@@ -160,8 +160,8 @@ export const CreateLeaseModal = ({
                       </p>
                     ) : (
                       <p className="mt-1.5 text-xs text-muted-foreground">
-                        No approved applicant for this unit — the lease is recorded against this
-                        name only, and the tenant will not see it in a GetRentos account.
+                        No approved applicant for this unit: the lease is recorded against this name
+                        only, and the tenant will not see it in a GetRentos account.
                       </p>
                     )}
                   </div>

@@ -11,7 +11,7 @@ import { qk } from '@/lib/query/keys';
  *
  * Mounted inside the gate console rather than at the app root: a guard is the
  * only person who records these writes, and the gate console is where they will
- * be looking when the network returns. Rendering nothing is the point — the
+ * be looking when the network returns. Rendering nothing is the point: the
  * queue's state is shown in the Check-In screen where the guard acts, not as a
  * banner strapped across every screen in the app.
  *

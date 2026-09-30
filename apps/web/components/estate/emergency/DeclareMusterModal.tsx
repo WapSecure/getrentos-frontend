@@ -13,7 +13,7 @@ const DESCRIPTION_MIN_LENGTH = 3;
  * The six kinds, as a manager picks them.
  *
  * Plain nouns on purpose. The sentence people receive is composed server-side
- * from the kind — "a gas leak, leave by the nearest exit" — so this list only
+ * from the kind: "a gas leak, leave by the nearest exit": so this list only
  * has to be unambiguous to the person choosing, not grammatical.
  */
 const KIND_OPTIONS: { value: EmergencyKind; label: string }[] = [
@@ -57,7 +57,7 @@ interface DeclareMusterModalProps {
  *
  * What is NOT on this form is the roll. It is built by the server in the same
  * transaction that records the declaration, from who the estate believes is
- * inside at that moment — a client that assembled it would be assembling it from
+ * inside at that moment: a client that assembled it would be assembling it from
  * whatever its cache last saw, and the value of a roll call is that it is a
  * snapshot taken at a stated time.
  */
@@ -182,7 +182,7 @@ export const DeclareMusterModal = ({
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Leave it blank if you have not decided. Residents are told to leave by the nearest
-                  exit instead — nobody is kept waiting on a form field.
+                  exit instead: nobody is kept waiting on a form field.
                 </p>
               </div>
             </div>

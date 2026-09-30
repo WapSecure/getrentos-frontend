@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Sparkles } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { PlanGateError } from '@getrentos/shared';
 import { tierAtLeast, type PlanTier } from '@getrentos/shared';
@@ -16,7 +16,7 @@ interface EstateFeatureGateProps {
   /**
    * The page's own refusal, when it has one.
    *
-   * The API is the authority, so a 403 is enough on its own to show the upsell —
+   * The API is the authority, so a 403 is enough on its own to show the upsell:
    * that is the path taken whenever the tier was not known when the page first
    * rendered.
    */
@@ -35,7 +35,7 @@ const ESTATE_BILLING_HREF = ROUTES.ESTATE_BILLING;
  *  - That one reads the CALLER's subscription. An estate feature is entitled from
  *    the estate owner's plan, so a manager who happens to subscribe personally
  *    would unlock a page their estate has not paid for, and a manager of a paying
- *    estate would be locked out of one it has — the same mistake the sidebar made
+ *    estate would be locked out of one it has: the same mistake the sidebar made
  *    once and the backend never makes.
  *  - That one only knows about Pro, and every remaining gate feature is
  *    Enterprise. A Pro estate would sail past it and then watch every query on
@@ -69,13 +69,13 @@ export function EstateFeatureGate({
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-12 text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-primary">
-          <Sparkles className="h-6 w-6" />
+          <BadgeCheck className="h-6 w-6" />
         </div>
         <h1 className="mt-4 text-lg font-semibold text-foreground">{feature}</h1>
         <p className="mt-2 max-w-md text-sm text-muted-foreground">
           {feature} is an {needed} feature.
           {current ? ` ${estate?.name ?? 'This estate'} is on ${current}.` : ''} Nothing here is a
-          safety feature — an estate without it makes slower decisions about who is on site, not
+          safety feature: an estate without it makes slower decisions about who is on site, not
           unsafe ones.
         </p>
         <Button variant="primary" className="mt-6" href={ESTATE_BILLING_HREF}>

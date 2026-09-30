@@ -317,7 +317,7 @@ export default function AdminAccessPage() {
         staff={resetTarget}
         onReset={() => {
           queryClient.invalidateQueries({ queryKey: adminKeys.staff });
-          notify('Password reset — all previous sessions were revoked.', 'success');
+          notify('Password reset: all previous sessions were revoked.', 'success');
         }}
       />
 

@@ -53,7 +53,7 @@ export const ViolationCard = ({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-foreground truncate">
-              {violation.unitLabel} — {violation.residentName}
+              {violation.unitLabel}: {violation.residentName}
             </p>
             <Badge variant={statusVariant[violation.status]}>
               {statusLabels[violation.status]}

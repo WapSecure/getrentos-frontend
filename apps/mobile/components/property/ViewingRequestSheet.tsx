@@ -41,7 +41,7 @@ function ViewingRequestForm({ onClose, propertyId, propertyTitle }: Omit<Props, 
       track('viewing_requested', { propertyId });
       qc.invalidateQueries({ queryKey: qk.renter.viewings });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
-      toast.show('Viewing requested — the landlord will confirm a time.', 'success');
+      toast.show('Viewing requested: the landlord will confirm a time.', 'success');
       onClose();
     },
     onError: (err) =>

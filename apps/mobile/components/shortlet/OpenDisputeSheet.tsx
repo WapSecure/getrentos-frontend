@@ -48,7 +48,7 @@ function Inner({
     mutationFn: () =>
       shortletsApi.openDispute(booking.id, {
         category: category!,
-        title: `${chosen?.label ?? 'Problem'} — ${booking.propertyTitle}`.slice(0, 120),
+        title: `${chosen?.label ?? 'Problem'}: ${booking.propertyTitle}`.slice(0, 120),
         description: description.trim(),
       }),
     onSuccess: (d) => {

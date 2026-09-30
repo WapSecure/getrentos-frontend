@@ -97,7 +97,7 @@ function WishlistManageBody() {
         ))}
         {query.data?.length === 0 ? (
           <Text variant="callout" color="mutedForeground">
-            No wishlists yet — create one below.
+            No wishlists yet: create one below.
           </Text>
         ) : null}
       </View>

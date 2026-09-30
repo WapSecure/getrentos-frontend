@@ -191,7 +191,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
                   }}
                 >
                   <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }} center>
-                    Upload failed — remove and try again
+                    Upload failed: remove and try again
                   </Text>
                 </View>
               ) : null}

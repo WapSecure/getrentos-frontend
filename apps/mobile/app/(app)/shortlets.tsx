@@ -11,7 +11,7 @@ import {
   MessageSquare,
   Search,
   SlidersHorizontal,
-  Sparkles,
+  BadgeCheck,
   Users,
 } from 'lucide-react-native';
 import { Chip, IconButton, Text, TextField, useTheme } from '@getrentos/ui-native';
@@ -28,7 +28,7 @@ import {
   type StayRefinements,
 } from '@/components/shortlet/StayFiltersSheet';
 
-/** Short stays: where, when, who — then every result priced for exactly that. */
+/** Short stays: where, when, who: then every result priced for exactly that. */
 export default function Shortlets() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -279,7 +279,7 @@ function DettyBanner() {
           backgroundColor: 'rgba(255,180,84,0.18)',
         }}
       >
-        <Sparkles size={20} color={NIGHT.amber} />
+        <BadgeCheck size={20} color={NIGHT.amber} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text variant="label" style={{ color: NIGHT.amber }}>

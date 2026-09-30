@@ -37,7 +37,7 @@ export const DisputePaymentDialog = ({
         <div className="p-4 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">Dispute Payment</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Tell us what&apos;s wrong with this charge — our support team will review it within 2
+            Tell us what&apos;s wrong with this charge: our support team will review it within 2
             business days.
           </DialogDescription>
         </div>

@@ -38,7 +38,7 @@ function DisputePaymentForm({ onClose, payment }: { onClose: () => void; payment
         (old: Awaited<ReturnType<typeof paymentsApi.list>> | undefined) =>
           old ? { ...old, items: old.items.map((p) => (p.id === updated.id ? updated : p)) } : old
       );
-      toast.show('Dispute submitted — we’ll review it within 2 business days.', 'success');
+      toast.show('Dispute submitted: we’ll review it within 2 business days.', 'success');
       onClose();
     },
     onError: (err) =>

@@ -71,7 +71,7 @@ export default function ResidentEmergency() {
   });
 
   const data = query.data;
-  // The people who live here — the lines this household's answer covers. Visitor
+  // The people who live here: the lines this household's answer covers. Visitor
   // lines are shown, but a marshal answers for them.
   const mine = residentLines(data?.myEntries ?? []);
   const visitorEntries = (data?.myEntries ?? []).filter((entry) => entry.basis !== 'RESIDENT');
@@ -128,7 +128,7 @@ export default function ResidentEmergency() {
                 <Siren size={22} color={colors.destructive} />
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyStrong">
-                    {data.muster.kindLabel} — the estate has raised the alarm
+                    {data.muster.kindLabel}: the estate has raised the alarm
                   </Text>
                   <Text variant="body" style={{ marginTop: spacing.xs }}>
                     {data.muster.assemblyInstruction}
@@ -157,7 +157,7 @@ export default function ResidentEmergency() {
               </Text>
               <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.xs }}>
                 {answered
-                  ? `${describeMyHouseholdAnswer(states[0] ?? 'UNACCOUNTED')}. You can change it — an answer given in a hurry is worth correcting.`
+                  ? `${describeMyHouseholdAnswer(states[0] ?? 'UNACCOUNTED')}. You can change it: an answer given in a hurry is worth correcting.`
                   : someAnswered
                     ? 'Some of your household has answered. Answering again covers everybody who lives here.'
                     : 'One answer covers everybody who lives here. Tell a marshal anything you cannot say here.'}
@@ -292,7 +292,7 @@ export default function ResidentEmergency() {
                     {visitorEntries.length === 1
                       ? 'One visitor is still on site. A marshal answers for them'
                       : `${visitorEntries.length} visitors are still on site. A marshal answers for them`}
-                    {' — the person who let them in is not always the person holding this phone.'}
+                    {': the person who let them in is not always the person holding this phone.'}
                   </Text>
                   {visitorEntries.map((entry) => (
                     <View

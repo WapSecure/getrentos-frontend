@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Heart, Bookmark, Download, Sparkles } from 'lucide-react';
+import { Heart, Bookmark, Download, BadgeCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
@@ -53,7 +53,7 @@ export const SavedPropertiesHeader = ({
             transition={{ delay: 0.2 }}
             className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5"
           >
-            <Sparkles className="w-4 h-4 text-purple-600 shrink-0" />
+            <BadgeCheck className="w-4 h-4 text-purple-600 shrink-0" />
             <p className="text-sm text-foreground">
               <span className="font-semibold">Insight:</span> You have {savedCount} saved
               properties.

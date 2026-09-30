@@ -326,7 +326,7 @@ export const CreateSaleListingModal = ({
                     >
                       <Upload className="w-4 h-4" />
                       {form.galleryCount > 0
-                        ? `${form.galleryCount} image(s) added — add more`
+                        ? `${form.galleryCount} image(s) added: add more`
                         : 'Add gallery images'}
                     </button>
                   </div>

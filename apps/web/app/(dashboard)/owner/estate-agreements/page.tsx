@@ -38,7 +38,7 @@ export default function OwnerEstateAgreementsPage() {
     mutationFn: (id: string) => unwrap(estateAgreementService.approve(id, {})),
     onSuccess: () => {
       setToast({
-        message: 'Approved — the estate can now market your property.',
+        message: 'Approved: the estate can now market your property.',
         variant: 'success',
       });
       refresh();
@@ -60,7 +60,7 @@ export default function OwnerEstateAgreementsPage() {
       unwrap(estateAgreementService.revoke(id, reason.trim() || 'Authorisation withdrawn')),
     onSuccess: () => {
       setToast({
-        message: 'Withdrawn — their published listings for this property are now paused.',
+        message: 'Withdrawn: their published listings for this property are now paused.',
         variant: 'success',
       });
       refresh();
@@ -181,7 +181,7 @@ export default function OwnerEstateAgreementsPage() {
         <h1 className="text-2xl font-bold text-foreground">Estate requests</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Estates inside your properties&apos; communities can ask to advertise them. You keep
-          ownership and control of any money — an estate only ever gains the right to market.
+          ownership and control of any money: an estate only ever gains the right to market.
         </p>
       </header>
 

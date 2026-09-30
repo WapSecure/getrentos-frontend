@@ -23,7 +23,7 @@ import {
   BedDouble,
   Globe,
   Gift,
-  Sparkles,
+  BadgeCheck,
   ShieldCheck,
   Handshake,
 } from 'lucide-react';
@@ -95,7 +95,7 @@ export const navGroups = [
       item('sidebar.reviews', ROUTES.LANDLORD_REVIEWS, Star),
       item('sidebar.referrals', ROUTES.LANDLORD_REFERRALS, Gift),
       item('sidebar.settings', ROUTES.LANDLORD_SETTINGS, Settings),
-      item('sidebar.billing', ROUTES.LANDLORD_BILLING, Sparkles),
+      item('sidebar.billing', ROUTES.LANDLORD_BILLING, BadgeCheck),
       item('sidebar.verification', ROUTES.LANDLORD_VERIFICATION, ShieldCheck),
     ],
   },

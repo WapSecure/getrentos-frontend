@@ -81,7 +81,7 @@ export const AgentRegister = () => {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Agents</h1>
           <p className="mt-1 text-muted-foreground">
-            Field-agent register — clients, assigned properties, tasks, inspections and reviews.
+            Field-agent register: clients, assigned properties, tasks, inspections and reviews.
           </p>
         </div>
         <Button variant="outline" onClick={handleExport} disabled={exporting}>
@@ -300,7 +300,7 @@ function AgentCase360({
                 actions.request({
                   title: 'Suspend agent activity?',
                   description:
-                    'Blocks new client invitations and inspection/verification submissions immediately — independent of the account, which stays otherwise usable.',
+                    'Blocks new client invitations and inspection/verification submissions immediately: independent of the account, which stays otherwise usable.',
                   label: 'Suspend',
                   run: (reason) => unwrap(adminMarketplaceService.suspendAgent(detail.id, reason)),
                 })
@@ -489,7 +489,7 @@ function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: 
         <DialogContent>
           <DialogTitle className="font-semibold">Reassign task</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            {task.title} — find the target agent&apos;s user ID from their own case-360 URL or the
+            {task.title}: find the target agent&apos;s user ID from their own case-360 URL or the
             users register.
           </DialogDescription>
           <div className="mt-5 space-y-4">

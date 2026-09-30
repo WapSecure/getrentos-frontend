@@ -14,7 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 
-// recharts is heavy (~400 KB) — load it only when this dashboard mounts.
+// recharts is heavy (~400 KB): load it only when this dashboard mounts.
 const LandlordRevenueChart = dynamic(
   () =>
     import('@/components/landlord/dashboard/LandlordRevenueChart').then(

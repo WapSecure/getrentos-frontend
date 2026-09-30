@@ -126,7 +126,7 @@ export const LandlordVerificationStatusModal = ({
                     accept=".pdf,.jpg,.jpeg,.png,.webp"
                     multiple={false}
                     label=""
-                    hint="PDF or image — preview before submitting"
+                    hint="PDF or image: preview before submitting"
                   />
                   <div className="mt-3">
                     <Select

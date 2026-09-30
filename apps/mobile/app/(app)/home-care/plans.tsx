@@ -113,7 +113,7 @@ export default function Plans() {
           <EmptyState
             icon={<CalendarClock size={34} color={colors.mutedForeground} />}
             title="No plans yet"
-            description="Service the AC every 3 months, the generator monthly — set it once and it’s tracked."
+            description="Service the AC every 3 months, the generator monthly: set it once and it’s tracked."
             action={<Button label="Add a plan" onPress={() => setAdding(true)} />}
           />
         ) : (

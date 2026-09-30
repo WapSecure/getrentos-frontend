@@ -112,7 +112,7 @@ export default function GatemanIncidentsPage() {
 
       {panicSent && (
         <p className="text-center text-sm font-medium text-red-600">
-          Alert sent — the estate manager has been notified.
+          Alert sent: the estate manager has been notified.
         </p>
       )}
 

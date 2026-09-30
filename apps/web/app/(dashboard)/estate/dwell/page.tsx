@@ -42,7 +42,7 @@ const windowStart = (days: string) => new Date(Date.now() - Number(days) * DAY_M
 /**
  * Dwell analytics: who is still inside, and how long visits actually run.
  *
- * ENTERPRISE, and the only feature in this programme that is — the gating rule in
+ * ENTERPRISE, and the only feature in this programme that is: the gating rule in
  * `docs/estate-gate-programme.md` is that an estate without it makes slower
  * decisions, where an estate without the watchlist or mustering admits somebody
  * it banned or loses track of who was in the building. That is why this is the
@@ -62,7 +62,7 @@ export default function EstateDwellPage() {
    * Held in state beside the range rather than derived during render.
    *
    * `new Date(Date.now() - n)` in the render body produces a different instant
-   * every time, and it is in the query key — so react-query would see a brand new
+   * every time, and it is in the query key: so react-query would see a brand new
    * window on each render and fetch forever. The pair only moves when the manager
    * picks a different range, which is exactly when it should.
    */
@@ -76,7 +76,7 @@ export default function EstateDwellPage() {
   /**
    * Whether it is worth asking the API at all.
    *
-   * A known shortfall is not worth two guaranteed 403s on every visit — and in a
+   * A known shortfall is not worth two guaranteed 403s on every visit: and in a
    * browser console they are two red errors that make a real one harder to spot.
    * An UNKNOWN tier is not a shortfall, so it still asks: the rule everywhere in
    * this codebase is that an absent plan fails open, and the gate then shows the
@@ -138,8 +138,8 @@ export default function EstateDwellPage() {
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-foreground mb-1">Still inside</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            The gate console knows who went in. This is the other half of the same question — who
-            never came back out — and it is where a visit that has outstayed the estate&rsquo;s own
+            The gate console knows who went in. This is the other half of the same question: who
+            never came back out: and it is where a visit that has outstayed the estate&rsquo;s own
             authorisation shows up.
           </p>
           <OnSiteBoard board={boardQuery.data} isLoading={boardQuery.isLoading} />

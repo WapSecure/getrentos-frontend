@@ -149,7 +149,7 @@ export const AddOwnerPropertyModal = ({
       );
       if (result.failedProofCount > 0) {
         setUploadWarning(
-          `${result.failedProofCount} document${result.failedProofCount === 1 ? '' : 's'} could not upload. Your property was still created—open its verification status to retry the evidence.`
+          `${result.failedProofCount} document${result.failedProofCount === 1 ? '' : 's'} could not upload. Your property was still created. Open its verification status to retry the evidence.`
         );
       }
       setSubmitted(true);

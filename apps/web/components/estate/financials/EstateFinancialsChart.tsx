@@ -39,7 +39,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 /** Same shape as EstateDuesTrendChart, but backed by the Financials feature's
- * own /financials/chart route rather than the Dashboard's — kept as a
+ * own /financials/chart route rather than the Dashboard's: kept as a
  * separate component/route pair so each page owns its own data path even
  * though the underlying computation is identical today. */
 export const EstateFinancialsChart = ({ estateId }: EstateFinancialsChartProps) => {

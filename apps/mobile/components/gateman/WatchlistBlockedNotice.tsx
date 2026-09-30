@@ -40,7 +40,7 @@ export interface WatchlistBlockedNoticeProps {
  * Shown when an estate's watch list refuses an entry at the gate.
  *
  * Takes over the screen rather than toasting. A toast disappears in seconds, and
- * this is not a notification — it is the estate's instruction, carrying a reason
+ * this is not a notification: it is the estate's instruction, carrying a reason
  * the guard has to repeat to somebody standing in front of them, and one
  * decision to make.
  *
@@ -49,12 +49,12 @@ export interface WatchlistBlockedNoticeProps {
  * nothing.
  *
  * The override is two deliberate steps rather than one button. Refusing is the
- * default — that is what the estate asked for — and admitting somebody anyway is
+ * default: that is what the estate asked for: and admitting somebody anyway is
  * a decision a guard makes on purpose, with a reason, because that reason is
  * what the estate office is told and what the audit records.
  *
  * A plain `View` rather than a sheet, so it can be dropped inside a screen, a
- * console card, or a sheet that is already open — a second sheet on top of a
+ * console card, or a sheet that is already open: a second sheet on top of a
  * sheet is not a thing React Native renders usefully.
  */
 export function WatchlistBlockedNotice({

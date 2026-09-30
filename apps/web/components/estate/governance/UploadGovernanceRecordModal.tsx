@@ -18,7 +18,7 @@ interface UploadGovernanceRecordModalProps {
     requiresSignatures?: boolean;
   }) => void;
   isSubmitting?: boolean;
-  /** Set when uploading a new version of an existing record — pre-fills the title and type. */
+  /** Set when uploading a new version of an existing record: pre-fills the title and type. */
   newVersionOf?: { id: string; title: string; type: 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER' };
 }
 

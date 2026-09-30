@@ -57,7 +57,7 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
     const u = units.find((x) => x.id === id);
     // Prefill from the unit so the common case is a single tap.
     if (u) {
-      if (!title) setTitle(`${u.propertyName} — ${u.unitName}`);
+      if (!title) setTitle(`${u.propertyName}: ${u.unitName}`);
       if (!rent && u.askingRent) setRent(String(u.askingRent));
       if (u.askingRentPeriod) setPeriod(u.askingRentPeriod);
     }
@@ -81,7 +81,7 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
       // The publication gate either puts it live or holds it for an admin.
       toast.show(
         listing.status === 'pending_verification'
-          ? 'Listing created and held for review — it goes live once approved.'
+          ? 'Listing created and held for review: it goes live once approved.'
           : 'Listing is live.',
         'success'
       );

@@ -3,7 +3,7 @@
  * land parcel. Shortlets have their own richer page (booking calendar).
  *
  * Like `publicListingMap`, this has NO imports so server components can use it.
- * Every route read here is `@Public()` and returns a publicly safe DTO — owner
+ * Every route read here is `@Public()` and returns a publicly safe DTO: owner
  * contact details are never in it, so nothing needs stripping.
  */
 
@@ -195,7 +195,7 @@ export async function fetchPublicListing(
       amenities: s.amenities ?? [],
       facts: [
         ...fact('Property type', humanise(s.propertyType)),
-        ...fact('Payment', 'Protected — GetRentos holds it until the deal is done'),
+        ...fact('Payment', 'Protected: GetRentos holds it until the deal is done'),
       ],
     };
   }

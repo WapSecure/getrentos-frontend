@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/site';
 
-export const alt = `${SITE_NAME} — Trust-Driven Property Operating System`;
+export const alt = `${SITE_NAME}: Rent, buy and manage property`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -55,8 +55,8 @@ export default function OpengraphImage() {
             lineHeight: 1.05,
           }}
         >
-          <span>The trust-driven</span>
-          <span>property operating system.</span>
+          <span>Rent, buy and manage property</span>
+          <span>with fewer surprises.</span>
         </div>
         <div
           style={{

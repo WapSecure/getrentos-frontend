@@ -191,8 +191,8 @@ export default function GatemanDeliveries() {
 /**
  * Logging a parcel, by one of two routes.
  *
- * The guard either picks the household from a list — because the courier said a
- * name and the guard recognised it — or the courier reads out the code the
+ * The guard either picks the household from a list: because the courier said a
+ * name and the guard recognised it: or the courier reads out the code the
  * household sent them, in which case the household names itself.
  *
  * The shell is thin on purpose: the form is only mounted while the sheet is
@@ -325,7 +325,7 @@ function LogDeliveryForm({
           }}
           placeholder="The six digits the household sent"
           keyboardType="number-pad"
-          hint="Optional — use it instead of picking a household"
+          hint="Optional: use it instead of picking a household"
         />
         <Button
           label={checkCode.isPending ? 'Checking…' : 'Check code'}

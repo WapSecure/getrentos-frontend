@@ -12,7 +12,7 @@ interface OnSiteBoardProps {
 /**
  * Who the estate believes is still inside.
  *
- * Every sentence here is composed server-side and printed verbatim —
+ * Every sentence here is composed server-side and printed verbatim:
  * `insideLabel`, `expectationLabel`, `tally.label`. That is deliberate: the two
  * sentences carry the distinction this screen turns on (an elapsed time the
  * estate said nothing about, versus a visit past a window it wrote down), and the
@@ -38,7 +38,7 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
       <EmptyState
         icon={Clock}
         title="Nobody is recorded as still inside"
-        description="Every visitor the gate admitted has been logged out. This board is the other half of “who is inside?” — the console knows who went in, and this knows who never came back out."
+        description="Every visitor the gate admitted has been logged out. This board is the other half of “who is inside?”: the console knows who went in, and this knows who never came back out."
       />
     );
   }
@@ -67,7 +67,7 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
             threshold is invisible to the reader is one they cannot calibrate. */}
         <p className="text-xs text-muted-foreground mt-2">
           The office is told once about a visit that runs more than {board.graceMinutes} minutes
-          past the end the estate authorised, and only where the estate stated an end — a standing
+          past the end the estate authorised, and only where the estate stated an end: a standing
           authorisation&rsquo;s hours. A visit with no stated end is shown here and nobody is
           notified about it.
         </p>
@@ -122,8 +122,8 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
 
       <p className="text-xs text-muted-foreground">
         Counted at {new Date(board.asOf).toLocaleString()}. A visit leaves this board when the gate
-        logs the exit — so if somebody has left and is still listed, what is missing is the exit,
-        not the person.
+        logs the exit: so if somebody has left and is still listed, what is missing is the exit, not
+        the person.
       </p>
     </div>
   );

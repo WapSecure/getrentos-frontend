@@ -133,7 +133,7 @@ export const UssdSimulator = () => {
         </div>
       </div>
       <p className="text-center text-xs text-muted-foreground mt-3">
-        Simulated USSD session — no real airtime or phone required
+        Simulated USSD session: no real airtime or phone required
       </p>
     </div>
   );

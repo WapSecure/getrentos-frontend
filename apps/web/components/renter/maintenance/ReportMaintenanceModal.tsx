@@ -22,7 +22,7 @@ type ReportFormData = Omit<CreateMaintenanceRequestInput, 'category' | 'priority
 type ReportField = 'title' | 'category' | 'priority' | 'description';
 
 const MAX_PHOTOS = 5;
-const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024; // 10MB — matches the backend's per-file limit
+const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024; // 10MB: matches the backend's per-file limit
 
 interface ReportMaintenanceModalProps {
   isOpen: boolean;
@@ -394,7 +394,7 @@ export const ReportMaintenanceModal = ({
                   <Camera className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Click to upload photos</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    PNG, JPG up to 10MB — up to {MAX_PHOTOS} photos
+                    PNG, JPG up to 10MB: up to {MAX_PHOTOS} photos
                   </p>
                 </button>
                 {photoError && <p className="mt-1 text-xs text-red-500">{photoError}</p>}

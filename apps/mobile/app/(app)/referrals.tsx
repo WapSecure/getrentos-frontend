@@ -28,7 +28,7 @@ export default function Referrals() {
   const share = () => {
     if (!query.data) return;
     Share.share({
-      message: `Join me on GetRentos — the safer way to rent, buy and manage property. Use my code ${query.data.code} when you sign up.`,
+      message: `Join me on GetRentos: the safer way to rent, buy and manage property. Use my code ${query.data.code} when you sign up.`,
     }).catch(() => undefined);
   };
 
@@ -70,7 +70,7 @@ export default function Referrals() {
                 </Text>
                 &apos;s referral
                 {query.data.refereeRewardAmount
-                  ? ` — you earned ₦${query.data.refereeRewardAmount.toLocaleString()}`
+                  ? `: you earned ₦${query.data.refereeRewardAmount.toLocaleString()}`
                   : ''}
                 .
               </Text>
@@ -83,7 +83,7 @@ export default function Referrals() {
               <Text variant="heading">Invite friends, earn rewards</Text>
             </View>
             <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-              Share your code — when a friend signs up and completes their first move, you both earn
+              Share your code: when a friend signs up and completes their first move, you both earn
               a reward.
             </Text>
 

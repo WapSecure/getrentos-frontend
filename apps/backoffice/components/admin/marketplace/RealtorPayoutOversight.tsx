@@ -143,7 +143,7 @@ export const RealtorPayoutOversight = () => {
                     {formatDate(p.createdAt)} · {p.commissionCount} commission
                     {p.commissionCount === 1 ? '' : 's'} settled
                   </p>
-                  {/* A failure is the bank sending money back — say why. */}
+                  {/* A failure is the bank sending money back: say why. */}
                   {p.status === 'failed' && p.failureReason && (
                     <p className="mt-0.5 text-sm text-red-600 dark:text-red-400">
                       {p.failureReason}

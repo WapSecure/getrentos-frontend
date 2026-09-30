@@ -171,7 +171,7 @@ export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwel
  *
  * The API sends the two durations as plain numbers and words every SENTENCE
  * itself, so this has to render them the same way the sentence beneath them does
- * — otherwise one card reads "4h 30m on average" and then "longest 5h" in a
+ *: otherwise one card reads "4h 30m on average" and then "longest 5h" in a
  * different idiom two lines apart. It mirrors the server's `describeDuration`,
  * which is why it is "1h 30m" rather than the "1 hr 30 min" the home-management
  * SLA panel uses for a different feature's figures.

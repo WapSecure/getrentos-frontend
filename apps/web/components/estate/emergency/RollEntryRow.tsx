@@ -9,7 +9,7 @@ import type { MusterRollEntry, MusterRollState } from '@/types/estate';
  * The four things a marshal can say about one person.
  *
  * "Not yet accounted for" is on the list even though it is where everybody
- * starts, because a mistap has to be undoable — a roll that cannot be corrected
+ * starts, because a mistap has to be undoable: a roll that cannot be corrected
  * is one a marshal stops trusting. Note the wording: this is the marshal
  * speaking about somebody else, so it reads "Accounted for", never "safe".
  */
@@ -45,7 +45,7 @@ const stateTone: Record<MusterRollState, string> = {
 
 interface RollEntryRowProps {
   entry: MusterRollEntry;
-  /** False once the muster is closed or timed out — a finished record stops moving. */
+  /** False once the muster is closed or timed out: a finished record stops moving. */
   rollOpen: boolean;
   isSaving: boolean;
   /** Answers for one person. Called with no note on a plain tap. */
@@ -57,13 +57,13 @@ interface RollEntryRowProps {
  *
  * The tap records the answer on its own, with no note required, because a
  * marshal with a torch in one hand works in single taps. A note is available
- * underneath for the two answers that usually want one — "not on site" and
- * "needs help" — but it never stands between a marshal and recording that
+ * underneath for the two answers that usually want one: "not on site" and
+ * "needs help": but it never stands between a marshal and recording that
  * somebody is out.
  *
  * `basisLabel` is the API's wording, not ours: it distinguishes a resident of
  * the estate from somebody who was inside when the alarm went, and from somebody
- * admitted *after* the roll was taken — a claim about where a person physically
+ * admitted *after* the roll was taken: a claim about where a person physically
  * was, which is not this screen's to guess at.
  */
 export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryRowProps) => {

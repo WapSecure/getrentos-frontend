@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { BadgeCheck, ArrowRight } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 
@@ -79,7 +79,7 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
     >
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-purple-600" />
+          <BadgeCheck className="w-4 h-4 text-purple-600" />
           <h3 className="font-semibold text-foreground">Recommendations</h3>
         </div>
       </div>

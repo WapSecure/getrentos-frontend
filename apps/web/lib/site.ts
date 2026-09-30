@@ -5,7 +5,7 @@
  */
 export const SITE_NAME = 'GetRentos';
 export const SITE_DESCRIPTION =
-  'The trust-driven property operating system. One workspace for renters, landlords, owners, buyers, realtors and agents — verified identities, verified properties, escrow-secured payments.';
+  'Property services for renters, landlords, owners, buyers, realtors and agents, with verified identities, verified properties and protected payments.';
 
 /** Production origin. Override with NEXT_PUBLIC_SITE_URL in non-prod environments. */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://getrentos.com').replace(

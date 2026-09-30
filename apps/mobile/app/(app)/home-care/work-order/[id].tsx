@@ -373,7 +373,7 @@ export default function WorkOrderDetail() {
       <ReasonSheet
         open={panel === 'cancel'}
         title="Cancel this work order?"
-        hint="Say why — the tenant and vendor may see it."
+        hint="Say why: the tenant and vendor may see it."
         action="Cancel work order"
         busy={cancel.isPending}
         onClose={() => setPanel(null)}

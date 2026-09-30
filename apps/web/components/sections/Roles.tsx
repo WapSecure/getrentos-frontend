@@ -50,7 +50,7 @@ export const Roles = () => {
         <SectionHeading
           badge="ROLES"
           title="Six roles, one shared trust layer."
-          description="Everyone gets a tailored workspace — same verification, payment protection and dispute rails underneath."
+          description="Everyone gets a tailored workspace: same verification, payment protection and dispute rails underneath."
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((role) => (

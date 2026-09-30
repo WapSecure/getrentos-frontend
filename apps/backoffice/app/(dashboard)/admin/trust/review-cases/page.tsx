@@ -72,7 +72,7 @@ export default function TrustReviewCasesPage() {
         </h1>
         <p className="mt-1 text-muted-foreground">
           Verifications flagged for a human decision. Blocking decisions (reject / restrict) are
-          four-eyes — they need a second officer.
+          four-eyes: they need a second officer.
         </p>
       </div>
 

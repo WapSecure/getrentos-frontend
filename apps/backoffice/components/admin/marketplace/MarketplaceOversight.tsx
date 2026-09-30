@@ -624,7 +624,7 @@ function ListingDetailDialog({
                       actions.request({
                         title: 'Permanently close this listing?',
                         description:
-                          'This cannot be undone — the seller would need to create a new listing.',
+                          'This cannot be undone: the seller would need to create a new listing.',
                         label: 'Close',
                         run: () => unwrap(adminMarketplaceService.closeListing(listingId)),
                       })
@@ -927,7 +927,7 @@ function OfferCase360({
 
         {!detail.transaction && detail.status === 'ACCEPTED' && (
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ListChecks className="h-4 w-4" /> Accepted — escrow transaction pending.
+            <ListChecks className="h-4 w-4" /> Accepted: escrow transaction pending.
           </p>
         )}
       </div>

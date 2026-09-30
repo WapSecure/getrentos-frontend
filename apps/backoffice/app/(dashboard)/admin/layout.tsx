@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       );
 
       // Signed out, signed in as someone without a back-office role, or holding
-      // only an identity-less session — the refresh cookie is not port-scoped, so
+      // only an identity-less session: the refresh cookie is not port-scoped, so
       // this app can silently restore a session from the main app's cookie and
       // end up with no profile at all. All three are treated as "not an admin".
       //

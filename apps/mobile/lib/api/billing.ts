@@ -67,7 +67,7 @@ export const naira = (kobo: number) => kobo / 100;
 export function planHeadline(b: MyBilling, date: (iso: string) => string): string {
   if (b.status === 'TRIALING')
     return b.trialEndsAt ? `Trial ends ${date(b.trialEndsAt)}` : 'Pro trial active';
-  if (b.status === 'PAST_DUE') return 'Payment failed — update your card';
+  if (b.status === 'PAST_DUE') return 'Payment failed: update your card';
   if (!b.isActive) return 'Free plan';
   if (b.cancelAtPeriodEnd)
     return b.currentPeriodEnd ? `Pro until ${date(b.currentPeriodEnd)}` : 'Pro until period end';

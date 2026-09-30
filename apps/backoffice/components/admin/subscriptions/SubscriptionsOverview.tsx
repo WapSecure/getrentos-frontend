@@ -251,7 +251,7 @@ function SubscriptionRow({
           </p>
           <p className="text-xs text-muted-foreground">
             {row.priceKobo == null
-              ? // No cycle/price means the plan was granted rather than bought —
+              ? // No cycle/price means the plan was granted rather than bought:
                 // it should not be counted as revenue, and this makes that visible.
                 row.tier === 'PRO'
                 ? 'Granted'
@@ -261,7 +261,7 @@ function SubscriptionRow({
         </td>
         <td className="p-4">
           <Badge variant={STATUS_VARIANT[row.status]}>{STATUS_LABEL[row.status]}</Badge>
-          {/* A row can be past due and still have access — show what the app does, not just the label. */}
+          {/* A row can be past due and still have access: show what the app does, not just the label. */}
           {row.status === 'PAST_DUE' && row.isActive && (
             <p className="mt-1 text-xs text-muted-foreground">Access retained</p>
           )}
@@ -408,7 +408,7 @@ function InvoiceRow({ invoice }: { invoice: AdminSubscriptionInvoice }) {
       <td className="p-3 whitespace-nowrap text-foreground">
         {naira(invoice.amountKobo)}
         {/* An inferred amount came from our reconciliation, not a confirmed
-            charge — worth flagging before it is quoted back to a customer. */}
+            charge: worth flagging before it is quoted back to a customer. */}
         {invoice.inferred && (
           <span className="block text-xs text-amber-600 dark:text-amber-400">
             Inferred from provider

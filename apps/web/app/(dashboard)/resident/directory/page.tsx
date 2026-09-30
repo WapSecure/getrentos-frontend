@@ -65,7 +65,7 @@ export default function ResidentDirectoryPage() {
           {directory.map((entry) => (
             <div key={entry.id} className="p-4">
               <p className="text-sm font-medium text-foreground">
-                {entry.unitLabel} — {entry.residentName}
+                {entry.unitLabel}: {entry.residentName}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {entry.contactPhone ?? '—'}

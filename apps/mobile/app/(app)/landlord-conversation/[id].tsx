@@ -108,7 +108,7 @@ export default function LandlordConversation() {
             <EmptyState
               icon={<MessageCircle size={30} color={colors.mutedForeground} />}
               title="No messages yet"
-              description="Say hello — replies land here."
+              description="Say hello: replies land here."
             />
           }
         />

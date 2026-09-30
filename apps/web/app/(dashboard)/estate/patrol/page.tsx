@@ -28,7 +28,7 @@ type Tab = (typeof TABS)[number]['value'];
  * ENTERPRISE, and the gate is on the OFFICE, never on the guard. The reason is
  * in the programme doc: an estate without this makes a slower decision, where an
  * estate without the watchlist admits somebody it banned. But scanning is not
- * gated even here — a guard standing at a checkpoint at 02:00 is the wrong
+ * gated even here: a guard standing at a checkpoint at 02:00 is the wrong
  * person to hear about a billing state, and refusing the scan would lose the
  * patrol record over it. The API enforces exactly that split, and this page only
  * decides which half of it to render.
@@ -46,7 +46,7 @@ export default function EstatePatrolPage() {
   /**
    * Whether it is worth asking the API at all.
    *
-   * A known shortfall is not worth three guaranteed 403s on every visit — and in
+   * A known shortfall is not worth three guaranteed 403s on every visit: and in
    * a browser console they are three red errors that make a real one harder to
    * find. An UNKNOWN tier is not a shortfall: the rule everywhere in this
    * codebase is that an absent plan fails open, so it still asks and lets the

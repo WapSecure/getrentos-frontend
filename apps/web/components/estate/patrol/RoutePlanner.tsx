@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, CalendarClock, Plus, Route as RouteIcon, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Route as RouteIcon, X } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -165,7 +165,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
 
       {active.length === 0 && !checkpointsQuery.isLoading && (
         <p className="text-sm text-muted-foreground">
-          Add a checkpoint first — a round is a list of places to reach.
+          Add a checkpoint first: a round is a list of places to reach.
         </p>
       )}
 
@@ -213,7 +213,13 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                       <span className="w-5 shrink-0 text-right text-xs text-muted-foreground">
                         {checkpoint.position}
                       </span>
-                      <span className={checkpoint.active ? 'text-foreground' : 'text-muted-foreground line-through'}>
+                      <span
+                        className={
+                          checkpoint.active
+                            ? 'text-foreground'
+                            : 'text-muted-foreground line-through'
+                        }
+                      >
                         {checkpoint.name}
                       </span>
                       {!checkpoint.active && <Badge variant="neutral">Retired</Badge>}
@@ -233,7 +239,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
               <div>
                 <DialogTitle>{editingId ? 'Edit round' : 'Add a round'}</DialogTitle>
                 <DialogDescription>
-                  The time is the estate's own clock. The window is how long the round may take
+                  The time is the estate&apos;s own clock. The window is how long the round may take
                   before it counts as late.
                 </DialogDescription>
               </div>
@@ -298,7 +304,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
               <Field
                 label="Checkpoints, in the order they should be walked"
                 required
-                hint="The order is recorded, not enforced — a round walked out of sequence is shown as such rather than refused."
+                hint="The order is recorded, not enforced: a round walked out of sequence is shown as such rather than refused."
               >
                 {draft.checkpointIds.length === 0 ? (
                   <p className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
@@ -360,7 +366,10 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                       key={checkpoint.id}
                       type="button"
                       onClick={() =>
-                        setDraft({ ...draft, checkpointIds: [...draft.checkpointIds, checkpoint.id] })
+                        setDraft({
+                          ...draft,
+                          checkpointIds: [...draft.checkpointIds, checkpoint.id],
+                        })
                       }
                       className="flex w-full items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-left text-sm text-foreground hover:border-foreground/20"
                     >

@@ -7,7 +7,7 @@ const benefits = [
   {
     icon: WifiOff,
     title: 'Works with zero data',
-    description: 'USSD runs over your carrier signal — no internet connection needed, ever.',
+    description: 'USSD runs over your carrier signal: no internet connection needed, ever.',
   },
   {
     icon: Smartphone,
@@ -17,7 +17,7 @@ const benefits = [
   {
     icon: ShieldCheck,
     title: 'Same secure GetRentos account',
-    description: 'USSD sessions are tied to your verified number — no separate signup needed.',
+    description: 'USSD sessions are tied to your verified number: no separate signup needed.',
   },
 ];
 
@@ -35,8 +35,8 @@ export const UssdExplainer = () => {
         <p className="text-sm text-muted-foreground mt-2 max-w-lg">
           We&apos;re building dial-in access on{' '}
           <span className="font-semibold text-foreground">{USSD_CODE}</span> so you can check your
-          rent balance, pay, view your Trust Score, or report a maintenance issue from any phone —
-          no app, no data plan. Try the preview below to see how it&apos;ll work.
+          rent balance, pay, view your Trust Score, or report a maintenance issue from any phone: no
+          app, no data plan. Try the preview below to see how it&apos;ll work.
         </p>
       </div>
 

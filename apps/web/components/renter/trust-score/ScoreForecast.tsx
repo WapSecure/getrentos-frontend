@@ -67,7 +67,7 @@ export const ScoreForecast = ({ currentScore, verifications }: ScoreForecastProp
         ) : (
           <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
             <p className="text-sm font-medium text-green-800 dark:text-green-300">
-              All verifications complete — your score is at its potential.
+              All verifications complete: your score is at its potential.
             </p>
           </div>
         )}

@@ -12,7 +12,7 @@ import {
   Ruler,
   School,
   ShoppingCart,
-  Sparkles,
+  BadgeCheck,
   Stethoscope,
   TrainFront,
   TreePine,
@@ -115,7 +115,7 @@ export const GeoInsightsPanel = ({
         <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
           <MapPin className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">
-            {title ? `${title} — map & insights pending` : 'Map & insights pending'}
+            {title ? `${title}: map & insights pending` : 'Map & insights pending'}
           </p>
           <p className="max-w-sm text-xs text-muted-foreground">
             {isError
@@ -192,7 +192,7 @@ export const GeoInsightsPanel = ({
           {insights.aiSummary && (
             <div className="rounded-2xl border border-primary/20 bg-accent/40 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                <Sparkles className="h-4 w-4" />
+                <BadgeCheck className="h-4 w-4" />
                 AI property insight
               </div>
               <p className="mt-2 text-sm leading-relaxed text-foreground">{insights.aiSummary}</p>

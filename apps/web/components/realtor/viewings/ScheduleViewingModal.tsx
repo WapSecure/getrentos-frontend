@@ -132,7 +132,7 @@ export const ScheduleViewingModal = ({
                   selectedItem={selectedLeadApi}
                   getItemValue={(lead) => lead.id}
                   getItemLabel={(lead) =>
-                    `${lead.fullName} — ${lead.listing?.listingTitle || 'Untitled listing'}`
+                    `${lead.fullName}: ${lead.listing?.listingTitle || 'Untitled listing'}`
                   }
                   search={leadSearch}
                   onSearchChange={(value) => {

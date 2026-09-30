@@ -35,8 +35,8 @@ interface LogDeliveryModalProps {
 /**
  * Logging a parcel at the gate, by one of two routes.
  *
- * The guard either picks the household from a list — because the courier said a
- * name and the guard recognised it — or the courier presents the code the
+ * The guard either picks the household from a list: because the courier said a
+ * name and the guard recognised it: or the courier presents the code the
  * household sent them, in which case the household names itself and the guard
  * does not choose at all.
  *
@@ -47,7 +47,7 @@ interface LogDeliveryModalProps {
  *
  * The shell below is thin on purpose. All the form's state lives in
  * `LogDeliveryForm`, which is only mounted while the dialog is open, so the next
- * opening cannot inherit the last one's household or an already-spent code — the
+ * opening cannot inherit the last one's household or an already-spent code: the
  * parent closes this dialog itself on success and never calls `onClose`, so
  * "clear the fields on close" was never going to cover that case.
  */
@@ -248,7 +248,7 @@ const LogDeliveryForm = ({
                           }`}
                         >
                           <span>
-                            {household.unitLabel} — {household.residentName}
+                            {household.unitLabel}: {household.residentName}
                           </span>
                           <span
                             aria-hidden="true"

@@ -21,8 +21,8 @@ export const VideoCallSimulator = ({ hostName, onEndDemo }: VideoCallSimulatorPr
     <div className="flex items-start gap-2 bg-amber-500/15 px-3 py-2">
       <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
       <p className="text-xs text-amber-200">
-        Preview only — this is a demo of the viewing screen. No call is connected and your camera
-        and microphone stay off.
+        Preview only: this is a demo of the viewing screen. No call is connected and your camera and
+        microphone stay off.
       </p>
     </div>
 

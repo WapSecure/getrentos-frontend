@@ -112,7 +112,7 @@ export function ShortletPayoutsDialog({
           )}
           {/* The same requirement, shown before the host tries: the balance below is
               real money they cannot withdraw yet, so say so up front. When the tier
-              is only held back by something else — an open dispute, a review case —
+              is only held back by something else: an open dispute, a review case:
               the summary says which, because sending an already-verified host to get
               verified again is a dead end. */}
           {!withdraw.error && summary && !summary.canWithdraw && (
@@ -169,7 +169,7 @@ export function ShortletPayoutsDialog({
                     <span className="text-muted-foreground">
                       Coming up
                       {summary.nextReleaseAt && (
-                        <> — the next part unlocks {formatDate(summary.nextReleaseAt)}</>
+                        <>: the next part unlocks {formatDate(summary.nextReleaseAt)}</>
                       )}
                     </span>
                     <span className="font-medium">{formatCurrency(summary.upcoming)}</span>
@@ -184,7 +184,7 @@ export function ShortletPayoutsDialog({
                 {summary.inTransit > 0 && (
                   <li className="flex items-start justify-between gap-3">
                     <span className="text-muted-foreground">
-                      On its way to your bank — shows as paid once the bank confirms
+                      On its way to your bank: shows as paid once the bank confirms
                     </span>
                     <span className="font-medium">{formatCurrency(summary.inTransit)}</span>
                   </li>
@@ -192,7 +192,7 @@ export function ShortletPayoutsDialog({
                 {summary.inFailedPayout > 0 && (
                   <li className="flex items-start justify-between gap-3">
                     <span className="text-muted-foreground">
-                      In a payout that failed — support will retry it
+                      In a payout that failed: support will retry it
                     </span>
                     <span className="font-medium">{formatCurrency(summary.inFailedPayout)}</span>
                   </li>
@@ -200,7 +200,7 @@ export function ShortletPayoutsDialog({
                 {(summary.penaltiesOutstanding ?? 0) > 0 && (
                   <li className="flex items-start justify-between gap-3">
                     <span className="text-muted-foreground">
-                      Cancellation fees you owe — taken out of your next withdrawal
+                      Cancellation fees you owe: taken out of your next withdrawal
                     </span>
                     <span className="whitespace-nowrap font-medium text-destructive">
                       −{formatCurrency(summary.penaltiesOutstanding)}
@@ -272,7 +272,7 @@ export function ShortletPayoutsDialog({
             <p className="mb-2 text-sm font-medium">Payout history</p>
             {payouts && payouts.items.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No withdrawals yet — earnings appear here once you withdraw.
+                No withdrawals yet: earnings appear here once you withdraw.
               </p>
             ) : (
               <div className="divide-y divide-border rounded-lg border border-border">

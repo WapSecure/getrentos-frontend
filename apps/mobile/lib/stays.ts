@@ -46,8 +46,8 @@ export const PROBLEM_OPTIONS: { value: GuestPromiseProblem; label: string; hint:
 ];
 
 export const OUTCOME_LABEL: Record<GuestPromiseOutcome, string> = {
-  FULL_REFUND: 'Upheld — full refund',
-  PARTIAL_REFUND: 'Partly upheld — partial refund',
+  FULL_REFUND: 'Upheld: full refund',
+  PARTIAL_REFUND: 'Partly upheld: partial refund',
   NOT_UPHELD: 'Not upheld',
 };
 
@@ -187,7 +187,7 @@ export function seasonRange(startDate: string, endDate: string): string {
   return `${fmt(startDate)} – ${fmt(endDate)}`;
 }
 
-/** "Sun 20 Dec" — a trip day, short enough for one line. */
+/** "Sun 20 Dec": a trip day, short enough for one line. */
 export const tripDay = (iso: string) =>
   new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString('en-NG', {
     weekday: 'short',
@@ -352,7 +352,7 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
         return {
           pill: 'Awaiting payment',
           tone: 'warning',
-          title: 'Confirmed — pay to secure it',
+          title: 'Confirmed: pay to secure it',
           detail: 'Your money is held by GetRentos and only paid to the host after you check in.',
           action: 'pay',
         };
@@ -380,9 +380,9 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
         tone: 'success',
         title:
           days > 1
-            ? `You're all set — ${days} days to go`
+            ? `You're all set: ${days} days to go`
             : days === 1
-              ? "You're all set — check-in is tomorrow"
+              ? "You're all set: check-in is tomorrow"
               : days === 0
                 ? 'Check-in is today'
                 : 'Enjoy your stay',

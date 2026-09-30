@@ -33,16 +33,17 @@ const RANGES = [
  */
 export const RoundReport = ({ estateId }: { estateId: string }) => {
   const [rangeDays, setRangeDays] = useState('14');
+  const [referenceTime] = useState(() => Date.now());
   /**
    * Held in state rather than computed during render: an instant computed in the
    * render body is a different instant every time, and it is in the query key,
    * so react-query would see a new window on every render and fetch forever.
    */
-  const [from, setFrom] = useState(() => new Date(Date.now() - 14 * DAY_MS).toISOString());
+  const [from, setFrom] = useState(() => new Date(referenceTime - 14 * DAY_MS).toISOString());
 
   const selectRange = (days: string) => {
     setRangeDays(days);
-    setFrom(new Date(Date.now() - Number(days) * DAY_MS).toISOString());
+    setFrom(new Date(referenceTime - Number(days) * DAY_MS).toISOString());
   };
 
   const reportQuery = useQuery({
@@ -128,7 +129,7 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
       {missed.length > 0 && (
         <p className="text-xs text-muted-foreground">
           A missed round was reported to the office when its window closed. A scan proves that
-          somebody holding the code reached the checkpoint — the code is what makes that true, so
+          somebody holding the code reached the checkpoint: the code is what makes that true, so
           give a checkpoint a new one whenever a label goes missing.
         </p>
       )}
@@ -182,17 +183,17 @@ const RoundCard = ({ round }: { round: PatrolRound }) => {
     ) : (
       <Clock className="h-4 w-4" />
     );
-  const variant = round.status === 'COMPLETE' ? 'success' : round.status === 'MISSED' ? 'danger' : 'info';
+  const variant =
+    round.status === 'COMPLETE' ? 'success' : round.status === 'MISSED' ? 'danger' : 'info';
 
   return (
-    <Card
-      className={`p-4 ${round.status === 'MISSED' ? 'border-destructive/40' : ''}`}
-    >
+    <Card className={`p-4 ${round.status === 'MISSED' ? 'border-destructive/40' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-medium text-foreground">{round.routeName}</p>
           <p className="text-sm text-muted-foreground">
-            Due {formatInstant(round.scheduledFor)} · window shut {formatInstant(round.windowEndsAt)}
+            Due {formatInstant(round.scheduledFor)} · window shut{' '}
+            {formatInstant(round.windowEndsAt)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

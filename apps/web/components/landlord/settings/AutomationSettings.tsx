@@ -15,7 +15,7 @@ interface AutomationToggle {
   label: string;
   description: string;
   icon: React.ElementType;
-  /** No automation behind this yet — shown, but not switchable, so it never promises what won't happen. */
+  /** No automation behind this yet: shown, but not switchable, so it never promises what won't happen. */
   comingSoon?: boolean;
 }
 
@@ -189,7 +189,7 @@ export const AutomationSettings = () => {
             </div>
             {graceDays > MAX_GRACE_DAYS && (
               <p className="text-xs text-destructive mt-1">
-                {MAX_GRACE_DAYS} days is the maximum — beyond that rent would never be flagged.
+                {MAX_GRACE_DAYS} days is the maximum: beyond that rent would never be flagged.
               </p>
             )}
           </div>

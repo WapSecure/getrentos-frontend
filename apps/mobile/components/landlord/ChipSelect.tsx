@@ -15,7 +15,7 @@ interface Props<T extends string> {
   emptyText?: string;
 }
 
-/** Single-choice chips — the landlord forms' stand-in for a select. */
+/** Single-choice chips: the landlord forms' stand-in for a select. */
 export function ChipSelect<T extends string>({
   label,
   options,

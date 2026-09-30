@@ -29,7 +29,7 @@ export interface WalkInSheetProps {
  * Raises a walk-in: somebody is at the barrier with nothing arranged.
  *
  * The guard picks the unit rather than quoting a code, because there is no code.
- * Submitting does NOT admit anyone — it asks the household, and the barrier
+ * Submitting does NOT admit anyone: it asks the household, and the barrier
  * stays shut until they answer. That is why this screen is framed as a request
  * and never as "let them in".
  *
@@ -59,7 +59,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
   const [overrideError, setOverrideError] = useState<string | null>(null);
   /**
    * What the estate's list said when the guard asked before attempting the
-   * raise. Set only for an answer that is not a refusal — a refusal is not an
+   * raise. Set only for an answer that is not a refusal: a refusal is not an
    * advisory and belongs to the notice below, which owns the decision.
    */
   const [screening, setScreening] = useState<WatchlistScreening | null>(null);
@@ -142,7 +142,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
    * Asks about this visitor before anything is attempted.
    *
    * Needs the household first, because the question is "this visitor, coming to
-   * see this unit" — and because if the answer refuses them, the only way
+   * see this unit": and because if the answer refuses them, the only way
    * forward is the override, which raises the request.
    */
   const canCheck =
@@ -188,7 +188,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
         <View style={{ gap: spacing.xs }}>
           {/* Once the estate has refused, the primary action is gone on purpose.
               Leaving "Ask for approval" here would invite a retry that returns
-              the same refusal while the visitor waits — the only route forward
+              the same refusal while the visitor waits: the only route forward
               is the stated override inside the notice. */}
           {refusal ? (
             <Button label="Close" variant="outline" fullWidth onPress={handleClose} />
@@ -254,7 +254,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
                     {h.residentName}
                     {reachable
                       ? ''
-                      : ' · nobody here uses the app, so they cannot approve — ask the estate office'}
+                      : ' · nobody here uses the app, so they cannot approve: ask the estate office'}
                   </Text>
                 </Pressable>
               );

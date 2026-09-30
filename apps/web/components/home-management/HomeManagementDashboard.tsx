@@ -6,7 +6,7 @@ import { homeManagementKeys } from '@/lib/queryKeys';
 import { homeManagementService } from '@/services/homeManagementService';
 const cards = [
   // This is the count of assets in ACTIVE service, not the register size, so
-  // the label has to say so — otherwise "0" next to a full asset register reads
+  // the label has to say so: otherwise "0" next to a full asset register reads
   // as a broken number rather than as every asset needing attention.
   { key: 'assets', label: 'Assets in Service', icon: Boxes },
   { key: 'plansDue', label: 'Care Plans Due', icon: CalendarClock },

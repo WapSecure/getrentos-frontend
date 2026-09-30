@@ -131,7 +131,7 @@ export function Section({
   );
 }
 
-/** Icon, a strong line and a quiet one — the unit of every fact list. */
+/** Icon, a strong line and a quiet one: the unit of every fact list. */
 export function InfoRow({
   icon: Icon,
   title,
@@ -205,7 +205,7 @@ function Line({ line }: { line: PriceLine }) {
 }
 
 /**
- * What the guest pays, line by line, then the total and — apart from it — the
+ * What the guest pays, line by line, then the total and: apart from it: the
  * refundable deposit. Ends with where the money waits.
  */
 export function PriceBreakdown({

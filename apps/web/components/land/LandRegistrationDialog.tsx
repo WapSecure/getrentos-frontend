@@ -297,7 +297,7 @@ export const LandRegistrationDialog = ({
                 accept=".pdf,.jpg,.jpeg,.png,.webp"
                 multiple={false}
                 label=""
-                hint="Ownership evidence (PDF or image) — preview before submitting"
+                hint="Ownership evidence (PDF or image): preview before submitting"
               />
             </div>
           </div>

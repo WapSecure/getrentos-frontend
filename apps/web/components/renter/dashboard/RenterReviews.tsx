@@ -44,7 +44,7 @@ export const RenterReviews = () => {
       setShowReviewModal(false);
       setRating(0);
       setReviewText('');
-      setToast({ message: 'Review submitted — thanks for sharing!', variant: 'success' });
+      setToast({ message: 'Review submitted: thanks for sharing!', variant: 'success' });
     },
     onError: (err: Error) => {
       setToast({ message: err.message || 'Failed to submit review.', variant: 'error' });
@@ -74,7 +74,7 @@ export const RenterReviews = () => {
     });
   };
 
-  // Nothing to write and nothing written yet — reviews only become relevant
+  // Nothing to write and nothing written yet: reviews only become relevant
   // after a lease ends, so keep the card off the dashboard until then.
   if (pending.length === 0 && submitted.length === 0) return null;
 
