@@ -55,7 +55,9 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
 
   const createMutation = useMutation({
     mutationFn: () =>
-      unwrap(estateService.createPatrolCheckpoint(estateId, { name, location: location || undefined })),
+      unwrap(
+        estateService.createPatrolCheckpoint(estateId, { name, location: location || undefined })
+      ),
     onSuccess: (checkpoint) => {
       setIssued(checkpoint);
       setCopied(false);
@@ -80,7 +82,9 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
   const retireMutation = useMutation({
     mutationFn: (checkpoint: PatrolCheckpoint) =>
       unwrap(
-        estateService.updatePatrolCheckpoint(estateId, checkpoint.id, { active: !checkpoint.active })
+        estateService.updatePatrolCheckpoint(estateId, checkpoint.id, {
+          active: !checkpoint.active,
+        })
       ),
     onSuccess: () => {
       setRetiring(null);
@@ -320,9 +324,7 @@ const IssuedCodeNotice = ({
     <div className="flex items-start gap-3">
       <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-foreground">
-          Code for {checkpoint.name} — shown once
-        </p>
+        <p className="font-medium text-foreground">Code for {checkpoint.name} — shown once</p>
         <div className="mt-2 flex items-center gap-2">
           <code className="rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-2xl tracking-[0.3em] text-foreground">
             {checkpoint.code}

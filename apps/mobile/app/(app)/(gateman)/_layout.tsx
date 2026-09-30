@@ -66,7 +66,8 @@ export default function GatemanTabsLayout() {
             title: 'Incidents',
             tabBarIcon: ({ color, size }) => <Siren color={color} size={size} />,
           }}
-        />        <Tabs.Screen
+        />{' '}
+        <Tabs.Screen
           name="account"
           options={{
             title: 'Account',

@@ -213,7 +213,13 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                       <span className="w-5 shrink-0 text-right text-xs text-muted-foreground">
                         {checkpoint.position}
                       </span>
-                      <span className={checkpoint.active ? 'text-foreground' : 'text-muted-foreground line-through'}>
+                      <span
+                        className={
+                          checkpoint.active
+                            ? 'text-foreground'
+                            : 'text-muted-foreground line-through'
+                        }
+                      >
                         {checkpoint.name}
                       </span>
                       {!checkpoint.active && <Badge variant="neutral">Retired</Badge>}

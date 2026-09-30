@@ -174,8 +174,8 @@ export default function GatemanPatrol() {
                 {queued.length} scan{queued.length === 1 ? '' : 's'} waiting to send
               </Text>
               <Text variant="caption" color="mutedForeground">
-                Saved with the time you took them, so they still count against the round they
-                belong to.
+                Saved with the time you took them, so they still count against the round they belong
+                to.
               </Text>
             </View>
           </Card>

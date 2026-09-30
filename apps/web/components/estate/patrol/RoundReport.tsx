@@ -190,17 +190,17 @@ const RoundCard = ({ round }: { round: PatrolRound }) => {
     ) : (
       <Clock className="h-4 w-4" />
     );
-  const variant = round.status === 'COMPLETE' ? 'success' : round.status === 'MISSED' ? 'danger' : 'info';
+  const variant =
+    round.status === 'COMPLETE' ? 'success' : round.status === 'MISSED' ? 'danger' : 'info';
 
   return (
-    <Card
-      className={`p-4 ${round.status === 'MISSED' ? 'border-destructive/40' : ''}`}
-    >
+    <Card className={`p-4 ${round.status === 'MISSED' ? 'border-destructive/40' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-medium text-foreground">{round.routeName}</p>
           <p className="text-sm text-muted-foreground">
-            Due {formatInstant(round.scheduledFor)} · window shut {formatInstant(round.windowEndsAt)}
+            Due {formatInstant(round.scheduledFor)} · window shut{' '}
+            {formatInstant(round.windowEndsAt)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
