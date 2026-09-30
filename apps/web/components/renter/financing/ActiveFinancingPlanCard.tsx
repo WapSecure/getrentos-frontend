@@ -46,8 +46,8 @@ export const ActiveFinancingPlanCard = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="p-6 bg-accent">
+      <div className="overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm">
+        <div className="bg-primary/5 p-6 sm:p-7">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -66,7 +66,7 @@ export const ActiveFinancingPlanCard = ({
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 sm:p-7">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <Stat
               label="Financed Amount"
@@ -96,7 +96,7 @@ export const ActiveFinancingPlanCard = ({
           </div>
 
           {nextDue && (
-            <div className="flex items-center justify-between p-4 rounded-xl border border-border mb-6">
+            <div className="mb-6 flex items-center justify-between rounded-2xl border border-border/70 bg-secondary/30 p-4">
               <div>
                 <p className="text-xs text-muted-foreground">Next payment due</p>
                 <p className="text-lg font-bold text-foreground">

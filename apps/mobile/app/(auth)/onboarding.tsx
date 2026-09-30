@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, BackHandler, Platform, useWindowDimensions, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   Extrapolation,
@@ -139,13 +138,6 @@ export default function Onboarding() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* soft brand wash behind the scenes, drawn from theme tokens */}
-      <LinearGradient
-        pointerEvents="none"
-        colors={[colors.accent, colors.background]}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 560 }}
-      />
-
       <View
         style={{
           flexDirection: 'row',

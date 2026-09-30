@@ -61,7 +61,7 @@ export const MessageThread = ({
     <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
       <div className="p-4 border-b border-border flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+          <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
             {getInitials(contactName)}
           </div>
           <div className="min-w-0">

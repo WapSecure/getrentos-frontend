@@ -60,7 +60,7 @@ export const ConversationItem = ({
     >
       <div className="flex items-start gap-3">
         <div className="relative shrink-0">
-          <div className="w-12 h-12 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold text-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
             {getInitials(conversation.participantName)}
           </div>
           {conversation.unreadCount > 0 && (

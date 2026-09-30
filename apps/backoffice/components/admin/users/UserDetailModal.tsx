@@ -41,7 +41,7 @@ export const UserDetailModal = ({
         <DialogContent>
           <div className="p-4 border-b border-border flex justify-between items-center pr-12">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                 {getInitials(user.fullName)}
               </div>
               <div>

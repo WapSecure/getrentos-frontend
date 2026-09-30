@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CreditCard, CheckCircle, Clock, AlertCircle, Shield, TrendingUp } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Shield } from 'lucide-react';
 
 interface Payment {
   id: string;
@@ -75,22 +75,24 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <section aria-label="Payment overview" className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
       {stats.map((stat, index) => (
         <motion.div
           key={stat.label}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className={`${stat.bg} rounded-xl p-4 border border-border`}
+          className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm"
         >
           <div className="flex items-center gap-2">
-            <stat.icon className={`w-4 h-4 ${stat.color}`} />
+            <span className={`rounded-lg p-2 ${stat.bg}`}>
+              <stat.icon className={`h-4 w-4 ${stat.color}`} aria-hidden="true" />
+            </span>
             <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
-          <p className={`text-lg font-bold ${stat.color} mt-1`}>{stat.value}</p>
+          <p className="mt-3 text-lg font-bold tracking-tight text-foreground">{stat.value}</p>
         </motion.div>
       ))}
-    </div>
+    </section>
   );
 };

@@ -48,7 +48,7 @@ export const PropertyDetailModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="relative h-48 bg-linear-to-br from-secondary to-muted shrink-0">
+            <div className="relative h-48 bg-muted shrink-0">
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-5xl">🏠</span>
               </div>

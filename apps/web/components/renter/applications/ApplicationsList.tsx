@@ -7,6 +7,7 @@ import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ApplicationWithdrawModal } from './ApplicationWithdrawModal';
 import { FileText } from 'lucide-react';
+import { EmptyState } from '@getrentos/ui';
 
 interface Note {
   id: string;
@@ -68,16 +69,16 @@ export const ApplicationsList = ({
 
   if (sortedApplications.length === 0) {
     return (
-      <div className="text-center py-12 bg-card rounded-xl border border-border">
-        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-          <FileText className="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium text-foreground">No applications found</h3>
-        <p className="text-muted-foreground mt-1">
-          {filterStatus === 'all'
-            ? "You haven't submitted any applications yet"
-            : `No ${filterStatus} applications found`}
-        </p>
+      <div className="rounded-2xl border border-border/70 bg-card py-8 shadow-sm">
+        <EmptyState
+          icon={FileText}
+          title="No applications found"
+          description={
+            filterStatus === 'all'
+              ? "You haven't submitted any applications yet."
+              : `There are no ${filterStatus.replace('_', ' ')} applications in this view.`
+          }
+        />
       </div>
     );
   }
@@ -90,7 +91,7 @@ export const ApplicationsList = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}
+          className={viewMode === 'grid' ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'space-y-4'}
         >
           {sortedApplications.map((application, index) => (
             <motion.div

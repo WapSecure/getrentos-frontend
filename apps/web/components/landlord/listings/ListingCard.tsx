@@ -61,7 +61,7 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
       transition={{ delay, duration: 0.4 }}
       className="bg-card rounded-2xl border border-border overflow-hidden"
     >
-      <div className="relative h-32 bg-linear-to-br from-secondary to-muted">
+      <div className="relative h-32 bg-muted">
         {showCover ? (
           // Signed MinIO URLs, so plain <img> rather than next/image.
           // eslint-disable-next-line @next/next/no-img-element

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   CheckCircle,
   Clock,
@@ -13,7 +12,7 @@ import {
   Shield,
   Calendar,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 
 interface Payment {
   id: string;
@@ -81,31 +80,31 @@ export const PaymentCard = ({
       case 'paid':
         return {
           label: 'Paid',
-          color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+          variant: 'success' as BadgeVariant,
           icon: CheckCircle,
         };
       case 'pending':
         return {
           label: 'Pending',
-          color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+          variant: 'warning' as BadgeVariant,
           icon: Clock,
         };
       case 'overdue':
         return {
           label: 'Overdue',
-          color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+          variant: 'danger' as BadgeVariant,
           icon: AlertCircle,
         };
       case 'processing':
         return {
           label: 'Processing',
-          color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+          variant: 'info' as BadgeVariant,
           icon: Clock,
         };
       default:
         return {
           label: 'Unknown',
-          color: 'bg-gray-100 text-gray-800',
+          variant: 'neutral' as BadgeVariant,
           icon: Clock,
         };
     }
@@ -118,25 +117,20 @@ export const PaymentCard = ({
   const isPayable = payment.status === 'pending' || payment.status === 'overdue';
 
   return (
-    <div className="p-4 hover:bg-secondary transition-colors cursor-pointer group">
+    <article className="group p-4 transition-colors hover:bg-secondary/50 sm:p-5">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         {/* Status Icon */}
-        <div
-          className={`w-10 h-10 rounded-full ${statusConfig.color} flex items-center justify-center shrink-0`}
-        >
-          <StatusIcon className="w-5 h-5" />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <StatusIcon className="h-5 w-5" aria-hidden="true" />
         </div>
 
         {/* Payment Info */}
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-foreground">{payment.propertyName}</h4>
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
-            >
-              <StatusIcon className="w-3 h-3" />
+            <Badge variant={statusConfig.variant} icon={<StatusIcon className="h-3 w-3" />}>
               {statusConfig.label}
-            </span>
+            </Badge>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-muted-foreground">
               <MethodIcon className="w-3 h-3" />
               {payment.method.replace('_', ' ')}
@@ -164,7 +158,7 @@ export const PaymentCard = ({
             <p className="text-xs text-gray-500">{formatDate(payment.date)}</p>
           </div>
 
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             {isPayable && (
               <Button
                 size="sm"
@@ -175,34 +169,49 @@ export const PaymentCard = ({
                 }}
                 className="whitespace-nowrap"
               >
-                Pay Now
+                Pay now
+              </Button>
+            )}
+            {payment.status === 'paid' && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDispute();
+                }}
+                className="text-muted-foreground"
+              >
+                Report issue
               </Button>
             )}
             {payment.receiptUrl && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDownloadReceipt();
                 }}
-                className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                title="Download receipt"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+                aria-label="Download receipt"
               >
                 <Download className="w-4 h-4 text-gray-500" />
               </button>
             )}
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onViewDetails();
               }}
-              className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              title="View details"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+              aria-label="View payment details"
             >
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };

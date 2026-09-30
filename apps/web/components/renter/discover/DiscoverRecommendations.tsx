@@ -21,7 +21,7 @@ export const DiscoverRecommendations = () => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-      <div className="bg-linear-to-r from-primary/10 to-transparent rounded-xl border border-primary/20 overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="flex items-center gap-3 p-4">
           <div className="p-2 rounded-lg bg-primary/20">
             <Sparkles className="w-5 h-5 text-primary" />

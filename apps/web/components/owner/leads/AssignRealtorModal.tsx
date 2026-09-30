@@ -147,7 +147,7 @@ export const AssignRealtorModal = ({ lead, onClose, onAssign }: AssignRealtorMod
                               : 'border-border hover:bg-secondary'
                           }`}
                         >
-                          <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
                             {getInitials(realtor.name)}
                           </div>
                           <div className="min-w-0">

@@ -35,16 +35,16 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
         </Button>
       </div>
 
-      <div className="mt-4 p-3 rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800">
+      <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
-            <Shield className="w-5 h-5 text-blue-600" />
+          <div className="rounded-lg bg-primary/10 p-2">
+            <Shield className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+            <p className="text-sm font-medium text-foreground">
               Higher trust scores unlock more features
             </p>
-            <p className="text-xs text-blue-700 dark:text-blue-400">
+            <p className="text-xs text-muted-foreground">
               Complete verifications to increase your score
             </p>
           </div>

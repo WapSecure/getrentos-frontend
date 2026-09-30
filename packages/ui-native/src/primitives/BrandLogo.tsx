@@ -1,5 +1,5 @@
 import { View, type StyleProp, type ViewStyle } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 
@@ -10,11 +10,7 @@ export interface BrandLogoProps {
   showWordmark?: boolean;
   /** Show the brand tagline under the wordmark. Default false. */
   showTagline?: boolean;
-  /**
-   * `gradient` (default) = the brand blue gradient mark;
-   * `mono` = a single flat colour (follows the theme foreground).
-   */
-  tone?: 'gradient' | 'mono';
+  tone?: 'brand' | 'mono';
   style?: StyleProp<ViewStyle>;
 }
 
@@ -23,7 +19,7 @@ export function BrandLogo({
   size = 24,
   showWordmark = true,
   showTagline = false,
-  tone = 'gradient',
+  tone = 'brand',
   style,
 }: BrandLogoProps) {
   const { colors } = useTheme();
@@ -63,33 +59,17 @@ export function BrandLogo({
 /** Just the mark, no wordmark. */
 export function BrandMark({
   size = 24,
-  tone = 'gradient',
+  tone = 'brand',
 }: {
   size?: number;
-  tone?: 'gradient' | 'mono';
+  tone?: 'brand' | 'mono';
 }) {
   const { colors } = useTheme();
   const width = size * (128 / 144);
-  const fill = tone === 'mono' ? colors.foreground : 'url(#gr-brand)';
+  const fill = tone === 'mono' ? colors.foreground : colors.primary;
 
   return (
     <Svg width={width} height={size} viewBox="0 0 128 144">
-      {tone === 'gradient' ? (
-        <Defs>
-          <LinearGradient
-            id="gr-brand"
-            x1="16"
-            y1="14"
-            x2="108"
-            y2="126"
-            gradientUnits="userSpaceOnUse"
-          >
-            <Stop offset="0" stopColor="#35B8FF" />
-            <Stop offset="0.55" stopColor="#1478F2" />
-            <Stop offset="1" stopColor="#0E5BEF" />
-          </LinearGradient>
-        </Defs>
-      ) : null}
       <Path
         d="M18 122 64 24l46 98"
         fill="none"

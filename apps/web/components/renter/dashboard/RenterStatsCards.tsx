@@ -92,27 +92,21 @@ const StatCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-primary/5 to-transparent" />
-
-      <div className="relative p-4">
-        {/* Icon at the top */}
-        <div
-          className={`inline-flex p-2.5 rounded-xl ${colors.bg} transition-all duration-300 group-hover:scale-110 mb-3`}
-        >
-          <Icon className={`w-5 h-5 ${colors.icon}`} />
+      <div className="relative p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <p className="text-sm leading-5 text-muted-foreground">{label}</p>
+          <div className={`inline-flex shrink-0 rounded-xl p-2.5 ${colors.bg}`}>
+            <Icon className={`w-5 h-5 ${colors.icon}`} />
+          </div>
         </div>
 
-        {/* Content below icon */}
         <div>
-          <p className="text-sm text-muted-foreground mb-1">{label}</p>
           <p className={`font-bold text-foreground tracking-tight ${valueSize}`}>{formatValue()}</p>
           {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
         </div>
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </motion.div>
   );
 };
@@ -200,7 +194,10 @@ export const RenterStatsCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <section
+      aria-label="Renter account overview"
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+    >
       {stats.map((stat) => (
         <StatCard
           key={stat.label}
@@ -213,6 +210,6 @@ export const RenterStatsCards = () => {
           isCurrency={stat.isCurrency}
         />
       ))}
-    </div>
+    </section>
   );
 };

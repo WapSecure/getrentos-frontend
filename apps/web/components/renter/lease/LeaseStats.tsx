@@ -52,14 +52,14 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <section aria-label="Lease summary" className="mb-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {stats.map((stat, index) => (
         <motion.div
           key={stat.label}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className="bg-card rounded-xl p-4 border border-border"
+          className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm"
         >
           <div className="flex items-center gap-2 mb-1">
             <stat.icon className="w-4 h-4 text-primary" />
@@ -71,6 +71,6 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
           </p>
         </motion.div>
       ))}
-    </div>
+    </section>
   );
 };

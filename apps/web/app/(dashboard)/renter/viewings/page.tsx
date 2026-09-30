@@ -9,6 +9,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { viewingRequestStatusBadges } from '@/lib/statusBadge';
 import { ROUTES } from '@/lib/constants/auth';
+import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 const formatWhen = (iso?: string) =>
   iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : null;
@@ -37,12 +38,17 @@ export default function RenterViewingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Viewing requests</h1>
-        <p className="text-muted-foreground mt-1">
-          The homes you&apos;ve asked to see, and what the landlord has confirmed.
-        </p>
-      </div>
+      <RenterPageHeader
+        eyebrow="Property search"
+        icon={CalendarCheck}
+        title="Viewing requests"
+        description="Track every home you have asked to see and the times confirmed by the property owner."
+        actions={
+          <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
+            Browse homes
+          </Button>
+        }
+      />
 
       {viewings.length === 0 ? (
         <EmptyState
@@ -60,7 +66,10 @@ export default function RenterViewingsPage() {
           {viewings.map((viewing) => {
             const badge = viewingRequestStatusBadges[viewing.status];
             return (
-              <li key={viewing.id} className="rounded-xl border border-border bg-card p-4">
+              <li
+                key={viewing.id}
+                className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="font-semibold text-foreground">{viewing.propertyName}</h2>

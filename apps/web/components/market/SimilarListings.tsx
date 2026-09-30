@@ -79,7 +79,7 @@ export function SimilarListings({
                     style={{ backgroundImage: `url(${listing.image})` }}
                   />
                 ) : (
-                  <div className="flex h-44 items-center justify-center bg-gradient-to-br from-primary/15 via-accent to-primary/5">
+                  <div className="flex h-44 items-center justify-center bg-muted">
                     <Home className="h-7 w-7 text-primary/40" />
                   </div>
                 )}

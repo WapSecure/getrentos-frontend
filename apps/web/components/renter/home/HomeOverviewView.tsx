@@ -210,9 +210,8 @@ export function HomeOverviewView() {
 
   return (
     <div className="space-y-6 pb-8">
-      <section className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-8">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/[0.06] blur-3xl" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-2xl border border-border bg-card px-6 py-7 shadow-sm sm:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <div className="mb-4 flex items-center gap-2">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">

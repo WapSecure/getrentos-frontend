@@ -43,7 +43,7 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
     <div className="bg-card rounded-xl border border-border flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
       <div className="p-4 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold text-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
             {getInitials(conversation.participantName)}
           </div>
           <div>

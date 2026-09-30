@@ -43,7 +43,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
           {initials}
         </div>
         <div className="hidden sm:block text-left">

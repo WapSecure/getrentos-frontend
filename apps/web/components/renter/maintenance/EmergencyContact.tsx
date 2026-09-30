@@ -26,7 +26,7 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
       animate={{ opacity: 1, y: 0 }}
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 bg-linear-to-r from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-b border-red-200 dark:border-red-800">
+      <div className="border-b border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/20">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-red-600" />
           <div>

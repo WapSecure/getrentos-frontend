@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileText, Download, Mail, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Download, Mail, CalendarDays, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import type { RenewalOffer } from '@/types/lease';
@@ -41,23 +41,23 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
       case 'active':
         return {
           label: 'Active',
-          color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+          variant: 'success' as BadgeVariant,
           icon: CheckCircle,
         };
       case 'expiring':
         return {
           label: 'Expiring Soon',
-          color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+          variant: 'warning' as BadgeVariant,
           icon: AlertCircle,
         };
       case 'expired':
         return {
           label: 'Expired',
-          color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+          variant: 'danger' as BadgeVariant,
           icon: AlertCircle,
         };
       default:
-        return { label: 'Unknown', color: 'bg-gray-100 text-gray-800', icon: AlertCircle };
+        return { label: 'Unknown', variant: 'neutral' as BadgeVariant, icon: AlertCircle };
     }
   };
 
@@ -73,24 +73,31 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-foreground">My Lease</h1>
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
-            >
-              <StatusIcon className="w-3 h-3" />
-              {statusConfig.label}
+    <motion.header
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-7 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7"
+    >
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-3xl">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+              Tenancy record
             </span>
+            <Badge variant={statusConfig.variant} icon={<StatusIcon className="h-3 w-3" />}>
+              {statusConfig.label}
+            </Badge>
           </div>
-          <p className="text-muted-foreground mt-1">
-            {lease.propertyName} • {lease.address}
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {lease.propertyName}
+          </h1>
+          <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground sm:text-base">
+            <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {lease.address}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
             className="gap-2"
@@ -98,12 +105,12 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             disabled={isDownloading}
             onClick={() => void handleDownload()}
           >
-            <Download className="w-4 h-4" />
-            {isDownloading ? 'Downloading…' : 'Download Lease'}
+            <Download className="h-4 w-4" aria-hidden="true" />
+            {isDownloading ? 'Downloading…' : 'Download lease'}
           </Button>
-          <Button variant="primary" className="gap-2" size="sm">
-            <Mail className="w-4 h-4" />
-            Contact Landlord
+          <Button href="/renter/messages" variant="primary" className="gap-2" size="sm">
+            <Mail className="h-4 w-4" aria-hidden="true" />
+            Contact property owner
           </Button>
         </div>
       </div>
@@ -113,17 +120,17 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
         </p>
       ) : null}
 
-      <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-        <div className="flex flex-wrap items-center gap-4 text-sm">
+      <div className="relative mt-6 rounded-2xl border border-border/70 bg-secondary/40 p-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-blue-600" />
-            <span className="text-blue-700 dark:text-blue-300 font-medium">Lease Period</span>
+            <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
+            <span className="font-semibold text-foreground">Lease period</span>
           </div>
           <span className="text-muted-foreground">
             {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
           </span>
           {lease.status === 'active' && (
-            <span className="text-xs text-green-600 bg-green-100 dark:bg-green-900/20 px-2 py-0.5 rounded-full">
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
               {Math.ceil(
                 (new Date(lease.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
               )}{' '}
@@ -131,12 +138,12 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             </span>
           )}
           {lease.status === 'expiring' && renewalOffer && (
-            <span className="text-xs text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 px-2 py-0.5 rounded-full">
+            <span className="rounded-full bg-warning-subtle px-2.5 py-1 text-xs font-semibold text-warning">
               Renewal offer available
             </span>
           )}
         </div>
       </div>
-    </motion.div>
+    </motion.header>
   );
 };

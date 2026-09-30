@@ -40,7 +40,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
     <div className="bg-card border border-border rounded-xl p-4">
       <h3 className="text-sm font-semibold text-foreground mb-3">Landlord</h3>
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold shrink-0">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
           {name.charAt(0)}
         </div>
         <div className="min-w-0">

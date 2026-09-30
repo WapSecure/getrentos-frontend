@@ -8,6 +8,7 @@ import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
 import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeField';
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
+import { AuthMethodTabs } from '@/components/auth/AuthMethodTabs';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
@@ -60,36 +61,17 @@ export default function SignupPage() {
   }, [step]);
 
   return (
-    <div className="relative flex min-h-screen bg-background">
-      {/* Ambient canvas: soft radial glows (form side stays clean + airy). */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(70%_50%_at_100%_0%,rgba(0,113,227,0.1),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(50%_40%_at_0%_100%,rgba(0,113,227,0.05),transparent_60%)]" />
-      </div>
-
-      {/* Back Button - Top Left */}
+    <main className="relative flex min-h-screen bg-background">
       <button
         onClick={handleBack}
-        className="fixed top-6 left-6 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+        className="fixed left-4 top-4 z-30 flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card/90 px-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 sm:left-6 sm:top-6"
         aria-label="Go back"
       >
-        <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-        <span className="text-sm text-gray-700 dark:text-gray-300">
-          {step === 'otp' ? 'Back to signup' : 'Back'}
-        </span>
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        <span>{step === 'otp' ? 'Back to signup' : 'Back'}</span>
       </button>
 
-      {/* Start Over Button */}
-      <button
-        onClick={handleStartOver}
-        className="fixed top-6 left-28 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
-        aria-label="Start over"
-      >
-        <RefreshCw className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-        <span className="text-sm text-gray-700 dark:text-gray-300">Start Over</span>
-      </button>
-
-      <div className="fixed top-6 right-6 z-20">
+      <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
         <ThemeToggle />
       </div>
 
@@ -97,20 +79,36 @@ export default function SignupPage() {
       <SignupLeftContent />
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo — pt-16 clears the fixed Back/Start Over buttons above it */}
-          <div className="lg:hidden text-center mb-8 pt-16">
-            <div className="mb-4 flex justify-center">
+      <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
+        <div className="w-full max-w-[32rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
+          <div className="mb-8">
+            <div className="mb-6 flex justify-center lg:hidden">
               <Logo size="md" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground">
-              {step === 'signup' ? 'Create an account' : 'Verify your identity'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                  {step === 'signup' ? 'Join GetRentos' : 'One final step'}
+                </p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  {step === 'signup' ? 'Create an account' : 'Verify your identity'}
+                </h1>
+              </div>
+              {step === 'otp' && (
+                <button
+                  type="button"
+                  onClick={handleStartOver}
+                  className="flex min-h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  Start over
+                </button>
+              )}
+            </div>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
               {step === 'signup'
-                ? 'Join GetRentos and start your property journey'
-                : 'Enter the verification code sent to your device'}
+                ? 'Create one secure account for every part of your property journey.'
+                : 'Enter the verification code we sent to your device.'}
             </p>
           </div>
 
@@ -121,7 +119,8 @@ export default function SignupPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm"
+                className="mb-5 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
+                role="alert"
               >
                 {error}
               </motion.div>
@@ -139,40 +138,17 @@ export default function SignupPage() {
                 transition={{ duration: 0.3 }}
               >
                 {/* Method Selection */}
-                <div className="flex gap-2 mb-6 p-1 bg-gray-100 dark:bg-white/10 rounded-xl">
-                  <button
-                    onClick={() => setMethod(SIGNUP_METHODS.EMAIL)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                      method === SIGNUP_METHODS.EMAIL
-                        ? 'bg-card text-primary shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </button>
-                  <button
-                    onClick={() => setMethod(SIGNUP_METHODS.PHONE)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                      method === SIGNUP_METHODS.PHONE
-                        ? 'bg-card text-primary shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <Phone className="w-4 h-4" />
-                    Phone
-                  </button>
-                  <button
-                    onClick={() => setMethod(SIGNUP_METHODS.WHATSAPP)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                      method === SIGNUP_METHODS.WHATSAPP
-                        ? 'bg-card text-primary shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    WhatsApp
-                  </button>
+                <div className="mb-7">
+                  <AuthMethodTabs
+                    label="Choose a signup method"
+                    value={method}
+                    onChange={setMethod}
+                    tabs={[
+                      { value: SIGNUP_METHODS.EMAIL, label: 'Email', icon: Mail },
+                      { value: SIGNUP_METHODS.PHONE, label: 'Phone', icon: Phone },
+                      { value: SIGNUP_METHODS.WHATSAPP, label: 'WhatsApp', icon: MessageCircle },
+                    ]}
+                  />
                 </div>
 
                 {/* Signup Form */}
@@ -215,11 +191,11 @@ export default function SignupPage() {
 
           {/* Login Link - only show on signup step */}
           {step === 'signup' && (
-            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-7 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
               <a
                 href={ROUTES.LOGIN}
-                className="font-medium text-primary hover:text-primary-hover transition-colors"
+                className="font-semibold text-primary transition-colors hover:text-primary-hover focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 Sign in
               </a>
@@ -227,15 +203,15 @@ export default function SignupPage() {
           )}
 
           {/* Trust Badges for Mobile */}
-          <div className="lg:hidden mt-8 pt-6 border-t border-border">
-            <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-8 border-t border-border pt-6 lg:hidden">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
-                SOC2 Certified
+                Secure by design
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
-                GDPR Compliant
+                Identity verification
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
@@ -244,7 +220,7 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

@@ -20,15 +20,6 @@ export default function NotFound() {
 
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-10">
-      <div
-        aria-hidden="true"
-        className="absolute -top-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -bottom-32 right-[-6rem] h-72 w-72 rounded-full bg-info/10 blur-3xl"
-      />
-
       <section className="relative w-full max-w-lg rounded-[28px] border border-border/70 bg-card/85 p-7 text-center shadow-[0_24px_80px_rgba(0,0,0,0.10)] backdrop-blur-xl sm:p-10">
         <Logo href={ROUTES.HOME} size="md" className="mx-auto w-fit" />
 

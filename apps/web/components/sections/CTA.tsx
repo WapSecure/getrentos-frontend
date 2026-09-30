@@ -5,8 +5,7 @@ import { ROUTES } from '@/lib/constants/auth';
 export const CTA = () => (
   <section className="px-4 py-20">
     <div className="mx-auto max-w-5xl text-center">
-      <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-linear-to-br from-primary/10 via-accent/60 to-transparent p-10 shadow-lg backdrop-blur md:p-16 dark:from-primary/15 dark:via-accent/10">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+      <div className="rounded-2xl border border-border bg-card p-10 shadow-sm md:p-16">
         <h2 className="text-3xl font-bold tracking-[-0.02em] text-foreground md:text-5xl">
           Ready to get started?
         </h2>

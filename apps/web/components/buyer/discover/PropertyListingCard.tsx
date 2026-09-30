@@ -29,7 +29,7 @@ export const PropertyListingCard = ({
       className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
       onClick={onViewDetails}
     >
-      <div className="relative h-44 bg-linear-to-br from-secondary to-muted">
+      <div className="relative h-44 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
           <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
         </div>

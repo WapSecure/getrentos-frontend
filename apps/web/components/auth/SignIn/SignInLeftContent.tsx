@@ -8,14 +8,7 @@ import { SignInStats } from './SignInStats';
 
 export const SignInLeftContent = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
-      {/* Background: soft radial glow + dot texture. */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(75%_55%_at_30%_0%,rgba(0,113,227,0.12),transparent_62%)]" />
-        <div className="hero-dots absolute inset-0 opacity-50" />
-        <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-      </div>
-
+    <aside className="relative hidden border-r border-border bg-muted/30 transition-all duration-300 lg:flex lg:w-1/2">
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
         {/* Logo - Now clickable */}
         <div className="mb-12">
@@ -34,14 +27,14 @@ export const SignInLeftContent = () => {
               Welcome back
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            <h2 className="mb-5 text-4xl font-bold tracking-tight text-foreground xl:text-5xl">
               The safer way
               <span className="block text-primary mt-2">to find home.</span>
-            </h1>
+            </h2>
 
-            <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
-              Every listing verified. Every transaction protected. Join 120,000+ members who trust
-              GetRentos.
+            <p className="mb-8 max-w-xl text-lg leading-8 text-muted-foreground">
+              Discover verified opportunities, protected payments, and a clearer property journey in
+              one trusted workspace.
             </p>
 
             <SignInTrustFeatures />
@@ -51,15 +44,15 @@ export const SignInLeftContent = () => {
 
         {/* Bottom Trust Signals */}
         <div className="mt-12 pt-6 border-t border-border">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-white/40">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
-                SOC2 Certified
+                Secure by design
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
-                GDPR Compliant
+                Identity verification
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
@@ -69,6 +62,6 @@ export const SignInLeftContent = () => {
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };

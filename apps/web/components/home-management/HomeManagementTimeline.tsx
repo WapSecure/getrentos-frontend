@@ -285,7 +285,7 @@ function TimelineLoadingState() {
       {Array.from({ length: 4 }, (_, index) => (
         <div
           key={index}
-          className="h-28 animate-pulse border-b border-border bg-gradient-to-r from-transparent via-secondary/70 to-transparent last:border-b-0"
+          className="h-28 animate-pulse border-b border-border bg-muted last:border-b-0"
         />
       ))}
     </div>

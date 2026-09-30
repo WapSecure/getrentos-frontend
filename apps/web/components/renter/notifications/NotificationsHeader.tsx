@@ -2,6 +2,7 @@
 
 import { Bell, BellOff, CheckCheck, Trash2 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface NotificationsHeaderProps {
   unreadCount: number;
@@ -17,14 +18,13 @@ export const NotificationsHeader = ({
   onClearAll,
 }: NotificationsHeaderProps) => {
   return (
-    <div className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
-          <p className="text-muted-foreground mt-1">Stay updated on your property journey</p>
-        </div>
-
-        <div className="flex items-center gap-3">
+    <RenterPageHeader
+      eyebrow="Activity centre"
+      icon={Bell}
+      title="Notifications"
+      description="Stay current on applications, payments, messages, viewings, and your home."
+      actions={
+        <>
           {unreadCount > 0 && (
             <Button variant="outline" className="gap-2" size="sm" onClick={onMarkAllAsRead}>
               <CheckCheck className="w-4 h-4" />
@@ -34,7 +34,7 @@ export const NotificationsHeader = ({
           {totalCount > 0 && (
             <Button
               variant="ghost"
-              className="gap-2 text-red-500 hover:text-red-700"
+              className="gap-2 text-destructive hover:text-destructive"
               size="sm"
               onClick={onClearAll}
             >
@@ -42,10 +42,10 @@ export const NotificationsHeader = ({
               Clear All
             </Button>
           )}
-        </div>
-      </div>
-
-      <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        </>
+      }
+    >
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
             {unreadCount > 0 ? (
@@ -55,17 +55,15 @@ export const NotificationsHeader = ({
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+            <p className="text-sm font-semibold text-foreground">
               {unreadCount > 0
                 ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
                 : 'All caught up!'}
             </p>
-            <p className="text-xs text-blue-700 dark:text-blue-400">
-              {totalCount} total notifications
-            </p>
+            <p className="text-xs text-muted-foreground">{totalCount} total notifications</p>
           </div>
         </div>
       </div>
-    </div>
+    </RenterPageHeader>
   );
 };

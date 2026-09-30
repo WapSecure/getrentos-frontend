@@ -9,7 +9,6 @@ import { LeaseDocuments } from '@/components/renter/lease/LeaseDocuments';
 import { LeaseRenewalOffer } from '@/components/renter/lease/LeaseRenewalOffer';
 import { LeasePaymentSchedule } from '@/components/renter/lease/LeasePaymentSchedule';
 import { LeaseMoveOutChecklist } from '@/components/renter/lease/LeaseMoveOutChecklist';
-import { LeaseSummaryCard } from '@/components/renter/lease/LeaseSummaryCard';
 import { RentIncreaseHistory } from '@/components/renter/lease/RentIncreaseHistory';
 import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaymentReminders';
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
@@ -174,10 +173,9 @@ export const LeaseView = () => {
 
       <LeaseHeader lease={lease} renewalOffer={renewalOffer} />
       <LeaseStats lease={lease} />
-      <LeaseSummaryCard lease={lease} />
 
-      <div className="grid lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="mt-7 grid gap-6 xl:grid-cols-3">
+        <div className="space-y-6 xl:col-span-2">
           <LeaseDetails lease={lease} />
           <LeaseTimeline lease={lease} />
           <UpcomingPaymentReminders reminders={paymentReminders} />

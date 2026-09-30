@@ -256,7 +256,7 @@ export const ApplicationDetailsModal = ({
                       </h4>
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white font-semibold">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
                             {application.landlord.name.charAt(0)}
                           </div>
                           <div className="flex-1">

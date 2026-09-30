@@ -50,7 +50,7 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
       <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
@@ -94,17 +94,20 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
                 )}
                 {!method.isDefault && (
                   <button
+                    type="button"
                     onClick={() => onSetDefault(method.id)}
-                    className="text-xs text-primary hover:underline"
+                    className="min-h-9 rounded-lg px-2 text-xs font-semibold text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
                   >
-                    Set Default
+                    Set default
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => onRemove(method.id)}
-                  className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                  aria-label={`Remove ${method.name}`}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/15"
                 >
-                  <Trash2 className="w-3 h-3 text-red-500" />
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </div>
             </motion.div>

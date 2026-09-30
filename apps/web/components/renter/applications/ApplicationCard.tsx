@@ -56,10 +56,10 @@ export const ApplicationCard = ({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow"
+        className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
       >
         <div className="flex flex-col sm:flex-row">
-          <div className="w-full sm:w-40 h-32 bg-linear-to-br from-secondary to-muted flex items-center justify-center shrink-0 relative">
+          <div className="relative flex h-32 w-full shrink-0 items-center justify-center bg-muted sm:w-40">
             <Home className="w-8 h-8 text-gray-400" />
           </div>
 
@@ -114,8 +114,12 @@ export const ApplicationCard = ({
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <User className="w-3 h-3" />
                 <span className="text-foreground">{application.landlord.name}</span>
-                <Star className="w-3 h-3 fill-primary text-primary" />
-                <span>{application.landlord.rating || 4.8}</span>
+                {(application.landlord.rating ?? 0) > 0 && (
+                  <>
+                    <Star className="h-3 w-3 fill-primary text-primary" aria-hidden="true" />
+                    <span>{application.landlord.rating}</span>
+                  </>
+                )}
               </div>
               <div className="flex gap-2">
                 {canWithdraw && onWithdraw && (
@@ -146,9 +150,9 @@ export const ApplicationCard = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow group"
+      className="group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
     >
-      <div className="h-32 bg-linear-to-br from-secondary to-muted flex items-center justify-center relative">
+      <div className="relative flex h-32 items-center justify-center bg-muted">
         <Home className="w-10 h-10 text-gray-400" />
         <Badge
           variant={status.variant}

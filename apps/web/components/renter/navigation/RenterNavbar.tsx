@@ -118,21 +118,31 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
         }`}
       >
         <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
             <Logo size="md" />
 
             {/* Desktop Navigation Links */}
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden items-center gap-1 rounded-xl bg-secondary/60 p-1 md:flex">
               <Link
                 href={ROUTES.RENTER_DASHBOARD}
-                className="text-foreground font-medium hover:text-primary transition-colors"
+                aria-current={pathname === ROUTES.RENTER_DASHBOARD ? 'page' : undefined}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                  pathname === ROUTES.RENTER_DASHBOARD
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
                 {t('nav.dashboard')}
               </Link>
               <Link
                 href={ROUTES.RENTER_DISCOVER}
-                className="text-muted-foreground hover:text-primary transition-colors"
+                aria-current={pathname.startsWith(ROUTES.RENTER_DISCOVER) ? 'page' : undefined}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                  pathname.startsWith(ROUTES.RENTER_DISCOVER)
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
                 {t('nav.discover')}
               </Link>
@@ -158,7 +168,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                   onChange={(event) => setSearchQuery(event.target.value)}
                   aria-label="Search properties and locations"
                   placeholder={t('nav.search_placeholder')}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full rounded-xl border border-border bg-secondary/60 py-2 pl-10 pr-4 text-foreground placeholder-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/10"
                 />
               </div>
             </form>
@@ -180,11 +190,11 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                   }
                   aria-expanded={showNotifications}
                   aria-controls="renter-notifications-menu"
-                  className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
+                  className="relative flex min-h-10 min-w-10 items-center justify-center rounded-xl transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
                 >
                   <Bell className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
                   )}
                 </button>
 
@@ -195,7 +205,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+                      className="absolute right-0 z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border/70 bg-card shadow-2xl"
                     >
                       <div className="p-3 border-b border-border flex justify-between items-center">
                         <h3 className="font-semibold text-foreground">Notifications</h3>
@@ -210,7 +220,9 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-gray-500">No notifications</div>
+                          <div className="p-6 text-center text-sm text-muted-foreground">
+                            You&apos;re all caught up
+                          </div>
                         ) : (
                           notifications.map((notification) => (
                             <button
@@ -225,7 +237,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(notification.createdAt), {
                                     addSuffix: true,
                                   })}
@@ -285,7 +297,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="Search properties and locations"
                 placeholder={t('nav.search_placeholder')}
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full rounded-xl border border-border bg-secondary/60 py-2 pl-10 pr-4 text-foreground placeholder-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/10"
               />
             </div>
           </form>

@@ -34,7 +34,7 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
 
   return (
     <>
-      <div className="relative h-52 bg-linear-to-br from-secondary to-muted">
+      <div className="relative h-52 bg-muted">
         {showVideo && listing.videoTourUrl ? (
           <video
             className="absolute inset-0 h-full w-full bg-black object-contain"

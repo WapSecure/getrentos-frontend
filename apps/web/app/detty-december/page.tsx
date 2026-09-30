@@ -53,7 +53,7 @@ export default function DettyDecemberPage() {
   return (
     <main className="min-h-screen bg-background pt-16">
       <Navigation />
-      <section className="border-b border-border/60 bg-gradient-to-b from-amber-50/70 to-background dark:from-amber-950/20">
+      <section className="border-b border-border bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
           <span className="inline-flex items-center rounded-full border border-amber-300/60 bg-amber-100/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-900 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
             Dec 20 – Jan 3

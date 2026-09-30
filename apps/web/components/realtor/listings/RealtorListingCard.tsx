@@ -63,7 +63,7 @@ export const RealtorListingCard = ({ listing, onClick, delay = 0 }: RealtorListi
       onClick={onClick}
       className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
     >
-      <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
+      <div className="relative h-40 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
           <Megaphone className="w-12 h-12 text-muted-foreground" />
         </div>

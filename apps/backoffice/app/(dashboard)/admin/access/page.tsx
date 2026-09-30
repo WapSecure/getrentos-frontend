@@ -195,7 +195,7 @@ export default function AdminAccessPage() {
                   className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between"
                 >
                   <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-primary to-primary/60 font-semibold text-xs text-primary-foreground">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                       {getInitials(member.legalName)}
                     </div>
                     <div className="min-w-0">

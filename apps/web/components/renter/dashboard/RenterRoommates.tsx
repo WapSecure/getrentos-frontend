@@ -105,7 +105,7 @@ export const RenterRoommates = () => {
               className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-white/5"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
                   {roommate.name.charAt(0)}
                 </div>
                 <div>

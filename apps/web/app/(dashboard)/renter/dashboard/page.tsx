@@ -7,7 +7,6 @@ import { RenterTrustScoreCard } from '@/components/renter/dashboard/RenterTrustS
 import { RenterRecommendedProperties } from '@/components/renter/dashboard/RenterRecommendedProperties';
 import { RenterUpcomingPayments } from '@/components/renter/dashboard/RenterUpcomingPayments';
 import { RenterRecentActivity } from '@/components/renter/dashboard/RenterRecentActivity';
-import { RenterMoveInChecklist } from '@/components/renter/dashboard/RenterMoveInChecklist';
 import { RenterLeaseRenewal } from '@/components/renter/dashboard/RenterLeaseRenewal';
 import { RenterRoommates } from '@/components/renter/dashboard/RenterRoommates';
 import { RenterReviews } from '@/components/renter/dashboard/RenterReviews';
@@ -22,33 +21,27 @@ export default function RenterDashboardPage() {
   if (currentHour >= 18) greeting = 'evening';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <RenterDashboardHeader greeting={greeting} firstName={firstName} />
 
       <RenterStatsCards />
 
-      {/* Primary row: applications get the width, trust score rides alongside
-          and drops beneath on narrower screens. */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid items-start gap-6 xl:grid-cols-12">
+        <div className="space-y-6 xl:col-span-8">
           <RenterApplicationsList />
+          <RenterRecentActivity />
         </div>
-        <RenterTrustScoreCard />
+        <div className="xl:col-span-4">
+          <RenterTrustScoreCard />
+        </div>
       </div>
 
-      {/* Full-width when it renders; collapses cleanly when it doesn't. */}
       <RenterRecommendedProperties />
 
-      {/* Secondary widgets share one flowing grid. Several of these hide
-          themselves when the renter has nothing to show (no lease, no
-          roommates, etc.); as direct grid children they simply drop out and
-          the remaining cards reflow — no stranded half-width cards, even gaps. */}
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-min items-start">
+      <div className="grid auto-rows-min items-start gap-6 lg:grid-cols-2">
         <RenterUpcomingPayments />
         <RenterLeaseRenewal />
-        <RenterMoveInChecklist />
         <RenterRoommates />
-        <RenterRecentActivity />
         <RenterReviews />
       </div>
     </div>

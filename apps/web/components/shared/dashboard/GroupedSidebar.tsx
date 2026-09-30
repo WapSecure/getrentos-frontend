@@ -44,8 +44,8 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
   const pathname = usePathname();
 
   return (
-    <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border/70 bg-card/55 backdrop-blur-xl supports-backdrop-filter:bg-card/65 lg:block">
-      <nav className="space-y-5 p-4" aria-label={ariaLabel}>
+    <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-card lg:block">
+      <nav className="space-y-6 p-4" aria-label={ariaLabel}>
         {groups.map((group) => (
           <section
             key={group.label}
@@ -66,9 +66,9 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
                     key={item.href}
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
                       isActive
-                        ? 'bg-accent text-primary shadow-sm'
+                        ? 'bg-accent text-primary'
                         : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                     }`}
                   >
@@ -115,7 +115,7 @@ export function GroupedMobileNavigation({
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={onNavigate}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'}`}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>

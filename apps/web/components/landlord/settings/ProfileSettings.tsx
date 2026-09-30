@@ -68,7 +68,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           className="w-16 h-16 rounded-full object-cover"
           loading="lazy"
           fallback={
-            <div className="w-16 h-16 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xl">
+            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
               {getInitials(fullName || 'User')}
             </div>
           }

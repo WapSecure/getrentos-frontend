@@ -82,7 +82,7 @@ export const FeaturedProperty = () => (
           </div>
 
           <div
-            className="relative flex min-h-[300px] items-center justify-center overflow-hidden bg-linear-to-br from-gray-100 to-gray-200 dark:from-muted/50 dark:to-muted"
+            className="relative flex min-h-[300px] items-center justify-center overflow-hidden bg-muted"
             aria-hidden="true"
           >
             <div className="relative z-10 text-center">

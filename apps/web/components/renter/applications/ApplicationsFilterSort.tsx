@@ -42,16 +42,19 @@ export const ApplicationsFilterSort = ({
   setViewMode,
 }: ApplicationsFilterSortProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Application status">
         {statusOptions.map((option) => (
           <button
             key={option.value}
+            type="button"
+            role="tab"
+            aria-selected={filterStatus === option.value}
             onClick={() => setFilterStatus(option.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`min-h-10 shrink-0 rounded-xl px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
               filterStatus === option.value
-                ? 'bg-primary text-white'
-                : 'bg-secondary text-muted-foreground hover:bg-gray-200 dark:hover:bg-white/20'
+                ? 'bg-primary/10 text-primary ring-1 ring-primary/10'
+                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
             }`}
           >
             {option.label}
@@ -72,19 +75,29 @@ export const ApplicationsFilterSort = ({
           ))}
         </LegacySelect>
 
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg">
+        <div
+          className="flex gap-1 rounded-xl bg-secondary p-1"
+          role="group"
+          aria-label="Application view"
+        >
           <button
+            type="button"
+            aria-label="Grid view"
+            aria-pressed={viewMode === 'grid'}
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'
+            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
+              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            aria-label="List view"
+            aria-pressed={viewMode === 'list'}
             onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'
+            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
+              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
             }`}
           >
             <List className="w-4 h-4" />

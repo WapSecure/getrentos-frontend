@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../accessibility';
@@ -90,7 +89,7 @@ export function Button({
       borderColor: palette.border,
       borderWidth: variant === 'outline' ? StyleSheet.hairlineWidth * 2 : 0,
     },
-    variant !== 'primary' && variant !== 'destructive' && { backgroundColor: palette.bg },
+    { backgroundColor: palette.bg },
     style,
   ];
 
@@ -105,16 +104,6 @@ export function Button({
       style={frame}
       {...rest}
     >
-      {variant === 'primary' ? (
-        <LinearGradient
-          colors={[colors.primary, colors.primaryHover]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-      ) : variant === 'destructive' ? (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.destructive }]} />
-      ) : null}
       {body}
     </PressableScale>
   );

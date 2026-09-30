@@ -98,7 +98,7 @@ export const DiscoverApplicationAssistant = () => {
             </div>
 
             {suggestion && (
-              <div className="p-3 rounded-lg bg-linear-to-r from-primary/10 to-transparent border border-primary/20">
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-primary mt-0.5" />
                   <div>

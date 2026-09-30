@@ -32,6 +32,7 @@ import {
   MessageCircle,
   Smartphone,
 } from 'lucide-react';
+import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 type SettingsTab =
   | 'profile'
@@ -116,28 +117,37 @@ export default function SettingsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account preferences and settings</p>
-      </div>
+      <RenterPageHeader
+        eyebrow="Account control centre"
+        icon={Settings}
+        title="Settings"
+        description="Manage your renter profile, privacy, security, payments, notifications, and accessibility preferences."
+      />
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="lg:w-64 shrink-0">
-          <div className="bg-card rounded-xl border border-border overflow-hidden sticky top-20">
-            <div className="p-2 space-y-1">
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="shrink-0 lg:w-72">
+          <div className="sticky top-20 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+            <div
+              className="flex gap-1 overflow-x-auto p-2 lg:block lg:space-y-1"
+              role="tablist"
+              aria-label="Settings sections"
+            >
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 lg:w-full ${
                       activeTab === tab.id
-                        ? 'bg-accent text-primary'
+                        ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/10'
                         : 'text-foreground hover:bg-secondary'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                     {tab.label}
                   </button>
                 );
@@ -147,7 +157,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex-1">
-          <div className="bg-card rounded-xl border border-border overflow-hidden p-6">
+          <div className="overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-sm sm:p-7">
             {renderContent()}
           </div>
         </div>

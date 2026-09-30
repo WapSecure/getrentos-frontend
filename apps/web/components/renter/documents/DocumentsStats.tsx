@@ -76,16 +76,21 @@ export const DocumentsStats = ({ summary }: DocumentsStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-6">
+    <section
+      aria-label="Document overview"
+      className="mb-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+    >
       {stats.map((stat) => (
-        <div key={stat.label} className={`${stat.bg} rounded-xl p-3 border border-border`}>
+        <div key={stat.label} className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <stat.icon className={`w-4 h-4 ${stat.color}`} />
+            <span className={`rounded-lg p-2 ${stat.bg}`}>
+              <stat.icon className={`h-4 w-4 ${stat.color}`} aria-hidden="true" />
+            </span>
             <span className="text-xs text-muted-foreground truncate">{stat.label}</span>
           </div>
-          <p className={`text-base font-bold ${stat.color} mt-1`}>{stat.value}</p>
+          <p className="mt-3 text-xl font-bold tracking-tight text-foreground">{stat.value}</p>
         </div>
       ))}
-    </div>
+    </section>
   );
 };

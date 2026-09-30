@@ -18,7 +18,7 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
   const body = (
     <>
       <div
-        className="flex h-32 items-center justify-center rounded-t-2xl bg-gradient-to-br from-primary/15 to-primary/5 bg-cover bg-center"
+        className="flex h-32 items-center justify-center rounded-t-2xl bg-muted bg-cover bg-center"
         style={estate.bannerUrl ? { backgroundImage: `url(${estate.bannerUrl})` } : undefined}
       >
         {!estate.bannerUrl && <Building2 className="h-8 w-8 text-primary/50" />}
@@ -41,7 +41,9 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
         <div className="mt-4 flex flex-wrap gap-2">
           {estate.rentCount > 0 && <Badge variant="info">{estate.rentCount} to rent</Badge>}
           {estate.saleCount > 0 && <Badge variant="success">{estate.saleCount} for sale</Badge>}
-          {estate.shortletCount > 0 && <Badge variant="warning">{estate.shortletCount} shortlets</Badge>}
+          {estate.shortletCount > 0 && (
+            <Badge variant="warning">{estate.shortletCount} shortlets</Badge>
+          )}
           {estate.listingCount === 0 && <Badge variant="neutral">No live listings</Badge>}
         </div>
 
@@ -121,8 +123,8 @@ export const EstatesDirectoryBrowser = ({
           Estates on GetRentos
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Browse the properties marketed by an estate — the ones its own team lists, and the ones its
-          residents&apos; owners list. Every home shows who is marketing it and whose it is.
+          Browse the properties marketed by an estate — the ones its own team lists, and the ones
+          its residents&apos; owners list. Every home shows who is marketing it and whose it is.
         </p>
       </header>
 

@@ -46,7 +46,7 @@ export const RenterUpcomingPayments = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.4 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
+      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
     >
       <div className="p-4 border-b border-border">
         <h2 className="text-lg font-semibold text-foreground">Upcoming Payments</h2>

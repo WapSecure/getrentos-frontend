@@ -17,6 +17,7 @@ import {
 } from '@getrentos/ui';
 import {
   CalendarX,
+  CalendarDays,
   CreditCard,
   Gavel,
   Heart,
@@ -212,37 +213,49 @@ export const GuestBookingsWorkspace = () => {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">My Shortlet Bookings</h1>
-          <p className="mt-1 text-muted-foreground">Track your stays and requests.</p>
-          {guestRatingAverage != null && (
-            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              Your guest rating:{' '}
-              <span className="font-medium text-foreground">{guestRatingAverage.toFixed(1)}</span>
-              <span>
-                ({guestRatingCount} review{guestRatingCount === 1 ? '' : 's'})
+    <div className="mx-auto max-w-[90rem]">
+      <header className="mb-7 rounded-2xl border border-border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                <CalendarDays className="h-4 w-4" aria-hidden="true" />
               </span>
+              Shortlet stays
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              My shortlet bookings
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+              Track upcoming stays, payment status, deposits, messages, and booking requests.
             </p>
-          )}
+            {guestRatingAverage != null && (
+              <p className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                Your guest rating:{' '}
+                <span className="font-medium text-foreground">{guestRatingAverage.toFixed(1)}</span>
+                <span>
+                  ({guestRatingCount} review{guestRatingCount === 1 ? '' : 's'})
+                </span>
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
+              <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setDisputesOpen(true)}>
+              <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setClaimsOpen(true)}>
+              <ShieldAlert className="mr-1.5 h-4 w-4" /> Deposit claims
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setWishlistOpen(true)}>
+              <Heart className="mr-1.5 h-4 w-4" /> Saved
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
-            <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setDisputesOpen(true)}>
-            <Gavel className="mr-1.5 h-4 w-4" /> Disputes
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setClaimsOpen(true)}>
-            <ShieldAlert className="mr-1.5 h-4 w-4" /> Deposit claims
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setWishlistOpen(true)}>
-            <Heart className="mr-1.5 h-4 w-4" /> Saved
-          </Button>
-        </div>
-      </div>
+      </header>
 
       {isLoading ? (
         <div className="space-y-3">
@@ -259,7 +272,10 @@ export const GuestBookingsWorkspace = () => {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div
+              key={b.id}
+              className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
+            >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-medium">{b.propertyTitle}</h3>

@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
+  Activity as ActivityIcon,
+  ArrowRight,
   Clock,
   Heart,
   CheckCircle,
@@ -86,45 +88,59 @@ export const RenterRecentActivity = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.4 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
+      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
     >
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
-        <p className="text-sm text-muted-foreground">Your latest actions and updates</p>
+      <div className="flex items-start justify-between gap-4 border-b border-border/70 p-5">
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+            Latest updates
+          </p>
+          <h2 className="text-lg font-semibold text-foreground">Recent activity</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Important changes across your renter account.
+          </p>
+        </div>
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <ActivityIcon className="h-5 w-5" aria-hidden="true" />
+        </div>
       </div>
 
-      <div className="divide-y divide-border">
+      <div className="space-y-2 p-3">
         {activities.map((activity, index) => (
-          <motion.div
+          <motion.button
+            type="button"
             key={activity.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.45 + index * 0.03, duration: 0.3 }}
-            className="p-3 hover:bg-secondary transition-colors cursor-pointer"
+            className="group flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
             onClick={() => router.push(activityRoutes[activity.type])}
           >
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg bg-secondary`}>
-                <activity.icon className={`w-4 h-4 ${activity.iconColor}`} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-foreground">{activity.title}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <Clock className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    {formatTimeAgo(activity.time)}
-                  </span>
-                </div>
+            <div className="rounded-xl border border-border/70 bg-background p-2.5">
+              <activity.icon className={`h-4 w-4 ${activity.iconColor}`} aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-foreground">{activity.title}</p>
+              <div className="mt-1 flex items-center gap-1">
+                <Clock className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                <span className="text-xs text-muted-foreground">
+                  {formatTimeAgo(activity.time)}
+                </span>
               </div>
             </div>
-          </motion.div>
+            <ArrowRight
+              className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </motion.button>
         ))}
       </div>
 
-      <div className="p-3 border-t border-border text-center">
+      <div className="border-t border-border/70 p-3 text-center">
         <button
+          type="button"
           onClick={() => router.push(ROUTES.RENTER_NOTIFICATIONS)}
-          className="text-sm text-primary hover:text-primary-hover transition-colors"
+          className="min-h-10 rounded-lg px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/5 hover:text-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
         >
           View all activity
         </button>

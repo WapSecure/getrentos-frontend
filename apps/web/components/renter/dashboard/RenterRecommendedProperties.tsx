@@ -60,9 +60,9 @@ export const RenterRecommendedProperties = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.4 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
+      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
     >
-      <div className="p-4 border-b border-border flex justify-between items-center">
+      <div className="flex items-center justify-between border-b border-border/70 p-5">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Recommended for You</h2>
           <p className="text-sm text-muted-foreground">
@@ -75,17 +75,17 @@ export const RenterRecommendedProperties = () => {
         </Button>
       </div>
 
-      <div className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+      <div className="p-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recommendedProperties.map((property, index) => (
             <motion.div
               key={property.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 + index * 0.05, duration: 0.3 }}
-              className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              className="overflow-hidden rounded-2xl border border-border/70 bg-background transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
             >
-              <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
+              <div className="relative h-40 bg-muted">
                 {property.image && !failedImages.includes(property.id) ? (
                   // Signed MinIO URLs, so plain <img> rather than next/image.
                   // eslint-disable-next-line @next/next/no-img-element
