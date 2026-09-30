@@ -41,6 +41,9 @@ export function GuestPromiseReportDialog({
   const [problem, setProblem] = useState<GuestPromiseProblem | null>(null);
   const [description, setDescription] = useState('');
   const [photos, setPhotos] = useState<PendingUpload[]>([]);
+  // Shown inline. Cleared as soon as the guest edits, so a message they have
+  // already acted on does not sit there contradicting the form (adding the photo
+  // it asked for used to leave "Add at least one photo" on screen).
   const [error, setError] = useState<string | null>(null);
 
   const needsPhoto = problem !== null && problem !== 'NO_ACCESS';
@@ -112,7 +115,10 @@ export function GuestPromiseReportDialog({
                   name="problem"
                   className="mt-1 accent-[var(--primary)]"
                   checked={problem === option.value}
-                  onChange={() => setProblem(option.value)}
+                  onChange={() => {
+                    setProblem(option.value);
+                    setError(null);
+                  }}
                 />
                 <span>
                   <span className="font-medium">{option.label}</span>
@@ -125,7 +131,10 @@ export function GuestPromiseReportDialog({
           <Field label="Tell us what happened">
             <Textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                setError(null);
+              }}
               rows={4}
               maxLength={2000}
               placeholder="e.g. The listing shows a pool and a generator. There is no pool and the generator doesn't work."
@@ -138,7 +147,10 @@ export function GuestPromiseReportDialog({
             </p>
             <DocumentUpload
               value={photos}
-              onChange={(next) => setPhotos(next.slice(0, MAX_PHOTOS))}
+              onChange={(next) => {
+                setPhotos(next.slice(0, MAX_PHOTOS));
+                setError(null);
+              }}
               accept="image/jpeg,image/png,image/webp"
               multiple
               label=""
