@@ -86,7 +86,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
           sizes="(max-width: 768px) 100vw, 1024px"
           className="object-cover"
           loading="lazy"
-          fallback={<div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5" />}
+          fallback={<div className="w-full h-full bg-muted" />}
         />
       </div>
 

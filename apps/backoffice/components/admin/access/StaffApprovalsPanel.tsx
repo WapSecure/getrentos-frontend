@@ -77,7 +77,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
       <li key={approval.id} className="flex flex-col gap-3 p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-warning to-warning/60 text-white font-semibold text-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning text-sm font-semibold text-white">
               {getInitials(approval.staffUser.legalName)}
             </div>
             <div className="min-w-0">

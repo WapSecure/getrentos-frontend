@@ -72,7 +72,7 @@ export const PaymentSchedule = ({
 
   if (upcomingPayments.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
@@ -89,7 +89,7 @@ export const PaymentSchedule = ({
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />

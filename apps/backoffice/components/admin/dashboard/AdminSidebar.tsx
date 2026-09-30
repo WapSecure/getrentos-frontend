@@ -210,7 +210,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 z-30 hidden w-64 overflow-y-auto border-r border-border/70 bg-card/55 backdrop-blur-xl supports-backdrop-filter:bg-card/65 lg:block">
+    <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-card lg:block">
       <nav className="space-y-5 p-4" aria-label="Administration navigation">
         {navGroups.map((group) => {
           const visibleItems = group.items.filter((item) => hasAccess(roles, item));
@@ -236,7 +236,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
                       aria-current={isActive ? 'page' : undefined}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-accent text-primary shadow-sm'
+                          ? 'bg-accent text-primary'
                           : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                       }`}
                     >
@@ -283,7 +283,7 @@ export const AdminMobileNavigation = ({
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={onNavigate}
-                    className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'}`}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
                   >
                     <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 truncate">{item.label}</span>

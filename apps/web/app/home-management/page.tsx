@@ -128,7 +128,6 @@ export default function HomeManagementProductPage() {
       <Navigation />
 
       <section className="relative overflow-hidden px-4 pb-20 pt-32 sm:px-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[36rem] bg-[radial-gradient(circle_at_top_left,rgba(25,118,210,0.14),transparent_42%),radial-gradient(circle_at_top_right,rgba(46,125,100,0.12),transparent_38%)]" />
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">

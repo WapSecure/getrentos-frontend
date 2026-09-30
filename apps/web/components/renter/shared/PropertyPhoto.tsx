@@ -30,7 +30,7 @@ export const PropertyPhoto = ({
   const [failed, setFailed] = useState(false);
 
   return (
-    <div className={`relative bg-linear-to-br from-secondary to-muted ${className}`}>
+    <div className={`relative bg-muted ${className}`}>
       {src && !failed ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img

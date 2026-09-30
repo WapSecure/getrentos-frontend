@@ -17,7 +17,7 @@ const trustFeatures = [
   {
     icon: Shield,
     title: 'Bank-Grade Security',
-    description: '256-bit encryption and SOC2 certified data centers',
+    description: 'Sensitive account data is protected by secure controls',
   },
   {
     icon: Lock,
@@ -48,14 +48,7 @@ const trustFeatures = [
 
 export const SignupLeftContent = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
-      {/* Background: soft radial glow + dot texture. */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(75%_55%_at_30%_0%,rgba(0,113,227,0.12),transparent_62%)]" />
-        <div className="hero-dots absolute inset-0 opacity-50" />
-        <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-      </div>
-
+    <aside className="relative hidden border-r border-border bg-muted/30 transition-all duration-300 lg:flex lg:w-1/2">
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
         {/* Logo - Now clickable */}
         <div className="mb-12">
@@ -74,14 +67,14 @@ export const SignupLeftContent = () => {
               Trust-driven platform
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            <h2 className="mb-5 text-4xl font-bold tracking-tight text-foreground xl:text-5xl">
               Start with trust.
               <span className="block text-primary mt-2">Build your verified profile.</span>
-            </h1>
+            </h2>
 
-            <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
-              Unlock the safest property platform on the market. Every transaction is protected by
-              payment protection and verified identities.
+            <p className="mb-8 max-w-xl text-lg leading-8 text-muted-foreground">
+              One secure profile gives you access to verified property opportunities, protected
+              payments, and the tools for every role you manage.
             </p>
 
             {/* Trust Features Grid */}
@@ -112,7 +105,7 @@ export const SignupLeftContent = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20"
+              className="rounded-xl border border-border bg-card p-4"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-foreground">Your Trust Score</span>
@@ -137,15 +130,15 @@ export const SignupLeftContent = () => {
 
         {/* Bottom Trust Signals */}
         <div className="mt-12 pt-6 border-t border-border">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-white/40">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
-                SOC2 Certified
+                Secure by design
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
-                GDPR Compliant
+                Identity verification
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-3 h-3 text-primary" />
@@ -155,6 +148,6 @@ export const SignupLeftContent = () => {
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };

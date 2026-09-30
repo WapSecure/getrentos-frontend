@@ -1,15 +1,19 @@
 import { ReferralSummaryCard } from '@/components/referral/ReferralSummaryCard';
+import { Gift } from 'lucide-react';
+import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 export default function RenterReferralsPage() {
   return (
-    <div className="max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Refer & Earn</h1>
-        <p className="text-muted-foreground mt-1">
-          Share your code with friends — you both earn a reward when they sign up.
-        </p>
+    <div>
+      <RenterPageHeader
+        eyebrow="Rewards"
+        icon={Gift}
+        title="Refer & earn"
+        description="Invite friends to GetRentos and track the rewards earned from successful referrals."
+      />
+      <div className="max-w-2xl">
+        <ReferralSummaryCard />
       </div>
-      <ReferralSummaryCard />
     </div>
   );
 }

@@ -126,7 +126,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
       animate={{ opacity: 1, y: 0 }}
       className="bg-card rounded-xl border border-primary/30 overflow-hidden"
     >
-      <div className="p-4 bg-linear-to-r from-primary/10 to-transparent border-b border-primary/20">
+      <div className="border-b border-border bg-muted/30 p-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-foreground">Renewal Offer</h3>

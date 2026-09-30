@@ -34,8 +34,11 @@ export const DocumentCategories = ({
   const categoryList = Object.keys(categories).sort();
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border">
+    <nav
+      aria-label="Document categories"
+      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
+    >
+      <div className="border-b border-border/70 p-4">
         <div className="flex items-center gap-2">
           <Folder className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Categories</h3>
@@ -43,12 +46,14 @@ export const DocumentCategories = ({
         <p className="text-xs text-muted-foreground mt-0.5">{categoryList.length} categories</p>
       </div>
 
-      <div className="p-2 space-y-1 max-h-96 overflow-y-auto">
+      <div className="max-h-96 space-y-1 overflow-y-auto p-2">
         <button
+          type="button"
           onClick={() => onSelectCategory('all')}
-          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+          aria-current={selectedCategory === 'all' ? 'true' : undefined}
+          className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
             selectedCategory === 'all'
-              ? 'bg-accent text-primary'
+              ? 'bg-primary/10 text-primary ring-1 ring-primary/10'
               : 'hover:bg-secondary text-foreground'
           }`}
         >
@@ -56,7 +61,7 @@ export const DocumentCategories = ({
             <FolderOpen className="w-4 h-4" />
             <span>All Documents</span>
           </div>
-          <span className="text-xs text-gray-500">{total}</span>
+          <span className="text-xs text-muted-foreground">{total}</span>
         </button>
 
         {categoryList.map((category) => {
@@ -66,10 +71,12 @@ export const DocumentCategories = ({
           return (
             <button
               key={category}
+              type="button"
               onClick={() => onSelectCategory(category)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+              aria-current={selectedCategory === category ? 'true' : undefined}
+              className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
                 selectedCategory === category
-                  ? 'bg-accent text-primary'
+                  ? 'bg-primary/10 text-primary ring-1 ring-primary/10'
                   : 'hover:bg-secondary text-foreground'
               }`}
             >
@@ -77,11 +84,11 @@ export const DocumentCategories = ({
                 <Icon className={`w-4 h-4 ${color}`} />
                 <span>{category}</span>
               </div>
-              <span className="text-xs text-gray-500">{categories[category]}</span>
+              <span className="text-xs text-muted-foreground">{categories[category]}</span>
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };

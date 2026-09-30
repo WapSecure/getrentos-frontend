@@ -1,7 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery } from '@tanstack/react-query';
 import {
   Bell,
@@ -407,16 +406,9 @@ function HeroCard({
             style={StyleSheet.absoluteFill}
           />
         ) : (
-          <LinearGradient
-            colors={[colors.primaryHover, colors.primary]}
-            style={StyleSheet.absoluteFill}
-          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.muted }]} />
         )}
-        <LinearGradient
-          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.05)', 'rgba(0,0,0,0.85)']}
-          locations={[0, 0.4, 1]}
-          style={StyleSheet.absoluteFill}
-        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.42)' }]} />
 
         <View
           style={{

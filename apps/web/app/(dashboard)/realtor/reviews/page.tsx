@@ -98,7 +98,7 @@ export default function RealtorReviewsPage() {
             <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
                     {getInitials(review.author)}
                   </div>
                   <div>

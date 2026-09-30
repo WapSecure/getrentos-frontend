@@ -36,19 +36,22 @@ export const ApplicationsStats = ({ applications }: ApplicationsStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <section
+      aria-label="Application overview"
+      className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-4"
+    >
       {stats.map((stat, index) => (
         <motion.div
           key={stat.label}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className={`${stat.bg} rounded-xl p-4 border border-border`}
+          className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm"
         >
           <p className="text-sm text-muted-foreground">{stat.label}</p>
-          <p className={`text-2xl font-bold ${stat.color} mt-1`}>{stat.value}</p>
+          <p className={`mt-2 text-2xl font-bold tracking-tight ${stat.color}`}>{stat.value}</p>
         </motion.div>
       ))}
-    </div>
+    </section>
   );
 };

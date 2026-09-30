@@ -43,7 +43,7 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
+          <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
             {getInitials(tenant.name)}
           </div>
           <div>

@@ -344,7 +344,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   key={listing.id}
                   className="group overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(0,0,0,0.12)]"
                 >
-                  <div className="relative flex h-44 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.20),transparent_45%),linear-gradient(135deg,hsl(var(--secondary)),hsl(var(--muted)))]">
+                  <div className="relative flex h-44 items-center justify-center overflow-hidden bg-muted">
                     <Trees className="h-12 w-12 text-primary/60" />
                     <div className="absolute left-3 top-3">
                       <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
@@ -424,7 +424,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         <DialogContent>
           {activeListing && (
             <div className="max-h-[85vh] overflow-y-auto">
-              <div className="relative flex h-48 items-center justify-center bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.22),transparent_45%),linear-gradient(135deg,hsl(var(--secondary)),hsl(var(--muted)))]">
+              <div className="relative flex h-48 items-center justify-center bg-muted">
                 <Trees className="h-16 w-16 text-primary/60" />
                 <div className="absolute bottom-4 left-5 rounded-xl bg-primary px-3 py-1.5 font-semibold text-primary-foreground">
                   {formatCurrency(activeListing.askingPrice)}

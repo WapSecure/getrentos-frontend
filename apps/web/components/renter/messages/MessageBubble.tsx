@@ -58,7 +58,7 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isCurrentUser && (
         <div className="shrink-0 mr-3">
-          <div className="w-8 h-8 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-xs font-semibold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
             {getInitials(message.senderName)}
           </div>
         </div>

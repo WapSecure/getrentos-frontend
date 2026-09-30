@@ -75,7 +75,7 @@ export const OfferNegotiationModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-sm">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
                   {getInitials(offer.buyerName)}
                 </div>
                 <div>

@@ -1,15 +1,7 @@
 import { cn } from '@getrentos/shared';
 
 export const Skeleton = ({ className }: { className?: string }) => {
-  return (
-    <div
-      aria-hidden="true"
-      className={cn(
-        'animate-pulse rounded-lg bg-gradient-to-r from-muted via-secondary to-muted bg-[length:200%_100%]',
-        className
-      )}
-    />
-  );
+  return <div aria-hidden="true" className={cn('animate-pulse rounded-lg bg-muted', className)} />;
 };
 
 export const PageLoadingState = () => {

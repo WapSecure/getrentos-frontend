@@ -19,6 +19,8 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { LayoutGrid, Map, Search } from 'lucide-react';
+import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 export default function DiscoverPage() {
   const searchParams = useSearchParams();
@@ -138,12 +140,12 @@ export default function DiscoverPage() {
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Discover Properties</h1>
-        <p className="text-muted-foreground mt-1">
-          Find your perfect home from thousands of verified listings
-        </p>
-      </div>
+      <RenterPageHeader
+        eyebrow="Property marketplace"
+        icon={Search}
+        title="Discover properties"
+        description="Search, compare, and shortlist verified homes that fit your location, lifestyle, and budget."
+      />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -158,46 +160,42 @@ export default function DiscoverPage() {
             <div className="flex-1">
               <DiscoverFilters onApplyFilters={handleApplyFilters} />
             </div>
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-1 rounded-xl border border-border/70 bg-secondary/60 p-1"
+              role="group"
+              aria-label="Property results view"
+            >
               <button
+                type="button"
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
+                aria-label="Show properties as a grid"
+                aria-pressed={viewMode === 'grid'}
+                className={`flex min-h-10 min-w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
                   viewMode === 'grid'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-muted-foreground'
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:bg-card/70 hover:text-foreground'
                 }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                  />
-                </svg>
+                <LayoutGrid className="h-5 w-5" aria-hidden="true" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode('map')}
-                className={`p-2 rounded-lg transition-colors ${
+                aria-label="Show properties on a map"
+                aria-pressed={viewMode === 'map'}
+                className={`flex min-h-10 min-w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
                   viewMode === 'map'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-muted-foreground'
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:bg-card/70 hover:text-foreground'
                 }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                  />
-                </svg>
+                <Map className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           </div>
 
           {estateFromUrl && (
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/50 px-4 py-3">
               <p className="text-sm text-muted-foreground">
                 Showing only properties marketed inside{' '}
                 <span className="font-medium text-foreground">

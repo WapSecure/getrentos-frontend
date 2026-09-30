@@ -78,7 +78,7 @@ export const RenterHomeManagement = () => {
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className="border-b border-border bg-linear-to-br from-accent/80 via-card to-card p-5">
+      <div className="border-b border-border bg-muted/30 p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">

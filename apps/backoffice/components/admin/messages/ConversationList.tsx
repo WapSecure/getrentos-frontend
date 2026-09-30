@@ -70,7 +70,7 @@ export const ConversationList = ({
               }`}
               aria-current={activeId === conversation.id ? 'true' : undefined}
             >
-              <div className="w-9 h-9 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
                 {getInitials(conversation.participantName)}
               </div>
               <div className="min-w-0 flex-1">

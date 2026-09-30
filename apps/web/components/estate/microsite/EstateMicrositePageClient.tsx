@@ -57,7 +57,7 @@ export const EstateMicrositePageClient = ({
           sizes="(max-width: 768px) 100vw, 768px"
           className="object-cover"
           fallback={
-            <div className="w-full h-full bg-linear-to-r from-primary/20 to-primary/5 flex items-center justify-center">
+            <div className="w-full h-full bg-muted flex items-center justify-center">
               <Building2 className="w-12 h-12 text-primary/40" />
             </div>
           }

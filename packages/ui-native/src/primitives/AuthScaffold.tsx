@@ -3,7 +3,6 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { ChevronLeft } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Progress } from './Progress';
@@ -52,11 +51,6 @@ export function AuthScaffold({
       // keyboard — pad on both platforms or the sticky footer ends up under it.
       behavior={Platform.OS === 'web' ? undefined : 'padding'}
     >
-      <LinearGradient
-        pointerEvents="none"
-        colors={[colors.accent, colors.background]}
-        style={styles.brandWash}
-      />
       <View style={{ paddingTop: insets.top + spacing.sm, paddingHorizontal: spacing.xl }}>
         <View style={styles.headerRow}>
           {onBack ? (
@@ -147,6 +141,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 44,
   },
-  brandWash: { position: 'absolute', top: 0, left: 0, right: 0, height: 360 },
   backSpacer: { width: 44, height: 44 },
 });

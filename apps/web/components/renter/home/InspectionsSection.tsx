@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck, UserCheck, ChevronRight } from 'lucide-react';
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card, EmptyState, PageErrorState, PageLoadingState } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -26,10 +26,11 @@ export function InspectionsSection() {
   const queryClient = useQueryClient();
   const [activeInspectionId, setActiveInspectionId] = useState<string | null>(null);
 
-  const { data: inspections = [] } = useQuery({
+  const inspectionsQuery = useQuery({
     queryKey: renterKeys.inspections,
     queryFn: () => unwrap(renterService.listInspections()),
   });
+  const inspections = inspectionsQuery.data ?? [];
 
   const acknowledge = useMutation({
     mutationFn: (id: string) => unwrap(renterService.acknowledgeInspection(id)),
@@ -38,13 +39,35 @@ export function InspectionsSection() {
     },
   });
 
-  if (inspections.length === 0) return null;
+  if (inspectionsQuery.isLoading) return <PageLoadingState />;
+  if (inspectionsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Inspections are unavailable"
+        description="We could not load the inspection records for your home. Please try again."
+        onRetry={() => void inspectionsQuery.refetch()}
+        isRetrying={inspectionsQuery.isFetching}
+      />
+    );
+  }
+
+  if (inspections.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border/70 bg-card py-10 shadow-sm">
+        <EmptyState
+          icon={ClipboardCheck}
+          title="No inspection records yet"
+          description="Scheduled, move-in, and move-out inspection reports will appear here when they are available."
+        />
+      </div>
+    );
+  }
 
   const activeInspection = inspections.find((i) => i.id === activeInspectionId) || null;
   const pendingCount = inspections.filter((i) => !i.acknowledgedAt).length;
 
   return (
-    <Card static hover={false}>
+    <Card static hover={false} className="overflow-hidden rounded-2xl border-border/70 shadow-sm">
       <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
         <div className="flex items-center gap-3">
           <ClipboardCheck className="h-5 w-5 text-primary" />
@@ -63,8 +86,9 @@ export function InspectionsSection() {
         {inspections.slice(0, 4).map((inspection) => (
           <button
             key={inspection.id}
+            type="button"
             onClick={() => setActiveInspectionId(inspection.id)}
-            className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-secondary/60 sm:px-6"
+            className="group flex min-h-16 w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-primary/15 sm:px-6"
           >
             <span className="min-w-0 flex-1">
               <span className="truncate text-sm font-medium text-foreground">

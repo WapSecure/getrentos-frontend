@@ -19,12 +19,12 @@ export const SignInStats = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6 }}
-      className="grid grid-cols-3 gap-4 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20"
+      className="grid grid-cols-3 gap-4 rounded-2xl border border-border bg-card p-4"
     >
       {highlights.map((item) => (
         <div key={item.headline} className="text-center">
           <div className="text-2xl font-bold text-primary">{item.headline}</div>
-          <div className="text-xs text-gray-500 dark:text-white/50">{item.caption}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{item.caption}</div>
         </div>
       ))}
     </motion.div>

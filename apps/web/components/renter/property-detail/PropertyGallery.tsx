@@ -28,7 +28,7 @@ export const PropertyGallery = ({
 
   return (
     <div className="rounded-xl overflow-hidden border border-border">
-      <div className="relative h-80 bg-linear-to-br from-secondary to-muted">
+      <div className="relative h-80 bg-muted">
         {showPlaceholder ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
             <Home className="w-12 h-12 text-gray-700/40" />

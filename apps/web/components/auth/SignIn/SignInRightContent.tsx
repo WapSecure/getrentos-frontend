@@ -12,6 +12,7 @@ import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
 import { Toast, ToastVariant } from '@getrentos/ui';
 import { SessionExpiredNotice } from '@getrentos/ui';
+import { AuthMethodTabs } from '../AuthMethodTabs';
 
 interface SignInRightContentProps {
   method: SignInMethod;
@@ -107,29 +108,34 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   };
 
   return (
-    <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
+    <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[30rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="fixed top-6 left-6 lg:static lg:mb-6 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-border hover:bg-gray-100 dark:hover:bg-white/20 transition-all shadow-sm"
+          className="fixed left-4 top-4 z-30 flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card/90 px-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 sm:left-6 sm:top-6 lg:static lg:mb-8"
+          aria-label="Go back"
         >
-          <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Back</span>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <span>Back</span>
         </button>
 
-        {/* Mobile Header */}
-        <div className="lg:hidden text-center mb-8">
-          <div className="mb-4 flex justify-center">
+        <div className="mb-8">
+          <div className="mb-6 flex justify-center lg:hidden">
             <Logo size="md" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Sign in to continue your property journey
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+            Secure account access
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Welcome back
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Sign in to manage your properties, payments, and conversations in one place.
           </p>
         </div>
 
@@ -146,40 +152,17 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
         )}
 
         {/* Method Selection */}
-        <div className="flex gap-2 mb-6 p-1 bg-gray-100 dark:bg-white/10 rounded-xl">
-          <button
-            onClick={() => setMethod('email')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-              method === 'email'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Mail className="w-4 h-4" />
-            Email
-          </button>
-          <button
-            onClick={() => setMethod('phone')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-              method === 'phone'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Phone className="w-4 h-4" />
-            Phone
-          </button>
-          <button
-            onClick={() => setMethod('magic-link')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-              method === 'magic-link'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Fingerprint className="w-4 h-4" />
-            Magic Link
-          </button>
+        <div className="mb-7">
+          <AuthMethodTabs
+            label="Choose a sign-in method"
+            value={method}
+            onChange={setMethod}
+            tabs={[
+              { value: 'email', label: 'Email', icon: Mail },
+              { value: 'phone', label: 'Phone', icon: Phone },
+              { value: 'magic-link', label: 'Magic link', icon: Fingerprint },
+            ]}
+          />
         </div>
 
         {/* Dynamic Form */}
@@ -192,17 +175,17 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
         {/* Sign Up Link */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <a
               href={ROUTES.SIGNUP}
-              className="font-medium text-primary hover:text-primary-hover transition-colors"
+              className="font-semibold text-primary transition-colors hover:text-primary-hover focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             >
               Create one now
             </a>
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

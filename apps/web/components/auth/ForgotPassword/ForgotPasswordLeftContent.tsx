@@ -6,12 +6,7 @@ import { Logo } from '@/components/ui/Logo';
 
 export const ForgotPasswordLeftContent = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background transition-all duration-300">
-      <div className="absolute inset-0 opacity-10 lg:opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2e7d64] rounded-full blur-3xl" />
-      </div>
-
+    <div className="relative hidden border-r border-border bg-muted/30 transition-all duration-300 lg:flex lg:w-1/2">
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
         {/* Logo - Now clickable */}
         <div className="mb-12">

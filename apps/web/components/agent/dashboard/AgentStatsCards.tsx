@@ -37,8 +37,6 @@ const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCard
       transition={{ delay, duration: 0.4 }}
       className="group relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-primary/5 to-transparent" />
-
       <div className="relative p-4">
         <div
           className={`inline-flex p-2.5 rounded-xl ${colors.bg} transition-all duration-300 group-hover:scale-110 mb-3`}
@@ -52,8 +50,6 @@ const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCard
           {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
         </div>
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </motion.div>
   );
 };

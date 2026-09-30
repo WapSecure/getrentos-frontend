@@ -158,7 +158,7 @@ const ProfileSettingsForm = ({
               className="w-20 h-20 rounded-full object-cover"
               loading="lazy"
               fallback={
-                <div className="w-20 h-20 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-semibold">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground">
                   {user?.fullName?.charAt(0) || 'U'}
                 </div>
               }

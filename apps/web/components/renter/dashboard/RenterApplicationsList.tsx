@@ -87,9 +87,9 @@ export const RenterApplicationsList = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.4 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
+      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
     >
-      <div className="p-4 border-b border-border flex justify-between items-center">
+      <div className="flex items-center justify-between border-b border-border/70 p-5">
         <div>
           <h2 className="text-lg font-semibold text-foreground">
             {t('dashboard.applications.title')}
@@ -116,7 +116,7 @@ export const RenterApplicationsList = () => {
               onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
-                <div className="w-full md:w-16 h-16 bg-linear-to-br from-secondary to-muted rounded-xl flex items-center justify-center shrink-0">
+                <div className="flex h-16 w-full shrink-0 items-center justify-center rounded-xl bg-muted md:w-16">
                   <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
                     <Home className="w-4 h-4 text-primary" />
                   </div>

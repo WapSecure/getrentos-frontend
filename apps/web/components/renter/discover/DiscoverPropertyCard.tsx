@@ -41,11 +41,7 @@ interface DiscoverPropertyCardProps {
  * measurement and contradicts the listing's own title ("3-bedroom apartment …
  * 0 beds"). Missing detail shows as an em dash instead.
  */
-function listingDetail(
-  value: number | null | undefined,
-  singular: string,
-  plural: string,
-): string {
+function listingDetail(value: number | null | undefined, singular: string, plural: string): string {
   if (!value) return '—';
   return `${value} ${value === 1 ? singular : plural}`;
 }
@@ -95,7 +91,7 @@ export const DiscoverPropertyCard = ({
       onHoverEnd={() => setIsHovered(false)}
       className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300"
     >
-      <div className="relative h-48 bg-linear-to-br from-secondary to-muted">
+      <div className="relative h-48 bg-muted">
         {property.image && !imageFailed ? (
           // Signed MinIO URLs, so plain <img> rather than next/image.
           // eslint-disable-next-line @next/next/no-img-element
@@ -127,7 +123,11 @@ export const DiscoverPropertyCard = ({
           // name a screen reader offers a column of identical "button"s with no
           // way to tell which property each one saves. The label also carries
           // the current state, which the fill colour only conveys visually.
-          aria-label={isSaved ? `Remove ${property.title} from your shortlist` : `Save ${property.title} to your shortlist`}
+          aria-label={
+            isSaved
+              ? `Remove ${property.title} from your shortlist`
+              : `Save ${property.title} to your shortlist`
+          }
           title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
           className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors z-10"
         >

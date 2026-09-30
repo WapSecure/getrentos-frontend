@@ -1,6 +1,5 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import {
@@ -34,25 +33,6 @@ export default function Welcome() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient
-        colors={[colors.accent, colors.background, colors.background]}
-        locations={[0, 0.58, 1]}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-      />
-      <View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          width: 240,
-          height: 240,
-          borderRadius: 120,
-          right: -110,
-          top: 80,
-          backgroundColor: colors.infoSubtle,
-          opacity: 0.7,
-        }}
-      />
-
       <View
         style={{
           flexDirection: 'row',

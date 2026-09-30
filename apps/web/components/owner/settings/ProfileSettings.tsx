@@ -69,7 +69,7 @@ const ProfileSettingsForm = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-linear-to-r from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-semibold">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-semibold">
               {user?.fullName?.charAt(0) || 'U'}
             </div>
             <button className="absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-white hover:bg-primary-hover transition-colors">

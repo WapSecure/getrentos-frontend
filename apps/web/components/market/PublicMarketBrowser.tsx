@@ -200,7 +200,7 @@ function mapMedia(listing: PublicListingCard) {
     );
   }
   return (
-    <div className="flex h-52 w-full items-center justify-center bg-gradient-to-br from-primary/15 via-accent to-primary/5">
+    <div className="flex h-52 w-full items-center justify-center bg-muted">
       <Home className="h-8 w-8 text-primary/40" />
     </div>
   );
@@ -358,8 +358,7 @@ export const PublicMarketBrowser = ({
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="relative overflow-hidden rounded-[2rem] border border-primary/15 bg-gradient-to-br from-accent via-card to-background px-6 py-10 shadow-sm sm:px-10 sm:py-14 lg:px-14">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <header className="rounded-2xl border border-border bg-card px-6 py-10 shadow-sm sm:px-10 sm:py-14 lg:px-14">
         <div className="relative max-w-3xl">
           <span className="inline-flex items-center rounded-full border border-primary/20 bg-card/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-primary backdrop-blur">
             GetRentos trusted marketplace

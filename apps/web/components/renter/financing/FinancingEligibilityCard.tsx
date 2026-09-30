@@ -43,8 +43,8 @@ export const FinancingEligibilityCard = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="p-6 bg-accent">
+      <div className="overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm">
+        <div className="border-b border-border bg-muted/30 p-6 sm:p-7">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-5 h-5 text-primary" />
             <span className="text-xs font-semibold uppercase tracking-wide text-primary">
@@ -60,11 +60,11 @@ export const FinancingEligibilityCard = ({
           </p>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 sm:p-7">
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             {steps.map((step) => (
               <div key={step.title} className="flex flex-col gap-2">
-                <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                   <step.icon className="w-4 h-4 text-primary" />
                 </div>
                 <p className="text-sm font-medium text-foreground">{step.title}</p>
@@ -73,7 +73,7 @@ export const FinancingEligibilityCard = ({
             ))}
           </div>
 
-          <div className="rounded-xl border border-border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-secondary/30 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Your current rent obligation</p>
               <p className="text-xl font-bold text-foreground">
@@ -110,7 +110,7 @@ export const FinancingEligibilityCard = ({
         </div>
       </div>
 
-      <div className="flex items-start gap-2 p-4 rounded-xl bg-secondary">
+      <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-secondary/50 p-4">
         <ShieldCheck className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
           GetRentos Flex is not a loan against your future income — it&apos;s a rent-specific

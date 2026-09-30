@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { format } from 'date-fns';
+import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -60,22 +61,19 @@ export const CalendarHeader = ({
   };
 
   return (
-    <div className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="type-title">Calendar</h1>
-          <p className="text-muted-foreground mt-1">Manage your property schedule and events</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button variant="primary" className="gap-2" size="sm" onClick={onAddEvent}>
-            <Plus className="w-4 h-4" />
-            Add Event
-          </Button>
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+    <RenterPageHeader
+      eyebrow="Schedule"
+      icon={CalendarIcon}
+      title="Calendar"
+      description="Keep viewings, payments, inspections, and household events in one reliable schedule."
+      actions={
+        <Button variant="primary" className="gap-2" size="sm" onClick={onAddEvent}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          Add event
+        </Button>
+      }
+    >
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/70 bg-background/70 p-2.5">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => navigateMonth(-1)} className="p-2">
             <ChevronLeft className="w-4 h-4" />
@@ -94,7 +92,7 @@ export const CalendarHeader = ({
 
         <div className="flex-1" />
 
-        <div className="flex gap-1 p-1 bg-secondary rounded-xl" aria-label="Calendar view">
+        <div className="flex gap-1 rounded-xl bg-secondary p-1" aria-label="Calendar view">
           <Button
             variant="ghost"
             size="sm"
@@ -121,6 +119,6 @@ export const CalendarHeader = ({
           </Button>
         </div>
       </div>
-    </div>
+    </RenterPageHeader>
   );
 };

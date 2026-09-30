@@ -58,7 +58,7 @@ export const TrustBadges = ({ badges }: TrustBadgesProps) => {
               key={badge.id}
               className={`p-3 rounded-lg text-center transition-all ${
                 badge.earned
-                  ? 'bg-linear-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200 dark:border-amber-800'
+                  ? 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800'
                   : 'bg-gray-50 dark:bg-white/5 border border-border opacity-50'
               }`}
             >

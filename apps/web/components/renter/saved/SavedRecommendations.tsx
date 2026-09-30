@@ -22,14 +22,14 @@ export const SavedRecommendations = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-linear-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden"
+      className="overflow-hidden rounded-xl border border-border bg-card"
     >
-      <div className="p-3 border-b border-purple-200 dark:border-purple-800 flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-purple-600" />
+      <div className="flex items-center gap-2 border-b border-border p-3">
+        <Sparkles className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground">Recommendations</h3>
       </div>
 
-      <div className="divide-y divide-purple-200 dark:divide-purple-800">
+      <div className="divide-y divide-border">
         {recommendations.slice(0, 3).map((rec) => (
           <div
             key={rec.id}

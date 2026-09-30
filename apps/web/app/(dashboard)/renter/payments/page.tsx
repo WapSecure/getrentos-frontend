@@ -312,11 +312,14 @@ export default function PaymentsPage() {
   return (
     <>
       {tabNav}
-      <PaymentsHeader onExport={() => setShowExportModal(true)} />
+      <PaymentsHeader
+        onExport={() => setShowExportModal(true)}
+        onPayOutstanding={payablePayments.length > 0 ? () => setShowPayAllConfirm(true) : undefined}
+      />
       <PaymentsStats payments={payments} />
 
-      <div className="grid lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="mt-7 grid items-start gap-6 xl:grid-cols-12">
+        <div className="space-y-6 xl:col-span-8">
           <PaymentsList
             payments={payments}
             onPayNow={handlePayNow}
@@ -325,7 +328,7 @@ export default function PaymentsPage() {
           />
           <PaymentReceiptsGallery receipts={receipts} onDownload={handleDownloadReceipt} />
         </div>
-        <div className="space-y-6">
+        <div className="space-y-6 xl:col-span-4">
           <PaymentNotifications
             notifications={notifications}
             onMarkAsRead={handleMarkNotificationAsRead}

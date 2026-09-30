@@ -60,7 +60,7 @@ export const RealtorListingPreviewModal = ({
       <DialogContent>
         {listing && (
           <>
-            <div className="relative h-40 bg-linear-to-br from-secondary to-muted">
+            <div className="relative h-40 bg-muted">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Megaphone className="w-12 h-12 text-muted-foreground" />
               </div>

@@ -297,7 +297,7 @@ function Gallery({ listing }: { listing: PublicListingDetail }) {
   const [cover, ...rest] = listing.images;
   if (!cover) {
     return (
-      <div className="mt-5 flex h-72 items-center justify-center rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/15 via-accent to-primary/5 text-sm font-medium text-muted-foreground sm:h-[30rem]">
+      <div className="mt-5 flex h-72 items-center justify-center rounded-3xl border border-primary/10 bg-muted text-sm font-medium text-muted-foreground sm:h-[30rem]">
         Photos are being prepared for this listing
       </div>
     );

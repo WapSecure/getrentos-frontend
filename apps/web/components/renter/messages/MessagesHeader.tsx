@@ -1,6 +1,7 @@
 'use client';
 
-import { Bell } from 'lucide-react';
+import { Bell, MessageCircle } from 'lucide-react';
+import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface MessagesHeaderProps {
   unreadCount: number;
@@ -8,33 +9,18 @@ interface MessagesHeaderProps {
 
 export const MessagesHeader = ({ unreadCount }: MessagesHeaderProps) => {
   return (
-    <div className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Messages</h1>
-          <p className="text-muted-foreground mt-1">Communicate with landlords and agents</p>
+    <RenterPageHeader
+      eyebrow="Communication"
+      icon={MessageCircle}
+      title="Messages"
+      description="Keep conversations with property owners and agents organised in one secure place."
+      actions={
+        <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-background/70 px-3">
+          <Bell className="h-4 w-4 text-primary" aria-hidden="true" />
+          <span className="text-sm font-medium text-foreground">{unreadCount}</span>
+          <span className="text-xs text-muted-foreground">unread</span>
         </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-card rounded-lg border border-border">
-            <Bell className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">{unreadCount}</span>
-            <span className="text-xs text-gray-500">unread</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 p-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-sm font-medium text-green-700 dark:text-green-300">
-            All landlords are online
-          </span>
-          <span className="text-xs text-green-600 dark:text-green-400 ml-auto">
-            Response time: ~5 min
-          </span>
-        </div>
-      </div>
-    </div>
+      }
+    />
   );
 };
