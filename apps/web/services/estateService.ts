@@ -52,6 +52,8 @@ import type {
   PatrolRoute,
   PatrolReport,
   PatrolScanResult,
+  ExpectedToday,
+  GuestListImportResult,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -1354,6 +1356,40 @@ export const estateService = {
     formData.append('file', file);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/microsite/banner`, { method: 'POST', body: formData })
+    );
+  },
+
+  /**
+   * Who is coming today: invitations, standing authorisations, and parcels.
+   *
+   * ENTERPRISE. Every row carries its own deadline, so the screen renders what
+   * the estate has been told rather than deciding for itself who is due.
+   */
+  async getExpectedToday(estateId: string): Promise<ApiResponse<ExpectedToday>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/expected-today`));
+  },
+
+  /**
+   * Enter a household's guest list, once.
+   *
+   * One household and one deadline for the whole list, because that is how a
+   * list arrives: one resident is having the party. Each row becomes a real
+   * visitor pass — screened exactly as a single invitation is — and the reply
+   * reports the outcome of every row, so one bad line does not hide the rest.
+   */
+  async importGuestList(
+    estateId: string,
+    data: { householdId: string; expiresAt: string; file: File }
+  ): Promise<ApiResponse<GuestListImportResult>> {
+    const formData = new FormData();
+    formData.append('householdId', data.householdId);
+    formData.append('expiresAt', data.expiresAt);
+    formData.append('file', data.file);
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/expected-visitors/import`, {
+        method: 'POST',
+        body: formData,
+      })
     );
   },
 };

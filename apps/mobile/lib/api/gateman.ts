@@ -160,6 +160,77 @@ export interface VehicleLog {
   createdAt: string;
 }
 
+/**
+ * One arrival the estate has been told about.
+ *
+ * Every row carries the deadline it was given, and nothing here says a visitor
+ * is definitely coming. `deadlineLabel` is worded by the server so a guard's
+ * screen never has to decide whether "until Friday" includes today.
+ */
+export interface ExpectedVisitor {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  visitorName: string;
+  visitorPhone?: string | null;
+  purpose?: string | null;
+  deadline: string;
+  deadlineLabel: string;
+  deadlineToday: boolean;
+  source: 'RESIDENT' | 'GATE' | 'CONTRACTOR' | 'IMPORT';
+  sourceLabel: string;
+}
+
+export interface ExpectedContractor {
+  id: string;
+  name: string;
+  company?: string | null;
+  trade?: string | null;
+  householdId?: string | null;
+  unitLabel?: string | null;
+  hoursLabel: string;
+  deadline: string;
+  deadlineLabel: string;
+  deadlineToday: boolean;
+  daysLabel: string;
+}
+
+export interface ExpectedParcel {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  courier: string;
+  description?: string | null;
+  deadline: string;
+  deadlineLabel: string;
+  deadlineToday: boolean;
+}
+
+/**
+ * Who the estate expects today.
+ *
+ * A hint board, and the guard's screen says so out loud: nothing here opens a
+ * barrier, and the pass PIN is still what admits anybody. It is readable at the
+ * gate on purpose — the guard is the one being asked "am I expecting them?" —
+ * and showing it is safe precisely because it cannot admit anyone.
+ */
+export interface ExpectedToday {
+  estateId: string;
+  asOf: string;
+  visitors: ExpectedVisitor[];
+  contractors: ExpectedContractor[];
+  parcels: ExpectedParcel[];
+  tally: {
+    visitors: number;
+    contractors: number;
+    parcels: number;
+    byEndOfToday: number;
+    label: string;
+  };
+}
+
 export type IncidentCategory = 'security' | 'maintenance' | 'safety' | 'other';
 export type IncidentPriority = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
@@ -213,6 +284,17 @@ export const gatemanApi = {
   listMyEstates: () => apiFetch<GatemanEstate[]>('/estate/mine'),
 
   listGates: (estateId: string) => apiFetch<Gate[]>(`/estate/${estateId}/gates`),
+
+  /**
+   * Who the estate expects today, for the guard being asked at the barrier.
+   *
+   * Read-only, and deliberately open to a guard even where the guest list behind
+   * it is the office's: this replaces a phone call to the office, and nothing on
+   * it admits anybody, so a guard holding it cannot let in someone the estate
+   * would not have. It is a hint board — a visitor still presents their PIN.
+   */
+  getExpectedToday: (estateId: string) =>
+    apiFetch<ExpectedToday>(`/estate/${estateId}/expected-today`),
 
   /**
    * Asks the estate's watch list about somebody, instead of attempting a write.

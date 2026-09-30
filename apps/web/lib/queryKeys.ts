@@ -350,6 +350,14 @@ export const estateKeys = {
    * register and a new checkpoint must show up there without the routes being
    * refetched — they cannot change as a result of adding one.
    */
+  /**
+   * Who is coming today.
+   *
+   * One key, and it takes no window: the board is "now" by definition, so a key
+   * that carried an instant would grow the cache an entry per render and reuse
+   * none of them.
+   */
+  expectedToday: (estateId: string) => ['estate', estateId, 'expected-today'] as const,
   patrolCheckpoints: (estateId: string) => ['estate', estateId, 'patrol-checkpoints'] as const,
   patrolRoutes: (estateId: string) => ['estate', estateId, 'patrol-routes'] as const,
   /**

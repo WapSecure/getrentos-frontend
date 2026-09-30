@@ -259,6 +259,16 @@ export const ROUTES = {
    * screen, not the checkpoint's.
    */
   ESTATE_PATROL: '/estate/patrol',
+  /**
+   * Who the estate expects today, and a guest list entered once.
+   *
+   * Enterprise, and the gate is on the office rather than the gate. The board
+   * replaces a phone call: a guard without it still checks anybody in by PIN, so
+   * nothing is stranded by its absence — which is the same test dwell and patrol
+   * pass. It also reads the office's own guest-list entry, so the two halves are
+   * one purchase rather than a feature and its upgrade.
+   */
+  ESTATE_EXPECTED: '/estate/expected',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
   ESTATE_POLLS: '/estate/polls',

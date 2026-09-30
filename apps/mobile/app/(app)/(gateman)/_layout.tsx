@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Car, Footprints, KeyRound, Package, Siren, User } from 'lucide-react-native';
+import { Car, Footprints, KeyRound, Package, Siren, User, UserCheck } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
@@ -37,6 +37,17 @@ export default function GatemanTabsLayout() {
           options={{
             title: 'Check-In',
             tabBarIcon: ({ color, size }) => <KeyRound color={color} size={size} />,
+          }}
+        />
+        {/* Second, directly after Check-In, because it is the same job done in
+            the other order: Check-In answers "is this pass good?" and this
+            answers "were they expected?", which is the question a guard is
+            asked first. Read-only — nothing on it opens the barrier. */}
+        <Tabs.Screen
+          name="gate-expected"
+          options={{
+            title: 'Expected',
+            tabBarIcon: ({ color, size }) => <UserCheck color={color} size={size} />,
           }}
         />
         <Tabs.Screen
