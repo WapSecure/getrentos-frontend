@@ -404,6 +404,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
               </div>
               {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') &&
                 b.depositStatus === 'HELD' &&
+                // The deposit covers the stay, so a claim only makes sense once
+                // the guest has checked out. The API refuses it before then.
+                b.checkOut <= TODAY &&
                 b.depositClaimStatus !== 'PENDING' && (
                   <div className="mt-3 flex justify-end gap-2 border-t border-border pt-3">
                     <Button variant="outline" size="sm" onClick={() => setClaimTarget(b)}>

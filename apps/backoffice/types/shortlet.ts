@@ -202,6 +202,10 @@ export interface AdminShortletDepositClaim {
   listingTitle?: string;
   claimedBy: string;
   guestName: string;
+  /** First night of the stay the claim is against. */
+  checkIn?: string;
+  /** Checkout of the stay the claim is against — a claim can only be filed after this. */
+  checkOut?: string;
   amount: number;
   reason: string;
   evidence: string[];
@@ -227,6 +231,8 @@ export interface AdminShortletFeeConfig {
   currentCommissionPct: number;
   taxName?: string;
   taxPct: number;
+  /** Platform default hours after check-out that a held deposit stays claimable. */
+  depositClaimWindowHours: number;
   updatedAt: string;
 }
 
@@ -236,6 +242,7 @@ export interface AdminShortletFeeConfigInput {
   taxPct: number;
   introCommissionPct: number | null;
   introEndsAt: string | null;
+  depositClaimWindowHours: number;
 }
 
 export type AdminHostPenaltyStatus = 'OUTSTANDING' | 'SETTLED' | 'WAIVED';

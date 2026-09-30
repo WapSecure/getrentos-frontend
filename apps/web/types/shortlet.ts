@@ -53,6 +53,11 @@ export interface ShortletListing {
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;
+  /**
+   * Hours after check-out this listing keeps the deposit claimable. Absent means
+   * the platform default from the admin Fees tab applies.
+   */
+  depositClaimWindowHours?: number;
   ratingAverage?: number;
   reviewCount: number;
   pricingMode: ShortletPricingMode;
@@ -174,6 +179,10 @@ export interface ShortletDepositClaim {
   listingTitle?: string;
   claimedBy: string;
   guestName: string;
+  /** First night of the stay the claim is against. */
+  checkIn?: string;
+  /** Checkout of the stay the claim is against. */
+  checkOut?: string;
   amount: number;
   reason: string;
   evidence: string[];
@@ -290,6 +299,8 @@ export interface UpdateShortletListingInput extends ShortletPricingRules, Shortl
   tourUrl?: string;
   cancellationPolicy?: ShortletCancellationPolicy;
   deposit?: number;
+  /** Null clears the override so the platform default applies again. */
+  depositClaimWindowHours?: number | null;
 }
 
 export interface CreateShortletBookingInput {
