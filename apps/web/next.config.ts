@@ -80,7 +80,6 @@ const nextConfig: NextConfig = {
         destination: '/renter/help?tab=legal',
         permanent: true,
       },
-      { source: '/renter/ussd-access', destination: '/renter/settings?tab=ussd', permanent: true },
     ];
   },
 };

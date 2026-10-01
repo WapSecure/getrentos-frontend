@@ -306,7 +306,6 @@ export const ROUTES = {
   RENTER_VERIFICATION: '/renter/verification',
   RENTER_TRUST_SCORE: '/renter/trust-score',
   RENTER_CREDIT_REPORT: '/renter/credit-report',
-  RENTER_USSD_ACCESS: '/renter/ussd-access',
   RENTER_CALENDAR: '/renter/calendar',
   RENTER_ROOMMATES: '/renter/roommates',
   RENTER_NOTIFICATIONS: '/renter/notifications',

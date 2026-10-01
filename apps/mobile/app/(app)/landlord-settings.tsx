@@ -266,7 +266,9 @@ function AutomationCard({ initial }: { initial: AutomationSettings }) {
     },
   });
 
-  const keys = Object.keys(AUTOMATION_LABEL) as (keyof AutomationSettings)[];
+  // Automatic invoice generation is not live yet, so it must not be offered
+  // as a setting that appears to save but has no operational effect.
+  const keys: (keyof AutomationSettings)[] = ['rentReminders', 'overdueAlerts', 'leaseExpiry'];
 
   return (
     <Card padding="none">
