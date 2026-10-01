@@ -74,7 +74,6 @@ export default function AppLayout() {
       <Stack.Screen name="calendar" options={DETAIL_OPTIONS} />
       <Stack.Screen name="move-checklist" options={DETAIL_OPTIONS} />
       <Stack.Screen name="financing" options={DETAIL_OPTIONS} />
-      <Stack.Screen name="credit-reporting" options={DETAIL_OPTIONS} />
       <Stack.Screen name="inspections" options={DETAIL_OPTIONS} />
       <Stack.Screen name="referrals" options={DETAIL_OPTIONS} />
       <Stack.Screen name="data-export" options={DETAIL_OPTIONS} />
@@ -120,7 +119,6 @@ export default function AppLayout() {
       <Stack.Screen name="landlord-conversation/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
-      <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />
       <Stack.Screen name="security-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>
