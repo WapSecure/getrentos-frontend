@@ -25,6 +25,7 @@ import {
   UserCheck,
   Timer,
   Footprints,
+  CalendarClock,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
@@ -63,6 +64,11 @@ const GATED_ROUTES: Partial<Record<string, PlanTier>> = {
   // is why a locked nav item here means "you cannot change the schedule", never
   // "your guards cannot scan".
   [ROUTES.ESTATE_PATROL]: 'ENTERPRISE',
+  // The same purchase as the three above it, for the reason in the programme
+  // doc: this board says who is expected and the guest list fills it in, but the
+  // pass PIN is still what admits anybody. A guard without it checks people in
+  // exactly as before — the loss is a phone call, not an admission.
+  [ROUTES.ESTATE_EXPECTED]: 'ENTERPRISE',
 };
 
 export const navItems: NavItem[] = [
@@ -73,6 +79,11 @@ export const navItems: NavItem[] = [
   { label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
   { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: Receipt },
   { label: 'Visitor Passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
+  // Directly after the passes it reads, because it is the outstanding half of
+  // the same thing: Visitor Passes lists what was issued, and this answers the
+  // question a guard actually asks — who is due today — across invitations,
+  // standing authorisations and parcels at once.
+  { label: 'Expected today', href: ROUTES.ESTATE_EXPECTED, icon: CalendarClock },
   { label: 'Vehicles', href: ROUTES.ESTATE_VEHICLES, icon: Car },
   { label: 'Watch list', href: ROUTES.ESTATE_WATCHLIST, icon: ShieldAlert },
   // Next to the watch list because the two answer the same question from
@@ -110,13 +121,16 @@ export const navItems: NavItem[] = [
 // insertion point silently shifts by one.
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
-  { label: 'Residents and access', items: navItems.slice(3, 11) },
+  // The upper bound moved by one when Expected today was inserted after Visitor
+  // Passes. Everything from here down is a slice of the list above, so an insert
+  // without this shift drops the last item of each group into the next one.
+  { label: 'Residents and access', items: navItems.slice(3, 12) },
   // Boundaries moved by one when Patrols was inserted after Deliveries: the
   // groups are slices of the list above, so an insert without this puts
   // Emergency in Community and shifts everything after it.
-  { label: 'Safety and operations', items: navItems.slice(11, 16) },
-  { label: 'Community', items: navItems.slice(16, 20) },
-  { label: 'Administration', items: navItems.slice(20) },
+  { label: 'Safety and operations', items: navItems.slice(12, 17) },
+  { label: 'Community', items: navItems.slice(17, 21) },
+  { label: 'Administration', items: navItems.slice(21) },
 ];
 
 export const EstateSidebar = () => {

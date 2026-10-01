@@ -322,6 +322,13 @@ export const qk = {
      */
     walkIns: (estateId: string) => ['gateman', estateId, 'walk-ins'] as const,
     deliveries: (estateId: string) => ['gateman', estateId, 'deliveries'] as const,
+    /**
+     * Who is expected today, for the guard being asked at the barrier.
+     *
+     * No window in the key: the board is "now" by definition, so keying on an
+     * instant would add a cache entry per render and reuse none of them.
+     */
+    expectedToday: (estateId: string) => ['gateman', estateId, 'expected-today'] as const,
     vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
     incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,
   },

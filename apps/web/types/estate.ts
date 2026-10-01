@@ -1001,3 +1001,104 @@ export interface PatrolScanResult {
   message: string;
   instruction: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Expected today                                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One arrival the estate has been told about.
+ *
+ * Every row carries the deadline it was given, and nothing here says a visitor
+ * is definitely coming — the board reports what the estate knows, and the PIN is
+ * what actually admits anybody. `deadlineToday` is computed against the ESTATE's
+ * own day, so a screen never has to decide what "today" means for itself.
+ */
+export interface ExpectedVisitor {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  visitorName: string;
+  visitorPhone?: string | null;
+  purpose?: string | null;
+  deadline: string;
+  /** 'by 18:00 today' / 'by Sat 3 Oct, 09:00' — server-worded. */
+  deadlineLabel: string;
+  deadlineToday: boolean;
+  source: 'RESIDENT' | 'GATE' | 'CONTRACTOR' | 'IMPORT';
+  /** 'Pass from the household' / 'From a guest list the office entered'. */
+  sourceLabel: string;
+}
+
+export interface ExpectedContractor {
+  id: string;
+  name: string;
+  company?: string | null;
+  trade?: string | null;
+  householdId?: string | null;
+  unitLabel?: string | null;
+  /** '08:00-17:00' or the estate's own words for "any time". */
+  hoursLabel: string;
+  deadline: string;
+  deadlineLabel: string;
+  deadlineToday: boolean;
+  /** 'Mondays and Thursdays' / 'Every day'. */
+  daysLabel: string;
+}
+
+export interface ExpectedParcel {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  courier: string;
+  description?: string | null;
+  deadline: string;
+  deadlineLabel: string;
+  deadlineToday: boolean;
+}
+
+/**
+ * Who the estate expects, and which of them by the end of today.
+ *
+ * A hint board. Nothing on it opens a barrier — the pass PIN remains the only
+ * thing that admits anybody.
+ */
+export interface ExpectedToday {
+  estateId: string;
+  asOf: string;
+  visitors: ExpectedVisitor[];
+  contractors: ExpectedContractor[];
+  parcels: ExpectedParcel[];
+  tally: {
+    visitors: number;
+    contractors: number;
+    parcels: number;
+    byEndOfToday: number;
+    label: string;
+  };
+}
+
+/** One line of a guest list that could not be added, numbered like the spreadsheet. */
+export interface GuestListImportError {
+  row: number;
+  visitorName?: string;
+  message: string;
+}
+
+/**
+ * What a guest list produced.
+ *
+ * Per row, never all-or-nothing: one unreadable line must not refuse the rest,
+ * so the screen has to be able to show what was taken and what was not.
+ */
+export interface GuestListImportResult {
+  created: number;
+  failed: number;
+  errors: GuestListImportError[];
+  /** 'Added 2 of 3. 1 row needs attention.' */
+  label: string;
+  expiresAt: string;
+  deadlineLabel: string;
+}
