@@ -356,6 +356,16 @@ export const estateKeys = {
    * none of them.
    */
   expectedToday: (estateId: string) => ['estate', estateId, 'expected-today'] as const,
+  /**
+   * The identity document recorded against ONE visitor's pass.
+   *
+   * Keyed by the pass, deliberately. An estate-wide key would have every pass in
+   * the office's list share a cache entry, and the value carries a signed URL to
+   * somebody's identity document — so the key is narrow enough that only the pass
+   * the office actually asked about is ever fetched.
+   */
+  visitorIdCheck: (estateId: string, passId: string) =>
+    ['estate', estateId, 'visitor-passes', passId, 'id-check'] as const,
   patrolCheckpoints: (estateId: string) => ['estate', estateId, 'patrol-checkpoints'] as const,
   patrolRoutes: (estateId: string) => ['estate', estateId, 'patrol-routes'] as const,
   /**

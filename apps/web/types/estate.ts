@@ -1,4 +1,4 @@
-import type { PlanTier } from '@getrentos/shared';
+import type { PlanTier, VisitorIdDocumentType } from '@getrentos/shared';
 
 export interface Estate {
   id: string;
@@ -1005,7 +1005,6 @@ export interface PatrolScanResult {
 /* -------------------------------------------------------------------------- */
 /* Expected today                                                              */
 /* -------------------------------------------------------------------------- */
-
 /**
  * One arrival the estate has been told about.
  *
@@ -1078,6 +1077,33 @@ export interface ExpectedToday {
     byEndOfToday: number;
     label: string;
   };
+}
+
+/**
+ * The identity document a guard was shown at the barrier.
+ *
+ * `documentTypeLabel` is what a screen displays — the server words it, so a
+ * recorded check reads the same everywhere. `documentUrl` is a short-lived signed
+ * URL, and is present only when this caller may see the document: its absence
+ * means a check exists that is not this caller's to look at.
+ *
+ * Note this is fetched for ONE pass at a time, never as part of a list. One
+ * estate-wide key would put a signed URL for every visitor's document into a
+ * single cached response.
+ */
+export interface VisitorIdCheck {
+  id: string;
+  visitorPassId: string;
+  documentType: VisitorIdDocumentType;
+  documentTypeLabel: string;
+  checkedAt: string;
+  checkedById: string;
+  checkedByName?: string | null;
+  sizeBytes: number;
+  mimeType: string;
+  documentUrl?: string;
+  documentWithheld?: boolean;
+  notice?: string;
 }
 
 /** One line of a guest list that could not be added, numbered like the spreadsheet. */

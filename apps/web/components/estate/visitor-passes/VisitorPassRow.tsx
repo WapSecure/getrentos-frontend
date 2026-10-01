@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge, Button } from '@getrentos/ui';
+import { IdCheckDialog } from '@/components/estate/visitor-passes/IdCheckDialog';
 import type { VisitorPass } from '@/types/estate';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
@@ -36,11 +37,12 @@ const formatDate = (value: string) =>
 
 interface VisitorPassRowProps {
   pass: VisitorPass;
+  estateId: string;
   onRevoke: () => void;
   isRevoking?: boolean;
 }
 
-export const VisitorPassRow = ({ pass, onRevoke, isRevoking }: VisitorPassRowProps) => {
+export const VisitorPassRow = ({ pass, estateId, onRevoke, isRevoking }: VisitorPassRowProps) => {
   return (
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="min-w-0">
@@ -53,6 +55,10 @@ export const VisitorPassRow = ({ pass, onRevoke, isRevoking }: VisitorPassRowPro
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">
+        {/* Offered on every pass, including ones the guard admitted without a
+            document: the dialog is where the reason that is allowed gets
+            explained, which a hidden button could not do. */}
+        <IdCheckDialog estateId={estateId} passId={pass.id} visitorName={pass.visitorName} />
         <Badge variant={statusVariant[pass.status]}>{statusLabels[pass.status]}</Badge>
         {pass.status === 'pending' && (
           <Button variant="outline" size="sm" disabled={isRevoking} onClick={onRevoke}>

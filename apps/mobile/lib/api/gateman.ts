@@ -231,6 +231,32 @@ export interface ExpectedToday {
   };
 }
 
+/**
+ * The identity document a guard was shown at the barrier.
+ *
+ * `documentTypeLabel` is what a screen displays — the server words it, so a
+ * recorded check reads the same on every client and cannot drift from the
+ * vocabulary above. `documentUrl` is a short-lived signed URL and is present
+ * only when this caller may see the document at all.
+ *
+ * The absence of `documentUrl` is NOT an error: it means a check exists and it is
+ * not this caller's to look at.
+ */
+export interface VisitorIdCheck {
+  id: string;
+  visitorPassId: string;
+  documentType: string;
+  documentTypeLabel: string;
+  checkedAt: string;
+  checkedById: string;
+  checkedByName?: string | null;
+  sizeBytes: number;
+  mimeType: string;
+  documentUrl?: string;
+  documentWithheld?: boolean;
+  notice?: string;
+}
+
 export type IncidentCategory = 'security' | 'maintenance' | 'safety' | 'other';
 export type IncidentPriority = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
@@ -295,6 +321,32 @@ export const gatemanApi = {
    */
   getExpectedToday: (estateId: string) =>
     apiFetch<ExpectedToday>(`/estate/${estateId}/expected-today`),
+
+  /**
+   * Records the document a guard was shown against a visitor's pass.
+   *
+   * Recording does not admit anybody — the visitor is admitted on their pass as
+   * always — and it is NOT queued offline like a check-in: the photograph is the
+   * evidence, so a write that waited in a queue would be filed against the moment
+   * the network came back rather than the moment the guard looked at the
+   * document. A guard with no connection keeps the pass flow and loses the photo,
+   * which is the right way round.
+   */
+  recordVisitorIdCheck: (
+    estateId: string,
+    passId: string,
+    documentType: string,
+    file: PickedFile
+  ) => {
+    const form = new FormData();
+    form.append('documentType', documentType);
+    appendFile(form, 'file', file);
+    return apiUpload<VisitorIdCheck>(`/estate/${estateId}/visitor-passes/${passId}/id-check`, form);
+  },
+
+  /** The document recorded against a pass, or null when the guard took none. */
+  getVisitorIdCheck: (estateId: string, passId: string) =>
+    apiFetch<VisitorIdCheck | null>(`/estate/${estateId}/visitor-passes/${passId}/id-check`),
 
   /**
    * Asks the estate's watch list about somebody, instead of attempting a write.
