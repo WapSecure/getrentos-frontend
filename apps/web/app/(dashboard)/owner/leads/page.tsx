@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
 import { BuyerLeadCard } from '@/components/owner/leads/BuyerLeadCard';
-import { ScheduleViewingModal } from '@/components/owner/leads/ScheduleViewingModal';
-import { AssignRealtorModal } from '@/components/owner/leads/AssignRealtorModal';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -25,8 +23,6 @@ export default function OwnerLeadsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<StageFilter>('all');
-  const [schedulingLead, setSchedulingLead] = useState<BuyerLead | null>(null);
-  const [assigningLead, setAssigningLead] = useState<BuyerLead | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -61,20 +57,6 @@ export default function OwnerLeadsPage() {
 
   const handleMessage = (lead: BuyerLead) => {
     router.push(`${ROUTES.OWNER_MESSAGES}?lead=${lead.id}`);
-  };
-
-  // Lead-stage updates (schedule/assign/convert) are tracked server-side via
-  // viewings & offers; these handlers keep the modal flow responsive locally.
-  const handleScheduleConfirm = () => {
-    setSchedulingLead(null);
-  };
-
-  const handleAssignRealtor = () => {
-    setAssigningLead(null);
-  };
-
-  const handleConvertToOffer = () => {
-    setSchedulingLead(null);
   };
 
   const filterOptions: { value: StageFilter; label: string }[] = [
@@ -150,9 +132,6 @@ export default function OwnerLeadsPage() {
               lead={lead}
               delay={index * 0.05}
               onMessage={() => handleMessage(lead)}
-              onScheduleViewing={() => setSchedulingLead(lead)}
-              onConvertToOffer={handleConvertToOffer}
-              onAssignRealtor={() => setAssigningLead(lead)}
             />
           ))}
         </div>
@@ -167,18 +146,6 @@ export default function OwnerLeadsPage() {
           className="mt-6"
         />
       )}
-
-      <ScheduleViewingModal
-        lead={schedulingLead}
-        onClose={() => setSchedulingLead(null)}
-        onSchedule={handleScheduleConfirm}
-      />
-
-      <AssignRealtorModal
-        lead={assigningLead}
-        onClose={() => setAssigningLead(null)}
-        onAssign={handleAssignRealtor}
-      />
     </>
   );
 }

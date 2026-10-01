@@ -1,14 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  ShieldCheck,
-  ShieldAlert,
-  MessageSquare,
-  CalendarClock,
-  Handshake,
-  UserPlus,
-} from 'lucide-react';
+import { ShieldCheck, ShieldAlert, MessageSquare } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
@@ -48,19 +41,9 @@ interface BuyerLeadCardProps {
   lead: BuyerLead;
   delay?: number;
   onMessage: () => void;
-  onScheduleViewing: () => void;
-  onConvertToOffer: () => void;
-  onAssignRealtor: () => void;
 }
 
-export const BuyerLeadCard = ({
-  lead,
-  delay = 0,
-  onMessage,
-  onScheduleViewing,
-  onConvertToOffer,
-  onAssignRealtor,
-}: BuyerLeadCardProps) => {
+export const BuyerLeadCard = ({ lead, delay = 0, onMessage }: BuyerLeadCardProps) => {
   const stage = stageConfig[lead.stage];
 
   return (
@@ -105,41 +88,17 @@ export const BuyerLeadCard = ({
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+      <div className="mt-4 pt-4 border-t border-border">
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
-          className="px-2.5 text-gray-500"
+          className="w-full gap-2"
           title="Message Buyer"
           onClick={onMessage}
         >
           <MessageSquare className="w-4 h-4" />
+          Message buyer
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="px-2.5 text-gray-500"
-          title="Schedule Viewing"
-          onClick={onScheduleViewing}
-        >
-          <CalendarClock className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="px-2.5 text-gray-500"
-          title="Assign Realtor"
-          onClick={onAssignRealtor}
-        >
-          <UserPlus className="w-4 h-4" />
-        </Button>
-        <div className="flex-1" />
-        {lead.stage !== 'offer_made' && (
-          <Button variant="primary" size="sm" className="gap-1.5" onClick={onConvertToOffer}>
-            <Handshake className="w-3.5 h-3.5" />
-            Convert to Offer
-          </Button>
-        )}
       </div>
     </motion.div>
   );
