@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, KeyRound, Plus, UserCheck } from 'lucide-react';
 import { Button, EmptyState, Pagination } from '@getrentos/ui';
@@ -167,7 +168,14 @@ export default function EstateContractorPassesPage() {
               </p>
               <p className="text-xs text-muted-foreground mt-1">{issued.scheduleLabel}</p>
             </div>
-            <img src={issued.qrDataUrl} alt="Gate code as a QR" className="w-28 h-28 rounded-lg" />
+            <Image
+              src={issued.qrDataUrl}
+              alt="Gate code as a QR"
+              width={112}
+              height={112}
+              unoptimized
+              className="w-28 h-28 rounded-lg"
+            />
           </div>
           <div className="flex gap-2 mt-4">
             <Button

@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
+import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
 import { Button, DocumentUpload, Select } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';

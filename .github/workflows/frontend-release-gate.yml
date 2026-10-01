@@ -36,7 +36,7 @@ jobs:
       - run: pnpm --filter mobile type-check
       - run: pnpm --filter mobile type-check:test
       # Ratchet the existing web warning baseline: new warnings fail the gate.
-      - run: pnpm --filter web lint --max-warnings=75
+      - run: pnpm --filter web lint --max-warnings=0
       - run: pnpm --filter backoffice lint --max-warnings=0
       - run: pnpm --filter mobile lint --max-warnings=0
       - run: pnpm --filter mobile test:ci

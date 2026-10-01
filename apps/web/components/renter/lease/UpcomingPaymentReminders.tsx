@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, Bell, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Calendar, Bell, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface PaymentReminder {

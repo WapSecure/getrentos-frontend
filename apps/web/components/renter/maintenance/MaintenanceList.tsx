@@ -5,8 +5,8 @@ import { LegacyInput } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Wrench, Clock, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Search, Wrench } from 'lucide-react';
 import { MaintenanceCard } from './MaintenanceCard';
 import { MaintenanceDetailsModal } from './MaintenanceDetailsModal';
 import { VendorRatingModal } from './VendorRatingModal';

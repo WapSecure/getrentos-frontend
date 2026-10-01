@@ -1,7 +1,7 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { Palette, Moon, Sun, Monitor, Check } from 'lucide-react';
+import { Moon, Sun, Monitor, Check } from 'lucide-react';
 
 export const ThemeSettings = () => {
   const { theme, setTheme } = useTheme();

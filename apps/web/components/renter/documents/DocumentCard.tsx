@@ -14,10 +14,8 @@ import {
   File,
   FileCheck,
   Shield,
-  Tag,
   Users,
   Check,
-  X,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { DocumentPreviewModal } from './DocumentPreviewModal';

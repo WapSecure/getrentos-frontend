@@ -1,10 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, ShieldAlert, ShieldX, Check, FileText } from 'lucide-react';
+import { X, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
 import { Button, DocumentUpload, Select } from '@getrentos/ui';
 import type { Property, VerificationStatus } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';

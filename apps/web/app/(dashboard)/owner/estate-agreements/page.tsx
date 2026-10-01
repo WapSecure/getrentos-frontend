@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Check, Loader2, MapPin, ShieldCheck, X } from 'lucide-react';
+import { Building2, Check, Loader2, MapPin, ShieldCheck } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
 import { estateAgreementService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';

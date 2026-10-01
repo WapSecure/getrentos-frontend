@@ -7,13 +7,6 @@ interface TrustScoreStatsProps {
 }
 
 export const TrustScoreStats = ({ trustScore }: TrustScoreStatsProps) => {
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600 dark:text-green-400';
-    if (score >= 70) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 50) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  };
-
   const stats = [
     {
       icon: CheckCircle,
@@ -61,7 +54,7 @@ export const TrustScoreStats = ({ trustScore }: TrustScoreStatsProps) => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {stats.map((stat, index) => (
+      {stats.map((stat) => (
         <div key={stat.label} className={`${stat.bg} rounded-xl p-4 border border-border`}>
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />

@@ -5,24 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   MapPin,
-  Bed,
-  Bath,
-  Square,
   Calendar,
-  Home,
-  User,
   Mail,
   Phone,
   FileText,
   Clock,
-  CheckCircle,
-  AlertCircle,
   MessageCircle,
   Download,
   Trash2,
-  Building2,
   Shield,
-  Star,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Application } from '@/types/renter';

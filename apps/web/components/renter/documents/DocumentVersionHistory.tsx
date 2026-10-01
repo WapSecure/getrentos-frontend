@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, Download, FileText, Check, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, Download, FileText, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface Version {
@@ -23,7 +23,6 @@ interface DocumentVersionHistoryProps {
 
 export const DocumentVersionHistory = ({
   versions,
-  documentName,
   onRestore,
   onDownload,
 }: DocumentVersionHistoryProps) => {

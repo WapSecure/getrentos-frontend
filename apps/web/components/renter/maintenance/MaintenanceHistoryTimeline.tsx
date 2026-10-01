@@ -1,15 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  Clock,
-  CheckCircle,
-  User,
-  Wrench,
-  Calendar,
-  MessageCircle,
-  AlertCircle,
-} from 'lucide-react';
+import { Clock, CheckCircle, User, Wrench, MessageCircle, AlertCircle } from 'lucide-react';
 
 interface HistoryEvent {
   id: string;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Siren, TriangleAlert } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

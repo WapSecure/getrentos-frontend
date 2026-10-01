@@ -14,7 +14,7 @@ import {
   NumberInput,
   Select,
 } from '@getrentos/ui';
-import { MapPinned, Upload } from 'lucide-react';
+import { MapPinned } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import {
   LAND_AREA_UNIT_LABELS,

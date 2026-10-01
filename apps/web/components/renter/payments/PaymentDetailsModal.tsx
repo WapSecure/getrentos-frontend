@@ -12,7 +12,6 @@ import {
   Building2,
   Wallet,
   Download,
-  FileText,
   MessageCircle,
 } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';

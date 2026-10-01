@@ -55,7 +55,7 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
 
             <div className="space-y-4">
-              {timelineItems.map((item, index) => (
+              {timelineItems.map((item) => (
                 <div key={item.id} className="relative pl-10">
                   <div
                     className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center ${

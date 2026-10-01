@@ -26,7 +26,7 @@ export const DocumentShareModal = ({
 }: DocumentShareModalProps) => {
   const [copied, setCopied] = useState(false);
   const [shareEmail, setShareEmail] = useState('');
-  const [shareLink, setShareLink] = useState(`https://getrentos.com/share/${documentId}`);
+  const shareLink = `https://getrentos.com/share/${documentId}`;
   const [expiryDays, setExpiryDays] = useState(7);
   const [lastSharedWith, setLastSharedWith] = useState<string | null>(null);
 

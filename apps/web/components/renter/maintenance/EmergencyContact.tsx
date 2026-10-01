@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Phone, Mail, AlertTriangle, Clock, Building2, User, MessageCircle } from 'lucide-react';
+import { Phone, Mail, AlertTriangle, Clock, User, MessageCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface EmergencyContact {

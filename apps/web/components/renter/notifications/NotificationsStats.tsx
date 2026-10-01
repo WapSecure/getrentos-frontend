@@ -106,7 +106,7 @@ export const NotificationsStats = ({ notifications, unreadCount }: Notifications
 
   return (
     <div className="grid grid-cols-3 gap-4 mb-6">
-      {stats.map((stat, index) => (
+      {stats.map((stat) => (
         <div key={stat.label} className={`${stat.bg} rounded-xl p-4 border border-border`}>
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />

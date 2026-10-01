@@ -48,9 +48,6 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
     }
   };
 
-  const isValid =
-    method === 'email' ? validateEmail(identifier) === '' : validatePhone(identifier) === '';
-
   return (
     <div className="space-y-6">
       <div className="flex gap-2 p-1 bg-gray-100 dark:bg-white/10 rounded-xl">

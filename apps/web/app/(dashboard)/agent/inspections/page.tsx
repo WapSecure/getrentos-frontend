@@ -66,7 +66,7 @@ function AgentInspectionsPageContent() {
     submitInspection.mutate(data);
   };
 
-  const handleSync = (inspectionId: string) => {
+  const handleSync = () => {
     setActiveInspectionId(null);
   };
 

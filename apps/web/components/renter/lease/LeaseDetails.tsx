@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, FileText, User, Mail, Phone, MapPin } from 'lucide-react';
+import { Calendar, FileText, Mail, Phone, MapPin } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';

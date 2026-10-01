@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, Select } from '@getrentos/ui';
 
 const categoryOptions = [
   { value: 'SECURITY', label: 'Security' },

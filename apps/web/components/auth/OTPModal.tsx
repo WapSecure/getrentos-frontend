@@ -62,7 +62,7 @@ export const OTPModal = ({
     setIsVerifying(true);
     try {
       await onVerify(otpValue);
-    } catch (err) {
+    } catch {
       setError('Invalid verification code. Please try again.');
     } finally {
       setIsVerifying(false);

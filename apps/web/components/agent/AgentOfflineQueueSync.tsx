@@ -1,11 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import {
-  agentOfflineQueue,
-  replayAgentOfflineQueue,
-  type AgentOfflineOperation,
-} from '@/lib/agentOfflineQueue';
+import { replayAgentOfflineQueue, type AgentOfflineOperation } from '@/lib/agentOfflineQueue';
 import { agentService } from '@/services/agentService';
 import { listAgentBinaryOperations, removeAgentBinaryOperation } from '@/lib/agentBinaryQueue';
 

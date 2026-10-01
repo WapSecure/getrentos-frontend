@@ -23,7 +23,6 @@ interface ApplicationNotesProps {
 }
 
 export const ApplicationNotes = ({
-  applicationId,
   notes,
   onAddNote,
   onDeleteNote,

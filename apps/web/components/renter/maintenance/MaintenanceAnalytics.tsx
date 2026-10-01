@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceAnalyticsProps {
