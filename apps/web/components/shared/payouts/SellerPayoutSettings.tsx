@@ -85,7 +85,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
             </div>
           ) : (
             <p className="text-xs text-muted-foreground mt-2">
-              Not yet verified — save it again to resolve it against your bank.
+              Not yet verified: save it again to resolve it against your bank.
             </p>
           )}
           <p className="mt-2 text-xs text-muted-foreground">

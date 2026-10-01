@@ -6,7 +6,7 @@ export default function LandlordReferralsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Refer & Earn</h1>
         <p className="text-muted-foreground mt-1">
-          Share your code with other landlords — you both earn a reward when they sign up.
+          Share your code with other landlords: you both earn a reward when they sign up.
         </p>
       </div>
       <ReferralSummaryCard />

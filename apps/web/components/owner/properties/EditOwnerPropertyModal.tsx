@@ -87,7 +87,7 @@ const EditOwnerPropertyForm = ({
     setIsUploading(true);
     try {
       // `unwrap` takes the pending response and resolves to its payload, so it
-      // must be awaited — destructuring the promise itself yields undefined.
+      // must be awaited: destructuring the promise itself yields undefined.
       const { key } = await unwrap(ownerService.uploadPropertyMedia(file));
       setCoverKey(key);
       setPreviewUrl(URL.createObjectURL(file));

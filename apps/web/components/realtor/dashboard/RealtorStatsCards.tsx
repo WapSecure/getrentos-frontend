@@ -79,7 +79,7 @@ interface RealtorStatsCardsProps {
   activeLeads: number;
   upcomingViewings: number;
   pendingOffers: number;
-  /** null when the realtor isn't on Pro — commissions are a Pro feature. */
+  /** null when the realtor isn't on Pro: commissions are a Pro feature. */
   commissionYtd: number | null;
 }
 

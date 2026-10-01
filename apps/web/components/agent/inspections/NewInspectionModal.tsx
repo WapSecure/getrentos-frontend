@@ -114,7 +114,7 @@ export const NewInspectionModal = ({
                   placeholder="Select an inspection task"
                   options={tasks.map((task) => ({
                     value: task.id,
-                    label: `${task.title} — ${task.propertyAddress}`,
+                    label: `${task.title}: ${task.propertyAddress}`,
                   }))}
                 />
               </div>
@@ -196,7 +196,7 @@ export const NewInspectionModal = ({
                       >
                         <Camera className="w-3.5 h-3.5" />
                         {room.photoCount > 0
-                          ? `${room.photoCount} photo(s) attached — add more`
+                          ? `${room.photoCount} photo(s) attached: add more`
                           : 'Attach photo'}
                       </button>
                     </div>

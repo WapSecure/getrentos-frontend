@@ -80,8 +80,8 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
 /**
  * Public directory of estates.
  *
- * The directory only lists estates that are actually worth visiting — one with a
- * live listing or a published page — because a directory of empty pages is worse
+ * The directory only lists estates that are actually worth visiting: one with a
+ * live listing or a published page: because a directory of empty pages is worse
  * than no directory. An estate whose page is not published yet can still appear
  * (it has live listings) and the card says so rather than pretending to be
  * clickable.
@@ -123,8 +123,8 @@ export const EstatesDirectoryBrowser = ({
           Estates on GetRentos
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Browse the properties marketed by an estate — the ones its own team lists, and the ones
-          its residents&apos; owners list. Every home shows who is marketing it and whose it is.
+          Browse the properties marketed by an estate: the ones its own team lists, and the ones its
+          residents&apos; owners list. Every home shows who is marketing it and whose it is.
         </p>
       </header>
 

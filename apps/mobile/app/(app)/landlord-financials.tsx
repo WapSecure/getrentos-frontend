@@ -80,7 +80,7 @@ export default function LandlordFinancials() {
             gap: spacing.lg,
           }}
         >
-          {/* Net profit is the headline — a single figure, so no chart. */}
+          {/* Net profit is the headline: a single figure, so no chart. */}
           <Card elevated>
             {stats.isLoading ? (
               <View style={{ gap: spacing.sm }}>

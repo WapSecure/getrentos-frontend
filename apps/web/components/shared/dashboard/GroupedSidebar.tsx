@@ -10,7 +10,7 @@ export interface GroupedSidebarItem {
   label: ReactNode;
   href: string;
   icon: ElementType;
-  /** Shows a small lock badge — the page itself still opens, and prompts to upgrade. */
+  /** Shows a small lock badge: the page itself still opens, and prompts to upgrade. */
   locked?: boolean;
   /**
    * Which plan clears the lock, so the badge can say so out loud.

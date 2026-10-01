@@ -5,7 +5,7 @@ import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { EvidenceItem } from '@/types/admin';
 
 interface MaintenanceDocumentsDialogProps {
-  /** e.g. "Vendor quote" or "Vendor invoice" — names what the files belong to. */
+  /** e.g. "Vendor quote" or "Vendor invoice": names what the files belong to. */
   recordLabel: string;
   /** What the record is, shown under the title so the file has context. */
   subtitle: string;
@@ -23,7 +23,7 @@ interface MaintenanceDocumentsDialogProps {
  *
  * A quote or invoice is an amount. Without the document attached, whoever
  * approves it is taking the number on trust, and there is no record of who
- * supplied what — so this is the place an approver checks the file before
+ * supplied what: so this is the place an approver checks the file before
  * deciding, and attaches it when it arrives by some other route.
  */
 export const MaintenanceDocumentsDialog = ({
@@ -40,9 +40,7 @@ export const MaintenanceDocumentsDialog = ({
   <Dialog open onOpenChange={(open) => !open && onClose()}>
     <DialogContent className="max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
       <div className="p-4 border-b border-border shrink-0 pr-12">
-        <DialogTitle className="font-semibold text-foreground">
-          {recordLabel} documents
-        </DialogTitle>
+        <DialogTitle className="font-semibold text-foreground">{recordLabel} documents</DialogTitle>
         <p className="text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</p>
       </div>
 

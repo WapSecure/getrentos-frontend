@@ -42,7 +42,7 @@ const workflows = [
     icon: FileText,
     title: 'A durable operating record',
     description:
-      'Keep lease records, home documents, receipts, and service conversations tied to the property—not scattered across tools.',
+      'Keep lease records, home documents, receipts, and service conversations tied to the property instead of scattering them across tools.',
   },
 ];
 
@@ -116,7 +116,7 @@ const operatingPlans = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Home Management — Assets, Care, Vendors',
+  title: 'Home Management: Assets, Care, Vendors',
   description:
     'Track assets, schedule preventive care, and control work orders for your property with GetRentos home management.',
   alternates: { canonical: '/home-management' },
@@ -151,8 +151,7 @@ export default function HomeManagementProductPage() {
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground">
-              Built into the GetRentos operating system—no separate spreadsheets, inboxes, or guest
-              accounts.
+              Built into GetRentos, with no separate spreadsheets, inboxes, or guest accounts.
             </p>
           </div>
 
@@ -275,7 +274,7 @@ export default function HomeManagementProductPage() {
               Start with the homes you operate today.
             </h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">
-              Home Management is designed to be funded by the operator—not the resident—and to
+              Home Management is designed to be funded by the operator, not the resident, and to
               expand from everyday care into governed portfolio operations.
             </p>
           </div>

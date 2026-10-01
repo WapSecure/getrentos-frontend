@@ -23,7 +23,7 @@ const todayIso = () => new Date().toISOString().slice(0, 10);
 /**
  * `availableFrom` is the listing's own date and is often already in the past
  * (a stale advert, or seed data). The picker sets `min` to today, but `min`
- * does NOT clamp a value that is pre-filled into it — so defaulting straight to
+ * does NOT clamp a value that is pre-filled into it: so defaulting straight to
  * `availableFrom` let an application be submitted with a move-in date that had
  * already gone by. Fall back to the earliest date the picker actually offers.
  */

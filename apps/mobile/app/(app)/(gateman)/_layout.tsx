@@ -11,12 +11,12 @@ import { premiumTabBarOptions } from '@/lib/navigationStyles';
  *
  * The Deliveries tab file is `gate-deliveries.tsx`, not `deliveries.tsx`,
  * deliberately: route groups don't contribute a URL segment, so a group screen
- * also answers on its bare path — `(gateman)/deliveries` and the top-level
+ * also answers on its bare path: `(gateman)/deliveries` and the top-level
  * `deliveries.tsx` (the resident deliveries screen) would both claim
  * `/deliveries`. Expo Router's generated types express routes as a union, so
  * that duplicate collapses silently and `tsc` will never flag it; the clash
  * only surfaces at runtime as a mis-resolved deep link. Migrating the shared
- * screens out of the top-level namespace is a bigger cleanup — until then, any
+ * screens out of the top-level namespace is a bigger cleanup: until then, any
  * new portal tab whose name already exists at the top level needs a prefix.
  */
 export default function GatemanTabsLayout() {

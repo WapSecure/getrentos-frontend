@@ -196,7 +196,7 @@ export function ShortletMediaManager({
         {suggestions.length > 0 && (
           <div className="mt-3">
             <p className="mb-2 text-xs font-medium text-muted-foreground">
-              Use photos already on this property — click to add
+              Use photos already on this property: click to add
             </p>
             <div className="flex flex-wrap gap-2">
               {suggestions.map((s) => {

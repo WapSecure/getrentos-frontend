@@ -25,7 +25,7 @@ const formatNaira = (amount: number) =>
  *
  * All three markets now have a PUBLIC browse page, so an anonymous visitor who
  * found this estate through search can keep browsing it. Before this, rentals and
- * sales pointed at `/renter/discover` and `/buyer/discover` — dashboard routes —
+ * sales pointed at `/renter/discover` and `/buyer/discover`: dashboard routes:
  * so the click bounced to the login screen and dropped the estate filter, which
  * made this public page a funnel into a wall. Contacting a landlord or making an
  * offer still needs an account; that is the sign-in prompt on the market page, not
@@ -129,7 +129,7 @@ const ListingCard = ({ listing, slug }: { listing: EstateStorefrontListing; slug
 );
 
 /**
- * "Available in this estate" — the reason a visitor shared the link in the
+ * "Available in this estate": the reason a visitor shared the link in the
  * first place.
  *
  * Shows everything published inside the estate, not only what the estate
@@ -154,7 +154,7 @@ export const EstateAvailableListings = ({
           page: 1,
           pageSize: 24,
           ...(tab === 'ALL' ? {} : { listingType: tab }),
-        }),
+        })
       ),
     staleTime: 5 * 60_000,
   });
@@ -171,9 +171,11 @@ export const EstateAvailableListings = ({
     SHORTLET: initialCounts?.shortlet,
   };
 
-  // A tab with nothing behind it is noise, so it is hidden — except while the
+  // A tab with nothing behind it is noise, so it is hidden: except while the
   // counts are still unknown, when hiding would flash the row of tabs away.
-  const visibleTabs = TABS.filter((t) => t.key === 'ALL' || counts[t.key] === undefined || counts[t.key]! > 0);
+  const visibleTabs = TABS.filter(
+    (t) => t.key === 'ALL' || counts[t.key] === undefined || counts[t.key]! > 0
+  );
 
   return (
     <section className="mt-10">

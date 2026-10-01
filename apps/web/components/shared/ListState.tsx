@@ -31,7 +31,7 @@ interface ListStateProps {
  * Renders loading, error and empty states for a fetched list.
  *
  * List pages used to show their "nothing here yet" copy whenever the array was
- * empty, which includes the first render before the request resolves — so a
+ * empty, which includes the first render before the request resolves: so a
  * landlord with a full portfolio was briefly told they had none, and invited to
  * start again. The three states are genuinely different and must not be conflated.
  */
@@ -43,7 +43,7 @@ export const ListState = ({
   skeletonRows = 3,
   skeletonClassName = 'h-24',
   errorTitle = "We couldn't load this",
-  errorDescription = 'This was a connection problem — nothing was lost. Try again.',
+  errorDescription = 'This was a connection problem: nothing was lost. Try again.',
 }: ListStateProps) => {
   if (query.isPending) {
     return (

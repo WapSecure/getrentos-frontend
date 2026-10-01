@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, BadgeCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import type { BillingCycle, PlanPricing } from '@/services/subscriptionService';
@@ -16,7 +16,7 @@ const naira = (kobo: number) => formatCurrency(kobo / 100);
  *
  * `trialAvailable` decides whether this is an offer for a free trial or for a
  * straight purchase. A customer who has already used their trial is never
- * shown "start your free trial" — offering something we would refuse is worse
+ * shown "start your free trial": offering something we would refuse is worse
  * than showing them the real price.
  */
 export function ProPriceCard({
@@ -47,7 +47,7 @@ export function ProPriceCard({
     <div className="rounded-2xl border border-border bg-card p-6">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
-          <Sparkles className="h-5 w-5" />
+          <BadgeCheck className="h-5 w-5" />
         </div>
         <div>
           <p className="font-semibold text-foreground">GetRentos Pro</p>
@@ -76,7 +76,7 @@ export function ProPriceCard({
       <p className="mt-1 text-xs text-muted-foreground">
         {pricing.currency}
         {pricing.vatInclusive
-          ? ' · VAT included — no surprises at checkout'
+          ? ' · VAT included: no surprises at checkout'
           : ' · VAT added at checkout'}
       </p>
 
@@ -110,7 +110,7 @@ export function ProPriceCard({
                 ? 'Opening secure checkout…'
                 : trialAvailable
                   ? `Start ${pricing.trialDays}-day free trial`
-                  : `Subscribe — ${naira(amount)}/${per}`}
+                  : `Subscribe: ${naira(amount)}/${per}`}
             </Button>
           ) : (
             <Button
@@ -132,7 +132,7 @@ export function ProPriceCard({
                   ? `We take ${capture} now just to verify your card, refund it straight away, and ${naira(
                       amount
                     )} only starts when your trial ends.`
-                  : `Card required — ${naira(amount)} starts when your trial ends.`}
+                  : `Card required: ${naira(amount)} starts when your trial ends.`}
             </span>
           </p>
         </div>

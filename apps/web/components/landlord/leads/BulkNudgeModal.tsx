@@ -14,7 +14,7 @@ interface BulkNudgeModalProps {
 }
 
 const DEFAULT_MESSAGE =
-  "Hi, just following up on your interest — still looking? Let us know if you'd like to move forward.";
+  "Hi, just following up on your interest: still looking? Let us know if you'd like to move forward.";
 
 export const BulkNudgeModal = ({
   leadCount,

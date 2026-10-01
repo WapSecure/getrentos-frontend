@@ -76,7 +76,7 @@ export function ApplicationNotesSection({ applicationId }: Props) {
         ) : null}
       </View>
       <Text variant="caption" color="mutedForeground">
-        Only visible to you — not shared with the landlord.
+        Only visible to you: not shared with the landlord.
       </Text>
 
       {composing ? (

@@ -111,12 +111,12 @@ export default function EstateWatchlistPage() {
       </div>
 
       {/* Says what the list does, because a manager who assumes it is only a note
-          would never rely on it — and one who assumes a WATCH entry stops
+          would never rely on it: and one who assumes a WATCH entry stops
           somebody would find out at the barrier instead. */}
       <div className="bg-card rounded-2xl border border-border p-4 mb-6">
         <p className="text-sm text-muted-foreground">
-          Everybody on this list is checked against at every way into the estate — a visitor pass
-          being used, a pass being issued, a walk-in at the barrier, and a vehicle being logged — as
+          Everybody on this list is checked against at every way into the estate: a visitor pass
+          being used, a pass being issued, a walk-in at the barrier, and a vehicle being logged: as
           well as by a guard searching the list. Names, phone numbers and plates are matched
           exactly, ignoring case, spacing and word order, so{' '}
           <span className="font-mono text-xs">lag 123 xy</span> matches{' '}

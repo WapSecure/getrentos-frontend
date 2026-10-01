@@ -382,7 +382,7 @@ export function DuesQueue() {
     resource: 'dues',
     eyebrow: 'Dues & Levies',
     title: 'Household due ledger',
-    description: 'Platform-wide per-household levies across estates — arrears = Overdue filter.',
+    description: 'Platform-wide per-household levies across estates: arrears = Overdue filter.',
     icon: Wallet,
     filters: [{ key: 'status', label: 'Status', options: dueStatusOptions }],
     listFn: (params) => adminEstateService.listDues(params),
@@ -447,7 +447,7 @@ export function DuesQueue() {
               actions.request({
                 title: 'Waive this due?',
                 description:
-                  'The household will owe nothing further on this levy. This cannot be undone — a waived due can only be recreated as a new charge.',
+                  'The household will owe nothing further on this levy. This cannot be undone: a waived due can only be recreated as a new charge.',
                 label: 'Waive',
                 run: (reason) => unwrap(adminEstateService.waiveDue(d.id, reason)),
               })
@@ -889,7 +889,7 @@ export function StaffQueue() {
           onClick={() =>
             actions.request({
               title: 'Revoke access?',
-              description: `${s.legalName} will immediately lose staff access to ${s.organizationName}. This cannot be undone from here — they would need to be re-invited.`,
+              description: `${s.legalName} will immediately lose staff access to ${s.organizationName}. This cannot be undone from here: they would need to be re-invited.`,
               label: 'Revoke',
               run: (reason) => unwrap(adminEstateService.revokeStaff(s.id, reason)),
             })
@@ -972,7 +972,7 @@ export function GovernanceQueue() {
                 actions.request({
                   title: 'Remove this record?',
                   description:
-                    'The stored file and this version will be permanently removed. Use this for a wrong or defamatory upload — not to correct routine content, which the estate manager should re-version instead.',
+                    'The stored file and this version will be permanently removed. Use this for a wrong or defamatory upload: not to correct routine content, which the estate manager should re-version instead.',
                   label: 'Remove',
                   run: (reason) => unwrap(adminEstateService.removeGovernanceRecord(g.id, reason)),
                 })

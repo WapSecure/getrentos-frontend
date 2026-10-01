@@ -190,7 +190,7 @@ export default function GatemanIncidents() {
 
       {panicSent ? (
         <Text variant="caption" center style={{ color: colors.destructive }}>
-          Alert sent — the estate manager has been notified.
+          Alert sent: the estate manager has been notified.
         </Text>
       ) : null}
 

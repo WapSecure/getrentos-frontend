@@ -158,6 +158,14 @@ export function GatemanPostProvider({ children }: { children: ReactNode }) {
     [estate?.id]
   );
 
+  const estatesLoading = estatesQuery.isLoading;
+  const estatesError = estatesQuery.isError;
+  const estatesRefetching = estatesQuery.isRefetching;
+  const refetchEstates = estatesQuery.refetch;
+  const gatesLoading = gatesQuery.isLoading;
+  const gatesRefetching = gatesQuery.isRefetching;
+  const refetchGates = gatesQuery.refetch;
+
   const value = useMemo<GatemanPost>(
     () => ({
       estates,
@@ -167,16 +175,16 @@ export function GatemanPostProvider({ children }: { children: ReactNode }) {
       needsGateChoice: gates.length > 1 && !gate,
       selectEstate,
       selectGate,
-      isLoading: !restored || estatesQuery.isLoading || (!!estate && gatesQuery.isLoading),
+      isLoading: !restored || estatesLoading || (!!estate && gatesLoading),
       // A failed gate lookup is only fatal when the estate itself loaded: a
       // guard at a single-estate posting whose gates call failed can still work,
       // and blocking them at the barrier would be worse than a missing gate.
-      isError: estatesQuery.isError,
+      isError: estatesError,
       refetch: () => {
-        void estatesQuery.refetch();
-        void gatesQuery.refetch();
+        void refetchEstates();
+        void refetchGates();
       },
-      isRefetching: estatesQuery.isRefetching || gatesQuery.isRefetching,
+      isRefetching: estatesRefetching || gatesRefetching,
     }),
     [
       estates,
@@ -186,13 +194,13 @@ export function GatemanPostProvider({ children }: { children: ReactNode }) {
       selectEstate,
       selectGate,
       restored,
-      estatesQuery.isLoading,
-      estatesQuery.isError,
-      estatesQuery.isRefetching,
-      estatesQuery.refetch,
-      gatesQuery.isLoading,
-      gatesQuery.isRefetching,
-      gatesQuery.refetch,
+      estatesLoading,
+      estatesError,
+      estatesRefetching,
+      refetchEstates,
+      gatesLoading,
+      gatesRefetching,
+      refetchGates,
     ]
   );
 

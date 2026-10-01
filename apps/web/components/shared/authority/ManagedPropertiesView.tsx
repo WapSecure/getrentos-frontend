@@ -32,7 +32,7 @@ import { unwrap } from '@/lib/apiHelpers';
  * had decided.
  *
  * Mounted per persona (owner / agent / realtor) because each portal has its own
- * navigation, but the content is identical — a mandate is a fact about a
+ * navigation, but the content is identical: a mandate is a fact about a
  * property, not about which dashboard you happen to be looking at.
  */
 
@@ -172,12 +172,12 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
  * What actually happened when a claim was submitted.
  *
  * The backend answers a claim that already exists by returning it untouched
- * rather than creating a duplicate — both an ACTIVE authority and a PENDING
+ * rather than creating a duplicate: both an ACTIVE authority and a PENDING
  * claim come straight back. Announcing "claim filed" in those cases describes
  * something that did not happen, so the message follows the status we got back.
  */
 const claimOutcomeMessage = (status: AuthorityStatus) => {
-  if (status === 'ACTIVE') return 'You already act for this property — nothing new was filed.';
+  if (status === 'ACTIVE') return 'You already act for this property: nothing new was filed.';
   if (status === 'PENDING') return 'You already have a claim on this property awaiting an officer.';
   return 'Claim filed. It grants nothing until an officer approves it.';
 };
@@ -215,7 +215,7 @@ const ClaimForm = () => {
       <h2 className="font-semibold text-foreground mb-1">Ask to act for a property</h2>
       <p className="text-sm text-muted-foreground mb-4">
         Use the property’s id. An officer checks the mandate, then grants the two capabilities
-        separately — listing a property and moving money on it are not the same permission.
+        separately: listing a property and moving money on it are not the same permission.
       </p>
 
       <div className="grid sm:grid-cols-2 gap-3">
@@ -295,7 +295,7 @@ export const ManagedPropertiesView = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Managed properties</h1>
         <p className="text-muted-foreground mt-1">
-          Properties you can act for because the owner gave you authority — with exactly what that
+          Properties you can act for because the owner gave you authority: with exactly what that
           authority lets you do.
         </p>
       </div>

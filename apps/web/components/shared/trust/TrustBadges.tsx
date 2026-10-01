@@ -10,7 +10,7 @@ import {
   ClipboardCheck,
   CheckCircle,
   Crown,
-  Sparkles,
+  BadgeCheck,
   Lock,
   Users,
 } from 'lucide-react';
@@ -25,7 +25,7 @@ const iconMap: Record<string, React.ElementType> = {
   ClipboardCheck,
   CheckCircle,
   Crown,
-  Sparkles,
+  BadgeCheck,
   Lock,
   Users,
   Award,

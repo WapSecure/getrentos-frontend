@@ -26,7 +26,7 @@ const TABS: HubTab[] = [
   { id: 'financing', label: 'Flex Financing', icon: Zap },
 ];
 
-/** Real gateway checkout redirect — pulled out of component scope so it reads as an
+/** Real gateway checkout redirect: pulled out of component scope so it reads as an
  *  ordinary side effect rather than a render-path mutation. */
 function redirectToCheckout(url: string) {
   window.location.href = url;
@@ -85,7 +85,7 @@ export default function PaymentsPage() {
       unwrap(renterService.payNow(paymentId, method)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
-        // Real gateway flow — the payment is PROCESSING until checkout
+        // Real gateway flow: the payment is PROCESSING until checkout
         // completes, so redirect instead of claiming success.
         redirectToCheckout(updated.authorizationUrl);
         return;
@@ -139,7 +139,7 @@ export default function PaymentsPage() {
       for (const payment of payablePayments) {
         const updated = await unwrap(renterService.payNow(payment.id, payment.method));
         if (updated.authorizationUrl) {
-          // Real gateway flow — only one checkout can be completed at a
+          // Real gateway flow: only one checkout can be completed at a
           // time, so redirect to this one now; the rest stay payable.
           redirectToCheckout(updated.authorizationUrl);
           return;

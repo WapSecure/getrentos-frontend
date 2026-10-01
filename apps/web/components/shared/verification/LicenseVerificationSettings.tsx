@@ -116,7 +116,7 @@ export const LicenseVerificationSettings = () => {
               accept=".pdf,.jpg,.jpeg,.png,.webp"
               multiple={false}
               label=""
-              hint="PDF or image — preview before submitting"
+              hint="PDF or image: preview before submitting"
             />
           </div>
 

@@ -48,7 +48,7 @@ function pinIconHtml(priceLabel?: string): string {
 
 /**
  * Keyless map powered by Leaflet + OpenStreetMap tiles.
- * No API keys, no billing — works out of the box anywhere.
+ * No API keys, no billing: works out of the box anywhere.
  */
 export const PropertyMap = ({
   center,

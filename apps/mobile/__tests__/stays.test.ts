@@ -38,7 +38,7 @@ const booking = (over: Partial<ShortletBooking> = {}): ShortletBooking => ({
 });
 
 describe('the price a guest reads', () => {
-  it('lists nights, the one discount, cleaning and tax — matching the API total', () => {
+  it('lists nights, the one discount, cleaning and tax: matching the API total', () => {
     const q = {
       listingId: 'l1',
       available: true,
@@ -115,9 +115,9 @@ describe('my stays', () => {
   });
 
   it('counts down to check-in on a paid stay', () => {
-    expect(stayHeadline(booking(), '2026-12-15').title).toBe("You're all set — 5 days to go");
+    expect(stayHeadline(booking(), '2026-12-15').title).toBe("You're all set: 5 days to go");
     expect(stayHeadline(booking(), '2026-12-19').title).toBe(
-      "You're all set — check-in is tomorrow"
+      "You're all set: check-in is tomorrow"
     );
   });
 

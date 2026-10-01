@@ -1,18 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X,
-  Bed,
-  Bath,
-  Square,
-  MapPin,
-  Star,
-  TrendingUp,
-  Shield,
-  Home,
-  GitCompare,
-} from 'lucide-react';
+import { X, Bed, Bath, Square, MapPin, Star, Shield, GitCompare } from 'lucide-react';
 import { Property } from '@/types/renter';
 
 interface DiscoverCompareDrawerProps {

@@ -61,7 +61,7 @@ function MessageTemplateForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Message"
-        placeholder="Hi, I'd like to arrange a viewing this week — what times suit you?"
+        placeholder="Hi, I'd like to arrange a viewing this week: what times suit you?"
         multiline
         numberOfLines={4}
         maxLength={1000}

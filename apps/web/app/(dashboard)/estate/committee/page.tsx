@@ -95,7 +95,7 @@ export default function EstateCommitteePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Committee</h1>
         <p className="text-muted-foreground mt-1">
-          The board running {estate.name} — appoint households to a seat and title.
+          The board running {estate.name}: appoint households to a seat and title.
         </p>
       </div>
 
@@ -107,7 +107,7 @@ export default function EstateCommitteePage() {
             onValueChange={setHouseholdId}
             options={availableHouseholds.map((h) => ({
               value: h.id,
-              label: `${h.unitLabel} — ${h.residentName}`,
+              label: `${h.unitLabel}: ${h.residentName}`,
             }))}
             placeholder="Select a household"
           />

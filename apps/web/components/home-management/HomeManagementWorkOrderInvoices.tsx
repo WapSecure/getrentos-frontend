@@ -379,7 +379,7 @@ export function HomeManagementWorkOrderInvoices({
               message:
                 result.payoutStatus === 'PAID'
                   ? 'Vendor paid.'
-                  : 'Payment sent — it shows as paid once the bank confirms.',
+                  : 'Payment sent: it shows as paid once the bank confirms.',
               variant: 'success',
             }
       );
@@ -506,7 +506,7 @@ export function HomeManagementWorkOrderInvoices({
             )}
           </div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Reconcile completed vendor work. Approval makes an invoice ready for finance review — it
+            Reconcile completed vendor work. Approval makes an invoice ready for finance review: it
             does not pay a vendor.
           </p>
         </div>
@@ -888,7 +888,7 @@ export function HomeManagementWorkOrderInvoices({
                 </Field>
                 <Field label="Currency" hint="Matches the approved work-order spend.">
                   <div className="flex min-h-11 items-center rounded-xl border border-border bg-secondary/60 px-3.5 text-sm text-foreground">
-                    NGN — Nigerian naira
+                    NGN: Nigerian naira
                   </div>
                 </Field>
               </div>

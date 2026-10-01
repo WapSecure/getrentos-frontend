@@ -65,15 +65,15 @@ export default function OwnerLeadsPage() {
 
   // Lead-stage updates (schedule/assign/convert) are tracked server-side via
   // viewings & offers; these handlers keep the modal flow responsive locally.
-  const handleScheduleConfirm = (_leadId: string) => {
+  const handleScheduleConfirm = () => {
     setSchedulingLead(null);
   };
 
-  const handleAssignRealtor = (_leadId: string, _realtorName: string) => {
+  const handleAssignRealtor = () => {
     setAssigningLead(null);
   };
 
-  const handleConvertToOffer = (_lead: BuyerLead) => {
+  const handleConvertToOffer = () => {
     setSchedulingLead(null);
   };
 
@@ -151,7 +151,7 @@ export default function OwnerLeadsPage() {
               delay={index * 0.05}
               onMessage={() => handleMessage(lead)}
               onScheduleViewing={() => setSchedulingLead(lead)}
-              onConvertToOffer={() => handleConvertToOffer(lead)}
+              onConvertToOffer={handleConvertToOffer}
               onAssignRealtor={() => setAssigningLead(lead)}
             />
           ))}
@@ -171,7 +171,7 @@ export default function OwnerLeadsPage() {
       <ScheduleViewingModal
         lead={schedulingLead}
         onClose={() => setSchedulingLead(null)}
-        onSchedule={(leadId) => handleScheduleConfirm(leadId)}
+        onSchedule={handleScheduleConfirm}
       />
 
       <AssignRealtorModal

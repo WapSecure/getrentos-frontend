@@ -90,13 +90,13 @@ export default function LandlordMicrositePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Microsite</h1>
         <p className="text-muted-foreground mt-1">
-          A public page showcasing your listings — share one link instead of the whole app.
+          A public page showcasing your listings: share one link instead of the whole app.
         </p>
       </div>
 
       <ProFeatureGate
         title="Microsite is a Pro feature"
-        description="Upgrade to Pro to get a public page showcasing your listings — one link to share instead of the whole app."
+        description="Upgrade to Pro to get a public page showcasing your listings: one link to share instead of the whole app."
       >
         <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
           <div className="flex items-center justify-between">
@@ -104,8 +104,8 @@ export default function LandlordMicrositePage() {
               <p className="text-sm font-medium text-foreground">Publish microsite</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {enabled
-                  ? 'Live — visible to anyone with the link'
-                  : 'Draft — not publicly visible yet'}
+                  ? 'Live: visible to anyone with the link'
+                  : 'Draft: not publicly visible yet'}
               </p>
             </div>
             <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Publish microsite" />

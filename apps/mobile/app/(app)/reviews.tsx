@@ -73,7 +73,7 @@ export default function Reviews() {
         ) : null}
         {tab === 'about-you' && r.reviewerName ? (
           <Text variant="caption" color="mutedForeground">
-            — {r.reviewerName}
+            : {r.reviewerName}
           </Text>
         ) : null}
       </View>
@@ -173,7 +173,7 @@ export default function Reviews() {
           <EmptyState
             icon={<Star size={30} color={colors.mutedForeground} />}
             title="No reviews about you"
-            description="Landlords and agents can review you after a tenancy — these feed your trust score."
+            description="Landlords and agents can review you after a tenancy: these feed your trust score."
           />
         ) : (
           (received.data?.items ?? []).map(renderReview)

@@ -5,7 +5,7 @@ const PORTAL_UNAVAILABLE_OPTIONS = { presentation: 'modal' } as const;
 const DETAIL_OPTIONS = { animation: 'slide_from_right' } as const;
 
 /**
- * Authenticated shell. No redirect here — the root `useProtectedRoute` keeps an
+ * Authenticated shell. No redirect here: the root `useProtectedRoute` keeps an
  * anonymous user out and routes unbuilt portals to the holding screen. This
  * layout just declares the navigator.
  */
@@ -43,6 +43,8 @@ export default function AppLayout() {
       <Stack.Screen name="shortlet-dispute/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="detty-december" options={DETAIL_OPTIONS} />
       <Stack.Screen name="(buyer)" />
+      <Stack.Screen name="(realtor)" />
+      <Stack.Screen name="(estate)" />
       <Stack.Screen name="buyer-listing/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="buyer-offer/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="buyer-conversation/[id]" options={DETAIL_OPTIONS} />
@@ -72,7 +74,6 @@ export default function AppLayout() {
       <Stack.Screen name="calendar" options={DETAIL_OPTIONS} />
       <Stack.Screen name="move-checklist" options={DETAIL_OPTIONS} />
       <Stack.Screen name="financing" options={DETAIL_OPTIONS} />
-      <Stack.Screen name="credit-reporting" options={DETAIL_OPTIONS} />
       <Stack.Screen name="inspections" options={DETAIL_OPTIONS} />
       <Stack.Screen name="referrals" options={DETAIL_OPTIONS} />
       <Stack.Screen name="data-export" options={DETAIL_OPTIONS} />
@@ -118,7 +119,6 @@ export default function AppLayout() {
       <Stack.Screen name="landlord-conversation/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="privacy-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="whatsapp-settings" options={DETAIL_OPTIONS} />
-      <Stack.Screen name="ussd" options={DETAIL_OPTIONS} />
       <Stack.Screen name="security-settings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="portal-unavailable" options={PORTAL_UNAVAILABLE_OPTIONS} />
     </Stack>

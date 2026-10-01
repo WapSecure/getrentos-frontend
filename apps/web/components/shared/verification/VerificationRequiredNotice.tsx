@@ -61,13 +61,13 @@ interface NoticeMeta {
 /**
  * Copy for a tier requirement that the user already satisfies on evidence but
  * which something else is holding back (backend `withheldReason`). Sending them
- * to verification would be a loop — they hold the evidence already — so the CTA
+ * to verification would be a loop: they hold the evidence already: so the CTA
  * points at the trust profile, which shows what the tier is actually waiting on.
  */
 const WITHHELD_COPY: Record<TrustWithheldReason, { message: string; cta: string }> = {
   SCORE_BELOW_TIER3_MIN: {
     message:
-      'Your identity and financial checks are complete, but your trust score is below the threshold this action requires. Nothing is wrong with your account — building up your trust profile restores access automatically.',
+      'Your identity and financial checks are complete, but your trust score is below the threshold this action requires. Nothing is wrong with your account: building up your trust profile restores access automatically.',
     cta: 'See what your score needs',
   },
   OPEN_DISPUTE_AS_SUBJECT: {
@@ -119,7 +119,7 @@ function readMeta(error: unknown): NoticeMeta | null {
 }
 
 interface VerificationRequiredNoticeProps {
-  /** The caught error / failed response from a gated action — renders nothing unless it's a verification/tier gate. */
+  /** The caught error / failed response from a gated action: renders nothing unless it's a verification/tier gate. */
   error: unknown;
   /** Destination for ownership-proof upsell (the property page). */
   href: string;

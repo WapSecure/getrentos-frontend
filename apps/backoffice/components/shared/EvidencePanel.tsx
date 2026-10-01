@@ -40,7 +40,7 @@ interface EvidencePanelProps {
   onResolveUrl?: (evidenceId: string) => Promise<string | null | undefined>;
   /**
    * Detaches a file that should not be on this record. Only offered where
-   * removing a mis-attach is legitimate — an approver should not be able to
+   * removing a mis-attach is legitimate: an approver should not be able to
    * quietly drop evidence from a case.
    */
   onRemove?: (evidenceId: string) => void;
@@ -65,8 +65,8 @@ interface EvidencePanelProps {
  * The evidence on a case, as a reviewer needs to see it.
  *
  * Shared by every case family that can carry attachments, so a dispute, a fraud
- * alert and a vendor invoice all present evidence — and the warning that an
- * external link is not ours — the same way.
+ * alert and a vendor invoice all present evidence: and the warning that an
+ * external link is not ours: the same way.
  *
  * Files we hold open in the in-app viewer through a short-lived signed URL.
  * Links recorded before uploads existed are separated out, labelled as not held
@@ -262,8 +262,8 @@ export const EvidencePanel = ({
                   )}
                   {!isStored && (
                     <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-300">
-                      External link recorded before uploads were supported — we did not receive
-                      this file.
+                      External link recorded before uploads were supported: we did not receive this
+                      file.
                     </p>
                   )}
                   {item.note && (

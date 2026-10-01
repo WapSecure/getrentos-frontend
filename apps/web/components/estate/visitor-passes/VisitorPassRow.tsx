@@ -47,7 +47,7 @@ export const VisitorPassRow = ({ pass, estateId, onRevoke, isRevoking }: Visitor
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
-          {pass.visitorName} — {pass.unitLabel}
+          {pass.visitorName}: {pass.unitLabel}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {pass.residentName}

@@ -4,12 +4,12 @@ import { Navigation } from '@/components/layout/Navigation';
 import { ShortletMarketplaceBrowser } from '@/components/shortlet/ShortletMarketplaceBrowser';
 
 export const metadata: Metadata = {
-  title: 'Shortlets — Furnished Short-Stay Apartments',
+  title: 'Shortlets: Furnished Short-Stay Apartments',
   description:
     'Book verified, furnished short-stay apartments and homes. Your payment is held by GetRentos until you arrive, verified hosts, and instant confirmation on GetRentos.',
   alternates: { canonical: '/shortlets' },
   openGraph: {
-    title: 'Shortlets — Furnished Short-Stay Apartments',
+    title: 'Shortlets: Furnished Short-Stay Apartments',
     description: 'Book verified, furnished short-stay apartments and homes on GetRentos.',
     url: '/shortlets',
     type: 'website',

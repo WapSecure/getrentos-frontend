@@ -24,7 +24,7 @@ interface MicrositeFormProps {
 }
 
 // A separate component so its local draft state can be lazily initialized
-// straight from `settings` at mount — this component only mounts once the
+// straight from `settings` at mount: this component only mounts once the
 // settings query has resolved, so there is no async "sync into state" effect
 // to write (which react-hooks/set-state-in-effect would flag as a real error).
 function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
@@ -86,7 +86,7 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Microsite</h1>
         <p className="text-muted-foreground mt-1">
-          A public page showcasing {estateName} — share one link with prospective residents.
+          A public page showcasing {estateName}: share one link with prospective residents.
         </p>
       </div>
 
@@ -96,8 +96,8 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
             <p className="text-sm font-medium text-foreground">Publish microsite</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {enabled
-                ? 'Live — visible to anyone with the link'
-                : 'Draft — not publicly visible yet'}
+                ? 'Live: visible to anyone with the link'
+                : 'Draft: not publicly visible yet'}
             </p>
           </div>
           <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Publish microsite" />
@@ -234,7 +234,7 @@ export default function EstateMicrositePage() {
     return (
       <ProFeatureGate
         title="Microsite is a Pro feature"
-        description="Upgrade to Pro to get a public page showcasing your estate — one link to share with residents and prospective buyers."
+        description="Upgrade to Pro to get a public page showcasing your estate: one link to share with residents and prospective buyers."
       >
         <div />
       </ProFeatureGate>

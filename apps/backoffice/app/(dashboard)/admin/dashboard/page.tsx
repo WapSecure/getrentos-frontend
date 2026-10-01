@@ -12,7 +12,7 @@ import { adminKeys } from '@/lib/queryKeys';
 import { PageErrorState } from '@getrentos/ui';
 import { useAdminUser } from '../layout';
 
-// recharts is heavy — load it only when this dashboard mounts.
+// recharts is heavy: load it only when this dashboard mounts.
 const PlatformGrowthChart = dynamic(
   () =>
     import('@/components/admin/dashboard/PlatformGrowthChart').then((m) => m.PlatformGrowthChart),

@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  CheckCircle,
-  Circle,
-  FileText,
-  AlertCircle,
-  Camera,
-  Wrench,
-  Droplets,
-  Zap,
-} from 'lucide-react';
+import { CheckCircle, Circle, FileText, AlertCircle } from 'lucide-react';
 
 interface ChecklistItem {
   id: string;

@@ -282,7 +282,7 @@ export default function OwnerPropertyDetail() {
               <Card elevated style={{ gap: spacing.sm }}>
                 <Text variant="bodyStrong">Rent it out instead</Text>
                 <Text variant="caption" color="mutedForeground">
-                  Manage this property as a rental — units, tenants and rent — from the landlord
+                  Manage this property as a rental: units, tenants and rent: from the landlord
                   workspace.
                 </Text>
                 <Button

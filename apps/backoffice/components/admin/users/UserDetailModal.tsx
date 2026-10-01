@@ -1,6 +1,6 @@
 'use client';
 
-import { Ban, CheckCircle2, ShieldAlert, Sparkles } from 'lucide-react';
+import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { Badge, Button } from '@getrentos/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@getrentos/shared';
@@ -82,7 +82,7 @@ export const UserDetailModal = ({
                       onChangeSubscription(user.id, user.planTier === 'PRO' ? 'FREE' : 'PRO')
                     }
                   >
-                    <Sparkles className="w-3 h-3" />
+                    <BadgeCheck className="w-3 h-3" />
                     {user.planTier === 'PRO' ? 'Move to Free' : 'Upgrade to Pro'}
                   </Button>
                 </div>

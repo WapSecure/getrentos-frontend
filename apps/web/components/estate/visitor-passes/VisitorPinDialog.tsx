@@ -35,7 +35,7 @@ export const VisitorPinDialog = ({ pass, onClose }: VisitorPinDialogProps) => {
             </div>
             <h3 className="font-semibold text-foreground mb-1">Visitor Pass Issued</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              For {pass.visitorName} — {pass.unitLabel}
+              For {pass.visitorName}: {pass.unitLabel}
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

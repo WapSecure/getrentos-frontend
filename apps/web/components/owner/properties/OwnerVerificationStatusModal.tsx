@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle, Check, FileText } from 'lucide-react';
+import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
 import { Button, DocumentUpload, Select } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -117,7 +117,7 @@ export const OwnerVerificationStatusModal = ({
       const detail = await unwrap(trustService.getVerification(verification.id));
 
       if (detail.decision === 'PASS') {
-        setTrustMessage('Property verified — address, title document and ownership all passed.');
+        setTrustMessage('Property verified: address, title document and ownership all passed.');
         onVerified?.();
       } else {
         setTrustError(
@@ -227,7 +227,7 @@ export const OwnerVerificationStatusModal = ({
                     accept=".pdf,.jpg,.jpeg,.png,.webp"
                     multiple={false}
                     label=""
-                    hint="PDF or image — preview before submitting"
+                    hint="PDF or image: preview before submitting"
                   />
                   <div className="mt-3">
                     <Select

@@ -149,7 +149,7 @@ export default function MaintenancePage() {
   };
 
   // Scheduled maintenance is derived from real requests that are still active
-  // (submitted / assigned / in progress) — no fabricated entries.
+  // (submitted / assigned / in progress): no fabricated entries.
   const scheduledMaintenance = requests
     .filter((r) => r.status !== 'resolved' && r.status !== 'cancelled')
     .map((r) => ({

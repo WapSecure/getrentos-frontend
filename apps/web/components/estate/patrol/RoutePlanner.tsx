@@ -165,7 +165,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
 
       {active.length === 0 && !checkpointsQuery.isLoading && (
         <p className="text-sm text-muted-foreground">
-          Add a checkpoint first — a round is a list of places to reach.
+          Add a checkpoint first: a round is a list of places to reach.
         </p>
       )}
 
@@ -312,7 +312,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
             <Field
               label="Checkpoints, in the order they should be walked"
               required
-              hint="The order is recorded, not enforced — a round walked out of sequence is shown as such rather than refused."
+              hint="The order is recorded, not enforced: a round walked out of sequence is shown as such rather than refused."
             >
               {draft.checkpointIds.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">

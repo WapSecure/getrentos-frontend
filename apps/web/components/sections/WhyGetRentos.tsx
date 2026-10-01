@@ -1,4 +1,4 @@
-import { Banknote, Layers, Lock, Sparkles } from 'lucide-react';
+import { Banknote, Layers, Lock, BadgeCheck } from 'lucide-react';
 import { MarketingCard, SectionHeading } from './primitives';
 
 /**
@@ -25,7 +25,7 @@ const reasons = [
     description: 'Rent and sale payments are held until the agreed conditions are met.',
   },
   {
-    icon: Sparkles,
+    icon: BadgeCheck,
     title: 'Free to start',
     description:
       'Every role has a free plan. Pro adds tools for portfolios and teams when you outgrow it.',

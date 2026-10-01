@@ -9,7 +9,7 @@ import { describeWatchlistBasis } from '@/components/gateman/WatchlistBlockedNot
  * has been attempted.
  *
  * A guard who screens first finds out before they have told a visitor they are
- * asking the household — and without a household being asked to consent to
+ * asking the household: and without a household being asked to consent to
  * somebody the estate has already decided against. That is the whole value of a
  * check they can run early, so it has to be usable before the form is finished.
  *
@@ -32,7 +32,7 @@ export const WatchlistCheckResult = ({ screening }: { screening: WatchlistScreen
               differently would not match. Saying so stops a guard treating this
               as a promise. */}
           <p className="text-xs mt-0.5">
-            Compared exactly against what the list holds, ignoring case, spacing and word order — so
+            Compared exactly against what the list holds, ignoring case, spacing and word order: so
             a genuinely different spelling would not show up.
           </p>
         </div>
@@ -46,7 +46,7 @@ export const WatchlistCheckResult = ({ screening }: { screening: WatchlistScreen
         <Eye className="w-4 h-4 shrink-0 mt-0.5 text-amber-700 dark:text-amber-400" />
         <div className="min-w-0 space-y-2">
           <p className="text-sm font-semibold text-foreground">
-            On the estate&apos;s watch list — not refused
+            On the estate&apos;s watch list: not refused
           </p>
           {screening.matches.map((match) => (
             <div key={match.entryId} className="space-y-0.5">

@@ -1,6 +1,5 @@
 'use client';
 
-import { AnimatedParticles } from '@getrentos/ui';
 import { ThemeToggle } from '@getrentos/ui';
 import { AdminSignInForm } from '@/components/auth/AdminSignIn/AdminSignInForm';
 
@@ -11,7 +10,6 @@ const WEB_APP_URL = process.env.NEXT_PUBLIC_WEB_APP_URL || 'http://localhost:300
 export default function AdminLoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <AnimatedParticles />
       <div className="fixed top-6 right-6 z-20">
         <ThemeToggle />
       </div>

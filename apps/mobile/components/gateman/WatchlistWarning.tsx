@@ -6,7 +6,7 @@ import { Text, useTheme } from '@getrentos/ui-native';
  * The estate's note about somebody it matched but did not refuse.
  *
  * Shown after a write that succeeded, because a WATCH entry admits the visitor
- * on purpose — the estate wants to hear about them, and this is the guard
+ * on purpose: the estate wants to hear about them, and this is the guard
  * finding out in time to pass it on. Until this existed the sentence was composed
  * on the server and thrown away, so the severity did nothing a guard could see.
  *

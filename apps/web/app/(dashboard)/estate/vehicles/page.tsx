@@ -55,7 +55,7 @@ export default function EstateVehiclesPage() {
       ),
     enabled: !!estate,
   });
-  // The API only supports an "open" boolean filter — "exited" is applied client-side on this page.
+  // The API only supports an "open" boolean filter: "exited" is applied client-side on this page.
   const logs = (data?.items ?? []).filter((log) =>
     statusFilter === 'exited' ? !!log.exitedAt : true
   );

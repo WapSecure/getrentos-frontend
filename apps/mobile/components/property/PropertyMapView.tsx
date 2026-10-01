@@ -120,7 +120,7 @@ function buildHtml(
 }
 
 /**
- * Keyless map powered by Leaflet + OpenStreetMap tiles, embedded via WebView —
+ * Keyless map powered by Leaflet + OpenStreetMap tiles, embedded via WebView:
  * mirrors the web app's `PropertyMap` (no Google/Mapbox key or billing needed).
  */
 export function PropertyMapView({

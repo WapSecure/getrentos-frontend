@@ -568,7 +568,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             setDisputeTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
             setToast({
-              message: 'Dispute opened — the other party has been notified.',
+              message: 'Dispute opened: the other party has been notified.',
               variant: 'success',
             });
           }}
@@ -583,7 +583,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             queryClient.invalidateQueries({ queryKey: shortletKeys.hostBookings });
             queryClient.invalidateQueries({ queryKey: shortletKeys.depositClaims });
             setToast({
-              message: 'Deposit claim filed — an admin will review it.',
+              message: 'Deposit claim filed: an admin will review it.',
               variant: 'success',
             });
           }}

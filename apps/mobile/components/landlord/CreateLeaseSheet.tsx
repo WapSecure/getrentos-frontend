@@ -33,7 +33,7 @@ export function CreateLeaseSheet({ open, onClose }: Props) {
 
 const digits = (v: string) => v.replace(/\D/g, '');
 
-/** One year on from a yyyy-MM-dd date — the usual Nigerian tenancy term. */
+/** One year on from a yyyy-MM-dd date: the usual Nigerian tenancy term. */
 function yearAfter(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);
   return toISODate(new Date(y + 1, m - 1, d));

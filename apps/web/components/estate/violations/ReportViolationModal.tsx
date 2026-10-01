@@ -41,7 +41,7 @@ export const ReportViolationModal = ({
     .filter((h) => h.status === 'active')
     .map((h) => ({
       value: h.id,
-      label: `${h.unitLabel} — ${h.residentName}`,
+      label: `${h.unitLabel}: ${h.residentName}`,
     }));
 
   const handleClose = () => {

@@ -32,7 +32,7 @@ export const PostSwitcher = () => {
   // Nothing to choose and nothing to warn about: a lone gate on a lone estate is
   // already known, so the control would only take up room. Stays mounted while
   // the post is loading, because a control that vanishes and pops back in is
-  // worse than one that is briefly blank — and during that window the "pick your
+  // worse than one that is briefly blank: and during that window the "pick your
   // gate" warning would be absent exactly when the guard is about to check
   // someone in.
   if (!isLoading && estates.length <= 1 && gates.length <= 1) return null;

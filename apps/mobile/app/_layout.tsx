@@ -27,7 +27,7 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 /**
  * The single source of navigation truth. One effect, one `router.replace` per
- * transition — never `<Redirect>` scattered across nested layouts (two of them
+ * transition: never `<Redirect>` scattered across nested layouts (two of them
  * firing at once trips React's update counter on the native stack).
  */
 function useProtectedRoute(onboardingSeen: boolean | null) {
@@ -45,7 +45,7 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     // open to signed-out visitors; signed-in users fall through to their portal.
     const root = segments[0];
     const inApp = root === '(app)';
-    // Route on the portal we can OPEN, not on the user's most senior role —
+    // Route on the portal we can OPEN, not on the user's most senior role:
     // otherwise a role with no screens yet (realtor, owner, estate) hides a
     // portal the user does have.
     const portalReady = !!usablePortal;
@@ -66,7 +66,7 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
         // "account"), and group segments are invisible in the URL, so a
         // deep link or stale bookmark can resolve into the WRONG portal's
         // screen. Only re-route when the matched segment is itself a
-        // portal group marker — top-level pushed screens outside any
+        // portal group marker: top-level pushed screens outside any
         // group (e.g. "violations", "saved") are unambiguous by name and
         // must stay untouched here.
         target = portalHref(usablePortal);

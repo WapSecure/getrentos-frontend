@@ -21,7 +21,7 @@ const MAX_PHOTOS = 12;
  *
  * When the estate has supplied none, the panel says so and explains what the
  * listing is showing instead. A manager looking at their own listing and seeing
- * someone else's photo has no way to know why — the property's cover is being
+ * someone else's photo has no way to know why: the property's cover is being
  * used as a fallback, and that is worth stating rather than leaving as a mystery.
  */
 export const ListingMediaPanel = ({
@@ -117,7 +117,7 @@ export const ListingMediaPanel = ({
         <p className="mt-3 text-xs text-muted-foreground">
           {listing.coverImageUrl
             ? 'No photos from you yet, so this listing is showing the property owner’s image.'
-            : 'No photos from you yet, and the property has none of its own — this listing has no image.'}
+            : 'No photos from you yet, and the property has none of its own: this listing has no image.'}
         </p>
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">

@@ -72,9 +72,9 @@ export default function HostListingDetail() {
       void haptics.success();
       toast.show(
         status === 'PUBLISHED'
-          ? 'Live — guests can book again.'
+          ? 'Live: guests can book again.'
           : status === 'PAUSED'
-            ? 'Paused — hidden from search, bookings kept.'
+            ? 'Paused: hidden from search, bookings kept.'
             : 'Listing closed.',
         'success'
       );

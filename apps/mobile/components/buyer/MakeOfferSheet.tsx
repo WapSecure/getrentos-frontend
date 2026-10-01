@@ -60,7 +60,7 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
       router.push(`/(app)/buyer-offer/${offer.id}`);
     },
     onError: (err) => {
-      // A verification gate is explained inline, with the way forward — not as a toast.
+      // A verification gate is explained inline, with the way forward: not as a toast.
       if (readGate(err)) return;
       toast.show(err instanceof ApiError ? err.message : 'Could not submit this offer.', 'error');
     },

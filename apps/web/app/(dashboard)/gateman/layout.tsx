@@ -67,7 +67,7 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
   return (
     <GatemanUserContext.Provider value={user}>
       {/* One estate and one barrier for the whole console. Mounted above the
-          navbar so the switcher and every gate page read the same post — an
+          navbar so the switcher and every gate page read the same post: an
           arrival recorded from the vehicles page must be attributed to the same
           barrier as one recorded from check-in. */}
       <GatemanPostProvider>

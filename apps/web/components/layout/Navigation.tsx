@@ -62,7 +62,7 @@ export const Navigation = () => {
   const isSignedIn = useAuthStore((s) => s.isAuthenticated);
   // Computed client-side only (localStorage is unavailable on the server).
   // The Dashboard link only renders once the reactive auth store flips to
-  // signed-in — after hydration — so there is no SSR/client mismatch.
+  // signed-in: after hydration: so there is no SSR/client mismatch.
   const [dashboardHref] = useState<string>(() =>
     typeof window === 'undefined' ? ROUTES.DASHBOARD : getDashboardRoute(getUserRole() || 'renter')
   );

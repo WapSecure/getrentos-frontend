@@ -76,7 +76,7 @@ export const MaintenanceTicketCard = ({
         <div className="min-w-0">
           {showHousehold && (
             <p className="text-sm font-semibold text-foreground truncate">
-              {ticket.unitLabel} — {ticket.residentName}
+              {ticket.unitLabel}: {ticket.residentName}
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2 mt-1">

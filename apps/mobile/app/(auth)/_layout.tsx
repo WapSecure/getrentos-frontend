@@ -10,7 +10,7 @@ const WELCOME_OPTIONS = { animation: 'fade' } as const;
 const TWO_FACTOR_OPTIONS = { presentation: 'modal', animation: 'slide_from_bottom' } as const;
 
 /**
- * Unauthenticated flow. No redirect here — the root `useProtectedRoute` decides
+ * Unauthenticated flow. No redirect here: the root `useProtectedRoute` decides
  * when to leave this group. Keeping it a plain navigator avoids the nested
  * redirect war that trips the native stack.
  */

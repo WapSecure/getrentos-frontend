@@ -41,7 +41,7 @@ function StatusPill({ status }: { status: SubscriptionInvoice['status'] }) {
  *
  * Exists because "you were charged" is not a receipt. Someone doing their books
  * (or reconciling a bank statement) needs the amount, the date, and the period
- * it covered — and a line item explaining every debit they can see, including
+ * it covered: and a line item explaining every debit they can see, including
  * the card-verification charge we take and refund.
  *
  * Rendered for Free accounts as well as Pro: a customer who cancelled still

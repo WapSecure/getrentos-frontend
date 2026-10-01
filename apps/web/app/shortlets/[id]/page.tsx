@@ -41,11 +41,11 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
     `Book ${listing.title} in ${listing.city}, ${listing.state} on GetRentos. Verified host, escrow-secured payment.`;
 
   return {
-    title: `${listing.title} — ${listing.city}, ${listing.state}`,
+    title: `${listing.title}: ${listing.city}, ${listing.state}`,
     description,
     alternates: { canonical: `/shortlets/${id}` },
     openGraph: {
-      title: `${listing.title} — ${listing.city}, ${listing.state}`,
+      title: `${listing.title}: ${listing.city}, ${listing.state}`,
       description,
       url: `${SITE_URL}/shortlets/${id}`,
       type: 'website',

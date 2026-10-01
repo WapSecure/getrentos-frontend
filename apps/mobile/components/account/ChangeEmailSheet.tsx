@@ -22,8 +22,8 @@ interface Props {
 
 /**
  * The sign-in email changes only after the new address proves itself with a
- * code. The API asks the account holder to confirm it's them first — the
- * StepUpSheet at the root handles that — and emails the old address.
+ * code. The API asks the account holder to confirm it's them first: the
+ * StepUpSheet at the root handles that: and emails the old address.
  */
 export function ChangeEmailSheet({ open, onClose }: Props) {
   return (

@@ -145,7 +145,7 @@ export const ReferralSummaryCard = () => {
         <h3 className="text-sm font-semibold text-foreground mb-4">Recent referrals</h3>
         {summary.referrals.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No referrals yet — share your code above to start earning.
+            No referrals yet: share your code above to start earning.
           </p>
         ) : (
           <div className="space-y-3">

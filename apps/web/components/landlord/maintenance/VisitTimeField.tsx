@@ -15,7 +15,7 @@ interface VisitTimeFieldProps {
   label?: string;
 }
 
-/** Date and time for a vendor's visit — the earliest choice is right now. */
+/** Date and time for a vendor's visit: the earliest choice is right now. */
 export const VisitTimeField = ({
   value,
   onChange,

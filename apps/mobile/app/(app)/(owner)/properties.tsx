@@ -40,7 +40,7 @@ export default function OwnerProperties() {
   });
   const listings = useQuery({ queryKey: qk.owner.listings, queryFn: () => ownerApi.listings() });
 
-  // The newest listing per property — what the card should say about it.
+  // The newest listing per property: what the card should say about it.
   const listingFor = useMemo(() => {
     const map = new Map<string, OwnerListing>();
     for (const l of listings.data?.items ?? []) {

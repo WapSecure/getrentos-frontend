@@ -79,8 +79,8 @@ export function ShortletBookingDialog({
 
   const unavailableNights = useMemo(() => calendar?.unavailableDates ?? [], [calendar]);
   /**
-   * A taken night cannot start a stay. It can *end* one — the guest leaves in
-   * the morning and the next arrives that afternoon — so a check-out is only
+   * A taken night cannot start a stay. It can *end* one: the guest leaves in
+   * the morning and the next arrives that afternoon: so a check-out is only
    * blocked when the night before it is taken.
    */
   const blockedCheckOuts = useMemo(() => unavailableNights.map(nextDay), [unavailableNights]);
@@ -284,7 +284,7 @@ export function ShortletBookingDialog({
                 {busy
                   ? 'Booking…'
                   : listing.instantBooking
-                    ? 'Book now — instant confirmation'
+                    ? 'Book now: instant confirmation'
                     : 'Request to book'}
               </Button>
               <p className="text-center text-xs text-muted-foreground">

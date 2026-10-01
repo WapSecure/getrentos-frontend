@@ -21,7 +21,7 @@ interface LiftWatchlistEntryModalProps {
 /**
  * Takes an entry off the watch list.
  *
- * A reason is required, and the copy says what the change actually does — from
+ * A reason is required, and the copy says what the change actually does: from
  * the next arrival onward, nothing is refused. Lifting is not a soft delete:
  * the row stays, the audit keeps it, and the estate can still answer "was this
  * person on our list in March, and who decided that?".

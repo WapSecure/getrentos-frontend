@@ -83,7 +83,7 @@ export const PropertyCard = ({
   const occupancyPct =
     property.totalUnits > 0 ? Math.round((property.occupiedUnits / property.totalUnits) * 100) : 0;
   // Cover images are presigned MinIO URLs, so they can expire or fail to load
-  // (e.g. a long-open tab) — fall back to the placeholder rather than a broken
+  // (e.g. a long-open tab): fall back to the placeholder rather than a broken
   // image icon.
   const [coverFailed, setCoverFailed] = useState(false);
   const showCover = Boolean(property.coverImage) && !coverFailed;

@@ -11,7 +11,7 @@ interface Props {
 const PLOT_HEIGHT = 96;
 
 /**
- * Monthly rent collected — magnitude per discrete period, so bars rather than a
+ * Monthly rent collected: magnitude per discrete period, so bars rather than a
  * line. One series, so no legend: the section heading names it.
  *
  * Only the peak is labelled by default; tapping a bar reveals that month's

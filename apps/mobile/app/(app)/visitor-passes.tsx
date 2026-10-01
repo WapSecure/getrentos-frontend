@@ -267,8 +267,8 @@ export default function ResidentVisitorPasses() {
 /**
  * Collects why a visitor was refused.
  *
- * The reason is optional — somebody declining a visitor should not have to
- * justify it to reach the button — but when it is given the guard reads it out
+ * The reason is optional: somebody declining a visitor should not have to
+ * justify it to reach the button: but when it is given the guard reads it out
  * loud, so it is framed as something to say to the person at the barrier rather
  * than as a note for the record.
  */
@@ -439,7 +439,7 @@ function PassIssuedSheet({
       {pass ? (
         <View style={{ alignItems: 'center', gap: spacing.md }}>
           <Text variant="body" color="mutedForeground" center>
-            For {pass.visitorName} — {pass.unitLabel}
+            For {pass.visitorName}: {pass.unitLabel}
           </Text>
           <Image
             source={{ uri: pass.qrDataUrl }}

@@ -64,7 +64,7 @@ export const HowItWorks = () => (
       <SectionHeading
         badge="END-TO-END FLOW"
         title="From search to signature, one continuous loop."
-        description="Every transaction passes through eight stages — trust built at every handoff."
+        description="Every transaction passes through eight stages: trust built at every handoff."
       />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {steps.map((step) => (

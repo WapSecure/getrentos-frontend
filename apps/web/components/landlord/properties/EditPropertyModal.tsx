@@ -27,7 +27,7 @@ type Photo = {
   file?: File;
 };
 
-/** Cover first, then the rest — mirrors how the API orders `galleryImageKeys`. */
+/** Cover first, then the rest: mirrors how the API orders `galleryImageKeys`. */
 const photosFromProperty = (property: Property): Photo[] => {
   const keys = property.galleryImageKeys ?? [];
   const urls = property.galleryImages ?? [];

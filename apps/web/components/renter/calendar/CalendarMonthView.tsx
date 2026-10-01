@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  format,
-  isToday,
-  isSameMonth,
-  isSameDay,
-} from 'date-fns';
-import { motion } from 'framer-motion';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isToday, isSameDay } from 'date-fns';
 import type { CalendarEvent } from '@/types/calendar';
 
 interface CalendarMonthViewProps {

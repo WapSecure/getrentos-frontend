@@ -107,7 +107,7 @@ export const ROLES = {
   ESTATE: {
     id: 'estate',
     name: 'Estate Manager',
-    description: 'Manage a gated community — households, dues, and access.',
+    description: 'Manage a gated community: households, dues, and access.',
     icon: 'Briefcase',
     requiresVerification: ['identity'],
     canAddLater: true,
@@ -231,7 +231,7 @@ export const ROUTES = {
   /** The estate's do-not-admit list, screened at every way in. */
   ESTATE_WATCHLIST: '/estate/watchlist',
   /**
-   * Standing authorisations for people who keep arriving — a cleaner on
+   * Standing authorisations for people who keep arriving: a cleaner on
    * Tuesdays, a contractor on site for six weeks. Enterprise-gated.
    */
   ESTATE_CONTRACTORS: '/estate/contractors',
@@ -244,7 +244,7 @@ export const ROUTES = {
    */
   ESTATE_EMERGENCY: '/estate/emergency',
   /**
-   * How long visits run, and who never left. Enterprise — the only gate feature
+   * How long visits run, and who never left. Enterprise: the only gate feature
    * whose absence makes an estate slower rather than unsafe, which is what makes
    * it the one that is paid for.
    */
@@ -255,7 +255,7 @@ export const ROUTES = {
    *
    * Enterprise like dwell, and for the same reason: an estate without it makes a
    * slower decision rather than an unsafe one. The GUARD's scan is deliberately
-   * not gated — see `docs/estate-gate-programme.md` — so this is the office's
+   * not gated: see `docs/estate-gate-programme.md`: so this is the office's
    * screen, not the checkpoint's.
    */
   ESTATE_PATROL: '/estate/patrol',
@@ -316,7 +316,6 @@ export const ROUTES = {
   RENTER_VERIFICATION: '/renter/verification',
   RENTER_TRUST_SCORE: '/renter/trust-score',
   RENTER_CREDIT_REPORT: '/renter/credit-report',
-  RENTER_USSD_ACCESS: '/renter/ussd-access',
   RENTER_CALENDAR: '/renter/calendar',
   RENTER_ROOMMATES: '/renter/roommates',
   RENTER_NOTIFICATIONS: '/renter/notifications',

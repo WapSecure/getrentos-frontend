@@ -21,10 +21,8 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldEllipsis,
-  Smartphone,
-  Sparkles,
+  BadgeCheck,
   Star,
-  TrendingUp,
   UserRound,
   Users,
   Wallet,
@@ -109,13 +107,6 @@ export default function Account() {
       onPress: go('/(app)/financing'),
     },
     {
-      key: 'credit',
-      label: 'Credit reporting',
-      description: 'Turn on-time rent into credit history',
-      icon: TrendingUp,
-      onPress: go('/(app)/credit-reporting'),
-    },
-    {
       key: 'roommates',
       label: 'Roommates',
       description: 'Split rent and shared expenses',
@@ -137,7 +128,7 @@ export default function Account() {
       key: 'trust',
       label: 'Trust score',
       description: 'How landlords see you',
-      icon: Sparkles,
+      icon: BadgeCheck,
       value: profile?.trustScore != null ? `${profile.trustScore} / 100` : undefined,
       onPress: go('/(app)/trust-score'),
     },
@@ -210,13 +201,6 @@ export default function Account() {
       icon: MessageCircle,
       onPress: go('/(app)/whatsapp-settings'),
     },
-    {
-      key: 'ussd',
-      label: 'Dial-in access',
-      description: 'Use GetRentos with no data',
-      icon: Smartphone,
-      onPress: go('/(app)/ussd'),
-    },
   ];
 
   const help: SettingsItem[] = [
@@ -288,7 +272,7 @@ export default function Account() {
             <View style={{ flex: 1 }}>
               <Text variant="bodyStrong">Verify your identity</Text>
               <Text variant="caption" color="mutedForeground">
-                Unlocks applications and offers — about two minutes
+                Unlocks applications and offers: about two minutes
               </Text>
             </View>
             <ChevronRight size={18} color={colors.warning} />

@@ -185,7 +185,7 @@ export default function RenterHome() {
                 Verify your identity
               </Text>
               <Text variant="caption" color="mutedForeground">
-                Unlocks applications and offers — takes two minutes
+                Unlocks applications and offers: takes two minutes
               </Text>
             </View>
             <ChevronRight size={18} color={colors.warning} />
@@ -337,7 +337,7 @@ export default function RenterHome() {
         ) : (
           <Card elevated>
             <Text variant="callout" color="mutedForeground">
-              No listings available right now — check back soon.
+              No listings available right now: check back soon.
             </Text>
           </Card>
         )}

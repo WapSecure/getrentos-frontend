@@ -7,7 +7,7 @@ const PAD_HEIGHT = 180;
 
 /**
  * A minimal but real signature capture: freehand strokes drawn as SVG paths,
- * rasterized to a PNG data URI via react-native-svg's native `toDataURL` —
+ * rasterized to a PNG data URI via react-native-svg's native `toDataURL`:
  * no extra native dependency needed for the capture step.
  */
 export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) => void }) {
@@ -23,7 +23,7 @@ export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) 
   };
 
   // A lazy state initializer keeps this instance stable across renders. The
-  // handlers only ever touch state via functional updaters — never a ref —
+  // handlers only ever touch state via functional updaters: never a ref:
   // so nothing here reads a value during render.
   const [panResponder] = useState(() =>
     PanResponder.create({
@@ -54,7 +54,7 @@ export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) 
     onChange(null);
   };
 
-  // Capture only after a completed stroke has actually committed to the SVG —
+  // Capture only after a completed stroke has actually committed to the SVG:
   // calling toDataURL synchronously on release would rasterize the previous
   // frame, since the state update hasn't painted yet.
   useEffect(() => {

@@ -61,7 +61,7 @@ function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDat
       qc.invalidateQueries({ queryKey: ['shortlets', 'availability', listing.id] });
       toast.show(
         booking.status === 'CONFIRMED'
-          ? 'Booked — now secure it with payment.'
+          ? 'Booked: now secure it with payment.'
           : 'Request sent to the host.',
         'success'
       );
@@ -177,7 +177,7 @@ function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDat
         />
         <Text variant="caption" color="mutedForeground" center>
           {listing.instantBooking
-            ? 'Confirmed straight away. You pay next — held by GetRentos until you check in.'
+            ? 'Confirmed straight away. You pay next: held by GetRentos until you check in.'
             : "The host confirms first. You won't pay anything until they accept."}
         </Text>
       </View>

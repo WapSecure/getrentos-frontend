@@ -24,7 +24,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
  * Prefixed `gate-` for the same reason `gate-deliveries` is: route groups don't
  * contribute a URL segment, so a group screen also answers on its bare path, and
  * Expo Router's generated route union would collapse a clash silently. There is
- * no top-level `patrol.tsx` today — the prefix is what keeps it that way.
+ * no top-level `patrol.tsx` today: the prefix is what keeps it that way.
  *
  * One field and one button, because it is used at two in the morning by somebody
  * holding a phone in one hand. The code is printed at the checkpoint, so the
@@ -41,7 +41,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
  * 2. A scan queued offline carries the moment it HAPPENED, not the moment it was
  *    sent. A scan taken inside the window and typed up after the connection came
  *    back must still count as inside the window, or the estate is told nobody
- *    walked a patrol somebody did walk — which is the one error this feature
+ *    walked a patrol somebody did walk: which is the one error this feature
  *    exists to prevent.
  */
 export default function GatemanPatrol() {
@@ -80,7 +80,7 @@ export default function GatemanPatrol() {
       });
       setResult(null);
       setCode('');
-      toast.show('No connection — the scan is saved and will be sent when it returns.', 'info');
+      toast.show('No connection: the scan is saved and will be sent when it returns.', 'info');
     },
   });
 
@@ -149,7 +149,7 @@ export default function GatemanPatrol() {
         ) : result ? (
           // Rendered as the server wrote it, never interpreted. One wording
           // covers an unknown code, a retired checkpoint, and a checkpoint that
-          // is not on a round tonight — so this screen cannot be used to work out
+          // is not on a round tonight: so this screen cannot be used to work out
           // which checkpoints exist here.
           <Card>
             <View style={{ gap: spacing.sm }}>
@@ -183,7 +183,7 @@ export default function GatemanPatrol() {
 
         <Text variant="caption" color="mutedForeground">
           A scan records that you reached this checkpoint. If the code is refused, tell the office
-          rather than trying another — the checkpoint may not be on tonight&apos;s round.
+          rather than trying another: the checkpoint may not be on tonight&apos;s round.
         </Text>
       </View>
     </Screen>

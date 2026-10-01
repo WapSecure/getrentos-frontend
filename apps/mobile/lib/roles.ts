@@ -68,18 +68,20 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
   'landlord',
   'gateman',
   'owner',
+  'realtor',
+  'estate',
 ];
 
 /**
  * The portal the app should actually open: the highest-priority portal the user
  * holds that is implemented.
  *
- * `primaryPortal` answers "who is this?" — but routing on it strands a user
+ * `primaryPortal` answers "who is this?": but routing on it strands a user
  * whose most senior role has no screens yet, even when a lower-ranked role of
  * theirs is fully built. An AGENT who also manages an estate, or a REALTOR who
  * also guards a gate, used to land on the holding screen with no way forward.
  *
- * Returns `null` only when nothing they hold is built — the one case that
+ * Returns `null` only when nothing they hold is built: the one case that
  * should show the holding screen.
  */
 export function usablePortal(roles: BackendRole[], preferred?: Portal | null): Portal | null {
@@ -185,7 +187,7 @@ export const SIGNUP_ROLES: SignupRole[] = [
   {
     id: 'estate',
     name: 'Estate manager',
-    tagline: 'Manage a gated community — households, dues, and access.',
+    tagline: 'Manage a gated community: households, dues, and access.',
     icon: 'Briefcase',
     requires: ['identity'],
   },

@@ -12,7 +12,7 @@ import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 
-// recharts is heavy — load it only when the reports page mounts.
+// recharts is heavy: load it only when the reports page mounts.
 const PlatformRevenueChart = dynamic(
   () =>
     import('@/components/admin/reports/PlatformRevenueChart').then((m) => m.PlatformRevenueChart),

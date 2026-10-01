@@ -517,7 +517,7 @@ export function HomeManagementWorkOrderQueue({
     ? 'Resolution note'
     : 'Cancellation reason';
   // Invoicing reconciles the vendor's bill against the work order's approved
-  // cost, and this work order never had one approved — so the cost has to be
+  // cost, and this work order never had one approved: so the cost has to be
   // captured here or the job can never be paid.
   const lifecycleCostNeeded = Boolean(
     isResolvingLifecycleWorkOrder && lifecycleDialog?.workOrder.approvedCost === null

@@ -1,1 +1,1 @@
-export type TourModalMode = 'tour' | 'booking' | 'confirmed' | 'call';
+export type TourModalMode = 'tour' | 'booking' | 'confirmed';

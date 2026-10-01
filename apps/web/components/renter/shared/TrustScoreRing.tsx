@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, animate } from 'framer-motion';
 
 interface TrustScoreRingProps {
   score: number;

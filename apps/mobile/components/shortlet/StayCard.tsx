@@ -8,8 +8,8 @@ import { nightsLabel } from '@/lib/stays';
 import { TrustChips } from './StayUI';
 
 /**
- * One stay in search. With dates it leads with the total the guest will pay —
- * nights, cleaning and VAT in — or says plainly why those dates don't work.
+ * One stay in search. With dates it leads with the total the guest will pay:
+ * nights, cleaning and VAT in: or says plainly why those dates don't work.
  */
 export const StayCard = memo(function StayCard({
   item,

@@ -187,7 +187,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
 
                   {views.daily.length > 0 && (
                     <div>
-                      <p className="mb-2 text-sm font-medium">Views — last 30 days</p>
+                      <p className="mb-2 text-sm font-medium">Views: last 30 days</p>
                       <div className="flex h-28 items-end gap-1 rounded-lg border border-border p-3">
                         {views.daily.map((d) => (
                           <div

@@ -205,7 +205,8 @@ export function PaymentsQueue() {
           description: `${naira(pendingAction.payment.amount)} for ${pendingAction.payment.propertyTitle} will be released to the landlord payout flow. This action cannot be undone here.`,
           label: 'Release funds',
           promptLabel: 'Release reason',
-          promptPlaceholder: 'Why these funds can be settled now (checked with the renter, no dispute)…',
+          promptPlaceholder:
+            'Why these funds can be settled now (checked with the renter, no dispute)…',
         },
         flag: {
           title: 'Flag payment for review?',
@@ -219,13 +220,14 @@ export function PaymentsQueue() {
           description: `The review hold on the payment for ${pendingAction.payment.propertyTitle} will be removed. This does not release the funds automatically.`,
           label: 'Clear review',
           promptLabel: 'Clearing reason',
-          promptPlaceholder: 'Why the review hold can come off (e.g. the rent transfer was confirmed)…',
+          promptPlaceholder:
+            'Why the review hold can come off (e.g. the rent transfer was confirmed)…',
         },
       }[pendingAction.type]
     : null;
   /**
    * A reason is optional when opening a review and required when closing one or
-   * releasing funds — the two actions that hand a payment back to (or past) the
+   * releasing funds: the two actions that hand a payment back to (or past) the
    * automatic settlement path.
    */
   const promptRequired = pendingAction !== null && pendingAction.type !== 'flag';
@@ -716,7 +718,7 @@ export function PayoutAccountsQueue() {
     resource: 'payout-accounts',
     eyebrow: 'Payout Accounts',
     title: 'Landlord payout accounts',
-    description: 'Disbursement readiness — who can actually be paid out.',
+    description: 'Disbursement readiness: who can actually be paid out.',
     icon: Landmark,
     filters: [{ key: 'verified', label: 'Verified', options: verifiedFilterOptions }],
     listFn: (params) => adminRentFinanceService.listPayoutAccounts(params),

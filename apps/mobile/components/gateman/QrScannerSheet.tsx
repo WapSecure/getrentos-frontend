@@ -7,8 +7,8 @@ import { Sheet } from '@/components/Sheet';
 import { haptics } from '@/lib/haptics';
 
 /**
- * A visitor's QR payload is the raw 6-digit PIN — the API builds it with
- * `QRCode.toDataURL(pin)` — so a scan is the very same secret the keypad would
+ * A visitor's QR payload is the raw 6-digit PIN: the API builds it with
+ * `QRCode.toDataURL(pin)`: so a scan is the very same secret the keypad would
  * have collected. This is convenience only, not a second credential.
  *
  * Digits are extracted rather than read verbatim so a wrapped payload (a URL or
@@ -29,7 +29,7 @@ export interface QrScannerSheetProps {
 /**
  * Full-screen-ish QR scanner for the gate. Mount it with a changing `key` (as
  * the check-in screen does) so every open starts with a fresh camera and a
- * cleared latch — `react-hooks/set-state-in-effect` forbids resetting that in an
+ * cleared latch: `react-hooks/set-state-in-effect` forbids resetting that in an
  * effect here.
  */
 export function QrScannerSheet({ open, onClose, onScan }: QrScannerSheetProps) {

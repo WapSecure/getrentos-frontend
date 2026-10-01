@@ -35,8 +35,8 @@ export const SignLeaseModal = ({ lease, onClose, onSign, isPending }: SignLeaseM
               Sign lease
             </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
-              {lease.propertyName} — {lease.unitName}, tenant {lease.tenantName}. Draw your
-              signature below to countersign as landlord.
+              {lease.propertyName}: {lease.unitName}, tenant {lease.tenantName}. Draw your signature
+              below to countersign as landlord.
             </DialogDescription>
 
             <div className="mt-6">

@@ -33,7 +33,7 @@ function OAuthCallbackContent() {
   const openSession = (accessToken: string, me: MeResponse) => {
     const primaryRoleId = BACKEND_ROLE_TO_ID[me.roles[0]] || 'renter';
     // Session-only by default (refresh token is an httpOnly session cookie)
-    // — consistent with an unchecked "Remember me" checkbox.
+    //: consistent with an unchecked "Remember me" checkbox.
     saveAuthSession(
       {
         accessToken,

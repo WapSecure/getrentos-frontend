@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { CalendarCheck, PhoneCall, Video } from 'lucide-react';
+import { CalendarCheck, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
-import { VideoCallSimulator } from './VideoCallSimulator';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { DateTimeField, isFutureDateTime } from '@/components/shared/forms/DateTimeField';
@@ -66,7 +65,6 @@ export const VirtualTourViewerModal = ({
             {mode === 'tour' && (videoTourUrl ? 'Walkthrough video' : 'No video tour yet')}
             {mode === 'booking' && 'Book a live video viewing'}
             {mode === 'confirmed' && 'Viewing requested'}
-            {mode === 'call' && 'Video viewing demo'}
           </DialogDescription>
         </div>
 
@@ -150,25 +148,15 @@ export const VirtualTourViewerModal = ({
                   Viewing request sent for {formattedRequest}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {host} will confirm your requested time — you&apos;ll see it in your viewing
+                  {host} will confirm your requested time: you&apos;ll see it in your viewing
                   requests once confirmed.
                 </p>
               </div>
             </div>
 
-            <Button variant="primary" fullWidth className="gap-2" onClick={() => setMode('call')}>
-              <PhoneCall className="w-4 h-4" />
-              Preview the Video Viewing
-            </Button>
             <Button variant="ghost" fullWidth onClick={() => setMode('tour')}>
               Back to Video Tour
             </Button>
-          </div>
-        )}
-
-        {mode === 'call' && (
-          <div className="p-4">
-            <VideoCallSimulator hostName={host} onEndDemo={() => setMode('confirmed')} />
           </div>
         )}
       </DialogContent>

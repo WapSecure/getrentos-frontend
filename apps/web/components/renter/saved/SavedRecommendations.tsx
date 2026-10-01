@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronRight, MapPin, Bed, Bath } from 'lucide-react';
+import { BadgeCheck, ChevronRight, MapPin, Bed, Bath } from 'lucide-react';
 import Link from 'next/link';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -25,7 +25,7 @@ export const SavedRecommendations = () => {
       className="overflow-hidden rounded-xl border border-border bg-card"
     >
       <div className="flex items-center gap-2 border-b border-border p-3">
-        <Sparkles className="h-4 w-4 text-primary" />
+        <BadgeCheck className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground">Recommendations</h3>
       </div>
 

@@ -30,7 +30,7 @@ export default function LandlordEvictionsPage() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: landlordKeys.evictions });
 
   // Every lifecycle transition is validated server-side (wrong state, terminal case, …),
-  // so a rejected action has to be shown — otherwise the button just looks dead.
+  // so a rejected action has to be shown: otherwise the button just looks dead.
   const clearActionError = () => setActionError(null);
   const reportActionError = (error: unknown) =>
     setActionError(

@@ -67,12 +67,12 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   sale: {
     title: 'Homes for sale',
-    body: 'Make an offer once you sign in — GetRentos holds your payment until the sale completes.',
+    body: 'Make an offer once you sign in: GetRentos holds your payment until the sale completes.',
     search: 'Search area, estate or title',
   },
   shortlet: {
     title: 'Shortlets',
-    body: 'Furnished short stays from verified hosts — GetRentos holds your payment until you arrive.',
+    body: 'Furnished short stays from verified hosts: GetRentos holds your payment until you arrive.',
     search: 'Search area or city',
   },
   land: {
@@ -715,7 +715,7 @@ function EstatesDirectory({
 
 /* ------------------------------- join bar ------------------------------- */
 
-/** The one thing browsing can't do — said plainly, not as a paywall. */
+/** The one thing browsing can't do: said plainly, not as a paywall. */
 function JoinBar() {
   const { colors, spacing, radius, shadows } = useTheme();
   const insets = useSafeAreaInsets();

@@ -311,7 +311,7 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                 actions.request({
                   title: 'Suspend this estate?',
                   description:
-                    'The manager and every gate-staff account will immediately lose access to every estate action — residents can still pay dues and report issues. Use this for fraud, non-payment, or a Terms-of-Service violation.',
+                    'The manager and every gate-staff account will immediately lose access to every estate action: residents can still pay dues and report issues. Use this for fraud, non-payment, or a Terms-of-Service violation.',
                   label: 'Suspend',
                   run: (reason) => unwrap(adminEstateService.archiveEstate(detail.id, reason)),
                 })

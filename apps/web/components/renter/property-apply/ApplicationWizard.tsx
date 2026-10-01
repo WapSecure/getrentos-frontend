@@ -113,7 +113,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
     if (stepIndex === 0) return data.fullName.trim() && data.email.trim() && data.phone.trim();
     // Employer is `@IsOptional()` on the API's SubmitApplicationDto, and this
     // same step offers "Student" as an employment status. Requiring it here
-    // hard-blocked anyone without an employer — they had to invent one — with
+    // hard-blocked anyone without an employer: they had to invent one: with
     // Continue disabled and no explanation of what was missing.
     if (stepIndex === 1) return data.monthlyIncome.trim();
     if (stepIndex === 2) return data.documents.filter((d) => d.required).every((d) => d.uploaded);

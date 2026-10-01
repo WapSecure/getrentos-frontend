@@ -25,7 +25,7 @@ import type { TierGrant, TierGrantState } from '@/types/trust';
 type StateFilter = 'all' | TierGrantState;
 
 const PAGE_SIZE = 12;
-/** Mirrors the server DTO floor — a grant moves money, so "why" is mandatory. */
+/** Mirrors the server DTO floor: a grant moves money, so "why" is mandatory. */
 const MIN_REASON_LENGTH = 10;
 
 const STATE_OPTIONS: { value: StateFilter; label: string }[] = [
@@ -47,7 +47,7 @@ const STATE_META: Record<TierGrantState, { label: string; variant: BadgeVariant 
  * A grant is the backoffice answer for a host who cannot pass the automated bank
  * name enquiry (offline statement, unlisted bank). It confers the SAME
  * capability as a passing bank check, so every grant requires a reason, is
- * audited, and can be withdrawn — a revoked grant drops the user back to the
+ * audited, and can be withdrawn: a revoked grant drops the user back to the
  * tier their other evidence supports.
  */
 export default function TierGrantsPage() {
@@ -124,7 +124,7 @@ export default function TierGrantsPage() {
       return;
     }
     if (reason.trim().length < MIN_REASON_LENGTH) {
-      setFormError(`Give a reason of at least ${MIN_REASON_LENGTH} characters — it is audited.`);
+      setFormError(`Give a reason of at least ${MIN_REASON_LENGTH} characters: it is audited.`);
       return;
     }
     setGranted(null);
@@ -171,7 +171,7 @@ export default function TierGrantsPage() {
                 className="mb-1 block text-xs font-medium text-muted-foreground"
                 htmlFor="grant-reason"
               >
-                Reason (audited — required)
+                Reason (audited: required)
               </label>
               <Textarea
                 id="grant-reason"
@@ -201,7 +201,7 @@ export default function TierGrantsPage() {
           {granted && !formError && (
             <p className="mt-3 flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
               <BadgeCheck className="h-4 w-4" />
-              Grant recorded for {granted.userEmail ?? granted.userId} — they now hold trust tier 3.
+              Grant recorded for {granted.userEmail ?? granted.userId}: they now hold trust tier 3.
             </p>
           )}
 

@@ -226,7 +226,7 @@ function PaymentRow({
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: spacing.sm }}>
           <AlertTriangle size={13} color={colors.warning} />
           <Text variant="caption" color="warning">
-            Disputed — under review
+            Disputed: under review
           </Text>
         </View>
       ) : disputable ? (

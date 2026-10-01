@@ -21,7 +21,7 @@ describe('onboarding seen flag', () => {
   });
 
   it('marking it seen in one screen updates the root router too', async () => {
-    // Two independent callers — the onboarding screen and the root layout.
+    // Two independent callers: the onboarding screen and the root layout.
     const screen = await renderHook(() => useOnboardingSeen());
     const root = await renderHook(() => useOnboardingSeen());
     await waitFor(() => expect(root.result.current.seen).toBe(false));

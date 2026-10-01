@@ -98,7 +98,7 @@ export default function LandlordLeasesPage() {
       setToast({
         message:
           updated.status === 'signed'
-            ? 'Lease fully executed — both parties have signed.'
+            ? 'Lease fully executed: both parties have signed.'
             : 'Your signature was recorded. Waiting on the tenant.',
         variant: 'success',
       });

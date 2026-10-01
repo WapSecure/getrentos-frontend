@@ -120,7 +120,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                   <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-medium text-red-700 dark:text-red-400">
-                      Payment on hold — dispute open
+                      Payment on hold: dispute open
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-300 mt-0.5">
                       {transaction.disputeReason ||
@@ -214,7 +214,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                 <Lock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-700 dark:text-blue-300">
                   The money you pay is held safely by GetRentos and only paid to the owner once all
-                  verification conditions are met — protecting both you and the seller.
+                  verification conditions are met: protecting both you and the seller.
                 </p>
               </div>
 

@@ -42,7 +42,7 @@ export function ShortletOpenDepositClaimDialog({
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const open = useMutation({
-    // Evidence stays local until the host confirms — they can preview/zoom/rotate
+    // Evidence stays local until the host confirms: they can preview/zoom/rotate
     // each photo first, and nothing is uploaded to storage until "File claim".
     mutationFn: async () => {
       const keys: string[] = [];
@@ -113,7 +113,7 @@ export function ShortletOpenDepositClaimDialog({
               accept="image/*"
               multiple
               label=""
-              hint="Preview each photo before filing — nothing is uploaded until you confirm."
+              hint="Preview each photo before filing: nothing is uploaded until you confirm."
             />
           </div>
           <div className="flex justify-end gap-2 pt-1">

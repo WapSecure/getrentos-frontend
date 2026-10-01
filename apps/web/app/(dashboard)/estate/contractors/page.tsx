@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, KeyRound, Plus, UserCheck } from 'lucide-react';
 import { Button, EmptyState, Pagination } from '@getrentos/ui';
@@ -44,7 +45,7 @@ const statusTone: Record<ContractorPassStatus, string> = {
  *
  * Named "contractors" in the nav because that is what an estate calls them, but
  * the list is anybody who comes back: a cleaner, a driver, a tutor. What the page
- * has to make clear is the thing that is easy to get wrong — this is permission
+ * has to make clear is the thing that is easy to get wrong: this is permission
  * to keep arriving, not a visit. Each arrival still appears as its own visitor
  * pass, which is why the visit count here is the number worth looking at.
  */
@@ -85,7 +86,7 @@ export default function EstateContractorPassesPage() {
       invalidate();
       setPage(1);
       setIsAddOpen(false);
-      // Shown once and never again — the API could not tell us this PIN a second
+      // Shown once and never again: the API could not tell us this PIN a second
       // time if we asked, which is what makes the stored hash worth having.
       setIssued(created);
     },
@@ -138,10 +139,10 @@ export default function EstateContractorPassesPage() {
       <div className="bg-card rounded-2xl border border-border p-4 mb-6">
         <p className="text-sm text-muted-foreground">
           This authorises somebody to{' '}
-          <span className="font-medium text-foreground">keep arriving</span> — a cleaner on
-          Tuesdays, a contractor on site for six weeks. They present the code below at the barrier
-          exactly like any other visitor, and every arrival is still recorded as its own visitor
-          pass, so &ldquo;who is inside?&rdquo; and check-out behave the same.
+          <span className="font-medium text-foreground">keep arriving</span>: a cleaner on Tuesdays,
+          a contractor on site for six weeks. They present the code below at the barrier exactly
+          like any other visitor, and every arrival is still recorded as its own visitor pass, so
+          &ldquo;who is inside?&rdquo; and check-out behave the same.
         </p>
         <p className="text-sm text-muted-foreground mt-2">
           A Free estate keeps one-off visitor passes, including everything the watch list does. An
@@ -156,7 +157,7 @@ export default function EstateContractorPassesPage() {
             <div>
               <div className="flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-primary" />
-                <p className="font-medium text-foreground">Code for {issued.name} — shown once</p>
+                <p className="font-medium text-foreground">Code for {issued.name}: shown once</p>
               </div>
               <p className="font-mono text-3xl tracking-[0.3em] text-foreground mt-3">
                 {issued.pin}
@@ -167,7 +168,14 @@ export default function EstateContractorPassesPage() {
               </p>
               <p className="text-xs text-muted-foreground mt-1">{issued.scheduleLabel}</p>
             </div>
-            <img src={issued.qrDataUrl} alt="Gate code as a QR" className="w-28 h-28 rounded-lg" />
+            <Image
+              src={issued.qrDataUrl}
+              alt="Gate code as a QR"
+              width={112}
+              height={112}
+              unoptimized
+              className="w-28 h-28 rounded-lg"
+            />
           </div>
           <div className="flex gap-2 mt-4">
             <Button

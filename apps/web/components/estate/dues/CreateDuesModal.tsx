@@ -184,7 +184,7 @@ export const CreateDuesModal = ({
                             checked={selectedHouseholdIds.includes(household.id)}
                             onCheckedChange={() => toggleHousehold(household.id)}
                           />
-                          {household.unitLabel} — {household.residentName}
+                          {household.unitLabel}: {household.residentName}
                         </label>
                       ))
                     )}

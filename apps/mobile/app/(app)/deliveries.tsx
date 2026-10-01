@@ -36,7 +36,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
  * resident whose name was used has no way to show it was never handed to them.
  * So the code leads the screen, not the log.
  *
- * Every label is written server-side and rendered as it arrives — the difference
+ * Every label is written server-side and rendered as it arrives: the difference
  * between an expiry and a withdrawal is decided once, in `delivery.util.ts`, so
  * this screen cannot contradict what the guard's own refusal says.
  */

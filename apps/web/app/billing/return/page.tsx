@@ -11,7 +11,7 @@ import { useProCheckout } from '@/hooks/useProCheckout';
 /**
  * Where the payment gateway returns the customer.
  *
- * The result is confirmed server-side against the gateway — the query string is
+ * The result is confirmed server-side against the gateway: the query string is
  * only used to find the reference, never as proof of payment.
  */
 function BillingReturnContent() {
@@ -74,7 +74,7 @@ function BillingReturnContent() {
           <h1 className="mt-4 text-xl font-semibold text-foreground">You&apos;re on Pro</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {view.detail?.trialEndsAt
-              ? `Your free trial runs until ${new Date(view.detail.trialEndsAt).toLocaleDateString()}. We'll only charge you after that — cancel any time before then.`
+              ? `Your free trial runs until ${new Date(view.detail.trialEndsAt).toLocaleDateString()}. We'll only charge you after that: cancel any time before then.`
               : 'Your Pro plan is active.'}
           </p>
           <Link
@@ -93,7 +93,7 @@ function BillingReturnContent() {
             We couldn&apos;t confirm that payment
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {view.message} If you were charged, your plan will be activated automatically — you
+            {view.message} If you were charged, your plan will be activated automatically: you
             don&apos;t need to pay again.
           </p>
           <Link

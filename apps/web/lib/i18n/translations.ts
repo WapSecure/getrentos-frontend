@@ -24,7 +24,6 @@ export type TranslationKey =
   | 'sidebar.roommates'
   | 'sidebar.trust_score'
   | 'sidebar.credit_report'
-  | 'sidebar.ussd_access'
   | 'sidebar.notifications'
   | 'sidebar.calendar'
   | 'sidebar.settings'
@@ -118,7 +117,6 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.roommates': 'Roommates',
     'sidebar.trust_score': 'Trust Score',
     'sidebar.credit_report': 'Credit Report',
-    'sidebar.ussd_access': 'USSD Access',
     'sidebar.notifications': 'Notifications',
     'sidebar.calendar': 'Calendar',
     'sidebar.settings': 'Settings',
@@ -211,7 +209,6 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.roommates': 'House People',
     'sidebar.trust_score': 'Trust Score',
     'sidebar.credit_report': 'Credit Report',
-    'sidebar.ussd_access': 'USSD Code',
     'sidebar.notifications': 'Notification Dem',
     'sidebar.calendar': 'Calendar',
     'sidebar.settings': 'Settings',

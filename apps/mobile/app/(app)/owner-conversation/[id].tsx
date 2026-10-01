@@ -77,7 +77,7 @@ export default function OwnerConversation() {
       const error =
         err instanceof ApiError
           ? err.isNetwork
-            ? 'Not sent — you’re offline.'
+            ? 'Not sent: you’re offline.'
             : err.message
           : 'Not sent.';
       setPending((list) => list.map((x) => (x.key === p.key ? { ...x, error } : x)));

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, CheckCircle, AlertCircle, Clock, CreditCard } from 'lucide-react';
+import { Bell, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 
 interface Notification {
   id: string;

@@ -11,7 +11,7 @@ import { renterService } from '@/services/renterService';
 import { CreditSummaryView } from '@/components/shared/credit/CreditSummaryView';
 
 /**
- * Lets an applicant put a verified credit check in front of their landlord — on
+ * Lets an applicant put a verified credit check in front of their landlord: on
  * their own terms. Nothing is shown at all until a credit provider is connected,
  * so the screen never advertises something that can't be done.
  */

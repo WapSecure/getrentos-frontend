@@ -264,7 +264,7 @@ export default function LandlordPropertiesPage() {
             We couldn&apos;t load your properties
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Your portfolio is safe — this was a connection problem. Try again.
+            Your portfolio is safe: this was a connection problem. Try again.
           </p>
           <Button variant="primary" className="mt-6" onClick={() => refetchProperties()}>
             Try again

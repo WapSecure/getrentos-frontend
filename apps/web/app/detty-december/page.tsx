@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     'Verified short stays for Detty December. GetRentos holds your payment until you arrive, shows the all-in price up front, and refunds you if the place is not as described.',
   alternates: { canonical: '/detty-december' },
   openGraph: {
-    title: 'Detty December stays — booked safely on GetRentos',
+    title: 'Detty December stays: booked safely on GetRentos',
     description:
       'Verified hosts, all-in prices, and your money held until you arrive. Book your December stay before the rush.',
     url: '/detty-december',

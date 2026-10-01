@@ -33,7 +33,7 @@ const formatDeadline = (value: string) =>
 
 /**
  * A lease in progress is not one thing. The tenant signs, then owes the first
- * payment into escrow, then waits for the landlord to hand over — each stage
+ * payment into escrow, then waits for the landlord to hand over: each stage
  * asks something different, so the card shows one at a time rather than
  * implying a single "sign here" step.
  */
@@ -66,7 +66,7 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
         <div>
           <h2 className="font-semibold text-foreground">{heading}</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {lease.propertyName} — {lease.unitName}
+            {lease.propertyName}: {lease.unitName}
           </p>
         </div>
       </div>
@@ -133,7 +133,7 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
       {stage === 'sent' && (
         <div className="p-3 mx-5 mt-5 rounded-lg bg-secondary text-muted-foreground text-xs">
           <Clock className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-          Read the terms, then sign. Nothing is owed until your signature is on the lease — after
+          Read the terms, then sign. Nothing is owed until your signature is on the lease: after
           that, you pay the first rent to GetRentos, which holds it while the landlord hands over.
         </div>
       )}
@@ -142,7 +142,7 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
         <>
           <div className="p-5 space-y-3 border-b border-border">
             <p className="text-sm text-muted-foreground">
-              Read the whole agreement before you sign — it is what you are agreeing to, not the
+              Read the whole agreement before you sign: it is what you are agreeing to, not the
               summary above.
             </p>
             <Button

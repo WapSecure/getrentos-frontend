@@ -28,7 +28,7 @@ import { DIMENSION_LABELS, nonScoreCodes, parseScoreCodes } from './scoreCodes';
 /**
  * The dimension.v1 score as it stood when this decision was taken, decoded from
  * the decision payload's own codes. A reviewer who can see that a rejection
- * happened at score 50 — with the financial dimension at 25/25 — reads the case
+ * happened at score 50: with the financial dimension at 25/25: reads the case
  * very differently from one who sees only the verdict.
  */
 const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
@@ -504,7 +504,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                       {isBlocking && (
                         <p className="flex items-start gap-1.5 text-xs text-orange-600 dark:text-orange-400">
                           <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                          Four-eyes: blocking decisions are confirmed by a second officer — the
+                          Four-eyes: blocking decisions are confirmed by a second officer: the
                           reviewer assigned to this case cannot be the resolver.
                         </p>
                       )}

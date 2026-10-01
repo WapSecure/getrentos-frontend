@@ -136,7 +136,7 @@ export function HouseholdEditorDialog({
   );
 }
 
-/** Corrects a due's amount — only ever offered while it's still pending/overdue. */
+/** Corrects a due's amount: only ever offered while it's still pending/overdue. */
 export function DueAmountDialog({
   due,
   onClose,

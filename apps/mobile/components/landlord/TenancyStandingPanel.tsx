@@ -6,7 +6,7 @@ import { Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { landlordApi } from '@/lib/api/landlord';
 
 /**
- * The applicant's record from past tenancies. Fetched only when opened — it
+ * The applicant's record from past tenancies. Fetched only when opened: it
  * is one request per applicant, and most landlords never expand most rows.
  * Respects the applicant's choice: when they have not shared, say so plainly
  * rather than showing empty fields that read as bad news.

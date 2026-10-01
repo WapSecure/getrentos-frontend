@@ -62,7 +62,7 @@ export const MessageThread = ({
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <MessageCircle className="w-8 h-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-gray-400">No messages yet — say hello</p>
+            <p className="text-sm text-gray-400">No messages yet: say hello</p>
           </div>
         ) : (
           messages.map((message) => {

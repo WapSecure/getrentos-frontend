@@ -110,7 +110,7 @@ export default function LandlordOverview() {
         />
       </View>
 
-      {/* Money first — it is what a landlord opens the app to check. */}
+      {/* Money first: it is what a landlord opens the app to check. */}
       <Card elevated>
         {stats.isError ? (
           <ErrorState
@@ -330,7 +330,7 @@ function StatTile({
     borderColor: colors.border,
   } as const;
 
-  // Only the tiles that lead somewhere are tappable — a chevron without a
+  // Only the tiles that lead somewhere are tappable: a chevron without a
   // target reads as a broken affordance.
   if (!onPress) return <View style={style}>{body}</View>;
 

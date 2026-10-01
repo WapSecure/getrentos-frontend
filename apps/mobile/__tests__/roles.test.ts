@@ -17,7 +17,7 @@ describe('mobile role routing', () => {
   });
 
   it('opens the highest-priority implemented portal for a multi-role user', () => {
-    expect(usablePortal(['REALTOR', 'AGENT', 'RENTER'])).toBe('agent');
+    expect(usablePortal(['REALTOR', 'AGENT', 'RENTER'])).toBe('realtor');
   });
 });
 
@@ -33,11 +33,16 @@ describe('workspace preference', () => {
     expect(open(['LANDLORD', 'PROPERTY_OWNER'], null)).toBe('landlord');
   });
 
-  it('never opens an unbuilt workspace, even if chosen', () => {
-    expect(open(['REALTOR', 'RENTER'], 'realtor')).toBe('renter');
+  it('opens the native realtor and estate-manager workspaces', () => {
+    expect(open(['REALTOR', 'RENTER'], 'realtor')).toBe('realtor');
+    expect(open(['ESTATE_MANAGER'])).toBe('estate');
   });
 
   it('lists only built workspaces, most senior first', () => {
-    expect(switchablePortals(['RENTER', 'REALTOR', 'LANDLORD'])).toEqual(['landlord', 'renter']);
+    expect(switchablePortals(['RENTER', 'REALTOR', 'LANDLORD'])).toEqual([
+      'landlord',
+      'realtor',
+      'renter',
+    ]);
   });
 });

@@ -349,7 +349,7 @@ export const VerificationCenter = ({
       setBankCode('');
       setError(null);
       invalidateVerification();
-      // Bank completion can lift the account to tier 3 — refresh the chip.
+      // Bank completion can lift the account to tier 3: refresh the chip.
       queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
     },
     onError: (reason) =>
@@ -733,7 +733,7 @@ export const VerificationCenter = ({
                 ) : (
                   <>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Code sent — in development it is printed to the backend log.
+                      Code sent: in development it is printed to the backend log.
                     </p>
                     <div className="mt-3 flex gap-2">
                       <Input
@@ -832,7 +832,7 @@ export const VerificationCenter = ({
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Account holder name (optional — compared for a match)
+                      Account holder name (optional: compared for a match)
                     </label>
                     <Input
                       value={accountName}
@@ -895,7 +895,7 @@ export const VerificationCenter = ({
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Holder name (optional — compared for a match)
+                      Holder name (optional: compared for a match)
                     </label>
                     <Input
                       value={documentHolder}
@@ -931,7 +931,7 @@ export const VerificationCenter = ({
         )}
       </div>
 
-      {/* Document path + trust score links — role-aware per mounting page */}
+      {/* Document path + trust score links: role-aware per mounting page */}
       {(documentsHref || trustScoreHref) && (
         <div className="grid gap-4 sm:grid-cols-2">
           {documentsHref && (

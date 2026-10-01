@@ -46,13 +46,15 @@ export const CalendarStats = ({ events }: CalendarStatsProps) => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      {stats.map((stat, index) => (
+      {stats.map((stat) => (
         <div key={stat.label} className={`${stat.bg} rounded-2xl p-4 border border-border`}>
           <div className="flex items-center gap-2">
             <stat.icon className={`w-4 h-4 ${stat.color}`} />
             <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
-          <p className={`text-2xl font-semibold tracking-[-0.03em] ${stat.color} mt-1`}>{stat.value}</p>
+          <p className={`text-2xl font-semibold tracking-[-0.03em] ${stat.color} mt-1`}>
+            {stat.value}
+          </p>
         </div>
       ))}
     </div>

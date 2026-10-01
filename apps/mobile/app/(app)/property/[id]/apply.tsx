@@ -264,7 +264,7 @@ export default function ApplyToRent() {
   });
 
   // Leaving mid-application (swipe back, Android back, header back on step 1)
-  // would silently throw away everything typed — ask first.
+  // would silently throw away everything typed: ask first.
   const navigation = useNavigation();
   const dirty = step > 0 || !!data.currentAddress || !!data.employer || !!data.monthlyIncome;
   useEffect(

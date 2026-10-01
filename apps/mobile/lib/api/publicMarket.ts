@@ -4,7 +4,7 @@ import type { ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
 
 /**
- * The public marketplace — what anyone can browse without an account, mirroring
+ * The public marketplace: what anyone can browse without an account, mirroring
  * the web's /rent, /buy, /shortlets, /land and /estates.
  *
  * Every call is `anonymous`: these routes are `@Public()` on the API and return
@@ -38,7 +38,7 @@ export interface MarketCard {
   period?: 'month' | 'year' | 'night';
   bedrooms?: number;
   bathrooms?: number;
-  /** Floor area in m² — rentals only. */
+  /** Floor area in m²: rentals only. */
   size?: number;
   image?: string;
   verified: boolean;
@@ -58,7 +58,7 @@ export interface MarketDetail extends MarketCard {
   amenities: string[];
   latitude?: number;
   longitude?: number;
-  /** Who is behind the listing — a name and trust signal only, never contact details. */
+  /** Who is behind the listing: a name and trust signal only, never contact details. */
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
   facts: MarketFact[];
 }
@@ -66,7 +66,7 @@ export interface MarketDetail extends MarketCard {
 export interface MarketFilters {
   /** Free text: title, address, city, state or estate name (land: also plot number). */
   search?: string;
-  /** Estate public slug — where an estate's "For rent" / "For sale" lands. */
+  /** Estate public slug: where an estate's "For rent" / "For sale" lands. */
   estate?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -90,7 +90,7 @@ export interface MarketFilters {
   roadAccess?: boolean;
 }
 
-/** Which refinements each market's API accepts — the filter sheet shows only these. */
+/** Which refinements each market's API accepts: the filter sheet shows only these. */
 export const MARKET_FILTERS: Record<MarketKind, readonly (keyof MarketFilters)[]> = {
   rent: [
     'minPrice',
@@ -125,7 +125,7 @@ export function activeFilterCount(kind: MarketKind, f: MarketFilters): number {
   }).length;
 }
 
-/** The public web page for a listing — what the share sheet sends. */
+/** The public web page for a listing: what the share sheet sends. */
 export function marketWebPath(kind: MarketKind, id: string): string {
   const base = { rent: '/rent', sale: '/buy', shortlet: '/shortlets', land: '/land' }[kind];
   return `${base}/${encodeURIComponent(id)}`;
@@ -188,7 +188,7 @@ interface SaleDto {
 
 export interface EstateDirectoryEntry {
   estateId: string;
-  /** Present only when the estate has a public storefront — the filter needs it. */
+  /** Present only when the estate has a public storefront: the filter needs it. */
   slug?: string;
   name: string;
   city: string;
@@ -428,7 +428,7 @@ export const publicMarketApi = {
           longitude: s.longitude,
           facts: [
             ...fact('Property type', humanise(s.propertyType)),
-            ...fact('Payment', 'Protected — GetRentos holds it until the deal is done'),
+            ...fact('Payment', 'Protected: GetRentos holds it until the deal is done'),
           ],
         };
       }

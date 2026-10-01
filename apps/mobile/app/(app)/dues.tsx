@@ -54,7 +54,7 @@ export default function ResidentDues() {
   const pay = useMutation({
     mutationFn: (dueId: string) => residentApi.payDue(dueId),
     onSuccess: async (updated) => {
-      // A real gateway checkout was started — open it in an in-app browser.
+      // A real gateway checkout was started: open it in an in-app browser.
       // The webhook confirms payment server-side once the resident finishes
       // there; refetch once they close the browser to pick up the new status.
       if (updated.authorizationUrl) {

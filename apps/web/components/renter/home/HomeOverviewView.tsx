@@ -229,8 +229,8 @@ export function HomeOverviewView() {
               {lease.address}
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Your operational record for this home—repairs, lease documents, payments, and the
-              people supporting you.
+              Your operational record for this home, including repairs, lease documents, payments,
+              and the people supporting you.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

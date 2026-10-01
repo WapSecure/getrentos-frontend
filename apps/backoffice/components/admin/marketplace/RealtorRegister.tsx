@@ -92,8 +92,7 @@ export const RealtorRegister = () => {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Realtors</h1>
           <p className="mt-1 text-muted-foreground">
-            Professional register — licenses, business settings, payout readiness, deals and
-            reviews.
+            Professional register: licenses, business settings, payout readiness, deals and reviews.
           </p>
         </div>
         <Button variant="outline" onClick={handleExport} disabled={exporting}>
@@ -334,7 +333,7 @@ function RealtorCase360({
                 actions.request({
                   title: 'Suspend realtor activity?',
                   description:
-                    'Blocks new listings and client invitations immediately — independent of the account, which stays otherwise usable (e.g. as a Renter).',
+                    'Blocks new listings and client invitations immediately: independent of the account, which stays otherwise usable (e.g. as a Renter).',
                   label: 'Suspend',
                   run: (reason) =>
                     unwrap(adminMarketplaceService.suspendRealtor(detail.id, reason)),

@@ -58,7 +58,7 @@ function SubmitReviewForm({ pending, onClose }: { pending: PendingReview; onClos
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.reviewsPending });
       qc.invalidateQueries({ queryKey: ['renter', 'reviews', 'submitted'] });
-      toast.show('Thanks — your review is live.', 'success');
+      toast.show('Thanks: your review is live.', 'success');
       onClose();
     },
     onError: (err) =>

@@ -131,7 +131,7 @@ const LeadRow = ({ lead }: { lead: EstateLead }) => (
  *
  * The server scopes this to properties the estate currently holds marketing
  * rights for, so there is no client-side "should I be seeing this" logic to get
- * wrong — and the page says so, because a manager who cannot find an enquiry for
+ * wrong: and the page says so, because a manager who cannot find an enquiry for
  * a property that merely sits inside the estate deserves an explanation rather
  * than an empty list.
  */
@@ -187,8 +187,8 @@ export default function EstateLeadsPage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Enquiries</h1>
         <p className="text-muted-foreground mt-1">
-          Everyone who has responded to a property {estate?.name ?? 'this estate'} markets —
-          rentals, sales and shortlets in one place.
+          Everyone who has responded to a property {estate?.name ?? 'this estate'} markets: rentals,
+          sales and shortlets in one place.
         </p>
       </div>
 
@@ -234,7 +234,7 @@ export default function EstateLeadsPage() {
                 title={total === 0 ? 'No enquiries yet' : 'No matches'}
                 description={
                   total === 0
-                    ? 'When someone books a viewing, applies, offers or books a shortlet on a property you market, they appear here. Enquiries on properties that are simply inside the estate — and not marketed by you — stay with the owner.'
+                    ? 'When someone books a viewing, applies, offers or books a shortlet on a property you market, they appear here. Enquiries on properties that are simply inside the estate: and not marketed by you: stay with the owner.'
                     : 'No enquiry matches that search on this page.'
                 }
               />
@@ -279,7 +279,7 @@ export default function EstateLeadsPage() {
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         <p className="text-sm text-muted-foreground">
           You see enquiries for properties the owner has given you marketing rights for. A property
-          that is merely inside the estate — with no agreement — stays private to its owner, and its
+          that is merely inside the estate: with no agreement: stays private to its owner, and its
           enquiries never reach this page.
         </p>
       </div>

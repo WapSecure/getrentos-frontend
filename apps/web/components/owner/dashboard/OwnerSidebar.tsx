@@ -18,7 +18,6 @@ import {
   Settings,
   MapPinned,
   BedDouble,
-  Sparkles,
   KeyRound,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -40,7 +39,7 @@ interface NavItem {
  * Shortlets were already backend-gated in Batch 7b (their controllers allow
  * both LANDLORD and PROPERTY_OWNER, and PlanTierGuard checks the caller's
  * own subscription regardless of role) but never got the lock-icon treatment
- * on this sidebar — fixed here alongside the new Analytics gate.
+ * on this sidebar: fixed here alongside the new Analytics gate.
  */
 const PRO_GATED_ROUTES = new Set<string>([ROUTES.OWNER_ANALYTICS, ROUTES.OWNER_HOME_MANAGEMENT]);
 
@@ -70,7 +69,7 @@ export const navItems: NavItem[] = [
     icon: Building2,
   },
   { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
-  { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: Sparkles },
+  { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: BadgeCheck },
   { label: 'Verification', href: '/owner/verification', icon: ShieldCheck },
 ];
 

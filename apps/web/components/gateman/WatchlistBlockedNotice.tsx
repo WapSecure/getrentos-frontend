@@ -32,7 +32,7 @@ interface WatchlistBlockedNoticeProps {
   /** The entries that fired. Empty only when the API withheld them. */
   matches: WatchlistMatch[];
   onOverride: (reason: string) => void;
-  /** Abandons the write — the guard turns the visitor away instead. */
+  /** Abandons the write: the guard turns the visitor away instead. */
   onDefer?: () => void;
   isOverriding?: boolean;
   /** A failure of the override attempt itself, shown without losing the reason typed. */
@@ -49,7 +49,7 @@ interface WatchlistBlockedNoticeProps {
  * estate's reason, and says plainly that asking again changes nothing.
  *
  * The override is two deliberate steps rather than one button. Refusing is the
- * default — that is what the estate asked for — and admitting somebody anyway is
+ * default: that is what the estate asked for: and admitting somebody anyway is
  * a decision a guard makes on purpose, with a reason, because that reason is
  * what the estate office is told and what the audit records.
  */
@@ -72,7 +72,7 @@ export const WatchlistBlockedNotice = ({
         <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
         <div className="min-w-0 space-y-3">
           <p className="text-sm font-semibold text-foreground">
-            Do not admit — this estate&apos;s watch list
+            Do not admit: this estate&apos;s watch list
           </p>
 
           {matches.length > 0 ? (

@@ -85,7 +85,7 @@ export function ShortletOpenDisputeDialog({
           </Field>
           <Field
             label="Details"
-            hint="Be specific — include dates, amounts, and anything that helps admins decide."
+            hint="Be specific: include dates, amounts, and anything that helps admins decide."
           >
             <Textarea
               value={description}

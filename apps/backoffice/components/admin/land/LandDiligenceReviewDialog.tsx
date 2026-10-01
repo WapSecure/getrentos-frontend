@@ -142,7 +142,10 @@ export const LandDiligenceReviewDialog = ({
     () => documents.filter((document) => document.link).map(toCitedEvidence),
     [documents]
   );
-  const uncitedDocuments = useMemo(() => documents.filter((document) => !document.link), [documents]);
+  const uncitedDocuments = useMemo(
+    () => documents.filter((document) => !document.link),
+    [documents]
+  );
   /** The reviewer's own working checklist, offered when tying a document to a check. */
   const checklistOptions = checklist
     .filter((item) => item.key.trim())
@@ -333,7 +336,10 @@ export const LandDiligenceReviewDialog = ({
                                   </p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
-                                  <DocumentPreview document={document} onResolveUrl={onResolveDocumentUrl} />
+                                  <DocumentPreview
+                                    document={document}
+                                    onResolveUrl={onResolveDocumentUrl}
+                                  />
                                   {canManageDocuments && onLinkDocument && (
                                     <Button
                                       variant="outline"
@@ -579,13 +585,16 @@ const Metadata = ({ label, value }: { label: string; value: string }) => (
 
 /** `SURVEY_PLAN` reads as "Survey plan" wherever a document type is shown. */
 const humanise = (value: string) =>
-  value.replaceAll('_', ' ').toLowerCase().replace(/^\w/, (character) => character.toUpperCase());
+  value
+    .replaceAll('_', ' ')
+    .toLowerCase()
+    .replace(/^\w/, (character) => character.toUpperCase());
 
 /**
  * A cited document, as the shared evidence panel expects it.
  *
  * The panel carries the file's own provenance, so who cited it and against
- * which check is recorded in the note — that is what a later reviewer needs to
+ * which check is recorded in the note: that is what a later reviewer needs to
  * see, and it keeps one renderer for evidence across every case family.
  */
 const toCitedEvidence = (document: LandDiligenceDocument): EvidenceItem => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Key, Lock, CheckCircle, Sparkles } from 'lucide-react';
+import { Key, Lock, CheckCircle, BadgeCheck } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 
 export const ForgotPasswordLeftContent = () => {
@@ -20,7 +20,7 @@ export const ForgotPasswordLeftContent = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 mb-6">
-              <Sparkles className="w-3 h-3 text-primary" />
+              <BadgeCheck className="w-3 h-3 text-primary" />
               <span className="text-xs font-medium text-gray-700 dark:text-white/80">
                 FORGOT PASSWORD
               </span>

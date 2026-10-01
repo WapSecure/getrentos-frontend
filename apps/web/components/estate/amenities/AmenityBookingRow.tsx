@@ -29,7 +29,7 @@ export const AmenityBookingRow = ({
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
           {booking.amenityName}
-          {showHousehold ? ` — ${booking.unitLabel} (${booking.residentName})` : ''}
+          {showHousehold ? `: ${booking.unitLabel} (${booking.residentName})` : ''}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {formatDateTime(booking.startsAt)} – {formatDateTime(booking.endsAt)}

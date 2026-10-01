@@ -17,7 +17,7 @@ const steps = [
     icon: Zap,
     title: 'We pay your landlord today',
     description:
-      'The full amount is paid to GetRentos and passed on to your landlord straight away — no waiting.',
+      'The full amount is paid to GetRentos and passed on to your landlord straight away: no waiting.',
   },
   {
     icon: Clock,
@@ -113,7 +113,7 @@ export const FinancingEligibilityCard = ({
       <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-secondary/50 p-4">
         <ShieldCheck className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
-          GetRentos Flex is not a loan against your future income — it&apos;s a rent-specific
+          GetRentos Flex is not a loan against your future income: it&apos;s a rent-specific
           installment plan tied to your existing lease. Missed installments affect your Trust Score
           the same way a missed rent payment would.
         </p>

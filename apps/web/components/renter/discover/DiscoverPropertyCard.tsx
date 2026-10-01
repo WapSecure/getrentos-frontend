@@ -35,7 +35,7 @@ interface DiscoverPropertyCardProps {
 }
 
 /**
- * A listing's detail can be genuinely absent — one created without a unit has no
+ * A listing's detail can be genuinely absent: one created without a unit has no
  * bedroom or bathroom count to report, and no floor area either. Printing the
  * raw number turns "we don't know" into "0 beds", which reads as a real
  * measurement and contradicts the listing's own title ("3-bedroom apartment …

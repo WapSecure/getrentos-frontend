@@ -220,7 +220,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
           <section>
             <h4 className="text-sm font-semibold text-foreground mb-1">Payout account</h4>
             <p className="text-xs text-muted-foreground mb-3">
-              Where this vendor is paid when you pay an approved invoice — transfers run through
+              Where this vendor is paid when you pay an approved invoice: transfers run through
               Paystack.
             </p>
 
@@ -239,7 +239,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Not yet verified — save it again to resolve it against the bank.
+                    Not yet verified: save it again to resolve it against the bank.
                   </p>
                 )}
               </div>

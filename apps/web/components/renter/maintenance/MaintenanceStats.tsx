@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Wrench, Clock, UserCheck, CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Wrench, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceStatsProps {
@@ -17,8 +17,6 @@ export const MaintenanceStats = ({ requests }: MaintenanceStatsProps) => {
   const open = requests.filter((r) => !CLOSED.includes(r.status)).length;
   const resolved = requests.filter((r) => r.status === 'resolved').length;
   const urgent = requests.filter((r) => r.priority === 'urgent').length;
-  const inProgress = requests.filter((r) => r.status === 'in_progress').length;
-
   const stats = [
     {
       icon: Wrench,

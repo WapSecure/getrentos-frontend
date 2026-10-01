@@ -19,7 +19,7 @@ interface WatchlistEntryRowProps {
  *
  * Shows the contacts as they were recorded rather than claiming which of them
  * the matching runs on. Working that out here would mean reimplementing the
- * server's normalisation in the browser, and the two would drift — the list
+ * server's normalisation in the browser, and the two would drift: the list
  * would start claiming to cover somebody it no longer fires for. The API refuses
  * an entry with nothing matchable at creation, so every row here does fire.
  */
@@ -76,14 +76,14 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
         {isLifted && (
           <p className="text-xs text-muted-foreground mt-1">
             Lifted {entry.liftedAt ? formatDate(entry.liftedAt) : ''}
-            {entry.liftReason ? ` — ${entry.liftReason}` : ''}. Not enforced.
+            {entry.liftReason ? `: ${entry.liftReason}` : ''}. Not enforced.
           </p>
         )}
 
         {isExpired && (
           <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
-            Lapsed on {formatDate(entry.expiresAt!)}. Not enforced — extend it or add it again if
-            the estate still needs it.
+            Lapsed on {formatDate(entry.expiresAt!)}. Not enforced: extend it or add it again if the
+            estate still needs it.
           </p>
         )}
       </div>

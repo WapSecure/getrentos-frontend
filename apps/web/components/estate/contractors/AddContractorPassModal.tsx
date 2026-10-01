@@ -65,7 +65,7 @@ const hasFullName = (value: string) => value.trim().split(/\s+/).filter(Boolean)
  *    saying so here means the manager is told why rather than just "no".
  *
  * The Enterprise refusal is shown from the API's own message, because that
- * message names the tier — and this modal is the moment an estate finds out the
+ * message names the tier: and this modal is the moment an estate finds out the
  * feature is paid for.
  */
 export const AddContractorPassModal = ({
@@ -172,7 +172,7 @@ export const AddContractorPassModal = ({
                   Authorise a regular visitor
                 </h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  For somebody who comes back — a cleaner, a driver, a contractor on site.
+                  For somebody who comes back: a cleaner, a driver, a contractor on site.
                 </p>
               </div>
               <button onClick={handleClose} aria-label="Close" className="text-muted-foreground">
@@ -301,7 +301,7 @@ export const AddContractorPassModal = ({
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {daysOfWeek.length === 0
-                    ? 'Any day. Selecting days restricts admission to them — useful for a cleaner who only comes on Tuesdays.'
+                    ? 'Any day. Selecting days restricts admission to them: useful for a cleaner who only comes on Tuesdays.'
                     : 'They can only be admitted on the days selected.'}
                 </p>
               </div>

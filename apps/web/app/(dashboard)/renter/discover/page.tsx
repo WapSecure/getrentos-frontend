@@ -27,7 +27,7 @@ export default function DiscoverPage() {
   const router = useRouter();
   const queryFromUrl = searchParams.get('q')?.trim() ?? '';
   // Arriving from an estate microsite (`?estate=<slug>`). Carried in the filters so
-  // every listing query on this page — grid AND map — stays scoped to that estate.
+  // every listing query on this page: grid AND map: stays scoped to that estate.
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
@@ -43,7 +43,7 @@ export default function DiscoverPage() {
     propertyType: '',
     verifiedOnly: false,
   });
-  // Typed explicitly (not inferred) so `estate` stays OPTIONAL — the filter panel and
+  // Typed explicitly (not inferred) so `estate` stays OPTIONAL: the filter panel and
   // the saved-search helpers build filter objects without it, and a required key
   // would make every one of them a type error.
   const filters: {

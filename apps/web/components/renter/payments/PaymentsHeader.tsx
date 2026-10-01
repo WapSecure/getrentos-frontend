@@ -40,7 +40,7 @@ export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderPro
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                All payments are escrow-protected
+                Payments use GetRentos Payment Protection
               </p>
               <p className="text-xs text-muted-foreground">
                 Your funds are held securely until conditions are met

@@ -9,7 +9,7 @@ import type { WatchlistScreening } from '@/lib/gateman/watchlistRefusal';
  * has been attempted.
  *
  * A guard who screens first finds out before they have told a visitor they are
- * asking the household — and without a household being asked to consent to
+ * asking the household: and without a household being asked to consent to
  * somebody the estate has already decided against. That is the whole value of a
  * check they can run early, so it has to be usable before the form is finished.
  *
@@ -42,7 +42,7 @@ export function WatchlistCheckResult({ screening }: { screening: WatchlistScreen
               differently would not match. Saying so stops a guard treating this
               as a promise. */}
           <Text variant="caption" color="mutedForeground">
-            Compared exactly against what the list holds, ignoring case, spacing and word order — so
+            Compared exactly against what the list holds, ignoring case, spacing and word order: so
             a genuinely different spelling would not show up.
           </Text>
         </View>
@@ -63,7 +63,7 @@ export function WatchlistCheckResult({ screening }: { screening: WatchlistScreen
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <Eye size={16} color={colors.warning} />
         <Text variant="bodyStrong" style={{ flex: 1 }}>
-          On the estate&apos;s watch list — not refused
+          On the estate&apos;s watch list: not refused
         </Text>
       </View>
 

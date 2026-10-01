@@ -60,7 +60,7 @@ const SORTS: Record<PublicMarket, { value: string; label: string }[]> = {
 const humaniseSlug = (slug: string) =>
   slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-/** Spelled out rather than `noun + 's'` — "propertys" is not a word. */
+/** Spelled out rather than `noun + 's'`: "propertys" is not a word. */
 const NOUNS: Record<PublicMarket, { one: string; many: string }> = {
   rent: { one: 'rental', many: 'rentals' },
   sale: { one: 'property', many: 'properties' },
@@ -164,7 +164,7 @@ const ListingCard = ({
             )}
           </p>
           {/* Browsing is open to anyone; contacting the landlord or making an offer
-            is not — the detail page says so and carries the sign-in step. */}
+            is not: the detail page says so and carries the sign-in step. */}
           <Link
             href={href}
             className="inline-flex items-center gap-1 rounded-sm text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -274,7 +274,7 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
  * (sort vocabulary, price period, whether media exists) rather than duplicated.
  *
  * `estate` comes from the URL: this is where a public estate storefront's "For
- * rent" / "For sale" links land, so the filter has to survive the click — and the
+ * rent" / "For sale" links land, so the filter has to survive the click: and the
  * banner has to be visible, or a visitor cannot tell why the market is so small.
  */
 export const PublicMarketBrowser = ({

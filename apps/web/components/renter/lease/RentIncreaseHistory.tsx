@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { TrendingUp, Calendar } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
 
 interface RentIncrease {

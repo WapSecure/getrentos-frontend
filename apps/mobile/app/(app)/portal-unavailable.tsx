@@ -20,7 +20,7 @@ export default function PortalUnavailable() {
   const { colors, spacing } = useTheme();
   const label = PORTAL_LABEL[portal ?? ''] ?? 'This';
 
-  // Admin is not "coming later" — the backoffice is a desktop console by
+  // Admin is not "coming later": the backoffice is a desktop console by
   // design, so promising a mobile build here would be a lie. It points at the
   // web instead.
   const isAdmin = portal === 'admin';
@@ -35,7 +35,7 @@ export default function PortalUnavailable() {
         <Text variant="body" color="mutedForeground" center style={{ maxWidth: 320 }}>
           {isAdmin
             ? 'Trust reviews, staff approvals and the fraud queue live in the backoffice. Sign in there on a desktop at getrentos.com.'
-            : 'Your portal is being built next — use the web app at getrentos.com in the meantime.'}
+            : 'Your portal is being built next: use the web app at getrentos.com in the meantime.'}
         </Text>
         <Button
           label="Sign out"

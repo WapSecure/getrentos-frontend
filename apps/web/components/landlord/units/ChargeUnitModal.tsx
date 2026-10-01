@@ -78,7 +78,7 @@ const ChargeUnitForm = ({
         <DialogTitle className="font-semibold text-foreground">Charge rent</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           {unit.propertyName} • {unit.unitName}
-          {unit.tenantName ? ` — ${unit.tenantName}` : ''}
+          {unit.tenantName ? `: ${unit.tenantName}` : ''}
         </DialogDescription>
       </div>
 
@@ -109,7 +109,7 @@ const ChargeUnitForm = ({
           />
           {rent === undefined && (
             <p className="mt-1 text-xs text-muted-foreground">
-              This unit has no listing or lease rent to copy — enter the amount yourself.
+              This unit has no listing or lease rent to copy: enter the amount yourself.
             </p>
           )}
         </div>

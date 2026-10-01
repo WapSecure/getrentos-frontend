@@ -14,14 +14,14 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Trust-Driven Property Operating System',
+  title: 'Rent, Buy and Manage Property',
   description:
-    'One workspace for renters, landlords, owners, buyers, realtors and agents. Verified identities, verified properties, escrow-secured payments — from first search to final signature.',
+    'One place for renters, landlords, owners, buyers, realtors and agents. Verified identities, verified properties and protected payments from first search to final signature.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: `${SITE_NAME} — Rent, buy, and manage property with trust`,
+    title: `${SITE_NAME}: Rent, buy and manage property`,
     description:
-      'Rent shortlets, buy land, and manage property on a platform built on verified identities and escrow-secured payments.',
+      'Rent shortlets, buy land and manage property with verified identities and protected payments.',
     url: SITE_URL,
     type: 'website',
   },
@@ -32,8 +32,7 @@ const organizationJsonLd = {
   '@type': 'Organization',
   name: SITE_NAME,
   url: SITE_URL,
-  description:
-    'Trust-driven property operating system for renters, landlords, owners, buyers, realtors and agents.',
+  description: 'Property services for renters, landlords, owners, buyers, realtors and agents.',
   sameAs: [],
   contactPoint: {
     '@type': 'ContactPoint',

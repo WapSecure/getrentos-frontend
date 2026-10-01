@@ -16,9 +16,7 @@ import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
-import type { CreditBureau, CreditReportingProfile } from '@/types/credit-reporting';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
-import type { UssdMenu } from '@/types/ussd';
 
 export interface ViewingRequest {
   id: string;
@@ -754,20 +752,6 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/trust-score'));
   },
 
-  // ---- Credit reporting ----
-  async getCreditReporting(): Promise<ApiResponse<CreditReportingProfile>> {
-    return safeCall(() => authFetch('/renter/credit-reporting'));
-  },
-
-  async enrollCreditReporting(bureau?: CreditBureau): Promise<ApiResponse<CreditReportingProfile>> {
-    return safeCall(() =>
-      authFetch('/renter/credit-reporting/enroll', {
-        method: 'POST',
-        body: JSON.stringify({ bureau: bureau ?? undefined }),
-      })
-    );
-  },
-
   // ---- Flex financing ----
   async getFinancing(): Promise<ApiResponse<FinancingOverview>> {
     return safeCall(() => authFetch('/renter/financing'));
@@ -786,11 +770,6 @@ export const renterService = {
     return safeCall(() =>
       authFetch(`/renter/financing/installments/${installmentId}/pay`, { method: 'POST' })
     );
-  },
-
-  // ---- USSD ----
-  async getUssdMenu(): Promise<ApiResponse<UssdMenu>> {
-    return safeCall(() => authFetch('/renter/ussd/menu'));
   },
 
   // ---- Documents ----

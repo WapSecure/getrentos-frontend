@@ -149,7 +149,7 @@ export const ShortletMarketplaceBrowser = ({
             Shortlet stays
           </h1>
           <p className="text-muted-foreground sm:text-lg">
-            Furnished apartments and homes available for short stays — book by the night or flat
+            Furnished apartments and homes available for short stays: book by the night or flat
             rate.
           </p>
         </div>

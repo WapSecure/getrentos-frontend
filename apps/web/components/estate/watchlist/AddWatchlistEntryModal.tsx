@@ -19,7 +19,7 @@ const SUBJECT_OPTIONS = [
  *
  * Written out rather than left to the enum names. "WATCH" on its own reads like
  * a weaker BLOCK, and a manager who expects it to stop somebody would find out
- * at the barrier instead — where the person has already been let in.
+ * at the barrier instead: where the person has already been let in.
  */
 const SEVERITY_OPTIONS = [
   { value: 'BLOCK', label: 'Do not admit them' },
@@ -56,7 +56,7 @@ interface AddWatchlistEntryModalProps {
  *  - A vehicle with no registration. There is nothing else a guard can compare.
  *
  * Both are refused with the reason on screen, because the point is not to block
- * the manager — it is to stop the estate believing it is protected by a rule
+ * the manager: it is to stop the estate believing it is protected by a rule
  * that can never fire.
  */
 export const AddWatchlistEntryModal = ({
@@ -94,7 +94,7 @@ export const AddWatchlistEntryModal = ({
   };
 
   // The same rule the API applies: at least two name words, or a number to fall
-  // back on. Mirrored here only to explain it — the server remains the authority.
+  // back on. Mirrored here only to explain it: the server remains the authority.
   const nameWordCount = label.trim().split(/\s+/).filter(Boolean).length;
   const hasPhone = phone.replace(/\D/g, '').length >= 7;
   const cannotMatch = isVehicle ? plateNumber.trim().length < 3 : nameWordCount < 2 && !hasPhone;
@@ -155,7 +155,7 @@ export const AddWatchlistEntryModal = ({
 
               <p className="text-xs text-muted-foreground">
                 {severity === 'BLOCK'
-                  ? 'The gate is refused, and they can only be admitted if a guard gives a reason — which you are told about.'
+                  ? 'The gate is refused, and they can only be admitted if a guard gives a reason: which you are told about.'
                   : 'The gate is not refused. The estate office is told when they arrive.'}
               </p>
 
@@ -261,7 +261,7 @@ export const AddWatchlistEntryModal = ({
                 <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
                   {isVehicle
                     ? 'A vehicle needs a plate number. Without one there is nothing a guard can compare, so the rule would never fire.'
-                    : 'This cannot be matched against anybody yet. Give a full name, or add a phone number — otherwise the list would look like it was covering somebody it never would.'}
+                    : 'This cannot be matched against anybody yet. Give a full name, or add a phone number: otherwise the list would look like it was covering somebody it never would.'}
                 </p>
               )}
 

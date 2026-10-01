@@ -93,7 +93,7 @@ export const LeaseCard = ({
           <span>
             Tenant has signed. They haven’t paid the first rent to GetRentos yet
             {lease.paymentDueAt
-              ? ` — due ${new Date(lease.paymentDueAt).toLocaleDateString('en-NG', {
+              ? `: due ${new Date(lease.paymentDueAt).toLocaleDateString('en-NG', {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric',
@@ -105,7 +105,7 @@ export const LeaseCard = ({
 
       {lease.status === 'awaiting_landlord' && (
         <p className="text-xs text-green-700 dark:text-green-400 mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg px-2.5 py-1.5">
-          GetRentos is holding the rent. Countersign to confirm you have handed over — the money is
+          GetRentos is holding the rent. Countersign to confirm you have handed over: the money is
           paid to you after the confirmation period.
         </p>
       )}
@@ -131,7 +131,7 @@ export const LeaseCard = ({
         )}
         {lease.status === 'awaiting_payment' && (
           <p className="text-xs text-muted-foreground py-2">
-            Waiting for the tenant&apos;s payment. Your countersignature is what releases the keys —
+            Waiting for the tenant&apos;s payment. Your countersignature is what releases the keys:
             it cannot happen before the money is held.
           </p>
         )}

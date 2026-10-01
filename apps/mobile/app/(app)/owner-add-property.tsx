@@ -97,7 +97,7 @@ export default function OwnerAddProperty() {
       qc.invalidateQueries({ queryKey: qk.owner.dashboard });
       if (proofFailed) {
         Alert.alert(
-          'Property added — document didn’t upload',
+          'Property added: document didn’t upload',
           'Your property was saved, but the ownership document could not be sent. Open the property to try again.'
         );
       } else {

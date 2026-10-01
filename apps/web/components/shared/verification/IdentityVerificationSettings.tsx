@@ -139,7 +139,7 @@ export const IdentityVerificationSettings = ({
               accept=".pdf,.jpg,.jpeg,.png,.webp"
               multiple={false}
               label=""
-              hint="PDF or image — preview before submitting"
+              hint="PDF or image: preview before submitting"
             />
           </div>
 
@@ -156,7 +156,7 @@ export const IdentityVerificationSettings = ({
               accept=".jpg,.jpeg,.png,.webp"
               multiple={false}
               label=""
-              hint="A clear photo of your face — preview before submitting"
+              hint="A clear photo of your face: preview before submitting"
             />
           </div>
 

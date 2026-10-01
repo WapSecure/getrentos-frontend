@@ -150,7 +150,7 @@ export default function MyStays() {
   );
 }
 
-/** What hosts have said about this guest — the record hosts see when you book. */
+/** What hosts have said about this guest: the record hosts see when you book. */
 function HostsOnYou() {
   const { colors, spacing } = useTheme();
   const reviews = useQuery({

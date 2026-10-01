@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { RefreshCcw, Home, AlertTriangle } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { Button } from '@getrentos/ui/Button';
-import { AnimatedParticles } from '@getrentos/ui/AnimatedParticles';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function Error({
@@ -20,8 +19,6 @@ export default function Error({
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center relative px-6">
-      <AnimatedParticles />
-
       <div className="relative z-10 mb-8">
         <Logo size="lg" />
       </div>

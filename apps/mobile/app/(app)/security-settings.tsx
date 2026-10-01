@@ -83,7 +83,7 @@ export default function SecuritySettings() {
   );
 }
 
-/** Face ID / fingerprint before the app opens — on this phone only. */
+/** Face ID / fingerprint before the app opens: on this phone only. */
 function AppLockSection() {
   const { colors, spacing } = useTheme();
   const toast = useToast();

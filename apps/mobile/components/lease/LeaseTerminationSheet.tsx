@@ -47,9 +47,8 @@ function LeaseTerminationForm({ onClose }: Omit<Props, 'open'>) {
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="body" color="mutedForeground">
-        Ask to end your lease early. Your landlord will review the request — this doesn&apos;t
-        cancel your lease on its own, and early termination may carry a penalty under your lease
-        terms.
+        Ask to end your lease early. Your landlord will review the request: this doesn&apos;t cancel
+        your lease on its own, and early termination may carry a penalty under your lease terms.
       </Text>
       <DateField
         label="Proposed move-out date"

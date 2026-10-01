@@ -19,7 +19,7 @@ import type { InvestmentMetrics } from '@/types/owner';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
-// recharts is heavy — load it only when the analytics page mounts.
+// recharts is heavy: load it only when the analytics page mounts.
 const ROIComparisonChart = dynamic(
   () => import('@/components/owner/analytics/ROIComparisonChart').then((m) => m.ROIComparisonChart),
   {

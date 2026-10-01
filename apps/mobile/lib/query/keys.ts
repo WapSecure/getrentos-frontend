@@ -55,6 +55,13 @@ export const qk = {
     pricing: ['me', 'subscription', 'pricing'] as const,
     invoices: ['billing', 'invoices'] as const,
   },
+  estateManager: {
+    estates: ['estate-manager', 'estates'] as const,
+    dashboard: (estateId: string) => ['estate-manager', estateId, 'dashboard'] as const,
+  },
+  realtor: {
+    dashboard: ['realtor', 'dashboard'] as const,
+  },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
@@ -91,14 +98,12 @@ export const qk = {
     applicationNotes: (applicationId: string) =>
       ['renter', 'applications', applicationId, 'notes'] as const,
     financing: ['renter', 'financing'] as const,
-    creditReporting: ['renter', 'credit-reporting'] as const,
     recentlyViewed: ['renter', 'recently-viewed'] as const,
     inspections: ['renter', 'inspections'] as const,
     referrals: ['referrals', 'summary'] as const,
     dataExport: ['renter', 'settings', 'data-export'] as const,
     paymentMethods: ['renter', 'payments', 'methods'] as const,
     preferences: ['renter', 'settings', 'preferences'] as const,
-    ussdMenu: ['renter', 'ussd', 'menu'] as const,
     leasePaymentReminders: ['renter', 'lease', 'payment-reminders'] as const,
     leaseRentIncreases: ['renter', 'lease', 'rent-increases'] as const,
     messageTemplates: ['renter', 'messages', 'templates'] as const,

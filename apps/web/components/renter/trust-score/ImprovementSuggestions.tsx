@@ -1,6 +1,15 @@
 'use client';
 
-import { Sparkles, User, Phone, Mail, Shield, Users, CheckCircle, ArrowRight } from 'lucide-react';
+import {
+  BadgeCheck,
+  User,
+  Phone,
+  Mail,
+  Shield,
+  Users,
+  CheckCircle,
+  ArrowRight,
+} from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface Verification {
@@ -49,7 +58,7 @@ export const ImprovementSuggestions = ({ verifications }: ImprovementSuggestions
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
+          <BadgeCheck className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Improve Your Score</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">

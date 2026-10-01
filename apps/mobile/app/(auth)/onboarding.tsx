@@ -51,7 +51,7 @@ const SLIDES = [
     key: 'trust',
     eyebrow: 'Trust',
     title: 'Verified landlords and agents only',
-    body: 'Identity, ownership and licences are confirmed up front — so you always know exactly who you are dealing with.',
+    body: 'Identity, ownership and licences are confirmed up front: so you always know exactly who you are dealing with.',
     Scene: VerifiedPeopleScene,
   },
 ] as const;

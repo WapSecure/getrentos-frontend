@@ -107,7 +107,7 @@ export const IssueVisitorPassModal = ({
                             }`}
                           >
                             <span>
-                              {household.unitLabel} — {household.residentName}
+                              {household.unitLabel}: {household.residentName}
                             </span>
                             <span
                               aria-hidden="true"
@@ -173,7 +173,7 @@ export const IssueVisitorPassModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Expires{' '}
                   <span className="text-gray-400 font-normal">
-                    (optional — defaults to 24 hours)
+                    (optional: defaults to 24 hours)
                   </span>
                 </label>
                 <DatePicker value={expiresAt} onChange={setExpiresAt} />

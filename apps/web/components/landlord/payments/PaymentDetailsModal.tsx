@@ -38,7 +38,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
               <div>
                 <h3 className="font-semibold text-foreground">Payment Details</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {payment.tenantName} — {payment.unitName}
+                  {payment.tenantName}: {payment.unitName}
                 </p>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
@@ -62,7 +62,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                   <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                      Funds Frozen — Dispute Raised
+                      Funds Frozen: Dispute Raised
                     </p>
                     <p className="text-xs text-red-700 dark:text-red-400 mt-1">
                       {payment.disputeReason ||

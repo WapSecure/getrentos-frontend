@@ -10,7 +10,7 @@ import {
 } from '@/lib/api/publicMarket';
 import { LAND_TITLE_TYPE_LABEL } from '@/lib/api/land';
 
-/** The refinements a filter sheet edits — everything except search, sort and estate scope. */
+/** The refinements a filter sheet edits: everything except search, sort and estate scope. */
 export type MarketRefinements = Omit<MarketFilters, 'search' | 'sort' | 'estate'>;
 
 const PROPERTY_TYPES: { value: string; label: string }[] = [

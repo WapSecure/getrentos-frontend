@@ -100,7 +100,7 @@ describe('public marketplace requests', () => {
     });
   });
 
-  it('leaves unticked toggles off the wire — false means "don’t filter"', async () => {
+  it('leaves unticked toggles off the wire: false means "don’t filter"', async () => {
     await publicMarketApi.list('rent', { verifiedOnly: false, furnished: false });
     expect(lastQuery().params).toEqual(paging);
   });
@@ -198,7 +198,7 @@ describe('public marketplace normalisation', () => {
     });
   });
 
-  it('keeps the server’s shortlet order — sorting is the API’s job now', async () => {
+  it('keeps the server’s shortlet order: sorting is the API’s job now', async () => {
     const stay = (id: string, nightlyRate: number) => ({
       id,
       listingId: id,

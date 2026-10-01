@@ -45,7 +45,7 @@ const STATUS_META: Record<AuthorityStatus, { label: string; variant: BadgeVarian
 const MIN_REASON_LENGTH = 10;
 
 /**
- * Property authority claims — the officer's queue.
+ * Property authority claims: the officer's queue.
  *
  * Approving grants a mandate over someone else's property, which is why it
  * lives behind the same verification permissions as the rest of the trust
@@ -99,7 +99,7 @@ export default function PropertyAuthoritiesPage() {
         ? `${claim.userEmail ?? 'The claimant'} may now act for that property.`
         : action === 'reject'
           ? 'Claim rejected.'
-          : 'Mandate revoked — the publication gate stops counting it immediately.'
+          : 'Mandate revoked: the publication gate stops counting it immediately.'
     );
     setOpenId(null);
     setReason('');
@@ -153,7 +153,7 @@ export default function PropertyAuthoritiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Property Authorities</h1>
           <p className="text-muted-foreground mt-1">
-            People acting for a property they do not own — managers, agents, co-owners, POA holders.
+            People acting for a property they do not own: managers, agents, co-owners, POA holders.
           </p>
         </div>
         <div className="w-56">
@@ -328,7 +328,7 @@ export default function PropertyAuthoritiesPage() {
 
                     <div className="space-y-2 border-t border-border pt-4">
                       <Textarea
-                        placeholder={`Or reject it — reason (at least ${MIN_REASON_LENGTH} characters)`}
+                        placeholder={`Or reject it: reason (at least ${MIN_REASON_LENGTH} characters)`}
                         value={reason}
                         onChange={(event) => setReason(event.target.value)}
                       />

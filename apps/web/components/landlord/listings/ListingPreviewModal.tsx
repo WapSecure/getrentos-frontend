@@ -48,7 +48,7 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={currentImage}
-            alt={`${listing.listingTitle} — photo ${active + 1}`}
+            alt={`${listing.listingTitle}: photo ${active + 1}`}
             onError={() => setFailed((prev) => ({ ...prev, [active]: true }))}
             className="absolute inset-0 h-full w-full object-cover"
           />

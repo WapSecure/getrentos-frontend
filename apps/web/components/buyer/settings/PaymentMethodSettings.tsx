@@ -67,7 +67,7 @@ export const PaymentMethodSettings = () => {
         </div>
       ) : (
         <p className="text-xs text-muted-foreground mb-6">
-          Add your bank details — your account will be marked as verified once you save.
+          Add your bank details: your account will be marked as verified once you save.
         </p>
       )}
 

@@ -101,8 +101,8 @@ export const AdminMaintenanceOverview = () => {
       setToast({
         message:
           result.notified > 0
-            ? `Scan complete — ${result.notified} work order(s) notified of SLA breaches.`
-            : 'Scan complete — no new SLA breaches to notify.',
+            ? `Scan complete: ${result.notified} work order(s) notified of SLA breaches.`
+            : 'Scan complete: no new SLA breaches to notify.',
         variant: 'success',
       });
       queryClient.invalidateQueries({ queryKey: ['admin', 'maintenance'] });

@@ -59,8 +59,7 @@ function Inner({
     >
       <View style={{ gap: spacing.md }}>
         <Text variant="callout" color="mutedForeground">
-          Ask about {listing.title} — parking, early check-in, anything the listing doesn&apos;t
-          say.
+          Ask about {listing.title}: parking, early check-in, anything the listing doesn&apos;t say.
         </Text>
         <TextField
           value={text}

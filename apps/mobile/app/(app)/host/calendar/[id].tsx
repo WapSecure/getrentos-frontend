@@ -139,7 +139,7 @@ export default function HostCalendar() {
           );
           return;
         }
-        Alert.alert('Reopen these dates?', `${span}${range.reason ? ` — ${range.reason}` : ''}`, [
+        Alert.alert('Reopen these dates?', `${span}${range.reason ? `: ${range.reason}` : ''}`, [
           { text: 'Keep blocked', style: 'cancel' },
           { text: 'Reopen', onPress: () => unblock.mutate(range.id) },
         ]);

@@ -57,7 +57,7 @@ export const propertyAuthorityApi = {
  * the message follows the status we got back rather than assuming "filed".
  */
 export function claimOutcome(status: AuthorityStatus): string {
-  if (status === 'ACTIVE') return 'You already act for this property — nothing new was filed.';
+  if (status === 'ACTIVE') return 'You already act for this property: nothing new was filed.';
   if (status === 'PENDING') return 'You already have a claim on this property awaiting an officer.';
   return 'Claim filed. It grants nothing until an officer approves it.';
 }

@@ -14,7 +14,7 @@ import {
   NumberInput,
   Select,
 } from '@getrentos/ui';
-import { MapPinned, Upload } from 'lucide-react';
+import { MapPinned } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import {
   LAND_AREA_UNIT_LABELS,
@@ -297,7 +297,7 @@ export const LandRegistrationDialog = ({
                 accept=".pdf,.jpg,.jpeg,.png,.webp"
                 multiple={false}
                 label=""
-                hint="Ownership evidence (PDF or image) — preview before submitting"
+                hint="Ownership evidence (PDF or image): preview before submitting"
               />
             </div>
           </div>

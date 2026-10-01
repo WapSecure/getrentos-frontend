@@ -1,6 +1,6 @@
 'use client';
 
-import { Lightbulb, Sparkles } from 'lucide-react';
+import { Lightbulb, BadgeCheck } from 'lucide-react';
 
 const tips = [
   'Complete all verifications to maximize your trust score',
@@ -27,7 +27,7 @@ export const TrustScoreTips = () => {
             key={index}
             className="flex items-start gap-2 p-2 rounded-lg hover:bg-secondary transition-colors"
           >
-            <Sparkles className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+            <BadgeCheck className="w-4 h-4 text-primary mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground">{tip}</p>
           </div>
         ))}

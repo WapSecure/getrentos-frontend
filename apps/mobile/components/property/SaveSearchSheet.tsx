@@ -43,7 +43,7 @@ function SaveSearchForm({ onClose, filters }: Omit<Props, 'open'>) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.savedSearches });
-      toast.show('Search saved — we’ll alert you to new matches.', 'success');
+      toast.show('Search saved: we’ll alert you to new matches.', 'success');
       onClose();
     },
     onError: (err) =>

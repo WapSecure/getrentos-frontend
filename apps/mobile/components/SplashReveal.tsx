@@ -37,7 +37,7 @@ export function SplashReveal() {
       if (finished) scheduleOnRN(setDone, true);
     };
     if (reduceMotion) {
-      // No scale or drift — show the brand and dissolve.
+      // No scale or drift: show the brand and dissolve.
       markOpacity.set(1);
       markScale.set(1);
       wordOpacity.set(1);
@@ -93,13 +93,13 @@ export function SplashReveal() {
           <BrandLogo size={64} showWordmark={false} />
         </Animated.View>
         <Animated.View style={[{ alignItems: 'center', gap: spacing.xs }, wordStyle]}>
-          {/* wordmark only — the mark above already carries the brand */}
+          {/* wordmark only: the mark above already carries the brand */}
           <Text style={{ fontSize: 26, lineHeight: 30, fontWeight: '800' }}>
             <Text style={{ color: colors.foreground, fontSize: 26, fontWeight: '800' }}>Get</Text>
             <Text style={{ color: colors.primary, fontSize: 26, fontWeight: '800' }}>Rentos</Text>
           </Text>
           <Text variant="caption" color="mutedForeground">
-            Rent, buy and manage — safely
+            Rent, buy and manage: safely
           </Text>
         </Animated.View>
       </View>

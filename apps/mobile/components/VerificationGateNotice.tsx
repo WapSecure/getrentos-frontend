@@ -13,7 +13,7 @@ export function VerificationGateNotice({
 }: {
   error: unknown;
   verifyHref?: Href;
-  /** The persona's trust profile — used when the score, not evidence, is short. */
+  /** The persona's trust profile: used when the score, not evidence, is short. */
   scoreHref?: Href;
   /** Called before navigating, e.g. to close the sheet the notice sits in. */
   onNavigate?: () => void;

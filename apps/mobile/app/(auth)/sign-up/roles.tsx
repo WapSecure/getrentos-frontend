@@ -68,7 +68,7 @@ export default function SignUpRoles() {
     <AuthScaffold
       kicker="Almost there"
       title="How will you use GetRentos?"
-      subtitle="Pick what fits today — you can add more roles later, with supporting documents."
+      subtitle="Pick what fits today: you can add more roles later, with supporting documents."
       progress={1}
       progressLabel="Sign-up step 3 of 3"
       onBack={() => router.back()}
