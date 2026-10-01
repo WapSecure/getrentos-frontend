@@ -6,7 +6,7 @@ import { LandMarketplaceBrowser } from '@/components/land/LandMarketplaceBrowser
 export const metadata: Metadata = {
   title: 'Land: Verified Land Listings',
   description:
-    'Browse verified land listings with title deed verification. Buy land securely with escrow-protected payments on GetRentos.',
+    'Browse verified land listings with title deed verification and GetRentos Payment Protection.',
   alternates: { canonical: '/land' },
   openGraph: {
     title: 'Land: Verified Land Listings',

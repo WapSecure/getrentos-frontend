@@ -67,7 +67,7 @@ export const AutoPaySetup = () => {
               <Shield className="w-4 h-4 text-green-600 mt-0.5" />
               <div>
                 <p className="text-xs font-medium text-green-800 dark:text-green-300">
-                  AutoPay is escrow-protected
+                  AutoPay uses GetRentos Payment Protection
                 </p>
                 <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
                   GetRentos holds each payment until the conditions are met

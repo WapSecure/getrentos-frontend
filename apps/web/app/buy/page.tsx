@@ -2,17 +2,22 @@ import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
-import { firstPagePath, saleToCard, type PublicListingCard, type SaleApiItem } from '@/lib/publicListingMap';
+import {
+  firstPagePath,
+  saleToCard,
+  type PublicListingCard,
+  type SaleApiItem,
+} from '@/lib/publicListingMap';
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
   description:
-    'Browse homes for sale across Nigeria. Verified properties, escrow-protected payments, and results you can scope to a single estate.',
+    'Browse homes for sale across Nigeria. Verified properties, GetRentos Payment Protection, and results you can scope to a single estate.',
   alternates: { canonical: '/buy' },
   openGraph: {
     title: 'Properties for Sale in Nigeria',
-    description: 'Browse homes for sale across Nigeria, with escrow-protected payments.',
+    description: 'Browse homes for sale across Nigeria with GetRentos Payment Protection.',
     url: '/buy',
     type: 'website',
   },
