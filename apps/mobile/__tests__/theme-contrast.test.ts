@@ -15,7 +15,7 @@ function contrast(foreground: string, background: string): number {
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
 
-const semanticPairs: Array<[keyof Palette, keyof Palette]> = [
+const semanticPairs: [keyof Palette, keyof Palette][] = [
   ['foreground', 'background'],
   ['cardForeground', 'card'],
   ['mutedForeground', 'background'],

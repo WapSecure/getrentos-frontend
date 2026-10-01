@@ -21,10 +21,8 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldEllipsis,
-  Smartphone,
   BadgeCheck,
   Star,
-  TrendingUp,
   UserRound,
   Users,
   Wallet,
@@ -107,13 +105,6 @@ export default function Account() {
       description: 'Split yearly rent into monthly payments',
       icon: Wallet,
       onPress: go('/(app)/financing'),
-    },
-    {
-      key: 'credit',
-      label: 'Credit reporting',
-      description: 'Turn on-time rent into credit history',
-      icon: TrendingUp,
-      onPress: go('/(app)/credit-reporting'),
     },
     {
       key: 'roommates',
@@ -209,13 +200,6 @@ export default function Account() {
       description: 'Rent alerts without the app',
       icon: MessageCircle,
       onPress: go('/(app)/whatsapp-settings'),
-    },
-    {
-      key: 'ussd',
-      label: 'Dial-in access',
-      description: 'Use GetRentos with no data',
-      icon: Smartphone,
-      onPress: go('/(app)/ussd'),
     },
   ];
 

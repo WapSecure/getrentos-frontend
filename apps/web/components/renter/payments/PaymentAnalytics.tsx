@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, PieChart, Calendar } from 'lucide-react';
+import { TrendingUp, PieChart, Calendar } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
 
 interface Payment {
@@ -20,8 +20,17 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
   const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0);
   const averagePayment = paidPayments.length > 0 ? totalPaid / paidPayments.length : 0;
 
-  // Calculate monthly spending (mock)
-  const monthlySpending = totalPaid / 6; // Assuming 6 months of data
+  const paidMonths = new Set(
+    paidPayments
+      .map((payment) => {
+        const date = new Date(payment.date);
+        return Number.isNaN(date.getTime())
+          ? null
+          : `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`;
+      })
+      .filter((month): month is string => month !== null)
+  );
+  const monthlyAverage = paidMonths.size > 0 ? totalPaid / paidMonths.size : 0;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -43,7 +52,7 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
           <PieChart className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Payment Analytics</h3>
         </div>
-        <p className="text-xs text-muted-foreground mt-0.5">Spending insights</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Based on payments shown on this page</p>
       </div>
 
       <div className="p-4 space-y-4">
@@ -67,21 +76,12 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3 text-primary" />
-            <span className="text-xs text-gray-500">Monthly Average</span>
+            <span className="text-xs text-gray-500">Average per active month</span>
           </div>
-          <p className="text-lg font-bold text-foreground">{formatCurrency(monthlySpending)}</p>
-        </div>
-
-        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <div className="flex items-start gap-2">
-            <TrendingUp className="w-4 h-4 text-blue-600 mt-0.5" />
-            <div>
-              <p className="text-xs font-medium text-blue-800 dark:text-blue-300">Spending Trend</p>
-              <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
-                Your rent spending has been consistent over the last 6 months.
-              </p>
-            </div>
-          </div>
+          <p className="text-lg font-bold text-foreground">{formatCurrency(monthlyAverage)}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Across {paidMonths.size} month{paidMonths.size === 1 ? '' : 's'} represented
+          </p>
         </div>
       </div>
     </motion.div>

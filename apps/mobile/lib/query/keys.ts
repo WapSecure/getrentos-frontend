@@ -55,6 +55,13 @@ export const qk = {
     pricing: ['me', 'subscription', 'pricing'] as const,
     invoices: ['billing', 'invoices'] as const,
   },
+  estateManager: {
+    estates: ['estate-manager', 'estates'] as const,
+    dashboard: (estateId: string) => ['estate-manager', estateId, 'dashboard'] as const,
+  },
+  realtor: {
+    dashboard: ['realtor', 'dashboard'] as const,
+  },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,

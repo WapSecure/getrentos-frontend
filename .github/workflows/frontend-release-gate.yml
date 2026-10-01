@@ -1,0 +1,45 @@
+name: Frontend release gate
+
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_API_URL: https://api.invalid.example
+      NEXT_PUBLIC_APP_URL: https://app.invalid.example
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @getrentos/shared build
+      - run: pnpm --filter web type-check
+      - run: pnpm --filter backoffice type-check
+      - run: pnpm --filter mobile type-check
+      - run: pnpm --filter mobile type-check:test
+      # Ratchet the existing web warning baseline: new warnings fail the gate.
+      - run: pnpm --filter web lint --max-warnings=75
+      - run: pnpm --filter backoffice lint --max-warnings=0
+      - run: pnpm --filter mobile lint --max-warnings=0
+      - run: pnpm --filter mobile test:ci
+      - run: pnpm --filter web build
+      - run: pnpm --filter backoffice build
+      - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/getrentos-mobile-web

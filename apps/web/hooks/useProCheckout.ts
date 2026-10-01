@@ -40,6 +40,10 @@ export function useProCheckout() {
           return;
         }
 
+        if (process.env.NODE_ENV === 'production' || !session.simulated) {
+          throw new Error('Checkout is unavailable. No payment gateway session was created.');
+        }
+
         // No gateway configured (dev): confirm the simulated payment and refresh.
         await unwrap(billingService.verifyCheckout(session.reference));
         await refresh();
