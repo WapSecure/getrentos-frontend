@@ -54,6 +54,7 @@ import type {
   PatrolScanResult,
   ExpectedToday,
   GuestListImportResult,
+  VisitorIdCheck,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -1391,5 +1392,20 @@ export const estateService = {
         body: formData,
       })
     );
+  },
+
+  /**
+   * The identity document recorded against one visitor's pass, or null.
+   *
+   * Fetched for ONE pass at a time and never as part of a list: the response
+   * carries a short-lived signed URL to somebody's identity document, so the
+   * office only ever receives one it deliberately asked about. Null is a normal
+   * outcome — it means the guard recorded nothing, which is allowed.
+   */
+  async getVisitorIdCheck(
+    estateId: string,
+    passId: string
+  ): Promise<ApiResponse<VisitorIdCheck | null>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes/${passId}/id-check`));
   },
 };

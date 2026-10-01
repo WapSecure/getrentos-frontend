@@ -174,6 +174,7 @@ export default function EstateVisitorPassesPage() {
             <VisitorPassRow
               key={pass.id}
               pass={pass}
+              estateId={estate.id}
               onRevoke={() => revokePass.mutate(pass.id)}
               isRevoking={revokePass.isPending}
             />

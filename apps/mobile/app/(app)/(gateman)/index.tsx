@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   CloudOff,
+  IdCard,
   KeyRound,
   MapPin,
   ScanLine,
@@ -27,6 +28,7 @@ import {
 import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 import { WalkInSheet } from '@/components/gateman/WalkInSheet';
+import { IdDocumentSheet } from '@/components/gateman/IdDocumentSheet';
 import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedSheet';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { ApiError } from '@/lib/api/client';
@@ -48,6 +50,11 @@ export default function GatemanCheckIn() {
   const [pin, setPin] = useState('');
   const [scannerOpen, setScannerOpen] = useState(false);
   const [walkInOpen, setWalkInOpen] = useState(false);
+  /** The pass whose identity document the guard is recording, if any. */
+  const [idSheetFor, setIdSheetFor] = useState<{
+    passId: string;
+    visitorName: string;
+  } | null>(null);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{
     pass?: VisitorPass;
@@ -358,6 +365,16 @@ export default function GatemanCheckIn() {
   // Null for every ordinary arrival, so the confirmation below is unchanged for
   // them. Derived once rather than twice so the two conditionals cannot drift.
   const standingPassNote = result?.pass ? describeStandingPass(result.pass) : null;
+  /**
+   * The pass currently checked in, held in a const of its own.
+   *
+   * `result` is state, so TypeScript will not carry a `result?.pass` narrowing
+   * from the JSX condition into the button's `onPress` closure — the state could
+   * have changed by the time the press happens. Narrowing a local is what makes
+   * the reference legal, and it is also the honest reading: this press is about
+   * the pass that was resolved when the card was rendered.
+   */
+  const checkedInPass = result?.pass ?? null;
 
   if (isPostLoading) {
     return (
@@ -560,7 +577,7 @@ export default function GatemanCheckIn() {
           />
         </Card>
 
-        {result?.pass ? (
+        {checkedInPass ? (
           <Card elevated>
             <View style={{ flexDirection: 'row', gap: spacing.md }}>
               <CheckCircle2 size={22} color={colors.success} />
@@ -569,16 +586,34 @@ export default function GatemanCheckIn() {
                   Checked in
                 </Text>
                 <Text variant="body">
-                  {result.pass.visitorName} → {result.pass.unitLabel}
+                  {checkedInPass.visitorName} → {checkedInPass.unitLabel}
                 </Text>
                 <Text variant="caption" color="mutedForeground">
-                  Hosted by {result.pass.residentName}
+                  Hosted by {checkedInPass.residentName}
                 </Text>
                 {standingPassNote ? (
                   <Text variant="caption" color="mutedForeground">
                     {standingPassNote}
                   </Text>
                 ) : null}
+                {/* Offered here rather than before admission because this is the
+                    moment the person is still in front of the guard. It records
+                    a document; it does not decide anything about the admission,
+                    which has already happened on the pass. */}
+                <View style={{ marginTop: spacing.sm }}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<IdCard size={16} />}
+                    label="Identity document"
+                    onPress={() =>
+                      setIdSheetFor({
+                        passId: checkedInPass.id,
+                        visitorName: checkedInPass.visitorName,
+                      })
+                    }
+                  />
+                </View>
               </View>
             </View>
           </Card>
@@ -861,6 +896,21 @@ export default function GatemanCheckIn() {
               warning: pass.watchlistWarning,
             })
           }
+        />
+      ) : null}
+
+      {/* Mounted as its own sibling rather than inside the pass card, so a
+          re-render of the result cannot tear it down mid-capture. Keyed on the
+          pass so it remounts for a different visitor instead of carrying the
+          previous document type over. */}
+      {estate && idSheetFor ? (
+        <IdDocumentSheet
+          key={`id-check-${idSheetFor.passId}`}
+          open
+          onClose={() => setIdSheetFor(null)}
+          estateId={estate.id}
+          passId={idSheetFor.passId}
+          visitorName={idSheetFor.visitorName}
         />
       ) : null}
     </>

@@ -324,6 +324,15 @@ export const qk = {
      * instant would add a cache entry per render and reuse none of them.
      */
     expectedToday: (estateId: string) => ['gateman', estateId, 'expected-today'] as const,
+    /**
+     * The identity document recorded against one visitor's pass.
+     *
+     * Keyed by the pass, not just the estate: it is a single record about one
+     * person, and reusing one estate-wide key would have every pass share a cache
+     * entry and show the wrong document.
+     */
+    visitorIdCheck: (estateId: string, passId: string) =>
+      ['gateman', estateId, 'id-check', passId] as const,
     vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
     incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,
   },
