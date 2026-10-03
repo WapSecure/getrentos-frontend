@@ -59,9 +59,6 @@ export const qk = {
     estates: ['estate-manager', 'estates'] as const,
     dashboard: (estateId: string) => ['estate-manager', estateId, 'dashboard'] as const,
   },
-  realtor: {
-    dashboard: ['realtor', 'dashboard'] as const,
-  },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
@@ -132,6 +129,33 @@ export const qk = {
     detail: (kind: string, id: string) => ['market', 'detail', kind, id] as const,
     estates: (search?: string) => ['market', 'estates', search ?? null] as const,
     saved: ['market', 'saved'] as const,
+  },
+  realtor: {
+    dashboard: ['realtor', 'dashboard'] as const,
+    activity: ['realtor', 'activity'] as const,
+    clients: ['realtor', 'clients'] as const,
+    assigned: (relationshipId: string) =>
+      ['realtor', 'clients', relationshipId, 'properties'] as const,
+    listings: ['realtor', 'listings'] as const,
+    leads: (status?: string, search?: string) =>
+      ['realtor', 'leads', { status: status ?? null, search: search ?? null }] as const,
+    lead: (id: string) => ['realtor', 'lead', id] as const,
+    viewings: ['realtor', 'viewings'] as const,
+    offers: ['realtor', 'offers'] as const,
+    commissions: (status?: string) => ['realtor', 'commissions', status ?? 'all'] as const,
+    trend: ['realtor', 'commissions', 'trend'] as const,
+    payoutSummary: ['realtor', 'payout-summary'] as const,
+    payoutAccount: ['realtor', 'payout-account'] as const,
+    payouts: ['realtor', 'payouts'] as const,
+    payout: (id: string) => ['realtor', 'payout', id] as const,
+    conversations: ['realtor', 'conversations'] as const,
+    messages: (id: string) => ['realtor', 'conversations', id, 'messages'] as const,
+    documents: ['realtor', 'documents'] as const,
+    reviews: ['realtor', 'reviews'] as const,
+    reviewsSummary: ['realtor', 'reviews', 'summary'] as const,
+    trustProfile: ['realtor', 'trust-profile'] as const,
+    profile: ['realtor', 'profile'] as const,
+    notifications: ['realtor', 'notifications'] as const,
   },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,

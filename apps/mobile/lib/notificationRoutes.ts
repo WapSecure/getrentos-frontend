@@ -51,6 +51,20 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/landlord/shortlets': '/(app)/host',
   '/landlord/billing': '/(app)/billing',
   '/landlord/realtors': '/(app)/representatives',
+  '/realtor/dashboard': '/(app)/(realtor)',
+  '/realtor/clients': '/(app)/realtor-clients',
+  '/realtor/listings': '/(app)/(realtor)/listings',
+  '/realtor/leads': '/(app)/(realtor)/pipeline',
+  '/realtor/viewings': '/(app)/(realtor)/pipeline',
+  '/realtor/offers': '/(app)/realtor-offers',
+  '/realtor/commissions': '/(app)/realtor-commissions',
+  '/realtor/documents': '/(app)/realtor-documents',
+  '/realtor/messages': '/(app)/(realtor)/messages',
+  '/realtor/reviews': '/(app)/realtor-reviews',
+  '/realtor/trust-profile': '/(app)/realtor-trust-profile',
+  '/realtor/verification': '/(app)/verify-identity',
+  '/realtor/billing': '/(app)/billing',
+  '/realtor/managed': '/(app)/managed-properties',
   '/resident/visitor-passes': '/(app)/visitor-passes',
   '/resident/dues': '/(app)/dues',
   '/resident/deliveries': '/(app)/deliveries',
@@ -76,6 +90,15 @@ const OWNER_FALLBACK: [prefix: string, route: string][] = [
   ['ESCROW_', '/(app)/owner-transactions'],
 ];
 
+/**
+ * Realtor-side screens. A realtor's "commission earned" arrives typed as the
+ * escrow release that earned it, and their offers are the ones they negotiate.
+ */
+const REALTOR_FALLBACK: [prefix: string, route: string][] = [
+  ['ESCROW_', '/(app)/realtor-commissions'],
+  ['OFFER_', '/(app)/realtor-offers'],
+];
+
 /** Portals that host short stays; their shortlet notifications are the host's side. */
 const HOST_PORTALS = new Set<Portal>(['owner', 'landlord']);
 
@@ -90,7 +113,14 @@ const HOST_ONLY_TYPES = new Set(['SHORTLET_BOOKING_REQUEST', 'SHORTLET_REVIEW_RE
 const GUEST_PORTALS = new Set<Portal>(['renter', 'buyer']);
 
 /** Portals whose tab bar has a Messages tab. */
-const PORTALS_WITH_INBOX = new Set<Portal>(['renter', 'buyer', 'landlord', 'agent', 'owner']);
+const PORTALS_WITH_INBOX = new Set<Portal>([
+  'renter',
+  'buyer',
+  'landlord',
+  'agent',
+  'owner',
+  'realtor',
+]);
 
 /** The native route for a web action path, or null if the app has no screen for it. */
 export function routeForActionUrl(url?: string | null): string | null {
@@ -132,10 +162,10 @@ export function routeForNotification(
       : '/(app)/host';
   }
   // Sellers see offers and escrow from the other side of the table.
+  const sellerSide =
+    portal === 'owner' ? OWNER_FALLBACK : portal === 'realtor' ? REALTOR_FALLBACK : null;
   const portalFallback =
-    portal === 'owner' && type
-      ? OWNER_FALLBACK.find(([prefix]) => type.startsWith(prefix))?.[1]
-      : undefined;
+    sellerSide && type ? sellerSide.find(([prefix]) => type.startsWith(prefix))?.[1] : undefined;
   if (portalFallback) return portalFallback;
   const byType = type ? TYPE_FALLBACK.find(([prefix]) => type.startsWith(prefix))?.[1] : null;
   if (byType) return byType;

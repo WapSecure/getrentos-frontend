@@ -36,19 +36,9 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { HostFeeNote } from '@/components/host/HostUI';
+import { WITHHELD } from '@/lib/withdrawal';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
-
-/** Why a verified host still can't withdraw (the backend names the real blocker). */
-const WITHHELD: Record<string, string> = {
-  SCORE_BELOW_TIER3_MIN:
-    'Your checks are complete, but your trust score is below what withdrawing needs. It restores itself as your trust profile builds.',
-  OPEN_DISPUTE_AS_SUBJECT: 'A dispute open against you is holding withdrawals until it’s resolved.',
-  OPEN_REVIEW_CASE:
-    'A trust review on your account is still open. Withdrawals unlock when it closes.',
-  FAILED_FINANCIAL_CHECK: 'An earlier financial check didn’t pass. Re-submit it to withdraw again.',
-  ACCOUNT_RESTRICTED: 'Your account is restricted. Contact support to withdraw.',
-};
 
 export default function HostEarnings() {
   const { colors, spacing, radius } = useTheme();
