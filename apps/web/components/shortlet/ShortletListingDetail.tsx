@@ -623,6 +623,12 @@ export function ShortletListingDetail({
                   <span className="text-success">{listing.weeklyDiscountPct}% off</span>
                 </div>
               ) : null}
+              {listing.pricingMode === 'PER_NIGHT' && listing.twoWeekDiscountPct ? (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Stays of 14+ nights</span>
+                  <span className="text-success">{listing.twoWeekDiscountPct}% off</span>
+                </div>
+              ) : null}
               {listing.pricingMode === 'PER_NIGHT' && listing.monthlyDiscountPct ? (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Stays of 28+ nights</span>

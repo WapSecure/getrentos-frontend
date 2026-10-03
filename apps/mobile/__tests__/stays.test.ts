@@ -86,11 +86,17 @@ describe('the price a guest reads', () => {
     expect(
       discountPhrases({
         weeklyDiscountPct: 10,
+        twoWeekDiscountPct: 15,
         monthlyDiscountPct: 25,
         lastMinuteDiscountPct: 15,
         lastMinuteDays: 3,
       } as ShortletListing)
-    ).toEqual(['10% off 7+ nights', '25% off 28+ nights', '15% off within 3 days of arrival']);
+    ).toEqual([
+      '10% off 7+ nights',
+      '15% off 14+ nights',
+      '25% off 28+ nights',
+      '15% off within 3 days of arrival',
+    ]);
   });
 });
 

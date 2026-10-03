@@ -49,7 +49,7 @@ export const CANCELLATION_POLICY_LABEL: Record<ShortletCancellationPolicy, strin
   STRICT: 'Strict',
 };
 
-export type ShortletDiscountType = 'WEEKLY' | 'MONTHLY' | 'LAST_MINUTE';
+export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
 
 /** Search with dates: the all-in price for those dates. */
 export interface StayQuote {
@@ -116,6 +116,7 @@ export interface ShortletListing {
   maxNights?: number;
   weekendUpliftPct?: number;
   weeklyDiscountPct?: number;
+  twoWeekDiscountPct?: number;
   monthlyDiscountPct?: number;
   lastMinuteDiscountPct?: number;
   lastMinuteDays?: number;

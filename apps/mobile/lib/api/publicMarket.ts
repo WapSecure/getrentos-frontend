@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
-import type { ShortletListing } from './shortlets';
+import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
 
 /**
@@ -35,7 +35,8 @@ export interface MarketCard {
   title: string;
   location: string;
   price: number;
-  period?: 'month' | 'year' | 'night';
+  /** `total` = the whole price for the chosen dates (shortlets). */
+  period?: 'month' | 'year' | 'night' | 'total';
   bedrooms?: number;
   bathrooms?: number;
   /** Floor area in m²: rentals only. */
@@ -44,6 +45,8 @@ export interface MarketCard {
   verified: boolean;
   /** A short secondary fact for the card, e.g. "600 sqm · C of O". */
   highlight?: string;
+  /** Trust signals shown over the photo, e.g. "Inspected", "Fair price". */
+  badges?: string[];
 }
 
 export interface MarketFact {
@@ -61,6 +64,8 @@ export interface MarketDetail extends MarketCard {
   /** Who is behind the listing: a name and trust signal only, never contact details. */
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
   facts: MarketFact[];
+  /** Shortlets: the full listing, for the essentials, rules, prices and trust sections. */
+  stay?: ShortletListing;
 }
 
 export interface MarketFilters {
@@ -84,6 +89,9 @@ export interface MarketFilters {
   /** Shortlets only. */
   guests?: number;
   instantBooking?: boolean;
+  /** Shortlets only, yyyy-MM-dd: with both, every stay is priced in full for these dates. */
+  checkIn?: string;
+  checkOut?: string;
   /** Land only. */
   titleType?: string;
   minAreaSqm?: number;
@@ -244,22 +252,47 @@ const saleToCard = (s: SaleDto): MarketCard => ({
   highlight: humanise(s.propertyType),
 });
 
-const shortletToCard = (s: ShortletListing): MarketCard => ({
-  id: s.listingId ?? s.id,
-  kind: 'shortlet',
-  title: s.title,
-  location: place(s.city, s.state),
-  price: money(s.nightlyRate),
-  period: 'night',
-  image: s.coverImageUrl || s.images?.[0] || undefined,
-  verified: !!s.isVerified,
-  highlight: [
-    `Up to ${s.maxGuests} guest${s.maxGuests === 1 ? '' : 's'}`,
-    s.instantBooking ? 'Instant book' : undefined,
-  ]
-    .filter(Boolean)
-    .join(' · '),
-});
+/**
+ * A stay in the public list. With dates it is priced the way the booking will
+ * be — nights, cleaning and tax in — or says why those dates don't work.
+ */
+const shortletToCard = (s: ShortletListing): MarketCard => {
+  const q = s.stayQuote;
+  const nights = (n: number) => `${n} night${n === 1 ? '' : 's'}`;
+  const base = {
+    id: s.listingId ?? s.id,
+    kind: 'shortlet' as const,
+    title: s.title,
+    location: place(s.city, s.state),
+    image: s.coverImageUrl || s.images?.[0] || undefined,
+    verified: !!s.isVerified,
+    badges: [s.inspection ? 'Inspected' : undefined, s.fairPrice ? 'Fair price' : undefined].filter(
+      (b): b is string => !!b
+    ),
+  };
+  if (q?.bookable) {
+    return {
+      ...base,
+      price: money(q.quote.total),
+      period: 'total',
+      highlight: `Total for ${nights(q.quote.nights)} · incl. cleaning${q.quote.tax ? ` & ${q.quote.taxName ?? 'tax'}` : ''}`,
+    };
+  }
+  return {
+    ...base,
+    price: money(s.nightlyRate),
+    period: 'night',
+    highlight:
+      q && !q.bookable
+        ? q.reason
+        : [
+            `Up to ${s.maxGuests} guest${s.maxGuests === 1 ? '' : 's'}`,
+            s.instantBooking ? 'Instant book' : undefined,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+  };
+};
 
 const landToCard = (l: LandListing): MarketCard => ({
   id: l.id,
@@ -363,6 +396,8 @@ export const publicMarketApi = {
               estate: f.estate,
               guests: f.guests,
               instantBooking: f.instantBooking,
+              // Dates only count as a pair.
+              ...(f.checkIn && f.checkOut ? { checkIn: f.checkIn, checkOut: f.checkOut } : {}),
               sort: f.sort,
             })}`,
             anon
@@ -436,6 +471,7 @@ export const publicMarketApi = {
         const s = await apiFetch<ShortletListing>(`/shortlets/${id}`, anon);
         return {
           ...shortletToCard(s),
+          stay: s,
           images: gallery(s.coverImageUrl, s.images),
           address: s.address,
           description: s.description,
@@ -494,6 +530,14 @@ export const publicMarketApi = {
         };
       }
     }
+  },
+
+  /** The all-in price of one stay for a date range (public: no account needed). */
+  stayQuote(id: string, checkIn: string, checkOut: string) {
+    return apiFetch<ShortletAvailability>(
+      `/shortlets/${id}/availability${toQuery({ checkIn, checkOut })}`,
+      anon
+    );
   },
 
   estates(search: string | undefined, page = 1, pageSize = 20) {

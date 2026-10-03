@@ -115,6 +115,7 @@ export const guestsLabel = (n: number) => `${n} ${n === 1 ? 'guest' : 'guests'}`
 
 const DISCOUNT_NAME: Record<ShortletDiscountType, string> = {
   WEEKLY: 'Weekly discount',
+  TWO_WEEK: 'Two-week discount',
   MONTHLY: 'Monthly discount',
   LAST_MINUTE: 'Last-minute discount',
 };
@@ -169,6 +170,7 @@ export function quoteLines(q: ShortletAvailability): PriceLine[] {
 export function discountPhrases(l: ShortletListing): string[] {
   const out: string[] = [];
   if (l.weeklyDiscountPct) out.push(`${l.weeklyDiscountPct}% off 7+ nights`);
+  if (l.twoWeekDiscountPct) out.push(`${l.twoWeekDiscountPct}% off 14+ nights`);
   if (l.monthlyDiscountPct) out.push(`${l.monthlyDiscountPct}% off 28+ nights`);
   if (l.lastMinuteDiscountPct && l.lastMinuteDays)
     out.push(

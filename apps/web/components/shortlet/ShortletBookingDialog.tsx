@@ -27,6 +27,7 @@ const TODAY = new Date().toISOString().slice(0, 10);
 
 const DISCOUNT_LABEL: Record<ShortletDiscountType, string> = {
   WEEKLY: 'Weekly discount',
+  TWO_WEEK: 'Two-week discount',
   MONTHLY: 'Monthly discount',
   LAST_MINUTE: 'Last-minute discount',
 };

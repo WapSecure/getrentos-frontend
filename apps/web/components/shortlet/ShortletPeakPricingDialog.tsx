@@ -50,6 +50,7 @@ export function ShortletPeakPricingDialog({
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const [weekly, setWeekly] = useState(String(listing.weeklyDiscountPct || ''));
+  const [twoWeek, setTwoWeek] = useState(String(listing.twoWeekDiscountPct || ''));
   const [monthly, setMonthly] = useState(String(listing.monthlyDiscountPct || ''));
   const [lastMinute, setLastMinute] = useState(String(listing.lastMinuteDiscountPct || ''));
   const [lastMinuteDays, setLastMinuteDays] = useState(String(listing.lastMinuteDays || 3));
@@ -82,6 +83,7 @@ export function ShortletPeakPricingDialog({
       unwrap(
         shortletService.updateListing(listing.id, {
           weeklyDiscountPct: toNum(weekly),
+          twoWeekDiscountPct: toNum(twoWeek),
           monthlyDiscountPct: toNum(monthly),
           lastMinuteDiscountPct: toNum(lastMinute),
           lastMinuteDays: Math.max(1, toNum(lastMinuteDays)),
@@ -276,6 +278,9 @@ export function ShortletPeakPricingDialog({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Field label="Weekly (7+ nights) %">
                 <NumberInput min={0} max={90} value={weekly} onValueChange={setWeekly} />
+              </Field>
+              <Field label="Two weeks (14+ nights) %">
+                <NumberInput min={0} max={90} value={twoWeek} onValueChange={setTwoWeek} />
               </Field>
               <Field label="Monthly (28+ nights) %">
                 <NumberInput min={0} max={90} value={monthly} onValueChange={setMonthly} />

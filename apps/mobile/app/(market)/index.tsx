@@ -7,6 +7,7 @@ import { FlashList } from '@shopify/flash-list';
 import {
   BedDouble,
   Building2,
+  CalendarDays,
   ChevronLeft,
   Home,
   KeyRound,
@@ -46,6 +47,8 @@ import {
 import { track } from '@/lib/analytics';
 import { forgetListing } from '@/lib/pendingListing';
 import { MarketFilterSheet, type MarketRefinements } from '@/components/market/MarketFilterSheet';
+import { StayDatesSheet, type StayDates } from '@/components/shortlet/StayDatesSheet';
+import { seasonRange } from '@/lib/stays';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet';
 
@@ -283,12 +286,22 @@ function Listings({
   const saved = useMarketSaved(kind);
   const [refine, setRefine] = useState<MarketRefinements>({});
   const [sheetOpen, setSheetOpen] = useState(false);
+  // Shortlets: with dates, every stay shows the total for exactly those nights.
+  const [dates, setDates] = useState<StayDates | null>(null);
+  const [datesOpen, setDatesOpen] = useState(false);
+  const dated = kind === 'shortlet' && !!dates;
   const [compared, setCompared] = useState<MarketCard[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const refineCount = activeFilterCount(kind, refine);
   const filters = useMemo(
-    () => ({ ...refine, search: search || undefined, sort, estate: estate?.slug }),
-    [refine, search, sort, estate]
+    () => ({
+      ...refine,
+      search: search || undefined,
+      sort,
+      estate: estate?.slug,
+      ...(dated ? { checkIn: dates.checkIn, checkOut: dates.checkOut } : {}),
+    }),
+    [refine, search, sort, estate, dated, dates]
   );
 
   const query = useInfiniteQuery({
@@ -307,8 +320,15 @@ function Listings({
 
   const open = useCallback(
     (id: string) =>
-      router.push({ pathname: '/(market)/listing/[kind]/[id]', params: { kind, id } }),
-    [kind]
+      router.push({
+        pathname: '/(market)/listing/[kind]/[id]',
+        params: {
+          kind,
+          id,
+          ...(dated ? { checkIn: dates.checkIn, checkOut: dates.checkOut } : {}),
+        },
+      }),
+    [kind, dated, dates]
   );
 
   const toggleCompare = useCallback((listing: MarketCard) => {
@@ -399,6 +419,17 @@ function Listings({
         style={{ marginHorizontal: -spacing.xl }}
         contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}
       >
+        {kind === 'shortlet' ? (
+          <Chip
+            size="sm"
+            label={dates ? seasonRange(dates.checkIn, dates.checkOut) : 'Add dates'}
+            selected={!!dates}
+            leadingIcon={
+              <CalendarDays size={13} color={dates ? colors.accentForeground : colors.foreground} />
+            }
+            onPress={() => setDatesOpen(true)}
+          />
+        ) : null}
         <Chip
           size="sm"
           label="Filters"
@@ -426,22 +457,33 @@ function Listings({
       {query.data ? (
         <Text variant="caption" color="mutedForeground" accessibilityLiveRegion="polite">
           {total.toLocaleString()} {total === 1 ? 'listing' : 'listings'}
+          {dated ? ' · prices are the total for your dates' : ''}
         </Text>
       ) : null}
     </View>
   );
 
   const sheet = (
-    <MarketFilterSheet
-      open={sheetOpen}
-      kind={kind}
-      value={refine}
-      onClose={() => setSheetOpen(false)}
-      onApply={(next) => {
-        setRefine(next);
-        track('market_filters_applied', { kind, count: activeFilterCount(kind, next) });
-      }}
-    />
+    <>
+      {kind === 'shortlet' ? (
+        <StayDatesSheet
+          open={datesOpen}
+          onClose={() => setDatesOpen(false)}
+          value={dates}
+          onChange={setDates}
+        />
+      ) : null}
+      <MarketFilterSheet
+        open={sheetOpen}
+        kind={kind}
+        value={refine}
+        onClose={() => setSheetOpen(false)}
+        onApply={(next) => {
+          setRefine(next);
+          track('market_filters_applied', { kind, count: activeFilterCount(kind, next) });
+        }}
+      />
+    </>
   );
 
   if (query.isError && items.length === 0) {

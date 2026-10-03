@@ -19,7 +19,8 @@ export interface PropertyCardData {
   title: string;
   location: string;
   price: number;
-  period?: 'month' | 'year' | 'night' | null;
+  /** `total` = the whole price for chosen dates (the tag says what it covers). */
+  period?: 'month' | 'year' | 'night' | 'total' | null;
   bedrooms?: number;
   bathrooms?: number;
   /** Floor area in m². */
@@ -30,9 +31,16 @@ export interface PropertyCardData {
   score?: number | null;
   /** One short secondary fact, e.g. "600 sqm · C of O" or "Instant book". */
   tag?: string;
+  /** Short trust signals shown over the photo, e.g. "Inspected", "Fair price". */
+  badges?: string[];
 }
 
-const SPOKEN_PERIOD = { month: 'per month', year: 'per year', night: 'per night' } as const;
+const SPOKEN_PERIOD = {
+  month: 'per month',
+  year: 'per year',
+  night: 'per night',
+  total: 'in total',
+} as const;
 
 /** What a screen reader hears for a card: price in naira, not a bare number. */
 export function describeProperty(p: PropertyCardData): string {
@@ -47,6 +55,7 @@ export function describeProperty(p: PropertyCardData): string {
     p.tag,
     p.score != null ? `${Math.round(p.score)} percent match` : null,
     p.verified ? 'Verified' : null,
+    ...(p.badges ?? []),
   ]
     .filter(Boolean)
     .join(', ');
@@ -164,6 +173,17 @@ function PropertyCardBase({
           </Text>
         </View>
       ) : null}
+      {!row && property.badges?.length ? (
+        <View style={styles.badges}>
+          {property.badges.map((b) => (
+            <View key={b} style={styles.lightBadge}>
+              <Text variant="caption" style={{ color: '#161b22', fontWeight: '700' }}>
+                {b}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 
@@ -278,6 +298,21 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 999,
+  },
+  badges: {
+    position: 'absolute',
+    left: 10,
+    bottom: 10,
+    right: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  lightBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.92)',
   },
   heart: {
     position: 'absolute',

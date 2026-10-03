@@ -46,6 +46,8 @@ export interface HostListing {
   maxNights?: number;
   weekendUpliftPct?: number;
   weeklyDiscountPct: number;
+  /** Stays of 14+ nights. */
+  twoWeekDiscountPct?: number;
   monthlyDiscountPct: number;
   lastMinuteDiscountPct: number;
   lastMinuteDays: number;
@@ -101,6 +103,7 @@ export interface CreateHostListingInput extends ListingPricingInput {
 
 export interface PricingRulesInput {
   weeklyDiscountPct?: number;
+  twoWeekDiscountPct?: number;
   monthlyDiscountPct?: number;
   lastMinuteDiscountPct?: number;
   lastMinuteDays?: number;
@@ -147,7 +150,7 @@ export interface HostBooking {
   nightlyRate?: number;
   cleaningFee?: number;
   subtotal: number;
-  discountType?: 'WEEKLY' | 'MONTHLY' | 'LAST_MINUTE';
+  discountType?: 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
   discountAmount?: number;
   total: number;
   status: ShortletBookingStatus;
@@ -645,6 +648,7 @@ export function rulesSummary(l: HostListing): string | null {
   if (l.seasons?.length)
     parts.push(l.seasons.length === 1 ? l.seasons[0].name : `${l.seasons.length} seasons`);
   if (l.weeklyDiscountPct) parts.push(`${l.weeklyDiscountPct}% weekly`);
+  if (l.twoWeekDiscountPct) parts.push(`${l.twoWeekDiscountPct}% two-week`);
   if (l.monthlyDiscountPct) parts.push(`${l.monthlyDiscountPct}% monthly`);
   if (l.lastMinuteDiscountPct) parts.push(`${l.lastMinuteDiscountPct}% last-minute`);
   if (l.advanceNoticeDays) parts.push(`${l.advanceNoticeDays}d notice`);
