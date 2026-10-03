@@ -1087,6 +1087,7 @@ function peakSummary(l: ShortletListing): string | null {
     parts.push(seasons.length === 1 ? `Season: ${seasons[0].name}` : `${seasons.length} seasons`);
   }
   if (l.weeklyDiscountPct) parts.push(`${l.weeklyDiscountPct}% off 7+ nights`);
+  if (l.twoWeekDiscountPct) parts.push(`${l.twoWeekDiscountPct}% off 14+ nights`);
   if (l.monthlyDiscountPct) parts.push(`${l.monthlyDiscountPct}% off 28+ nights`);
   if (l.lastMinuteDiscountPct) parts.push(`${l.lastMinuteDiscountPct}% last-minute`);
   if (l.advanceNoticeDays) parts.push(`${l.advanceNoticeDays}d notice`);

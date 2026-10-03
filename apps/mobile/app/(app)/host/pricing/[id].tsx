@@ -84,6 +84,7 @@ function Rules({ listing: l }: { listing: HostListing }) {
   const perNight = l.pricingMode === 'PER_NIGHT';
   const initial = {
     weekly: l.weeklyDiscountPct ?? 0,
+    twoWeek: l.twoWeekDiscountPct ?? 0,
     monthly: l.monthlyDiscountPct ?? 0,
     lastMinute: l.lastMinuteDiscountPct ?? 0,
     lastMinuteDays: l.lastMinuteDays || 3,
@@ -98,6 +99,7 @@ function Rules({ listing: l }: { listing: HostListing }) {
     mutationFn: () =>
       hostShortletsApi.update(l.id, {
         weeklyDiscountPct: r.weekly,
+        twoWeekDiscountPct: r.twoWeek,
         monthlyDiscountPct: r.monthly,
         lastMinuteDiscountPct: r.lastMinute,
         lastMinuteDays: r.lastMinuteDays,
@@ -129,6 +131,16 @@ function Rules({ listing: l }: { listing: HostListing }) {
               step={5}
               suffix="%"
               onChange={(weekly) => set({ weekly })}
+            />
+            <Divider />
+            <Stepper
+              label="Two weeks"
+              hint="14 nights or more"
+              value={r.twoWeek}
+              max={90}
+              step={5}
+              suffix="%"
+              onChange={(twoWeek) => set({ twoWeek })}
             />
             <Divider />
             <Stepper

@@ -47,6 +47,16 @@ import { rememberListing } from '@/lib/pendingListing';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
+import type { ShortletListing } from '@/lib/api/shortlets';
+import { nightsLabel, seasonRange } from '@/lib/stays';
+import { GuestPromiseCard, SupportContact, TrustChips } from '@/components/shortlet/StayUI';
+import {
+  EssentialsBlock,
+  FairPriceNote,
+  InspectionBlock,
+  PricingBlock,
+  RulesBlock,
+} from '@/components/shortlet/StaySections';
 
 const CTA: Record<MarketKind, string> = {
   rent: 'Sign in to enquire',
@@ -195,7 +205,9 @@ function Body({ listing: p }: { listing: MarketDetail }) {
             {p.kind === 'rent' || p.kind === 'shortlet' ? 'Price' : 'Asking price'}
           </Text>
           <Price amount={p.price} period={p.period} variant="heading" />
+          {p.stay ? <StayTotal stay={p.stay} /> : null}
         </Card>
+        {p.stay ? <TrustChips listing={p.stay} /> : null}
       </View>
 
       {p.bedrooms || p.bathrooms || p.size || p.highlight ? (
@@ -222,7 +234,8 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         </View>
       ) : null}
 
-      <CostContext listing={p} />
+      {/* A stay's own Prices section itemises everything, so the generic note would only contradict it. */}
+      {p.stay ? null : <CostContext listing={p} />}
 
       {p.host ? (
         <Card
@@ -327,6 +340,19 @@ function Body({ listing: p }: { listing: MarketDetail }) {
             ))}
           </Card>
         </View>
+      ) : null}
+
+      {p.stay ? (
+        <>
+          <EssentialsBlock listing={p.stay} />
+          <RulesBlock listing={p.stay} />
+          <PricingBlock listing={p.stay} />
+          <FairPriceNote listing={p.stay} />
+          <InspectionBlock listing={p.stay} />
+          <GuestPromiseCard>
+            <SupportContact context={`Question about ${p.title}`} />
+          </GuestPromiseCard>
+        </>
       ) : null}
 
       {p.amenities.length ? (
@@ -588,4 +614,47 @@ function initials(name: string) {
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase())
     .join('');
+}
+
+/**
+ * The full price of a stay for the dates chosen in the list: what the booking
+ * will cost, or why those dates don't work. Nothing shows without dates.
+ */
+function StayTotal({ stay }: { stay: ShortletListing }) {
+  const { colors } = useTheme();
+  const { checkIn, checkOut } = useLocalSearchParams<{ checkIn?: string; checkOut?: string }>();
+  const id = stay.listingId ?? stay.id;
+  const quote = useQuery({
+    queryKey: ['market', 'stay-quote', id, checkIn, checkOut],
+    queryFn: () => publicMarketApi.stayQuote(id, checkIn!, checkOut!),
+    enabled: !!checkIn && !!checkOut,
+  });
+  const q = quote.data;
+  if (!checkIn || !checkOut || !q) return null;
+  if (!q.available) {
+    return (
+      <Text variant="callout" style={{ color: colors.warning }}>
+        {seasonRange(checkIn, checkOut)}: {q.reason ?? 'those dates are taken.'}
+      </Text>
+    );
+  }
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${(q.estimatedTotal ?? 0).toLocaleString('en-NG')} naira in total for ${seasonRange(checkIn, checkOut)}`}
+      style={{ gap: 2 }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 5 }}>
+        <Price amount={q.estimatedTotal ?? 0} variant="subheading" />
+        <Text variant="callout" color="mutedForeground">
+          total
+        </Text>
+      </View>
+      <Text variant="caption" color="mutedForeground">
+        {seasonRange(checkIn, checkOut)} · {nightsLabel(q.estimatedNights ?? 0)} · incl. cleaning
+        {q.estimatedTax ? ` & ${q.taxName ?? 'tax'}` : ''}
+        {stay.deposit ? ` · + ₦${stay.deposit.toLocaleString('en-NG')} refundable deposit` : ''}
+      </Text>
+    </View>
+  );
 }

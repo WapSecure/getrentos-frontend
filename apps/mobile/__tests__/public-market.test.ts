@@ -216,6 +216,100 @@ describe('public marketplace normalisation', () => {
     expect(items[0]).toMatchObject({ period: 'night', highlight: 'Up to 2 guests' });
   });
 
+  describe('shortlets with dates', () => {
+    const stay = (over: Record<string, unknown> = {}) => ({
+      id: 's1',
+      listingId: 's1',
+      title: 'Ikoyi flat',
+      city: 'Lagos',
+      state: 'Lagos',
+      nightlyRate: 100000,
+      maxGuests: 4,
+      instantBooking: true,
+      isVerified: true,
+      ...over,
+    });
+
+    it('sends the dates only as a pair', async () => {
+      await publicMarketApi.list('shortlet', { checkIn: '2026-12-20', checkOut: '2026-12-27' });
+      expect(lastQuery().params).toMatchObject({ checkIn: '2026-12-20', checkOut: '2026-12-27' });
+      await publicMarketApi.list('shortlet', { checkIn: '2026-12-20' });
+      expect(lastQuery().params).not.toHaveProperty('checkIn');
+    });
+
+    it('never sends dates to the other markets', async () => {
+      await publicMarketApi.list('rent', { checkIn: '2026-12-20', checkOut: '2026-12-27' });
+      expect(lastQuery().params).not.toHaveProperty('checkIn');
+    });
+
+    it('shows the total for the dates, with what it includes', async () => {
+      fetchMock.mockResolvedValueOnce(
+        page([
+          stay({
+            stayQuote: {
+              bookable: true,
+              quote: {
+                nights: 7,
+                nightsTotal: 630000,
+                cleaningFee: 20000,
+                tax: 48750,
+                taxName: 'VAT',
+                total: 698750,
+                perNight: 90000,
+              },
+            },
+          }),
+        ])
+      );
+      const { items } = await publicMarketApi.list('shortlet', {
+        checkIn: '2026-11-10',
+        checkOut: '2026-11-17',
+      });
+      expect(items[0]).toMatchObject({
+        price: 698750,
+        period: 'total',
+        highlight: 'Total for 7 nights · incl. cleaning & VAT',
+      });
+    });
+
+    it('says why the dates don’t work, and keeps the nightly price', async () => {
+      fetchMock.mockResolvedValueOnce(
+        page([stay({ stayQuote: { bookable: false, reason: 'Minimum stay is 5 night(s).' } })])
+      );
+      const { items } = await publicMarketApi.list('shortlet', {
+        checkIn: '2026-12-20',
+        checkOut: '2026-12-22',
+      });
+      expect(items[0]).toMatchObject({
+        price: 100000,
+        period: 'night',
+        highlight: 'Minimum stay is 5 night(s).',
+      });
+    });
+
+    it('carries the trust signals a stay has earned', async () => {
+      fetchMock.mockResolvedValueOnce(
+        page([
+          stay({
+            inspection: { inspectedAt: '2026-08-01' },
+            fairPrice: { typicalNightly: 110000 },
+          }),
+          stay({ id: 's2', listingId: 's2' }),
+        ])
+      );
+      const { items } = await publicMarketApi.list('shortlet', {});
+      expect(items[0].badges).toEqual(['Inspected', 'Fair price']);
+      expect(items[1].badges).toEqual([]);
+    });
+
+    it('quotes one stay without an account', async () => {
+      await publicMarketApi.stayQuote('s1', '2026-11-10', '2026-11-17');
+      const [path, opts] = fetchMock.mock.calls.at(-1)!;
+      expect(path).toBe('/shortlets/s1/availability?checkIn=2026-11-10&checkOut=2026-11-17');
+      expect(opts).toMatchObject({ anonymous: true });
+    });
+  });
+
   it('keeps public market data in the offline cache', () => {
     expect(
       shouldPersistQuery({ queryKey: qk.market.list('rent', {}), state: { status: 'success' } })
