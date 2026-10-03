@@ -103,3 +103,18 @@ describe('realtor notifications', () => {
     );
   });
 });
+
+describe('estate office notifications', () => {
+  it('opens the office’s dues, not a resident’s own, for a manager', () => {
+    expect(routeForNotification({ type: 'ESTATE_DUE_OVERDUE' }, 'estate')).toBe(
+      '/(app)/(estate)/dues'
+    );
+    expect(routeForNotification({ type: 'ESTATE_DUE_OVERDUE' }, 'resident')).toBe('/(app)/dues');
+  });
+
+  it('maps the web estate paths', () => {
+    expect(routeForNotification({ actionUrl: '/estate/households' }, 'estate')).toBe(
+      '/(app)/(estate)/households'
+    );
+  });
+});
