@@ -251,6 +251,13 @@ export interface RealtorNotification {
   createdAt: string;
 }
 
+export interface RealtorNotificationPreference {
+  /** Category: offers, messages, clients, payments or reviews. */
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
 export interface RealtorProfile {
   fullName: string;
   email: string;
@@ -398,6 +405,20 @@ export const realtorApi = {
     companyName?: string;
     phone?: string;
   }) => apiFetch<RealtorProfile>('/realtor/settings/profile', { method: 'PUT', body }),
+
+  uploadAvatar: (file: PickedFile) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    return apiUpload<RealtorProfile>('/realtor/settings/profile/avatar', form);
+  },
+
+  notificationPreferences: () =>
+    apiFetch<RealtorNotificationPreference[]>('/realtor/settings/notifications'),
+  updateNotificationPreferences: (preferences: RealtorNotificationPreference[]) =>
+    apiFetch<RealtorNotificationPreference[]>('/realtor/settings/notifications', {
+      method: 'PUT',
+      body: { preferences },
+    }),
 
   notifications: () =>
     apiFetch<Paginated<RealtorNotification>>(

@@ -3,6 +3,7 @@ import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
   Bell,
+  BellRing,
   CircleHelp,
   FileSignature,
   FileStack,
@@ -107,6 +108,13 @@ export default function RealtorAccount() {
       description: 'Everything we’ve told you',
       icon: Bell,
       onPress: go('/(app)/realtor-notifications'),
+    },
+    {
+      key: 'notification-settings',
+      label: 'Push alerts',
+      description: 'Choose what buzzes your phone',
+      icon: BellRing,
+      onPress: go('/(app)/realtor-notification-settings'),
     },
     {
       key: 'billing',

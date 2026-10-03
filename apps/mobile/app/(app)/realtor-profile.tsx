@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { Camera } from 'lucide-react-native';
 import {
+  Avatar,
   Button,
   Card,
   ErrorState,
@@ -16,6 +19,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorProfile } from '@/lib/api/realtor';
 import { ApiError } from '@/lib/api/client';
+import { pickImage } from '@/lib/filePicker';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 export default function RealtorProfileScreen() {
@@ -56,7 +60,7 @@ export default function RealtorProfileScreen() {
 }
 
 function ProfileForm({ initial }: { initial: RealtorProfile }) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [fullName, setFullName] = useState(initial.fullName);
@@ -85,8 +89,65 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
       toast.show(err instanceof ApiError ? err.message : 'Could not save your profile.', 'error'),
   });
 
+  const avatar = useMutation({
+    mutationFn: async () => {
+      const file = await pickImage();
+      return file ? realtorApi.uploadAvatar(file) : null;
+    },
+    onSuccess: (saved) => {
+      if (!saved) return;
+      qc.setQueryData(qk.realtor.profile, saved);
+      toast.show('Photo updated.', 'success');
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not update your photo.', 'error'),
+  });
+  const photo = initial.avatarUrl;
+
   return (
     <>
+      <View style={{ alignItems: 'center', gap: spacing.sm }}>
+        <Pressable
+          onPress={() => avatar.mutate()}
+          disabled={avatar.isPending}
+          accessibilityRole="button"
+          accessibilityLabel="Change profile photo"
+          accessibilityState={{ disabled: avatar.isPending, busy: avatar.isPending }}
+          style={{ opacity: avatar.isPending ? 0.6 : 1 }}
+        >
+          {photo ? (
+            <Image
+              source={{ uri: photo }}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              accessible={false}
+              style={{ width: 84, height: 84, borderRadius: 42 }}
+            />
+          ) : (
+            <Avatar name={fullName} size={84} />
+          )}
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: colors.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 2,
+              borderColor: colors.background,
+            }}
+          >
+            <Camera size={13} color={colors.primaryForeground} />
+          </View>
+        </Pressable>
+        <Text variant="caption" color="mutedForeground">
+          {avatar.isPending ? 'Uploading…' : 'Tap to change photo'}
+        </Text>
+      </View>
       <Card elevated style={{ gap: spacing.md }}>
         <TextField
           label="Full name"

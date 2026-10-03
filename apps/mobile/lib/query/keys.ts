@@ -156,6 +156,7 @@ export const qk = {
     trustProfile: ['realtor', 'trust-profile'] as const,
     profile: ['realtor', 'profile'] as const,
     notifications: ['realtor', 'notifications'] as const,
+    notificationPreferences: ['realtor', 'notification-preferences'] as const,
   },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,
