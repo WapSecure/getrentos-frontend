@@ -2334,7 +2334,8 @@ function FeeConfigForm({
   const nextInput: AdminShortletFeeConfigInput = {
     commissionPct,
     taxName: taxName.trim() || undefined,
-    taxPct: Math.min(100, Math.max(0, Number(taxPct) || 0)),
+    // Up to two decimals, as the API allows (Nigeria's VAT is 7.5%).
+    taxPct: Math.round(Math.min(100, Math.max(0, Number(taxPct) || 0)) * 100) / 100,
     introCommissionPct: introValue,
     introEndsAt: hasIntro && introLastDay ? launchEndsAfter(introLastDay) : null,
     depositClaimWindowHours: Math.max(
@@ -2418,13 +2419,17 @@ function FeeConfigForm({
               maxLength={60}
             />
           </Field>
-          <Field label="Tax (%)" hint="Added to the guest charge on top of the stay total.">
+          <Field
+            label="Tax (%)"
+            hint="Added to the guest charge on top of the stay total. Decimals are fine, e.g. 7.5 for VAT."
+          >
             <NumberInput
+              integer={false}
               min={0}
               max={100}
               value={taxPct}
               onValueChange={setTaxPct}
-              placeholder="e.g. 7"
+              placeholder="e.g. 7.5"
             />
           </Field>
           <Field
