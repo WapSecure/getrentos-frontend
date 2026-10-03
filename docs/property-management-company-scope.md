@@ -607,6 +607,74 @@ review item; mandate grants are not FK-linked to their mandate (finding c).
 
 ---
 
+## 9c. Phase 2 — in progress (2026-10-03)
+
+Backend commit `d3e6796`. Two of the four Phase 2 workstreams are done; the other two
+are listed at the end of this section rather than left implied.
+
+**1. A grant now records the mandate that wrote it** (finding c closed).
+`PropertyAuthority.managementMandateId` is a real FK with an index, and revocation keys
+off it instead of matching the note string `Management mandate <uuid>`. A note is written
+for humans; editing one would have silently stopped the match and left a terminated
+mandate's access live. The migration backfills from the note but adopts **only notes that
+resolve to a mandate that still exists** — a hand-written note that merely looks similar is
+left null rather than claimed by a mandate that never wrote it. The backfill was tested
+directly against the database with one matching note and three non-matching ones, because
+an off-by-one in the `substring` would have reported success while adopting nothing.
+
+**2. No single staff account ends a client engagement** (raised in Phase 1, decided).
+`terminate()` used to exempt staff from the manager's notice rule. Staff now raise a
+request and a **different** staff member approves it. The ask is its own record,
+following `LeaseTerminationRequest`'s precedent, so while it is open the mandate keeps
+running and keeps its authority — a withdrawn request leaves nothing to undo, and no
+`PENDING_TERMINATION` status had to be added to the state machine.
+
+The notice rule is applied on approval **only when GetRentos is the manager**, because
+there the notice period is our own commitment to the owner and skipping it needs `force`
+plus a reason of its own, exactly as it would for any other manager. For a third-party
+firm, ops may still end it at once: that is the collapsed-firm case the old bypass existed
+for, and the notice there is the firm's obligation, not ours. Owners are unaffected — and
+a direct termination closes any open request, so ops is never shown a decision about an
+engagement that is already over.
+
+**3. `@RequiresPropertyCapability`, and why it could not be applied as planned.**
+The guard is built and registered in the global chain: it resolves the property, asks
+`authorizeFor`, fails closed when a declared route's property id is missing, and
+deliberately does **not** fall back to a generic `:id`.
+
+**The finding that shaped it:** writing the coverage test revealed that **no landlord
+route uses `:propertyId` at all**. The API is uniformly `:id`-keyed, and `:id` means a
+different entity on nearly every controller — a listing, a lease, a maintenance request,
+an eviction case. Of ~44 parameterised routes on the landlord surface, **exactly three
+carry a property id** (`landlord/properties`). For the rest the property is only knowable
+_after_ the entity has been loaded, so a pre-handler guard cannot cover them and the
+service must make the call, as it does today.
+
+So the guard is a mechanism for property-keyed routes and for new ones, not a blanket
+solution. To stop the surface drifting, the coverage test instead forces an explicit
+**classification per controller**, discovered by walking the controllers themselves:
+`PROPERTY_KEYED` (its parameterised routes must declare, guard enforces) or
+`SCOPES_IN_SERVICE` (with the reason, read out of the service, for where the check
+actually lives). A new controller fails the build until someone classifies it, and a
+classification for a deleted controller fails as stale. The map doubles as the Phase 2
+work list: 12 controllers resolve their entity and call `authorizeFor`, 4 are owner-only,
+2 guard with an explicit `landlordId` comparison, 4 scope by the caller's own account or
+SQL, and 1 is property-keyed.
+
+Verified: build green; full suite **251 suites / 3261 tests**. Six guarantees falsified
+one at a time — the maker/checker comparison, the staff guard on `terminate()`, id-keyed
+revocation, the notice rule binding us as manager, a missing route declaration, and an
+unclassified controller — each caught by the test written for it.
+
+**Still to do in Phase 2:** make the four owner-only services grant-aware
+(`dashboard`, `financials`, `owner-statements`, `tenants`, and the portfolio analytics
+behind it) using the still-unused `controlledPropertyScope`, which also closes Phase 1
+finding (a); classify the `modules/owner` controller surface, which this increment
+deliberately left alone rather than half-cover; and add `actorId` + mandate attribution to
+custody actions in the audit log.
+
+---
+
 ## 10. Open decisions (need product/legal sign-off)
 
 1. **Fee defaults**: is GetRentos publishing standard rates (e.g. 10% of rent collected,
@@ -645,7 +713,11 @@ review item; mandate grants are not FK-linked to their mandate (finding c).
     staff member can `terminate()` a mandate where GetRentos is the manager — no notice,
     no second approver. For a third-party firm that is correct. For _our own_ engagement
     with a client it means one person can end the relationship unilaterally. Decide:
-    maker/checker, ops escalation, or accept it explicitly.
+    maker/checker, ops escalation, or accept it explicitly. **DECIDED — maker/checker.**
+    Shipped in Phase 2: staff raise a request and a different staff member approves it,
+    and when GetRentos is the manager the agreed notice binds us too. Applied to all
+    staff-initiated terminations rather than only GetRentos-as-manager, so the rule is
+    "no one person ends a client engagement" and not a special case to remember.
 
 ---
 
