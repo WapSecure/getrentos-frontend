@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -6,7 +5,7 @@ import {
   BarChart3,
   Bell,
   Building2,
-  ChevronRight,
+  DoorOpen,
   FileSignature,
   Handshake,
   Plus,
@@ -14,38 +13,33 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
-import {
-  Card,
-  ErrorState,
-  IconButton,
-  Price,
-  PressableScale,
-  Screen,
-  SectionHeader,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { ErrorState, IconButton, Screen, useTheme } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
-import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
+import {
+  ActivityFeed,
+  AttentionCard,
+  PortfolioCard,
+  QuickActions,
+  dashboardGreeting,
+} from '@/components/dashboard/DashboardParts';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName, relativeTime } from '@/lib/format';
+import { firstName } from '@/lib/format';
 
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+/** The kinds of activity the owner dashboard reports. */
+const ACTIVITY_ICON: Record<string, LucideIcon> = {
+  offer: FileSignature,
+  transaction: Wallet,
+  viewing: DoorOpen,
+};
 
 export default function OwnerHome() {
   const { profile } = useAuth();
-  const { colors, spacing, radius } = useTheme();
+  const { colors } = useTheme();
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
@@ -59,7 +53,7 @@ export default function OwnerHome() {
 
   const header = (
     <DashboardHeader
-      eyebrow={greeting()}
+      eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
       roleBadge="PO"
       subtitle="Your properties, offers and sales"
@@ -122,183 +116,62 @@ export default function OwnerHome() {
 
       {/* What needs you first: offers waiting on an answer. */}
       {d?.pendingOffers ? (
-        <PressableScale
-          onPress={() => router.push('/(app)/(owner)/offers')}
-          accessibilityRole="button"
+        <AttentionCard
+          Icon={FileSignature}
+          title={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer' : 'offers'} waiting for you`}
+          detail="Accept, counter or decline"
           accessibilityLabel={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer is' : 'offers are'} waiting for your answer`}
-        >
-          <Card
-            elevated
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              backgroundColor: colors.accent,
-            }}
-          >
-            <FileSignature size={20} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">
-                {d.pendingOffers} {d.pendingOffers === 1 ? 'offer' : 'offers'} waiting for you
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Accept, counter or decline
-              </Text>
-            </View>
-            <ChevronRight size={18} color={colors.primary} />
-          </Card>
-        </PressableScale>
+          onPress={() => router.push('/(app)/(owner)/offers')}
+        />
       ) : null}
 
-      <Card
-        elevated
-        accessible
-        accessibilityLabel={
-          dashboard.isPending
-            ? 'Loading portfolio value'
-            : showMoney
-              ? `Portfolio value, ${Math.round(d?.portfolioValue ?? 0).toLocaleString('en-NG')} naira. Estimated from your properties recorded values.`
-              : 'Portfolio value hidden'
-        }
-        accessibilityState={{ busy: dashboard.isPending }}
-        style={{ gap: spacing.xs }}
+      <PortfolioCard
+        label="Portfolio value"
+        amount={d?.portfolioValue ?? 0}
+        hint="Estimated from your properties’ recorded values"
+        loading={dashboard.isPending}
+        visible={showMoney}
+        onToggle={toggleMoney}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-            Portfolio value
-          </Text>
-          <BalanceVisibilityButton visible={showMoney} onToggle={toggleMoney} />
-        </View>
-        {dashboard.isPending ? (
-          <Skeleton height={30} width="60%" />
-        ) : showMoney ? (
-          <Price amount={d?.portfolioValue ?? 0} variant="title" />
-        ) : (
-          <Text variant="title">••••••</Text>
-        )}
-        <Text variant="caption" color="mutedForeground">
-          Estimated from your properties’ recorded values
-        </Text>
         {/* A single point isn't a trend, so the chart waits for two. */}
-        {(trend.data?.length ?? 0) > 1 ? (
-          <View style={{ marginTop: spacing.sm }}>
-            <RevenueTrendChart points={trend.data!} />
-          </View>
-        ) : null}
-      </Card>
+        {(trend.data?.length ?? 0) > 1 ? <RevenueTrendChart points={trend.data!} /> : null}
+      </PortfolioCard>
 
       <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
-      <View style={{ gap: spacing.md }}>
-        <SectionHeader title="Quick actions" />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          <QuickAction
-            label="Add property"
-            Icon={Plus}
-            onPress={() => router.push('/(app)/owner-add-property')}
-          />
-          <QuickAction
-            label="Buyer leads"
-            Icon={Users}
-            onPress={() => router.push('/(app)/owner-leads')}
-          />
-          <QuickAction
-            label="Sales in progress"
-            Icon={Wallet}
-            onPress={() => router.push('/(app)/owner-transactions')}
-            badge={d?.activeTransactions}
-          />
-          <QuickAction
-            label="Analytics"
-            Icon={BarChart3}
-            onPress={() => router.push('/(app)/owner-analytics')}
-          />
-        </View>
-      </View>
+      <QuickActions
+        actions={[
+          {
+            label: 'Add property',
+            Icon: Plus,
+            onPress: () => router.push('/(app)/owner-add-property'),
+          },
+          { label: 'Buyer leads', Icon: Users, onPress: () => router.push('/(app)/owner-leads') },
+          {
+            label: 'Sales in progress',
+            Icon: Wallet,
+            onPress: () => router.push('/(app)/owner-transactions'),
+            badge: d?.activeTransactions,
+          },
+          {
+            label: 'Analytics',
+            Icon: BarChart3,
+            onPress: () => router.push('/(app)/owner-analytics'),
+          },
+        ]}
+      />
 
-      {d?.recentActivity?.length ? (
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader title="Recent activity" />
-          <Card elevated padding="none">
-            {d.recentActivity.slice(0, 6).map((a, i) => (
-              <View
-                key={a.id}
-                accessible
-                accessibilityLabel={`${a.message}, ${relativeTime(a.timestamp)}`}
-                style={{
-                  flexDirection: 'row',
-                  gap: spacing.md,
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  borderTopWidth: i ? 1 : 0,
-                  borderTopColor: colors.border,
-                }}
-              >
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: radius.full,
-                    marginTop: 6,
-                    backgroundColor: colors.primary,
-                  }}
-                />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="callout">{a.message}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {relativeTime(a.timestamp)}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </Card>
-        </View>
-      ) : null}
+      <ActivityFeed
+        description="The latest movement across your properties"
+        loading={dashboard.isPending}
+        emptyText="Nothing has happened across your properties yet."
+        items={(d?.recentActivity ?? []).slice(0, 6).map((a) => ({
+          id: a.id,
+          Icon: ACTIVITY_ICON[a.type] ?? Bell,
+          title: a.message,
+          timestamp: a.timestamp,
+        }))}
+      />
     </Screen>
-  );
-}
-
-function QuickAction({
-  label,
-  Icon,
-  onPress,
-  badge,
-}: {
-  label: string;
-  Icon: LucideIcon;
-  onPress: () => void;
-  badge?: number;
-}) {
-  const { colors, spacing, radius } = useTheme();
-  return (
-    <PressableScale
-      onPress={onPress}
-      haptic={false}
-      accessibilityRole="button"
-      accessibilityLabel={badge ? `${label}, ${badge} active` : label}
-      style={{
-        flexBasis: '48%',
-        flexGrow: 1,
-        minHeight: 56,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        padding: spacing.md,
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.card,
-      }}
-    >
-      <Icon size={18} color={colors.primary} />
-      <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
-        {label}
-      </Text>
-      {badge ? (
-        <Text variant="caption" color="primary" style={{ fontWeight: '800' }}>
-          {badge}
-        </Text>
-      ) : null}
-    </PressableScale>
   );
 }
