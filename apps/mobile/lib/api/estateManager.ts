@@ -1,4 +1,6 @@
-import { apiFetch } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { appendFile, type PickedFile } from './documents';
+import type { VisitorPass } from './visitor-pass';
 import type { Paginated } from './properties';
 
 /**
@@ -144,6 +146,83 @@ export interface Violation {
   createdAt: string;
 }
 
+export interface IssuedVisitorPass extends VisitorPass {
+  pin: string;
+  /** The pin as a scannable QR code (data:image/png;base64,...). */
+  qrDataUrl: string;
+}
+
+/** `BLOCK` refuses entry. `WATCH` admits the visitor but tells the office. */
+export type WatchlistSeverity = 'BLOCK' | 'WATCH';
+export type WatchlistSubjectType = 'PERSON' | 'VEHICLE';
+
+export interface WatchlistEntry {
+  id: string;
+  subjectType: WatchlistSubjectType;
+  severity: WatchlistSeverity;
+  /** Lifted entries stay on the list as a record of who decided what. */
+  status: 'ACTIVE' | 'LIFTED';
+  label: string;
+  phone?: string;
+  plateNumber?: string;
+  reason: string;
+  photoUrl?: string;
+  expiresAt?: string;
+  liftedAt?: string;
+  liftReason?: string;
+  createdAt: string;
+}
+
+export type EmergencyKind = 'FIRE' | 'GAS_LEAK' | 'STRUCTURAL' | 'SECURITY' | 'MEDICAL' | 'OTHER';
+export type MusterRollState = 'UNACCOUNTED' | 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
+
+export interface MusterRollEntry {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  personName: string;
+  basis: 'RESIDENT' | 'ON_SITE';
+  /** Why they are on the roll, in words. */
+  basisLabel: string;
+  state: MusterRollState;
+  stateLabel: string;
+  stateAt?: string | null;
+  stateNote?: string | null;
+}
+
+/** Counted server-side so every screen and message prints the same figures. */
+export interface MusterTally {
+  total: number;
+  accountedFor: number;
+  notOnSite: number;
+  needsHelp: number;
+  unaccounted: number;
+  settled: boolean;
+}
+
+export interface MusterSummary {
+  id: string;
+  kind: EmergencyKind;
+  kindLabel: string;
+  description: string;
+  status: 'ACTIVE' | 'CLOSED' | 'TIMED_OUT';
+  statusLabel: string;
+  declaredAt: string;
+  closedAt?: string | null;
+  tally: MusterTally;
+  tallyLabel: string;
+}
+
+export interface EmergencyMuster extends MusterSummary {
+  assemblyPoint?: string | null;
+  /** What residents were told to do, composed server-side. */
+  assemblyInstruction: string;
+  closingNote?: string | null;
+  /** False once closed or timed out. */
+  rollOpen: boolean;
+  roll: MusterRollEntry[];
+}
+
 /* ----------------------------------- api ---------------------------------- */
 
 function q(params: Record<string, string | number | boolean | undefined | null>): string {
@@ -246,6 +325,116 @@ export const estateManagerApi = {
     apiFetch<MaintenanceTicket[]>(`/estate/${estateId}/maintenance${q({ status })}`),
   violations: (estateId: string, status?: string) =>
     apiFetch<Violation[]>(`/estate/${estateId}/violations${q({ status })}`),
+
+  closeIncident: (estateId: string, id: string, how: 'resolve' | 'dismiss', notes?: string) =>
+    apiFetch<Incident>(`/estate/${estateId}/incidents/${id}/${how}`, {
+      method: 'PATCH',
+      body: notes ? { resolutionNotes: notes } : {},
+    }),
+  startMaintenance: (estateId: string, id: string) =>
+    apiFetch<MaintenanceTicket>(`/estate/${estateId}/maintenance/${id}/start`, { method: 'PATCH' }),
+  closeMaintenance: (estateId: string, id: string, how: 'resolve' | 'dismiss', notes?: string) =>
+    apiFetch<MaintenanceTicket>(`/estate/${estateId}/maintenance/${id}/${how}`, {
+      method: 'PATCH',
+      body: notes ? { resolutionNotes: notes } : {},
+    }),
+  reportViolation: (
+    estateId: string,
+    body: { householdId: string; description: string; category: string }
+  ) => apiFetch<Violation>(`/estate/${estateId}/violations`, { method: 'POST', body }),
+  warnViolation: (estateId: string, id: string) =>
+    apiFetch<Violation>(`/estate/${estateId}/violations/${id}/warn`, { method: 'PATCH' }),
+  closeViolation: (estateId: string, id: string, how: 'resolve' | 'dismiss', notes?: string) =>
+    apiFetch<Violation>(`/estate/${estateId}/violations/${id}/${how}`, {
+      method: 'PATCH',
+      body: notes ? { resolutionNotes: notes } : {},
+    }),
+
+  activeMuster: (estateId: string) =>
+    apiFetchOrNull<EmergencyMuster>(`/estate/${estateId}/emergency-musters/active`),
+  musters: (estateId: string) =>
+    apiFetch<Paginated<MusterSummary>>(
+      `/estate/${estateId}/emergency-musters${q({ page: 1, pageSize: 20 })}`
+    ),
+  muster: (estateId: string, musterId: string) =>
+    apiFetch<EmergencyMuster>(`/estate/${estateId}/emergency-musters/${musterId}`),
+  declareMuster: (
+    estateId: string,
+    body: { kind: EmergencyKind; description: string; assemblyPoint?: string }
+  ) => apiFetch<EmergencyMuster>(`/estate/${estateId}/emergency-musters`, { method: 'POST', body }),
+  setRollState: (
+    estateId: string,
+    musterId: string,
+    entryId: string,
+    state: MusterRollState,
+    stateNote?: string
+  ) =>
+    apiFetch<EmergencyMuster>(`/estate/${estateId}/emergency-musters/${musterId}/roll/${entryId}`, {
+      method: 'PATCH',
+      body: { state, ...(stateNote ? { stateNote } : {}) },
+    }),
+  addMusterArrivals: (estateId: string, musterId: string) =>
+    apiFetch<EmergencyMuster>(`/estate/${estateId}/emergency-musters/${musterId}/roll/arrivals`, {
+      method: 'POST',
+    }),
+  closeMuster: (estateId: string, musterId: string, closingNote?: string) =>
+    apiFetch<EmergencyMuster>(`/estate/${estateId}/emergency-musters/${musterId}/close`, {
+      method: 'POST',
+      body: closingNote ? { closingNote } : {},
+    }),
+
+  visitorPasses: (estateId: string, opts: { page?: number; status?: string } = {}) =>
+    apiFetch<Paginated<VisitorPass>>(
+      `/estate/${estateId}/visitor-passes${q({ page: opts.page ?? 1, pageSize: 30, status: opts.status })}`
+    ),
+  issueVisitorPass: (
+    estateId: string,
+    body: {
+      householdId: string;
+      visitorName: string;
+      visitorPhone?: string;
+      purpose?: string;
+      expiresAt?: string;
+    }
+  ) => apiFetch<IssuedVisitorPass>(`/estate/${estateId}/visitor-passes`, { method: 'POST', body }),
+  revokeVisitorPass: (estateId: string, passId: string) =>
+    apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/revoke`, {
+      method: 'PATCH',
+    }),
+
+  watchlist: (estateId: string, status: 'ACTIVE' | 'LIFTED', page = 1) =>
+    apiFetch<Paginated<WatchlistEntry>>(
+      `/estate/${estateId}/watchlist${q({ page, pageSize: 30, status })}`
+    ),
+  addToWatchlist: (
+    estateId: string,
+    entry: {
+      label: string;
+      reason: string;
+      subjectType: WatchlistSubjectType;
+      severity: WatchlistSeverity;
+      phone?: string;
+      plateNumber?: string;
+      expiresAt?: string;
+      photo?: PickedFile | null;
+    }
+  ) => {
+    const form = new FormData();
+    form.append('label', entry.label);
+    form.append('reason', entry.reason);
+    form.append('subjectType', entry.subjectType);
+    form.append('severity', entry.severity);
+    if (entry.phone) form.append('phone', entry.phone);
+    if (entry.plateNumber) form.append('plateNumber', entry.plateNumber);
+    if (entry.expiresAt) form.append('expiresAt', entry.expiresAt);
+    if (entry.photo) appendFile(form, 'file', entry.photo);
+    return apiUpload<WatchlistEntry>(`/estate/${estateId}/watchlist`, form);
+  },
+  liftWatchlistEntry: (estateId: string, entryId: string, liftReason: string) =>
+    apiFetch<WatchlistEntry>(`/estate/${estateId}/watchlist/${entryId}/lift`, {
+      method: 'PATCH',
+      body: { liftReason },
+    }),
 };
 
 /* --------------------------------- helpers -------------------------------- */
@@ -332,3 +521,99 @@ export function chargeAudience(selected: number, activeHouseholds: number): stri
   if (!selected) return `Every active household (${activeHouseholds.toLocaleString('en-NG')})`;
   return `${selected} selected household${selected === 1 ? '' : 's'}`;
 }
+
+/* ------------------------------ operations -------------------------------- */
+
+const titleCase = (s: string) => s.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+
+export const INCIDENT_PRIORITY_TONE: Record<Incident['priority'], Tone> = {
+  critical: 'danger',
+  high: 'warning',
+  medium: 'info',
+  low: 'neutral',
+};
+export const TICKET_PRIORITY_TONE: Record<MaintenanceTicket['priority'], Tone> = {
+  urgent: 'danger',
+  high: 'warning',
+  medium: 'info',
+  low: 'neutral',
+};
+export const categoryLabel = titleCase;
+
+/** A queue item still waiting on the office. */
+export const isOpenItem = (status: string) =>
+  status === 'open' ||
+  status === 'in_progress' ||
+  status === 'reported' ||
+  status === 'warning_issued';
+
+export const VIOLATION_STATUS: Record<Violation['status'], { label: string; tone: Tone }> = {
+  reported: { label: 'Recorded', tone: 'warning' },
+  warning_issued: { label: 'Warning sent', tone: 'info' },
+  resolved: { label: 'Resolved', tone: 'success' },
+  dismissed: { label: 'Dismissed', tone: 'neutral' },
+};
+export const VIOLATION_CATEGORIES: { value: string; label: string }[] = [
+  { value: 'NOISE', label: 'Noise' },
+  { value: 'UNAUTHORIZED_PARKING', label: 'Parking' },
+  { value: 'PET_VIOLATION', label: 'Pets' },
+  { value: 'PROPERTY_MAINTENANCE', label: 'Upkeep' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+/** Most urgent first, then oldest first: what has waited longest at each level. */
+export function byUrgency<T extends { priority: string; createdAt: string }>(items: T[]): T[] {
+  const rank: Record<string, number> = { critical: 0, urgent: 0, high: 1, medium: 2, low: 3 };
+  return [...items].sort(
+    (a, b) =>
+      (rank[a.priority] ?? 9) - (rank[b.priority] ?? 9) || a.createdAt.localeCompare(b.createdAt)
+  );
+}
+
+export const EMERGENCY_KINDS: { value: EmergencyKind; label: string }[] = [
+  { value: 'FIRE', label: 'Fire' },
+  { value: 'GAS_LEAK', label: 'Gas leak' },
+  { value: 'SECURITY', label: 'Security' },
+  { value: 'MEDICAL', label: 'Medical' },
+  { value: 'STRUCTURAL', label: 'Structural' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+export const ROLL_STATE: Record<MusterRollState, { label: string; tone: Tone }> = {
+  UNACCOUNTED: { label: 'Not yet accounted for', tone: 'warning' },
+  NEEDS_HELP: { label: 'Needs help', tone: 'danger' },
+  ACCOUNTED: { label: 'Accounted for', tone: 'success' },
+  NOT_ON_SITE: { label: 'Not on site', tone: 'neutral' },
+};
+
+/**
+ * The roll in the order a marshal works it: people needing help, then anyone
+ * still missing, then the settled lines; by unit within each.
+ */
+export function rollOrder(roll: MusterRollEntry[]): MusterRollEntry[] {
+  const rank: Record<MusterRollState, number> = {
+    NEEDS_HELP: 0,
+    UNACCOUNTED: 1,
+    ACCOUNTED: 2,
+    NOT_ON_SITE: 3,
+  };
+  return [...roll].sort(
+    (a, b) =>
+      rank[a.state] - rank[b.state] ||
+      a.unitLabel.localeCompare(b.unitLabel, undefined, { numeric: true }) ||
+      a.personName.localeCompare(b.personName)
+  );
+}
+
+/** Closing with people still missing has to be explained; a settled roll does not. */
+export const closingNoteRequired = (t: Pick<MusterTally, 'unaccounted'>) => t.unaccounted > 0;
+
+/** A visitor pass still usable or in use: someone may arrive, or is inside. */
+export const isLivePass = (status: string) =>
+  status === 'pending' ||
+  status === 'approved' ||
+  status === 'awaiting_approval' ||
+  status === 'checked_in';
+
+/** A registration as the gate reads it: upper case, no spaces or dashes. */
+export const normalisePlate = (plate: string) => plate.toUpperCase().replace(/[^A-Z0-9]/g, '');

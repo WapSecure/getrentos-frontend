@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { WatchlistScreening } from '@/lib/gateman/watchlistRefusal';
@@ -298,7 +298,7 @@ export type GateWriteOptions = {
 
 export const gatemanApi = {
   /** The estate this guard is posted to; `null` when they hold no post yet. */
-  getMyEstate: () => apiFetch<GatemanEstate | null>('/estate/me'),
+  getMyEstate: () => apiFetchOrNull<GatemanEstate>('/estate/me'),
 
   /**
    * Every estate this guard can open.
@@ -346,7 +346,7 @@ export const gatemanApi = {
 
   /** The document recorded against a pass, or null when the guard took none. */
   getVisitorIdCheck: (estateId: string, passId: string) =>
-    apiFetch<VisitorIdCheck | null>(`/estate/${estateId}/visitor-passes/${passId}/id-check`),
+    apiFetchOrNull<VisitorIdCheck>(`/estate/${estateId}/visitor-passes/${passId}/id-check`),
 
   /**
    * Asks the estate's watch list about somebody, instead of attempting a write.

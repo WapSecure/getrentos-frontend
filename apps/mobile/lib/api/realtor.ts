@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './agentTrustProfile';
@@ -348,7 +348,7 @@ export const realtorApi = {
     apiFetch<Paginated<Commission>>(`/realtor/commissions${q({ page, pageSize: 30, status })}`),
   commissionTrend: () => apiFetch<{ label: string; value: number }[]>('/realtor/commissions/trend'),
   payoutSummary: () => apiFetch<RealtorPayoutSummary>('/realtor/commissions/payouts/summary'),
-  payoutAccount: () => apiFetch<RealtorPayoutAccount | null>('/realtor/commissions/payout-account'),
+  payoutAccount: () => apiFetchOrNull<RealtorPayoutAccount>('/realtor/commissions/payout-account'),
   // Behind "confirm it's you": apiFetch prompts for it automatically.
   savePayoutAccount: (bankCode: string, accountNumber: string) =>
     apiFetch<RealtorPayoutAccount>('/realtor/commissions/payout-account', {

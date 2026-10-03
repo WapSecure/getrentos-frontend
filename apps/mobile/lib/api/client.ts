@@ -221,6 +221,17 @@ export async function apiDownload(
  * Multipart upload. Native `fetch` sets the `multipart/form-data` boundary
  * itself from a `FormData` body — never set `Content-Type` by hand here.
  */
+/**
+ * For an endpoint that answers "there isn't one" with null.
+ *
+ * The API sends that as an empty body, which `apiFetch` reads as `undefined`,
+ * and a query function that returns `undefined` is an error to React Query: the
+ * screen shows a failure for what is an ordinary empty state.
+ */
+export async function apiFetchOrNull<T>(path: string, options: ApiRequest = {}): Promise<T | null> {
+  return (await apiFetch<T | null>(path, options)) ?? null;
+}
+
 export async function apiUpload<T>(path: string, form: FormData, _retry = false): Promise<T> {
   const token = hooks.getAccessToken();
 

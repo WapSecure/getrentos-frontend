@@ -56,6 +56,13 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/dues': '/(app)/(estate)/dues',
   '/estate/announcements': '/(app)/estate-announcements',
   '/estate/billing': '/(app)/billing',
+  '/estate/incidents': '/(app)/estate-incidents',
+  '/estate/maintenance': '/(app)/estate-maintenance',
+  '/estate/violations': '/(app)/estate-violations',
+  '/estate/emergency': '/(app)/estate-emergency',
+  '/estate/visitor-passes': '/(app)/estate-visitors',
+  '/estate/watchlist': '/(app)/estate-watchlist',
+  '/resident/violations': '/(app)/violations',
   '/realtor/dashboard': '/(app)/(realtor)',
   '/realtor/clients': '/(app)/realtor-clients',
   '/realtor/listings': '/(app)/(realtor)/listings',
@@ -108,6 +115,11 @@ const REALTOR_FALLBACK: [prefix: string, route: string][] = [
 const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_DUE_', '/(app)/(estate)/dues'],
   ['ESTATE_ANNOUNCEMENT_', '/(app)/estate-announcements'],
+  ['ESTATE_INCIDENT_', '/(app)/estate-incidents'],
+  ['ESTATE_MAINTENANCE_', '/(app)/estate-maintenance'],
+  ['ESTATE_EMERGENCY_', '/(app)/estate-emergency'],
+  ['ESTATE_WATCHLIST_', '/(app)/estate-watchlist'],
+  ['ESTATE_VISIT', '/(app)/estate-visitors'],
 ];
 
 /** Portals that host short stays; their shortlet notifications are the host's side. */

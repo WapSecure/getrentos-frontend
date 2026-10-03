@@ -1,4 +1,4 @@
-import { apiDownload, apiFetch } from './client';
+import { apiDownload, apiFetch, apiFetchOrNull } from './client';
 
 export interface LeaseLandlord {
   name: string;
@@ -89,7 +89,7 @@ export interface UpcomingPaymentReminder {
 export const leaseApi = {
   getLease: () => apiFetch<Lease>('/renter/lease'),
 
-  getPendingLease: () => apiFetch<PendingLease | null>('/renter/lease/pending'),
+  getPendingLease: () => apiFetchOrNull<PendingLease>('/renter/lease/pending'),
 
   sign: (leaseId: string, signatureData: string) =>
     apiFetch<PendingLease>(`/renter/lease/${leaseId}/sign`, {
@@ -97,7 +97,7 @@ export const leaseApi = {
       body: { signatureData },
     }),
 
-  getRenewalOffer: () => apiFetch<RenewalOffer | null>('/renter/lease/renewal-offer'),
+  getRenewalOffer: () => apiFetchOrNull<RenewalOffer>('/renter/lease/renewal-offer'),
 
   respondRenewalOffer: (id: string, action: 'accept' | 'decline') =>
     apiFetch<RenewalOffer>(`/renter/lease/renewal-offer/${id}/respond`, {
