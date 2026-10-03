@@ -139,7 +139,7 @@ function DepositClaimBadges({ b }: { b: ShortletBooking }) {
           </Badge>
         )}
       {b.taxAmount != null && b.taxAmount > 0 && (
-        <Badge variant="neutral">Tax {formatCurrency(b.taxAmount)}</Badge>
+        <Badge variant="neutral">Incl. tax {formatCurrency(b.taxAmount)}</Badge>
       )}
     </div>
   );
@@ -307,7 +307,10 @@ export const GuestBookingsWorkspace = () => {
                 </div>
                 <div className="text-right">
                   <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
-                  <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
+                  {/* A booking's total is the stay; tax is charged on top of it. */}
+                  <p className="mt-1 font-semibold">
+                    {formatCurrency(b.total + (b.taxAmount ?? 0))}
+                  </p>
                   {b.paymentStatus && b.paymentStatus !== 'UNPAID' && (
                     <Badge
                       variant={b.paymentStatus === 'PAID' ? 'success' : 'info'}
