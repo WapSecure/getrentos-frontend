@@ -1,38 +1,39 @@
-import { Pressable, View } from 'react-native';
+import { useState } from 'react';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
-  ChevronRight,
+  Building2,
   DoorOpen,
   FileText,
+  KeyRound,
   MessageCircle,
+  PieChart,
+  Plus,
   TriangleAlert,
   Wrench,
+  type LucideIcon,
 } from 'lucide-react-native';
-import {
-  Badge,
-  Card,
-  Divider,
-  ErrorState,
-  IconButton,
-  Price,
-  Screen,
-  SectionHeader,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { ErrorState, IconButton, Price, Screen, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName, relativeTime } from '@/lib/format';
+import { firstName } from '@/lib/format';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
-import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
+import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import {
+  ActivityFeed,
+  AttentionCard,
+  PortfolioCard,
+  QuickActions,
+  dashboardGreeting,
+} from '@/components/dashboard/DashboardParts';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
-const ACTIVITY_ICON: Record<LandlordActivity['type'], typeof Banknote> = {
+const ACTIVITY_ICON: Record<LandlordActivity['type'], LucideIcon> = {
   payment: Banknote,
   application: FileText,
   maintenance: Wrench,
@@ -41,17 +42,11 @@ const ACTIVITY_ICON: Record<LandlordActivity['type'], typeof Banknote> = {
   viewing: DoorOpen,
 };
 
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-
 export default function LandlordOverview() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors } = useTheme();
   const { profile } = useAuth();
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
+  const [adding, setAdding] = useState(false);
 
   const stats = useQuery({
     queryKey: qk.landlord.dashboardStats,
@@ -62,286 +57,165 @@ export default function LandlordOverview() {
     queryKey: qk.landlord.revenueTrend,
     queryFn: landlordApi.revenueTrend,
   });
-
   // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.landlord.notifications,
     queryFn: landlordApi.notifications,
   });
-  const unreadCount = (notifications.data ?? []).filter((n) => !n.read).length;
+  const unread = (notifications.data ?? []).filter((n) => !n.read).length;
 
   const s = stats.data;
-  const occupancy =
-    s && s.totalProperties > 0 && s.occupiedUnits + s.vacantUnits + s.reservedUnits > 0
-      ? Math.round((s.occupiedUnits / (s.occupiedUnits + s.vacantUnits + s.reservedUnits)) * 100)
-      : 0;
+  const refresh = () => {
+    stats.refetch();
+    activity.refetch();
+    revenue.refetch();
+  };
 
-  return (
-    <Screen
-      refreshing={stats.isRefetching || activity.isRefetching}
-      onRefresh={() => {
-        stats.refetch();
-        activity.refetch();
-        revenue.refetch();
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text variant="label" color="primary" uppercase>
-            {greeting()}
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: spacing.sm,
-            }}
-          >
-            <Text variant="title">{firstName(profile?.legalName)}</Text>
-            <Badge label="LL" tone="info" />
-          </View>
-        </View>
+  const header = (
+    <DashboardHeader
+      eyebrow={dashboardGreeting()}
+      title={firstName(profile?.legalName)}
+      roleBadge="LL"
+      subtitle="Your rentals, tenants and rent"
+      accessory={
         <IconButton
           onPress={() => router.push('/(app)/landlord-notifications')}
-          accessibilityLabel="Notifications"
-          badge={unreadCount}
+          accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          badge={unread}
           icon={<Bell size={21} color={colors.foreground} />}
         />
-      </View>
+      }
+    />
+  );
 
-      {/* Money first: it is what a landlord opens the app to check. */}
-      <Card elevated>
-        {stats.isError ? (
-          <ErrorState
-            title="We couldn't load your portfolio"
-            description="Your property and payment data is safe. Check your connection and try again."
-            onRetry={() => stats.refetch()}
-          />
-        ) : stats.isLoading ? (
-          <View style={{ gap: spacing.sm }}>
-            <Skeleton height={16} width="50%" />
-            <Skeleton height={30} width="70%" />
-          </View>
-        ) : (
-          <View style={{ gap: spacing.md }}>
-            <View style={{ gap: 2 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  Annual rent roll
-                </Text>
-                <BalanceVisibilityButton visible={showMoney} onToggle={toggleMoney} />
-              </View>
-              {showMoney ? (
-                <Price amount={s?.annualRentRoll ?? 0} variant="display" />
-              ) : (
-                <Text variant="display">••••••</Text>
-              )}
-            </View>
-
-            {s && s.outstandingAmount > 0 ? (
-              <Pressable
-                onPress={() => router.push('/(app)/landlord-payments')}
-                accessibilityRole="button"
-                accessibilityLabel="View outstanding payments"
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.sm,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  backgroundColor: colors.destructive + '14',
-                }}
-              >
-                <TriangleAlert size={16} color={colors.destructive} />
-                <Text variant="caption" style={{ flex: 1, color: colors.destructive }}>
-                  {s.outstandingPayments} outstanding payment
-                  {s.outstandingPayments === 1 ? '' : 's'} · {}
-                  {showMoney ? (
-                    <Price amount={s.outstandingAmount} variant="caption" color="destructive" />
-                  ) : (
-                    '••••••'
-                  )}
-                </Text>
-              </Pressable>
-            ) : null}
-          </View>
-        )}
-      </Card>
-
-      {!stats.isError ? (
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-          <StatTile
-            label="Properties"
-            value={s?.totalProperties ?? 0}
-            loading={stats.isLoading}
-            onPress={() => router.push('/(app)/(landlord)/properties')}
-          />
-          <StatTile label="Occupied" value={`${occupancy}%`} loading={stats.isLoading} />
-          <StatTile label="Vacant" value={s?.vacantUnits ?? 0} loading={stats.isLoading} />
-        </View>
-      ) : null}
-
-      {(revenue.data ?? []).length > 0 ? (
-        <View style={{ gap: spacing.md }}>
-          <Text variant="heading">Revenue</Text>
-          <Card elevated>
-            <RevenueTrendChart points={revenue.data ?? []} />
-          </Card>
-        </View>
-      ) : null}
-
-      {s && s.activeMaintenanceRequests > 0 ? (
-        <Pressable
-          onPress={() => router.push('/(app)/landlord-maintenance')}
-          accessibilityRole="button"
-          accessibilityLabel={`${s.activeMaintenanceRequests} open maintenance requests`}
-        >
-          <Card elevated>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <View
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: radius.md,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.warning + '1f',
-                }}
-              >
-                <Wrench size={18} color={colors.warning} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyStrong">
-                  {s.activeMaintenanceRequests} open maintenance request
-                  {s.activeMaintenanceRequests === 1 ? '' : 's'}
-                </Text>
-                <Text variant="caption" color="mutedForeground">
-                  Assign a vendor or mark them resolved
-                </Text>
-              </View>
-            </View>
-          </Card>
-        </Pressable>
-      ) : null}
-
-      <View style={{ gap: spacing.md }}>
-        <SectionHeader
-          title="Recent activity"
-          description="The latest movement across your portfolio"
+  if (stats.isError && !s) {
+    return (
+      <Screen refreshing={stats.isRefetching} onRefresh={refresh}>
+        {header}
+        <ErrorState
+          title="We couldn't load your dashboard"
+          description="Your property and payment data is safe. Check your connection and try again."
+          onRetry={() => stats.refetch()}
         />
-        {activity.isError ? (
-          <ErrorState
-            title="Recent activity is unavailable"
-            description="Try again to load the latest updates across your portfolio."
-            onRetry={() => activity.refetch()}
-          />
-        ) : activity.isLoading ? (
-          <View style={{ gap: spacing.sm }}>
-            {[0, 1, 2].map((i) => (
-              <Skeleton key={i} height={62} radius={radius.lg} />
-            ))}
-          </View>
-        ) : (activity.data ?? []).length === 0 ? (
-          <Text variant="callout" color="mutedForeground">
-            Nothing has happened across your properties yet.
-          </Text>
-        ) : (
-          <Card elevated padding="none">
-            {(activity.data ?? []).slice(0, 8).map((a, i) => {
-              const Icon = ACTIVITY_ICON[a.type] ?? FileText;
-              return (
-                <View key={a.id}>
-                  {i > 0 ? <Divider /> : null}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: spacing.md,
-                      padding: spacing.lg,
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: radius.sm,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: colors.secondary,
-                      }}
-                    >
-                      <Icon size={15} color={colors.foreground} />
-                    </View>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="callout" style={{ fontWeight: '600' }}>
-                        {a.title}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {a.description}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {relativeTime(a.timestamp)}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
-          </Card>
-        )}
-      </View>
-    </Screen>
-  );
-}
+      </Screen>
+    );
+  }
 
-function StatTile({
-  label,
-  value,
-  loading,
-  onPress,
-}: {
-  label: string;
-  value: string | number;
-  loading?: boolean;
-  onPress?: () => void;
-}) {
-  const { colors, spacing, radius } = useTheme();
+  const units = s ? s.occupiedUnits + s.vacantUnits + s.reservedUnits : 0;
+  const occupancy = s && units > 0 ? Math.round((s.occupiedUnits / units) * 100) : 0;
 
-  const body = (
-    <>
-      {loading ? <Skeleton height={22} width="60%" /> : <Text variant="heading">{value}</Text>}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-        <Text variant="caption" color="mutedForeground">
-          {label}
-        </Text>
-        {onPress ? <ChevronRight size={12} color={colors.mutedForeground} /> : null}
-      </View>
-    </>
-  );
-
-  const style = {
-    flex: 1,
-    gap: 4,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  } as const;
-
-  // Only the tiles that lead somewhere are tappable: a chevron without a
-  // target reads as a broken affordance.
-  if (!onPress) return <View style={style}>{body}</View>;
+  const metrics = s
+    ? [
+        {
+          label: 'Properties',
+          value: s.totalProperties,
+          Icon: Building2,
+          onPress: () => router.push('/(app)/(landlord)/properties'),
+        },
+        {
+          label: 'Occupied',
+          value: `${occupancy}%`,
+          Icon: PieChart,
+          onPress: () => router.push('/(app)/(landlord)/tenants'),
+        },
+        {
+          label: 'Vacant units',
+          value: s.vacantUnits,
+          Icon: KeyRound,
+          onPress: () => router.push('/(app)/landlord-listings'),
+        },
+        {
+          label: 'Open repairs',
+          value: s.activeMaintenanceRequests,
+          Icon: Wrench,
+          onPress: () => router.push('/(app)/landlord-maintenance'),
+        },
+      ]
+    : [];
 
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${label}: ${value}`}
-      style={style}
-    >
-      {body}
-    </Pressable>
+    <Screen refreshing={stats.isRefetching || activity.isRefetching} onRefresh={refresh}>
+      {header}
+
+      {/* What needs you first: rent that hasn't come in, then repairs waiting. */}
+      {s && s.outstandingPayments > 0 ? (
+        <AttentionCard
+          Icon={TriangleAlert}
+          tone="danger"
+          title={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment' : 'payments'} outstanding`}
+          detail={
+            <Text variant="caption" color="mutedForeground">
+              {showMoney ? <Price amount={s.outstandingAmount} variant="caption" /> : '••••••'}{' '}
+              still to collect
+            </Text>
+          }
+          accessibilityLabel={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment is' : 'payments are'} outstanding. Open payments`}
+          onPress={() => router.push('/(app)/landlord-payments')}
+        />
+      ) : null}
+      {s && s.activeMaintenanceRequests > 0 ? (
+        <AttentionCard
+          Icon={Wrench}
+          tone="warning"
+          title={`${s.activeMaintenanceRequests} open maintenance ${s.activeMaintenanceRequests === 1 ? 'request' : 'requests'}`}
+          detail="Assign a vendor or mark them resolved"
+          onPress={() => router.push('/(app)/landlord-maintenance')}
+        />
+      ) : null}
+
+      <PortfolioCard
+        label="Annual rent roll"
+        amount={s?.annualRentRoll ?? 0}
+        hint="A year of rent from your signed leases"
+        loading={stats.isPending}
+        visible={showMoney}
+        onToggle={toggleMoney}
+      >
+        {/* A single point isn't a trend, so the chart waits for two. */}
+        {(revenue.data?.length ?? 0) > 1 ? <RevenueTrendChart points={revenue.data!} /> : null}
+      </PortfolioCard>
+
+      <MetricGrid metrics={metrics} loading={stats.isPending} />
+
+      <QuickActions
+        actions={[
+          { label: 'Add property', Icon: Plus, onPress: () => setAdding(true) },
+          {
+            label: 'Applications',
+            Icon: FileText,
+            onPress: () => router.push('/(app)/landlord-applications'),
+          },
+          {
+            label: 'Rent payments',
+            Icon: Banknote,
+            onPress: () => router.push('/(app)/landlord-payments'),
+            badge: s?.outstandingPayments,
+          },
+          {
+            label: 'Maintenance',
+            Icon: Wrench,
+            onPress: () => router.push('/(app)/landlord-maintenance'),
+            badge: s?.activeMaintenanceRequests,
+          },
+        ]}
+      />
+
+      <ActivityFeed
+        description="The latest movement across your portfolio"
+        loading={activity.isPending}
+        error={activity.isError && !activity.data}
+        onRetry={() => activity.refetch()}
+        emptyText="Nothing has happened across your properties yet."
+        items={(activity.data ?? []).slice(0, 6).map((a) => ({
+          id: a.id,
+          Icon: ACTIVITY_ICON[a.type] ?? FileText,
+          title: a.title,
+          detail: a.description,
+          timestamp: a.timestamp,
+        }))}
+      />
+
+      <CreatePropertySheet open={adding} onClose={() => setAdding(false)} />
+    </Screen>
   );
 }
