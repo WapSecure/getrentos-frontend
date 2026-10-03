@@ -1,19 +1,41 @@
 import { Tabs } from 'expo-router';
-import { BriefcaseBusiness, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Home, Megaphone, MessageCircle, User, Users } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 export default function RealtorTabsLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+
   return (
     <Tabs screenOptions={premiumTabBarOptions(colors, insets.bottom)}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Business',
-          tabBarIcon: ({ color, size }) => <BriefcaseBusiness color={color} size={size} />,
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="pipeline"
+        options={{
+          title: 'Pipeline',
+          tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="listings"
+        options={{
+          title: 'Listings',
+          tabBarIcon: ({ color, size }) => <Megaphone color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: 'Messages',
+          tabBarIcon: ({ color, size }) => <MessageCircle color={color} size={size} />,
         }}
       />
       <Tabs.Screen

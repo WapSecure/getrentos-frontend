@@ -80,3 +80,26 @@ describe('hosting notifications', () => {
     expect(routeForActionUrl('/landlord/shortlets')).toBe('/(app)/host');
   });
 });
+
+describe('realtor notifications', () => {
+  it('opens commissions for the escrow release that earned one, not a buyer screen', () => {
+    expect(routeForNotification({ type: 'ESCROW_RELEASED' }, 'realtor')).toBe(
+      '/(app)/realtor-commissions'
+    );
+  });
+
+  it('opens the offers a realtor negotiates and their own inbox', () => {
+    expect(routeForNotification({ type: 'OFFER_RECEIVED' }, 'realtor')).toBe(
+      '/(app)/realtor-offers'
+    );
+    expect(routeForNotification({ type: 'NEW_MESSAGE' }, 'realtor')).toBe(
+      '/(app)/(realtor)/messages'
+    );
+  });
+
+  it('maps the web realtor paths', () => {
+    expect(routeForNotification({ actionUrl: '/realtor/leads' }, 'realtor')).toBe(
+      '/(app)/(realtor)/pipeline'
+    );
+  });
+});

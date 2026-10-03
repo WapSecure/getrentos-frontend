@@ -1,0 +1,191 @@
+import { RefreshControl, View } from 'react-native';
+import { router } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { FlashList } from '@shopify/flash-list';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Star } from 'lucide-react-native';
+import {
+  Card,
+  Divider,
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
+import { qk } from '@/lib/query/keys';
+import { realtorApi, type RealtorReview } from '@/lib/api/realtor';
+import { formatDate } from '@/lib/format';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
+
+/** What clients say, with the rating spread. */
+export default function RealtorReviews() {
+  const { colors, spacing, radius } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const summaryQuery = useQuery({
+    queryKey: qk.realtor.reviewsSummary,
+    queryFn: realtorApi.reviewsSummary,
+  });
+  const listQuery = useQuery({
+    queryKey: qk.realtor.reviews,
+    queryFn: realtorApi.reviews,
+  });
+  const items = listQuery.data?.items ?? [];
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View
+        style={{
+          paddingTop: insets.top + spacing.md,
+          paddingHorizontal: spacing.xl,
+          paddingBottom: spacing.sm,
+        }}
+      >
+        <DetailHeader
+          eyebrow="Reputation"
+          title="Reviews"
+          subtitle={
+            summaryQuery.data
+              ? `${summaryQuery.data.averageRating.toFixed(1)} average from ${summaryQuery.data.reviewCount} review${summaryQuery.data.reviewCount === 1 ? '' : 's'}`
+              : 'Client feedback and rating trends'
+          }
+          onBack={() => router.back()}
+        />
+      </View>
+
+      {summaryQuery.data ? (
+        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+          <Card elevated>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
+              <View style={{ alignItems: 'center' }}>
+                <Text variant="title" style={{ fontSize: 32 }}>
+                  {summaryQuery.data.averageRating.toFixed(1)}
+                </Text>
+                <View style={{ flexDirection: 'row', gap: 1 }}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      size={12}
+                      color={colors.warning}
+                      fill={
+                        n <= Math.round(summaryQuery.data!.averageRating)
+                          ? colors.warning
+                          : 'transparent'
+                      }
+                    />
+                  ))}
+                </View>
+                <Text variant="caption" color="mutedForeground">
+                  {summaryQuery.data.reviewCount} reviews
+                </Text>
+              </View>
+              <View style={{ flex: 1, gap: 4 }}>
+                {[5, 4, 3, 2, 1]
+                  .map((rating) => ({ rating, count: summaryQuery.data.distribution[rating] ?? 0 }))
+                  .map((d) => (
+                    <View
+                      key={d.rating}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                    >
+                      <Text variant="caption" color="mutedForeground" style={{ width: 10 }}>
+                        {d.rating}
+                      </Text>
+                      <View
+                        style={{
+                          flex: 1,
+                          height: 4,
+                          borderRadius: 2,
+                          backgroundColor: colors.secondary,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <View
+                          style={{
+                            height: 4,
+                            width: `${summaryQuery.data!.reviewCount ? (d.count / summaryQuery.data!.reviewCount) * 100 : 0}%`,
+                            backgroundColor: colors.warning,
+                          }}
+                        />
+                      </View>
+                    </View>
+                  ))}
+              </View>
+            </View>
+          </Card>
+        </View>
+      ) : null}
+
+      {listQuery.isError ? (
+        <ErrorState onRetry={() => listQuery.refetch()} />
+      ) : listQuery.isLoading ? (
+        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+          {[0, 1].map((i) => (
+            <Skeleton key={i} height={80} radius={radius.lg} />
+          ))}
+        </View>
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={<Star size={34} color={colors.mutedForeground} />}
+          title="No reviews yet"
+          description="Reviews from your clients will appear here."
+        />
+      ) : (
+        <FlashList
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }: { item: RealtorReview }) => (
+            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+              <Card elevated>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text variant="bodyStrong">{item.author ?? 'A client'}</Text>
+                  <View style={{ flexDirection: 'row', gap: 1 }}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star
+                        key={n}
+                        size={12}
+                        color={colors.warning}
+                        fill={n <= item.rating ? colors.warning : 'transparent'}
+                      />
+                    ))}
+                  </View>
+                </View>
+                <Text variant="caption" color="mutedForeground" style={{ marginTop: 2 }}>
+                  {formatDate(item.date, 'short')}
+                </Text>
+                {item.comment ? (
+                  <>
+                    <Divider style={{ marginVertical: spacing.sm }} />
+                    <Text variant="callout" color="mutedForeground">
+                      {item.comment}
+                    </Text>
+                  </>
+                ) : null}
+              </Card>
+            </View>
+          )}
+          contentContainerStyle={{
+            paddingTop: spacing.sm,
+            paddingBottom: insets.bottom + spacing['3xl'],
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={listQuery.isRefetching}
+              onRefresh={() => {
+                listQuery.refetch();
+                summaryQuery.refetch();
+              }}
+              tintColor={colors.mutedForeground}
+            />
+          }
+        />
+      )}
+    </View>
+  );
+}
