@@ -51,6 +51,11 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/landlord/shortlets': '/(app)/host',
   '/landlord/billing': '/(app)/billing',
   '/landlord/realtors': '/(app)/representatives',
+  '/estate/dashboard': '/(app)/(estate)',
+  '/estate/households': '/(app)/(estate)/households',
+  '/estate/dues': '/(app)/(estate)/dues',
+  '/estate/announcements': '/(app)/estate-announcements',
+  '/estate/billing': '/(app)/billing',
   '/realtor/dashboard': '/(app)/(realtor)',
   '/realtor/clients': '/(app)/realtor-clients',
   '/realtor/listings': '/(app)/(realtor)/listings',
@@ -97,6 +102,12 @@ const OWNER_FALLBACK: [prefix: string, route: string][] = [
 const REALTOR_FALLBACK: [prefix: string, route: string][] = [
   ['ESCROW_', '/(app)/realtor-commissions'],
   ['OFFER_', '/(app)/realtor-offers'],
+];
+
+/** The estate office sees its residents' dues, not a resident's own. */
+const ESTATE_FALLBACK: [prefix: string, route: string][] = [
+  ['ESTATE_DUE_', '/(app)/(estate)/dues'],
+  ['ESTATE_ANNOUNCEMENT_', '/(app)/estate-announcements'],
 ];
 
 /** Portals that host short stays; their shortlet notifications are the host's side. */
@@ -163,7 +174,13 @@ export function routeForNotification(
   }
   // Sellers see offers and escrow from the other side of the table.
   const sellerSide =
-    portal === 'owner' ? OWNER_FALLBACK : portal === 'realtor' ? REALTOR_FALLBACK : null;
+    portal === 'owner'
+      ? OWNER_FALLBACK
+      : portal === 'realtor'
+        ? REALTOR_FALLBACK
+        : portal === 'estate'
+          ? ESTATE_FALLBACK
+          : null;
   const portalFallback =
     sellerSide && type ? sellerSide.find(([prefix]) => type.startsWith(prefix))?.[1] : undefined;
   if (portalFallback) return portalFallback;

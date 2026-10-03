@@ -57,7 +57,24 @@ export const qk = {
   },
   estateManager: {
     estates: ['estate-manager', 'estates'] as const,
+    selected: ['estate-manager', 'selected'] as const,
+    /** Everything cached for one estate; invalidate this after a write. */
+    estate: (estateId: string) => ['estate-manager', estateId] as const,
     dashboard: (estateId: string) => ['estate-manager', estateId, 'dashboard'] as const,
+    duesTrend: (estateId: string) => ['estate-manager', estateId, 'dues-trend'] as const,
+    households: (estateId: string, search = '', status = '') =>
+      ['estate-manager', estateId, 'households', { search, status }] as const,
+    household: (estateId: string, householdId: string) =>
+      ['estate-manager', estateId, 'household', householdId] as const,
+    dues: (estateId: string, status = 'all') =>
+      ['estate-manager', estateId, 'dues', status] as const,
+    householdDues: (estateId: string, householdId: string) =>
+      ['estate-manager', estateId, 'dues', 'household', householdId] as const,
+    attention: (estateId: string) => ['estate-manager', estateId, 'attention'] as const,
+    announcements: (estateId: string) => ['estate-manager', estateId, 'announcements'] as const,
+    incidents: (estateId: string) => ['estate-manager', estateId, 'incidents'] as const,
+    maintenance: (estateId: string) => ['estate-manager', estateId, 'maintenance'] as const,
+    violations: (estateId: string) => ['estate-manager', estateId, 'violations'] as const,
   },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
