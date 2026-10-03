@@ -666,6 +666,17 @@ one at a time — the maker/checker comparison, the staff guard on `terminate()`
 revocation, the notice rule binding us as manager, a missing route declaration, and an
 unclassified controller — each caught by the test written for it.
 
+Also verified live against the running API (which also proves the new global guard
+resolves at boot — a DI failure there would take the process down, and no unit test boots
+the app). A mandate on a real property provisioned with `managementMandateId` set on both
+grants; a staff account raised a request and the mandate stayed `ACTIVE` with its
+authority untouched; approving one's own request was refused 403; the ops queue named the
+human who asked; a second staff account approved it, ending the mandate and leaving both
+grants `REVOKED` with every capability cleared; and the guard refused a landlord holding
+no grant on a property-keyed route with `PROPERTY_AUTHORITY_REQUIRED` while letting the
+owner through on their own property. The fixture, including a temporary second staff
+account, was removed afterwards.
+
 **Still to do in Phase 2:** make the four owner-only services grant-aware
 (`dashboard`, `financials`, `owner-statements`, `tenants`, and the portfolio analytics
 behind it) using the still-unused `controlledPropertyScope`, which also closes Phase 1
