@@ -386,24 +386,24 @@ function Earnings({
       </PressableScale>
     );
   }
+  const accessibilityLabel = loading
+    ? 'Loading commission'
+    : showMoney
+      ? `Commission available, ${Math.round(available).toLocaleString('en-NG')} naira. ${Math.round(pending).toLocaleString('en-NG')} naira still in escrow. Open commissions`
+      : 'Commission hidden. Open commissions';
+
   return (
-    <PressableScale
-      onPress={() => router.push('/(app)/realtor-commissions')}
-      accessibilityRole="button"
-      accessibilityLabel={
-        loading
-          ? 'Loading commission'
-          : showMoney
-            ? `Commission available, ${Math.round(available).toLocaleString('en-NG')} naira. ${Math.round(pending).toLocaleString('en-NG')} naira still in escrow. Open commissions`
-            : 'Commission hidden. Open commissions'
-      }
-    >
-      <Card elevated style={{ gap: spacing.xs }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Card elevated style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+      <PressableScale
+        onPress={() => router.push('/(app)/realtor-commissions')}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        style={{ flex: 1, gap: spacing.xs }}
+      >
+        <View>
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
             Commission ready to withdraw
           </Text>
-          <BalanceVisibilityButton visible={showMoney} onToggle={onToggle} />
         </View>
         {loading ? (
           <Skeleton height={30} width="50%" />
@@ -419,8 +419,9 @@ function Earnings({
               : 'More on the way once escrow releases'
             : 'Earned when a sale you worked on closes'}
         </Text>
-      </Card>
-    </PressableScale>
+      </PressableScale>
+      <BalanceVisibilityButton visible={showMoney} onToggle={onToggle} />
+    </Card>
   );
 }
 

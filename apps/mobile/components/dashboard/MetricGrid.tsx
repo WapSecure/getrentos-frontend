@@ -19,7 +19,7 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
     <Card
       elevated
       padding="none"
-      accessible={loading}
+      accessible={loading ? true : undefined}
       accessibilityLabel={loading ? 'Loading dashboard summary' : undefined}
       accessibilityState={{ busy: loading }}
     >
@@ -83,7 +83,7 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
           ) : (
             <View
               key={metric?.label ?? row.index}
-              accessible={!!metric}
+              accessible={metric ? true : undefined}
               accessibilityRole={metric ? 'text' : undefined}
               accessibilityLabel={metric ? `${metric.label}: ${metric.value}` : undefined}
               importantForAccessibility={metric ? 'yes' : 'no-hide-descendants'}

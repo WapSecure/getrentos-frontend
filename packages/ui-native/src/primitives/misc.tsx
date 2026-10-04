@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, View, type ViewProps } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 import { RotateCw } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -105,7 +105,7 @@ export function Skeleton({
 
   return (
     <Animated.View
-      accessible={false}
+      accessible={Platform.OS === 'web' ? undefined : false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={{
