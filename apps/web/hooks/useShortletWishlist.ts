@@ -6,19 +6,20 @@ import { unwrap } from '@/lib/apiHelpers';
 import { viewerHasRole } from '@/lib/viewer';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
+import { SHORTLET_GUEST_ROLE_IDS } from '@/lib/shortlet/guestRoutes';
 
 /**
- * The wishlist is a guest-only surface — the backend guards it with
- * `@Roles(RENTER, PROPERTY_BUYER)`. Anyone else (an anonymous visitor, or a
- * landlord browsing the public marketplace) calling it just earns a 403, so the
- * query and the heart it drives stay switched off until we know the viewer is a
- * guest.
+ * The wishlist is a guest-only surface — the backend guards it with the guest
+ * account types (SHORTLET_GUEST_ROLES). Anyone else (an anonymous visitor, or
+ * estate staff browsing the public marketplace) calling it just earns a 403, so
+ * the query and the heart it drives stay switched off until we know the viewer
+ * can be a guest.
  */
-export const isGuestShortletViewer = (): boolean => viewerHasRole('renter', 'buyer');
+export const isGuestShortletViewer = (): boolean => viewerHasRole(...SHORTLET_GUEST_ROLE_IDS);
 
 /**
  * Guest shortlet wishlist: tracks which listings are saved and toggles them.
- * Only meaningful when signed in as a guest (renter / property buyer) — check
+ * Only meaningful when signed in with an account that can book a stay — check
  * `canUseWishlist` before offering the control at all.
  */
 export const useShortletWishlist = () => {

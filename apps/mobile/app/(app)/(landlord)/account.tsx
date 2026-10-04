@@ -6,6 +6,7 @@ import {
   Banknote,
   BarChart3,
   BedDouble,
+  CalendarCheck,
   CircleHelp,
   ClipboardCheck,
   FileSignature,
@@ -143,9 +144,16 @@ export default function LandlordAccount() {
     {
       key: 'stays',
       label: 'Browse short stays',
-      description: 'Find a stay as a guest',
+      description: 'Find and book a stay as a guest',
       icon: Search,
       onPress: go('/(app)/shortlets'),
+    },
+    {
+      key: 'my-stays',
+      label: 'My stays',
+      description: 'Stays you have booked as a guest',
+      icon: CalendarCheck,
+      onPress: go('/(app)/shortlet-bookings'),
     },
     {
       key: 'referrals',
