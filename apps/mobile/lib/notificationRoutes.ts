@@ -63,6 +63,10 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/visitor-passes': '/(app)/estate-visitors',
   '/estate/watchlist': '/(app)/estate-watchlist',
   '/resident/violations': '/(app)/violations',
+  '/resident/amenities': '/(app)/amenities',
+  '/estate/polls': '/(app)/estate-polls',
+  '/estate/amenities': '/(app)/estate-amenities',
+  '/estate/expected': '/(app)/estate-expected',
   '/realtor/dashboard': '/(app)/(realtor)',
   '/realtor/clients': '/(app)/realtor-clients',
   '/realtor/listings': '/(app)/(realtor)/listings',
@@ -120,6 +124,7 @@ const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_EMERGENCY_', '/(app)/estate-emergency'],
   ['ESTATE_WATCHLIST_', '/(app)/estate-watchlist'],
   ['ESTATE_VISIT', '/(app)/estate-visitors'],
+  ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];
 
 /** Portals that host short stays; their shortlet notifications are the host's side. */

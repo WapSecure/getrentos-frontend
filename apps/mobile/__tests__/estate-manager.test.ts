@@ -1,6 +1,8 @@
 import {
+  bookingBuckets,
   byUrgency,
   chargeAudience,
+  cleanPollOptions,
   closingNoteRequired,
   dueTotal,
   dueWhen,
@@ -8,10 +10,14 @@ import {
   isFreeEstate,
   isLivePass,
   isOpenItem,
+  leadingOptions,
   normalisePlate,
   owed,
   pickEstate,
+  pollShare,
   rollOrder,
+  turnout,
+  type AmenityBooking,
   type Due,
   type MusterRollEntry,
 } from '@/lib/api/estateManager';
@@ -174,5 +180,60 @@ describe('the gate', () => {
     expect(isLivePass('checked_in')).toBe(true);
     expect(isLivePass('checked_out')).toBe(false);
     expect(isLivePass('revoked')).toBe(false);
+  });
+});
+
+describe('polls', () => {
+  const poll = (votes: number[]) => ({
+    totalVotes: votes.reduce((a, b) => a + b, 0),
+    options: votes.map((voteCount, i) => ({ id: `o${i}`, label: `Option ${i}`, voteCount })),
+  });
+
+  it('gives each option its share, and 0 rather than NaN before anyone votes', () => {
+    expect(pollShare(3, 12)).toBe(25);
+    expect(pollShare(1, 3)).toBe(33);
+    expect(pollShare(0, 0)).toBe(0);
+  });
+
+  it('names the option in front, both of them on a tie, and none on an empty poll', () => {
+    expect(leadingOptions(poll([2, 5, 1]))).toEqual(['o1']);
+    expect(leadingOptions(poll([4, 4, 1]))).toEqual(['o0', 'o1']);
+    expect(leadingOptions(poll([0, 0]))).toEqual([]);
+  });
+
+  it('reports turnout against the households that could vote', () => {
+    expect(turnout(30, 120)).toBe('30 of 120 households (25%)');
+    expect(turnout(1, 0)).toBe('1 vote');
+  });
+
+  it('keeps only distinct, non-empty choices', () => {
+    expect(cleanPollOptions([' Yes ', 'yes', '', 'No'])).toEqual(['Yes', 'No']);
+  });
+});
+
+describe('amenity bookings', () => {
+  const now = new Date('2026-10-04T12:00:00.000Z');
+  const booking = (id: string, startsAt: string, status: AmenityBooking['status'] = 'confirmed') =>
+    ({
+      id,
+      startsAt,
+      endsAt: new Date(new Date(startsAt).getTime() + 3_600_000).toISOString(),
+      status,
+    }) as AmenityBooking;
+
+  it('puts what is still ahead first, soonest first, and everything else under earlier', () => {
+    const b = bookingBuckets(
+      [
+        booking('later', '2026-10-06T10:00:00.000Z'),
+        booking('gone', '2026-10-01T10:00:00.000Z'),
+        booking('soon', '2026-10-04T15:00:00.000Z'),
+        booking('cancelled', '2026-10-05T10:00:00.000Z', 'cancelled'),
+        // Started but not finished: still in use, so still ahead.
+        booking('now', '2026-10-04T11:30:00.000Z'),
+      ],
+      now
+    );
+    expect(b.upcoming.map((x) => x.id)).toEqual(['now', 'soon', 'later']);
+    expect(b.past.map((x) => x.id)).toEqual(['cancelled', 'gone']);
   });
 });

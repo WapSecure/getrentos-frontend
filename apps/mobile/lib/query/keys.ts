@@ -81,6 +81,11 @@ export const qk = {
       ['estate-manager', estateId, 'muster', musterId] as const,
     visitorPasses: (estateId: string, status = 'all') =>
       ['estate-manager', estateId, 'visitor-passes', status] as const,
+    polls: (estateId: string) => ['estate-manager', estateId, 'polls'] as const,
+    amenities: (estateId: string) => ['estate-manager', estateId, 'amenities'] as const,
+    amenityBookings: (estateId: string) =>
+      ['estate-manager', estateId, 'amenity-bookings'] as const,
+    expectedToday: (estateId: string) => ['estate-manager', estateId, 'expected-today'] as const,
     watchlist: (estateId: string, status: string) =>
       ['estate-manager', estateId, 'watchlist', status] as const,
   },
