@@ -677,12 +677,75 @@ no grant on a property-keyed route with `PROPERTY_AUTHORITY_REQUIRED` while lett
 owner through on their own property. The fixture, including a temporary second staff
 account, was removed afterwards.
 
-**Still to do in Phase 2:** make the four owner-only services grant-aware
-(`dashboard`, `financials`, `owner-statements`, `tenants`, and the portfolio analytics
-behind it) using the still-unused `controlledPropertyScope`, which also closes Phase 1
-finding (a); classify the `modules/owner` controller surface, which this increment
-deliberately left alone rather than half-cover; and add `actorId` + mandate attribution to
-custody actions in the audit log.
+**Still to do in Phase 2:** add mandate attribution to custody actions in the audit log
+(see 9d).
+
+---
+
+## 9d. Phase 2 continued — reporting made grant-aware (2026-10-04)
+
+Backend commit `bb3f415` (the grant-aware services landed in `553c95d`).
+
+**1. Four reporting services now see a managed portfolio.** `dashboard`,
+`financials`, `tenants` and `portfolio-analytics` all scoped with
+`property: { ownerId: actorId }`. For an owner that is exact; for a manager it matched
+nothing, so the dashboard of a portfolio someone was hired to run read as **zero
+properties, zero units and zero rent** — indistinguishable from having none, and the
+exact numbers a manager would be held to. All four now use `controlledPropertyScope`,
+which closes Phase 1 finding (a) by giving that helper its first real consumers. Each
+service computes the scope once per method rather than once per query.
+
+**2. The fifth was left alone, deliberately.** `owner-statements` is not a read path:
+it _generates_, _issues_ and _pays out_ the owner's settlement. Making it grant-aware
+would hand any manager holding `TRANSACT` the ability to produce and settle the owner's
+money, which is the client-money boundary Phase 1 explicitly deferred — `FINANCE`
+grants nothing yet for exactly this reason. The four services above are read-only
+reporting on properties a manager operates; this one is the settlement step. Reading an
+operational ledger and paying an owner out are different acts, so they get different
+answers. **This needs a decision** (see 10.12).
+
+**3. The owner surface is classified.** The coverage test now walks both
+`modules/landlord` and `modules/owner` — 36 controllers — keyed by **controller class**
+rather than file, because `owner.controllers.ts` holds twelve controllers with genuinely
+different answers in one file. Both property-keyed controllers declare capabilities on
+their parameterised routes, so the guard enforces them in the pipeline.
+
+Two things worth recording from doing it:
+
+- **`requireOwned` is misleadingly named.** It does not require ownership; it calls
+  `authorizeFor(..., 'MANAGE')`. So a manager holding `canManage` can already update
+  _and archive_ a property they manage — including removing it from the owner's
+  portfolio. That is a policy question the name disguised (see 10.12).
+- **I annotated a route wrongly and the discipline caught it.** I had marked
+  `GET /owner/properties/:id` as `LIST` on the theory that seeing a property you
+  advertise is a listing-level act. The service gates it at `MANAGE`, so the declaration
+  advertised a level the route does not accept. Corrected — a declaration that
+  over-states what a route requires is worse than no declaration, because it invites
+  someone to delete the real check.
+
+**4. Owner-only routes are now expressible.** `POST /owner/properties/:id/convert-to-rental`
+requires _ownership_, not a capability: the service refuses unless the caller owns the
+property, because the route grants the `LANDLORD` role to the caller. No capability
+implies that, so a `MANAGE` annotation would have been a false claim. The classification
+gains an explicit per-handler exemption carrying a reason, and a test requires every
+exemption to state a reason and to match a route that actually exists — so a stale
+exemption cannot silently widen the hole it was written to document. Falsified by
+misspelling the handler, which was caught both as an undeclared route and as a
+nonexistent exemption.
+
+**5. Audit attribution — designed, not built.** Adding mandate attribution means deciding
+where it lives. Two facts shape it: `AuditLog` has no column for it (only `newValues`
+JSON, which is the wrong home for something you want to query as "everything Apex did
+under mandate X"), and `AuditService` can inject `PropertyAuthorityService` without a
+dependency cycle, so resolution can be centralised instead of threaded by hand. The
+`PropertyAuthority.managementMandateId` foreign key added earlier makes resolution a
+single indexed lookup, and a `mandateIdFor(propertyId, actorId)` on the authority service
+would give one definition of "which mandate is this person acting under". The work is
+**43 call sites across 18 services**, each of which has to pass the property it is acting
+on. Worth doing in one pass rather than half, or reports will mix attributed and
+unattributed actions and read as though the gaps were inactivity.
+
+Verified: build green; full suite **251 suites / 3265 tests**.
 
 ---
 
@@ -729,6 +792,19 @@ custody actions in the audit log.
     and when GetRentos is the manager the agreed notice binds us too. Applied to all
     staff-initiated terminations rather than only GetRentos-as-manager, so the rule is
     "no one person ends a client engagement" and not a special case to remember.
+12. **What may a manager write, not just read?** (raised by Phase 2). Reading a managed
+    property is settled. Writing is not, and the current answers disagree:
+    - `updateProperty` and `archiveProperty` gate on `MANAGE`, so a manager holding
+      `canManage` can **edit — and archive — a property they manage**, where archiving
+      removes it from the owner's portfolio. The gate is honest but the name
+      (`requireOwned`) hid it, so nobody chose it explicitly.
+    - `convertToRental` is owner-only, because it grants the `LANDLORD` role to the
+      caller.
+    - `owner-statements` (generate, issue, pay out) is owner-only for now, because that
+      is the client-money boundary and `FINANCE` grants nothing yet.
+      Decide the line: is archiving an owner-level act that a manager should have to ask
+      for, and does a `RENT` mandate include producing the owner's statement, or does that
+      wait for the Phase 3 ledger and maker/checker?
 
 ---
 
