@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortlets';
@@ -519,7 +519,7 @@ export const hostShortletsApi = {
   // ---- money ----
   earnings: () => apiFetch<EarningsAnalytics>('/host/shortlets/analytics'),
   views: () => apiFetch<ViewsAnalytics>('/host/shortlets/analytics/views'),
-  payoutAccount: () => apiFetch<HostPayoutAccount | null>('/host/shortlets/payout-account'),
+  payoutAccount: () => apiFetchOrNull<HostPayoutAccount>('/host/shortlets/payout-account'),
   savePayoutAccount: (bankCode: string, accountNumber: string) =>
     apiFetch<HostPayoutAccount>('/host/shortlets/payout-account', {
       method: 'POST',

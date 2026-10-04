@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, User, Users, WalletCards } from 'lucide-react-native';
+import { Home, ShieldAlert, User, Users, WalletCards } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@getrentos/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
@@ -28,6 +28,13 @@ export default function EstateTabsLayout() {
         options={{
           title: 'Dues',
           tabBarIcon: ({ color, size }) => <WalletCards color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="operations"
+        options={{
+          title: 'Operations',
+          tabBarIcon: ({ color, size }) => <ShieldAlert color={color} size={size} />,
         }}
       />
       <Tabs.Screen

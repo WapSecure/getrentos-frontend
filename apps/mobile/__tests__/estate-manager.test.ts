@@ -1,12 +1,19 @@
 import {
+  byUrgency,
   chargeAudience,
+  closingNoteRequired,
   dueTotal,
   dueWhen,
   isDueOpen,
   isFreeEstate,
+  isLivePass,
+  isOpenItem,
+  normalisePlate,
   owed,
   pickEstate,
+  rollOrder,
   type Due,
+  type MusterRollEntry,
 } from '@/lib/api/estateManager';
 
 const due = (over: Partial<Due>): Due =>
@@ -98,5 +105,74 @@ describe('who a charge reaches', () => {
   it('counts the picked ones', () => {
     expect(chargeAudience(1, 50)).toBe('1 selected household');
     expect(chargeAudience(3, 50)).toBe('3 selected households');
+  });
+});
+
+describe('office queues', () => {
+  it('puts the most urgent first, and the longest-waiting first within a level', () => {
+    const items = [
+      { id: 'low', priority: 'low', createdAt: '2026-10-01' },
+      { id: 'crit-new', priority: 'critical', createdAt: '2026-10-03' },
+      { id: 'high', priority: 'high', createdAt: '2026-10-02' },
+      { id: 'crit-old', priority: 'critical', createdAt: '2026-10-01' },
+      { id: 'urgent', priority: 'urgent', createdAt: '2026-10-02' },
+    ];
+    expect(byUrgency(items).map((i) => i.id)).toEqual([
+      'crit-old',
+      'urgent',
+      'crit-new',
+      'high',
+      'low',
+    ]);
+  });
+
+  it('knows what is still waiting on the office', () => {
+    for (const s of ['open', 'in_progress', 'reported', 'warning_issued']) {
+      expect(isOpenItem(s)).toBe(true);
+    }
+    expect(isOpenItem('resolved')).toBe(false);
+    expect(isOpenItem('dismissed')).toBe(false);
+  });
+});
+
+describe('emergency roll call', () => {
+  const entry = (id: string, unitLabel: string, state: MusterRollEntry['state']) =>
+    ({ id, unitLabel, personName: id, state }) as MusterRollEntry;
+
+  it('lists people needing help first, then the missing, then the settled, by unit', () => {
+    const roll = [
+      entry('safe', 'A1', 'ACCOUNTED'),
+      entry('missing-10', 'A10', 'UNACCOUNTED'),
+      entry('away', 'A3', 'NOT_ON_SITE'),
+      entry('help', 'C9', 'NEEDS_HELP'),
+      entry('missing-2', 'A2', 'UNACCOUNTED'),
+    ];
+    // A2 before A10: units sort the way a marshal walks them, not as text.
+    expect(rollOrder(roll).map((e) => e.id)).toEqual([
+      'help',
+      'missing-2',
+      'missing-10',
+      'safe',
+      'away',
+    ]);
+  });
+
+  it('asks for an explanation only when standing down with people missing', () => {
+    expect(closingNoteRequired({ unaccounted: 2 })).toBe(true);
+    expect(closingNoteRequired({ unaccounted: 0 })).toBe(false);
+  });
+});
+
+describe('the gate', () => {
+  it('reads a registration the way the gate matches it', () => {
+    expect(normalisePlate('abc-123 de')).toBe('ABC123DE');
+    expect(normalisePlate('  LND 45 xy ')).toBe('LND45XY');
+  });
+
+  it('knows which passes are still usable or in use', () => {
+    expect(isLivePass('pending')).toBe(true);
+    expect(isLivePass('checked_in')).toBe(true);
+    expect(isLivePass('checked_out')).toBe(false);
+    expect(isLivePass('revoked')).toBe(false);
   });
 });

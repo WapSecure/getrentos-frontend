@@ -75,6 +75,14 @@ export const qk = {
     incidents: (estateId: string) => ['estate-manager', estateId, 'incidents'] as const,
     maintenance: (estateId: string) => ['estate-manager', estateId, 'maintenance'] as const,
     violations: (estateId: string) => ['estate-manager', estateId, 'violations'] as const,
+    activeMuster: (estateId: string) => ['estate-manager', estateId, 'muster', 'active'] as const,
+    musters: (estateId: string) => ['estate-manager', estateId, 'muster', 'history'] as const,
+    muster: (estateId: string, musterId: string) =>
+      ['estate-manager', estateId, 'muster', musterId] as const,
+    visitorPasses: (estateId: string, status = 'all') =>
+      ['estate-manager', estateId, 'visitor-passes', status] as const,
+    watchlist: (estateId: string, status: string) =>
+      ['estate-manager', estateId, 'watchlist', status] as const,
   },
   renter: {
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
