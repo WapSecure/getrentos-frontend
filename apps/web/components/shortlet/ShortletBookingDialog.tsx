@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -20,7 +21,7 @@ import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
-import { ROUTES } from '@/lib/constants/auth';
+import { guestStayRoutes } from '@/lib/shortlet/guestRoutes';
 import type { ShortletBooking, ShortletDiscountType, ShortletListing } from '@/types/shortlet';
 
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -59,6 +60,9 @@ export function ShortletBookingDialog({
   /** The last failed booking attempt, so an identity gate can offer the way forward. */
   bookError?: unknown;
 }) {
+  // The viewer's own verification and "my stays" pages; resolved once per mount.
+  const [guestRoutes] = useState(guestStayRoutes);
+  const router = useRouter();
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guestCount, setGuestCount] = useState('1');
@@ -231,8 +235,8 @@ export function ShortletBookingDialog({
           {error && <p className="text-sm text-destructive">{error}</p>}
           <VerificationRequiredNotice
             error={bookError}
-            href={ROUTES.RENTER_VERIFICATION}
-            verificationHref={ROUTES.RENTER_VERIFICATION}
+            href={guestRoutes.verification}
+            verificationHref={guestRoutes.verification}
           />
 
           {createdBooking ? (
@@ -275,7 +279,14 @@ export function ShortletBookingDialog({
                       )}`}
                 </Button>
               )}
-              <Button variant="outline" className="w-full" onClick={onClose}>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push(guestRoutes.bookings)}
+              >
+                View my stays
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={onClose}>
                 Done
               </Button>
             </div>

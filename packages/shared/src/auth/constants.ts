@@ -351,6 +351,7 @@ export const ROUTES = {
   LANDLORD_SETTINGS: '/landlord/settings',
   LANDLORD_BILLING: '/landlord/billing',
   LANDLORD_VERIFICATION: '/landlord/verification',
+  LANDLORD_BOOKINGS: '/landlord/bookings',
   LANDLORD_REALTORS: '/landlord/realtors',
   LANDLORD_HELP: '/landlord/help',
   LANDLORD_HOME_MANAGEMENT: '/landlord/home-management',
@@ -370,6 +371,7 @@ export const ROUTES = {
   OWNER_MANAGED: '/owner/managed',
   OWNER_SETTINGS: '/owner/settings',
   OWNER_VERIFICATION: '/owner/verification',
+  OWNER_BOOKINGS: '/owner/bookings',
   OWNER_REALTORS: '/owner/realtors',
   OWNER_HELP: '/owner/help',
   OWNER_HOME_MANAGEMENT: '/owner/home-management',
@@ -411,6 +413,7 @@ export const ROUTES = {
   REALTOR_BILLING: '/realtor/billing',
   REALTOR_HELP: '/realtor/help',
   REALTOR_VERIFICATION: '/realtor/verification',
+  REALTOR_BOOKINGS: '/realtor/bookings',
 
   // Agent specific routes
   AGENT_TASKS: '/agent/tasks',
@@ -425,6 +428,7 @@ export const ROUTES = {
   AGENT_MANAGED: '/agent/managed',
   AGENT_SETTINGS: '/agent/settings',
   AGENT_VERIFICATION: '/agent/verification',
+  AGENT_BOOKINGS: '/agent/bookings',
   AGENT_HELP: '/agent/help',
 
   // Admin / BackOffice specific routes
