@@ -8,7 +8,7 @@ import {
   KeyRound,
   Landmark,
   Package,
-  Receipt,
+  ReceiptText,
   TriangleAlert,
   Vote,
   Wrench,
@@ -21,7 +21,7 @@ const ROWS = [
     href: '/(app)/dues',
     label: 'Dues',
     description: 'View and pay dues charged to your household',
-    icon: Receipt,
+    icon: ReceiptText,
   },
   {
     href: '/(app)/maintenance',

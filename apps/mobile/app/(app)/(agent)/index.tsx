@@ -3,11 +3,12 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  BadgeCheck,
   Building2,
-  ChevronRight,
   ClipboardCheck,
   ClipboardList,
   Clock,
+  Users,
 } from 'lucide-react-native';
 import {
   Badge,
@@ -22,6 +23,11 @@ import {
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import {
+  AttentionCard,
+  QuickActions,
+  dashboardGreeting,
+} from '@/components/dashboard/DashboardParts';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,
@@ -33,39 +39,58 @@ import {
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate, firstName } from '@/lib/format';
 
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
 export default function AgentHome() {
   const { profile } = useAuth();
   const { colors, spacing } = useTheme();
 
   const dashboard = useQuery({ queryKey: qk.agent.dashboard, queryFn: agentApi.dashboard });
 
+  const toTasks = () => router.push('/(app)/(agent)/tasks');
+
+  const header = (
+    <DashboardHeader
+      eyebrow={dashboardGreeting()}
+      title={firstName(profile?.legalName)}
+      roleBadge="AG"
+      subtitle="Your tasks, clients and field work"
+    />
+  );
+
   const metrics = dashboard.data
     ? [
-        { label: 'Properties', value: dashboard.data.assignedProperties, Icon: Building2 },
-        { label: 'Assigned', value: dashboard.data.assignedTasks, Icon: ClipboardList },
-        { label: 'In progress', value: dashboard.data.inProgressTasks, Icon: Clock },
-        { label: 'Completed', value: dashboard.data.completedTasks, Icon: ClipboardCheck },
+        {
+          label: 'Properties',
+          value: dashboard.data.assignedProperties,
+          Icon: Building2,
+          onPress: () => router.push('/(app)/agent-properties'),
+        },
+        {
+          label: 'Assigned',
+          value: dashboard.data.assignedTasks,
+          Icon: ClipboardList,
+          onPress: toTasks,
+        },
+        {
+          label: 'In progress',
+          value: dashboard.data.inProgressTasks,
+          Icon: Clock,
+          onPress: toTasks,
+        },
+        {
+          label: 'Completed',
+          value: dashboard.data.completedTasks,
+          Icon: ClipboardCheck,
+          onPress: toTasks,
+        },
       ]
     : [];
 
-  if (dashboard.isError) {
+  if (dashboard.isError && !dashboard.data) {
     return (
       <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-        <DashboardHeader
-          eyebrow={greeting()}
-          title={firstName(profile?.legalName)}
-          roleBadge="AG"
-          subtitle="Field operations and property work"
-        />
+        {header}
         <ErrorState
-          title="We couldn't load your workspace"
+          title="We couldn't load your dashboard"
           description="Check your connection and try again. Your assigned work is safe."
           onRetry={() => dashboard.refetch()}
         />
@@ -75,45 +100,37 @@ export default function AgentHome() {
 
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-      <DashboardHeader
-        eyebrow={greeting()}
-        title={firstName(profile?.legalName)}
-        roleBadge="AG"
-        subtitle="Field operations and property work"
-      />
+      {header}
 
+      {/* What needs you first: work past its deadline. */}
       {dashboard.data && dashboard.data.overdueTasks > 0 ? (
-        <Pressable
-          onPress={() => router.push('/(app)/(agent)/tasks')}
-          accessibilityRole="button"
-          accessibilityLabel={`${dashboard.data.overdueTasks} overdue ${dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}`}
-          accessibilityHint="Opens your assigned tasks"
-        >
-          <Card
-            elevated
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              backgroundColor: colors.warningSubtle,
-            }}
-          >
-            <AlertTriangle size={20} color={colors.warning} />
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong" style={{ color: colors.warning }}>
-                {dashboard.data.overdueTasks} overdue{' '}
-                {dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Take a look before they pile up
-              </Text>
-            </View>
-            <ChevronRight size={18} color={colors.warning} />
-          </Card>
-        </Pressable>
+        <AttentionCard
+          Icon={AlertTriangle}
+          tone="warning"
+          title={`${dashboard.data.overdueTasks} overdue ${dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}`}
+          detail="Take a look before they pile up"
+          onPress={toTasks}
+        />
       ) : null}
 
       <MetricGrid metrics={metrics} loading={dashboard.isPending} />
+
+      <QuickActions
+        actions={[
+          { label: 'My tasks', Icon: ClipboardList, onPress: toTasks },
+          { label: 'Clients', Icon: Users, onPress: () => router.push('/(app)/(agent)/clients') },
+          {
+            label: 'Inspections',
+            Icon: ClipboardCheck,
+            onPress: () => router.push('/(app)/agent-inspections'),
+          },
+          {
+            label: 'Verifications',
+            Icon: BadgeCheck,
+            onPress: () => router.push('/(app)/agent-verifications'),
+          },
+        ]}
+      />
 
       <View style={{ gap: spacing.md }}>
         <SectionHeader

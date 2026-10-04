@@ -2,18 +2,24 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
-  ChevronRight,
+  BedDouble,
+  Bell,
+  CalendarClock,
   FileSignature,
   FileText,
   Heart,
   Home as HomeIcon,
+  LandPlot,
+  Search,
   ShoppingBag,
   Wallet,
+  type LucideIcon,
 } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Screen,
   SectionHeader,
@@ -23,63 +29,92 @@ import {
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import {
+  ActivityFeed,
+  AttentionCard,
+  QuickActions,
+  dashboardGreeting,
+} from '@/components/dashboard/DashboardParts';
 import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
+import { buyerSettingsApi } from '@/lib/api/buyerSettings';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName, relativeTime } from '@/lib/format';
+import { firstName } from '@/lib/format';
 
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+/** The kinds of activity the buyer dashboard reports. */
+const ACTIVITY_ICON: Record<string, LucideIcon> = {
+  offer: FileSignature,
+  transaction: Wallet,
+  escrow: Wallet,
+  payment: Wallet,
+  viewing: CalendarClock,
+  document: FileText,
+  saved: Heart,
+};
 
 export default function BuyerHome() {
   const { profile } = useAuth();
   const { colors, spacing } = useTheme();
 
   const dashboard = useQuery({ queryKey: qk.buyer.dashboard, queryFn: buyerApi.dashboard });
+  // Drives the bell badge; the notifications screen owns the full list.
+  const notifications = useQuery({
+    queryKey: qk.buyer.notifications(1, 50),
+    queryFn: () => buyerSettingsApi.notifications(1, 50),
+  });
+  const unread = notifications.data?.items.filter((n) => !n.read).length ?? 0;
+  const d = dashboard.data;
 
-  const metrics = dashboard.data
+  const header = (
+    <DashboardHeader
+      eyebrow={dashboardGreeting()}
+      title={firstName(profile?.legalName)}
+      roleBadge="BY"
+      subtitle="Your offers, viewings and purchases"
+      accessory={
+        <IconButton
+          onPress={() => router.push('/(app)/buyer-notification-inbox')}
+          accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          badge={unread}
+          icon={<Bell size={21} color={colors.foreground} />}
+        />
+      }
+    />
+  );
+
+  const metrics = d
     ? [
         {
           label: 'Saved',
-          value: dashboard.data.savedListings,
+          value: d.savedListings,
           Icon: Heart,
           onPress: () => router.push('/(app)/buyer-saved'),
         },
         {
           label: 'Offers',
-          value: dashboard.data.activeOffers,
+          value: d.activeOffers,
           Icon: FileSignature,
           onPress: () => router.push('/(app)/(buyer)/offers'),
         },
         {
           label: 'Viewings',
-          value: dashboard.data.upcomingViewings,
-          Icon: HomeIcon,
+          value: d.upcomingViewings,
+          Icon: CalendarClock,
           onPress: () => router.push('/(app)/buyer-viewings'),
         },
-        { label: 'Purchases', value: dashboard.data.completedPurchases, Icon: ShoppingBag },
         {
-          label: 'Documents',
-          value: dashboard.data.documentsUploaded,
-          Icon: FileText,
-          onPress: () => router.push('/(app)/buyer-documents'),
+          label: 'Purchased',
+          value: d.completedPurchases,
+          Icon: ShoppingBag,
+          onPress: () => router.push('/(app)/buyer-transactions'),
         },
       ]
     : [];
 
-  if (dashboard.isError) {
+  if (dashboard.isError && !d) {
     return (
       <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-        <DashboardHeader
-          eyebrow={greeting()}
-          title={firstName(profile?.legalName)}
-          roleBadge="BY"
-          subtitle="Your property journey, at a glance"
-        />
+        {header}
         <ErrorState
           title="We couldn't load your dashboard"
           description="Check your connection and try again. Your saved homes and offers are safe."
@@ -91,45 +126,36 @@ export default function BuyerHome() {
 
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-      <DashboardHeader
-        eyebrow={greeting()}
-        title={firstName(profile?.legalName)}
-        roleBadge="BY"
-        subtitle="Your property journey, at a glance"
-      />
+      {header}
+
+      {/* What needs you first: a purchase with a payment in motion. */}
+      {d?.activeTransactions ? (
+        <AttentionCard
+          Icon={Wallet}
+          title={`${d.activeTransactions} ${d.activeTransactions === 1 ? 'purchase' : 'purchases'} in progress`}
+          detail="See what’s paid and what happens next"
+          onPress={() => router.push('/(app)/buyer-transactions')}
+        />
+      ) : null}
 
       <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
-      {dashboard.data?.activeTransactions ? (
-        <Pressable
-          onPress={() => router.push('/(app)/buyer-transactions')}
-          accessibilityRole="button"
-          accessibilityLabel={`${dashboard.data.activeTransactions} active ${dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}`}
-          accessibilityHint="Opens your purchase payment progress"
-        >
-          <Card
-            elevated
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              backgroundColor: colors.accent,
-            }}
-          >
-            <Wallet size={20} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">
-                {dashboard.data.activeTransactions} active{' '}
-                {dashboard.data.activeTransactions === 1 ? 'transaction' : 'transactions'}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Track your purchase payment
-              </Text>
-            </View>
-            <ChevronRight size={18} color={colors.primary} />
-          </Card>
-        </Pressable>
-      ) : null}
+      <QuickActions
+        actions={[
+          {
+            label: 'Find a property',
+            Icon: Search,
+            onPress: () => router.push('/(app)/(buyer)/discover'),
+          },
+          { label: 'Land', Icon: LandPlot, onPress: () => router.push('/(app)/land') },
+          {
+            label: 'Documents',
+            Icon: FileText,
+            onPress: () => router.push('/(app)/buyer-documents'),
+          },
+          { label: 'Short stays', Icon: BedDouble, onPress: () => router.push('/(app)/shortlets') },
+        ]}
+      />
 
       <View style={{ gap: spacing.md }}>
         <SectionHeader
@@ -180,47 +206,17 @@ export default function BuyerHome() {
         )}
       </View>
 
-      {dashboard.data?.recentActivity?.length ? (
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader
-            title="Recent activity"
-            description="Offers, viewings and payment updates"
-          />
-          <Card elevated padding="none">
-            {dashboard.data.recentActivity.slice(0, 6).map((a, i) => (
-              <View
-                key={a.id}
-                accessible
-                accessibilityLabel={`${a.message}, ${relativeTime(a.timestamp)}`}
-                style={{
-                  flexDirection: 'row',
-                  gap: spacing.md,
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  borderTopWidth: i ? 1 : 0,
-                  borderTopColor: colors.border,
-                }}
-              >
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    marginTop: 6,
-                    backgroundColor: colors.primary,
-                  }}
-                />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="callout">{a.message}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {relativeTime(a.timestamp)}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </Card>
-        </View>
-      ) : null}
+      <ActivityFeed
+        description="Offers, viewings and payment updates"
+        loading={dashboard.isPending}
+        emptyText="Your offers, viewings and payments will show up here."
+        items={(d?.recentActivity ?? []).slice(0, 6).map((a) => ({
+          id: a.id,
+          Icon: ACTIVITY_ICON[a.type] ?? Bell,
+          title: a.message,
+          timestamp: a.timestamp,
+        }))}
+      />
     </Screen>
   );
 }

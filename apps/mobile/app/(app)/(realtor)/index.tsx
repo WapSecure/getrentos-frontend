@@ -29,6 +29,11 @@ import {
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import {
+  ActivityFeed,
+  QuickActions,
+  dashboardGreeting,
+} from '@/components/dashboard/DashboardParts';
 import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { isUpgradeError } from '@/components/host/HostUI';
@@ -41,14 +46,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { realtorApi, viewingBuckets } from '@/lib/api/realtor';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName, relativeTime } from '@/lib/format';
-
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+import { firstName } from '@/lib/format';
 
 type SheetKind = 'lead' | 'viewing' | 'invite' | null;
 
@@ -56,6 +54,13 @@ type SheetKind = 'lead' | 'viewing' | 'invite' | null;
  * The realtor's day: who they're showing round today, what's waiting on them
  * (new offers, new leads, pending clients), and what they've earned.
  */
+/** The kinds of activity the realtor dashboard reports. */
+const ACTIVITY_ICON: Record<string, LucideIcon> = {
+  lead: UserPlus,
+  viewing: CalendarClock,
+  offer: FileSignature,
+};
+
 export default function RealtorHome() {
   const { profile } = useAuth();
   const { colors, spacing, radius } = useTheme();
@@ -105,9 +110,9 @@ export default function RealtorHome() {
 
   const header = (
     <DashboardHeader
-      eyebrow={greeting()}
+      eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="Realtor"
+      roleBadge="RL"
       subtitle={
         today.length
           ? `${today.length} ${today.length === 1 ? 'viewing' : 'viewings'} today`
@@ -283,65 +288,32 @@ export default function RealtorHome() {
 
       <MetricGrid metrics={metrics} loading={dashboard.isPending} />
 
-      <View style={{ gap: spacing.md }}>
-        <SectionHeader title="Quick actions" />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          <QuickAction label="Add a lead" Icon={Plus} onPress={() => setSheet('lead')} />
-          <QuickAction
-            label="Book a viewing"
-            Icon={CalendarClock}
-            onPress={() => setSheet('viewing')}
-          />
-          <QuickAction label="Invite a client" Icon={UserPlus} onPress={() => setSheet('invite')} />
-          <QuickAction
-            label="Offers"
-            Icon={FileSignature}
-            badge={newOffers}
-            onPress={() => router.push('/(app)/realtor-offers')}
-          />
-        </View>
-      </View>
+      <QuickActions
+        actions={[
+          { label: 'Add a lead', Icon: Plus, onPress: () => setSheet('lead') },
+          { label: 'Book a viewing', Icon: CalendarClock, onPress: () => setSheet('viewing') },
+          { label: 'Invite a client', Icon: UserPlus, onPress: () => setSheet('invite') },
+          {
+            label: 'Offers',
+            Icon: FileSignature,
+            badge: newOffers,
+            onPress: () => router.push('/(app)/realtor-offers'),
+          },
+        ]}
+      />
 
-      {activity.data?.length ? (
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader title="Recent activity" />
-          <Card elevated padding="none">
-            {activity.data.slice(0, 6).map((a, i) => (
-              <View
-                key={a.id}
-                accessible
-                accessibilityLabel={`${a.title}. ${a.description}, ${relativeTime(a.date)}`}
-                style={{
-                  flexDirection: 'row',
-                  gap: spacing.md,
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  borderTopWidth: i ? 1 : 0,
-                  borderTopColor: colors.border,
-                }}
-              >
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: radius.full,
-                    marginTop: 6,
-                    backgroundColor: colors.primary,
-                  }}
-                />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="callout" style={{ fontWeight: '600' }}>
-                    {a.title}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground" numberOfLines={2}>
-                    {a.description} · {relativeTime(a.date)}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </Card>
-        </View>
-      ) : null}
+      <ActivityFeed
+        description="Leads, viewings and offers across your clients"
+        loading={activity.isPending}
+        emptyText="Leads, viewings and offers will show up here."
+        items={(activity.data ?? []).slice(0, 6).map((a) => ({
+          id: a.id,
+          Icon: ACTIVITY_ICON[a.type] ?? Bell,
+          title: a.title,
+          detail: a.description,
+          timestamp: a.date,
+        }))}
+      />
 
       <AddLeadSheet open={sheet === 'lead'} onClose={() => setSheet(null)} />
       <ScheduleViewingSheet open={sheet === 'viewing'} onClose={() => setSheet(null)} />
@@ -420,51 +392,6 @@ function Earnings({
             : 'Earned when a sale you worked on closes'}
         </Text>
       </Card>
-    </PressableScale>
-  );
-}
-
-function QuickAction({
-  label,
-  Icon,
-  onPress,
-  badge,
-}: {
-  label: string;
-  Icon: LucideIcon;
-  onPress: () => void;
-  badge?: number;
-}) {
-  const { colors, spacing, radius } = useTheme();
-  return (
-    <PressableScale
-      onPress={onPress}
-      haptic={false}
-      accessibilityRole="button"
-      accessibilityLabel={badge ? `${label}, ${badge} new` : label}
-      style={{
-        flexBasis: '48%',
-        flexGrow: 1,
-        minHeight: 56,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        padding: spacing.md,
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.card,
-      }}
-    >
-      <Icon size={18} color={colors.primary} />
-      <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
-        {label}
-      </Text>
-      {badge ? (
-        <Text variant="caption" color="primary" style={{ fontWeight: '800' }}>
-          {badge}
-        </Text>
-      ) : null}
     </PressableScale>
   );
 }
