@@ -1,4 +1,4 @@
-import { RefreshControl, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -45,7 +45,7 @@ export default function LandlordTenants() {
         }}
       >
         <DashboardHeader
-          eyebrow="Portfolio"
+          eyebrow="Your portfolio"
           title="Tenants"
           subtitle={
             query.data
@@ -55,10 +55,21 @@ export default function LandlordTenants() {
         />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
+      {query.isError && items.length === 0 ? (
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={query.isRefetching}
+              onRefresh={() => query.refetch()}
+              tintColor={colors.mutedForeground}
+            />
+          }
+        >
+          <ErrorState onRetry={() => query.refetch()} />
+        </ScrollView>
+      ) : query.isPending ? (
+        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} height={88} radius={radius.lg} />
           ))}
@@ -81,7 +92,7 @@ export default function LandlordTenants() {
           }
           ListEmptyComponent={
             <EmptyState
-              icon={<Users size={32} color={colors.mutedForeground} />}
+              icon={<Users size={34} color={colors.mutedForeground} />}
               title="No tenants yet"
               description="Once a lease is signed the tenant shows up here with their rent status."
             />

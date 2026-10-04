@@ -118,3 +118,34 @@ describe('estate office notifications', () => {
     );
   });
 });
+
+describe('landlord notifications', () => {
+  it('opens the landlord side of rent, leases and repairs, not the renter screens', () => {
+    expect(routeForNotification({ type: 'RENT_OVERDUE' }, 'landlord')).toBe(
+      '/(app)/landlord-payments'
+    );
+    expect(routeForNotification({ type: 'LEASE_SIGNED' }, 'landlord')).toBe(
+      '/(app)/landlord-leases'
+    );
+    expect(routeForNotification({ type: 'MAINTENANCE_SUBMITTED' }, 'landlord')).toBe(
+      '/(app)/landlord-maintenance'
+    );
+    expect(routeForNotification({ type: 'APPLICATION_RECEIVED' }, 'landlord')).toBe(
+      '/(app)/landlord-applications'
+    );
+    expect(routeForNotification({ type: 'LEAD_FOLLOW_UP_DUE' }, 'landlord')).toBe(
+      '/(app)/landlord-leads'
+    );
+  });
+
+  it('leaves renters on their own rent and lease screens', () => {
+    expect(routeForNotification({ type: 'RENT_OVERDUE' }, 'renter')).toBe('/(app)/payments');
+    expect(routeForNotification({ type: 'LEASE_SIGNED' }, 'renter')).toBe('/(app)/lease');
+  });
+
+  it('still sends a landlord host to their hosting booking', () => {
+    expect(
+      routeForNotification({ type: 'SHORTLET_BOOKING_REQUEST', bookingId: 'b1' }, 'landlord')
+    ).toBe('/(app)/host/booking/b1');
+  });
+});

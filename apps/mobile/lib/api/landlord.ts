@@ -96,6 +96,13 @@ export const RENT_STATUS_TONE: Record<RentStatus, 'success' | 'warning' | 'dange
   partial: 'info',
 };
 
+export const VERIFICATION_LABEL: Record<VerificationStatus, string> = {
+  verified: 'Verified',
+  pending: 'In review',
+  unverified: 'Not verified',
+  rejected: 'Rejected',
+};
+
 export const VERIFICATION_TONE: Record<
   VerificationStatus,
   'success' | 'warning' | 'danger' | 'neutral'

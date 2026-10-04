@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Building2, LayoutDashboard, MessageCircle, User, Users } from 'lucide-react-native';
+import { Building2, Home, MessageCircle, User, Users } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
@@ -13,8 +13,8 @@ export default function LandlordTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Overview',
-          tabBarIcon: ({ color, size }) => <LayoutDashboard color={color} size={size} />,
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
       <Tabs.Screen
