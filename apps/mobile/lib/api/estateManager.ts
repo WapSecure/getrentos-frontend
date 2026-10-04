@@ -223,6 +223,42 @@ export interface EmergencyMuster extends MusterSummary {
   roll: MusterRollEntry[];
 }
 
+export interface PollOption {
+  id: string;
+  label: string;
+  voteCount: number;
+}
+
+export interface Poll {
+  id: string;
+  question: string;
+  status: 'open' | 'closed';
+  options: PollOption[];
+  /** One vote per household. */
+  totalVotes: number;
+  createdAt: string;
+}
+
+export interface Amenity {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface AmenityBooking {
+  id: string;
+  amenityId: string;
+  amenityName: string;
+  householdId: string;
+  unitLabel: string;
+  residentName: string;
+  startsAt: string;
+  endsAt: string;
+  status: 'confirmed' | 'cancelled';
+  createdAt: string;
+}
+
 /* ----------------------------------- api ---------------------------------- */
 
 function q(params: Record<string, string | number | boolean | undefined | null>): string {
@@ -399,6 +435,24 @@ export const estateManagerApi = {
   ) => apiFetch<IssuedVisitorPass>(`/estate/${estateId}/visitor-passes`, { method: 'POST', body }),
   revokeVisitorPass: (estateId: string, passId: string) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/revoke`, {
+      method: 'PATCH',
+    }),
+
+  polls: (estateId: string) => apiFetch<Poll[]>(`/estate/${estateId}/polls`),
+  createPoll: (estateId: string, body: { question: string; options: string[] }) =>
+    apiFetch<Poll>(`/estate/${estateId}/polls`, { method: 'POST', body }),
+  closePoll: (estateId: string, pollId: string) =>
+    apiFetch<Poll>(`/estate/${estateId}/polls/${pollId}/close`, { method: 'PATCH' }),
+
+  amenities: (estateId: string) => apiFetch<Amenity[]>(`/estate/${estateId}/amenities`),
+  addAmenity: (estateId: string, body: { name: string; description?: string }) =>
+    apiFetch<Amenity>(`/estate/${estateId}/amenities`, { method: 'POST', body }),
+  removeAmenity: (estateId: string, amenityId: string) =>
+    apiFetch<void>(`/estate/${estateId}/amenities/${amenityId}`, { method: 'DELETE' }),
+  amenityBookings: (estateId: string) =>
+    apiFetch<AmenityBooking[]>(`/estate/${estateId}/amenity-bookings`),
+  cancelAmenityBooking: (estateId: string, bookingId: string) =>
+    apiFetch<AmenityBooking>(`/estate/${estateId}/amenity-bookings/${bookingId}/cancel`, {
       method: 'PATCH',
     }),
 
@@ -617,3 +671,51 @@ export const isLivePass = (status: string) =>
 
 /** A registration as the gate reads it: upper case, no spaces or dashes. */
 export const normalisePlate = (plate: string) => plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+/* -------------------------------- community ------------------------------- */
+
+/** An option's share of the votes cast, as a whole percent. No votes is 0, not NaN. */
+export const pollShare = (voteCount: number, totalVotes: number) =>
+  totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+
+/**
+ * The option(s) in front. More than one when they are level, and none until
+ * somebody has voted, so a tie or an empty poll is never reported as a winner.
+ */
+export function leadingOptions(poll: Pick<Poll, 'options' | 'totalVotes'>): string[] {
+  if (!poll.totalVotes) return [];
+  const top = Math.max(...poll.options.map((o) => o.voteCount));
+  return poll.options.filter((o) => o.voteCount === top).map((o) => o.id);
+}
+
+/** How many households voted, against how many could. */
+export function turnout(totalVotes: number, households: number): string {
+  if (!households) return `${totalVotes} ${totalVotes === 1 ? 'vote' : 'votes'}`;
+  return `${totalVotes} of ${households.toLocaleString('en-NG')} households (${pollShare(totalVotes, households)}%)`;
+}
+
+/** Poll choices as typed: trimmed, without blanks or repeats. Mirrors the API's rule. */
+export function cleanPollOptions(options: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of options) {
+    const label = raw.trim();
+    if (!label || seen.has(label.toLowerCase())) continue;
+    seen.add(label.toLowerCase());
+    out.push(label);
+  }
+  return out;
+}
+
+/** Bookings still ahead (soonest first) and the rest (latest first). Cancelled ones are history. */
+export function bookingBuckets(bookings: AmenityBooking[], now: Date = new Date()) {
+  const upcoming: AmenityBooking[] = [];
+  const past: AmenityBooking[] = [];
+  for (const b of bookings) {
+    if (b.status === 'confirmed' && new Date(b.endsAt).getTime() >= now.getTime()) upcoming.push(b);
+    else past.push(b);
+  }
+  upcoming.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  past.sort((a, b) => b.startsAt.localeCompare(a.startsAt));
+  return { upcoming, past };
+}

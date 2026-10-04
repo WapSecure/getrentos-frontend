@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
+  CalendarCheck,
   ChevronRight,
   Gavel,
   ShieldAlert,
@@ -175,6 +176,12 @@ export default function EstateOperations() {
               countLabel="inside"
               note="Who’s in, who’s expected, issue a pass"
               href="/(app)/estate-visitors"
+            />
+            <Row
+              Icon={CalendarCheck}
+              label="Expected today"
+              note="Visitors, contractors and parcels due"
+              href="/(app)/estate-expected"
             />
             <Row
               Icon={ShieldBan}

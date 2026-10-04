@@ -9,7 +9,9 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Vote,
   WalletCards,
+  Waves,
 } from 'lucide-react-native';
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
@@ -32,6 +34,20 @@ export default function EstateAccount() {
       description: 'What you’ve told your residents',
       icon: Megaphone,
       onPress: go('/(app)/estate-announcements'),
+    },
+    {
+      key: 'polls',
+      label: 'Polls',
+      description: 'Put a decision to the estate',
+      icon: Vote,
+      onPress: go('/(app)/estate-polls'),
+    },
+    {
+      key: 'amenities',
+      label: 'Amenities',
+      description: 'Shared spaces and their bookings',
+      icon: Waves,
+      onPress: go('/(app)/estate-amenities'),
     },
     {
       key: 'charge',
