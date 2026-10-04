@@ -607,7 +607,7 @@ review item; mandate grants are not FK-linked to their mandate (finding c).
 
 ---
 
-## 9c. Phase 2 — in progress (2026-10-03)
+## 9c. Phase 2 — the mandate hardened (2026-10-03)
 
 Backend commit `d3e6796`. Two of the four Phase 2 workstreams are done; the other two
 are listed at the end of this section rather than left implied.
@@ -677,8 +677,8 @@ no grant on a property-keyed route with `PROPERTY_AUTHORITY_REQUIRED` while lett
 owner through on their own property. The fixture, including a temporary second staff
 account, was removed afterwards.
 
-**Still to do in Phase 2:** add mandate attribution to custody actions in the audit log
-(see 9d).
+**Still to do in Phase 2:** nothing outstanding — mandate attribution, the last item, landed
+in 9d. The open question Phase 2 raised is recorded as decision 12.
 
 ---
 
@@ -733,19 +733,46 @@ exemption cannot silently widen the hole it was written to document. Falsified b
 misspelling the handler, which was caught both as an undeclared route and as a
 nonexistent exemption.
 
-**5. Audit attribution — designed, not built.** Adding mandate attribution means deciding
-where it lives. Two facts shape it: `AuditLog` has no column for it (only `newValues`
-JSON, which is the wrong home for something you want to query as "everything Apex did
-under mandate X"), and `AuditService` can inject `PropertyAuthorityService` without a
-dependency cycle, so resolution can be centralised instead of threaded by hand. The
-`PropertyAuthority.managementMandateId` foreign key added earlier makes resolution a
-single indexed lookup, and a `mandateIdFor(propertyId, actorId)` on the authority service
-would give one definition of "which mandate is this person acting under". The work is
-**43 call sites across 18 services**, each of which has to pass the property it is acting
-on. Worth doing in one pass rather than half, or reports will mix attributed and
-unattributed actions and read as though the gaps were inactivity.
+**5. Audit attribution — shipped.** An owner could see that a firm acted but not on what
+grounds, so every action by a firm with access looked the same as an action by someone
+who simply had it — the question an owner with a dispute actually asks.
 
-Verified: build green; full suite **251 suites / 3265 tests**.
+`AuditLog.mandateId` is a real column with an index and a foreign key, not a key inside
+`newValues`: _"everything this firm did under this mandate"_ is a question someone will
+ask, and a JSON blob answers it with a sequential scan. `ON DELETE SET NULL`, because
+deleting a mandate must not erase the history of what was done under it. **No backfill** —
+the mandate was not recorded when those rows were written, and inferring one from whichever
+grant is live today would invent an attribution the original action never had.
+
+Resolution lives in `AuditService`, which takes the property the action touched and asks a
+new `mandateIdFor(propertyId, actorId)` on the authority service. Threading the rule through
+forty-odd call sites would have been forty-odd chances to derive it differently, and the
+authority service already owns "who may act for this property". Callers that know the
+mandate pass it and skip the lookup; the mandate service does that for its own lifecycle
+events. Attribution is deliberately **not** an authorisation check — any live grant means
+the person acted under that mandate, whichever capability the action needed — and a
+hand-granted authority is reported as having no mandate rather than borrowing one. A lookup
+that fails leaves the entry unattributed instead of failing the action: the action already
+happened.
+
+**Thirty of the forty-three call sites on the landlord and owner surface are attributed.**
+The other thirteen are not, each recorded in the code with its reason: vendors belong to the
+caller's own agency pool rather than a property; bulk actions span properties; media is
+staged before it is attached to anything; settings touch the caller's own account; owner
+statements are owner-level documents on owner-only routes. An entry that borrows a mandate
+it has no claim to is worse than one that admits it has none, because it reads as evidence.
+
+Verified: build green; full suite **257 suites / 3408 tests** after rebasing over twelve
+commits from other work; four guarantees falsified one at a time (the property requirement,
+the fail-soft catch, explicit attribution, and the filter refusing hand-granted authorities),
+each caught by its own test; and live — a manager's edit on a property they run records the
+mandate, the owner's edit on their own property records none, and querying by mandate returns
+the whole history naming the humans who acted.
+
+_Operational note for the next live run:_ the first attempt reported a null mandate because
+the process answering on the port was six hours older than the build. `dist` had the change;
+the listener did not. Check the serving process's start time against the build, not just that
+the port answers.
 
 ---
 
