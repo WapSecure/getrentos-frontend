@@ -47,3 +47,10 @@ export function relativeTime(value: string | Date): string {
 }
 
 export const firstName = (full?: string | null) => full?.trim().split(/\s+/)[0] ?? 'there';
+
+/** "PROPERTY_BUYER" or "tenant" as words: "Property buyer", "Tenant". */
+export function roleLabel(role?: string | null): string | undefined {
+  if (!role) return undefined;
+  const words = role.replace(/_/g, ' ').trim().toLowerCase();
+  return words ? words[0].toUpperCase() + words.slice(1) : undefined;
+}

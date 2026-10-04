@@ -1,5 +1,5 @@
 import { Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { routeForNotification } from '@/lib/notificationRoutes';
 import { landlordApi, type LandlordNotification } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
@@ -84,7 +85,7 @@ export default function LandlordNotifications() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
-        eyebrow="Landlord workspace"
+        eyebrow="Renting"
         title="Notifications"
         subtitle={
           unread > 0 ? `${unread} unread update${unread === 1 ? '' : 's'}` : 'You are all caught up'
@@ -127,9 +128,11 @@ export default function LandlordNotifications() {
               <Pressable
                 onPress={() => {
                   if (!item.read) readOne.mutate(item.id);
+                  const to = routeForNotification({ type: item.type.toUpperCase() }, 'landlord');
+                  if (to !== '/(app)/notifications') router.push(to as Href);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={item.title}
+                accessibilityLabel={`${item.read ? '' : 'Unread. '}${item.title}. ${item.body}`}
                 style={{ marginBottom: spacing.sm }}
               >
                 <Card padding={spacing.lg}>

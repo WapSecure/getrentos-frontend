@@ -110,6 +110,18 @@ const OWNER_FALLBACK: [prefix: string, route: string][] = [
  * Realtor-side screens. A realtor's "commission earned" arrives typed as the
  * escrow release that earned it, and their offers are the ones they negotiate.
  */
+/** Landlord-side screens: rent, leases and repairs mean managing them, not paying them. */
+const LANDLORD_FALLBACK: [prefix: string, route: string][] = [
+  ['RENT_', '/(app)/landlord-payments'],
+  ['PAYMENT_', '/(app)/landlord-payments'],
+  ['LEASE_', '/(app)/landlord-leases'],
+  ['APPLICATION_', '/(app)/landlord-applications'],
+  ['MAINTENANCE_', '/(app)/landlord-maintenance'],
+  ['LEAD_', '/(app)/landlord-leads'],
+  ['REVIEW_', '/(app)/landlord-reviews'],
+  ['MESSAGE', '/(app)/(landlord)/messages'],
+];
+
 const REALTOR_FALLBACK: [prefix: string, route: string][] = [
   ['ESCROW_', '/(app)/realtor-commissions'],
   ['OFFER_', '/(app)/realtor-offers'],
@@ -189,15 +201,17 @@ export function routeForNotification(
       ? `/(app)/host/booking/${bookingId}`
       : '/(app)/host';
   }
-  // Sellers see offers and escrow from the other side of the table.
+  // Sellers, landlords and estates see the same events from the other side of the table.
   const sellerSide =
     portal === 'owner'
       ? OWNER_FALLBACK
-      : portal === 'realtor'
-        ? REALTOR_FALLBACK
-        : portal === 'estate'
-          ? ESTATE_FALLBACK
-          : null;
+      : portal === 'landlord'
+        ? LANDLORD_FALLBACK
+        : portal === 'realtor'
+          ? REALTOR_FALLBACK
+          : portal === 'estate'
+            ? ESTATE_FALLBACK
+            : null;
   const portalFallback =
     sellerSide && type ? sellerSide.find(([prefix]) => type.startsWith(prefix))?.[1] : undefined;
   if (portalFallback) return portalFallback;
