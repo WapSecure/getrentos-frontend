@@ -104,6 +104,8 @@ const TYPE_FALLBACK: [prefix: string, route: string][] = [
 const OWNER_FALLBACK: [prefix: string, route: string][] = [
   ['OFFER_', '/(app)/(owner)/offers'],
   ['ESCROW_', '/(app)/owner-transactions'],
+  // A realtor asking to represent them: answered where they manage realtors.
+  ['REALTOR_CLIENT_', '/(app)/representatives'],
 ];
 
 /**
@@ -125,6 +127,7 @@ const LANDLORD_FALLBACK: [prefix: string, route: string][] = [
 const REALTOR_FALLBACK: [prefix: string, route: string][] = [
   ['ESCROW_', '/(app)/realtor-commissions'],
   ['OFFER_', '/(app)/realtor-offers'],
+  ['REALTOR_CLIENT_', '/(app)/realtor-clients'],
 ];
 
 /** The estate office sees its residents' dues, not a resident's own. */

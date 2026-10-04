@@ -92,7 +92,7 @@ export interface DirectoryEntry {
   contactEmail?: string;
 }
 
-export type DueStatus = 'pending' | 'paid' | 'overdue' | 'processing';
+export type DueStatus = 'pending' | 'paid' | 'overdue' | 'processing' | 'waived';
 export type DueCategory = 'rent' | 'service_charge' | 'deposit' | 'levy';
 export type BillingCycle = 'monthly' | 'quarterly' | 'annual';
 

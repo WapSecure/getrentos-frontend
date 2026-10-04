@@ -14,6 +14,7 @@ const statusVariant: Record<Due['status'], 'success' | 'warning' | 'danger'> = {
   pending: 'warning',
   overdue: 'danger',
   processing: 'warning',
+  waived: 'success',
 };
 
 const categoryLabels: Record<Due['category'], string> = {
@@ -86,7 +87,10 @@ export default function ResidentDuesPage() {
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {dues.map((due) => {
             const isPaying = payMutation.isPending && payMutation.variables === due.id;
-            const canPay = due.status === 'pending' || due.status === 'overdue';
+            // A checkout that was opened and left can be picked up again: the API checks
+            // whether the earlier one went through before starting another.
+            const canPay =
+              due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
             return (
               <div key={due.id} className="p-4">
                 <div className="flex items-center justify-between gap-4">
@@ -122,7 +126,11 @@ export default function ResidentDuesPage() {
                           payMutation.mutate(due.id);
                         }}
                       >
-                        {isPaying ? 'Processing…' : 'Pay Now'}
+                        {isPaying
+                          ? 'Processing…'
+                          : due.status === 'processing'
+                            ? 'Finish paying'
+                            : 'Pay Now'}
                       </Button>
                     )}
                   </div>

@@ -64,14 +64,14 @@ describe('estate plan', () => {
 });
 
 describe('what a household owes', () => {
-  it('adds the late fee to what a due costs', () => {
-    expect(dueTotal(due({ amount: 10_000, lateFeeApplied: 2_500 }))).toBe(12_500);
+  it('does not add the late fee twice: the amount already includes it', () => {
+    expect(dueTotal(due({ amount: 12_500, lateFeeApplied: 2_500 }))).toBe(12_500);
   });
 
   it('counts open dues only, and says how much of it is overdue', () => {
     const result = owed([
       due({ status: 'pending', amount: 10_000 }),
-      due({ status: 'overdue', amount: 20_000, lateFeeApplied: 5_000 }),
+      due({ status: 'overdue', amount: 25_000, lateFeeApplied: 5_000 }),
       due({ status: 'processing', amount: 4_000 }),
       due({ status: 'paid', amount: 99_000 }),
       due({ status: 'waived', amount: 99_000 }),

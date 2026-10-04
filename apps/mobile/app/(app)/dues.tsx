@@ -24,7 +24,8 @@ const STATUS_LABEL: Record<DueStatus, string> = {
   pending: 'Pending',
   paid: 'Paid',
   overdue: 'Overdue',
-  processing: 'Processing',
+  processing: 'Payment started',
+  waived: 'Waived',
 };
 
 const STATUS_TONE: Record<DueStatus, BadgeTone> = {
@@ -32,6 +33,7 @@ const STATUS_TONE: Record<DueStatus, BadgeTone> = {
   paid: 'success',
   overdue: 'danger',
   processing: 'warning',
+  waived: 'success',
 };
 
 const CATEGORY_LABEL: Record<DueCategory, string> = {
@@ -59,6 +61,10 @@ export default function ResidentDues() {
       // there; refetch once they close the browser to pick up the new status.
       if (updated.authorizationUrl) {
         await WebBrowser.openBrowserAsync(updated.authorizationUrl);
+      } else if (updated.status === 'paid') {
+        // An earlier checkout had already gone through: it was credited instead
+        // of charging again.
+        toast.show('Your earlier payment went through. This due is paid.', 'success');
       }
       qc.invalidateQueries({ queryKey: qk.resident.dues });
     },
@@ -112,8 +118,12 @@ function DueCard({
   paying: boolean;
 }) {
   const { spacing, colors } = useTheme();
-  const canPay = due.status === 'pending' || due.status === 'overdue';
-  const totalAmount = due.amount + due.lateFeeApplied;
+  // A checkout that was opened and left can be picked up again: the API checks
+  // whether the earlier one went through before starting another.
+  const canPay =
+    due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
+  // `amount` already includes any late fee; adding it again overstated the bill.
+  const totalAmount = due.amount;
 
   return (
     <Card elevated>
@@ -134,14 +144,16 @@ function DueCard({
           <Text variant="caption" color="mutedForeground">
             {due.status === 'paid' && due.paidDate
               ? `Paid ${formatDate(due.paidDate, 'short')}`
-              : `Due ${formatDate(due.dueDate, 'short')}`}
+              : due.status === 'waived'
+                ? 'Waived by your estate office'
+                : `Due ${formatDate(due.dueDate, 'short')}`}
           </Text>
         </View>
         <Badge label={STATUS_LABEL[due.status]} tone={STATUS_TONE[due.status]} />
       </View>
       {canPay ? (
         <Button
-          label="Pay Now"
+          label={due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
           size="sm"
           fullWidth={false}
           loading={paying}

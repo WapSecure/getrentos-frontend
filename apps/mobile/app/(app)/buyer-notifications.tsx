@@ -19,6 +19,7 @@ import {
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { categorySendsEmail } from '@getrentos/shared';
 
 export default function BuyerNotificationSettings() {
   const { colors, spacing } = useTheme();
@@ -118,21 +119,23 @@ export default function BuyerNotificationSettings() {
                     thumbColor={colors.card}
                   />
                 </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Text variant="callout">Email</Text>
-                  <Switch
-                    value={pref.email}
-                    onValueChange={(value) => setChannel(pref.id, 'email', value)}
-                    trackColor={{ true: colors.primary, false: colors.secondary }}
-                    thumbColor={colors.card}
-                  />
-                </View>
+                {categorySendsEmail(pref.id) ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text variant="callout">Email</Text>
+                    <Switch
+                      value={pref.email}
+                      onValueChange={(value) => setChannel(pref.id, 'email', value)}
+                      trackColor={{ true: colors.primary, false: colors.secondary }}
+                      thumbColor={colors.card}
+                    />
+                  </View>
+                ) : null}
               </View>
             </Card>
           ))}

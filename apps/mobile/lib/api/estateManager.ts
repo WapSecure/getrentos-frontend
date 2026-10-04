@@ -531,9 +531,12 @@ export const BILLING_CYCLES: { value: NewCharge['billingCycle']; label: string; 
     { value: 'ANNUAL', label: 'Yearly', every: 'every year' },
   ];
 
-/** What a due costs today: the charge plus any late fee already applied. */
-export const dueTotal = (d: Pick<Due, 'amount' | 'lateFeeApplied'>) =>
-  d.amount + (d.lateFeeApplied || 0);
+/**
+ * What a due costs today. The API adds a late fee INTO `amount` when the due
+ * goes overdue (`lateFeeApplied` only says how much of it is the fee), so the
+ * fee must not be added again.
+ */
+export const dueTotal = (d: Pick<Due, 'amount'>) => d.amount;
 
 export const isDueOpen = (d: Pick<Due, 'status'>) =>
   d.status === 'pending' || d.status === 'overdue' || d.status === 'processing';

@@ -111,8 +111,8 @@ export default function RealtorAccount() {
     },
     {
       key: 'notification-settings',
-      label: 'Push alerts',
-      description: 'Choose what buzzes your phone',
+      label: 'Alerts',
+      description: 'What buzzes your phone, and what’s emailed',
       icon: BellRing,
       onPress: go('/(app)/realtor-notification-settings'),
     },

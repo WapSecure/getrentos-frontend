@@ -16,6 +16,7 @@ import { realtorApi, type RealtorNotificationPreference } from '@/lib/api/realto
 import { ApiError } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { categorySendsEmail } from '@getrentos/shared';
 
 const COPY: Record<string, { label: string; hint: string }> = {
   offers: { label: 'Offers', hint: 'A buyer offers or counters on your listing' },
@@ -26,8 +27,10 @@ const COPY: Record<string, { label: string; hint: string }> = {
 };
 
 /**
- * Which updates buzz the phone. Everything still lands in Notifications; this
- * only decides what interrupts. The email channel is kept as it was saved.
+ * Which updates buzz the phone, and which are also emailed. Everything still
+ * lands in Notifications; this only decides what interrupts. Email exists only
+ * for the kinds GetRentos emails (offers and commission), so only those rows
+ * offer it.
  */
 export default function RealtorNotificationSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -53,9 +56,9 @@ export default function RealtorNotificationSettings() {
     onSuccess: (saved) => qc.setQueryData(key, saved),
   });
 
-  const setPush = (id: string, push: boolean) => {
+  const set = (id: string, channel: 'push' | 'email', value: boolean) => {
     void haptics.tap();
-    save.mutate((query.data ?? []).map((p) => (p.id === id ? { ...p, push } : p)));
+    save.mutate((query.data ?? []).map((p) => (p.id === id ? { ...p, [channel]: value } : p)));
   };
 
   return (
@@ -70,8 +73,8 @@ export default function RealtorNotificationSettings() {
     >
       <DetailHeader
         eyebrow="Settings"
-        title="Push alerts"
-        subtitle="Choose what buzzes your phone"
+        title="Alerts"
+        subtitle="What buzzes your phone, and what’s emailed"
         onBack={() => router.back()}
       />
       {query.isError && !query.data ? (
@@ -105,18 +108,40 @@ export default function RealtorNotificationSettings() {
                     </View>
                     <Switch
                       value={p.push}
-                      onValueChange={(v) => setPush(p.id, v)}
+                      onValueChange={(v) => set(p.id, 'push', v)}
                       accessibilityLabel={`${copy.label} push alerts`}
                       trackColor={{ true: colors.primary, false: colors.border }}
                     />
                   </View>
+                  {categorySendsEmail(p.id) ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: spacing.md,
+                        paddingHorizontal: spacing.lg,
+                        paddingBottom: spacing.lg,
+                      }}
+                    >
+                      <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+                        Also by email
+                      </Text>
+                      <Switch
+                        value={p.email}
+                        onValueChange={(v) => set(p.id, 'email', v)}
+                        accessibilityLabel={`${copy.label} by email`}
+                        trackColor={{ true: colors.primary, false: colors.border }}
+                      />
+                    </View>
+                  ) : null}
                 </View>
               );
             })}
           </Card>
           <Text variant="caption" color="mutedForeground">
-            Muted updates still appear in Notifications. If nothing arrives at all, check that
-            notifications are allowed for GetRentos in your phone’s settings.
+            Muted updates still appear in Notifications. Email is sent only for offers and money,
+            not for messages or reviews. If no push arrives at all, check that notifications are
+            allowed for GetRentos in your phone’s settings.
           </Text>
         </>
       )}

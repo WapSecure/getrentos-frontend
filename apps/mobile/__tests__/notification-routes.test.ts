@@ -149,3 +149,14 @@ describe('landlord notifications', () => {
     ).toBe('/(app)/host/booking/b1');
   });
 });
+
+describe('realtor and client updates', () => {
+  it('takes each side to where they deal with the other', () => {
+    expect(routeForNotification({ type: 'REALTOR_CLIENT_UPDATE' }, 'realtor')).toBe(
+      '/(app)/realtor-clients'
+    );
+    expect(routeForNotification({ type: 'REALTOR_CLIENT_UPDATE' }, 'owner')).toBe(
+      '/(app)/representatives'
+    );
+  });
+});

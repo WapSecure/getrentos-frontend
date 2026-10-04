@@ -7,6 +7,7 @@ import { Button, Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
+import { categorySendsEmail } from '@getrentos/shared';
 
 interface NotificationPreference {
   id: string;
@@ -96,7 +97,11 @@ export const NotificationSettings = () => {
               </div>
               <div className="flex items-center gap-8">
                 <div className="w-10 flex justify-center">
-                  <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                  {categorySendsEmail(pref.id) ? (
+                    <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                  ) : (
+                    <NoEmail />
+                  )}
                 </div>
                 <div className="w-10 flex justify-center">
                   <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
@@ -135,4 +140,15 @@ const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void 
       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
     />
   </button>
+);
+
+/** Shown where a category has no email: these updates are in-app and push only. */
+const NoEmail = () => (
+  <span
+    className="text-xs text-muted-foreground"
+    title="Not sent by email. Email is for payments, offers and verification."
+    aria-label="Not sent by email"
+  >
+    —
+  </span>
 );

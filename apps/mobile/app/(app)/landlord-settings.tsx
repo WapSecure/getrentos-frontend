@@ -31,6 +31,7 @@ import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { categorySendsEmail } from '@getrentos/shared';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -336,12 +337,14 @@ function PreferencesCard({ initial }: { initial: LandlordNotificationPreference[
           <View style={{ padding: spacing.lg, gap: spacing.sm }}>
             <Text variant="bodyStrong">{NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id}</Text>
             <View style={{ flexDirection: 'row', gap: spacing.xl }}>
-              <Channel
-                label="Email"
-                value={p.email}
-                onChange={(v) => set(p.id, 'email', v)}
-                category={NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id}
-              />
+              {categorySendsEmail(p.id) ? (
+                <Channel
+                  label="Email"
+                  value={p.email}
+                  onChange={(v) => set(p.id, 'email', v)}
+                  category={NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id}
+                />
+              ) : null}
               <Channel
                 label="Push"
                 value={p.push}
