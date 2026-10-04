@@ -18,6 +18,7 @@ import {
   Settings,
   MapPinned,
   BedDouble,
+  Luggage,
   KeyRound,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -48,6 +49,8 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.land_marketplace', href: ROUTES.OWNER_LAND, icon: MapPinned },
   { labelKey: 'sidebar.shortlets', href: ROUTES.OWNER_SHORTLETS, icon: BedDouble },
+  // Stays the owner booked as a guest, apart from the ones they host above.
+  { label: 'My stays', href: ROUTES.OWNER_BOOKINGS, icon: Luggage },
   { labelKey: 'sidebar.sale_listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
   { labelKey: 'sidebar.buyer_leads', href: ROUTES.OWNER_LEADS, icon: Users },
   { labelKey: 'sidebar.offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
@@ -75,10 +78,10 @@ export const navItems: NavItem[] = [
 
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Portfolio and listings', items: navItems.slice(1, 5) },
-  { label: 'Sales and investment', items: navItems.slice(5, 11) },
-  { label: 'Communication', items: navItems.slice(11, 14) },
-  { label: 'Trust and account', items: navItems.slice(14) },
+  { label: 'Portfolio and listings', items: navItems.slice(1, 6) },
+  { label: 'Sales and investment', items: navItems.slice(6, 12) },
+  { label: 'Communication', items: navItems.slice(12, 15) },
+  { label: 'Trust and account', items: navItems.slice(15) },
 ];
 
 export const OwnerSidebar = () => {

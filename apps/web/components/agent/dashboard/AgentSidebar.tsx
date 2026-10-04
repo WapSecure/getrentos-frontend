@@ -12,6 +12,7 @@ import {
   BadgeCheck,
   Settings,
   KeyRound,
+  Luggage,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -36,6 +37,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.reviews', href: ROUTES.AGENT_REVIEWS, icon: Star },
   { labelKey: 'sidebar.trust_profile', href: ROUTES.AGENT_TRUST_PROFILE, icon: BadgeCheck },
   { label: 'Managed properties', href: ROUTES.AGENT_MANAGED, icon: KeyRound },
+  { label: 'My stays', href: ROUTES.AGENT_BOOKINGS, icon: Luggage },
   { labelKey: 'sidebar.settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
   { label: 'Verification', href: '/agent/verification', icon: BadgeCheck },
 ];
