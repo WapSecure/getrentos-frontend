@@ -58,6 +58,7 @@ export default function AppLayout() {
       <Stack.Screen name="buyer-payment-method" options={DETAIL_OPTIONS} />
       <Stack.Screen name="buyer-search-preferences" options={DETAIL_OPTIONS} />
       <Stack.Screen name="buyer-notifications" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="buyer-notification-inbox" options={DETAIL_OPTIONS} />
       <Stack.Screen name="property/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="property/[id]/apply" options={DETAIL_OPTIONS} />
       <Stack.Screen name="application/[id]" options={DETAIL_OPTIONS} />

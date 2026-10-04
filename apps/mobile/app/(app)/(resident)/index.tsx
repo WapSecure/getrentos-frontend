@@ -8,7 +8,7 @@ import {
   Landmark,
   Megaphone,
   Package,
-  Receipt,
+  ReceiptText,
   TriangleAlert,
   Vote,
   Wrench,
@@ -32,6 +32,7 @@ import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { EmergencyBanner } from '@/components/resident/EmergencyBanner';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
@@ -83,8 +84,8 @@ export default function ResidentHome() {
       <EmergencyBanner />
 
       <DashboardHeader
-        eyebrow="Your community"
-        title={`Hi, ${firstName(profile?.legalName)}`}
+        eyebrow={dashboardGreeting()}
+        title={firstName(profile?.legalName)}
         roleBadge="RS"
         subtitle={
           household.data
@@ -106,7 +107,7 @@ export default function ResidentHome() {
       ) : (
         <Card elevated>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <Receipt size={18} color={colors.primary} />
+            <ReceiptText size={18} color={colors.primary} />
             <Text variant="bodyStrong" style={{ flex: 1 }}>
               Outstanding dues
             </Text>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -10,7 +10,15 @@ import {
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertCircle, ChevronLeft, MessageCircle, Send } from 'lucide-react-native';
+import {
+  AlertCircle,
+  ChevronLeft,
+  FileText,
+  MessageCircle,
+  Paperclip,
+  Send,
+  X,
+} from 'lucide-react-native';
 import {
   Avatar,
   EmptyState,
@@ -22,6 +30,7 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
+import type { PickedFile } from '@/lib/api/documents';
 import { relativeTime } from '@/lib/format';
 
 const POLL_MS = 8000;
@@ -34,11 +43,18 @@ export interface ThreadMessage {
   mine: boolean;
   /** Read out for the other side's messages. */
   senderName?: string;
+  /** Files sent with the message, shown by name. */
+  attachments?: { id: string; name: string }[];
 }
 
-type Row =
-  | { kind: 'sent'; m: ThreadMessage }
-  | { kind: 'pending'; key: string; text: string; error?: string };
+interface Pending {
+  key: string;
+  text: string;
+  file?: PickedFile;
+  error?: string;
+}
+
+type Row = { kind: 'sent'; m: ThreadMessage } | ({ kind: 'pending' } & Pending);
 
 /**
  * One conversation, for any portal: it refreshes while open, shows a message
@@ -55,6 +71,8 @@ export function MessageThread({
   markRead,
   conversationsKey,
   emptyDescription,
+  headerAccessory,
+  pickAttachment,
 }: {
   id: string;
   /** Who the thread is with. */
@@ -64,17 +82,23 @@ export function MessageThread({
   messagesKey: readonly unknown[];
   /** Oldest first. */
   fetchMessages: () => Promise<ThreadMessage[]>;
-  send: (text: string) => Promise<unknown>;
-  markRead: () => Promise<unknown>;
+  send: (text: string, file?: PickedFile) => Promise<unknown>;
+  /** Omit when the portal's API marks a thread read as it is fetched. */
+  markRead?: () => Promise<unknown>;
   /** The inbox list to refresh when something here changes. */
   conversationsKey: readonly unknown[];
   emptyDescription: string;
+  /** An action beside the name, e.g. pin this conversation. */
+  headerAccessory?: ReactNode;
+  /** Provide to let the user attach one file to a message. */
+  pickAttachment?: () => Promise<PickedFile | null>;
 }) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const [text, setText] = useState('');
-  const [pending, setPending] = useState<{ key: string; text: string; error?: string }[]>([]);
+  const [file, setFile] = useState<PickedFile | null>(null);
+  const [pending, setPending] = useState<Pending[]>([]);
 
   // Only this thread's messages are polled while it is open.
   const messages = useQuery({
@@ -87,7 +111,7 @@ export function MessageThread({
   // Mark read on open and whenever new messages arrive.
   const count = messages.data?.length ?? 0;
   useEffect(() => {
-    if (!id || !count) return;
+    if (!id || !count || !markRead) return;
     markRead()
       .then(() => qc.invalidateQueries({ queryKey: conversationsKey }))
       .catch(() => undefined);
@@ -97,7 +121,7 @@ export function MessageThread({
   }, [id, count, qc]);
 
   const send = useMutation({
-    mutationFn: (p: { key: string; text: string }) => sendMessage(p.text),
+    mutationFn: (p: Pending) => sendMessage(p.text, p.file),
     onSuccess: (_m, p) => {
       setPending((list) => list.filter((x) => x.key !== p.key));
       qc.invalidateQueries({ queryKey: messagesKey });
@@ -116,12 +140,15 @@ export function MessageThread({
 
   const submit = () => {
     const body = text.trim();
-    if (!body) return;
-    const p = { key: `${Date.now()}`, text: body };
+    if (!body && !file) return;
+    const p: Pending = { key: `${Date.now()}`, text: body, file: file ?? undefined };
     setPending((list) => [...list, p]);
     setText('');
+    setFile(null);
     send.mutate(p);
   };
+
+  const canSend = !!text.trim() || !!file;
 
   const rows = useMemo<Row[]>(
     () =>
@@ -167,6 +194,7 @@ export function MessageThread({
             </Text>
           ) : null}
         </View>
+        {headerAccessory}
       </View>
 
       {messages.isError && !messages.data ? (
@@ -199,6 +227,12 @@ export function MessageThread({
             const mine = item.kind === 'pending' || item.m.mine;
             const body = item.kind === 'sent' ? item.m.text : item.text;
             const failed = item.kind === 'pending' && !!item.error;
+            const files =
+              item.kind === 'sent'
+                ? (item.m.attachments ?? []).map((a) => a.name)
+                : item.file
+                  ? [item.file.name]
+                  : [];
             const who = mine
               ? 'You'
               : item.kind === 'sent'
@@ -208,7 +242,7 @@ export function MessageThread({
               <View
                 style={{ maxWidth: '82%', alignSelf: mine ? 'flex-end' : 'flex-start' }}
                 accessible
-                accessibilityLabel={`${who}, ${body}, ${
+                accessibilityLabel={`${who}, ${[body, ...files.map((f) => `file ${f}`)].filter(Boolean).join(', ')}, ${
                   item.kind === 'sent'
                     ? relativeTime(item.m.timestamp)
                     : failed
@@ -229,12 +263,40 @@ export function MessageThread({
                     borderColor: colors.destructive,
                   }}
                 >
-                  <Text
-                    variant="callout"
-                    style={{ color: mine ? colors.primaryForeground : colors.foreground }}
-                  >
-                    {body}
-                  </Text>
+                  {body ? (
+                    <Text
+                      variant="callout"
+                      style={{ color: mine ? colors.primaryForeground : colors.foreground }}
+                    >
+                      {body}
+                    </Text>
+                  ) : null}
+                  {files.map((name, i) => (
+                    <View
+                      key={`${name}-${i}`}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                        marginTop: body || i ? 6 : 0,
+                      }}
+                    >
+                      <FileText
+                        size={13}
+                        color={mine ? colors.primaryForeground : colors.mutedForeground}
+                      />
+                      <Text
+                        variant="caption"
+                        numberOfLines={1}
+                        style={{
+                          flexShrink: 1,
+                          color: mine ? colors.primaryForeground : colors.mutedForeground,
+                        }}
+                      >
+                        {name}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
                 {item.kind === 'sent' ? (
                   <Text
@@ -265,7 +327,7 @@ export function MessageThread({
                         setPending((list) =>
                           list.map((x) => (x.key === item.key ? { ...x, error: undefined } : x))
                         );
-                        send.mutate({ key: item.key, text: item.text });
+                        send.mutate({ key: item.key, text: item.text, file: item.file });
                       }}
                       accessibilityRole="button"
                       accessibilityLabel="Retry sending"
@@ -291,6 +353,32 @@ export function MessageThread({
         />
       )}
 
+      {file ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.sm,
+            backgroundColor: colors.secondary,
+          }}
+        >
+          <FileText size={15} color={colors.mutedForeground} />
+          <Text variant="caption" numberOfLines={1} style={{ flex: 1 }}>
+            {file.name}
+          </Text>
+          <Pressable
+            onPress={() => setFile(null)}
+            accessibilityRole="button"
+            accessibilityLabel={`Remove ${file.name}`}
+            hitSlop={12}
+          >
+            <X size={15} color={colors.mutedForeground} />
+          </Pressable>
+        </View>
+      ) : null}
+
       <View
         style={{
           flexDirection: 'row',
@@ -304,6 +392,18 @@ export function MessageThread({
           backgroundColor: colors.card,
         }}
       >
+        {pickAttachment ? (
+          <IconButton
+            onPress={async () => {
+              const picked = await pickAttachment();
+              if (picked) setFile(picked);
+            }}
+            haptic={false}
+            accessibilityLabel="Attach a file"
+            icon={<Paperclip size={19} color={colors.mutedForeground} />}
+            style={{ marginBottom: 5, borderWidth: 0, backgroundColor: 'transparent' }}
+          />
+        ) : null}
         <View style={{ flex: 1 }}>
           <TextField
             placeholder="Message"
@@ -316,18 +416,15 @@ export function MessageThread({
         </View>
         <IconButton
           onPress={submit}
-          disabled={!text.trim()}
+          disabled={!canSend}
           accessibilityLabel="Send message"
           icon={
-            <Send
-              size={18}
-              color={text.trim() ? colors.primaryForeground : colors.mutedForeground}
-            />
+            <Send size={18} color={canSend ? colors.primaryForeground : colors.mutedForeground} />
           }
           style={{
             marginBottom: 5,
             borderWidth: 0,
-            backgroundColor: text.trim() ? colors.primary : colors.secondary,
+            backgroundColor: canSend ? colors.primary : colors.secondary,
           }}
         />
       </View>

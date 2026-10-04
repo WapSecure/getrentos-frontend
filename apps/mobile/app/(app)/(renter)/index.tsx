@@ -3,17 +3,21 @@ import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Banknote,
   Bell,
   CalendarClock,
   CheckSquare,
   ChevronRight,
   FileCheck2,
+  FileSignature,
   FileText,
   Heart,
   MapPin,
   MessageCircle,
+  Search,
   ShieldAlert,
   ShieldCheck,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
 import {
@@ -31,6 +35,13 @@ import {
   Text,
   useTheme,
 } from '@getrentos/ui-native';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { MetricGrid } from '@/components/dashboard/MetricGrid';
+import {
+  AttentionCard,
+  QuickActions,
+  dashboardGreeting,
+} from '@/components/dashboard/DashboardParts';
 import { qk } from '@/lib/query/keys';
 import { renterApi, type RenterDashboardStats } from '@/lib/api/renter';
 import type { RenterProperty } from '@/lib/api/properties';
@@ -44,13 +55,6 @@ import { notificationsApi } from '@/lib/api/notifications';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
-
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
 
 interface Metric {
   key: keyof RenterDashboardStats;
@@ -139,58 +143,33 @@ export default function RenterHome() {
         kyc.refetch();
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text variant="label" color="primary" uppercase>
-            {greeting()}
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: spacing.sm,
-            }}
-          >
-            <Text variant="title">{firstName(profile?.legalName)}</Text>
-            <Badge label="RT" tone="info" />
-          </View>
-        </View>
-        <IconButton
-          onPress={() => router.push('/(app)/notifications')}
-          accessibilityLabel="Notifications"
-          badge={unreadCount}
-          icon={<Bell size={21} color={colors.foreground} />}
-        />
-      </View>
+      <DashboardHeader
+        eyebrow={dashboardGreeting()}
+        title={firstName(profile?.legalName)}
+        roleBadge="RT"
+        subtitle="Your home search, applications and rent"
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/notifications')}
+            accessibilityLabel={
+              unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'
+            }
+            badge={unreadCount}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        }
+      />
 
+      {/* What needs you first: identity, then an application in motion. */}
       {showVerifyNudge ? (
-        <Pressable
-          onPress={() => router.push('/(app)/verify-identity')}
-          accessibilityRole="button"
+        <AttentionCard
+          Icon={ShieldAlert}
+          tone="warning"
+          title="Verify your identity"
+          detail="Unlocks applications and offers: takes two minutes"
           accessibilityLabel="Verify your identity. Unlocks applications and offers."
-        >
-          <Card
-            elevated
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              backgroundColor: colors.warningSubtle,
-            }}
-          >
-            <ShieldAlert size={20} color={colors.warning} />
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong" style={{ color: colors.warning }}>
-                Verify your identity
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Unlocks applications and offers: takes two minutes
-              </Text>
-            </View>
-            <ChevronRight size={18} color={colors.warning} />
-          </Card>
-        </Pressable>
+          onPress={() => router.push('/(app)/verify-identity')}
+        />
       ) : activeApplication ? (
         <Pressable
           onPress={() => router.push(`/(app)/application/${activeApplication.id}`)}
@@ -256,42 +235,32 @@ export default function RenterHome() {
         </Pressable>
       ) : null}
 
-      <Card elevated padding="none">
-        <View style={{ flexDirection: 'row' }}>
-          {METRICS.map(({ key, label, Icon, onPress }, i) => (
-            <Pressable
-              key={key}
-              onPress={onPress}
-              disabled={!onPress}
-              accessibilityRole="button"
-              accessibilityLabel={
-                stats.isPending ? `${label}, loading` : `${label}: ${stats.data?.[key] ?? 0}`
-              }
-              style={({ pressed }) => ({
-                flex: 1,
-                alignItems: 'center',
-                gap: 6,
-                paddingVertical: spacing.lg,
-                borderLeftWidth: i > 0 ? 1 : 0,
-                borderLeftColor: colors.border,
-                backgroundColor: pressed ? colors.secondary : 'transparent',
-              })}
-            >
-              <Icon size={17} color={colors.mutedForeground} />
-              {stats.isPending ? (
-                <Skeleton height={22} width={22} />
-              ) : (
-                <Text variant="title" style={{ fontSize: 20, lineHeight: 24 }}>
-                  {stats.data?.[key] ?? 0}
-                </Text>
-              )}
-              <Text variant="caption" color="mutedForeground">
-                {label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      </Card>
+      <MetricGrid
+        loading={stats.isPending}
+        metrics={METRICS.map(({ key, label, Icon, onPress }) => ({
+          label,
+          Icon,
+          onPress,
+          value: stats.data?.[key] ?? 0,
+        }))}
+      />
+
+      <QuickActions
+        actions={[
+          {
+            label: 'Find a home',
+            Icon: Search,
+            onPress: () => router.push('/(app)/(renter)/discover'),
+          },
+          { label: 'Pay rent', Icon: Banknote, onPress: () => router.push('/(app)/payments') },
+          {
+            label: 'Report a repair',
+            Icon: Wrench,
+            onPress: () => router.push('/(app)/report-maintenance'),
+          },
+          { label: 'My lease', Icon: FileSignature, onPress: () => router.push('/(app)/lease') },
+        ]}
+      />
 
       {stats.isError ? (
         <Card elevated style={{ gap: spacing.sm }}>
