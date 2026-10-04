@@ -21,6 +21,7 @@ import {
   Gavel,
   UsersRound,
   BedDouble,
+  Luggage,
   Globe,
   Gift,
   BadgeCheck,
@@ -63,6 +64,8 @@ export const navGroups = [
       item('sidebar.listings', ROUTES.LANDLORD_LISTINGS, Megaphone),
       item('sidebar.offers', ROUTES.LANDLORD_OFFERS, Handshake),
       item('sidebar.shortlets', ROUTES.LANDLORD_SHORTLETS, BedDouble),
+      // Stays the landlord booked as a guest, apart from the ones they host above.
+      item('sidebar.shortlet_bookings', ROUTES.LANDLORD_BOOKINGS, Luggage),
       item('sidebar.landlord_leads', ROUTES.LANDLORD_LEADS, UsersRound),
       item('sidebar.microsite', ROUTES.LANDLORD_MICROSITE, Globe),
     ],

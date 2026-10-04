@@ -23,6 +23,7 @@ import {
 } from '@/lib/api/notificationPreferences';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { categorySendsEmail } from '@getrentos/shared';
 
 const CHANNELS: { key: 'email' | 'push' | 'inApp'; label: string }[] = [
   { key: 'push', label: 'Push' },
@@ -118,7 +119,10 @@ export default function NotificationSettings() {
                 </Text>
                 <Divider style={{ marginVertical: spacing.md }} />
                 <View style={{ gap: spacing.sm }}>
-                  {CHANNELS.map(({ key, label }) => (
+                  {CHANNELS.filter(
+                    // Email exists only for the categories that are emailed.
+                    ({ key }) => key !== 'email' || categorySendsEmail(category)
+                  ).map(({ key, label }) => (
                     <View
                       key={key}
                       style={{

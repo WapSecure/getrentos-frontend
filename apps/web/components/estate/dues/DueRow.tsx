@@ -9,6 +9,7 @@ const statusVariant: Record<Due['status'], 'success' | 'warning' | 'danger'> = {
   pending: 'warning',
   overdue: 'danger',
   processing: 'warning',
+  waived: 'success',
 };
 
 const categoryLabels: Record<Due['category'], string> = {

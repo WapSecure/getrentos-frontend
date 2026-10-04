@@ -15,6 +15,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerNotificationPreference } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { categorySendsEmail } from '@getrentos/shared';
 
 const LABEL: Record<string, string> = {
   offers: 'New offers and counters',
@@ -121,22 +122,24 @@ export default function OwnerNotificationSettings() {
                     thumbColor={colors.card}
                   />
                 </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Text variant="callout">Email</Text>
-                  <Switch
-                    value={pref.email}
-                    onValueChange={(value) => setChannel(pref.id, 'email', value)}
-                    accessibilityLabel={`${LABEL[pref.id] ?? pref.id}: email`}
-                    trackColor={{ true: colors.primary, false: colors.secondary }}
-                    thumbColor={colors.card}
-                  />
-                </View>
+                {categorySendsEmail(pref.id) ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Text variant="callout">Email</Text>
+                    <Switch
+                      value={pref.email}
+                      onValueChange={(value) => setChannel(pref.id, 'email', value)}
+                      accessibilityLabel={`${LABEL[pref.id] ?? pref.id}: email`}
+                      trackColor={{ true: colors.primary, false: colors.secondary }}
+                      thumbColor={colors.card}
+                    />
+                  </View>
+                ) : null}
               </View>
             </Card>
           ))}

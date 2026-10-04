@@ -73,8 +73,9 @@ export default function ResidentHome() {
   };
 
   const outstanding = (dues.data?.items ?? [])
-    .filter((d) => d.status === 'pending' || d.status === 'overdue')
-    .reduce((sum, d) => sum + d.amount + d.lateFeeApplied, 0);
+    .filter((d) => d.status === 'pending' || d.status === 'overdue' || d.status === 'processing')
+    // `amount` already includes any late fee.
+    .reduce((sum, d) => sum + d.amount, 0);
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>

@@ -8,6 +8,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
+import { categorySendsEmail } from '@getrentos/shared';
 
 interface Preference {
   id: string;
@@ -223,15 +224,17 @@ const NotificationPreferencesForm = ({
 
               {pref.enabled && (
                 <div className="mt-3 pt-3 border-t border-border flex gap-4">
-                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={pref.channels.email}
-                      onChange={() => toggleChannel(pref.id, 'email')}
-                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                    />
-                    Email
-                  </label>
+                  {categorySendsEmail(pref.category) && (
+                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={pref.channels.email}
+                        onChange={() => toggleChannel(pref.id, 'email')}
+                        className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
+                      />
+                      Email
+                    </label>
+                  )}
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
