@@ -53,7 +53,12 @@ export const TrustScoreView = () => {
           <TrustScoreRing score={trustScore} size={200} strokeWidth={12} />
         </div>
         <div className="lg:col-span-2">
-          <TrustScoreStats trustScore={trustScore} />
+          <TrustScoreStats
+            trustScore={trustScore}
+            verifications={verifications}
+            badges={badges}
+            history={history}
+          />
         </div>
       </div>
 

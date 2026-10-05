@@ -2,6 +2,7 @@
 
 import { Bell, CheckCircle, Clock, AlertCircle, Inbox } from 'lucide-react';
 import { format } from 'date-fns';
+import { humanizeScoreReason } from '@/components/renter/trust-score/reasonLabels';
 
 interface ScoreHistoryItem {
   date: string;
@@ -44,7 +45,7 @@ export const ScoreNotifications = ({ history }: ScoreNotificationsProps) => {
                 )}
                 <div>
                   <p className="text-sm text-foreground">
-                    {item.reason}
+                    {humanizeScoreReason(item.reason)}
                     {item.change !== 0 && (
                       <span className={item.change > 0 ? ' text-green-600' : ' text-red-600'}>
                         {' '}

@@ -1,45 +1,74 @@
 'use client';
 
 import { CheckCircle, Clock, AlertCircle, TrendingUp, Award, Users } from 'lucide-react';
+import type { VerificationItem, Badge, TrustScoreHistoryItem } from '@/types/trust-score';
 
 interface TrustScoreStatsProps {
   trustScore: number;
+  verifications: VerificationItem[];
+  badges: Badge[];
+  history: TrustScoreHistoryItem[];
 }
 
-export const TrustScoreStats = ({ trustScore }: TrustScoreStatsProps) => {
+export const TrustScoreStats = ({
+  trustScore,
+  verifications = [],
+  badges = [],
+  history = [],
+}: TrustScoreStatsProps) => {
+  // Every figure here is derived from the account's real data. These cards used
+  // to be hardcoded ("4/6", "+12%", "3"), which contradicted the verification
+  // list and badge grid right beside them.
+  const totalVerifications = verifications.length;
+  const verifiedCount = verifications.filter((v) => v.verified).length;
+  const pendingCount = totalVerifications - verifiedCount;
+  const earnedBadges = badges.filter((b) => b.earned).length;
+  // Net movement since the first recorded point: the sum of each change.
+  const netChange = history.reduce((sum, item) => sum + item.change, 0);
+  const netChangeLabel = `${netChange > 0 ? '+' : ''}${netChange}`;
+
+  const positive = 'text-green-600 dark:text-green-400';
+  const negative = 'text-red-600 dark:text-red-400';
+  const neutral = 'text-muted-foreground';
+
   const stats = [
+    {
+      icon: TrendingUp,
+      label: 'Trust Score',
+      value: `${trustScore} / 100`,
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+    },
     {
       icon: CheckCircle,
       label: 'Verifications Complete',
-      value: '4/6',
-      color: 'text-green-600 dark:text-green-400',
+      value: `${verifiedCount}/${totalVerifications}`,
+      color: positive,
       bg: 'bg-green-50 dark:bg-green-900/20',
     },
     {
       icon: Clock,
       label: 'Pending Verifications',
-      value: '2',
+      value: `${pendingCount}`,
       color: 'text-yellow-600 dark:text-yellow-400',
       bg: 'bg-yellow-50 dark:bg-yellow-900/20',
     },
     {
-      icon: AlertCircle,
-      label: 'Required Actions',
-      value: '1',
-      color: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-50 dark:bg-red-900/20',
-    },
-    {
-      icon: TrendingUp,
-      label: 'Score Increase',
-      value: '+12%',
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-50 dark:bg-green-900/20',
+      icon: netChange < 0 ? AlertCircle : TrendingUp,
+      label: 'Net Score Change',
+      value: history.length === 0 ? '—' : netChangeLabel,
+      color: netChange > 0 ? positive : netChange < 0 ? negative : neutral,
+      bg:
+        netChange > 0
+          ? 'bg-green-50 dark:bg-green-900/20'
+          : netChange < 0
+            ? 'bg-red-50 dark:bg-red-900/20'
+            : 'bg-secondary',
     },
     {
       icon: Award,
       label: 'Badges Earned',
-      value: '3',
+      value: `${earnedBadges}/${badges.length}`,
       color: 'text-amber-600 dark:text-amber-400',
       bg: 'bg-amber-50 dark:bg-amber-900/20',
     },

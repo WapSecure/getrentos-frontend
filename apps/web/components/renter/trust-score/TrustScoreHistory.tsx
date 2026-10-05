@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { TrustScoreHistoryItem } from '@/types/trust-score';
+import { humanizeScoreReason } from '@/components/renter/trust-score/reasonLabels';
 
 interface TrustScoreHistoryProps {
   history: TrustScoreHistoryItem[];
@@ -40,8 +41,10 @@ export const TrustScoreHistory = ({ history }: TrustScoreHistoryProps) => {
           {history.map((item, index) => (
             <div key={index} className="py-3 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-foreground">{item.reason}</p>
-                <p className="text-xs text-gray-500">{formatDate(item.date)}</p>
+                <p className="text-sm font-medium text-foreground">
+                  {humanizeScoreReason(item.reason)}
+                </p>
+                <p className="text-xs text-muted-foreground">{formatDate(item.date)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-foreground">{item.score}</span>
