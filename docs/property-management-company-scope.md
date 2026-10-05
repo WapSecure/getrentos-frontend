@@ -395,6 +395,7 @@ timeline; audit attribution (`actorId` + mandate).
 **Phase 3 — Money & statements.** `ClientMoneyLedgerEntry`, fee engine
 (PERCENTAGE/FLAT + commissions + VAT/WHT), statement generation with line items and source
 documents, owner payout with maker/checker, reconciliation job, disputes on line items.
+_3a–3c shipped (see 9e); 3d–3f remain._
 
 **Phase 4 — Legal & proceedings.** Notices with correct periods, POA-backed actions,
 `LegalCase` + advocate + costs, eviction generalisation, owner approval gates, enforcement
@@ -776,6 +777,130 @@ the port answers.
 
 ---
 
+## 9e. Phase 3a–3c — the ledger and the fee engine (2026-10-05)
+
+Phase 3 is the money phase, and it is being built in three slices: the ledger itself, the
+wiring that keeps it filled, and the engine that decides what a fee is. All three are
+shipped. 3d (statements derived from the ledger), 3e (the daily reconciliation and drift
+alert) and 3f (maker–checker release, disputes on line items) remain.
+
+### 3a — `ClientMoneyLedgerEntry`, the backbone principle 1 asks for
+
+We have been holding other people's money — rent collected on an owner's behalf, dues
+collected for an estate — with no record of it beyond the statements derived from it. A
+statement is a document about a period, not a balance: it cannot answer "how much of this
+money are we holding right now", and two overlapping ones cannot be reconciled against a
+bank account at all.
+
+`ClientMoneyAccount` is a running balance per owner and per party holding the money;
+`ClientMoneyLedgerEntry` is signed, append-only, carries `balanceAfter`, and points at the
+model it came from so a statement line is never hand-typed.
+
+**The balance cannot drift from the history that produced it.** `balanceAfter` is computed
+from the account row *while holding a `FOR UPDATE` lock on it*, inside the transaction that
+writes the entry. Reading the balance and writing it back would let two simultaneous
+movements both read the same starting figure and both write the same result — one movement
+lost, and both rows still plausible. Removing the lock and restoring it changed nothing
+visible except the tests: the arithmetic it protects has to be reasoned about, which is why
+it is falsified rather than assumed.
+
+**Append-only is enforced by having nothing to enforce.** There is no update and no delete on
+the service, and a test asserts the surface has none. A correction is an `ADJUSTMENT` that
+shows up on the next statement, which is also what an owner wants to see rather than a figure
+that silently changed.
+
+### 3b — movements are derived, not reported
+
+Money already moves through the platform in a dozen places and none of them knew about the
+ledger. Rather than thread a ledger write through every one, `ClientMoneyRecorderService`
+reads what the platform already records and asks which of it has no entry yet. Releasing rent
+escrow has a scheduled job, an admin endpoint and a webhook; a due can be paid from three
+controllers. Instrumenting all of them would mean a payment path that quietly stops
+recording the day somebody adds a seventh, so instead the sweep covers every path including
+ones written later, and cannot be forgotten. It is idempotent by construction and runs on
+the same hourly schedule that already owns every time-based money transition.
+
+Two decisions shape it. **Money is credited when it arrives, not when we statement it**: rent
+credits on `escrowStatus = RELEASED`, dues on `status = PAID`, and a deposit is the tenant's
+money held for them rather than income — the same lines the statements already draw. That is
+what makes the drift alert in 3e mean anything, because the ledger tracks the pool rather
+than the paperwork. And **one movement per source event**, enforced by a partial unique index
+on `(accountId, entryType, sourceType, sourceId)`: a payout webhook delivered twice, or the
+sweep re-reading everything, cannot credit the same rent twice.
+
+### 3c — the fee engine, and what an engagement actually costs
+
+A fee was one number. It is now a basis (gross, or net of expenses), a schedule, a floor, a
+disclosed maintenance markup, and the two taxes that sit on a management fee here. Four
+decisions were confirmed before any of it was built, because each changes the arithmetic and
+none is recoverable from the code afterwards:
+
+- **VAT charges the owner; WHT does not.** VAT is added on top of the fee and held for the
+  tax authority, so it is charged but never part of `grossFee` — a report of fees earned that
+  included a tax we merely collect would overstate our revenue. WHT is withheld from the
+  manager's remuneration and remitted on their behalf, so it is disclosed and charged to
+  nobody. It is shown as `whtAmount` rather than a line item, because a line item on a
+  statement is something the owner is charged.
+- **A retainer is owed in a period that collected nothing.** A per-collection fee does not
+  exist in a month with no collection; a retainer does, because an empty month still cost a
+  visit. A statement is therefore no longer skipped when a property collected nothing and
+  spent nothing — the fee *is* the line, and a payout that goes negative is the owner owing
+  the platform, surfaced rather than absorbed.
+- **A markup is its own line**, so `totalExpenses` still matches the invoices behind it. A
+  markup hidden inside an expense is the complaint that makes owners distrust managers.
+- **The floor is not pro-rated.** Pro-rating it would weaken it precisely in a short period,
+  where the fixed cost of serving the property has not gone away. The retainer, by contrast,
+  *is* pro-rated to the window a mandate covered: charging a full month for a mandate that
+  began on the 16th is not a fee, it is a windfall.
+
+Precedence is mandate → property → organisation. `ManagementMandate.feeConfigId` — a field
+Phase 1 built for exactly this — wins, because a mandate is the agreement and letting a later
+ad-hoc config row outrank an agreed rate would charge an owner something other than what they
+signed for.
+
+**One statement, several movements.** `ClientMoneyLedgerEntry.sourceDetail` names which part
+of a source produced an entry and joins the idempotency key. Without it a statement's fee,
+markup and VAT would share a key and only the first would ever be recorded — the VAT owed to
+FIRS could not be derived from the ledger at all. Computing fees now lives in one place,
+`shared/fees`, and both the landlord and estate statement services take it from there; the
+estate's statements had no fee at all before this. `computeFee` is deleted rather than left
+beside it, so nothing can quietly go on charging the old way.
+
+### The upgrade hazard this uncovered, and why it is written down
+
+Adding a *discriminator* to an idempotency key is not additive. A statement whose fee was
+recorded before itemisation exists has an **empty** `sourceDetail`, so the new lookup cannot
+see it and records the service fee a second time. The owner is charged twice, both rows are
+individually correct, and the balance still agrees with the sum of the entries — nothing
+downstream notices.
+
+Found by running the new code against a database the old code had already written to. It
+could not have been found by a unit test, which is the argument for the live pass. Two
+defences, both now in place: a backfill migration that names those rows for what they always
+were, guarded so it cannot collide with an already-named row and be rejected by the index;
+and the lookup additionally accepting an unnamed fee as the service fee, so a deploy that
+runs the application before its migrations cannot double-charge either.
+
+The general rule, for the next time a key gains a part: **ask what the rows written before it
+look like.** `sourceDetail` is `NOT NULL DEFAULT ''` and deliberately not nullable — Postgres
+treats NULLs as *distinct* in a unique index, so a null there would switch the idempotency
+guarantee off for every entry that used it.
+
+Verified: build green; full suite **261 suites / 3513 tests**; the fee engine's guarantees
+falsified one at a time (tax folded into the fee, WHT charged to the owner, the floor
+resurrecting a per-collection fee, the retainer not pro-rated, the floor pro-rated, an
+omitted config field silently reset, the mandate's agreed rate losing precedence, the
+zero-amount filter removed, and the never-negative guarantee), each caught by its own test;
+and live — a ₦200,000 rent payment and a ₦150,000 expense, with a 10%-of-gross fee, a 10%
+markup, 7.5% VAT and 10% WHT, produce a service fee of ₦20,000, a markup of ₦15,000, VAT of
+₦2,625 and a payout of ₦12,375; each on its own statement line with its basis named, the WHT
+disclosed and charged to nobody, and the ledger carrying the three parts separately so the
+VAT owed to FIRS is readable on its own. Across a full statement cycle the owner's
+client-money balance lands on exactly zero, with the stored balance equal to the sum of the
+entries on every account, and running the sweep a second time writes nothing.
+
+---
+
 ## 10. Open decisions (need product/legal sign-off)
 
 1. **Fee defaults**: is GetRentos publishing standard rates (e.g. 10% of rent collected,
@@ -832,6 +957,30 @@ the port answers.
       Decide the line: is archiving an owner-level act that a manager should have to ask
       for, and does a `RENT` mandate include producing the owner's statement, or does that
       wait for the Phase 3 ledger and maker/checker?
+13. **What a fee is, and who bears each part of it** (raised and settled by Phase 3c).
+    Four questions, each of which changes the arithmetic and none of which is recoverable
+    from the code afterwards, so all four were confirmed before the engine was written.
+    **DECIDED (2026-10-05):**
+    - **VAT charges the owner; WHT does not.** VAT is added on top of the fee and held for
+      the tax authority, so it is charged but stays out of `grossFee` — a report of fees
+      earned that included a tax we merely collect would overstate our revenue. WHT comes
+      out of the manager's remuneration and is remitted on their behalf, so it is disclosed
+      on the statement (`whtAmount`) and charged to nobody. It is deliberately *not* a
+      statement line item, because a line item is something the owner is charged.
+    - **A retainer is owed in a period that collected nothing**, and the resulting negative
+      payout is surfaced as the owner owing the platform rather than absorbed. A
+      per-collection fee still only exists in a period that collected something.
+    - **A maintenance markup is its own line**, never folded into the expense, so
+      `totalExpenses` keeps matching the invoices behind it.
+    - **The floor is not pro-rated; the retainer is.** Pro-rating the floor would weaken it
+      exactly in a short period, where the fixed cost has not gone away; pro-rating the
+      retainer stops a mandate that began mid-month being charged a whole month.
+14. **Who may read and write the ledger, not just the statement?** (raised by Phase 3a).
+    The ledger and the owner statements are owner-only today, because `FINANCE` grants
+    nothing yet and Phase 2 made that explicit. But a manager who collected the rent is the
+    person who has to account for it, and a reconciliation an ops team cannot see is not a
+    reconciliation. Decide alongside 3f, when maker–checker on release gives `FINANCE`
+    something concrete to gate.
 
 ---
 
