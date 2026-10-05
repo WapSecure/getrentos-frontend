@@ -14,10 +14,14 @@
     "build:shared": "pnpm --filter @getrentos/shared build",
     "quality:mobile": "pnpm --filter mobile quality",
     "build:all": "pnpm run build:shared && pnpm run build:web && pnpm run build:backoffice",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
     "clean": "pnpm -r clean",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
     "prettier": "^3.2.5"
