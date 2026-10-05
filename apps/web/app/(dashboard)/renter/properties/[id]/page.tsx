@@ -206,7 +206,7 @@ export default function PropertyDetailPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <Square className="w-4 h-4" />
-                <span>{property.size} sqft</span>
+                <span>{property.size} sqm</span>
               </div>
               {property.availableFrom && (
                 <div className="flex items-center gap-1.5">

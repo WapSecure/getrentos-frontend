@@ -15,7 +15,7 @@ import { MessageReminders } from '@/components/renter/messages/MessageReminders'
 import { MessageCircle } from 'lucide-react';
 import { Conversation, Message, FilterState } from '@/types/messages';
 import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
@@ -75,7 +75,8 @@ export default function MessagesPage() {
     }) => unwrap(renterService.sendMessage(conversationId, text, files)),
     onMutate: async ({ conversationId, text }) => {
       await queryClient.cancelQueries({ queryKey: renterKeys.conversations });
-      const previousConversations = queryClient.getQueryData<Conversation[]>(conversationsQueryKey);
+      const previousConversations =
+        queryClient.getQueryData<Paginated<Conversation>>(conversationsQueryKey);
       const optimisticMessage: Message = {
         id: `optimistic-${crypto.randomUUID()}`,
         conversationId,
@@ -86,23 +87,27 @@ export default function MessagesPage() {
         timestamp: new Date().toISOString(),
         read: true,
       };
-      queryClient.setQueryData<Conversation[]>(conversationsQueryKey, (old = []) =>
-        old.map((conversation) =>
-          conversation.id === conversationId
-            ? {
-                ...conversation,
-                messages: [...(conversation.messages ?? []), optimisticMessage],
-                lastMessage: text,
-                lastMessageTime: optimisticMessage.timestamp,
-              }
-            : conversation
-        )
+      queryClient.setQueryData<Paginated<Conversation>>(conversationsQueryKey, (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.map((conversation) =>
+                conversation.id === conversationId
+                  ? {
+                      ...conversation,
+                      messages: [...(conversation.messages ?? []), optimisticMessage],
+                      lastMessage: text,
+                      lastMessageTime: optimisticMessage.timestamp,
+                    }
+                  : conversation
+              ),
+            }
+          : old
       );
       return { previousConversations };
     },
     onError: (error: Error, _variables, context) => {
-      if (context)
-        queryClient.setQueryData(renterKeys.conversations, context.previousConversations);
+      if (context) queryClient.setQueryData(conversationsQueryKey, context.previousConversations);
       setToast({
         message: error.message || 'Your message could not be sent. Please try again.',
         variant: 'error',

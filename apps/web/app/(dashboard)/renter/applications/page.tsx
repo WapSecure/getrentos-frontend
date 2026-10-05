@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApplicationsHeader } from '@/components/renter/applications/ApplicationsHeader';
-import { ApplicationsStats } from '@/components/renter/applications/ApplicationsStats';
 import { ApplicationsFilterSort } from '@/components/renter/applications/ApplicationsFilterSort';
 import { ApplicationsList } from '@/components/renter/applications/ApplicationsList';
 import { ApplicationAnalytics } from '@/components/renter/applications/ApplicationAnalytics';
@@ -125,10 +124,8 @@ export default function ApplicationsPage() {
     <>
       <ApplicationsHeader applications={applications} onExport={() => setShowExportModal(true)} />
 
-      <ApplicationsStats applications={applications} />
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="mt-7 grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="min-w-0 xl:col-span-2 space-y-6">
           <ApplicationsFilterSort
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}

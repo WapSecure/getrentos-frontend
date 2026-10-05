@@ -98,7 +98,7 @@ export const ApplicationCard = ({
               </div>
               <div className="flex items-center gap-1">
                 <Square className="w-3 h-3" />
-                <span>{application.size} sqft</span>
+                <span>{application.size} sqm</span>
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />

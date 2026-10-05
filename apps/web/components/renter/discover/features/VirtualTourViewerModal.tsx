@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { CalendarCheck, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
@@ -54,7 +55,9 @@ export const VirtualTourViewerModal = ({
     onClose();
   };
 
-  const formattedRequest = confirmedTime ? new Date(confirmedTime).toLocaleString() : '';
+  const formattedRequest = confirmedTime
+    ? format(new Date(confirmedTime), 'd MMM yyyy, h:mm a')
+    : '';
 
   return (
     <Dialog open={!!propertyTitle} onOpenChange={(open) => !open && handleClose()}>
@@ -113,6 +116,8 @@ export const VirtualTourViewerModal = ({
               value={preferredTime}
               onChange={setPreferredTime}
               requireFuture
+              minHour={8}
+              maxHour={20}
             />
 
             {requestViewing.isError && (

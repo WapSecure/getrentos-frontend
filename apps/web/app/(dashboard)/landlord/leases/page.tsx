@@ -93,6 +93,13 @@ export default function LandlordLeasesPage() {
     mutationFn: ({ id, signatureData }: { id: string; signatureData: string }) =>
       unwrap(landlordService.signLease(id, signatureData)),
     onSuccess: (updated) => {
+      // Patch the signed lease into every cached leases list so the card
+      // reflects the new status instantly, before the background refetch lands.
+      queryClient.setQueriesData<{ items: Lease[]; total: number } | undefined>(
+        { queryKey: ['landlord', 'leases'] },
+        (old) =>
+          old ? { ...old, items: old.items.map((l) => (l.id === updated.id ? updated : l)) } : old
+      );
       queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       setSigningLease(null);
       setToast({

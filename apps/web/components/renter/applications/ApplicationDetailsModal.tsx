@@ -222,7 +222,7 @@ export const ApplicationDetailsModal = ({
                             <span className="text-sm text-foreground">
                               {pluralize(application.bathrooms, 'bath')}
                             </span>
-                            <span className="text-sm text-foreground">{application.size} sqft</span>
+                            <span className="text-sm text-foreground">{application.size} sqm</span>
                           </div>
                         </div>
                         <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">

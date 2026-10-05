@@ -46,6 +46,10 @@ interface DateTimeFieldProps {
   requireFuture?: boolean;
   /** Minutes between the times offered. */
   timeStep?: number;
+  /** Earliest hour of day to offer (0–24). Defaults to the whole day. */
+  minHour?: number;
+  /** Latest hour of day to offer, exclusive (0–24). Defaults to the whole day. */
+  maxHour?: number;
   className?: string;
 }
 
@@ -56,6 +60,8 @@ export const DateTimeField = ({
   minDate,
   requireFuture = false,
   timeStep = 30,
+  minHour,
+  maxHour,
   className,
 }: DateTimeFieldProps) => {
   const labelId = useId();
@@ -73,7 +79,13 @@ export const DateTimeField = ({
           onChange={(next) => onChange(join(next, time))}
           min={minDate === null ? undefined : (minDate ?? todayISODate())}
         />
-        <TimePicker value={time} onChange={(next) => onChange(join(date, next))} step={timeStep} />
+        <TimePicker
+          value={time}
+          onChange={(next) => onChange(join(date, next))}
+          step={timeStep}
+          minHour={minHour}
+          maxHour={maxHour}
+        />
       </div>
       {inPast && (
         <p role="alert" className="mt-1 text-xs text-red-500">

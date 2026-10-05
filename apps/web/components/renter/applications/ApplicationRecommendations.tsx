@@ -90,12 +90,16 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
             key={rec.id}
             className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-secondary transition-colors"
           >
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1">
                 <h4 className="text-sm font-medium text-foreground">{rec.title}</h4>
                 <p className="text-xs text-gray-500 mt-0.5">{rec.description}</p>
               </div>
-              <Button size="sm" variant="ghost" className="gap-0 shrink-0">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="shrink-0 gap-1 self-start whitespace-nowrap"
+              >
                 {rec.action}
                 <ArrowRight className="w-3 h-3" />
               </Button>

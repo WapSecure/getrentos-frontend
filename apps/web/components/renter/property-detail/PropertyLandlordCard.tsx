@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Mail, Phone, Clock, Star, Shield, MessageCircle } from 'lucide-react';
+import { Clock, Star, Shield, MessageCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import type { Property } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
@@ -21,7 +21,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
 
   const startConversationMutation = useMutation({
     mutationFn: (landlordId: string) =>
-      unwrap(renterService.startConversation(landlordId, property.id)),
+      unwrap(renterService.startConversation(landlordId, property.propertyId)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.conversations });
       router.push(ROUTES.RENTER_MESSAGES);
@@ -57,23 +57,15 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         </div>
       </div>
 
+      {/* The landlord's direct email/phone are deliberately not shown to renters:
+          contact runs through in-app Messages so conversations stay on GetRentos. */}
       <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
-        {property.landlordEmail && (
+        {typeof property.landlordResponseRate === 'number' && (
           <div className="flex items-center gap-1.5">
-            <Mail className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{property.landlordEmail}</span>
+            <Clock className="w-3.5 h-3.5 shrink-0" />
+            <span>{property.landlordResponseRate}% response rate</span>
           </div>
         )}
-        {property.landlordPhone && (
-          <div className="flex items-center gap-1.5">
-            <Phone className="w-3.5 h-3.5 shrink-0" />
-            <span>{property.landlordPhone}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 shrink-0" />
-          <span>{property.landlordResponseRate ?? 90}% response rate</span>
-        </div>
       </div>
 
       <Button

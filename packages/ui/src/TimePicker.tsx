@@ -12,13 +12,19 @@ interface TimePickerProps {
   onChange: (value: string) => void;
   placeholder?: string;
   step?: number;
+  /** Earliest hour to offer (0–24). Defaults to 0 (midnight). */
+  minHour?: number;
+  /** Latest hour to offer, exclusive (0–24). Defaults to 24 (whole day). */
+  maxHour?: number;
   disabled?: boolean;
   className?: string;
 }
 
-const buildTimeOptions = (step: number) => {
+const buildTimeOptions = (step: number, minHour: number, maxHour: number) => {
   const options: { value: string; label: string }[] = [];
-  for (let minutes = 0; minutes < 24 * 60; minutes += step) {
+  const start = Math.max(0, Math.min(24, minHour)) * 60;
+  const end = Math.max(0, Math.min(24, maxHour)) * 60;
+  for (let minutes = start; minutes < end; minutes += step) {
     const hours24 = Math.floor(minutes / 60);
     const mins = minutes % 60;
     const value = `${String(hours24).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
@@ -33,11 +39,13 @@ export const TimePicker = ({
   onChange,
   placeholder = 'Select time',
   step = 30,
+  minHour = 0,
+  maxHour = 24,
   disabled,
   className,
 }: TimePickerProps) => {
   const [open, setOpen] = useState(false);
-  const [options] = useState(() => buildTimeOptions(step));
+  const [options] = useState(() => buildTimeOptions(step, minHour, maxHour));
   const selectedRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {

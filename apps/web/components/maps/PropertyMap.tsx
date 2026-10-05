@@ -39,8 +39,20 @@ function escapeHtml(text: string): string {
 const LAGOS = { lat: 6.5244, lng: 3.3792 };
 
 /** Custom styled pin (avoids Leaflet's default icon asset bundling issue). */
+/** Abbreviate a formatted price label (e.g. "₦8,500,000/yr") for a map pin → "₦8.5M". */
+function abbreviatePriceLabel(priceLabel?: string): string {
+  if (!priceLabel) return '₦';
+  const digits = priceLabel.split('/')[0].replace(/[^0-9]/g, '');
+  const n = Number(digits);
+  if (!digits || !Number.isFinite(n)) return '₦';
+  const trim = (v: number) => v.toFixed(1).replace(/\.0$/, '');
+  if (n >= 1_000_000) return `₦${trim(n / 1_000_000)}M`;
+  if (n >= 1_000) return `₦${trim(n / 1_000)}k`;
+  return `₦${n}`;
+}
+
 function pinIconHtml(priceLabel?: string): string {
-  const shortPrice = priceLabel ? priceLabel.replace(/[^0-9.kKmM]/g, '').slice(0, 5) : '₦';
+  const shortPrice = abbreviatePriceLabel(priceLabel);
   return `<div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0b6e4f;border:2px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.35);font-family:inherit;font-size:11px;font-weight:700;color:#ffffff;letter-spacing:-0.3px">${escapeHtml(
     shortPrice
   )}</div>`;

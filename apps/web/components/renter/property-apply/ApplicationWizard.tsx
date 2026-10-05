@@ -109,8 +109,34 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
   const removeDocument = (name: string) =>
     setDocument(name, { uploaded: false, documentId: undefined, url: undefined });
 
+  // A usable phone number: allows +, spaces, dashes and parentheses, but must
+  // carry at least 10 actual digits so free text like "abc" cannot advance.
+  const isValidPhone = (value: string) => {
+    if (!/^[+\d][\d\s()-]*$/.test(value.trim())) return false;
+    return value.replace(/\D/g, '').length >= 10;
+  };
+
+  // The rent expressed per month, so we can sanity-check stated income against it.
+  const monthlyRent =
+    property.period === 'year'
+      ? property.price / 12
+      : property.period === 'week'
+        ? (property.price * 52) / 12
+        : property.price;
+  const incomeValue = Number(data.monthlyIncome);
+  // Soft warning only: income that cannot cover a single month's rent is almost
+  // certainly a typo or a non-starter, but we don't hard-block the application.
+  const incomeBelowRent =
+    data.monthlyIncome.trim() !== '' && incomeValue > 0 && incomeValue < monthlyRent;
+
   const canAdvance = () => {
-    if (stepIndex === 0) return data.fullName.trim() && data.email.trim() && data.phone.trim();
+    if (stepIndex === 0)
+      return Boolean(
+        data.fullName.trim() &&
+        data.email.trim() &&
+        isValidPhone(data.phone) &&
+        data.currentAddress.trim()
+      );
     // Employer is `@IsOptional()` on the API's SubmitApplicationDto, and this
     // same step offers "Student" as an employment status. Requiring it here
     // hard-blocked anyone without an employer: they had to invent one: with
@@ -233,6 +259,12 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                 className={inputClass}
                 placeholder="e.g. 600000"
               />
+              {incomeBelowRent && (
+                <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-500">
+                  This is below the monthly rent of {nairaFormatter.format(Math.round(monthlyRent))}
+                  . Landlords usually look for income well above the rent, but you can still apply.
+                </p>
+              )}
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Preferred move-in date">
@@ -422,6 +454,12 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                 <span className="text-muted-foreground">Contact</span>
                 <span className="text-foreground font-medium">
                   {data.email} · {data.phone}
+                </span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Current address</span>
+                <span className="text-foreground font-medium text-right">
+                  {data.currentAddress || '—'}
                 </span>
               </div>
               <div className="flex justify-between">

@@ -1,7 +1,5 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useRef } from 'react';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
 
@@ -45,9 +43,9 @@ export function OtpInput({
   };
 
   return (
-    <div className="flex justify-center gap-2" aria-label="Verification code">
+    <div className="flex w-full justify-center gap-1.5 sm:gap-2" aria-label="Verification code">
       {digits.map((digit, index) => (
-        <LegacyInput
+        <input
           key={index}
           ref={(element) => {
             inputRefs.current[index] = element;
@@ -82,7 +80,7 @@ export function OtpInput({
               commit(nextDigits, index);
             }
           }}
-          className="w-12 h-12 text-center text-xl font-semibold border border-border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
+          className="h-12 min-w-0 flex-1 max-w-[3rem] text-center text-xl font-semibold border border-border rounded-xl bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
           maxLength={length}
         />
       ))}

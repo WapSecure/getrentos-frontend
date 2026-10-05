@@ -20,7 +20,7 @@ export function RenterPageHeader({
   return (
     <header className="mb-7 rounded-2xl border border-border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-3xl">
+        <div className="min-w-0 max-w-3xl">
           <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
             {Icon && (
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">

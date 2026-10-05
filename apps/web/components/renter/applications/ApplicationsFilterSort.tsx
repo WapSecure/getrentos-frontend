@@ -43,7 +43,11 @@ export const ApplicationsFilterSort = ({
 }: ApplicationsFilterSortProps) => {
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Application status">
+      <div
+        className="flex min-w-0 gap-1 overflow-x-auto sm:flex-1"
+        role="tablist"
+        aria-label="Application status"
+      >
         {statusOptions.map((option) => (
           <button
             key={option.value}

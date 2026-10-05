@@ -1,5 +1,5 @@
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
-export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
+export type ShortletDiscountType = 'WEEKLY' | 'MONTHLY' | 'LAST_MINUTE';
 
 /** A date range with its own nightly rate and/or minimum stay; start/end are the first and last night. */
 export interface ShortletSeason {
@@ -22,8 +22,6 @@ export interface ShortletSeasonInput {
 /** The peak-season rules a host sets on a listing. */
 export interface ShortletPricingRules {
   weeklyDiscountPct?: number;
-  /** Stays of 14+ nights. */
-  twoWeekDiscountPct?: number;
   monthlyDiscountPct?: number;
   lastMinuteDiscountPct?: number;
   lastMinuteDays?: number;
@@ -69,7 +67,6 @@ export interface ShortletListing {
   maxNights?: number;
   weekendUpliftPct?: number;
   weeklyDiscountPct: number;
-  twoWeekDiscountPct?: number;
   monthlyDiscountPct: number;
   lastMinuteDiscountPct: number;
   lastMinuteDays: number;

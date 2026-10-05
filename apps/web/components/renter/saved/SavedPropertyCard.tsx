@@ -195,7 +195,7 @@ export const SavedPropertyCard = ({
                 </div>
                 <div className="flex items-center gap-1">
                   <Square className="w-3 h-3" />
-                  <span>{property.size} sqft</span>
+                  <span>{property.size} sqm</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -358,7 +358,7 @@ export const SavedPropertyCard = ({
             </div>
             <div className="flex items-center gap-1">
               <Square className="w-3 h-3" />
-              <span>{property.size} sqft</span>
+              <span>{property.size} sqm</span>
             </div>
           </div>
 

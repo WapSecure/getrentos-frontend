@@ -146,7 +146,7 @@ export const DiscoverCompareDrawer = ({
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
                               <Square className="w-4 h-4 text-gray-400" />
-                              {property.size} sqft
+                              {property.size} sqm
                             </div>
                           </td>
                         ))}

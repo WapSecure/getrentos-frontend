@@ -13,6 +13,7 @@ import { useRenterUser } from '../../../layout';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
+import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
@@ -75,6 +76,16 @@ export default function PropertyApplyPage() {
   });
   const property = propertyQuery.data ?? null;
 
+  // Gate the whole wizard on identity verification, rather than only rejecting
+  // at submit: a renter shouldn't fill four steps and upload documents only to
+  // be turned away at the end (and lose the draft).
+  const kycQuery = useQuery({
+    queryKey: ['kyc-status'],
+    queryFn: () => unwrap(kycService.getStatus()),
+  });
+  const identityApproved = kycQuery.data?.identity?.status === 'APPROVED';
+  const verificationHref = `${ROUTES.RENTER_SETTINGS}?tab=verification`;
+
   const submitMutation = useMutation({
     mutationFn: (data: ApplicationFormData) =>
       unwrap(renterService.submitApplication(property?.id ?? '', data)),
@@ -89,7 +100,7 @@ export default function PropertyApplyPage() {
     await submitMutation.mutateAsync(data);
   };
 
-  if (propertyQuery.isLoading) return <PageLoadingState />;
+  if (propertyQuery.isLoading || kycQuery.isLoading) return <PageLoadingState />;
 
   if (propertyQuery.isError) {
     return (
@@ -159,17 +170,30 @@ export default function PropertyApplyPage() {
       </div>
 
       <div className="max-w-2xl space-y-4">
-        {submitMutation.error && (
-          <VerificationRequiredNotice
-            error={submitMutation.error}
-            href={`${ROUTES.RENTER_SETTINGS}?tab=verification`}
-          />
+        {identityApproved ? (
+          <>
+            {submitMutation.error && (
+              <VerificationRequiredNotice error={submitMutation.error} href={verificationHref} />
+            )}
+            <ApplicationWizard
+              property={property}
+              initialData={buildInitialData(property, user)}
+              onSubmit={handleSubmit}
+            />
+          </>
+        ) : (
+          <div className="space-y-3">
+            <VerificationRequiredNotice
+              error={{ reason: 'IDENTITY_REQUIRED' }}
+              href={verificationHref}
+              verificationHref={verificationHref}
+            />
+            <p className="text-sm text-muted-foreground">
+              Verify your identity to apply for this home. It only takes a minute, and you can pick
+              up your application here once it&apos;s approved.
+            </p>
+          </div>
         )}
-        <ApplicationWizard
-          property={property}
-          initialData={buildInitialData(property, user)}
-          onSubmit={handleSubmit}
-        />
       </div>
     </>
   );

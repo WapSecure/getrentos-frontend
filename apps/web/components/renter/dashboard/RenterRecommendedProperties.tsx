@@ -145,7 +145,7 @@ export const RenterRecommendedProperties = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Square className="w-3 h-3" />
-                    <span>{property.size} sqft</span>
+                    <span>{property.size} sqm</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">

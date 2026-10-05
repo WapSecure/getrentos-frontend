@@ -5,6 +5,7 @@ import { LegacyInput } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState, useMemo } from 'react';
+import { addYears, subDays, format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, BadgeCheck } from 'lucide-react';
 import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
@@ -46,7 +47,16 @@ export const CreateLeaseModal = ({
     if (unit && !rentAmount) setRentAmount(String(unit.askingRent ?? ''));
     // An approved applicant is the tenant: prefill rather than make the
     // landlord retype a name we already hold.
-    if (unit?.approvedApplicant) setTenantName(unit.approvedApplicant.name);
+    if (unit?.approvedApplicant) {
+      setTenantName(unit.approvedApplicant.name);
+      // Auto-draft the lease for an approved applicant: default a standard
+      // 12-month term starting today, so the landlord reviews and sends
+      // instead of re-entering everything (and spares them clicking the date
+      // picker forward a year). They can still change either date.
+      const today = new Date();
+      if (!leaseStart) setLeaseStart(format(today, 'yyyy-MM-dd'));
+      if (!leaseEnd) setLeaseEnd(format(subDays(addYears(today, 1), 1), 'yyyy-MM-dd'));
+    }
   };
 
   const reset = () => {

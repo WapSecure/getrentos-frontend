@@ -25,7 +25,7 @@ import { Badge, PageErrorState, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Card } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import type { MaintenanceRequest, MaintenanceRequestStatus } from '@/types/maintenance';
@@ -107,9 +107,12 @@ const quickActions = [
 ];
 
 export function HomeOverviewView() {
+  // A renter with no active lease yet (e.g. one still awaiting signature) gets a
+  // 404 here. That's "no active lease", not an outage, so tolerate it and fall
+  // through to the empty state below rather than showing a scary error.
   const leaseQuery = useQuery({
     queryKey: renterKeys.lease,
-    queryFn: () => unwrap(renterService.getLease()),
+    queryFn: () => unwrapOptional(renterService.getLease(), null),
   });
   const maintenanceQuery = useQuery({
     queryKey: renterKeys.maintenanceRequests,

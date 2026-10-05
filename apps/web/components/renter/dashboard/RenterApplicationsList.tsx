@@ -155,7 +155,7 @@ export const RenterApplicationsList = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <Square className="w-3 h-3" />
-                      <span>{app.size} sqft</span>
+                      <span>{app.size} sqm</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <CalendarDays className="w-3 h-3" />
