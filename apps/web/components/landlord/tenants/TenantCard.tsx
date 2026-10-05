@@ -31,8 +31,18 @@ interface TenantCardProps {
   delay?: number;
 }
 
+// A lease can start in the future, so "Moved in" would be wrong for a date that
+// hasn't arrived yet. Pick the tense from the date. Kept at module scope so the
+// time read stays out of the component's render body.
+const moveInTense = (dateString?: string | null): string => {
+  if (!dateString) return 'Moved in';
+  const date = new Date(dateString);
+  return !Number.isNaN(date.getTime()) && date.getTime() > Date.now() ? 'Moves in' : 'Moved in';
+};
+
 export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
   const rentStatus = rentStatusConfig[tenant.rentStatus];
+  const moveInLabel = moveInTense(tenant.moveInDate);
 
   return (
     <motion.div
@@ -66,7 +76,9 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
         {tenant.propertyName} • {tenant.unitName}
       </div>
       <div className="flex items-center justify-between mt-2">
-        <p className="text-xs text-gray-400">Moved in {formatDate(tenant.moveInDate)}</p>
+        <p className="text-xs text-gray-400">
+          {moveInLabel} {formatDate(tenant.moveInDate)}
+        </p>
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-muted-foreground">Trust Score</span>
           <span className="text-xs font-bold text-primary">{tenant.trustScore}</span>
