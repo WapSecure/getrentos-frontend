@@ -69,11 +69,32 @@ export default function LandlordLeasesPage() {
       data: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>;
       sendImmediately: boolean;
     }) => {
-      const { unitId, tenantName, tenantId, leaseStart, leaseEnd, rentAmount, securityDeposit } =
-        data;
+      const {
+        unitId,
+        tenantName,
+        tenantId,
+        leaseStart,
+        leaseEnd,
+        rentAmount,
+        rentPeriod,
+        securityDeposit,
+      } = data;
       return unwrap(
         landlordService.createLease(
-          { unitId, tenantName, tenantId, leaseStart, leaseEnd, rentAmount, securityDeposit },
+          {
+            unitId,
+            tenantName,
+            tenantId,
+            leaseStart,
+            leaseEnd,
+            rentAmount,
+            // Forward the cadence the modal resolved (the unit's period, else a
+            // yearly default). Dropping it here was why a manually drafted lease
+            // saved with no period and the card then mislabelled a short test
+            // term as "Monthly rent".
+            rentPeriod,
+            securityDeposit,
+          },
           sendImmediately
         )
       );
