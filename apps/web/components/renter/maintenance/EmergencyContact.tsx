@@ -90,8 +90,8 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
 
       <div className="p-3 border-t border-border text-center">
         <p className="text-xs text-gray-500">
-          For life-threatening emergencies, please call 911 or your local emergency services
-          immediately.
+          For life-threatening emergencies, please call 112 (Nigeria&apos;s emergency number) or
+          your local emergency services immediately.
         </p>
       </div>
     </motion.div>
