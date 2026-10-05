@@ -901,7 +901,78 @@ entries on every account, and running the sweep a second time writes nothing.
 
 ---
 
+## 9f. Phase 3d — a statement is a view of the ledger (2026-10-05)
+
+Principle 1 says statements are derived from the ledger, never hand-typed. Phase 3a–3c
+made the *amounts* agree with the ledger, but the agreement lived in the code: both the
+statement and the ledger were computed from the same rent and expense rows, so nothing in
+the data connected a line to the movement behind it. A statement could not be checked
+against the ledger, only believed.
+
+**Every line is now a ledger entry, rendered.** `OwnerStatementLineItem` carries
+`ledgerEntryId` and the source document behind the movement (`sourceType`, `sourceId`,
+`sourceDetail`), plus `propertyId`. Those are denormalised on purpose: a line has to stay
+readable after the payment or expense it came from has been deleted, and an owner reading
+an old statement is precisely when that matters.
+
+**Generation materialises, then reads back.** It claims the period's sources, writes the
+ledger entries for exactly those sources inside its own transaction, and then builds its
+lines and totals by reading the entries out. `netPayout` is literally the sum of the
+movements; the other totals are that sum filtered by entry type and part. A statement can
+therefore no longer state a figure the ledger does not hold.
+
+Two consequences worth noting. A statement no longer waits for the hourly sweep to know
+what it is worth — the movements exist before it does, and materialising is idempotent, so
+a charge the sweep finds later is a no-op. And the statement's id is minted up front,
+because a fee is sourced to the statement that produced it and the statement cannot exist
+before the charges it is made of have been written.
+
+**WHT is the one figure not read back, and that is the point.** It is withheld from the
+manager's remuneration rather than taken from the owner, so no movement exists for it.
+Manufacturing one to make the derivation uniform would put a number on the owner's ledger
+that nobody took from them. It is disclosed, charged to nobody, and the code says so.
+
+### A real bug, found by running it rather than by testing it
+
+The first live statement came back with the expense **missing** while the markup on it had
+been charged. The owner would have been paid for a bill the platform had already settled —
+₦60,000 too much on a ₦300,000 statement, from a statement that agreed with its own
+arithmetic and looked entirely plausible.
+
+The recorder derived an expense's holder from `expense.ownerStatement`. But a statement
+materialises its expenses *before* it claims them, because the claim is a foreign key to a
+statement that does not exist yet. So the lookup found nothing, the expense was skipped,
+and the markup — computed from the expense total the generation loop already had — was
+charged anyway. The holder is now passed in by the caller, the only party that knows it at
+that point.
+
+The unit tests had missed it because the fake recorder was more forgiving than the real
+one: it appended whatever it was asked to and ignored the holder it was handed, so the fake
+could not express the precondition the real one had. The fake now uses the holder, and the
+regression test is on the recorder rather than the statement: given a holder and an
+*unclaimed* expense, it must still write the debit.
+
+This is the second defect this phase found only live, after the double-charged fee in 3c,
+and both were the same shape — a precondition the tests could not express. The unit suite is
+what makes a change safe; it is not what tells you the change is right.
+
+Verified: build green; full suite **261 suites / 3525 tests**; the derivation falsified one
+guarantee at a time (a line that cites nothing, movements left to the sweep, a fallback that
+invents totals when the ledger cannot be read, a total taken from the source row, and the
+unclaimed-expense skip), each caught by its own test; and live — a ₦300,000 rent payment and
+a ₦60,000 expense produce a ₦30,000 fee, a ₦6,000 markup, ₦2,700 VAT and a payout of
+₦201,300, with five lines each citing its own ledger entry and source, the sum of the lines
+equal to `netPayout` to the naira, and every account's stored balance equal to the sum of
+its entries.
+
+_Also repaired a spec another commit left uncompilable (`landlord-applications.service.spec.ts`
+called a five-argument constructor with four), which meant a whole suite reported nothing
+and the suite count was short by ten tests._
+
+---
+
 ## 10. Open decisions (need product/legal sign-off)
+
 
 1. **Fee defaults**: is GetRentos publishing standard rates (e.g. 10% of rent collected,
    10% letting / 5% renewal), or leaving price to the market? Publishing constrains firms
