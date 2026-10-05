@@ -91,7 +91,11 @@ export const CreateLeaseModal = ({
       leaseStart,
       leaseEnd,
       rentAmount: Number(rentAmount),
-      rentPeriod: selectedUnit.askingRentPeriod,
+      // Default to yearly: rent in Nigeria is let by the year, and the vacant-unit
+      // list does not always carry the unit's period. Without this the lease is
+      // saved with no cadence and the card falls back to the term dates — a short
+      // test term then reads "Monthly rent" on an amount that is really annual.
+      rentPeriod: selectedUnit.askingRentPeriod ?? 'year',
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
     };
   };

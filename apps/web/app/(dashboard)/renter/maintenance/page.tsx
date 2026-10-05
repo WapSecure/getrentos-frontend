@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { MaintenanceHeader } from '@/components/renter/maintenance/MaintenanceHeader';
 import { MaintenanceStats } from '@/components/renter/maintenance/MaintenanceStats';
 import { MaintenanceList } from '@/components/renter/maintenance/MaintenanceList';
@@ -16,6 +17,7 @@ import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/
 import { renterService } from '@/services/renterService';
 
 export default function MaintenancePage() {
+  const router = useRouter();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -144,8 +146,11 @@ export default function MaintenancePage() {
     window.location.href = `tel:${phone}`;
   };
 
-  const handleMessage = (email: string) => {
-    window.location.href = `mailto:${email}`;
+  const handleMessage = () => {
+    // Keep the conversation on-platform (GetRentos messaging) rather than opening
+    // the device's email client: in-app messaging is the channel the rest of the
+    // product points tenants to, and it keeps a record against the tenancy.
+    router.push('/renter/messages');
   };
 
   // Scheduled maintenance is derived from real requests that are still active
