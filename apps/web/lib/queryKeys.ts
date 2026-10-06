@@ -458,3 +458,20 @@ export const sellerPayoutKeys = {
   account: ['marketplace', 'seller', 'payout-account'] as const,
   payouts: ['marketplace', 'seller', 'payouts'] as const,
 };
+
+/**
+ * Management mandates — the firm's side of the engagement.
+ *
+ * Separate from `authorityKeys` on purpose: the authority is "I may touch this
+ * building", the mandate is "on whose instruction, and until when". A screen
+ * needs both and they change for different reasons.
+ */
+export const mandateKeys = {
+  /** Every mandate the caller manages. This is what feeds the client switcher. */
+  managing: ['management-mandates', 'managing'] as const,
+  /** Every mandate on properties the caller owns — the same engagement, other side. */
+  mine: ['management-mandates', 'mine'] as const,
+  one: (id: string) => ['management-mandates', id] as const,
+  forProperty: (propertyId: string) => ['management-mandates', 'property', propertyId] as const,
+  terminationRequests: (id: string) => ['management-mandates', id, 'termination-requests'] as const,
+};

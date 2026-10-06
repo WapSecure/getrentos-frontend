@@ -102,6 +102,16 @@ export interface OwnerStatementLineItem {
   id: string;
   label: string;
   amount: number;
+  /**
+   * Where the line came from. The statement is a view of the ledger, so a line
+   * cites the movement it renders and the document behind it. Null on a line
+   * written before the ledger became the source of truth.
+   */
+  ledgerEntryId?: string | null;
+  sourceType?: string | null;
+  sourceId?: string | null;
+  sourceDetail?: string | null;
+  propertyId?: string | null;
 }
 
 export interface OwnerStatement {
@@ -111,6 +121,12 @@ export interface OwnerStatement {
   grossIncome: number;
   totalExpenses: number;
   managementFee: number;
+  /** Charged on top of the fee and held for the tax authority, not earned. */
+  vatAmount: number;
+  /** Charged apart from the expense it applies to, so expenses still add up. */
+  maintenanceMarkup: number;
+  /** Withheld from the manager. Disclosed to the owner, never deducted from the payout. */
+  whtAmount: number;
   netPayout: number;
   status: OwnerStatementStatus;
   payoutStatus: OwnerStatementPayoutStatus;

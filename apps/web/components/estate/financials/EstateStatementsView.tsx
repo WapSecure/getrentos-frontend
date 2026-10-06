@@ -22,6 +22,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { estateKeys } from '@/lib/queryKeys';
 import { estateService } from '@/services/estateService';
+import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import type { EstateStatement } from '@/types/estate';
 
 type GenerateForm = { periodStart: string; periodEnd: string };
@@ -264,21 +265,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
                 </div>
               </div>
 
-              <div className="mt-5 space-y-2">
-                {detail.lineItems?.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{item.label}</span>
-                    <span className="text-foreground">{formatCurrency(item.amount)}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 pt-5 border-t border-border space-y-2">
-                <div className="flex items-center justify-between text-base font-semibold">
-                  <span className="text-foreground">Net payout</span>
-                  <span className="text-foreground">{formatCurrency(detail.netPayout)}</span>
-                </div>
-              </div>
+              <StatementBreakdown className="mt-5" lineItems={detail.lineItems} totals={detail} />
 
               {detail.status === 'DRAFT' && (
                 <div className="mt-6 flex justify-end border-t border-border pt-5">

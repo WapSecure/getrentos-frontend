@@ -22,6 +22,7 @@ import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type OwnerStatement } from '@/services/landlordService';
+import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
@@ -312,35 +313,7 @@ export function OwnerStatementsView() {
                 </div>
               </div>
 
-              <div className="mt-5 space-y-2">
-                {detail.lineItems?.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{item.label}</span>
-                    <span className={item.amount < 0 ? 'text-red-600' : 'text-foreground'}>
-                      {formatCurrency(item.amount)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 pt-5 border-t border-border space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Gross income</span>
-                  <span className="text-foreground">{formatCurrency(detail.grossIncome)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Expenses</span>
-                  <span className="text-foreground">-{formatCurrency(detail.totalExpenses)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Management fee</span>
-                  <span className="text-foreground">-{formatCurrency(detail.managementFee)}</span>
-                </div>
-                <div className="flex items-center justify-between text-base font-semibold pt-2 border-t border-border">
-                  <span className="text-foreground">Net payout</span>
-                  <span className="text-foreground">{formatCurrency(detail.netPayout)}</span>
-                </div>
-              </div>
+              <StatementBreakdown className="mt-5" lineItems={detail.lineItems} totals={detail} />
 
               {detail.status === 'DRAFT' && (
                 <div className="mt-6 flex justify-end border-t border-border pt-5">
