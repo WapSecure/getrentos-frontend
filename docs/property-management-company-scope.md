@@ -1288,12 +1288,43 @@ because `requestedById` is `NOT NULL`, so a null actor matches nothing anyway. T
 test became one that reads the same row as two different people, which does fail when the value is
 hardcoded. A test that still passes when you delete the guard is not a test.
 
-### Also fixed on the way
+### Also fixed on the way — and the money bug the smell was pointing at
 
-`formatDate` is local-time app-wide, so a period ending `2026-11-30T23:59:59Z` renders as **1 Dec**
-east of UTC. Pre-existing, affects the owner statement view as much as the new queue. Left alone
-inside a feature commit — the two surfaces at least agree with each other now — and flagged for its
-own fix rather than quietly changed in passing.
+`formatDate` is local-time app-wide, so a period ending `2026-11-30T23:59:59Z` renders as
+**1 Dec** east of UTC. Chasing that turned out to be following a thread to something that
+actually moves money.
+
+`periodEnd` arrives as a **date**, so it means the whole of that day, and the landlord generator
+compared `lte: periodEnd`. Everything that happened on the period's last day after midnight was
+silently dropped — and this was not theoretical: **13 of the 17 rent payments in the live database
+carry a time on `dueDate`**. Rent due at 13:46 on the final day was left out of the statement, the
+owner was told _"there is no new rent or expense to put in a statement for this period"_ for a
+month that collected rent, and the payment then landed on a **later** statement. That is worse than
+losing it: the earlier statement stays wrong and looks final. The estate side already used an
+exclusive bound for dues; the landlord side did not.
+
+Fixed as a half-open interval `[periodStart, periodEndExclusive)` in both generators, including the
+corrections lookup, which took the same inclusive bound and so pushed a dispute decided at 15:00 on
+the last day into the next period (backend `136a822`).
+
+**Why the suite could not see it for two phases.** The statement spec's own matcher contained:
+
+```ts
+if ('gte' in want || 'lte' in want) return true; // period filtering is not under test here
+```
+
+Every date filter matched everything, and the test payments carried no date at all. This is the
+**third** instance in this feature of the same root cause — a fake more forgiving than the real
+collaborator (§3d's holder, the entry-id clause, and now the date filter) — and the first one to
+hide a money bug behind a green suite. Making the fake honest immediately failed one of the tests
+written in this very section, which had dated its period in September while the payment helper
+defaulted to August and had been passing only because nothing was ever filtered.
+
+Live before/after, with rent due at 13:46 on the last day: the old bound matches **0** rows and the
+statement reports **₦0** gross income; the new bound matches **1** and reports **₦300,000**.
+
+The display half is still open and now clearly separable: the query is correct, so what remains is
+purely how a business date is _rendered_ for a viewer outside the bank's timezone.
 
 ### Verification
 
