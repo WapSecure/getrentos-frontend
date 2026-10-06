@@ -395,10 +395,15 @@ timeline; audit attribution (`actorId` + mandate).
 **Phase 3 — Money & statements.** `ClientMoneyLedgerEntry`, fee engine
 (PERCENTAGE/FLAT + commissions + VAT/WHT), statement generation with line items and source
 documents, owner payout with maker/checker, reconciliation job, disputes on line items.
-_3a–3d shipped, and the first visible frontend slice shipped on top of them (see 9e–9g);
-3e (reconciliation) and 3f (maker/checker payout + line disputes) remain. The recurring
-lesson so far: 3e is the control that makes pooled client money safe, so it should not be
-deferred behind further surface work._
+_3a–3e shipped (9e–9h): the ledger, the recorder, the fee engine, ledger-derived statements,
+and the daily bank reconciliation with an ops surface. What remains is **3f** — maker/checker
+on release, and disputes on line items — plus the two decisions 9h leaves open (whether an
+open drift blocks a payout, and whether attesting a balance needs step-up)._
+
+_On the first real run the reconciliation found that the platform holds **₦8,439,975** of
+owner money that nobody has ever counted against a bank statement. That is the phase working,
+not a defect in it — and it is the strongest argument for finishing 3f rather than moving on,
+because a drift nobody can act on is only half a control._
 
 **Phase 4 — Legal & proceedings.** Notices with correct periods, POA-backed actions,
 `LegalCase` + advocate + costs, eviction generalisation, owner approval gates, enforcement
@@ -1072,6 +1077,111 @@ Verified: backend build green, **262 suites / 3548 tests** with one pre-existing
 failure (`workers/notification`, a Prisma mock — confirmed present without these changes);
 frontend typecheck and lint clean; and live on port 3002 against the seeded fixture, as both
 the owner and the manager.
+
+---
+
+## 9h. Phase 3e — the daily reconciliation (2026-10-06)
+
+Principle 5 of §7 — "bank/PSP balance vs sum of owner balances; a drift report must exist and
+alert ops" — and decision #3, which chose a pooled account with a per-owner ledger _because_ a
+daily check would exist. Until now the ledger was a system of record that nothing ever checked
+against the thing it claims to describe.
+
+Backend commit `18c0180`; backoffice commit `a5f3825b`.
+
+### It runs on two axes, because they fail for different reasons
+
+1. **Integrity** — every `ClientMoneyAccount.balance` must equal the sum of its own entries.
+   Computable with no outside input, so it always runs. A failure means **our own code is
+   wrong**: the ledger service moves the balance inside the same locked transaction that writes
+   the entry, so anything else writing money is a bug.
+2. **Drift** — the pooled balance at the bank versus what we say owners are owed. This needs a
+   figure the ledger did not produce, so `ClientMoneyBankBalance` records one, and that is the
+   whole design: **a number derived from our own rows would agree with them by construction and
+   could never show a bank charge, an inflow nobody recorded, or a payment that never cleared.**
+   It is an attestation — ops today, a provider feed later — and `source` says which.
+
+### The decisions, all of them about not lying by omission
+
+- **No attestation is not a match.** A date nobody counted is `UNATTESTED` with a null drift,
+  never `MATCHED`. Folding "nobody told us" into "the two agree" is how a reconciliation quietly
+  stops reconciling while still reporting a clean bill of health every single day.
+- **Integrity outranks drift.** `ledgerTotal` is summed from the very account rows an integrity
+  failure has just shown to be wrong, so reporting a drift against it would send somebody to the
+  bank when the fault is in our own writes. Both figures are surfaced; the status names which to
+  fix first.
+- **The holder list is a union** of who has accounts and who has an attested balance. A balance
+  recorded for a holder we hold no accounts for is the loudest drift there is — the bank has
+  money nobody's ledger knows about — and iterating only the accounts would skip it in silence.
+- **Only incidents alert.** A drift notifies; a day nobody counted does not, because an absent
+  process is not an incident and keeping the channel meaning "the money is wrong" is what makes
+  people read it. Staleness is stated on the report in days instead.
+- **An open drift notifies once; a fixed one that returns notifies again.** The alert record is
+  cleared when the pool goes healthy — otherwise a recurrence at the same size would look like a
+  duplicate of an incident that is already closed. This codebase has already had four
+  notifications for one dispute; a control is not the place to repeat that.
+- **Nothing is auto-corrected.** A job that wrote a balancing adjustment would erase the evidence
+  of exactly the event it exists to surface. The output is a verdict for a person to act on.
+
+### What it found on the first real run
+
+Pointed at the live database, the answer to "is the platform's client money where it says it
+is" was immediate and unwelcome: the platform pool holds **₦8,439,975** of owner money across
+three accounts and **has never been counted**. That is not a defect in this phase — it is the
+phase working, on day one, on real data. The surface says it in those words rather than showing
+a green tick, which is the entire reason `UNATTESTED` is a status rather than a null drift.
+
+### The surface (backoffice, `/admin/client-money`)
+
+Gated on the same `escrow.view` / `escrow.approve` permissions as Escrow Oversight, because it
+is the same question asked from the other end: escrow is money moving, this is whether money we
+already hold is still there. Three states are rendered distinguishably and deliberately:
+
+| state                        | what it means                | rendering                 |
+| ---------------------------- | ---------------------------- | ------------------------- |
+| `MATCHED`                    | the bank agrees              | green                     |
+| `DRIFT` / `INTEGRITY_FAILED` | something is wrong           | red, with both figures    |
+| `UNATTESTED`                 | **nobody counted the money** | neutral grey, never green |
+
+A pool with no attestation shows "not recorded" rather than ₦0, which would read as a bank
+holding nothing. Live, recording a balance through the dialog and running the reconciliation
+from the page flipped the fixture pool from _"Drift — short by ₦20,000"_ to _"Bank agrees — ₦0
+difference"_.
+
+The live pass also caught a rendering flaw the backend could not: a pool that had been **fixed**
+still read "staff alerted" beside its green badge, because `alertedAt` is history and survives
+the fix — so a resolved incident and an open one looked identical. It now reads "unresolved" or
+"an earlier alert has cleared".
+
+### Two decisions left open
+
+1. **Does an open drift block a payout?** This phase reports; it does not gate. Blocking release
+   while the pool is out is defensible — it is what "client money safety" means at its strongest
+   — but it can also deadlock payouts on a drift that is only a late bank feed. It belongs
+   alongside 3f, where release already has a maker/checker path to hang it on.
+2. **Should recording a balance need step-up?** It is the one write here that could hide a real
+   shortfall, since it is the figure the control is measured against. It is currently gated on
+   `escrow.approve` and audited with its previous value on every change — so a changed number is
+   _detectable afterwards_ — rather than demanding a confirmation token each time. The argument
+   against step-up is that a daily chore which demands MFA is a chore people learn to skip.
+
+### A trap worth recording
+
+`prisma migrate dev` in this repo offers to **RESET the database** because of pre-existing drift
+from other commits (three migrations modified after being applied, plus an undocumented `Due`
+index). Answering yes destroys every fixture on a database shared with other sessions. The
+migration here is therefore hand-written and applied with `migrate deploy`. It also had to add
+two **partial** unique indexes by hand, because Postgres treats NULLs as distinct and the
+platform's own pool is the row with a null `organizationId` — the same gotcha
+`ClientMoneyAccount` already carries a comment about.
+
+Verified: build green, 263 suites / 3590 tests (the one failure is the pre-existing
+`NotificationWorker` Prisma-mock failure, confirmed present without these changes), and **24/24
+checks passing live** against the real API and database — including that a day with no
+attestation is reported as unchecked rather than clean, that an open drift does not notify
+twice, that a shortfall which was fixed and recurred was announced again, and that our own
+records disagreeing outranks the bank. Falsified by removing the holder union and by not
+clearing the alert record: five tests fail, each attributable to one of the two.
 
 ---
 
