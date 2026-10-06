@@ -12,6 +12,9 @@ import {
   adminClientMoneyService,
   type ReleaseRequestRow,
 } from '@/services/adminClientMoneyService';
+import { PoolCheckFlag } from './PoolCheckFlag';
+
+const naira = (value: number) => `₦${value.toLocaleString('en-NG')}`;
 
 /** Matches the date style used across the backoffice's queues. */
 const date = (value?: string | null) =>
@@ -55,6 +58,49 @@ export function ReleaseQueue({
     queryKey: adminKeys.clientMoneyReleases,
     queryFn: () => unwrap(adminClientMoneyService.pendingReleases()),
   });
+
+  /**
+   * The pool verdicts, joined onto the rows by holder.
+   *
+   * Read from the reconciliation endpoint rather than added to the release DTO,
+   * so there is one definition of "is this pool where it should be" and the two
+   * tabs cannot come to disagree about the same money. The release row already
+   * names the holder (`organizationId`, null for the platform pool), which is the
+   * same key these rows are grouped by.
+   */
+  const pools = useQuery({
+    queryKey: adminKeys.clientMoneyReconciliation,
+    queryFn: () => unwrap(adminClientMoneyService.overview()),
+  });
+  const poolFor = (organizationId: string | null) =>
+    pools.data?.rows.find((pool) => pool.organizationId === organizationId);
+
+  /**
+   * The pool's condition as a sentence, for the confirmation step.
+   *
+   * `ConfirmDialog` takes its description as a string, so the row above carries
+   * the styling and this carries the words. The words are the part that matters:
+   * the approver commits here, and the phrase ends by saying outright that this is
+   * a flag rather than a block — otherwise an officer reads "the pool is short" at
+   * the moment of signing off and goes looking for a permission they already have.
+   */
+  const poolClause = (organizationId: string | null): string => {
+    const pool = poolFor(organizationId);
+    if (!pool) {
+      return ' Nothing has checked the pool this money would leave from, which is not the same as it agreeing.';
+    }
+    if (pool.status === 'MATCHED') return '';
+    if (pool.status === 'INTEGRITY_FAILED') {
+      return ' Be aware: our own ledger records for this pool disagree with each other. That is a fault on our side, not at the bank.';
+    }
+    if (pool.status === 'DRIFT') {
+      const short = (pool.drift ?? 0) < 0;
+      return ` Be aware: this pool is ${short ? 'short' : 'over'} by ${naira(
+        Math.abs(pool.drift ?? 0)
+      )} as of ${pool.asOfDate}. Not a block — the decision is still yours.`;
+    }
+    return ' Be aware: nobody has counted this pool, so nothing has confirmed it holds what we say owners are owed.';
+  };
 
   const decide = useMutation({
     mutationFn: (input: { id: string; action: 'approve' | 'reject'; note: string }) =>
@@ -143,6 +189,13 @@ export function ReleaseQueue({
                           Their note: &ldquo;{row.reason}&rdquo;
                         </p>
                       )}
+
+                      {/*
+                        The pool this money would leave from. Flag-only, on the
+                        decision the approver is about to make — which is the
+                        moment it is worth anything.
+                      */}
+                      <PoolCheckFlag pool={poolFor(row.organizationId)} />
                     </div>
 
                     <div className="flex shrink-0 gap-2">
@@ -201,7 +254,8 @@ export function ReleaseQueue({
           }
           description={
             pending.action === 'approve'
-              ? 'This sends the owner their money and cannot be undone from here. Say what you checked — the note is the record that two people looked at this.'
+              ? 'This sends the owner their money and cannot be undone from here. Say what you checked — the note is the record that two people looked at this.' +
+                poolClause(pending.row.organizationId)
               : 'The statement stays issued and the owner is still owed the money. This refuses the release, not the debt, and they can send it for approval again.'
           }
           confirmLabel={pending.action === 'approve' ? 'Release the money' : 'Hold it back'}
