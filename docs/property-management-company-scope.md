@@ -395,7 +395,10 @@ timeline; audit attribution (`actorId` + mandate).
 **Phase 3 — Money & statements.** `ClientMoneyLedgerEntry`, fee engine
 (PERCENTAGE/FLAT + commissions + VAT/WHT), statement generation with line items and source
 documents, owner payout with maker/checker, reconciliation job, disputes on line items.
-_3a–3c shipped (see 9e); 3d–3f remain._
+_3a–3d shipped, and the first visible frontend slice shipped on top of them (see 9e–9g);
+3e (reconciliation) and 3f (maker/checker payout + line disputes) remain. The recurring
+lesson so far: 3e is the control that makes pooled client money safe, so it should not be
+deferred behind further surface work._
 
 **Phase 4 — Legal & proceedings.** Notices with correct periods, POA-backed actions,
 `LegalCase` + advocate + costs, eviction generalisation, owner approval gates, enforcement
@@ -797,7 +800,7 @@ bank account at all.
 model it came from so a statement line is never hand-typed.
 
 **The balance cannot drift from the history that produced it.** `balanceAfter` is computed
-from the account row *while holding a `FOR UPDATE` lock on it*, inside the transaction that
+from the account row _while holding a `FOR UPDATE` lock on it_, inside the transaction that
 writes the entry. Reading the balance and writing it back would let two simultaneous
 movements both read the same starting figure and both write the same result — one movement
 lost, and both rows still plausible. Removing the lock and restoring it changed nothing
@@ -844,13 +847,13 @@ none is recoverable from the code afterwards:
 - **A retainer is owed in a period that collected nothing.** A per-collection fee does not
   exist in a month with no collection; a retainer does, because an empty month still cost a
   visit. A statement is therefore no longer skipped when a property collected nothing and
-  spent nothing — the fee *is* the line, and a payout that goes negative is the owner owing
+  spent nothing — the fee _is_ the line, and a payout that goes negative is the owner owing
   the platform, surfaced rather than absorbed.
 - **A markup is its own line**, so `totalExpenses` still matches the invoices behind it. A
   markup hidden inside an expense is the complaint that makes owners distrust managers.
 - **The floor is not pro-rated.** Pro-rating it would weaken it precisely in a short period,
   where the fixed cost of serving the property has not gone away. The retainer, by contrast,
-  *is* pro-rated to the window a mandate covered: charging a full month for a mandate that
+  _is_ pro-rated to the window a mandate covered: charging a full month for a mandate that
   began on the 16th is not a fee, it is a windfall.
 
 Precedence is mandate → property → organisation. `ManagementMandate.feeConfigId` — a field
@@ -868,7 +871,7 @@ beside it, so nothing can quietly go on charging the old way.
 
 ### The upgrade hazard this uncovered, and why it is written down
 
-Adding a *discriminator* to an idempotency key is not additive. A statement whose fee was
+Adding a _discriminator_ to an idempotency key is not additive. A statement whose fee was
 recorded before itemisation exists has an **empty** `sourceDetail`, so the new lookup cannot
 see it and records the service fee a second time. The owner is charged twice, both rows are
 individually correct, and the balance still agrees with the sum of the entries — nothing
@@ -883,7 +886,7 @@ runs the application before its migrations cannot double-charge either.
 
 The general rule, for the next time a key gains a part: **ask what the rows written before it
 look like.** `sourceDetail` is `NOT NULL DEFAULT ''` and deliberately not nullable — Postgres
-treats NULLs as *distinct* in a unique index, so a null there would switch the idempotency
+treats NULLs as _distinct_ in a unique index, so a null there would switch the idempotency
 guarantee off for every entry that used it.
 
 Verified: build green; full suite **261 suites / 3513 tests**; the fee engine's guarantees
@@ -904,7 +907,7 @@ entries on every account, and running the sweep a second time writes nothing.
 ## 9f. Phase 3d — a statement is a view of the ledger (2026-10-05)
 
 Principle 1 says statements are derived from the ledger, never hand-typed. Phase 3a–3c
-made the *amounts* agree with the ledger, but the agreement lived in the code: both the
+made the _amounts_ agree with the ledger, but the agreement lived in the code: both the
 statement and the ledger were computed from the same rent and expense rows, so nothing in
 the data connected a line to the movement behind it. A statement could not be checked
 against the ledger, only believed.
@@ -940,7 +943,7 @@ been charged. The owner would have been paid for a bill the platform had already
 arithmetic and looked entirely plausible.
 
 The recorder derived an expense's holder from `expense.ownerStatement`. But a statement
-materialises its expenses *before* it claims them, because the claim is a foreign key to a
+materialises its expenses _before_ it claims them, because the claim is a foreign key to a
 statement that does not exist yet. So the lookup found nothing, the expense was skipped,
 and the markup — computed from the expense total the generation loop already had — was
 charged anyway. The holder is now passed in by the caller, the only party that knows it at
@@ -950,7 +953,7 @@ The unit tests had missed it because the fake recorder was more forgiving than t
 one: it appended whatever it was asked to and ignored the holder it was handed, so the fake
 could not express the precondition the real one had. The fake now uses the holder, and the
 regression test is on the recorder rather than the statement: given a holder and an
-*unclaimed* expense, it must still write the debit.
+_unclaimed_ expense, it must still write the debit.
 
 This is the second defect this phase found only live, after the double-charged fee in 3c,
 and both were the same shape — a precondition the tests could not express. The unit suite is
@@ -971,8 +974,108 @@ and the suite count was short by ten tests._
 
 ---
 
-## 10. Open decisions (need product/legal sign-off)
+## 9g. The visible slice, and the four defects using it found (2026-10-06)
 
+Phases 0–3d were almost entirely backend. A ledger, a recorder, a fee engine and a statement
+derivation that no owner could open is a specification with tests, not a product, so this
+pass built the smallest frontend that makes the money work real: an agency workspace to say
+_who you are acting for_, the engagement list, a statement breakdown that traces each line
+back to the ledger, and a detail page for one engagement.
+
+Everything was then used rather than inspected, which found four defects. All four were the
+same mistake wearing different clothes: **a screen or a fake deciding something it did not
+have the standing to decide.**
+
+### The four
+
+1. **A statement charged a markup on an expense it did not show.** Phase 3d. Found by
+   opening the statement, not by the suite — see the section above for the mechanism.
+
+2. **`Pause` and `Record handover` were offered to actors the API refuses.** The list gated
+   its buttons on `status` alone. But whether a caller may pause an engagement is a
+   _property right_ — the owner's or the platform's, never the manager's, since a manager who
+   could pause could suspend their own notice period — and handover is only legal once a
+   mandate has actually ended. So every manager was shown two buttons that could only fail:
+   **403** from `suspend`, **409** from `handover`. The API was right in both cases; the
+   screen was guessing.
+
+3. **Every `Details` link 404'd**, because the route it pointed at had never been written.
+   Caught by clicking it.
+
+4. **`Sent to the owner` rendered the creation date.** No timestamp is kept for that step, so
+   the timeline was showing a date that meant something else. Caught by reading the page
+   against the record rather than against itself.
+
+### The fix for 2, and why it is a backend change
+
+The tempting fix is to derive the rule in the component — `ownerId === currentUser.id || isStaff(roles)`.
+That is exactly what this codebase already warns against in `mandate-capabilities.ts`: a rule
+stated twice is a rule that will disagree with itself, and the way it disagrees is by showing
+a button that fails. It is also the _same_ mistake as defect 2, just moved.
+
+So the API now answers the question. `mandate-viewer-permissions.ts` holds each action's two
+axes — who may do it, and which statuses it is legal in — and is read twice: by the guard
+that refuses, and by the DTO the UI renders from. `ACTION_STATUSES` is passed to
+`requireStatus` at every call site, so the status half is one definition too.
+
+`toDto` is now async and takes the caller, because one of the facts — "is this caller on the
+manager's side" — costs a membership lookup. The three read paths that took no actor
+(`listForOwner`, `listForProperty`, `listPendingVerification`) now take one. `getById` still
+answers **404** rather than 403 to a caller with no stake, so "not yours" and "not there"
+remain indistinguishable.
+
+This is a refactor of the enforcement, not a description beside it: every authority guard in
+the service now calls the same predicate the DTO does. `assertStaff` is gone.
+
+**The evidence that it is one rule and not two:** falsifying the table — letting a manager
+pause their own engagement — fails exactly three tests: the new table test, the _pre-existing_
+end-to-end guard test, and the new DTO test. If the guards and the DTO were two
+implementations that merely agreed today, breaking one would have failed one.
+
+Live, on one ACTIVE mandate, the two viewers now get opposite answers out of the same row:
+
+| viewer         | canSuspend | canServeNotice | canTerminate | canConfirmHandover |
+| -------------- | ---------- | -------------- | ------------ | ------------------ |
+| owner          | ✅         | ❌             | ✅           | ❌ _not ended_     |
+| manager (firm) | ❌         | ✅             | ✅           | ❌ _not ended_     |
+
+and the manager's screen now shows exactly `Serve notice` and `End engagement`.
+
+### What was built
+
+- `services/mandateService.ts` — the whole 18-route lifecycle, typed, plus `isLive`,
+  `grantsNothing` and `noticeSummary`.
+- `CustodyProvider` / `CustodyBar` — _which client am I acting for_, kept at the layout so it
+  cannot disagree between pages. The choice lives in `localStorage`, which is outside React,
+  so it is read with `useSyncExternalStore` rather than copied into state and kept in step by
+  an effect. A stored client the manager no longer holds is _derived_ away, not cleared in an
+  effect, so the stale id cannot be acted on by the render that discovers it. One live
+  engagement is adopted rather than asked about; several are a decision and are left open.
+- `MandateListView` / `MandateDetailView` — sharing one set of action buttons, one reason
+  prompt and one mutation, so the two cannot offer different things.
+- `StatementBreakdown` — the statement ladder for both landlord and estate, with every line
+  expandable to the ledger entry and source document behind it. Used by opening it: the rent
+  line traced to a `RentPayment` entry and the fee line to an `OwnerStatement`/`SERVICE_FEE`
+  entry, both confirmed against `ClientMoneyLedgerEntry` in the database. WHT is disclosed
+  separately, because it is withheld from the _manager's_ fee and is not a deduction from the
+  owner's payout — a distinction that is invisible unless the statement says so.
+
+### The pattern worth keeping
+
+Defects 1 and 2 are the same sentence twice: _a fake that is more forgiving than the real
+collaborator cannot express the real precondition, and a screen that re-derives a rule it was
+not given cannot express the real authority._ Both were found by running the thing against
+reality, not by reading it. The unit suite is what makes a change safe; it is still not what
+tells you the change is right.
+
+Verified: backend build green, **262 suites / 3548 tests** with one pre-existing unrelated
+failure (`workers/notification`, a Prisma mock — confirmed present without these changes);
+frontend typecheck and lint clean; and live on port 3002 against the seeded fixture, as both
+the owner and the manager.
+
+---
+
+## 10. Open decisions (need product/legal sign-off)
 
 1. **Fee defaults**: is GetRentos publishing standard rates (e.g. 10% of rent collected,
    10% letting / 5% renewal), or leaving price to the market? Publishing constrains firms
@@ -1036,7 +1139,7 @@ and the suite count was short by ten tests._
       the tax authority, so it is charged but stays out of `grossFee` — a report of fees
       earned that included a tax we merely collect would overstate our revenue. WHT comes
       out of the manager's remuneration and is remitted on their behalf, so it is disclosed
-      on the statement (`whtAmount`) and charged to nobody. It is deliberately *not* a
+      on the statement (`whtAmount`) and charged to nobody. It is deliberately _not_ a
       statement line item, because a line item is something the owner is charged.
     - **A retainer is owed in a period that collected nothing**, and the resulting negative
       payout is surfaced as the owner owing the platform rather than absorbed. A
