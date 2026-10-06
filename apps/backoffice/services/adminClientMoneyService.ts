@@ -148,6 +148,38 @@ export interface ReleaseRequestRow {
   periodEnd: string;
 }
 
+/**
+ * An owner's query about one line of an issued statement.
+ *
+ * The statement's own figure never changes: an upheld query is corrected by a
+ * ledger adjustment that appears on the NEXT statement. `adjustmentEntryId` is
+ * set when that happened, and `moneyEffect` says whether the payout behind it
+ * could still be stopped when the query arrived.
+ */
+export interface StatementLineDisputeRow {
+  id: string;
+  statementId: string;
+  lineId: string;
+  lineLabel: string;
+  lineAmount: number;
+  reason: string;
+  status: 'OPEN' | 'UPHELD' | 'REJECTED' | 'WITHDRAWN';
+  raisedById: string;
+  raisedByName: string | null;
+  raisedByMe: boolean;
+  /** What the managing firm said, when it replied on its own route. */
+  firmResponse: string | null;
+  firmRespondedByName: string | null;
+  firmRespondedAt: string | null;
+  resolvedByName: string | null;
+  resolvedAt: string | null;
+  /** What the owner is told, and the reason the field is required. */
+  outcomeNote: string | null;
+  adjustmentEntryId: string | null;
+  createdAt: string;
+  moneyEffect: 'HELD' | 'IN_FLIGHT' | 'PAID' | 'NONE';
+}
+
 export const adminClientMoneyService = {
   async overview(limit = 50): Promise<ApiResponse<ReconciliationOverview>> {
     return safeCall(() =>
@@ -214,6 +246,37 @@ export const adminClientMoneyService = {
       authFetch<ReleaseRequestRow>(`/admin/client-money/releases/${id}/reject`, {
         method: 'POST',
         body: JSON.stringify({ note }),
+      })
+    );
+  },
+
+  /**
+   * An owner saying a line on an issued statement is wrong.
+   *
+   * `moneyEffect` is the field to read before deciding anything: `HELD` means the
+   * payout can still be stopped, `IN_FLIGHT` and `PAID` mean it cannot, and only
+   * the first is something a person can still act on.
+   */
+  async pendingDisputes(): Promise<ApiResponse<StatementLineDisputeRow[]>> {
+    return safeCall(() => authFetch<StatementLineDisputeRow[]>('/admin/client-money/disputes'));
+  },
+
+  /**
+   * Decide a dispute.
+   *
+   * Upholding it reverses the disputed line as an ADJUSTMENT ledger entry, which
+   * lands on the owner's next statement — the statement itself is never edited.
+   * Rejecting it lets a held payout proceed.
+   */
+  async resolveDispute(
+    id: string,
+    outcome: 'UPHELD' | 'REJECTED',
+    note: string
+  ): Promise<ApiResponse<StatementLineDisputeRow>> {
+    return safeCall(() =>
+      authFetch<StatementLineDisputeRow>(`/admin/client-money/disputes/${id}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ outcome, note }),
       })
     );
   },

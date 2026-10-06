@@ -143,11 +143,46 @@ export interface EstateStatementRelease {
   thresholdAtRequest: number;
 }
 
+/**
+ * The organisation's owner querying one line of an estate statement.
+ *
+ * Only the owner may raise one: every member of the estate office can read these
+ * statements, and a manager disputing their own firm's figures would be
+ * adjudicating themselves. The firm gets a reply route and never a verdict.
+ */
+export interface EstateStatementLineDispute {
+  id: string;
+  statementId: string;
+  lineId: string;
+  lineLabel: string;
+  lineAmount: number;
+  reason: string;
+  status: 'OPEN' | 'UPHELD' | 'REJECTED' | 'WITHDRAWN';
+  raisedById: string;
+  raisedByName: string | null;
+  raisedByMe: boolean;
+  firmResponse: string | null;
+  firmRespondedByName: string | null;
+  firmRespondedAt: string | null;
+  resolvedByName: string | null;
+  resolvedAt: string | null;
+  outcomeNote: string | null;
+  adjustmentEntryId: string | null;
+  createdAt: string;
+  moneyEffect: 'HELD' | 'IN_FLIGHT' | 'PAID' | 'NONE';
+}
+
+export interface EstateStatementDisputeSummary {
+  openCount: number;
+  totalCount: number;
+  moneyEffect: 'HELD' | 'IN_FLIGHT' | 'PAID' | 'NONE';
+  reason: string | null;
+}
+
 export interface EstateStatementLineItem {
   id: string;
   label: string;
-  amount: number;
-  /**
+  amount: number; /**
    * Where the line came from. The statement is a view of the ledger, so a line
    * cites the movement it renders and the document behind it. Null on a line
    * written before the ledger became the source of truth.
@@ -178,6 +213,9 @@ export interface EstateStatement {
   transferRef?: string;
   /** The most recent ask to release this payout. Detail response only. */
   release?: EstateStatementRelease | null;
+  /** Queries against lines of this statement, newest first. Detail only. */
+  disputes?: EstateStatementLineDispute[];
+  disputeSummary?: EstateStatementDisputeSummary | null;
   paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;

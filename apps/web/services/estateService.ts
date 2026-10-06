@@ -55,6 +55,7 @@ import type {
   ExpectedToday,
   GuestListImportResult,
   VisitorIdCheck,
+  EstateStatementLineDispute,
 } from '@/types/estate';
 
 type EstatePageQuery = {
@@ -187,6 +188,60 @@ export const estateService = {
   async retryStatementPayout(estateId: string, id: string): Promise<ApiResponse<EstateStatement>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/statements/${id}/retry-payout`, { method: 'POST' })
+    );
+  },
+
+  /**
+   * The organisation's owner querying a line on one of its statements.
+   *
+   * The API refuses it for anybody else, including the estate office that
+   * maintains the statement — a manager who could query their own firm's figures
+   * would be adjudicating themselves.
+   */
+  async disputeStatementLine(
+    estateId: string,
+    statementId: string,
+    lineId: string,
+    reason: string
+  ): Promise<ApiResponse<EstateStatementLineDispute>> {
+    return safeCall(() =>
+      authFetch<EstateStatementLineDispute>(
+        `/estate/${estateId}/statements/${statementId}/lines/${lineId}/disputes`,
+        { method: 'POST', body: JSON.stringify({ reason }) }
+      )
+    );
+  },
+
+  /**
+   * The estate office's reply to a query about its own figures.
+   *
+   * A note, never a verdict: the platform decides these, so the office can
+   * explain and cannot close.
+   */
+  async respondToStatementLineDispute(
+    estateId: string,
+    statementId: string,
+    disputeId: string,
+    response: string
+  ): Promise<ApiResponse<EstateStatementLineDispute>> {
+    return safeCall(() =>
+      authFetch<EstateStatementLineDispute>(
+        `/estate/${estateId}/statements/${statementId}/disputes/${disputeId}/respond`,
+        { method: 'POST', body: JSON.stringify({ response }) }
+      )
+    );
+  },
+
+  async withdrawStatementLineDispute(
+    estateId: string,
+    statementId: string,
+    disputeId: string
+  ): Promise<ApiResponse<EstateStatementLineDispute>> {
+    return safeCall(() =>
+      authFetch<EstateStatementLineDispute>(
+        `/estate/${estateId}/statements/${statementId}/disputes/${disputeId}/withdraw`,
+        { method: 'POST' }
+      )
     );
   },
 

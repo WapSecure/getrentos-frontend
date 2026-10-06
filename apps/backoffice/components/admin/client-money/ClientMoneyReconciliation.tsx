@@ -20,6 +20,7 @@ import {
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { ReleaseQueue } from './ReleaseQueue';
+import { DisputeQueue } from './DisputeQueue';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
 import {
@@ -51,7 +52,7 @@ export function ClientMoneyReconciliation() {
   const canAttest = hasAdminPermission(user?.roles ?? [], 'escrow.approve');
   const canRelease = hasAdminPermission(user?.roles ?? [], 'escrow.approve');
 
-  const [tab, setTab] = useState<'pools' | 'releases'>('pools');
+  const [tab, setTab] = useState<'pools' | 'releases' | 'disputes'>('pools');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const notify = (message: string, variant: ToastVariant) => setToast({ message, variant });
 
@@ -78,6 +79,14 @@ export function ClientMoneyReconciliation() {
     enabled: canRelease,
   });
   const waitingCount = releases.data?.length ?? 0;
+
+  /** The same cache entry the disputes tab renders, so the count cannot disagree. */
+  const disputes = useQuery({
+    queryKey: adminKeys.clientMoneyDisputes,
+    queryFn: () => unwrap(adminClientMoneyService.pendingDisputes()),
+    enabled: canRelease,
+  });
+  const openDisputeCount = disputes.data?.length ?? 0;
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: adminKeys.clientMoneyReconciliation });
@@ -193,6 +202,14 @@ export function ClientMoneyReconciliation() {
               </span>
             )}
           </TabButton>
+          <TabButton selected={tab === 'disputes'} onClick={() => setTab('disputes')}>
+            Queries on statements
+            {openDisputeCount > 0 && (
+              <span className="ml-2 rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                {openDisputeCount}
+              </span>
+            )}
+          </TabButton>
         </div>
       )}
 
@@ -202,6 +219,8 @@ export function ClientMoneyReconciliation() {
 
       {tab === 'releases' && canRelease ? (
         <ReleaseQueue notify={notify} />
+      ) : tab === 'disputes' && canRelease ? (
+        <DisputeQueue notify={notify} />
       ) : (
         <>
           {/* Staleness is stated rather than alerted on: an absent process is not an

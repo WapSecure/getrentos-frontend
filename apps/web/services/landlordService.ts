@@ -127,8 +127,7 @@ export interface StatementRelease {
 export interface OwnerStatementLineItem {
   id: string;
   label: string;
-  amount: number;
-  /**
+  amount: number; /**
    * Where the line came from. The statement is a view of the ledger, so a line
    * cites the movement it renders and the document behind it. Null on a line
    * written before the ledger became the source of truth.
@@ -138,6 +137,48 @@ export interface OwnerStatementLineItem {
   sourceId?: string | null;
   sourceDetail?: string | null;
   propertyId?: string | null;
+}
+
+/**
+ * An owner saying one line of an issued statement is wrong.
+ *
+ * `moneyEffect` is the field that matters and the reason this is not a boolean:
+ * `HELD` means the payout can still be stopped, `IN_FLIGHT` and `PAID` mean it
+ * cannot. Telling an owner their money is held while a transfer is with the bank
+ * is how one problem becomes two.
+ */
+export interface StatementLineDispute {
+  id: string;
+  statementId: string;
+  lineId: string;
+  lineLabel: string;
+  lineAmount: number;
+  reason: string;
+  status: StatementLineDisputeStatus;
+  raisedById: string;
+  raisedByName: string | null;
+  raisedByMe: boolean;
+  firmResponse: string | null;
+  firmRespondedByName: string | null;
+  firmRespondedAt: string | null;
+  resolvedByName: string | null;
+  resolvedAt: string | null;
+  /** What the owner is told, and the whole reason the field is required. */
+  outcomeNote: string | null;
+  adjustmentEntryId: string | null;
+  createdAt: string;
+  moneyEffect: 'HELD' | 'IN_FLIGHT' | 'PAID' | 'NONE';
+}
+
+export type StatementLineDisputeStatus = 'OPEN' | 'UPHELD' | 'REJECTED' | 'WITHDRAWN';
+
+/** What disputes are doing to one statement's payout, when there are any. */
+export interface StatementDisputeSummary {
+  openCount: number;
+  totalCount: number;
+  moneyEffect: 'HELD' | 'IN_FLIGHT' | 'PAID' | 'NONE';
+  /** The oldest undecided complaint, which is the one to read first. */
+  reason: string | null;
 }
 
 export interface OwnerStatement {
@@ -159,6 +200,9 @@ export interface OwnerStatement {
   transferRef?: string;
   /** The most recent ask to release this payout. Detail response only. */
   release?: StatementRelease | null;
+  /** Disputes against lines of this statement, newest first. Detail only. */
+  disputes?: StatementLineDispute[];
+  disputeSummary?: StatementDisputeSummary | null;
   paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;
@@ -770,6 +814,39 @@ export const landlordService = {
   async retryOwnerStatementPayout(id: string): Promise<ApiResponse<OwnerStatement>> {
     return safeCall(() =>
       authFetch(`/landlord/owner-statements/${id}/retry-payout`, { method: 'POST' })
+    );
+  },
+
+  /**
+   * Say that one line is wrong.
+   *
+   * An issued statement is never edited, so this does not change the figure. If
+   * it is upheld the correction arrives on the NEXT statement, and until it is
+   * decided a payout that has not been sent is held.
+   */
+  async disputeStatementLine(
+    statementId: string,
+    lineId: string,
+    reason: string
+  ): Promise<ApiResponse<StatementLineDispute>> {
+    return safeCall(() =>
+      authFetch<StatementLineDispute>(
+        `/landlord/owner-statements/${statementId}/lines/${lineId}/disputes`,
+        { method: 'POST', body: JSON.stringify({ reason }) }
+      )
+    );
+  },
+
+  /** Take back your own complaint, before anybody has decided it. */
+  async withdrawStatementLineDispute(
+    statementId: string,
+    disputeId: string
+  ): Promise<ApiResponse<StatementLineDispute>> {
+    return safeCall(() =>
+      authFetch<StatementLineDispute>(
+        `/landlord/owner-statements/${statementId}/disputes/${disputeId}/withdraw`,
+        { method: 'POST' }
+      )
     );
   },
 

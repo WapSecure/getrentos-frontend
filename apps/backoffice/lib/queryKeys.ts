@@ -6,6 +6,8 @@ export const adminKeys = {
   clientMoneyReconciliation: ['admin', 'clientMoney', 'reconciliation'] as const,
   /** Owner payouts held for a second approver. */
   clientMoneyReleases: ['admin', 'clientMoney', 'releases'] as const,
+  /** Owner queries about statement lines, waiting to be decided. */
+  clientMoneyDisputes: ['admin', 'clientMoney', 'disputes'] as const,
   notifications: ['admin', 'notifications'] as const,
   notificationPage: (page: number) => ['admin', 'notifications', 'page', page] as const,
   users: (params?: {

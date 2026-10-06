@@ -24,6 +24,7 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type OwnerStatement } from '@/services/landlordService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
+import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
@@ -158,6 +159,49 @@ export function OwnerStatementsView() {
     },
     onError: (error: Error) => {
       setToast({ message: error.message || 'Unable to retry this payout.', variant: 'error' });
+    },
+  });
+
+  /**
+   * Query a figure on this statement.
+   *
+   * The toast says what actually happens — the figure is not going to change —
+   * because an owner who expects an edit will sit refreshing a number that is
+   * deliberately immutable.
+   */
+  const raiseDispute = useMutation({
+    mutationFn: ({ lineId, reason }: { lineId: string; reason: string }) =>
+      unwrap(landlordService.disputeStatementLine(detailId ?? '', lineId, reason)),
+    onSuccess: (dispute) => {
+      void queryClient.invalidateQueries({
+        queryKey: landlordKeys.ownerStatement(dispute.statementId),
+      });
+      invalidate();
+      setToast({
+        message:
+          dispute.moneyEffect === 'HELD'
+            ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
+            : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.',
+        variant: 'success',
+      });
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to raise that query.', variant: 'error' });
+    },
+  });
+
+  const withdrawDispute = useMutation({
+    mutationFn: (disputeId: string) =>
+      unwrap(landlordService.withdrawStatementLineDispute(detailId ?? '', disputeId)),
+    onSuccess: (dispute) => {
+      void queryClient.invalidateQueries({
+        queryKey: landlordKeys.ownerStatement(dispute.statementId),
+      });
+      invalidate();
+      setToast({ message: 'Query withdrawn.', variant: 'success' });
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to withdraw that query.', variant: 'error' });
     },
   });
 
@@ -332,7 +376,23 @@ export function OwnerStatementsView() {
 
               <StatementBreakdown className="mt-5" lineItems={detail.lineItems} totals={detail} />
 
-              <PayoutHeldNotice payoutStatus={detail.payoutStatus} release={detail.release} />
+              <PayoutHeldNotice
+                payoutStatus={detail.payoutStatus}
+                release={detail.release}
+                disputeSummary={detail.disputeSummary}
+              />
+
+              <StatementDisputeSection
+                lineItems={detail.lineItems}
+                disputes={detail.disputes}
+                // A draft can be regenerated, so querying one would convene a
+                // decision about a document that does not have to exist.
+                canRaise={detail.status === 'ISSUED'}
+                isRaising={raiseDispute.isPending}
+                isWithdrawing={withdrawDispute.isPending}
+                onRaise={(lineId, reason) => raiseDispute.mutate({ lineId, reason })}
+                onWithdraw={(disputeId) => withdrawDispute.mutate(disputeId)}
+              />
 
               {detail.status === 'DRAFT' && (
                 <div className="mt-6 flex justify-end border-t border-border pt-5">
