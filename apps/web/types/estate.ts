@@ -124,7 +124,24 @@ export interface EstateFinancialStats {
 }
 
 export type EstateStatementStatus = 'DRAFT' | 'ISSUED';
-export type EstateStatementPayoutStatus = 'PENDING' | 'PAID' | 'FAILED';
+/** See `OwnerStatementPayoutStatus` — the two held states are not failures. */
+export type EstateStatementPayoutStatus =
+  | 'PENDING'
+  | 'AWAITING_APPROVAL'
+  | 'PAID'
+  | 'FAILED'
+  | 'REJECTED';
+
+/** Why a payout is not on its way, when a second person is holding it. */
+export interface EstateStatementRelease {
+  id: string;
+  amount: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  requestedAt: string;
+  decidedAt: string | null;
+  decisionNote: string | null;
+  thresholdAtRequest: number;
+}
 
 export interface EstateStatementLineItem {
   id: string;
@@ -159,6 +176,8 @@ export interface EstateStatement {
   status: EstateStatementStatus;
   payoutStatus: EstateStatementPayoutStatus;
   transferRef?: string;
+  /** The most recent ask to release this payout. Detail response only. */
+  release?: EstateStatementRelease | null;
   paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;

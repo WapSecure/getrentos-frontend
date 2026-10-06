@@ -23,6 +23,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type OwnerStatement } from '@/services/landlordService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
+import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
@@ -35,11 +36,15 @@ const PAGE_SIZE = 10;
 
 const PAYOUT_BADGE: Record<
   OwnerStatement['payoutStatus'],
-  { label: string; variant: 'success' | 'warning' | 'danger' }
+  { label: string; variant: 'success' | 'warning' | 'danger' | 'neutral' | 'info' }
 > = {
   PAID: { label: 'Paid out', variant: 'success' },
   PENDING: { label: 'Payout pending', variant: 'warning' },
+  // Neither of these is a failure. Money held for a second signature is the
+  // control working, and a refusal holds the money rather than losing it.
+  AWAITING_APPROVAL: { label: 'Awaiting 2nd approval', variant: 'info' },
   FAILED: { label: 'Payout failed', variant: 'danger' },
+  REJECTED: { label: 'Payout held back', variant: 'warning' },
 };
 
 export function OwnerStatementsView() {
@@ -100,18 +105,24 @@ export function OwnerStatementsView() {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
       setToast(
-        result.payoutStatus === 'FAILED'
+        result.payoutStatus === 'AWAITING_APPROVAL'
           ? {
-              message: 'Statement issued, but the payout failed: retry it below.',
-              variant: 'error',
+              message:
+                'Statement issued. The payout is held while a second GetRentos officer approves it — your money is unaffected.',
+              variant: 'success',
             }
-          : result.payoutStatus === 'PENDING'
+          : result.payoutStatus === 'FAILED'
             ? {
-                message:
-                  'Statement issued. The payout is on its way and shows as paid once your bank confirms it.',
-                variant: 'success',
+                message: 'Statement issued, but the payout failed: retry it below.',
+                variant: 'error',
               }
-            : { message: 'Statement issued and paid out.', variant: 'success' }
+            : result.payoutStatus === 'PENDING'
+              ? {
+                  message:
+                    'Statement issued. The payout is on its way and shows as paid once your bank confirms it.',
+                  variant: 'success',
+                }
+              : { message: 'Statement issued and paid out.', variant: 'success' }
       );
     },
     onError: (error: Error) => {
@@ -128,15 +139,21 @@ export function OwnerStatementsView() {
       setToast(
         result.payoutStatus === 'PAID'
           ? { message: 'Payout succeeded.', variant: 'success' }
-          : result.payoutStatus === 'PENDING'
+          : result.payoutStatus === 'AWAITING_APPROVAL'
             ? {
-                message: 'Payout sent again. It shows as paid once your bank confirms it.',
+                message:
+                  'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.',
                 variant: 'success',
               }
-            : {
-                message: 'The payout failed again. Check the payout account and try again.',
-                variant: 'error',
-              }
+            : result.payoutStatus === 'PENDING'
+              ? {
+                  message: 'Payout sent again. It shows as paid once your bank confirms it.',
+                  variant: 'success',
+                }
+              : {
+                  message: 'The payout failed again. Check the payout account and try again.',
+                  variant: 'error',
+                }
       );
     },
     onError: (error: Error) => {
@@ -315,6 +332,8 @@ export function OwnerStatementsView() {
 
               <StatementBreakdown className="mt-5" lineItems={detail.lineItems} totals={detail} />
 
+              <PayoutHeldNotice payoutStatus={detail.payoutStatus} release={detail.release} />
+
               {detail.status === 'DRAFT' && (
                 <div className="mt-6 flex justify-end border-t border-border pt-5">
                   <Button
@@ -329,23 +348,28 @@ export function OwnerStatementsView() {
                 </div>
               )}
 
-              {detail.status === 'ISSUED' && detail.payoutStatus === 'FAILED' && (
-                <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
-                  <p className="text-xs text-muted-foreground">
-                    The transfer to your payout account didn&apos;t go through.
-                  </p>
-                  <Button
-                    className="gap-2"
-                    variant="outline"
-                    rounded="md"
-                    isLoading={retryPayout.isPending}
-                    onClick={() => retryPayout.mutate(detail.id)}
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Retry payout
-                  </Button>
-                </div>
-              )}
+              {detail.status === 'ISSUED' &&
+                (detail.payoutStatus === 'FAILED' || detail.payoutStatus === 'REJECTED') && (
+                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
+                    <p className="text-xs text-muted-foreground">
+                      {detail.payoutStatus === 'REJECTED'
+                        ? 'Held back by a second reviewer. Sending it again puts it back in front of them.'
+                        : 'The transfer to your payout account didn&apos;t go through.'}
+                    </p>
+                    <Button
+                      className="gap-2"
+                      variant="outline"
+                      rounded="md"
+                      isLoading={retryPayout.isPending}
+                      onClick={() => retryPayout.mutate(detail.id)}
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      {detail.payoutStatus === 'REJECTED'
+                        ? 'Send for approval again'
+                        : 'Retry payout'}
+                    </Button>
+                  </div>
+                )}
             </div>
           )}
         </DialogContent>

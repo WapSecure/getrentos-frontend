@@ -96,7 +96,33 @@ export interface ManagementFeeConfig {
 }
 
 export type OwnerStatementStatus = 'DRAFT' | 'ISSUED';
-export type OwnerStatementPayoutStatus = 'PENDING' | 'PAID' | 'FAILED';
+/**
+ * Where a payout has got to.
+ *
+ * `AWAITING_APPROVAL` and `REJECTED` are not failure states and must not be
+ * rendered as one. Above the platform threshold the money is held on purpose for
+ * a second person, and a refusal holds it further rather than losing it — the
+ * owner is still owed the money either way.
+ */
+export type OwnerStatementPayoutStatus =
+  | 'PENDING'
+  | 'AWAITING_APPROVAL'
+  | 'PAID'
+  | 'FAILED'
+  | 'REJECTED';
+
+/** Why a payout is not on its way, when a second person is holding it. */
+export interface StatementRelease {
+  id: string;
+  amount: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  requestedAt: string;
+  decidedAt: string | null;
+  /** What the approver said. The reason a refusal is not an unexplained silence. */
+  decisionNote: string | null;
+  /** The threshold in force when it was raised, so the gate explains itself. */
+  thresholdAtRequest: number;
+}
 
 export interface OwnerStatementLineItem {
   id: string;
@@ -131,6 +157,8 @@ export interface OwnerStatement {
   status: OwnerStatementStatus;
   payoutStatus: OwnerStatementPayoutStatus;
   transferRef?: string;
+  /** The most recent ask to release this payout. Detail response only. */
+  release?: StatementRelease | null;
   paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;

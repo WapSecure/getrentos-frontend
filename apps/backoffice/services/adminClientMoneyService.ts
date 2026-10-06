@@ -112,6 +112,42 @@ export function driftSentence(row: ReconciliationRow): string {
     : 'The bank holds more than owners are owed.';
 }
 
+/**
+ * A payout held for a second person.
+ *
+ * `thresholdAtRequest` is the threshold in force when it was raised, not the
+ * current one — a policy that has since changed must not rewrite why this
+ * particular release needed approving.
+ */
+export interface ReleaseRequestRow {
+  id: string;
+  statementId: string;
+  amount: number;
+  requestedById: string;
+  requestedByName: string | null;
+  reason: string | null;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  decidedById: string | null;
+  decidedByName: string | null;
+  decidedAt: string | null;
+  decisionNote: string | null;
+  transferRef: string | null;
+  thresholdAtRequest: number;
+  createdAt: string;
+  /**
+   * Whether the person reading this raised it. Answered by the server because
+   * the backoffice cannot work it out for itself: `AdminUser` carries no `id`,
+   * and `requestedByName` is a display name, not an identity.
+   */
+  requestedByMe: boolean;
+  ownerId: string;
+  ownerName: string | null;
+  organizationId: string | null;
+  organizationName: string | null;
+  periodStart: string;
+  periodEnd: string;
+}
+
 export const adminClientMoneyService = {
   async overview(limit = 50): Promise<ApiResponse<ReconciliationOverview>> {
     return safeCall(() =>
@@ -146,6 +182,38 @@ export const adminClientMoneyService = {
       authFetch('/admin/client-money/reconciliation/run', {
         method: 'POST',
         body: JSON.stringify(asOfDate ? { asOfDate } : {}),
+      })
+    );
+  },
+  /**
+   * Owner payouts held for a second approver, oldest first.
+   *
+   * Ordered by the API rather than here, because the order is a decision: an
+   * owner is waiting on the oldest one, so that is what somebody should pick up.
+   */
+  async pendingReleases(): Promise<ApiResponse<ReleaseRequestRow[]>> {
+    return safeCall(() => authFetch<ReleaseRequestRow[]>('/admin/client-money/releases'));
+  },
+
+  /**
+   * Send the money. The note is required: a checker who records nothing is a
+   * rubber stamp, and the record is the point of having two people.
+   */
+  async approveRelease(id: string, note: string): Promise<ApiResponse<ReleaseRequestRow>> {
+    return safeCall(() =>
+      authFetch<ReleaseRequestRow>(`/admin/client-money/releases/${id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({ note }),
+      })
+    );
+  },
+
+  /** Refuse the release. The statement is issued either way; the debt stands. */
+  async rejectRelease(id: string, note: string): Promise<ApiResponse<ReleaseRequestRow>> {
+    return safeCall(() =>
+      authFetch<ReleaseRequestRow>(`/admin/client-money/releases/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ note }),
       })
     );
   },

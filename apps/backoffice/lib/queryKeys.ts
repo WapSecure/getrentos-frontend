@@ -4,6 +4,8 @@ export const adminKeys = {
   userGrowth: ['admin', 'userGrowth'] as const,
   /** Client-money reconciliations: the daily verdict on the pooled accounts. */
   clientMoneyReconciliation: ['admin', 'clientMoney', 'reconciliation'] as const,
+  /** Owner payouts held for a second approver. */
+  clientMoneyReleases: ['admin', 'clientMoney', 'releases'] as const,
   notifications: ['admin', 'notifications'] as const,
   notificationPage: (page: number) => ['admin', 'notifications', 'page', page] as const,
   users: (params?: {
