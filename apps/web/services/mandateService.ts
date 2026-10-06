@@ -63,6 +63,32 @@ export interface MandateCapabilities {
   canTransact: boolean;
 }
 
+/**
+ * What *this caller* may do to this mandate right now.
+ *
+ * Computed by the API from the same rules its guards enforce, so a button shown
+ * here is a button that will work. Distinct from `capabilities` above, which is
+ * about the property: a manager with `canManage` on the property may still be
+ * unable to pause their own engagement, and an owner with no capabilities at all
+ * may be the only one who can.
+ *
+ * Never derive these client-side. A rule restated here drifts from the one the
+ * API enforces, and the drift shows up as a button that answers 403.
+ */
+export interface MandateViewerPermissions {
+  canSubmit: boolean;
+  canSign: boolean;
+  canVerify: boolean;
+  canReject: boolean;
+  canSuspend: boolean;
+  canResume: boolean;
+  canServeNotice: boolean;
+  canTerminate: boolean;
+  canRequestTermination: boolean;
+  canApproveTermination: boolean;
+  canConfirmHandover: boolean;
+}
+
 export interface ManagementMandateDto {
   id: string;
   propertyId: string;
@@ -76,6 +102,7 @@ export interface ManagementMandateDto {
   managerName?: string | null;
   scope: MandateScope[];
   capabilities: MandateCapabilities;
+  permissions: MandateViewerPermissions;
   feeConfigId: string | null;
   startAt: string | null;
   endAt: string | null;

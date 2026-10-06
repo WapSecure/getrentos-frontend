@@ -1,20 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Building2,
-  FileSignature,
-  Handshake,
-  Lock,
-  Pause,
-  Play,
-  Send,
-  ShieldCheck,
-  UserRound,
-} from 'lucide-react';
-import { Badge, Button, Card, ConfirmDialog, EmptyState, PageErrorState } from '@getrentos/ui';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Building2, FileSignature, Lock, ShieldCheck, UserRound } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, PageErrorState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
@@ -28,6 +17,8 @@ import {
   type ManagementMandateDto,
   type MandateStatus,
 } from '@/services/mandateService';
+import { MandateActionButtons } from './MandateActionButtons';
+import { useMandateActions, type ReasonAction, type SimpleAction } from './useMandateActions';
 
 /**
  * The engagements a firm holds, and what can be done to each one.
@@ -38,10 +29,15 @@ import {
  * verified it, so "why can I not do anything yet" is the question this screen is
  * mostly answering.
  *
- * Actions are shown by status rather than all at once, because most of them are
- * invalid most of the time and an enabled button that answers 409 teaches nobody
- * anything. Where an action needs a reason, it needs a real one — the backend
- * requires at least ten characters, since a second person may have to decide on it.
+ * Actions are shown from the permission set the API returns with the mandate,
+ * not from its status. Status alone is not enough: whether a caller may pause an
+ * engagement depends on who they are, which the screen cannot work out from a
+ * status field. Deriving it here would restate rules the API already enforces,
+ * and the two would drift — which is exactly how this screen came to offer
+ * "Pause" to managers the API then refused.
+ *
+ * Where an action needs a reason, it needs a real one — the backend requires at
+ * least ten characters, since a second person may have to decide on it.
  */
 
 const STATUS_VARIANT: Record<MandateStatus, 'success' | 'warning' | 'danger' | 'neutral' | 'info'> =
@@ -57,66 +53,10 @@ const STATUS_VARIANT: Record<MandateStatus, 'success' | 'warning' | 'danger' | '
   };
 
 /** The actions that end or pause an engagement, each with the reason it needs. */
-type ReasonAction = 'notice' | 'terminate' | 'suspend' | 'request-termination';
-
-const REASON_ACTIONS: Record<
-  ReasonAction,
-  {
-    title: string;
-    description: string;
-    confirmLabel: string;
-    promptLabel: string;
-    needsReason: boolean;
-  }
-> = {
-  notice: {
-    title: 'Serve notice?',
-    description:
-      'This records the date your notice clock started. The engagement keeps running until the ' +
-      'agreed notice period has passed — it does not end the mandate today, and it cannot be ' +
-      'back-dated.',
-    confirmLabel: 'Serve notice',
-    promptLabel: '',
-    needsReason: false,
-  },
-  terminate: {
-    title: 'End this engagement?',
-    description:
-      'This ends the mandate and revokes your access to the property immediately. The owner is ' +
-      'notified. Ending it before the notice period has run is allowed, but you have to say why, ' +
-      'and that goes on the record.',
-    confirmLabel: 'End the mandate',
-    promptLabel: 'Why is this ending early, or before notice has run?',
-    needsReason: true,
-  },
-  suspend: {
-    title: 'Pause this engagement?',
-    description:
-      'Your access is revoked but the agreement stays, so resuming does not need it re-signing. ' +
-      'Use this when something needs resolving rather than ending.',
-    confirmLabel: 'Pause',
-    promptLabel: 'What needs resolving?',
-    needsReason: true,
-  },
-  'request-termination': {
-    title: 'Ask GetRentos to end this engagement?',
-    description:
-      'This raises a request, not an ending. The mandate keeps running and your access stays ' +
-      'while it is open, and a second GetRentos staff member has to approve it — no one person ' +
-      'ends a client engagement alone.',
-    confirmLabel: 'Raise the request',
-    promptLabel: 'Why should this engagement end?',
-    needsReason: true,
-  },
-};
 
 export function MandateListView() {
   const queryClient = useQueryClient();
-  const [pendingAction, setPendingAction] = useState<{
-    mandate: ManagementMandateDto;
-    action: ReasonAction;
-  } | null>(null);
-  const [reason, setReason] = useState('');
+  const { act, runSimple, askReason, dialog } = useMandateActions();
 
   const { data, isLoading, error } = useQuery({
     queryKey: mandateKeys.managing,
@@ -127,47 +67,6 @@ export function MandateListView() {
     void queryClient.invalidateQueries({ queryKey: mandateKeys.managing });
     void queryClient.invalidateQueries({ queryKey: mandateKeys.mine });
   };
-
-  const act = useMutation({
-    mutationFn: async (input: {
-      mandate: ManagementMandateDto;
-      action: ReasonAction | 'submit' | 'sign' | 'resume' | 'handover';
-      reason?: string;
-    }) => {
-      const { mandate, action } = input;
-      const service = mandateService;
-      switch (action) {
-        case 'submit':
-          return unwrap(service.submit(mandate.id));
-        case 'sign':
-          // The side is inferred from who is calling, so the UI cannot sign for
-          // the other party even if it tried.
-          return unwrap(service.sign(mandate.id));
-        case 'notice':
-          return unwrap(service.serveNotice(mandate.id));
-        case 'terminate':
-          return unwrap(service.terminate(mandate.id, input.reason ?? ''));
-        case 'suspend':
-          return unwrap(service.suspend(mandate.id, input.reason ?? ''));
-        case 'resume':
-          return unwrap(service.resume(mandate.id));
-        case 'handover':
-          return unwrap(service.recordHandover(mandate.id));
-        case 'request-termination':
-          return unwrap(service.requestTermination(mandate.id, input.reason ?? ''));
-      }
-    },
-    onSuccess: () => {
-      invalidate();
-      setPendingAction(null);
-      setReason('');
-    },
-  });
-
-  const runSimple = (
-    mandate: ManagementMandateDto,
-    action: 'submit' | 'sign' | 'resume' | 'handover'
-  ) => act.mutate({ mandate, action });
 
   if (error) {
     return <PageErrorState description={(error as Error).message} onRetry={invalidate} />;
@@ -225,49 +124,14 @@ export function MandateListView() {
                 mandate={mandate}
                 busy={act.isPending}
                 onSimple={runSimple}
-                onReason={(action) => {
-                  setReason('');
-                  setPendingAction({ mandate, action });
-                }}
+                onReason={askReason}
               />
             </li>
           ))}
         </ul>
       )}
 
-      {pendingAction && (
-        <ConfirmDialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setPendingAction(null);
-          }}
-          title={REASON_ACTIONS[pendingAction.action].title}
-          description={REASON_ACTIONS[pendingAction.action].description}
-          confirmLabel={REASON_ACTIONS[pendingAction.action].confirmLabel}
-          isLoading={act.isPending}
-          promptLabel={
-            REASON_ACTIONS[pendingAction.action].needsReason
-              ? REASON_ACTIONS[pendingAction.action].promptLabel
-              : undefined
-          }
-          promptPlaceholder={
-            REASON_ACTIONS[pendingAction.action].needsReason
-              ? 'At least 10 characters — whoever has to decide will read this'
-              : undefined
-          }
-          promptValue={reason}
-          onPromptChange={setReason}
-          promptRequired={REASON_ACTIONS[pendingAction.action].needsReason}
-          promptMinLength={10}
-          onConfirm={() =>
-            act.mutate({
-              mandate: pendingAction.mandate,
-              action: pendingAction.action,
-              reason,
-            })
-          }
-        />
-      )}
+      {dialog}
     </div>
   );
 }
@@ -280,11 +144,8 @@ function MandateCard({
 }: {
   mandate: ManagementMandateDto;
   busy: boolean;
-  onSimple: (
-    mandate: ManagementMandateDto,
-    action: 'submit' | 'sign' | 'resume' | 'handover'
-  ) => void;
-  onReason: (action: ReasonAction) => void;
+  onSimple: (mandate: ManagementMandateDto, action: SimpleAction) => void;
+  onReason: (mandate: ManagementMandateDto, action: ReasonAction) => void;
 }) {
   const live = isLive(mandate);
 
@@ -348,59 +209,7 @@ function MandateCard({
         </p>
       )}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {mandate.status === 'DRAFT' && (
-          <Button size="sm" disabled={busy} onClick={() => onSimple(mandate, 'submit')}>
-            <Send className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-            Send to the owner
-          </Button>
-        )}
-        {mandate.status === 'PENDING_OWNER' && (
-          <Button size="sm" disabled={busy} onClick={() => onSimple(mandate, 'sign')}>
-            <FileSignature className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-            Sign
-          </Button>
-        )}
-        {live && (
-          <>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => onReason('notice')}>
-              Serve notice
-            </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => onReason('suspend')}>
-              <Pause className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-              Pause
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => onSimple(mandate, 'handover')}
-            >
-              <Handshake className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-              Record handover
-            </Button>
-          </>
-        )}
-        {mandate.status === 'SUSPENDED' && (
-          <Button size="sm" disabled={busy} onClick={() => onSimple(mandate, 'resume')}>
-            <Play className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-            Resume
-          </Button>
-        )}
-        {!['TERMINATED', 'EXPIRED', 'REJECTED'].includes(mandate.status) && (
-          <Button
-            size="sm"
-            variant="danger"
-            disabled={busy}
-            onClick={() =>
-              onReason(mandate.managerIsGetRentos ? 'request-termination' : 'terminate')
-            }
-          >
-            End engagement
-          </Button>
-        )}
-      </div>
-
+      <MandateActionButtons mandate={mandate} busy={busy} onSimple={onSimple} onReason={onReason} />
       {mandate.status === 'PENDING_OPS' && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
