@@ -395,10 +395,11 @@ timeline; audit attribution (`actorId` + mandate).
 **Phase 3 — Money & statements.** `ClientMoneyLedgerEntry`, fee engine
 (PERCENTAGE/FLAT + commissions + VAT/WHT), statement generation with line items and source
 documents, owner payout with maker/checker, reconciliation job, disputes on line items.
-_3a–3e shipped (9e–9h): the ledger, the recorder, the fee engine, ledger-derived statements,
-and the daily bank reconciliation with an ops surface. What remains is **3f** — maker/checker
-on release, and disputes on line items — plus the two decisions 9h leaves open (whether an
-open drift blocks a payout, and whether attesting a balance needs step-up)._
+_3a–3f shipped (9e–9i): the ledger, the recorder, the fee engine, ledger-derived statements,
+the daily bank reconciliation, maker/checker on release, and disputes on statement lines with
+both surfaces. **Phase 3 is complete.** One decision 9h left open is still open — whether
+attesting a balance needs step-up; the other (whether an open drift blocks a payout) was settled
+in 9i: it flags, it does not block._
 
 _On the first real run the reconciliation found that the platform holds **₦8,439,975** of
 owner money that nobody has ever counted against a bank statement. That is the phase working,
@@ -1182,6 +1183,130 @@ attestation is reported as unchecked rather than clean, that an open drift does 
 twice, that a shortfall which was fixed and recurred was announced again, and that our own
 records disagreeing outranks the bank. Falsified by removing the holder union and by not
 clearing the alert record: five tests fail, each attributable to one of the two.
+
+---
+
+## 9i. Phase 3f — maker/checker, and disputing a line (2026-10-06)
+
+The last of Phase 3. Two halves of the same problem: an owner could **send themselves the money**
+in one call, and had **no way to say a figure was wrong**. The first is the control §7 principle 3
+asks for; the second is the one that makes the control worth having, because a dispatch that
+nobody can question is a dispatch, not a check.
+
+Backend `cec7f26` (maker/checker), `3257fe7`, `bfeb5af`; frontend `a82674c8`, `96c8f98a`.
+
+### Maker/checker, and why the status vocabulary grew again
+
+At or above `PlatformConfig.clientMoneyReleaseThreshold` (default ₦1,000,000), issuing a
+statement still issues — an owner is entitled to their document — but the money is **held** and a
+`ClientMoneyReleaseRequest` names the maker.
+
+Two new payout statuses, and both are there because the existing ones would have lied:
+
+- `AWAITING_APPROVAL` is not `PENDING`. `PENDING` means a transfer is with the bank;
+  `AWAITING_APPROVAL` means **no transfer exists**. An owner is owed the difference between "the
+  bank is slow" and "nobody has approved this yet".
+- `REJECTED` is the terminal state `PENDING` cannot express. Without it a refused payout sits
+  `PENDING` forever and reads as a slow bank.
+
+The boundary is `>=`, not `>` — the threshold amount is inside the control. `thresholdAtRequest`
+is recorded on the row, because a threshold is a policy that changes and a policy must not rewrite
+why an old release needed approving. And a refusal is **not a dead end**: retrying re-applies the
+gate, or the control is a formality you can walk around by pressing the button twice.
+
+### Disputes: the correction moves forward, never backward
+
+An owner (or, for an estate statement, the organisation's owner) disputes **a line** on an
+**issued** statement. Only issued: a draft has not been presented as a claim on anybody's money
+and can simply be regenerated, so disputing one would convene a decision about a document that
+does not have to exist.
+
+The rule the whole feature rests on: **an issued statement is never edited.** An upheld dispute
+writes an `ADJUSTMENT` ledger entry, so the wrong figure stays visible on the statement it
+appeared on and the correction appears on the next one. Rewriting history to hide that a figure
+was ever wrong is the one outcome this must not produce.
+
+**The hold is limited to money that can still be stopped.** `HELD_BY_DISPUTE_PAYOUT_STATUSES` is
+`AWAITING_APPROVAL | FAILED | REJECTED` and deliberately **excludes `PENDING`** — `PENDING` means a
+transfer is already with the bank, and a rule that read "held" there would report a working
+control while the money left. The remaining set is exactly what release and retry can act on, so
+the gate cannot be bypassed by finding one more path that moves money, and it is read **inside the
+transaction that moves the money**.
+
+Adjudication is the platform's, gated on `escrow.approve` — the permission that already means "may
+move client money" — so no new money authority is created. Named tradeoff: a dispute officer
+cannot decide these alone today. The managing firm gets a reply route and never a verdict; a firm
+that could close its own case would be marking its own homework.
+
+### The decisions 9h left open
+
+Both were parked "alongside 3f, where release already has a maker/checker path to hang it on".
+**Confirmed with the user rather than assumed**, because each changes money movement:
+
+1. **An open drift does not block a payout; it is flagged.** The approver sees it and still
+   decides. Blocking would deadlock payouts on a drift that is often only a late bank feed.
+2. **An open dispute does hold the statement's payout** — while it can still be stopped, per the
+   rule above.
+3. **Staff decide, and the firm is notified and may add a note.** The firm cannot close a case.
+
+Still open from 9h and untouched here: **whether attesting a balance needs step-up.** Unchanged
+position — it is the one write that could hide a shortfall, it is audited with its previous value,
+and a daily chore that demands MFA is a chore people learn to skip.
+
+### The live pass found a defect the unit suite could not, again
+
+Generation read rent, expenses and its own fee charges — and nothing else. So an `ADJUSTMENT`,
+from an upheld dispute **or from the payout-reversal sweep that has shipped since 3c**, was written
+to the ledger and never appeared on any statement. The owner's _balance_ was corrected while their
+_statement_ showed the old figure forever. It is invisible from the ledger's side, which is exactly
+why only the live pass could see it: every unit test passed, and the money really was right.
+
+Two layers of it: the per-property `continue` had no way to know a correction existed, and the
+emptiness check refused a period whose only content was one. Corrections are now read once per
+statement — they belong to the owner, not to a building — and counted as something to state.
+
+The unit-level reason it had stayed hidden is worth recording on its own: **the statement spec's
+fake silently ignored a clause the real query sends.** `clientMoneyLedgerEntry.findMany` was stubbed
+to understand `sourceType`/`sourceId`, so the new `{ id: { in: [...] } }` clause matched nothing and
+the regression test failed for a reason that had nothing to do with the code under test. A fake that
+ignores a clause cannot reproduce the bug the clause exists to prevent — the same lesson as §3d,
+from the other direction.
+
+### On `requestedByMe`, and honesty about reach
+
+The backoffice cannot work out "did I raise this release?" — `AdminUser` carries no id — so the API
+answers it. While building it, one thing became clear and is worth stating rather than leaving to be
+discovered: **nobody on the platform backoffice can raise a release at all.** Only the landlord and
+estate statement issuers call `raise`, and neither role is in `ADMIN_STAFF_ROLES`. So a row can only
+say "you raised it" to somebody holding **both** a workspace role and a platform one — the operator
+who is also the escrow officer. The live fixture builds that shape deliberately, borrows the role,
+and gives it back on `off`. The flag is correct and cheap; it is not a common path, and the code says
+so instead of implying otherwise.
+
+A first version of this had an `actorId !== null` guard whose test passed **with the guard deleted** —
+because `requestedById` is `NOT NULL`, so a null actor matches nothing anyway. The guard went, and the
+test became one that reads the same row as two different people, which does fail when the value is
+hardcoded. A test that still passes when you delete the guard is not a test.
+
+### Also fixed on the way
+
+`formatDate` is local-time app-wide, so a period ending `2026-11-30T23:59:59Z` renders as **1 Dec**
+east of UTC. Pre-existing, affects the owner statement view as much as the new queue. Left alone
+inside a feature commit — the two surfaces at least agree with each other now — and flagged for its
+own fix rather than quietly changed in passing.
+
+### Verification
+
+- Backend: 267 suites / 3,660 tests. The single failure is the pre-existing `NotificationWorker`
+  Prisma-mock one, **re-confirmed by stashing every change and running it on clean HEAD**.
+- Live: `client-money-release-live-fixture.cjs` **32/32** (falsified by passing `null` instead of the
+  actor — fails exactly the row-is-mine check) and `statement-line-dispute-live-fixture.cjs`
+  **28/28**, driving the real routes end to end: a draft cannot be disputed, a held payout cannot be
+  released, a refusal frees it again, an upheld dispute leaves the statement byte-identical, and the
+  correction then appears as its own line on the next statement for the exact amount owed back.
+- Both surfaces driven in the browser: the owner sees "Held while a line is disputed" with their own
+  reason quoted and every past outcome with its note; the officer sees the open count on the tab and
+  decides through a dialog that says what the outcome will do before it does it.
 
 ---
 
