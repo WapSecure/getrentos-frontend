@@ -155,6 +155,15 @@ const navItems: NavItem[] = [
     permission: 'escrow.view',
   },
   {
+    // Beside escrow because it is the same question asked from the other end:
+    // escrow is money moving, this is whether money we already hold is still
+    // there. Gated on the same permission for that reason.
+    label: 'Client Money',
+    href: '/admin/client-money',
+    icon: Landmark,
+    permission: 'escrow.view',
+  },
+  {
     label: 'Audit Logs',
     href: ROUTES.ADMIN_AUDIT_LOGS,
     icon: ScrollText,

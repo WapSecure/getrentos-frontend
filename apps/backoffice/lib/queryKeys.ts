@@ -2,6 +2,8 @@ export const adminKeys = {
   dashboardStats: ['admin', 'dashboardStats'] as const,
   dashboardActivity: ['admin', 'dashboardActivity'] as const,
   userGrowth: ['admin', 'userGrowth'] as const,
+  /** Client-money reconciliations: the daily verdict on the pooled accounts. */
+  clientMoneyReconciliation: ['admin', 'clientMoney', 'reconciliation'] as const,
   notifications: ['admin', 'notifications'] as const,
   notificationPage: (page: number) => ['admin', 'notifications', 'page', page] as const,
   users: (params?: {
