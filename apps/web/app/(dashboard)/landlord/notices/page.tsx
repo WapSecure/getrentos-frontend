@@ -304,23 +304,39 @@ export default function LandlordNoticesPage() {
         </section>
       )}
 
-      <RaiseNoticeDialog
-        open={raising}
-        onOpenChange={setRaising}
-        leaseId={leaseId}
-        jurisdiction={ladder?.jurisdiction ?? 'NG-LA'}
-        nextKind={ladder?.next?.kind ?? null}
-        unconfigured={periods?.unconfigured ?? []}
-        isSubmitting={raiseNotice.isPending}
-        onSubmit={(input) => raiseNotice.mutate(input)}
-      />
+      {/*
+        Both dialogs are mounted only while open, rather than left mounted with an
+        `open` flag. It is the difference between a step that is actually next and
+        one that merely was next when the page first rendered: `useState` reads its
+        initial value on mount only, so a permanently-mounted dialog freezes on
+        whatever the ladder said before the query resolved. That bug showed the
+        *reminder* behind a button labelled "Raise notice to quit".
 
-      <ServeNoticeDialog
-        notice={serving}
-        onOpenChange={(open) => !open && setServing(null)}
-        isSubmitting={serveNotice.isPending}
-        onSubmit={(input) => serving && serveNotice.mutate({ id: serving.id, input })}
-      />
+        It also resets the fields, which matters most for the service date — a date
+        left over from a different notice would be recorded against this one, and
+        the expiry is computed from it.
+      */}
+      {raising && (
+        <RaiseNoticeDialog
+          open
+          onOpenChange={setRaising}
+          leaseId={leaseId}
+          jurisdiction={ladder?.jurisdiction ?? 'NG-LA'}
+          nextKind={ladder?.next?.kind ?? null}
+          unconfigured={periods?.unconfigured ?? []}
+          isSubmitting={raiseNotice.isPending}
+          onSubmit={(input) => raiseNotice.mutate(input)}
+        />
+      )}
+
+      {serving && (
+        <ServeNoticeDialog
+          notice={serving}
+          onOpenChange={(open) => !open && setServing(null)}
+          isSubmitting={serveNotice.isPending}
+          onSubmit={(input) => serveNotice.mutate({ id: serving.id, input })}
+        />
+      )}
 
       <ConfirmDialog
         open={withdrawing !== null}
