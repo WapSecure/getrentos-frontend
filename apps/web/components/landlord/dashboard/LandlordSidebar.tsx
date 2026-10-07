@@ -27,6 +27,7 @@ import {
   BadgeCheck,
   ShieldCheck,
   Handshake,
+  ShieldAlert,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -86,6 +87,7 @@ export const navGroups = [
     label: 'Finance and compliance',
     items: [
       item('sidebar.financials', ROUTES.LANDLORD_FINANCIALS, PieChart),
+      item('sidebar.notices', ROUTES.LANDLORD_NOTICES, ShieldAlert),
       item('sidebar.evictions', ROUTES.LANDLORD_EVICTIONS, Gavel),
       item('sidebar.documents', ROUTES.LANDLORD_DOCUMENTS, FolderOpen),
     ],

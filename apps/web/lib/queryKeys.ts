@@ -37,6 +37,10 @@ export const landlordKeys = {
     ] as const,
   maintenanceSummary: ['landlord', 'maintenanceSummary'] as const,
   evictions: ['landlord', 'evictions'] as const,
+  /** The notice ladder for one tenancy, and the period register behind it. */
+  leaseLadder: (leaseId: string) => ['landlord', 'tenancy-notices', 'ladder', leaseId] as const,
+  notices: ['landlord', 'tenancy-notices'] as const,
+  noticePeriods: ['landlord', 'tenancy-notices', 'periods'] as const,
   leads: ['landlord', 'leads'] as const,
   offers: (status?: string) => ['landlord', 'offers', status ?? 'all'] as const,
   offerThread: (offerId: string) => ['landlord', 'offers', offerId, 'thread'] as const,

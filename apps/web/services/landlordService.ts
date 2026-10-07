@@ -29,6 +29,15 @@ import type {
   ScreeningReference,
   ReferenceOutcome,
 } from '@/types/landlord';
+import type {
+  LeaseLadder,
+  NoticeKind,
+  NoticePeriodEntry,
+  NoticePeriodSettings,
+  NoticeServiceMethod,
+  NoticeState,
+  TenancyNotice,
+} from '@/types/tenancy-notice';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
 
@@ -1208,6 +1217,123 @@ export const landlordService = {
   ): Promise<ApiResponse<LandlordAutomationSettings>> {
     return safeCall(() =>
       authFetch('/landlord/settings/automation', { method: 'PUT', body: JSON.stringify(data) })
+    );
+  },
+
+  // ---- Tenancy notices ----
+
+  /** Where a tenancy stands: what is served, what is next, what blocks it. */
+  async getLeaseLadder(leaseId: string): Promise<ApiResponse<LeaseLadder>> {
+    return safeCall(() => authFetch(`/landlord/tenancy-notices/lease/${leaseId}`));
+  },
+
+  async listNotices(
+    params: {
+      leaseId?: string;
+      state?: NoticeState;
+      kind?: NoticeKind;
+      limit?: number;
+    } = {}
+  ): Promise<ApiResponse<{ notices: TenancyNotice[]; limit: number; truncated: boolean }>> {
+    return safeCall(() => authFetch(`/landlord/tenancy-notices${toQuery(params)}`));
+  },
+
+  /**
+   * Served notices running out, so the next step can be prepared before the
+   * current one completes rather than after.
+   */
+  async listExpiringNotices(withinDays?: number): Promise<ApiResponse<TenancyNotice[]>> {
+    return safeCall(() =>
+      authFetch(`/landlord/tenancy-notices/expiring${toQuery({ withinDays })}`)
+    );
+  },
+
+  async raiseNotice(data: {
+    leaseId: string;
+    kind: NoticeKind;
+    reason: string;
+    arrearsAmount?: number;
+    /**
+     * A number typed for this one notice. Kept available because counsel may
+     * advise a period the register does not hold — it is recorded as the least
+     * certain source and still needs a basis.
+     */
+    manualDays?: number;
+    manualBasis?: string;
+  }): Promise<ApiResponse<TenancyNotice>> {
+    return safeCall(() =>
+      authFetch('/landlord/tenancy-notices', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  /**
+   * Record service. This is where the period starts running, and the date is
+   * declared rather than assumed: whether it runs from the day of service or the
+   * day after is interpretation, so the person serving says which.
+   */
+  async serveNotice(
+    id: string,
+    data: { serviceDate: string; serviceMethod: NoticeServiceMethod; evidenceNote?: string }
+  ): Promise<ApiResponse<TenancyNotice>> {
+    return safeCall(() =>
+      authFetch(`/landlord/tenancy-notices/${id}/serve`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async withdrawNotice(id: string, reason: string): Promise<ApiResponse<TenancyNotice>> {
+    return safeCall(() =>
+      authFetch(`/landlord/tenancy-notices/${id}/withdraw`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  async supersedeNotice(
+    id: string,
+    replacementId: string,
+    reason: string
+  ): Promise<ApiResponse<TenancyNotice>> {
+    return safeCall(() =>
+      authFetch(`/landlord/tenancy-notices/${id}/supersede`, {
+        method: 'PATCH',
+        body: JSON.stringify({ replacementId, reason }),
+      })
+    );
+  },
+
+  // ---- The period register ----
+
+  async getNoticePeriods(): Promise<ApiResponse<NoticePeriodSettings>> {
+    return safeCall(() => authFetch('/landlord/tenancy-notices/periods'));
+  },
+
+  async setNoticePeriod(data: {
+    jurisdiction: string;
+    kind: NoticeKind;
+    days: number;
+    basis: string;
+  }): Promise<ApiResponse<NoticePeriodEntry>> {
+    return safeCall(() =>
+      authFetch('/landlord/tenancy-notices/periods', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async clearNoticePeriod(data: {
+    jurisdiction: string;
+    kind: NoticeKind;
+  }): Promise<ApiResponse<{ cleared: boolean }>> {
+    return safeCall(() =>
+      authFetch('/landlord/tenancy-notices/periods', {
+        method: 'DELETE',
+        body: JSON.stringify(data),
+      })
     );
   },
 };

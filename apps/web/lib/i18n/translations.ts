@@ -47,6 +47,7 @@ export type TranslationKey =
   | 'sidebar.owner_statements'
   | 'sidebar.arrears'
   | 'sidebar.evictions'
+  | 'sidebar.notices'
   | 'sidebar.landlord_leads'
   | 'sidebar.microsite'
   | 'sidebar.referrals'
@@ -140,6 +141,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.owner_statements': 'Owner Statements',
     'sidebar.arrears': 'Arrears',
     'sidebar.evictions': 'Evictions',
+    'sidebar.notices': 'Notices',
     'sidebar.landlord_leads': 'Leads',
     'sidebar.microsite': 'Microsite',
     'sidebar.referrals': 'Refer & Earn',
@@ -232,6 +234,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.owner_statements': 'Owner Statement Dem',
     'sidebar.arrears': 'Rent Wey Dem Owe',
     'sidebar.evictions': 'Comot-For-House Case',
+    'sidebar.notices': 'Notice Dem',
     'sidebar.landlord_leads': 'Leads',
     'sidebar.microsite': 'Microsite',
     'sidebar.referrals': 'Refer Person, Chop Money',
