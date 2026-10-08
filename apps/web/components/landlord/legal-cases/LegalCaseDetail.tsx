@@ -281,8 +281,8 @@ export function LegalCaseDetail({
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto">
-        <div className="flex items-start justify-between gap-4">
+      <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto p-6">
+        <div className="flex items-start justify-between gap-4 pr-8">
           <div className="min-w-0">
             <DialogTitle className="truncate text-xl font-semibold tracking-[-0.02em] text-foreground">
               {legalCase.kindLabel}
