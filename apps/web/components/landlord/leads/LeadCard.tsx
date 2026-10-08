@@ -11,54 +11,16 @@ import {
   Flame,
   Send,
 } from 'lucide-react';
-import { Button, Checkbox } from '@getrentos/ui';
+import { Badge, Button, Checkbox } from '@getrentos/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
-import type { LandlordLead, LeadStage } from '@/types/landlord';
+import { leadStageBadges } from '@/lib/statusBadge';
+import type { LandlordLead } from '@/types/landlord';
 
 const NUDGE_COOLDOWN_HOURS = 24;
 
 const isNudgeCooldownActive = (lastNudgedAt?: string): boolean =>
   !!lastNudgedAt &&
   Date.now() - new Date(lastNudgedAt).getTime() < NUDGE_COOLDOWN_HOURS * 60 * 60 * 1000;
-
-const stageConfig: Record<LeadStage, { label: string; className: string }> = {
-  inquiry: {
-    label: 'Inquiry',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  requested: {
-    label: 'Viewing Requested',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  confirmed: {
-    label: 'Viewing Confirmed',
-    className: 'text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20',
-  },
-  completed: {
-    label: 'Viewing Completed',
-    className: 'text-teal-700 bg-teal-50 dark:text-teal-400 dark:bg-teal-900/20',
-  },
-  cancelled: {
-    label: 'Cancelled',
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-white/10',
-  },
-  pending: {
-    label: 'Applied',
-    className: 'text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/20',
-  },
-  under_review: {
-    label: 'Under Review',
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
-  },
-  approved: {
-    label: 'Approved',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  rejected: {
-    label: 'Rejected',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-};
 
 interface LeadCardProps {
   lead: LandlordLead;
@@ -85,7 +47,7 @@ export const LeadCard = ({
   onNudge,
   isUpdatingViewing,
 }: LeadCardProps) => {
-  const stage = stageConfig[lead.stage];
+  const stage = leadStageBadges[lead.stage];
   const cooldownActive = isNudgeCooldownActive(lead.lastNudgedAt);
 
   return (
@@ -105,36 +67,36 @@ export const LeadCard = ({
             <div className="flex items-center gap-1.5">
               <h3 className="font-semibold text-foreground truncate">{lead.leadName}</h3>
               {lead.verified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" />
               ) : (
-                <ShieldAlert className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+                <ShieldAlert className="w-3.5 h-3.5 text-warning shrink-0" />
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">{lead.propertyName}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${stage.className}`}
+          <Badge
+            variant={stage.variant}
+            icon={stage.icon ? <stage.icon className="w-3 h-3" /> : undefined}
           >
             {stage.label}
-          </span>
+          </Badge>
           {lead.stale && (
-            <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20">
-              <Flame className="w-3 h-3" />
+            <Badge variant="warning" icon={<Flame className="w-3 h-3" />}>
               Going cold · {lead.daysSinceActivity}d
-            </span>
+            </Badge>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Trust Score</p>
+          <p className="text-xs text-muted-foreground">Trust Score</p>
           <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">First Contact</p>
+          <p className="text-xs text-muted-foreground">First Contact</p>
           <p className="text-sm font-medium text-foreground">{formatDate(lead.inquiryDate)}</p>
         </div>
       </div>
@@ -144,7 +106,7 @@ export const LeadCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="px-2.5 text-gray-500"
+            className="px-2.5 text-muted-foreground"
             title="Message"
             onClick={onMessage}
           >
@@ -172,7 +134,7 @@ export const LeadCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="px-2.5 text-gray-500"
+              className="px-2.5 text-muted-foreground"
               title="Cancel Viewing"
               disabled={isUpdatingViewing}
               onClick={onCancelViewing}

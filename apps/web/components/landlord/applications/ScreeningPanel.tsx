@@ -13,7 +13,7 @@ import {
   Phone,
   Users,
 } from 'lucide-react';
-import { Button, LegacyInput, LegacySelect } from '@getrentos/ui';
+import { Badge, Button, LegacyInput, LegacySelect, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -26,44 +26,37 @@ import type {
   ScreeningReference,
 } from '@/types/landlord';
 
+// Flag tints are an icon colour, not a status chip, so they map to the
+// semantic text tokens rather than to <Badge>.
 const flagStyle: Record<
   ScreeningFlagLevel,
   { icon: React.ElementType; className: string; label: string }
 > = {
-  concern: { icon: AlertOctagon, className: 'text-red-600 dark:text-red-400', label: 'Concern' },
-  watch: {
-    icon: AlertTriangle,
-    className: 'text-amber-600 dark:text-amber-400',
-    label: 'Worth a look',
-  },
-  ok: { icon: CheckCircle2, className: 'text-green-600 dark:text-green-400', label: 'Fine' },
+  concern: { icon: AlertOctagon, className: 'text-destructive', label: 'Concern' },
+  watch: { icon: AlertTriangle, className: 'text-warning', label: 'Worth a look' },
+  ok: { icon: CheckCircle2, className: 'text-success', label: 'Fine' },
 };
 
-const bandLabel: Record<AffordabilityBand, { text: string; className: string }> = {
-  comfortable: {
-    text: 'Comfortable',
-    className: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
-  },
-  stretched: {
-    text: 'A stretch',
-    className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
-  },
-  high: { text: 'High', className: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400' },
-  unknown: { text: 'Can’t tell', className: 'bg-secondary text-muted-foreground' },
+const bandLabel: Record<AffordabilityBand, { text: string; variant: BadgeVariant }> = {
+  comfortable: { text: 'Comfortable', variant: 'success' },
+  stretched: { text: 'A stretch', variant: 'warning' },
+  high: { text: 'High', variant: 'danger' },
+  unknown: { text: 'Can’t tell', variant: 'neutral' },
 };
 
+const outcomeBadge: Record<ReferenceOutcome, { label: string; variant: BadgeVariant }> = {
+  not_contacted: { label: 'Not contacted', variant: 'neutral' },
+  confirmed: { label: 'Confirmed', variant: 'success' },
+  concern: { label: 'Concern raised', variant: 'danger' },
+  unreachable: { label: 'Couldn’t reach', variant: 'warning' },
+};
+
+// The editable outcome picker still needs the plain labels on their own.
 const outcomeLabel: Record<ReferenceOutcome, string> = {
-  not_contacted: 'Not contacted',
-  confirmed: 'Confirmed',
-  concern: 'Concern raised',
-  unreachable: 'Couldn’t reach',
-};
-
-const outcomeClass: Record<ReferenceOutcome, string> = {
-  not_contacted: 'bg-secondary text-muted-foreground',
-  confirmed: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
-  concern: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400',
-  unreachable: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
+  not_contacted: outcomeBadge.not_contacted.label,
+  confirmed: outcomeBadge.confirmed.label,
+  concern: outcomeBadge.concern.label,
+  unreachable: outcomeBadge.unreachable.label,
 };
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
@@ -103,7 +96,7 @@ const ReferenceRow = ({
   });
 
   return (
-    <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-white/5 text-sm">
+    <div className="p-2.5 rounded-lg bg-muted text-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-foreground font-medium">
@@ -120,11 +113,9 @@ const ReferenceRow = ({
             {reference.phone}
           </a>
         </div>
-        <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${outcomeClass[reference.status]}`}
-        >
-          {outcomeLabel[reference.status]}
-        </span>
+        <Badge variant={outcomeBadge[reference.status].variant} className="shrink-0">
+          {outcomeBadge[reference.status].label}
+        </Badge>
       </div>
 
       {reference.note && !editing && (
@@ -157,7 +148,7 @@ const ReferenceRow = ({
             className="w-full px-2 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground"
           />
           {save.isError && (
-            <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+            <p role="alert" className="text-xs text-destructive">
               {save.error instanceof Error
                 ? save.error.message
                 : 'We could not save that. Please try again.'}
@@ -217,7 +208,7 @@ export const ScreeningPanel = ({
   }
   if (isError || !data) {
     return (
-      <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+      <p role="alert" className="text-sm text-destructive">
         We could not load the screening report for this applicant. Please close this and try again.
       </p>
     );
@@ -250,9 +241,7 @@ export const ScreeningPanel = ({
       <div className="p-3 rounded-lg border border-border">
         <div className="flex items-center justify-between gap-2 mb-2">
           <SectionTitle>Can they afford it?</SectionTitle>
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${band.className}`}>
-            {band.text}
-          </span>
+          <Badge variant={band.variant}>{band.text}</Badge>
         </div>
         <dl className="grid grid-cols-2 gap-3 text-sm tabular-nums">
           <div>
@@ -332,12 +321,9 @@ export const ScreeningPanel = ({
               ].map(
                 ([on, label]) =>
                   on && (
-                    <span
-                      key={label as string}
-                      className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
-                    >
+                    <Badge key={label as string} variant="success">
                       {label as string}
-                    </span>
+                    </Badge>
                   )
               )}
             </div>
@@ -359,7 +345,7 @@ export const ScreeningPanel = ({
           </SectionTitle>
           <div className="space-y-1.5">
             {data.nextOfKin && (
-              <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-white/5 text-sm">
+              <div className="p-2.5 rounded-lg bg-muted text-sm">
                 <p className="text-foreground font-medium">
                   {data.nextOfKin.name}{' '}
                   <span className="text-xs text-muted-foreground font-normal">
@@ -406,7 +392,7 @@ export const ScreeningPanel = ({
           {data.documents.map((doc) => (
             <div
               key={doc.name}
-              className="flex items-center justify-between gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5"
+              className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted"
             >
               <span className="text-sm text-foreground">
                 {doc.name}
@@ -422,18 +408,18 @@ export const ScreeningPanel = ({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                   >
-                    <FileCheck className="w-3.5 h-3.5 text-green-600" />
+                    <FileCheck className="w-3.5 h-3.5 text-success" />
                     Open
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                  <span className="inline-flex items-center gap-1 text-xs text-success">
                     <FileCheck className="w-3.5 h-3.5" /> Attached
                   </span>
                 )
               ) : (
                 <span
-                  className={`inline-flex items-center gap-1 text-xs ${doc.required ? 'text-red-500' : 'text-muted-foreground'}`}
+                  className={`inline-flex items-center gap-1 text-xs ${doc.required ? 'text-destructive' : 'text-muted-foreground'}`}
                 >
                   <FileX className="w-3.5 h-3.5" /> {doc.required ? 'Missing' : 'Not provided'}
                 </span>

@@ -21,8 +21,10 @@ import type {
   ViewingRequestStatus,
   VerificationStatus,
   ListingStatus,
+  LeadStage,
 } from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
+import type { MaintenancePriority, MaintenanceRequestStatus } from '@/types/maintenance';
 import type { OfferStatus } from '@/types/owner';
 import type { TaskStatus } from '@/types/agent';
 import type { LegalCaseStatus } from '@/types/legal-case';
@@ -85,6 +87,42 @@ export const legalCaseStatusBadges: Record<LegalCaseStatus, StatusBadgeEntry> = 
   DECIDED: { label: 'Decided', variant: 'warning' },
   CLOSED: { label: 'Closed', variant: 'success' },
   WITHDRAWN: { label: 'Withdrawn', variant: 'neutral' },
+};
+
+/**
+ * Lead pipeline stages.
+ *
+ * Centralised with the other vocabularies so the pipeline reads with one voice.
+ * The nine stages fold onto the five tokens by meaning, not by hue: a request
+ * awaiting the landlord is `warning`, anything in flight (inquiry, viewing
+ * confirmed, application in) is `info`, a good end (viewing done, approved) is
+ * `success`, a stopped one (cancelled) is `neutral`, and a refusal is `danger`.
+ */
+export const leadStageBadges: Record<LeadStage, StatusBadgeEntry> = {
+  inquiry: { label: 'Inquiry', variant: 'info' },
+  requested: { label: 'Viewing Requested', variant: 'warning', icon: Clock },
+  confirmed: { label: 'Viewing Confirmed', variant: 'info', icon: CheckCircle2 },
+  completed: { label: 'Viewing Completed', variant: 'success', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
+  pending: { label: 'Applied', variant: 'info' },
+  under_review: { label: 'Under Review', variant: 'warning' },
+  approved: { label: 'Approved', variant: 'success', icon: CheckCircle2 },
+  rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
+};
+
+export const maintenancePriorityBadges: Record<MaintenancePriority, StatusBadgeEntry> = {
+  low: { label: 'Low', variant: 'neutral' },
+  medium: { label: 'Medium', variant: 'info' },
+  high: { label: 'High', variant: 'warning' },
+  urgent: { label: 'Urgent', variant: 'danger' },
+};
+
+export const maintenanceStatusBadges: Record<MaintenanceRequestStatus, StatusBadgeEntry> = {
+  submitted: { label: 'Submitted', variant: 'warning' },
+  assigned: { label: 'Assigned', variant: 'info' },
+  in_progress: { label: 'In Progress', variant: 'info' },
+  resolved: { label: 'Resolved', variant: 'success', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
 
 export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry> = {
