@@ -63,7 +63,7 @@ export const NewFraudAlertModal = ({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg p-6">
         <DialogTitle className="font-semibold text-foreground flex items-center gap-2">
           <ShieldPlus className="w-4 h-4 text-red-500" />
           Flag a fraud alert

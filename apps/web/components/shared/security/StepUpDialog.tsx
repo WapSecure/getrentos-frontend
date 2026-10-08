@@ -111,7 +111,7 @@ export function StepUpDialog() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && finish(null)}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md p-6">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" aria-hidden />
           <DialogTitle className="text-lg font-semibold">Confirm it’s you</DialogTitle>

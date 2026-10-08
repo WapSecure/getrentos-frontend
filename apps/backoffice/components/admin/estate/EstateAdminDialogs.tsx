@@ -79,7 +79,7 @@ export function HouseholdEditorDialog({
           if (!open) onClose();
         }}
       >
-        <DialogContent>
+        <DialogContent className="p-6">
           <DialogTitle className="font-semibold">Correct household</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Changes apply platform-wide and are written to the audit trail.
@@ -174,7 +174,7 @@ export function DueAmountDialog({
           if (!open) onClose();
         }}
       >
-        <DialogContent>
+        <DialogContent className="p-6">
           <DialogTitle className="font-semibold">Adjust due amount</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {due?.residentName ? `${due.residentName} · ` : ''}

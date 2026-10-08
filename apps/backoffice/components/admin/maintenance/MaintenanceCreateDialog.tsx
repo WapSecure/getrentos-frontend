@@ -102,7 +102,7 @@ export function MaintenanceCreateDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-        <DialogContent>
+        <DialogContent className="p-6">
           <DialogTitle className="font-semibold">{title}</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Select linked records using searchable fields. The new configuration becomes visible

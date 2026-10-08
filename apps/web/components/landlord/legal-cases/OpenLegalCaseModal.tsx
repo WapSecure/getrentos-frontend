@@ -71,7 +71,7 @@ export function OpenLegalCaseModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg p-6">
         <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
           Open a case
         </DialogTitle>

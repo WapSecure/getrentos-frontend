@@ -486,7 +486,7 @@ function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: 
   return (
     <>
       <Dialog open onOpenChange={(open) => !open && onClose()}>
-        <DialogContent>
+        <DialogContent className="p-6">
           <DialogTitle className="font-semibold">Reassign task</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {task.title}: find the target agent&apos;s user ID from their own case-360 URL or the

@@ -274,7 +274,7 @@ export function ClientMoneyReconciliation() {
           )}
 
           <Dialog open={attestOpen} onOpenChange={setAttestOpen}>
-            <DialogContent>
+            <DialogContent className="p-6">
               <DialogTitle>Record what the bank holds</DialogTitle>
               <p className="mt-1 text-sm text-muted-foreground">
                 The whole control depends on this figure coming from outside the ledger. Record what

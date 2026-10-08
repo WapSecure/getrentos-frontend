@@ -54,7 +54,7 @@ export function AssignVendorDialog({
   return (
     <>
       <Dialog open={Boolean(order)} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent>
+        <DialogContent className="p-6">
           <DialogTitle className="font-semibold">Assign vendor</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Choose an active vendor for {order?.issueTitle}. Reassignment is recorded in the audit

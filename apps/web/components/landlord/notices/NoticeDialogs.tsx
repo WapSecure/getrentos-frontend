@@ -100,7 +100,7 @@ export function RaiseNoticeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg p-6">
         <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
           Raise a notice
         </DialogTitle>
@@ -247,7 +247,7 @@ export function ServeNoticeDialog({
 
   return (
     <Dialog open={notice !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg p-6">
         <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
           Record service
         </DialogTitle>

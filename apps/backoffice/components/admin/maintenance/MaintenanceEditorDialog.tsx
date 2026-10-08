@@ -122,7 +122,7 @@ export function MaintenanceEditorDialog({
   return (
     <>
       <Dialog open={Boolean(editor)} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent>
+        <DialogContent className="p-6">
           <DialogTitle className="font-semibold">{title}</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Changes apply platform-wide and are written to the audit trail.

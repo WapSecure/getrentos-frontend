@@ -615,7 +615,7 @@ function GenerateStatementDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent className="p-6">
         <DialogTitle className="font-semibold">Generate owner statement</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
           Find the owner&apos;s user ID from their case-360 URL or the users register.

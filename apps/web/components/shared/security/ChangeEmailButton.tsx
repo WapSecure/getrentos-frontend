@@ -87,7 +87,7 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
           if (!next) reset();
         }}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md p-6">
           <DialogTitle className="text-lg font-semibold">Change your sign-in email</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {reference
