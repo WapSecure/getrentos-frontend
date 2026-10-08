@@ -434,17 +434,17 @@ export const GuestBookingsWorkspace = () => {
         />
       )}
       <Dialog open={messagesOpen} onOpenChange={(o) => !o && setMessagesOpen(false)}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl p-0">
           <ShortletMessagesInbox role="guest" />
         </DialogContent>
       </Dialog>
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl p-0">
           <ShortletDisputesInbox />
         </DialogContent>
       </Dialog>
       <Dialog open={claimsOpen} onOpenChange={(o) => !o && setClaimsOpen(false)}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl p-0">
           <ShortletDepositClaimsInbox role="guest" />
         </DialogContent>
       </Dialog>

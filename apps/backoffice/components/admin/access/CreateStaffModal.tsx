@@ -78,7 +78,7 @@ export const CreateStaffModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="p-0">
         <div className="p-6">
           <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
             <ShieldPlus className="h-5 w-5 text-primary" />

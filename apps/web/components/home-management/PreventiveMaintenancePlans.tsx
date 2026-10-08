@@ -391,7 +391,7 @@ export function PreventiveMaintenancePlans({
       </div>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl p-0">
           <form onSubmit={submitPlan} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Create a preventive care plan

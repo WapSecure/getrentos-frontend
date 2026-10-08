@@ -50,7 +50,7 @@ export function ShortletReviewDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-0">
         <div className="p-5">
           <DialogTitle>Review your stay</DialogTitle>
           <DialogDescription>How was your stay at {booking.propertyTitle}?</DialogDescription>

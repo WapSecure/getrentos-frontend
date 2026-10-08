@@ -24,7 +24,7 @@ interface PropertyValueModalProps {
 /** The quick way to say what a property is worth, from the Portfolio table. */
 export const PropertyValueModal = ({ property, onClose }: PropertyValueModalProps) => (
   <Dialog open={!!property} onOpenChange={(open) => !open && onClose()}>
-    <DialogContent>
+    <DialogContent className="p-0">
       {property && (
         <PropertyValueForm key={property.propertyId} property={property} onClose={onClose} />
       )}

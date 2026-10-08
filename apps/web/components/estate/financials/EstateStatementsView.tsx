@@ -259,7 +259,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       )}
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg p-0">
           <form onSubmit={submit} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Generate statement
@@ -306,7 +306,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       </Dialog>
 
       <Dialog open={!!detailId} onOpenChange={(open) => !open && setDetailId(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg p-0">
           {detail && (
             <div className="p-6">
               <div className="flex items-center justify-between gap-3">

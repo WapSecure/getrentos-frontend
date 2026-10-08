@@ -255,7 +255,7 @@ export default function RealtorLeadsPage() {
         />
       )}
       <Dialog open={isCreateOpen} onOpenChange={handleCreateOpenChange}>
-        <DialogContent>
+        <DialogContent className="p-0">
           <div className="p-5 space-y-4">
             <DialogTitle>Add lead</DialogTitle>
             <Field label="Full name" htmlFor="lead-full-name" required error={formErrors.fullName}>

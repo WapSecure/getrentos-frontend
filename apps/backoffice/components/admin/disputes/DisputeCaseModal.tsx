@@ -108,7 +108,7 @@ export const DisputeCaseModal = ({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-2xl overflow-hidden flex flex-col max-h-[90vh] p-0">
         <div className="p-4 border-b border-border shrink-0 pr-12">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -167,8 +167,8 @@ export const DisputeCaseModal = ({
                 )}
                 {evidence.length > 0 && (
                   <p className="text-muted-foreground">
-                    <span className="font-medium text-foreground">Evidence:</span>{' '}
-                    {evidence.length} item{evidence.length === 1 ? '' : 's'}
+                    <span className="font-medium text-foreground">Evidence:</span> {evidence.length}{' '}
+                    item{evidence.length === 1 ? '' : 's'}
                   </p>
                 )}
               </div>
@@ -181,7 +181,9 @@ export const DisputeCaseModal = ({
             canAttach={canAttachEvidence}
             isAttaching={isAttachingEvidence}
             onAttach={
-              onAttachEvidence ? (file, note) => onAttachEvidence(dispute.id, file, note) : undefined
+              onAttachEvidence
+                ? (file, note) => onAttachEvidence(dispute.id, file, note)
+                : undefined
             }
             onResolveUrl={onResolveEvidenceUrl}
             emptyHint="No files attached to this case yet. Links submitted by a party arrive as unverified external references; files attached here are held on our side."

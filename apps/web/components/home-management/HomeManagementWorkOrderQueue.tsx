@@ -964,7 +964,7 @@ export function HomeManagementWorkOrderQueue({
           if (!open) closeLifecycleDialog();
         }}
       >
-        <DialogContent className="max-w-lg" showClose={!isLifecycleDialogPending}>
+        <DialogContent className="max-w-lg p-0" showClose={!isLifecycleDialogPending}>
           {lifecycleDialog && (
             <form onSubmit={submitLifecycleAction} className="p-6">
               <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
@@ -1050,7 +1050,7 @@ export function HomeManagementWorkOrderQueue({
           else closeCreateDialog();
         }}
       >
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl p-0">
           <form onSubmit={submitWorkOrder} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Create a work order
@@ -1366,7 +1366,7 @@ export function HomeManagementWorkOrderQueue({
           else closeCreateUnitDialog();
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg p-0">
           <form onSubmit={submitUnit} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Add a unit

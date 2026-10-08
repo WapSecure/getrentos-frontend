@@ -185,7 +185,7 @@ export default function LandlordViewingRequestsPage() {
       )}
 
       <Dialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md p-0">
           <div className="p-4 border-b border-border">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Confirm viewing

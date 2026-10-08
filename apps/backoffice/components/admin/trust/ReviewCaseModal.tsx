@@ -204,7 +204,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   return (
     <Dialog open={Boolean(caseItem)} onOpenChange={(open) => !open && handleClose()}>
       {caseItem && (
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl p-0">
           <div className="p-4 border-b border-border pr-12">
             <DialogTitle className="flex items-center gap-2 font-semibold text-foreground">
               <Fingerprint className="h-4 w-4 text-primary" />

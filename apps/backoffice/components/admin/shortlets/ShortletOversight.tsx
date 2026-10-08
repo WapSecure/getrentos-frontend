@@ -1733,7 +1733,7 @@ function PayoutDetailModal({
 }) {
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl p-0">
         <div className="p-5">
           <DialogTitle>Payout detail</DialogTitle>
           <DialogDescription>
@@ -1917,7 +1917,7 @@ function DisputeThreadModal({
   const resolved = dispute.status === 'RESOLVED';
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl p-0">
         <div className="p-5">
           <DialogTitle>{dispute.title}</DialogTitle>
           <DialogDescription>
@@ -2162,7 +2162,7 @@ function AdjudicateClaimModal({
   return (
     <>
       <Dialog open onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg p-0">
           <div className="p-5">
             <DialogTitle className="flex items-center gap-2">
               <ShieldAlert className="h-5 w-5" /> Adjudicate deposit claim

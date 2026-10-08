@@ -13,7 +13,7 @@ interface ListingPreviewModalProps {
 
 export const ListingPreviewModal = ({ listing, onClose }: ListingPreviewModalProps) => (
   <Dialog open={!!listing} onOpenChange={(open) => !open && onClose()}>
-    <DialogContent>
+    <DialogContent className="p-0">
       {/* Keyed so the photo/video viewer starts fresh for each listing. */}
       {listing && <ListingPreview key={listing.id} listing={listing} />}
     </DialogContent>

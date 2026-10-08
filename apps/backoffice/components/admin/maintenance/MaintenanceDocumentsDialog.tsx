@@ -38,7 +38,7 @@ export const MaintenanceDocumentsDialog = ({
   onClose,
 }: MaintenanceDocumentsDialogProps) => (
   <Dialog open onOpenChange={(open) => !open && onClose()}>
-    <DialogContent className="max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <DialogContent className="max-w-xl overflow-hidden flex flex-col max-h-[90vh] p-0">
       <div className="p-4 border-b border-border shrink-0 pr-12">
         <DialogTitle className="font-semibold text-foreground">{recordLabel} documents</DialogTitle>
         <p className="text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</p>

@@ -32,7 +32,7 @@ export const ChargeUnitModal = ({
   errorMessage,
 }: ChargeUnitModalProps) => (
   <Dialog open={!!unit} onOpenChange={(open) => !open && onClose()}>
-    <DialogContent className="max-w-md">
+    <DialogContent className="max-w-md p-0">
       {unit && (
         <ChargeUnitForm
           key={unit.id}

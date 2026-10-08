@@ -161,7 +161,7 @@ export const LandRegistrationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent>
+      <DialogContent className="p-0">
         <div className="border-b border-border p-5">
           <div className="flex items-start gap-3">
             <span className="rounded-xl bg-primary/10 p-2.5 text-primary">

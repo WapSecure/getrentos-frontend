@@ -420,7 +420,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         open={Boolean(activeListing)}
         onOpenChange={(open) => !open && setActiveListing(null)}
       >
-        <DialogContent>
+        <DialogContent className="p-0">
           {activeListing && (
             <div className="max-h-[85vh] overflow-y-auto">
               <div className="relative flex h-48 items-center justify-center bg-muted">

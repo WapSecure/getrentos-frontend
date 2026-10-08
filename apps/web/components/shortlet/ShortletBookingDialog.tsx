@@ -114,7 +114,7 @@ export function ShortletBookingDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg p-0">
         <div className="p-5">
           <DialogTitle>{listing.title}</DialogTitle>
           <DialogDescription>

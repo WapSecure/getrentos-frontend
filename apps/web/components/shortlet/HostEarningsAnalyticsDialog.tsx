@@ -56,7 +56,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl p-0">
         <div className="p-5">
           <DialogTitle>Earnings analytics</DialogTitle>
           <DialogDescription>Your shortlet earnings across all listings.</DialogDescription>

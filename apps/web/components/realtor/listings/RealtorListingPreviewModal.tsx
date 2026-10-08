@@ -57,7 +57,7 @@ export const RealtorListingPreviewModal = ({
 }: RealtorListingPreviewModalProps) => {
   return (
     <Dialog open={!!listing} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent className="p-0">
         {listing && (
           <>
             <div className="relative h-40 bg-muted">

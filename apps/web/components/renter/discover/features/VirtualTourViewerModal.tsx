@@ -61,7 +61,7 @@ export const VirtualTourViewerModal = ({
 
   return (
     <Dialog open={!!propertyTitle} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg p-0">
         <div className="p-4 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">{propertyTitle}</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">

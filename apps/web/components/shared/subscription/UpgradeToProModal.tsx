@@ -32,7 +32,7 @@ export const UpgradeToProModal = ({ isOpen, onClose, reason }: UpgradeToProModal
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm p-0">
         <div className="p-6 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-primary">
             <BadgeCheck className="h-6 w-6" />

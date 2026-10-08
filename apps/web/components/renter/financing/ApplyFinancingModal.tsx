@@ -46,7 +46,7 @@ export const ApplyFinancingModal = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent>
+      <DialogContent className="p-0">
         <div className="p-4 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">
             {step === 'select' ? 'Choose Your Plan' : 'Review & Confirm'}

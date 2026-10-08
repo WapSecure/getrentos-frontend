@@ -842,7 +842,7 @@ export function HomeManagementWorkOrderInvoices({
           else closeCreateDialog();
         }}
       >
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl p-0">
           <form onSubmit={submitInvoiceForm} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Create vendor invoice
@@ -1107,7 +1107,7 @@ export function HomeManagementWorkOrderInvoices({
           if (!open) closeActionDialog();
         }}
       >
-        <DialogContent className="max-w-lg" showClose={!actionDialogPending}>
+        <DialogContent className="max-w-lg p-0" showClose={!actionDialogPending}>
           {actionDialog && (
             <form onSubmit={submitInvoiceAction} className="p-6">
               <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">

@@ -28,7 +28,7 @@ export const SignLeaseModal = ({ lease, onClose, onSign, isPending }: SignLeaseM
 
   return (
     <Dialog open={!!lease} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg p-0">
         {lease && (
           <div className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">

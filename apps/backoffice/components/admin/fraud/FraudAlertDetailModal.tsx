@@ -73,7 +73,7 @@ export const FraudAlertDetailModal = ({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg overflow-hidden flex flex-col">
+      <DialogContent className="max-w-lg overflow-hidden flex flex-col p-0">
         <div className="p-4 border-b border-border shrink-0 pr-12">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">

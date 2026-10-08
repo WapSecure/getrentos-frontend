@@ -158,7 +158,7 @@ export function ShortletPeakPricingDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl p-0">
         <div className="p-5">
           <DialogTitle>Pricing &amp; seasons · {listing.title}</DialogTitle>
           <DialogDescription>

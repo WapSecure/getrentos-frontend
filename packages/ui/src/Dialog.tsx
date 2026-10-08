@@ -40,7 +40,10 @@ export const DialogContent = ({ children, className, showClose = true }: DialogC
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 8 }}
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/90 bg-card shadow-2xl focus:outline-none',
+          // p-6 is the default so a modal is never flush to the edge; a full-bleed
+          // modal (image preview, section layout with full-width dividers) opts out
+          // with `p-0`, and tailwind-merge lets that — or any p-* — win over this.
+          'fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/90 bg-card p-6 shadow-2xl focus:outline-none',
           className
         )}
       >

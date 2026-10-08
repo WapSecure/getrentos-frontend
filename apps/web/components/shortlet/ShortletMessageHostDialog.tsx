@@ -37,7 +37,7 @@ export function ShortletMessageHostDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-0">
         <div className="p-5">
           <DialogTitle>Message the host</DialogTitle>
           <DialogDescription>Ask about {listing.title} before you book.</DialogDescription>

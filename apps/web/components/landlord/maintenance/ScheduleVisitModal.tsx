@@ -21,7 +21,7 @@ export const ScheduleVisitModal = ({
   error = null,
 }: ScheduleVisitModalProps) => (
   <Dialog open={!!request} onOpenChange={(open) => !open && onClose()}>
-    <DialogContent>
+    <DialogContent className="p-0">
       {request && (
         <ScheduleForm
           key={request.id}

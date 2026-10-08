@@ -51,7 +51,7 @@ export function ShortletGuestReviewDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-0">
         <div className="p-5">
           <DialogTitle>Review your guest</DialogTitle>
           <DialogDescription>

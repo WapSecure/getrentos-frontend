@@ -38,7 +38,7 @@ export const UserDetailModal = ({
   return (
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
       {user && (
-        <DialogContent>
+        <DialogContent className="p-0">
           <div className="p-4 border-b border-border flex justify-between items-center pr-12">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">

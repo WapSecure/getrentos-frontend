@@ -522,7 +522,7 @@ export function HomeManagementWorkOrderQuotes({
           else closeCreateDialog();
         }}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl p-0">
           <form onSubmit={submitQuote} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Record vendor quote
@@ -647,7 +647,7 @@ export function HomeManagementWorkOrderQuotes({
           if (!open) closeActionDialog();
         }}
       >
-        <DialogContent className="max-w-lg" showClose={!actionDialogIsPending}>
+        <DialogContent className="max-w-lg p-0" showClose={!actionDialogIsPending}>
           {actionDialog && (
             <form onSubmit={submitAction} className="p-6">
               <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">

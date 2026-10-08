@@ -156,7 +156,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl p-0">
           <form
             onSubmit={(event) => {
               event.preventDefault();

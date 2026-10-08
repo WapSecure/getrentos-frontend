@@ -525,7 +525,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         <BlockDatesDialog listing={blockTarget} onClose={() => setBlockTarget(null)} />
       )}
       <Dialog open={messagesOpen} onOpenChange={(o) => !o && setMessagesOpen(false)}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl p-0">
           <ShortletMessagesInbox role="host" />
         </DialogContent>
       </Dialog>
@@ -539,12 +539,12 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         />
       )}
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl p-0">
           <ShortletDisputesInbox />
         </DialogContent>
       </Dialog>
       <Dialog open={claimsOpen} onOpenChange={(o) => !o && setClaimsOpen(false)}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl p-0">
           <ShortletDepositClaimsInbox role="host" />
         </DialogContent>
       </Dialog>
@@ -713,7 +713,7 @@ function CreateListingDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg p-0">
         <div className="p-5">
           <DialogTitle>New Shortlet Listing</DialogTitle>
           <DialogDescription>
@@ -968,7 +968,7 @@ function EditListingDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg p-0">
         <div className="p-5">
           <DialogTitle>Edit {listing.title}</DialogTitle>
           <DialogDescription>Update pricing and availability rules.</DialogDescription>
@@ -1145,7 +1145,7 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-0">
         <div className="p-5">
           <DialogTitle>Block dates · {listing.title}</DialogTitle>
           <DialogDescription>Unavailable check-in dates for this listing.</DialogDescription>

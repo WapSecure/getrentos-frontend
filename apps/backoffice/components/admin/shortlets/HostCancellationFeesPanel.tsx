@@ -184,7 +184,7 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
 
       {waiveTarget && (
         <Dialog open onOpenChange={(o) => !o && setWaiveTarget(null)}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md p-0">
             <div className="p-5">
               <DialogTitle>Waive this fee?</DialogTitle>
               <DialogDescription>

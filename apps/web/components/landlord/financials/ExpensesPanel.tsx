@@ -192,7 +192,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
       )}
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg p-0">
           <form onSubmit={submit} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Record an expense

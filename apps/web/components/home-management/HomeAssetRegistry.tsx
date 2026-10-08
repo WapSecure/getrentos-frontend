@@ -430,7 +430,7 @@ export function HomeAssetRegistry({
       </div>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl p-0">
           <form onSubmit={submitAsset} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Add an asset

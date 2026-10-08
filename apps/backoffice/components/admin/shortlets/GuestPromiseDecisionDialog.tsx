@@ -81,7 +81,7 @@ export function GuestPromiseDecisionDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg p-0">
         <div className="p-5">
           <DialogTitle>Decide this Guest Promise report</DialogTitle>
           <DialogDescription>

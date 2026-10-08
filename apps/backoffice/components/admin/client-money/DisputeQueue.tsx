@@ -202,7 +202,7 @@ export function DisputeQueue({
             if (!open) setPending(null);
           }}
         >
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg p-0">
             <div className="p-6">
               <DialogTitle className="text-lg font-semibold tracking-[-0.02em]">
                 Decide this query

@@ -44,7 +44,7 @@ export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl p-0">
         <div className="p-5">
           <DialogTitle>Saved shortlets</DialogTitle>
           <DialogDescription>Shortlets you saved to visit later.</DialogDescription>

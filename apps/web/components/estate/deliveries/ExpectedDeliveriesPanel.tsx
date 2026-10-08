@@ -168,7 +168,7 @@ export const ExpectedDeliveriesPanel = () => {
       )}
 
       <Dialog open={isDeclareOpen} onOpenChange={(open) => !open && closeDeclare()}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md p-0">
           <div className="p-6">
             {issued ? (
               <>

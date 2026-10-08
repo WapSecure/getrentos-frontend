@@ -212,7 +212,7 @@ export const LandDiligenceReviewDialog = ({
   return (
     <Dialog open={Boolean(record)} onOpenChange={(open) => !open && handleClose()}>
       {record && (
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl p-0">
           <div className="border-b border-border px-5 py-4 pr-12">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
