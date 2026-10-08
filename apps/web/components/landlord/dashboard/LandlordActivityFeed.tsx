@@ -12,28 +12,28 @@ type ActivityType = 'payment' | 'maintenance' | 'lease' | 'application' | 'expen
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   payment: {
     icon: CreditCard,
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    color: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-success-subtle',
+    color: 'text-success',
   },
   maintenance: {
     icon: Wrench,
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-subtle',
+    color: 'text-purple',
   },
   lease: {
     icon: CalendarClock,
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    color: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-warning-subtle',
+    color: 'text-warning',
   },
   application: {
     icon: UserPlus,
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    color: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-info-subtle',
+    color: 'text-info',
   },
   expense: {
     icon: Receipt,
-    bg: 'bg-rose-50 dark:bg-rose-950/20',
-    color: 'text-rose-600 dark:text-rose-400',
+    bg: 'bg-destructive/10',
+    color: 'text-destructive',
   },
 };
 

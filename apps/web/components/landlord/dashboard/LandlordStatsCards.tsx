@@ -18,39 +18,37 @@ interface StatCardProps {
   label: string;
   value: number | string;
   subtitle?: string;
-  color: string;
+  tone: StatTone;
   delay: number;
   isCurrency?: boolean;
 }
 
-const colorClasses = {
-  blue: { bg: 'bg-blue-50 dark:bg-blue-950/20', icon: 'text-blue-600 dark:text-blue-400' },
-  green: { bg: 'bg-green-50 dark:bg-green-950/20', icon: 'text-green-600 dark:text-green-400' },
-  orange: {
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    icon: 'text-orange-600 dark:text-orange-400',
-  },
-  amber: {
-    bg: 'bg-amber-50 dark:bg-amber-950/20',
-    icon: 'text-amber-600 dark:text-amber-400',
-  },
-  emerald: {
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    icon: 'text-emerald-600 dark:text-emerald-400',
-  },
-  red: { bg: 'bg-red-50 dark:bg-red-950/20', icon: 'text-red-600 dark:text-red-400' },
-  purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    icon: 'text-purple-600 dark:text-purple-400',
-  },
-} as const;
+/**
+ * The accent behind each figure.
+ *
+ * Seven cards used to carry seven hues — blue, green, amber, orange, emerald,
+ * red and purple — which is a colour per card rather than a colour per meaning,
+ * and left `green` sitting next to `emerald` as if they said different things.
+ * These are the five the design system has, so a card is now coloured by what it
+ * reports: healthy, needs attention, or neutral.
+ */
+type StatTone = 'info' | 'success' | 'warning' | 'muted' | 'purple' | 'destructive';
+
+const toneClasses: Record<StatTone, { bg: string; icon: string }> = {
+  info: { bg: 'bg-info-subtle', icon: 'text-info' },
+  success: { bg: 'bg-success-subtle', icon: 'text-success' },
+  warning: { bg: 'bg-warning-subtle', icon: 'text-warning' },
+  muted: { bg: 'bg-muted', icon: 'text-muted-foreground' },
+  purple: { bg: 'bg-purple-subtle', icon: 'text-purple' },
+  destructive: { bg: 'bg-destructive/10', icon: 'text-destructive' },
+};
 
 const StatCard = ({
   icon: Icon,
   label,
   value,
   subtitle,
-  color,
+  tone,
   delay,
   isCurrency,
 }: StatCardProps) => {
@@ -58,7 +56,7 @@ const StatCard = ({
     isCurrency && typeof value === 'number' ? formatCurrency(value, { compact: true }) : value;
   const valueStr = String(formattedValue);
   const valueSize = valueStr.length > 10 ? 'text-lg' : valueStr.length > 8 ? 'text-xl' : 'text-2xl';
-  const colors = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
+  const colors = toneClasses[tone];
 
   return (
     <motion.div
@@ -108,13 +106,13 @@ export const LandlordStatsCards = ({
   activeMaintenanceRequests,
 }: LandlordStatsCardsProps) => {
   const { visible: moneyVisible } = useMonetaryVisibility();
-  const stats = [
+  const stats: StatCardProps[] = [
     {
       icon: Building2,
       label: 'Total Properties',
       value: totalProperties,
       subtitle: 'Across your portfolio',
-      color: 'blue',
+      tone: 'info',
       delay: 0,
     },
     {
@@ -122,7 +120,7 @@ export const LandlordStatsCards = ({
       label: 'Occupied Units',
       value: occupiedUnits,
       subtitle: 'Signed and let',
-      color: 'green',
+      tone: 'success',
       delay: 0.05,
     },
     {
@@ -132,7 +130,7 @@ export const LandlordStatsCards = ({
       // Off the market but not let: a lease is out for signature or the first
       // payment is still due. Counting these as rented overstated the tenancy.
       subtitle: 'Awaiting signature or payment',
-      color: 'amber',
+      tone: 'warning',
       delay: 0.08,
     },
     {
@@ -140,7 +138,7 @@ export const LandlordStatsCards = ({
       label: 'Vacant Units',
       value: vacantUnits,
       subtitle: 'Available now',
-      color: 'orange',
+      tone: 'muted',
       delay: 0.1,
     },
     {
@@ -151,7 +149,7 @@ export const LandlordStatsCards = ({
       // the tenancy twelvefold.
       value: moneyVisible ? annualRentRoll : '••••••',
       subtitle: 'Contracted across let units, per year',
-      color: 'emerald',
+      tone: 'success',
       delay: 0.15,
       isCurrency: true,
     },
@@ -163,7 +161,7 @@ export const LandlordStatsCards = ({
         outstandingPayments === 1
           ? 'Across 1 unpaid charge'
           : `Across ${outstandingPayments} unpaid charges`,
-      color: 'red',
+      tone: 'destructive',
       delay: 0.2,
       isCurrency: true,
     },
@@ -172,7 +170,7 @@ export const LandlordStatsCards = ({
       label: 'Active Maintenance',
       value: activeMaintenanceRequests,
       subtitle: 'Open tickets',
-      color: 'purple',
+      tone: 'warning',
       delay: 0.25,
     },
   ];
