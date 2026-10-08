@@ -174,7 +174,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                 </span>
                 <button
                   onClick={() => deleteExpense.mutate(expense.id)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary hover:text-red-600"
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary hover:text-destructive"
                   aria-label="Remove expense"
                 >
                   <Trash2 className="w-4 h-4" />

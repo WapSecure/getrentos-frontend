@@ -66,11 +66,11 @@ export const ApplicationDetailsModal = ({
                 </h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Mail className="w-4 h-4 text-gray-400" />
+                    <Mail className="w-4 h-4 text-muted-foreground/60" />
                     {application.applicantEmail}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Phone className="w-4 h-4 text-gray-400" />
+                    <Phone className="w-4 h-4 text-muted-foreground/60" />
                     {application.applicantPhone}
                   </div>
                 </div>
@@ -82,7 +82,7 @@ export const ApplicationDetailsModal = ({
                 employmentStatus={application.employmentStatus}
               />
 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground/60">
                 Submitted {formatDate(application.applicationDate, 'long')}
               </p>
             </div>

@@ -72,7 +72,9 @@ export function OpenLegalCaseModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
-        <DialogTitle>Open a case</DialogTitle>
+        <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          Open a case
+        </DialogTitle>
 
         <div className="mt-4 space-y-4">
           <Field label="What kind of matter" required>

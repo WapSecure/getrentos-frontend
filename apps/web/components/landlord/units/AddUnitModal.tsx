@@ -15,7 +15,8 @@ interface AddUnitModalProps {
   onClose: () => void;
   properties: Property[];
   defaultPropertyId?: string;
-  onSave: (unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => void;}
+  onSave: (unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => void;
+}
 
 export const AddUnitModal = ({
   isOpen,
@@ -87,7 +88,7 @@ export const AddUnitModal = ({
             <div className="p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Property <span className="text-red-500">*</span>
+                  Property <span className="text-destructive">*</span>
                 </label>
                 <LegacySelect
                   value={propertyId}
@@ -104,7 +105,7 @@ export const AddUnitModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Unit Name <span className="text-red-500">*</span>
+                  Unit Name <span className="text-destructive">*</span>
                 </label>
                 <LegacyInput
                   type="text"
@@ -139,9 +140,7 @@ export const AddUnitModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Rent (₦)
-                </label>
+                <label className="block text-sm font-medium text-foreground mb-1">Rent (₦)</label>
                 <div className="flex gap-2">
                   <CurrencyInput
                     prefix="₦"
@@ -162,8 +161,8 @@ export const AddUnitModal = ({
                   </select>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what
-                  the advert will ask for.
+                  Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what the
+                  advert will ask for.
                 </p>
               </div>
             </div>

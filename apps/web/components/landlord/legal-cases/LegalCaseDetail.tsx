@@ -253,7 +253,7 @@ export function LegalCaseDetail({
       <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold tracking-[-0.02em] text-foreground">
               <Scale className="h-4 w-4 text-muted-foreground" aria-hidden />
               <span className="truncate">{legalCase.kindLabel}</span>
             </DialogTitle>

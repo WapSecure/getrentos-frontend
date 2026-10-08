@@ -211,7 +211,7 @@ export default function LandlordViewingRequestsPage() {
             />
 
             {confirmMutation.isError && (
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-destructive">
                 Could not confirm the viewing. Please try again.
               </p>
             )}

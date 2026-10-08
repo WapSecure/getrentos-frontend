@@ -122,7 +122,8 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
-            Company / Business Name <span className="text-gray-400 font-normal">(optional)</span>
+            Company / Business Name{' '}
+            <span className="text-muted-foreground/60 font-normal">(optional)</span>
           </label>
           <input
             type="text"

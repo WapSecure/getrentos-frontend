@@ -86,7 +86,7 @@ const VendorForm = ({
         <div className="p-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
-              Vendor Name <span className="text-red-500">*</span>
+              Vendor Name <span className="text-destructive">*</span>
             </label>
             <LegacyInput
               type="text"
@@ -112,7 +112,7 @@ const VendorForm = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
-              Phone <span className="text-red-500">*</span>
+              Phone <span className="text-destructive">*</span>
             </label>
             <LegacyInput
               type="tel"
