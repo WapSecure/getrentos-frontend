@@ -693,6 +693,18 @@ export const landlordService = {
     );
   },
 
+  async recordLegalCaseAdvocate(
+    id: string,
+    data: { name: string; firm?: string; contact?: string; feeAgreement?: string }
+  ): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/advocate`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
   async closeLegalCase(id: string, notes?: string): Promise<ApiResponse<LegalCase>> {
     return safeCall(() =>
       authFetch(`/landlord/legal-cases/${id}/close`, {

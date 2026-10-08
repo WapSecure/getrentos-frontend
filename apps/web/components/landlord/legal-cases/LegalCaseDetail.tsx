@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   AlertTriangle,
+  Briefcase,
   CalendarClock,
   CheckCircle2,
   Gavel,
@@ -133,6 +134,17 @@ function timelineFor(legalCase: LegalCase): TimelineEntry[] {
     });
   }
 
+  if (legalCase.advocateInstructedAt) {
+    entries.push({
+      at: legalCase.advocateInstructedAt,
+      title: `Counsel instructed — ${legalCase.advocateName ?? ''}`.trim(),
+      detail:
+        [legalCase.advocateFirm, legalCase.advocateFeeAgreement].filter(Boolean).join(' · ') ||
+        undefined,
+      tone: 'neutral',
+    });
+  }
+
   if (legalCase.enforcementAt) {
     entries.push({
       at: legalCase.enforcementAt,
@@ -163,6 +175,7 @@ export function LegalCaseDetail({
   onScheduleHearing,
   onRecordHearing,
   onEnforce,
+  onRecordAdvocate,
   onClose,
   onWithdraw,
 }: {
@@ -181,6 +194,12 @@ export function LegalCaseDetail({
     decision?: { outcome: LegalCaseOutcome; notes?: string };
   }) => void;
   onEnforce: (input: { method: EnforcementMethod; notes?: string; enforcedAt?: string }) => void;
+  onRecordAdvocate: (input: {
+    name: string;
+    firm?: string;
+    contact?: string;
+    feeAgreement?: string;
+  }) => void;
   onClose: (notes?: string) => void;
   onWithdraw: () => void;
 }) {
@@ -195,12 +214,26 @@ export function LegalCaseDetail({
   const [decisionNotes, setDecisionNotes] = useState('');
   const [enforcementMethod, setEnforcementMethod] = useState<EnforcementMethod>('BAILIFF');
   const [enforcementNotes, setEnforcementNotes] = useState('');
+  const [advocateOpen, setAdvocateOpen] = useState(false);
+  const [advName, setAdvName] = useState('');
+  const [advFirm, setAdvFirm] = useState('');
+  const [advContact, setAdvContact] = useState('');
+  const [advFee, setAdvFee] = useState('');
 
   if (!legalCase) return null;
 
   const isDone = legalCase.status === 'CLOSED' || legalCase.status === 'WITHDRAWN';
   const needsLease = legalCase.kind === 'EVICTION' && legalCase.leaseId === null;
   const fileBlocked = legalCase.ladderReadyToFile === false;
+
+  const hasAdvocate = Boolean(legalCase.advocateName);
+  const openAdvocate = () => {
+    setAdvName(legalCase.advocateName ?? '');
+    setAdvFirm(legalCase.advocateFirm ?? '');
+    setAdvContact(legalCase.advocateContact ?? '');
+    setAdvFee(legalCase.advocateFeeAgreement ?? '');
+    setAdvocateOpen(true);
+  };
 
   const nextHearing = legalCase.hearings
     .filter((hearing) => hearing.heldAt === null)
@@ -275,6 +308,9 @@ export function LegalCaseDetail({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={openAdvocate}>
+                  {hasAdvocate ? 'Update advocate' : 'Record advocate'}
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => onClose(undefined)}>Close case</DropdownMenuItem>
                 <DropdownMenuItem onSelect={onWithdraw} className="text-destructive">
                   Withdraw case
@@ -296,6 +332,20 @@ export function LegalCaseDetail({
               <span className="text-foreground">· {legalCase.suitNumber}</span>
             )}
           </p>
+        )}
+
+        {hasAdvocate && !advocateOpen && (
+          <div className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground">
+            <Briefcase className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span>
+              <span className="text-foreground">{legalCase.advocateName}</span>
+              {legalCase.advocateFirm && ` · ${legalCase.advocateFirm}`}
+              {legalCase.advocateContact && ` · ${legalCase.advocateContact}`}
+              {legalCase.advocateFeeAgreement && (
+                <span className="mt-0.5 block text-xs">{legalCase.advocateFeeAgreement}</span>
+              )}
+            </span>
+          </div>
         )}
 
         {/* --- The one next action ------------------------------------------- */}
@@ -526,6 +576,73 @@ export function LegalCaseDetail({
             >
               Record enforcement
             </Button>
+          </section>
+        )}
+
+        {advocateOpen && (
+          <section className="mt-4 rounded-xl border border-border p-4">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              <Briefcase className="h-4 w-4 text-muted-foreground" aria-hidden />
+              {hasAdvocate ? 'Update the advocate' : 'Record the advocate'}
+            </h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <Field label="Advocate" required>
+                <input
+                  value={advName}
+                  onChange={(event) => setAdvName(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                  placeholder="Adaeze Okafor"
+                />
+              </Field>
+              <Field label="Firm">
+                <input
+                  value={advFirm}
+                  onChange={(event) => setAdvFirm(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                  placeholder="Okafor & Co."
+                />
+              </Field>
+            </div>
+            <Field label="Contact">
+              <input
+                value={advContact}
+                onChange={(event) => setAdvContact(event.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                placeholder="Phone or email, as on the brief"
+              />
+            </Field>
+            <Field label="Fee agreement">
+              <Textarea
+                value={advFee}
+                onChange={(event) => setAdvFee(event.target.value)}
+                rows={2}
+                placeholder="10% of the sum recovered, ₦250,000 on brief"
+              />
+            </Field>
+            <div className="mt-3 flex gap-2">
+              <Button
+                isLoading={isSubmitting}
+                disabled={!advName.trim()}
+                onClick={() => {
+                  onRecordAdvocate({
+                    name: advName.trim(),
+                    ...(advFirm.trim() ? { firm: advFirm.trim() } : {}),
+                    ...(advContact.trim() ? { contact: advContact.trim() } : {}),
+                    ...(advFee.trim() ? { feeAgreement: advFee.trim() } : {}),
+                  });
+                  setAdvocateOpen(false);
+                }}
+              >
+                {hasAdvocate ? 'Update' : 'Record'} advocate
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setAdvocateOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+            </div>
           </section>
         )}
 

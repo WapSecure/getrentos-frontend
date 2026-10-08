@@ -72,6 +72,13 @@ export interface LegalCase {
   enforcementAt: string | null;
   enforcementNotes: string | null;
 
+  /** The advocate instructed on the owner's behalf. Null until counsel is engaged. */
+  advocateName: string | null;
+  advocateFirm: string | null;
+  advocateContact: string | null;
+  advocateFeeAgreement: string | null;
+  advocateInstructedAt: string | null;
+
   openedById: string;
   openedByName: string | null;
   closedAt: string | null;
