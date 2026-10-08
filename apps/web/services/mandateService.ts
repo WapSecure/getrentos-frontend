@@ -89,6 +89,20 @@ export interface MandateViewerPermissions {
   canConfirmHandover: boolean;
 }
 
+export type ServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
+
+/** A published GetRentos Managed tier, as returned by the fee-card endpoint. */
+export interface ManagedTierCard {
+  tier: ServicingTier;
+  name: string;
+  feePct: number;
+  lettingCommissionPct: number;
+  renewalCommissionPct: number;
+  scope: MandateScope[];
+  summary: string;
+  includes: string[];
+}
+
 export interface ManagementMandateDto {
   id: string;
   propertyId: string;
@@ -98,6 +112,7 @@ export interface ManagementMandateDto {
   managerOrganizationId: string | null;
   managerOrganizationName?: string | null;
   managerIsGetRentos: boolean;
+  servicingTier: ServicingTier | null;
   managerUserId: string | null;
   managerName?: string | null;
   scope: MandateScope[];
@@ -167,6 +182,22 @@ export function managing(): Promise<ApiResponse<ManagementMandateDto[]>> {
 /** Every mandate on properties the caller owns — the other side of the same list. */
 export function mine(): Promise<ApiResponse<ManagementMandateDto[]>> {
   return safeCall(() => authFetch<ManagementMandateDto[]>('/management-mandates/mine'));
+}
+
+export function managedFeeCard(): Promise<ApiResponse<ManagedTierCard[]>> {
+  return safeCall(() => authFetch<ManagedTierCard[]>('/management-mandates/managed/fee-card'));
+}
+
+export function optIntoManaged(
+  propertyId: string,
+  tier: ServicingTier
+): Promise<ApiResponse<ManagementMandateDto>> {
+  return safeCall(() =>
+    authFetch<ManagementMandateDto>('/management-mandates/managed', {
+      method: 'POST',
+      body: JSON.stringify({ propertyId, tier }),
+    })
+  );
 }
 
 export function forProperty(propertyId: string): Promise<ApiResponse<ManagementMandateDto[]>> {
