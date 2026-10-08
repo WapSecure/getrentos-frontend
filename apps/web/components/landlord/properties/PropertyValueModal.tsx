@@ -67,7 +67,9 @@ const PropertyValueForm = ({
   return (
     <>
       <div className="p-4 border-b border-border">
-        <DialogTitle className="font-semibold text-foreground">{property.name}</DialogTitle>
+        <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          {property.name}
+        </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Add what it is worth and what it cost to see its cap rate and yield.
         </DialogDescription>

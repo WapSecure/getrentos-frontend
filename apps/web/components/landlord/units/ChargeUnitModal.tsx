@@ -75,7 +75,9 @@ const ChargeUnitForm = ({
   return (
     <>
       <div className="p-4 border-b border-border">
-        <DialogTitle className="font-semibold text-foreground">Charge rent</DialogTitle>
+        <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          Charge rent
+        </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           {unit.propertyName} • {unit.unitName}
           {unit.tenantName ? `: ${unit.tenantName}` : ''}

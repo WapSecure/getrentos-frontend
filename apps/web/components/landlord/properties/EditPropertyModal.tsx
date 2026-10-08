@@ -197,7 +197,9 @@ const EditPropertyForm = ({
   return (
     <>
       <div className="p-4 border-b border-border">
-        <DialogTitle className="font-semibold text-foreground">Edit Property</DialogTitle>
+        <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          Edit Property
+        </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Update your property&apos;s core details
         </DialogDescription>
@@ -312,7 +314,7 @@ const EditPropertyForm = ({
                     aria-label="Remove photo"
                     title="Remove photo"
                     onClick={() => removePhoto(photo.id)}
-                    className="rounded bg-black/70 p-1 text-white hover:bg-red-600"
+                    className="rounded bg-black/70 p-1 text-white hover:bg-destructive"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -339,7 +341,7 @@ const EditPropertyForm = ({
           </div>
 
           {photos.length === 0 && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+            <p className="text-xs text-warning">
               Without a photo your listing card shows a placeholder instead of the property.
             </p>
           )}
@@ -377,7 +379,7 @@ const EditPropertyForm = ({
                   type="button"
                   aria-label="Remove video tour"
                   onClick={clearVideo}
-                  className="text-xs font-medium text-red-600 hover:underline dark:text-red-400"
+                  className="text-xs font-medium text-destructive hover:underline"
                 >
                   Remove
                 </button>
@@ -395,7 +397,7 @@ const EditPropertyForm = ({
           )}
 
           {mediaError && (
-            <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+            <p role="alert" className="text-xs text-destructive">
               {mediaError}
             </p>
           )}

@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
+import { applicationStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import type { RentalApplication } from '@/types/landlord';
 
@@ -44,9 +45,9 @@ export const ApplicationCard = ({
                 {application.applicantName}
               </h3>
               {isVerified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" />
               ) : (
-                <ShieldAlert className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+                <ShieldAlert className="w-3.5 h-3.5 text-warning shrink-0" />
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
@@ -59,13 +60,13 @@ export const ApplicationCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Monthly Income</p>
+          <p className="text-xs text-muted-foreground/60">Monthly Income</p>
           <p className="text-sm font-medium text-foreground">
             {formatCurrency(application.monthlyIncome, { compact: true })}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Applied</p>
+          <p className="text-xs text-muted-foreground/60">Applied</p>
           <p className="text-sm font-medium text-foreground">
             {formatDate(application.applicationDate)}
           </p>
@@ -87,7 +88,7 @@ export const ApplicationCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="px-2.5 text-gray-500"
+              className="px-2.5 text-muted-foreground"
               title="Request more info"
               onClick={onRequestInfo}
             >
@@ -96,7 +97,7 @@ export const ApplicationCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="px-2.5 text-red-500 hover:text-red-700"
+              className="px-2.5 text-destructive hover:text-destructive"
               title="Reject"
               onClick={onReject}
             >
@@ -119,32 +120,6 @@ export const ApplicationCard = ({
 };
 
 const StatusBadge = ({ status }: { status: RentalApplication['status'] }) => {
-  const config: Record<RentalApplication['status'], { label: string; className: string }> = {
-    pending: {
-      label: 'Pending',
-      className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-    },
-    under_review: {
-      label: 'Under Review',
-      className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-    },
-    approved: {
-      label: 'Approved',
-      className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-    },
-    rejected: {
-      label: 'Rejected',
-      className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-    },
-    withdrawn: {
-      label: 'Withdrawn',
-      className: 'text-muted-foreground bg-secondary',
-    },
-  };
-  const { label, className } = config[status];
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${className}`}>
-      {label}
-    </span>
-  );
+  const { label, variant } = applicationStatusBadges[status];
+  return <Badge variant={variant}>{label}</Badge>;
 };

@@ -136,7 +136,7 @@ export const CreateLeaseModal = ({
                 <>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Unit <span className="text-red-500">*</span>
+                      Unit <span className="text-destructive">*</span>
                     </label>
                     <LegacySelect
                       value={unitId}
@@ -154,7 +154,7 @@ export const CreateLeaseModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Tenant Name <span className="text-red-500">*</span>
+                      Tenant Name <span className="text-destructive">*</span>
                     </label>
                     <LegacyInput
                       type="text"
@@ -164,7 +164,7 @@ export const CreateLeaseModal = ({
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     {selectedUnit?.approvedApplicant ? (
-                      <p className="mt-1.5 flex items-start gap-1.5 text-xs text-green-700 dark:text-green-400">
+                      <p className="mt-1.5 flex items-start gap-1.5 text-xs text-success">
                         <BadgeCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                         <span>
                           {selectedUnit.approvedApplicant.name} was approved for this unit. This
@@ -183,13 +183,13 @@ export const CreateLeaseModal = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Lease Start <span className="text-red-500">*</span>
+                        Lease Start <span className="text-destructive">*</span>
                       </label>
                       <DatePicker value={leaseStart} onChange={setLeaseStart} />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Lease End <span className="text-red-500">*</span>
+                        Lease End <span className="text-destructive">*</span>
                       </label>
                       <DatePicker value={leaseEnd} onChange={setLeaseEnd} min={leaseStart} />
                     </div>
@@ -198,7 +198,7 @@ export const CreateLeaseModal = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Rent Amount (₦) <span className="text-red-500">*</span>
+                        Rent Amount (₦) <span className="text-destructive">*</span>
                       </label>
                       <CurrencyInput
                         prefix="₦"

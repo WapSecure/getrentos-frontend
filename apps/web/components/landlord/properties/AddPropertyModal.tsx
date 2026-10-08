@@ -186,7 +186,7 @@ export const AddPropertyModal = ({
                   <div
                     key={label}
                     className={`h-1 flex-1 rounded-full transition-colors ${
-                      index <= step ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
+                      index <= step ? 'bg-primary' : 'bg-border'
                     }`}
                   />
                 ))}
@@ -198,7 +198,7 @@ export const AddPropertyModal = ({
                 <>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Property Name <span className="text-red-500">*</span>
+                      Property Name <span className="text-destructive">*</span>
                     </label>
                     <LegacyInput
                       type="text"
@@ -228,7 +228,7 @@ export const AddPropertyModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Address <span className="text-red-500">*</span>
+                      Address <span className="text-destructive">*</span>
                     </label>
                     <LegacyInput
                       type="text"
@@ -288,7 +288,8 @@ export const AddPropertyModal = ({
                   />
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Gallery Images <span className="text-gray-400 font-normal">(optional)</span>
+                      Gallery Images{' '}
+                      <span className="text-muted-foreground/60 font-normal">(optional)</span>
                     </label>
                     <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors">
                       <LegacyInput
@@ -335,9 +336,9 @@ export const AddPropertyModal = ({
 
               {step === 2 && (
                 <>
-                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                    <ShieldCheck className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <div className="p-3 rounded-xl bg-info-subtle border border-info/30 flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-info mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground">
                       Verification documents are optional at this stage, but properties without at
                       least one document will show as unverified to renters and buyers until
                       submitted.
@@ -472,7 +473,7 @@ const UploadField = ({
   return (
     <div>
       <label className="block text-sm font-medium text-foreground mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
+        {label} {required && <span className="text-destructive">*</span>}
       </label>
       <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
         <LegacyInput
@@ -481,11 +482,11 @@ const UploadField = ({
           accept={accept}
           onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
-        <Icon className="w-4 h-4 text-gray-400 shrink-0" />
+        <Icon className="w-4 h-4 text-muted-foreground/60 shrink-0" />
         <span className="text-sm text-muted-foreground truncate">
           {file?.name || 'Click to select'}
         </span>
-        {file && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
+        {file && <Check className="w-4 h-4 text-success shrink-0 ml-auto" />}
       </label>
       {file && (file.type.startsWith('image/') || file.type.startsWith('video/')) && (
         <MediaPreview key={`${file.name}-${file.lastModified}`} file={file} />

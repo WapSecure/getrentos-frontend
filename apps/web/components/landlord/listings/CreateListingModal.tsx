@@ -134,7 +134,7 @@ export const CreateListingModal = ({
                 <>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Unit <span className="text-red-500">*</span>
+                      Unit <span className="text-destructive">*</span>
                     </label>
                     <Select
                       value={unitId}
@@ -149,7 +149,7 @@ export const CreateListingModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Listing Title <span className="text-red-500">*</span>
+                      Listing Title <span className="text-destructive">*</span>
                     </label>
                     <LegacyInput
                       type="text"
@@ -161,7 +161,7 @@ export const CreateListingModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">
-                      Rent Period <span className="text-red-500">*</span>
+                      Rent Period <span className="text-destructive">*</span>
                     </label>
                     <div className="flex gap-2">
                       {(['year', 'month'] as RentPeriod[]).map((p) => (
@@ -172,7 +172,7 @@ export const CreateListingModal = ({
                           className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
                             rentPeriod === p
                               ? 'bg-accent border-primary text-primary'
-                              : 'border-border text-muted-foreground hover:border-gray-300'
+                              : 'border-border text-muted-foreground hover:border-muted-foreground/40'
                           }`}
                         >
                           {p === 'year' ? 'Yearly (recommended)' : 'Monthly'}
@@ -189,7 +189,7 @@ export const CreateListingModal = ({
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
                         {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
-                        <span className="text-red-500">*</span>
+                        <span className="text-destructive">*</span>
                       </label>
                       <CurrencyInput
                         prefix="₦"
@@ -218,7 +218,7 @@ export const CreateListingModal = ({
                         type="checkbox"
                         checked={allowsMonthlyPayment}
                         onChange={(e) => setAllowsMonthlyPayment(e.target.checked)}
-                        className="w-4 h-4 mt-0.5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                        className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
                       />
                       <span>
                         <span className="flex items-center gap-1.5 font-medium">
@@ -235,7 +235,7 @@ export const CreateListingModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Availability Date <span className="text-red-500">*</span>
+                      Availability Date <span className="text-destructive">*</span>
                     </label>
                     <DatePicker value={availabilityDate} onChange={setAvailabilityDate} />
                   </div>
@@ -253,7 +253,7 @@ export const CreateListingModal = ({
                           className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                             amenities.includes(amenity)
                               ? 'bg-accent border-primary text-primary'
-                              : 'border-border text-muted-foreground hover:border-gray-300'
+                              : 'border-border text-muted-foreground hover:border-muted-foreground/40'
                           }`}
                         >
                           {amenity}
@@ -268,7 +268,7 @@ export const CreateListingModal = ({
                         type="checkbox"
                         checked={allowPets}
                         onChange={(e) => setAllowPets(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                       Allow pets
                     </label>
@@ -277,7 +277,7 @@ export const CreateListingModal = ({
                         type="checkbox"
                         checked={furnished}
                         onChange={(e) => setFurnished(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                       Furnished
                     </label>
@@ -286,7 +286,7 @@ export const CreateListingModal = ({
                         type="checkbox"
                         checked={shortLetEnabled}
                         onChange={(e) => setShortLetEnabled(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                       Short-let enabled
                     </label>
