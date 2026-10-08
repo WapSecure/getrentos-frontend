@@ -26,6 +26,7 @@ import {
   ClipboardList,
   Warehouse,
   CreditCard,
+  Sparkles,
 } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -68,6 +69,12 @@ const navItems: NavItem[] = [
     label: 'Property Authorities',
     href: '/admin/property-authorities',
     icon: Building2,
+    permission: 'verifications.approve',
+  },
+  {
+    label: 'GetRentos Managed',
+    href: '/admin/managed-mandates',
+    icon: Sparkles,
     permission: 'verifications.approve',
   },
   {
