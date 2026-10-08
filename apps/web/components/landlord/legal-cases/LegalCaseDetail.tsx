@@ -10,11 +10,9 @@ import {
   Landmark,
   Lock,
   MoreVertical,
-  Scale,
   ShieldAlert,
 } from 'lucide-react';
 import {
-  Badge,
   Button,
   DatePicker,
   Dialog,
@@ -286,9 +284,8 @@ export function LegalCaseDetail({
       <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <DialogTitle className="flex items-center gap-2 text-xl font-semibold tracking-[-0.02em] text-foreground">
-              <Scale className="h-4 w-4 text-muted-foreground" aria-hidden />
-              <span className="truncate">{legalCase.kindLabel}</span>
+            <DialogTitle className="truncate text-xl font-semibold tracking-[-0.02em] text-foreground">
+              {legalCase.kindLabel}
             </DialogTitle>
             <p className="mt-1 truncate text-sm text-muted-foreground">
               {legalCase.property.address}, {legalCase.property.city}
@@ -335,7 +332,7 @@ export function LegalCaseDetail({
         )}
 
         {hasAdvocate && !advocateOpen && (
-          <div className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground">
+          <div className="mt-3 flex items-start gap-1.5 text-sm text-muted-foreground">
             <Briefcase className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             <span>
               <span className="text-foreground">{legalCase.advocateName}</span>
@@ -697,9 +694,9 @@ export function LegalCaseDetail({
           </p>
         )}
 
-        <div className="mt-5 flex justify-end">
-          <Badge variant="neutral">Opened by {legalCase.openedByName ?? 'unknown'}</Badge>
-        </div>
+        <p className="mt-5 text-xs text-muted-foreground">
+          Opened by {legalCase.openedByName ?? 'unknown'}
+        </p>
       </DialogContent>
     </Dialog>
   );
