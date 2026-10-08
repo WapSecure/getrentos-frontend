@@ -96,8 +96,10 @@ const lifecycleVariant = (status: string): BadgeVariant => {
     APPROVED: 'success',
     RESOLVED: 'success',
     WITHDRAWN: 'neutral',
-    ISSUED: 'warning',
     FILED: 'info',
+    DECIDED: 'warning',
+    OPEN: 'neutral',
+    CLOSED: 'success',
     PENDING: 'warning',
   };
   return map[status] ?? 'neutral';
@@ -191,11 +193,15 @@ const terminationStatusOptions = [
   { value: 'APPROVED', label: 'Approved' },
   { value: 'REJECTED', label: 'Rejected' },
 ];
+/**
+ * No `DECIDED`: deciding a case needs an outcome, so it goes through the
+ * decision route rather than a status correction. An officer can reposition a
+ * case between steps; they cannot say what a court decided.
+ */
 const evictionStatusOptions = [
-  { value: 'DRAFT', label: 'Draft' },
-  { value: 'ISSUED', label: 'Issued' },
+  { value: 'OPEN', label: 'Open' },
   { value: 'FILED', label: 'Filed' },
-  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'CLOSED', label: 'Closed' },
   { value: 'WITHDRAWN', label: 'Withdrawn' },
 ];
 
@@ -881,11 +887,18 @@ export function EvictionsQueue() {
       },
       {
         key: 'reason',
-        header: 'Reason',
+        header: 'Matter',
         render: (e) => (
           <p className="max-w-[220px] truncate text-muted-foreground" title={e.reason}>
             {e.reason}
           </p>
+        ),
+      },
+      {
+        key: 'suit',
+        header: 'Suit',
+        render: (e) => (
+          <Cell primary={e.suitNumber ?? 'Not filed'} secondary={e.court ?? undefined} />
         ),
       },
       {

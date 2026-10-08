@@ -36,7 +36,10 @@ export const landlordKeys = {
       params?.priority ?? 'all',
     ] as const,
   maintenanceSummary: ['landlord', 'maintenanceSummary'] as const,
-  evictions: ['landlord', 'evictions'] as const,
+  /** Legal cases: recovery, injunction, title dispute, and eviction. */
+  legalCases: ['landlord', 'legal-cases'] as const,
+  legalCase: (id: string) => ['landlord', 'legal-cases', id] as const,
+  outstandingLegalCases: ['landlord', 'legal-cases', 'outstanding'] as const,
   /** The notice ladder for one tenancy, and the period register behind it. */
   leaseLadder: (leaseId: string) => ['landlord', 'tenancy-notices', 'ladder', leaseId] as const,
   notices: ['landlord', 'tenancy-notices'] as const,

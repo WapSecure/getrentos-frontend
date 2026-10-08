@@ -11,7 +11,6 @@ import type {
   RentPayment,
   Vendor,
   LandlordMaintenanceRequest,
-  EvictionCase,
   RentIncreaseCheck,
   TenancyStanding,
   LandlordLead,
@@ -29,6 +28,14 @@ import type {
   ScreeningReference,
   ReferenceOutcome,
 } from '@/types/landlord';
+import type {
+  EnforcementMethod,
+  HearingOutcome,
+  LegalCase,
+  LegalCaseKind,
+  LegalCaseOutcome,
+  LegalCaseStatus,
+} from '@/types/legal-case';
 import type {
   LeaseLadder,
   NoticeKind,
@@ -607,57 +614,143 @@ export const landlordService = {
     });
   },
 
-  // ---- Evictions ----
-  async listEvictions(
-    params: { page?: number; pageSize?: number } = {}
-  ): Promise<ApiResponse<Paginated<EvictionCase>>> {
+  // ---- Legal cases ----
+  //
+  // An eviction is `kind: 'EVICTION'` rather than its own endpoint. The notice
+  // steps that used to live here (`issue-notice` with a hand-typed cure period)
+  // are gone: notices belong to the tenancy's ladder, which resolves the period,
+  // records where the number came from, and refuses to invent one.
+
+  async listLegalCases(
+    params: {
+      propertyId?: string;
+      leaseId?: string;
+      status?: LegalCaseStatus;
+      kind?: LegalCaseKind;
+      limit?: number;
+    } = {}
+  ): Promise<ApiResponse<{ cases: LegalCase[]; limit: number; truncated: boolean }>> {
+    return safeCall(() => authFetch(`/landlord/legal-cases${toQuery(params)}`));
+  },
+
+  /** Cases that still have something to do — for a worklist rather than an archive. */
+  async listOutstandingLegalCases(limit?: number): Promise<ApiResponse<LegalCase[]>> {
+    return safeCall(() => authFetch(`/landlord/legal-cases/outstanding${toQuery({ limit })}`));
+  },
+
+  async getLegalCase(id: string): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() => authFetch(`/landlord/legal-cases/${id}`));
+  },
+
+  async openLegalCase(data: {
+    kind: LegalCaseKind;
+    propertyId: string;
+    /** Required for an eviction: the notices are what the claim is built on. */
+    leaseId?: string;
+    tenantId?: string;
+    description: string;
+  }): Promise<ApiResponse<LegalCase>> {
     return safeCall(() =>
-      authFetch<Paginated<EvictionCase>>(`/landlord/evictions${toQuery(params)}`)
+      authFetch('/landlord/legal-cases', { method: 'POST', body: JSON.stringify(data) })
     );
   },
 
-  async initiateEviction(leaseId: string, reason: string): Promise<ApiResponse<EvictionCase>> {
+  /**
+   * File in court. For a possession case this is refused until the notice to
+   * quit and the notice of intention have both run out, so the server's refusal
+   * is worth showing verbatim rather than replacing with something generic.
+   */
+  async fileLegalCase(
+    id: string,
+    data: { court: string; suitNumber: string }
+  ): Promise<ApiResponse<LegalCase>> {
     return safeCall(() =>
-      authFetch('/landlord/evictions', {
+      authFetch(`/landlord/legal-cases/${id}/file`, { method: 'PATCH', body: JSON.stringify(data) })
+    );
+  },
+
+  async decideLegalCase(
+    id: string,
+    data: { outcome: LegalCaseOutcome; notes?: string; decidedAt?: string }
+  ): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/decide`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async enforceLegalCase(
+    id: string,
+    data: { method: EnforcementMethod; notes?: string; enforcedAt?: string }
+  ): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/enforce`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async closeLegalCase(id: string, notes?: string): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/close`, {
+        method: 'PATCH',
+        body: JSON.stringify({ notes }),
+      })
+    );
+  },
+
+  async withdrawLegalCase(id: string, reason: string): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/withdraw`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  async scheduleHearing(
+    id: string,
+    data: { scheduledFor: string; purpose?: string }
+  ): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/hearings`, {
         method: 'POST',
-        body: JSON.stringify({ leaseId, reason }),
+        body: JSON.stringify(data),
       })
     );
   },
 
-  async issueEvictionNotice(id: string, cureDays: number): Promise<ApiResponse<EvictionCase>> {
+  /**
+   * Record what happened at a sitting. An adjournment must name the date it was
+   * adjourned to, and the server books that as the next sitting.
+   */
+  async recordHearing(
+    id: string,
+    hearingId: string,
+    data: { heldAt: string; outcome: HearingOutcome; notes?: string; adjournNextFor?: string }
+  ): Promise<ApiResponse<LegalCase>> {
     return safeCall(() =>
-      authFetch(`/landlord/evictions/${id}/issue-notice`, {
+      authFetch(`/landlord/legal-cases/${id}/hearings/${hearingId}`, {
         method: 'PATCH',
-        body: JSON.stringify({ cureDays }),
+        body: JSON.stringify(data),
       })
     );
   },
 
-  async markEvictionFiled(id: string): Promise<ApiResponse<EvictionCase>> {
-    return safeCall(() => authFetch(`/landlord/evictions/${id}/file`, { method: 'PATCH' }));
-  },
-
-  async resolveEviction(id: string, resolutionNotes?: string): Promise<ApiResponse<EvictionCase>> {
-    return safeCall(() =>
-      authFetch(`/landlord/evictions/${id}/resolve`, {
-        method: 'PATCH',
-        body: JSON.stringify({ resolutionNotes }),
-      })
-    );
-  },
-
-  async withdrawEviction(id: string): Promise<ApiResponse<EvictionCase>> {
-    return safeCall(() => authFetch(`/landlord/evictions/${id}/withdraw`, { method: 'PATCH' }));
-  },
-
-  async downloadEvictionNoticePdf(id: string): Promise<ApiResponse<void>> {
+  /**
+   * The printable notice record. Still an internal draft rather than a certified
+   * notice — the PDF says so on its face.
+   */
+  async downloadNoticePdf(noticeId: string): Promise<ApiResponse<void>> {
     return safeCall(async () => {
-      const blob = await authDownload(`/landlord/evictions/${id}/notice.pdf`);
+      const blob = await authDownload(`/landlord/tenancy-notices/${noticeId}/document`);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `eviction-notice-${id}.pdf`;
+      link.download = `tenancy-notice-${noticeId}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();

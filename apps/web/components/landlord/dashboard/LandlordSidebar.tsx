@@ -88,7 +88,7 @@ export const navGroups = [
     items: [
       item('sidebar.financials', ROUTES.LANDLORD_FINANCIALS, PieChart),
       item('sidebar.notices', ROUTES.LANDLORD_NOTICES, ShieldAlert),
-      item('sidebar.evictions', ROUTES.LANDLORD_EVICTIONS, Gavel),
+      item('sidebar.legal_cases', ROUTES.LANDLORD_LEGAL_CASES, Gavel),
       item('sidebar.documents', ROUTES.LANDLORD_DOCUMENTS, FolderOpen),
     ],
   },

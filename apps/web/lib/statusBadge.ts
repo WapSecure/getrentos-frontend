@@ -14,12 +14,12 @@ import type {
   RentPaymentStatus,
   EscrowStatus,
   LeaseStatus,
-  EvictionStatus,
   ViewingRequestStatus,
 } from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
 import type { OfferStatus } from '@/types/owner';
 import type { TaskStatus } from '@/types/agent';
+import type { LegalCaseStatus } from '@/types/legal-case';
 
 export interface StatusBadgeEntry {
   label: string;
@@ -65,12 +65,20 @@ export const viewingRequestStatusBadges: Record<ViewingRequestStatus, StatusBadg
   cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
 
-export const evictionStatusBadges: Record<EvictionStatus, StatusBadgeEntry> = {
-  draft: { label: 'Draft', variant: 'neutral' },
-  issued: { label: 'Notice issued', variant: 'warning' },
-  filed: { label: 'Filed', variant: 'info' },
-  resolved: { label: 'Resolved', variant: 'success' },
-  withdrawn: { label: 'Withdrawn', variant: 'neutral' },
+/**
+ * Case statuses.
+ *
+ * Lives here rather than inside the legal-case components for the same reason
+ * every other vocabulary does: so "what colour is filed" has one answer. The
+ * `DECIDED` variant is `warning` on purpose — a decision usually starts work
+ * (enforcement) rather than ending it, so it should not read as done.
+ */
+export const legalCaseStatusBadges: Record<LegalCaseStatus, StatusBadgeEntry> = {
+  OPEN: { label: 'Open', variant: 'neutral' },
+  FILED: { label: 'Filed', variant: 'info' },
+  DECIDED: { label: 'Decided', variant: 'warning' },
+  CLOSED: { label: 'Closed', variant: 'success' },
+  WITHDRAWN: { label: 'Withdrawn', variant: 'neutral' },
 };
 
 export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry> = {

@@ -10,7 +10,15 @@ export type RentalViewingStatus = 'REQUESTED' | 'CONFIRMED' | 'COMPLETED' | 'CAN
 export type RentalLeaseStatus = 'DRAFT' | 'SENT' | 'SIGNED' | 'EXPIRED';
 export type RentalRenewalStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
 export type RentalTerminationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-export type RentalEvictionStatus = 'DRAFT' | 'ISSUED' | 'FILED' | 'RESOLVED' | 'WITHDRAWN';
+/**
+ * Case statuses.
+ *
+ * `DECIDED` is deliberately not here. Every other status is a position in a
+ * workflow an officer can correct; a decision is a statement about what a court
+ * did, which needs an outcome, so the API refuses it and the control must not
+ * offer it.
+ */
+export type RentalEvictionStatus = 'OPEN' | 'FILED' | 'CLOSED' | 'WITHDRAWN';
 
 export interface AdminRentalOverview {
   totalListings: number;
@@ -157,20 +165,30 @@ export interface AdminRentalTermination {
   createdAt: string;
 }
 
+/**
+ * An eviction, which is now a legal case of `kind = 'EVICTION'`.
+ *
+ * `noticeIssuedAt` and `cureDeadline` are gone: the old model computed a cure
+ * deadline from a number typed by hand with no basis recorded, and the tenancy's
+ * notice ladder owns that now. A case is about the court instead.
+ */
 export interface AdminRentalEviction {
   id: string;
   status: RentalEvictionStatus;
-  leaseId: string;
+  leaseId: string | null;
   propertyTitle: string;
   city: string;
   unitName: string | null;
   tenantName: string | null;
   initiatorName: string | null;
   reason: string;
-  noticeIssuedAt: string | null;
-  cureDeadline: string | null;
+  court: string | null;
+  suitNumber: string | null;
   filedAt: string | null;
-  resolvedAt: string | null;
-  resolutionNotes: string | null;
+  outcome: string | null;
+  outcomeAt: string | null;
+  outcomeNotes: string | null;
+  enforcementMethod: string | null;
+  closedAt: string | null;
   createdAt: string;
 }

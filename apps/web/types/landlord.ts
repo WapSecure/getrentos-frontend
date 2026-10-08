@@ -251,25 +251,6 @@ export interface RentIncreaseCheck {
   source: string;
 }
 
-export type EvictionStatus = 'draft' | 'issued' | 'filed' | 'resolved' | 'withdrawn';
-
-export interface EvictionCase {
-  id: string;
-  leaseId: string;
-  propertyId: string;
-  propertyName: string;
-  unitName: string;
-  tenantName: string;
-  reason: string;
-  status: EvictionStatus;
-  noticeIssuedAt?: string;
-  cureDeadline?: string;
-  filedAt?: string;
-  resolvedAt?: string;
-  resolutionNotes?: string;
-  createdAt: string;
-}
-
 export interface RentalApplication {
   id: string;
   applicantName: string;
