@@ -31,6 +31,7 @@ const categoryOptions: { value: ExpenseCategory; label: string }[] = [
   { value: 'TAX', label: 'Tax' },
   { value: 'REPAIRS', label: 'Repairs' },
   { value: 'MANAGEMENT_FEE', label: 'Management fee' },
+  { value: 'LEGAL', label: 'Legal' },
   { value: 'OTHER', label: 'Other' },
 ];
 

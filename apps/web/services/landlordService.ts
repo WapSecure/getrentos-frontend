@@ -88,6 +88,7 @@ export type ExpenseCategory =
   | 'TAX'
   | 'REPAIRS'
   | 'MANAGEMENT_FEE'
+  | 'LEGAL'
   | 'OTHER';
 
 export interface Expense {
@@ -700,6 +701,18 @@ export const landlordService = {
     return safeCall(() =>
       authFetch(`/landlord/legal-cases/${id}/advocate`, {
         method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async recordLegalCaseCost(
+    id: string,
+    data: { amount: number; note: string; incurredAt?: string }
+  ): Promise<ApiResponse<LegalCase>> {
+    return safeCall(() =>
+      authFetch(`/landlord/legal-cases/${id}/costs`, {
+        method: 'POST',
         body: JSON.stringify(data),
       })
     );

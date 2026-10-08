@@ -172,6 +172,17 @@ export default function LandlordLegalCasesPage() {
     onSuccess: done('Advocate recorded.'),
     onError,
   });
+  const recordCost = useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: { amount: number; note: string; incurredAt?: string };
+    }) => unwrap(landlordService.recordLegalCaseCost(id, input)),
+    onSuccess: done('Cost recorded.'),
+    onError,
+  });
   const closeCase = useMutation({
     mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
       unwrap(landlordService.closeLegalCase(id, notes)),
@@ -191,6 +202,7 @@ export default function LandlordLegalCasesPage() {
     recordHearing.isPending ||
     enforceCase.isPending ||
     recordAdvocate.isPending ||
+    recordCost.isPending ||
     closeCase.isPending;
 
   const cases = data?.cases ?? [];
@@ -388,6 +400,7 @@ export default function LandlordLegalCasesPage() {
           onRecordHearing={(input) => recordHearing.mutate({ id: selected.id, input })}
           onEnforce={(input) => enforceCase.mutate({ id: selected.id, input })}
           onRecordAdvocate={(input) => recordAdvocate.mutate({ id: selected.id, input })}
+          onRecordCost={(input) => recordCost.mutate({ id: selected.id, input })}
           onClose={(notes) => closeCase.mutate({ id: selected.id, notes })}
           onWithdraw={() =>
             withdrawCase.mutate({

@@ -10,6 +10,7 @@ import {
   Landmark,
   Lock,
   MoreVertical,
+  Receipt,
   ShieldAlert,
 } from 'lucide-react';
 import {
@@ -27,7 +28,7 @@ import {
   Textarea,
 } from '@getrentos/ui';
 
-import { formatDate } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { LegalCaseStage } from './LegalCaseStage';
 import type {
   EnforcementMethod,
@@ -174,6 +175,7 @@ export function LegalCaseDetail({
   onRecordHearing,
   onEnforce,
   onRecordAdvocate,
+  onRecordCost,
   onClose,
   onWithdraw,
 }: {
@@ -198,6 +200,7 @@ export function LegalCaseDetail({
     contact?: string;
     feeAgreement?: string;
   }) => void;
+  onRecordCost: (input: { amount: number; note: string; incurredAt?: string }) => void;
   onClose: (notes?: string) => void;
   onWithdraw: () => void;
 }) {
@@ -217,6 +220,10 @@ export function LegalCaseDetail({
   const [advFirm, setAdvFirm] = useState('');
   const [advContact, setAdvContact] = useState('');
   const [advFee, setAdvFee] = useState('');
+  const [costOpen, setCostOpen] = useState(false);
+  const [costAmount, setCostAmount] = useState('');
+  const [costNote, setCostNote] = useState('');
+  const [costDate, setCostDate] = useState('');
 
   if (!legalCase) return null;
 
@@ -231,6 +238,14 @@ export function LegalCaseDetail({
     setAdvContact(legalCase.advocateContact ?? '');
     setAdvFee(legalCase.advocateFeeAgreement ?? '');
     setAdvocateOpen(true);
+  };
+
+  const hasCosts = legalCase.costs.items.length > 0;
+  const openCost = () => {
+    setCostAmount('');
+    setCostNote('');
+    setCostDate('');
+    setCostOpen(true);
   };
 
   const nextHearing = legalCase.hearings
@@ -308,6 +323,7 @@ export function LegalCaseDetail({
                 <DropdownMenuItem onSelect={openAdvocate}>
                   {hasAdvocate ? 'Update advocate' : 'Record advocate'}
                 </DropdownMenuItem>
+                <DropdownMenuItem onSelect={openCost}>Record a cost</DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => onClose(undefined)}>Close case</DropdownMenuItem>
                 <DropdownMenuItem onSelect={onWithdraw} className="text-destructive">
                   Withdraw case
@@ -342,6 +358,33 @@ export function LegalCaseDetail({
                 <span className="mt-0.5 block text-xs">{legalCase.advocateFeeAgreement}</span>
               )}
             </span>
+          </div>
+        )}
+
+        {hasCosts && !costOpen && (
+          <div className="mt-3 rounded-xl border border-border bg-muted/30 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                Costs to the owner
+              </span>
+              <span className="text-sm font-semibold text-foreground">
+                {formatCurrency(legalCase.costs.totalAmount)}
+              </span>
+            </div>
+            <ul className="mt-2 space-y-1">
+              {legalCase.costs.items.map((cost) => (
+                <li key={cost.id} className="flex items-baseline justify-between gap-3 text-sm">
+                  <span className="min-w-0 truncate text-muted-foreground">
+                    {cost.note ?? 'Cost'}
+                    <span className="ml-1.5 text-xs">{formatDate(cost.incurredAt)}</span>
+                  </span>
+                  <span className="shrink-0 tabular-nums text-foreground">
+                    {formatCurrency(cost.amount)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -637,6 +680,65 @@ export function LegalCaseDetail({
                 onClick={() => setAdvocateOpen(false)}
                 disabled={isSubmitting}
               >
+                Cancel
+              </Button>
+            </div>
+          </section>
+        )}
+
+        {costOpen && (
+          <section className="mt-4 rounded-xl border border-border p-4">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden />
+              Record a cost
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              A filing fee, the advocate&rsquo;s brief, a bailiff&rsquo;s charge. It is added to the
+              owner&rsquo;s account on their next statement.
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <Field label="Amount (₦)" required>
+                <input
+                  type="number"
+                  min={1}
+                  value={costAmount}
+                  onChange={(event) => setCostAmount(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                  placeholder="250000"
+                />
+              </Field>
+              <Field label="When">
+                <DatePicker
+                  value={costDate}
+                  onChange={setCostDate}
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+              </Field>
+            </div>
+            <Field label="What it was for" required>
+              <input
+                value={costNote}
+                onChange={(event) => setCostNote(event.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                placeholder="Filing fee"
+              />
+            </Field>
+            <div className="mt-3 flex gap-2">
+              <Button
+                isLoading={isSubmitting}
+                disabled={!(Number(costAmount) > 0) || costNote.trim().length < 2}
+                onClick={() => {
+                  onRecordCost({
+                    amount: Math.round(Number(costAmount)),
+                    note: costNote.trim(),
+                    ...(costDate ? { incurredAt: costDate } : {}),
+                  });
+                  setCostOpen(false);
+                }}
+              >
+                Record cost
+              </Button>
+              <Button variant="ghost" onClick={() => setCostOpen(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
             </div>

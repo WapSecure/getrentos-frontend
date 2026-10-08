@@ -45,6 +45,22 @@ export interface LegalCaseOutstanding {
   detail: string;
 }
 
+/** A single cost or disbursement recorded against the case. */
+export interface LegalCaseCost {
+  id: string;
+  /** Whole Naira, like every Expense. */
+  amount: number;
+  note: string | null;
+  incurredAt: string;
+}
+
+/** What the case has cost so far — the same expenses that reach the owner's statement. */
+export interface LegalCaseCosts {
+  /** Whole Naira. */
+  totalAmount: number;
+  items: LegalCaseCost[];
+}
+
 export interface LegalCase {
   id: string;
   kind: LegalCaseKind;
@@ -95,4 +111,7 @@ export interface LegalCase {
   ladderReadyToFile: boolean | null;
 
   outstanding: LegalCaseOutstanding[];
+
+  /** Costs and disbursements recorded against the case, carried to the owner's account. */
+  costs: LegalCaseCosts;
 }
