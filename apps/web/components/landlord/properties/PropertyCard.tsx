@@ -5,9 +5,6 @@ import { motion } from 'framer-motion';
 import {
   MapPin,
   DoorOpen,
-  ShieldCheck,
-  ShieldAlert,
-  ShieldX,
   MoreVertical,
   Building2,
   Pencil,
@@ -16,11 +13,13 @@ import {
   Trash2,
 } from 'lucide-react';
 import {
+  Badge,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@getrentos/ui';
+import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
 import type { Property } from '@/types/landlord';
 
@@ -32,32 +31,7 @@ const propertyTypeLabels: Record<Property['type'], string> = {
   shared_apartment: 'Shared Apartment',
 };
 
-const verificationConfig: Record<
-  Property['verificationStatus'],
-  { label: string; icon: React.ElementType; className: string }
-> = {
-  verified: {
-    label: 'Verified',
-    icon: ShieldCheck,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  pending: {
-    label: 'Pending Review',
-    icon: ShieldAlert,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  unverified: {
-    label: 'Unverified',
-    icon: ShieldAlert,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
-  },
-  rejected: {
-    label: 'Rejected',
-    icon: ShieldX,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-};
-
+const verificationConfig = verificationBadges;
 interface PropertyCardProps {
   property: Property;
   onClick?: () => void;
@@ -78,7 +52,6 @@ export const PropertyCard = ({
   delay = 0,
 }: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
-  const VerificationIcon = verification.icon;
   const vacantUnits = property.totalUnits - property.occupiedUnits;
   const occupancyPct =
     property.totalUnits > 0 ? Math.round((property.occupiedUnits / property.totalUnits) * 100) : 0;
@@ -111,7 +84,7 @@ export const PropertyCard = ({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+            <Building2 className="w-12 h-12 text-muted-foreground/40" />
           </div>
         )}
         <button
@@ -119,10 +92,15 @@ export const PropertyCard = ({
             e.stopPropagation();
             onVerify?.();
           }}
-          className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium hover:opacity-80 transition-opacity ${verification.className}`}
+          className="absolute top-3 left-3 rounded-full hover:opacity-80 transition-opacity"
+          title={verification.label}
         >
-          <VerificationIcon className="w-3 h-3" />
-          {verification.label}
+          <Badge
+            variant={verification.variant}
+            icon={verification.icon ? <verification.icon className="w-3 h-3" /> : undefined}
+          >
+            {verification.label}
+          </Badge>
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -173,7 +151,7 @@ export const PropertyCard = ({
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <DoorOpen className="w-4 h-4 text-gray-400" />
+            <DoorOpen className="w-4 h-4 text-muted-foreground/60" />
             {property.occupiedUnits}/{property.totalUnits} occupied
           </div>
           <p className="text-sm font-semibold text-primary">
@@ -188,7 +166,7 @@ export const PropertyCard = ({
           />
         </div>
         {vacantUnits > 0 && (
-          <p className="text-xs text-gray-400 mt-1.5">
+          <p className="text-xs text-muted-foreground/60 mt-1.5">
             {vacantUnits} unit{vacantUnits === 1 ? '' : 's'} vacant
           </p>
         )}

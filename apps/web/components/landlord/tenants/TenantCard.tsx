@@ -2,28 +2,24 @@
 
 import { motion } from 'framer-motion';
 import { MessageCircle, FileCheck, ShieldCheck, Home } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
+import { paymentStatusBadges } from '@/lib/statusBadge';
 import { formatDate, getInitials } from '@/lib/format';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';
 
-const rentStatusConfig: Record<RentPaymentStatus, { label: string; className: string }> = {
-  paid: {
-    label: 'Rent Paid',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  pending: {
-    label: 'Rent Pending',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  overdue: {
-    label: 'Rent Overdue',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-  processing: {
-    label: 'Processing',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
+const rentStatusConfig = paymentStatusBadges;
+
+/**
+ * The chip sits beside the tenant's name, where a bare "Pending" reads as a
+ * status of the person rather than of their rent. The variant comes from the one
+ * payment vocabulary — only the wording is scoped to this card.
+ */
+const RENT_LABEL: Record<RentPaymentStatus, string> = {
+  paid: 'Rent paid',
+  pending: 'Rent pending',
+  overdue: 'Rent overdue',
+  processing: 'Processing',
 };
 
 interface TenantCardProps {
@@ -59,24 +55,25 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
           <div>
             <div className="flex items-center gap-1.5">
               <h3 className="font-semibold text-foreground">{tenant.name}</h3>
-              {tenant.verified && <ShieldCheck className="w-3.5 h-3.5 text-green-500" />}
+              {tenant.verified && <ShieldCheck className="w-3.5 h-3.5 text-success" />}
             </div>
             <p className="text-xs text-muted-foreground">{tenant.email}</p>
           </div>
         </div>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${rentStatus.className}`}
+        <Badge
+          variant={rentStatus.variant}
+          icon={rentStatus.icon ? <rentStatus.icon className="w-3 h-3" /> : undefined}
         >
-          {rentStatus.label}
-        </span>
+          {RENT_LABEL[tenant.rentStatus]}
+        </Badge>
       </div>
 
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-4">
-        <Home className="w-4 h-4 text-gray-400" />
+        <Home className="w-4 h-4 text-muted-foreground/60" />
         {tenant.propertyName} • {tenant.unitName}
       </div>
       <div className="flex items-center justify-between mt-2">
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground/60">
           {moveInLabel} {formatDate(tenant.moveInDate)}
         </p>
         <div className="flex items-center gap-1">

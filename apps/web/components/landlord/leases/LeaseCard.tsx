@@ -66,13 +66,13 @@ export const LeaseCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Lease Period</p>
+          <p className="text-xs text-muted-foreground">Lease Period</p>
           <p className="text-sm font-medium text-foreground">
             {formatDate(lease.leaseStart)} – {formatDate(lease.leaseEnd)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground">
             {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd)}
           </p>
           <p className="text-sm font-medium text-foreground">
@@ -82,13 +82,13 @@ export const LeaseCard = ({
       </div>
 
       {isExpiringSoon && (
-        <p className="text-xs text-orange-600 dark:text-orange-400 mt-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg px-2.5 py-1.5">
+        <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5">
           Expires in {remainingDays} day{remainingDays === 1 ? '' : 's'}
         </p>
       )}
 
       {lease.status === 'awaiting_payment' && (
-        <p className="text-xs text-amber-700 dark:text-amber-400 mt-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
+        <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5 flex items-start gap-1.5">
           <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             Tenant has signed. They haven’t paid the first rent to GetRentos yet
@@ -104,7 +104,7 @@ export const LeaseCard = ({
       )}
 
       {lease.status === 'awaiting_landlord' && (
-        <p className="text-xs text-green-700 dark:text-green-400 mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg px-2.5 py-1.5">
+        <p className="text-xs text-success mt-3 rounded-xl bg-success-subtle px-2.5 py-1.5">
           GetRentos is holding the rent. Countersign to confirm you have handed over: the money is
           paid to you after the confirmation period.
         </p>
@@ -192,9 +192,9 @@ export const LeaseCard = ({
       </div>
 
       {lease.pendingRenewalOffer ? (
-        <div className="mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 flex gap-2">
-          <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-700 dark:text-amber-300" />
-          <p className="text-xs text-amber-800 dark:text-amber-300">
+        <div className="mt-3 p-3 rounded-xl bg-warning-subtle border border-warning/30 flex gap-2">
+          <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-warning" />
+          <p className="text-xs text-muted-foreground">
             Renewal offer sent {formatDate(lease.pendingRenewalOffer.offeredAt)} —{' '}
             {formatCurrency(lease.pendingRenewalOffer.newRentAmount)} (
             {lease.pendingRenewalOffer.increasePercentage >= 0 ? '+' : ''}
@@ -206,7 +206,7 @@ export const LeaseCard = ({
       ) : null}
 
       {downloadError ? (
-        <p className="mt-3 text-xs text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-3 text-xs text-destructive" role="alert">
           {downloadError}
         </p>
       ) : null}

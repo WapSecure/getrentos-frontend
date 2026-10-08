@@ -8,6 +8,10 @@ import {
   XCircle,
   Archive,
   PlayCircle,
+  PauseCircle,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldX,
 } from 'lucide-react';
 import type { BadgeVariant } from '@getrentos/ui';
 import type {
@@ -15,6 +19,8 @@ import type {
   EscrowStatus,
   LeaseStatus,
   ViewingRequestStatus,
+  VerificationStatus,
+  ListingStatus,
 } from '@/types/landlord';
 import type { ApplicationStatus } from '@/types/renter';
 import type { OfferStatus } from '@/types/owner';
@@ -87,6 +93,29 @@ export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry
   approved: { label: 'Approved', variant: 'success', icon: CheckCircle2 },
   rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
   withdrawn: { label: 'Withdrawn', variant: 'neutral' },
+};
+
+/**
+ * A property's, or a person's, verification standing.
+ *
+ * Defined once because the property card, the listing card and the verification
+ * banner all render it — and each of them used to carry its own copy of the same
+ * four colours, which is why "unverified" was grey in one place and amber in
+ * another.
+ */
+export const verificationBadges: Record<VerificationStatus, StatusBadgeEntry> = {
+  verified: { label: 'Verified', variant: 'success', icon: ShieldCheck },
+  pending: { label: 'Pending review', variant: 'warning', icon: ShieldAlert },
+  unverified: { label: 'Unverified', variant: 'neutral', icon: ShieldAlert },
+  rejected: { label: 'Rejected', variant: 'danger', icon: ShieldX },
+};
+
+export const listingStatusBadges: Record<ListingStatus, StatusBadgeEntry> = {
+  draft: { label: 'Draft', variant: 'neutral' },
+  pending_verification: { label: 'Pending verification', variant: 'warning', icon: Clock },
+  published: { label: 'Published', variant: 'success', icon: CheckCircle2 },
+  paused: { label: 'Paused', variant: 'neutral', icon: PauseCircle },
+  closed: { label: 'Closed', variant: 'danger', icon: XCircle },
 };
 
 export const offerStatusBadges: Record<OfferStatus, StatusBadgeEntry> = {

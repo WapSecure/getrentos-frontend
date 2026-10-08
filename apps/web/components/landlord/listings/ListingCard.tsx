@@ -13,32 +13,12 @@ import {
   Eye,
   Zap,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
+import { listingStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { Listing, ListingStatus } from '@/types/landlord';
+import type { Listing } from '@/types/landlord';
 
-const statusConfig: Record<ListingStatus, { label: string; className: string }> = {
-  draft: {
-    label: 'Draft',
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
-  },
-  pending_verification: {
-    label: 'Pending Verification',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  published: {
-    label: 'Published',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  paused: {
-    label: 'Paused',
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
-  },
-  closed: {
-    label: 'Closed',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
-};
+const statusConfig = listingStatusBadges;
 
 interface ListingCardProps {
   listing: Listing;
@@ -82,10 +62,13 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
             <Play className="w-3 h-3" /> Video tour
           </span>
         )}
-        <span
-          className={`absolute top-3 left-3 inline-flex px-2 py-1 rounded-full text-xs font-medium ${status.className}`}
-        >
-          {status.label}
+        <span className="absolute top-3 left-3">
+          <Badge
+            variant={status.variant}
+            icon={status.icon ? <status.icon className="w-3 h-3" /> : undefined}
+          >
+            {status.label}
+          </Badge>
         </span>
       </div>
 
