@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, Info } from 'lucide-react';
-import { Badge, Button, Card, Field, Select, Textarea } from '@getrentos/ui';
+import { Badge, Button, Card, Field, NumberInput, Select, Textarea } from '@getrentos/ui';
 
 import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticePeriodSettings, UnconfiguredPeriod } from '@/types/tenancy-notice';
@@ -56,13 +56,13 @@ export function NoticePeriodRegister({
   return (
     <div className="space-y-5">
       {missing.length > 0 ? (
-        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+        <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
           <div>
             <p className="font-medium">
               {missing.length} {missing.length === 1 ? 'period is' : 'periods are'} still unrecorded
             </p>
-            <p className="mt-0.5 text-xs">
+            <p className="mt-0.5 text-muted-foreground">
               Any notice that runs for a statutory period will be refused in these jurisdictions
               until a number is recorded. That is deliberate: this platform does not hold a day
               count of its own, so it cannot supply one and will not guess.
@@ -70,9 +70,9 @@ export function NoticePeriodRegister({
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-900">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-          <p>
+        <div className="flex items-start gap-2.5 rounded-2xl border border-success/30 bg-success-subtle p-4 text-sm text-foreground">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
+          <p className="text-muted-foreground">
             Every statutory period this property base needs has a number recorded against it.
             Notices that run for a period can be served.
           </p>
@@ -81,8 +81,8 @@ export function NoticePeriodRegister({
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="p-4">
-          <h3 className="text-sm font-medium text-gray-900">Record a period</h3>
-          <p className="mt-0.5 text-xs text-gray-500">
+          <h3 className="text-sm font-medium text-foreground">Record a period</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             The number and its basis are stored as yours. Both are shown beside every notice served
             under them, because &ldquo;we used 90 days&rdquo; is unanswerable six months later
             without them.
@@ -112,14 +112,7 @@ export function NoticePeriodRegister({
               required
               hint="Whole days. Lagos ties the notice to the period of the tenancy rather than to one number, so check the length for this tenancy before entering it."
             >
-              <input
-                type="number"
-                min={1}
-                value={days}
-                onChange={(event) => setDays(event.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                placeholder="90"
-              />
+              <NumberInput value={days} onValueChange={setDays} placeholder="90" />
             </Field>
 
             <Field
@@ -150,30 +143,30 @@ export function NoticePeriodRegister({
         <div className="space-y-4">
           <Card className="p-4">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-sm font-medium text-gray-900">Recorded periods</h3>
-              <span className="text-xs text-gray-500">table {settings.tableVersion}</span>
+              <h3 className="text-sm font-medium text-foreground">Recorded periods</h3>
+              <span className="text-xs text-muted-foreground">table {settings.tableVersion}</span>
             </div>
 
             {settings.entries.length === 0 ? (
-              <p className="mt-3 text-sm text-gray-500">
+              <p className="mt-3 text-sm text-muted-foreground">
                 Nothing recorded yet. Every statutory notice will be refused until something is.
               </p>
             ) : (
-              <ul className="mt-3 divide-y divide-gray-100">
+              <ul className="mt-3 divide-y divide-border">
                 {settings.entries.map((entry) => (
                   <li key={entry.id} className="py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-foreground">
                         {entry.kindLabel} — {entry.jurisdiction}
                       </span>
                       <Badge variant={entry.scope === 'FIRM' ? 'success' : 'neutral'}>
                         {entry.scope === 'FIRM' ? 'yours' : 'shipped'}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm text-gray-700">{entry.days} days</p>
-                    <p className="mt-0.5 text-xs text-gray-500">{entry.basis}</p>
+                    <p className="mt-1 text-sm text-foreground">{entry.days} days</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{entry.basis}</p>
                     <div className="mt-2 flex items-center gap-3">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/70">
                         updated {formatDate(entry.updatedAt)}
                       </span>
                       {entry.editable && (
@@ -195,7 +188,7 @@ export function NoticePeriodRegister({
 
           {missing.length > 0 && (
             <Card className="p-4">
-              <h3 className="text-sm font-medium text-gray-900">Still to confirm</h3>
+              <h3 className="text-sm font-medium text-foreground">Still to confirm</h3>
               <ul className="mt-3 space-y-3">
                 {missing.map((entry) => (
                   <MissingPeriod
@@ -211,7 +204,7 @@ export function NoticePeriodRegister({
             </Card>
           )}
 
-          <div className="flex items-start gap-2 rounded-md bg-gray-50 p-3 text-xs text-gray-600">
+          <div className="flex items-start gap-2 rounded-xl bg-muted p-3 text-xs text-muted-foreground">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             <p>
               This register is a tracking record, not legal advice. Nothing here is asserted by this
@@ -227,11 +220,11 @@ export function NoticePeriodRegister({
 
 function MissingPeriod({ entry, onPick }: { entry: UnconfiguredPeriod; onPick: () => void }) {
   return (
-    <li className="rounded-md border border-gray-200 p-3">
-      <p className="text-sm font-medium text-gray-900">
+    <li className="rounded-xl border border-border p-3">
+      <p className="text-sm font-medium text-foreground">
         {entry.kind.replace(/_/g, ' ').toLowerCase()} — {entry.jurisdiction}
       </p>
-      <p className="mt-1 text-xs text-gray-600">{entry.basis}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{entry.basis}</p>
       <Button variant="ghost" className="mt-2" onClick={onPick}>
         Record this one
       </Button>

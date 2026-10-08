@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   Field,
+  NumberInput,
   Select,
   Textarea,
 } from '@getrentos/ui';
@@ -128,14 +129,14 @@ export function RaiseNoticeDialog({
           </Field>
 
           {missing && (
-            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-3.5 text-sm text-foreground">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
               <div>
                 <p className="font-medium">
                   No period is recorded for this step in {missing.jurisdiction}
                 </p>
-                <p className="mt-0.5">{missing.basis}</p>
-                <p className="mt-1.5">
+                <p className="mt-0.5 text-muted-foreground">{missing.basis}</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">
                   Record it under Notice periods, or enter a number for this one notice below. This
                   platform does not supply a default, because a wrong number here looks procedurally
                   sound while invalidating the claim.
@@ -153,7 +154,7 @@ export function RaiseNoticeDialog({
             />
           </Field>
           {blockedByReason && reason.length > 0 && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               At least {MIN_REASON} characters — this is preserved as the record of what was served.
             </p>
           )}
@@ -163,19 +164,12 @@ export function RaiseNoticeDialog({
               label="Arrears, in naira"
               hint="Whole naira. Left blank, the notice carries no amount."
             >
-              <input
-                type="number"
-                min={0}
-                value={arrears}
-                onChange={(event) => setArrears(event.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                placeholder="600000"
-              />
+              <NumberInput value={arrears} onValueChange={setArrears} placeholder="600000" />
             </Field>
           )}
 
-          <details className="rounded-md border border-gray-200 p-3">
-            <summary className="cursor-pointer text-sm text-gray-700">
+          <details className="rounded-xl border border-border p-3">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">
               Enter a period for this one notice only
             </summary>
             <div className="mt-3 space-y-3">
@@ -183,14 +177,7 @@ export function RaiseNoticeDialog({
                 label="Days"
                 hint="Recorded as the least certain source, because it was typed for this notice rather than configured."
               >
-                <input
-                  type="number"
-                  min={1}
-                  value={manualDays}
-                  onChange={(event) => setManualDays(event.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="90"
-                />
+                <NumberInput value={manualDays} onValueChange={setManualDays} placeholder="90" />
               </Field>
               <Field
                 label="Basis"
@@ -263,8 +250,8 @@ export function ServeNoticeDialog({
 
         {notice && (
           <div className="mt-4 space-y-4">
-            <div className="rounded-md bg-gray-50 p-3 text-xs text-gray-600">
-              <p className="font-medium text-gray-900">{notice.kindLabel}</p>
+            <div className="rounded-xl bg-muted p-3 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground">{notice.kindLabel}</p>
               <p className="mt-0.5">
                 {notice.periodDays === null
                   ? 'This step runs for no set period, so serving it starts no countdown.'

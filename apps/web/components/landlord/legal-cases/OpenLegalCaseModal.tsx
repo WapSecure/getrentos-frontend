@@ -110,9 +110,9 @@ export function OpenLegalCaseModal({
           </Field>
 
           {needsLease && !leaseId && (
-            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-              <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-              <p>
+            <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-3.5 text-sm text-foreground">
+              <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
+              <p className="text-muted-foreground">
                 An eviction without a tenancy cannot be filed. There would be no notice record to
                 check, and the notices are what a possession claim stands on.
               </p>
@@ -133,7 +133,7 @@ export function OpenLegalCaseModal({
           </Field>
 
           {description.length > 0 && description.trim().length < MIN_DESCRIPTION && (
-            <p className="text-xs text-red-600">At least {MIN_DESCRIPTION} characters.</p>
+            <p className="text-xs text-destructive">At least {MIN_DESCRIPTION} characters.</p>
           )}
 
           <div className="flex justify-end gap-2 pt-2">

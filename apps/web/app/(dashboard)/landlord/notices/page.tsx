@@ -1,28 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, BellRing, Plus, Settings2 } from 'lucide-react';
 import {
   Badge,
   Button,
-  Card,
-  ConfirmDialog,
-  EmptyState,
-  PageErrorState,
-  PageLoadingState,
-  Select,
+  DataTable,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Toast,
-  type ToastVariant,
+  type Column,
 } from '@getrentos/ui';
 
-import { RaiseNoticeDialog, ServeNoticeDialog } from '@/components/landlord/notices/NoticeDialogs';
 import {
   NoticeLadderTimeline,
-  NoticeStateBadge,
+  noticeKindLabel,
 } from '@/components/landlord/notices/NoticeLadderTimeline';
 import { NoticePeriodRegister } from '@/components/landlord/notices/NoticePeriodRegister';
+import { RaiseNoticeDialog, ServeNoticeDialog } from '@/components/landlord/notices/NoticeDialogs';
+import { ListState } from '@/components/shared/ListState';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -30,71 +29,95 @@ import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticeServiceMethod, TenancyNotice } from '@/types/tenancy-notice';
 
 /**
- * Notices: the ladder, and the register that decides whether it can be walked.
+ * Notices.
  *
- * The lease selector is the spine of the screen. A notice only means something
- * against a tenancy — what has already been served, and what that makes available
- * next — so there is no useful global list to show first. The firm-wide list sits
- * underneath as a cross-check rather than as the entry point.
+ * Reworked from one long page that stacked a configuration form, a tenancy
+ * picker, a ladder and a list of everything — four things with four different
+ * jobs, in an order that served none of them. The daily question is "what is
+ * running and what runs out soon", so that is the page; the period register is
+ * configuration and lives behind its own tab, surfacing only as a warning when it
+ * is actually blocking something.
+ *
+ * The one thing kept from before is the wording around a block, because a
+ * possession claim served too early is technically fatal and the sentence
+ * explaining the date is worth the space.
  */
 
-const PAGE_SIZE = 25;
+type Tab = 'running' | 'periods';
 
 export default function LandlordNoticesPage() {
   const queryClient = useQueryClient();
-  const [leaseId, setLeaseId] = useState<string>('');
+  const searchParams = useSearchParams();
+  const leaseIdParam = searchParams.get('leaseId');
+  const [tab, setTab] = useState<Tab>('running');
+  const [openLadder, setOpenLadder] = useState<string | null>(null);
+  const [dismissedLink, setDismissedLink] = useState<string | null>(null);
+
+  /*
+    Two ways in: the row you clicked, and ?leaseId from a legal case. The link is
+    derived rather than copied into state so that arriving here again with a
+    different tenancy still opens — a client-side navigation does not remount
+    this component, so state seeded on mount would go stale.
+  */
+  const ladderFor = openLadder ?? (leaseIdParam !== dismissedLink ? leaseIdParam : null);
+
+  const closeLadder = () => {
+    setDismissedLink(leaseIdParam);
+    setOpenLadder(null);
+  };
   const [raising, setRaising] = useState(false);
   const [serving, setServing] = useState<TenancyNotice | null>(null);
-  const [withdrawing, setWithdrawing] = useState<TenancyNotice | null>(null);
-  const [withdrawReason, setWithdrawReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
 
   const {
-    data: leases,
-    isLoading: isLoadingLeases,
-    isError: leasesFailed,
-    refetch: refetchLeases,
+    data: running,
+    isPending,
+    isError,
+    refetch,
   } = useQuery({
-    queryKey: [...landlordKeys.leases(), { page: 1, pageSize: PAGE_SIZE, status: 'signed' }],
-    queryFn: () =>
-      unwrap(landlordService.listLeases({ status: 'signed', page: 1, pageSize: PAGE_SIZE })),
+    queryKey: [...landlordKeys.notices, { state: 'SERVED' }],
+    queryFn: () => unwrap(landlordService.listNotices({ state: 'SERVED', limit: 200 })),
   });
 
-  const { data: periods, isLoading: isLoadingPeriods } = useQuery({
+  const { data: periods, isPending: isPeriodsPending } = useQuery({
     queryKey: landlordKeys.noticePeriods,
     queryFn: () => unwrap(landlordService.getNoticePeriods()),
   });
 
-  const {
-    data: ladder,
-    isLoading: isLoadingLadder,
-    isError: ladderFailed,
-    error: ladderError,
-    refetch: refetchLadder,
-  } = useQuery({
-    queryKey: landlordKeys.leaseLadder(leaseId),
-    queryFn: () => unwrap(landlordService.getLeaseLadder(leaseId)),
-    enabled: leaseId.length > 0,
+  const { data: ladder, isError: ladderFailed } = useQuery({
+    queryKey: landlordKeys.leaseLadder(ladderFor ?? ''),
+    queryFn: () => unwrap(landlordService.getLeaseLadder(ladderFor as string)),
+    enabled: ladderFor !== null,
   });
 
-  const { data: allNotices } = useQuery({
-    queryKey: [...landlordKeys.notices, { limit: 50 }],
-    queryFn: () => unwrap(landlordService.listNotices({ limit: 50 })),
-  });
+  /*
+    A tenancy the reader cannot open is not worth a modal: the page behind it is
+    still the answer to the question they arrived with, so it goes to the same
+    place as every other outcome on this screen.
+  */
+  const noticeToast =
+    toast ??
+    (ladderFailed
+      ? { message: 'That tenancy is not one you can read.', variant: 'error' as const }
+      : null);
+
+  const dismissToast = () => {
+    setToast(null);
+    if (ladderFailed) closeLadder();
+  };
 
   const onError = (error: unknown) =>
     setToast({
-      // The refusals are the useful part of this feature — a period nobody has
-      // recorded, a rung served too early — so the server's sentence is surfaced
-      // verbatim rather than replaced with something generic.
       message: error instanceof Error ? error.message : 'Something went wrong.',
       variant: 'error',
     });
 
-  const refreshLadder = () => {
-    queryClient.invalidateQueries({ queryKey: landlordKeys.leaseLadder(leaseId) });
+  const refresh = () => {
     queryClient.invalidateQueries({ queryKey: landlordKeys.notices });
     queryClient.invalidateQueries({ queryKey: landlordKeys.noticePeriods });
+    if (ladderFor) queryClient.invalidateQueries({ queryKey: landlordKeys.leaseLadder(ladderFor) });
   };
 
   const raiseNotice = useMutation({
@@ -103,10 +126,10 @@ export default function LandlordNoticesPage() {
     onSuccess: () => {
       setRaising(false);
       setToast({
-        message: 'Notice raised. It is a draft until service is recorded against it.',
+        message: 'Notice raised. It is a draft until service is recorded.',
         variant: 'success',
       });
-      refreshLadder();
+      refresh();
     },
     onError,
   });
@@ -125,18 +148,7 @@ export default function LandlordNoticesPage() {
         message: 'Service recorded. The period now runs from the date you gave.',
         variant: 'success',
       });
-      refreshLadder();
-    },
-    onError,
-  });
-
-  const withdrawNotice = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
-      unwrap(landlordService.withdrawNotice(id, reason)),
-    onSuccess: () => {
-      setWithdrawing(null);
-      setToast({ message: 'Notice withdrawn.', variant: 'success' });
-      refreshLadder();
+      refresh();
     },
     onError,
   });
@@ -145,13 +157,8 @@ export default function LandlordNoticesPage() {
     mutationFn: (input: { jurisdiction: string; kind: NoticeKind; days: number; basis: string }) =>
       unwrap(landlordService.setNoticePeriod(input)),
     onSuccess: () => {
-      setToast({
-        message:
-          'Period recorded. Notices that run for a period can now be served in that jurisdiction.',
-        variant: 'success',
-      });
-      queryClient.invalidateQueries({ queryKey: landlordKeys.noticePeriods });
-      if (leaseId) queryClient.invalidateQueries({ queryKey: landlordKeys.leaseLadder(leaseId) });
+      setToast({ message: 'Period recorded.', variant: 'success' });
+      refresh();
     },
     onError,
   });
@@ -160,169 +167,244 @@ export default function LandlordNoticesPage() {
     mutationFn: (input: { jurisdiction: string; kind: NoticeKind }) =>
       unwrap(landlordService.clearNoticePeriod(input)),
     onSuccess: () => {
-      setToast({
-        message: 'Your period was removed. Notices will use whatever is shipped instead.',
-        variant: 'success',
-      });
-      queryClient.invalidateQueries({ queryKey: landlordKeys.noticePeriods });
+      setToast({ message: 'Your period was removed.', variant: 'success' });
+      refresh();
     },
     onError,
   });
 
-  const leaseOptions = (leases?.items ?? []).map((lease) => ({
-    value: lease.id,
-    label: `${lease.propertyName || 'Tenancy'}${lease.tenantName ? ` — ${lease.tenantName}` : ''}`,
-  }));
+  // Soonest first: the whole point of this view is what runs out next.
+  const notices = [...(running?.notices ?? [])].sort(
+    (a, b) =>
+      (a.daysRemaining ?? Number.MAX_SAFE_INTEGER) - (b.daysRemaining ?? Number.MAX_SAFE_INTEGER)
+  );
 
-  if (isLoadingPeriods) return <PageLoadingState />;
-  if (leasesFailed) return <PageErrorState onRetry={() => refetchLeases()} />;
+  const soon = notices.filter(
+    (notice) => notice.daysRemaining !== null && notice.daysRemaining <= 14
+  );
+  const unconfigured = periods?.unconfigured.length ?? 0;
+
+  const columns: Column<TenancyNotice>[] = [
+    {
+      key: 'tenancy',
+      header: 'Tenancy',
+      className: 'max-w-[18rem]',
+      render: (notice) => (
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">
+            {notice.property?.address ?? 'Tenancy'}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
+            {[notice.property?.city, notice.tenantName].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: 'step',
+      header: 'Step',
+      render: (notice) => <span className="text-sm text-foreground">{notice.kindLabel}</span>,
+    },
+    {
+      key: 'served',
+      header: 'Served',
+      render: (notice) => (
+        <span className="text-sm text-muted-foreground">
+          {notice.serviceDate ? formatDate(notice.serviceDate) : '—'}
+        </span>
+      ),
+    },
+    {
+      key: 'runs',
+      header: 'Runs to',
+      render: (notice) =>
+        notice.expiresAt ? (
+          <span className="text-sm text-foreground">{formatDate(notice.expiresAt)}</span>
+        ) : (
+          <span className="text-xs text-muted-foreground">No set period</span>
+        ),
+    },
+    {
+      key: 'left',
+      header: 'Left',
+      render: (notice) => {
+        if (notice.daysRemaining === null)
+          return <span className="text-xs text-muted-foreground">—</span>;
+        const urgent = notice.daysRemaining <= 14;
+        return (
+          <Badge variant={urgent ? 'warning' : 'neutral'}>
+            {notice.daysRemaining} {notice.daysRemaining === 1 ? 'day' : 'days'}
+          </Badge>
+        );
+      },
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
-      <div>
-        <Link
-          href="/landlord/dashboard"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Back to dashboard
-        </Link>
-        <h1 className="mt-2 text-xl font-semibold text-gray-900">Notices</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          The escalation ladder, and the period register it depends on. Served one step at a time,
-          because a claim that skips a step has no evidence for it.
+    <>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Notices</h1>
+        <p className="mt-1 text-muted-foreground">
+          {notices.length === 0
+            ? 'Nothing is running'
+            : soon.length > 0
+              ? `${notices.length} running · ${soon.length} running out within a fortnight`
+              : `${notices.length} running`}
         </p>
       </div>
 
-      {/* The register comes first: it is what decides whether the ladder can be walked at all. */}
-      {periods && (
-        <section>
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-900">
-            <ShieldCheck className="h-4 w-4 text-gray-400" aria-hidden />
-            Notice periods
-          </h2>
-          <NoticePeriodRegister
-            settings={periods}
-            isSubmitting={setPeriod.isPending || clearPeriod.isPending}
-            onSubmit={(input) => setPeriod.mutate(input)}
-            onClear={(input) => clearPeriod.mutate(input)}
-          />
-        </section>
-      )}
-
-      <section>
-        <h2 className="mb-3 text-sm font-medium text-gray-900">A tenancy</h2>
-
-        <Card className="p-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="min-w-[16rem] flex-1">
-              <Select
-                ariaLabel="Tenancy"
-                value={leaseId}
-                onValueChange={setLeaseId}
-                options={leaseOptions}
-                placeholder={isLoadingLeases ? 'Loading tenancies…' : 'Choose a tenancy'}
-              />
-            </div>
-            {ladder?.next && !ladder.nextBlockedReason && (
-              <Button onClick={() => setRaising(true)}>
-                Raise {ladder.next.kind.replace(/_/g, ' ').toLowerCase()}
-              </Button>
-            )}
-          </div>
-        </Card>
-
-        <div className="mt-4">
-          {!leaseId ? (
-            <EmptyState
-              icon={ShieldCheck}
-              title="Choose a tenancy"
-              description="A notice only means something against a tenancy — what has already been served, and what that makes available next."
-            />
-          ) : isLoadingLadder ? (
-            <PageLoadingState />
-          ) : ladderFailed ? (
-            <PageErrorState
-              onRetry={() => refetchLadder()}
-              description={ladderError instanceof Error ? ladderError.message : undefined}
-            />
-          ) : ladder ? (
-            <NoticeLadderTimeline
-              ladder={ladder}
-              actions={(notice) =>
-                notice.state === 'DRAFT' ? (
-                  <div className="flex gap-2">
-                    <Button onClick={() => setServing(notice)}>Record service</Button>
-                    <Button variant="ghost" onClick={() => setWithdrawing(notice)}>
-                      Withdraw
-                    </Button>
-                  </div>
-                ) : notice.state === 'SERVED' ? (
-                  <Button variant="ghost" onClick={() => setWithdrawing(notice)}>
-                    Withdraw
-                  </Button>
-                ) : null
-              }
-            />
-          ) : null}
-        </div>
-      </section>
-
-      {(allNotices?.notices.length ?? 0) > 0 && (
-        <section>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-medium text-gray-900">Everything raised</h2>
-            {allNotices?.truncated && (
-              <Badge variant="neutral">
-                Showing the most recent {allNotices.limit} — there are more
-              </Badge>
-            )}
-          </div>
-
-          <Card className="divide-y divide-gray-100">
-            {allNotices?.notices.map((notice) => (
-              <div
-                key={notice.id}
-                className="flex flex-wrap items-center justify-between gap-3 p-3"
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm text-gray-900">{notice.kindLabel}</span>
-                    <NoticeStateBadge state={notice.state} />
-                  </div>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    {notice.property?.address ?? 'Tenancy'} · raised {formatDate(notice.createdAt)}
-                    {notice.expiresAt && ` · runs to ${formatDate(notice.expiresAt)}`}
-                  </p>
-                </div>
-                <Button variant="ghost" onClick={() => setLeaseId(notice.leaseId)}>
-                  Open tenancy
-                </Button>
-              </div>
-            ))}
-          </Card>
-        </section>
-      )}
+      <div className="mb-4 flex w-fit gap-1 rounded-lg bg-secondary p-1">
+        <button
+          onClick={() => setTab('running')}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            tab === 'running'
+              ? 'bg-card text-primary shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <BellRing className="h-3.5 w-3.5" aria-hidden />
+          Running
+        </button>
+        <button
+          onClick={() => setTab('periods')}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            tab === 'periods'
+              ? 'bg-card text-primary shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Settings2 className="h-3.5 w-3.5" aria-hidden />
+          Periods
+          {unconfigured > 0 && (
+            <span className="ml-1 rounded-full bg-warning-subtle px-1.5 text-[10px] font-semibold text-warning">
+              {unconfigured}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/*
-        Both dialogs are mounted only while open, rather than left mounted with an
-        `open` flag. It is the difference between a step that is actually next and
-        one that merely was next when the page first rendered: `useState` reads its
-        initial value on mount only, so a permanently-mounted dialog freezes on
-        whatever the ladder said before the query resolved. That bug showed the
-        *reminder* behind a button labelled "Raise notice to quit".
-
-        It also resets the fields, which matters most for the service date — a date
-        left over from a different notice would be recorded against this one, and
-        the expiry is computed from it.
+        The register only surfaces on the daily view when it is actually standing
+        in the way of something. Otherwise it is configuration, and configuration
+        does not belong at the top of a worklist.
       */}
-      {raising && (
+      {tab === 'running' && unconfigured > 0 && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+          <div>
+            <p className="font-medium">
+              {unconfigured} notice {unconfigured === 1 ? 'period is' : 'periods are'} unrecorded
+            </p>
+            <p className="mt-0.5 text-muted-foreground">
+              A notice to quit or an intention to recover will be refused in those jurisdictions
+              until a number is recorded. This platform holds no day count of its own.
+            </p>
+            <Button variant="ghost" className="mt-1.5" onClick={() => setTab('periods')}>
+              Record one
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'running' ? (
+        <ListState
+          items={notices}
+          query={{ isPending, isError, refetch }}
+          errorTitle="We couldn't load your notices"
+          skeletonClassName="h-16"
+          empty={
+            <div className="rounded-2xl border border-border bg-card p-12 text-center">
+              <BellRing className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
+              <p className="text-muted-foreground">
+                Nothing is running. Open a tenancy to raise the first step.
+              </p>
+            </div>
+          }
+        >
+          <DataTable
+            columns={columns}
+            data={notices}
+            getRowKey={(notice) => notice.id}
+            onRowClick={(notice) => setOpenLadder(notice.leaseId)}
+          />
+        </ListState>
+      ) : isPeriodsPending || !periods ? (
+        <div className="space-y-3" aria-busy="true" aria-label="Loading">
+          {[0, 1, 2].map((row) => (
+            <div
+              key={row}
+              className="h-32 animate-pulse rounded-2xl border border-border bg-card"
+            />
+          ))}
+        </div>
+      ) : (
+        <NoticePeriodRegister
+          settings={periods}
+          isSubmitting={setPeriod.isPending || clearPeriod.isPending}
+          onSubmit={(input) => setPeriod.mutate(input)}
+          onClear={(input) => clearPeriod.mutate(input)}
+        />
+      )}
+
+      {/* The tenancy behind a row, or behind ?leaseId from a legal case. */}
+      {ladder && (
+        <Dialog open onOpenChange={(open) => !open && closeLadder()}>
+          <DialogContent className="max-h-[85vh] max-w-2xl p-0">
+            {/*
+              The header carries the tenancy so the body does not have to, and
+              stays put while the ladder scrolls — the one action in here should
+              never scroll out of reach.
+            */}
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-card px-5 py-4">
+              <div className="min-w-0">
+                <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+                  Notices on this tenancy
+                </DialogTitle>
+                <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                  {[
+                    [ladder.lease.property.address, ladder.lease.property.city]
+                      .filter(Boolean)
+                      .join(', '),
+                    ladder.lease.tenantName ?? 'Tenant not named',
+                    ladder.jurisdiction,
+                  ].join(' · ')}
+                </p>
+              </div>
+
+              {/*
+                Raising lives with the ladder rather than on the daily list,
+                because it is always "the next step" — there is no meaningful way
+                to raise one out of sequence, and the server refuses it.
+              */}
+              {ladder.next && !ladder.nextBlockedReason && (
+                <Button className="mr-7 shrink-0" onClick={() => setRaising(true)}>
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden />
+                  Raise {noticeKindLabel(ladder.next.kind).toLowerCase()}
+                </Button>
+              )}
+            </div>
+
+            <div className="px-5 py-4">
+              <NoticeLadderTimeline
+                ladder={ladder}
+                actions={(notice) =>
+                  notice.state === 'DRAFT' ? (
+                    <Button onClick={() => setServing(notice)}>Record service</Button>
+                  ) : null
+                }
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {raising && ladder && (
         <RaiseNoticeDialog
           open
           onOpenChange={setRaising}
-          leaseId={leaseId}
-          jurisdiction={ladder?.jurisdiction ?? 'NG-LA'}
-          nextKind={ladder?.next?.kind ?? null}
+          leaseId={ladder.lease.id}
+          jurisdiction={ladder.jurisdiction}
+          nextKind={ladder.next?.kind ?? null}
           unconfigured={periods?.unconfigured ?? []}
           isSubmitting={raiseNotice.isPending}
           onSubmit={(input) => raiseNotice.mutate(input)}
@@ -338,27 +420,9 @@ export default function LandlordNoticesPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={withdrawing !== null}
-        onOpenChange={(open) => !open && setWithdrawing(null)}
-        title="Withdraw this notice?"
-        description="Withdrawing is not the same as letting it run out. This one is recorded as taken back, so it stops being evidence of anything — and it will not unblock the next step the way an expired one does."
-        promptLabel="Why is it being withdrawn?"
-        promptPlaceholder="Arrears cleared in full after the notice was handed over."
-        promptValue={withdrawReason}
-        onPromptChange={setWithdrawReason}
-        promptRequired
-        promptMinLength={10}
-        confirmLabel="Withdraw notice"
-        isLoading={withdrawNotice.isPending}
-        onConfirm={() =>
-          withdrawing && withdrawNotice.mutate({ id: withdrawing.id, reason: withdrawReason })
-        }
-      />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      {noticeToast && (
+        <Toast message={noticeToast.message} variant={noticeToast.variant} onClose={dismissToast} />
       )}
-    </div>
+    </>
   );
 }
