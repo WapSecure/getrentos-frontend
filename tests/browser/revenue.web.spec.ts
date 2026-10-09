@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { accountFromEnv, expectHealthyPage, signIn } from './helpers/auth';
 
 test('login screen is usable', async ({ page }) => {
@@ -31,16 +31,27 @@ const journeys = [
 for (const journey of journeys) {
   const account = accountFromEnv(journey.role);
   test.describe(`${journey.role.toLowerCase()} revenue screens`, () => {
+    test.describe.configure({ mode: 'serial' });
     test.skip(
       !account,
       `Set E2E_${journey.role}_EMAIL and E2E_${journey.role}_PASSWORD (or E2E_PASSWORD).`
     );
 
-    test.beforeEach(async ({ page }) => signIn(page, account!));
+    let context: BrowserContext;
+    let rolePage: Page;
+    test.beforeAll(async ({ browser }, testInfo) => {
+      context = await browser.newContext({
+        baseURL: testInfo.project.use.baseURL as string,
+        viewport: testInfo.project.use.viewport,
+      });
+      rolePage = await context.newPage();
+      await signIn(rolePage, account!);
+    });
+    test.afterAll(async () => context?.close());
 
     for (const path of journey.paths) {
-      test(`${path} renders without server errors`, async ({ page }) => {
-        await expectHealthyPage(page, path);
+      test(`${path} renders without server errors`, async () => {
+        await expectHealthyPage(rolePage, path);
       });
     }
   });
