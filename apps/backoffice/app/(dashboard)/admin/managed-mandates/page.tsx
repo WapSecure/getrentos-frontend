@@ -159,6 +159,7 @@ const ActiveEngagements = ({
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
   const [newManager, setNewManager] = useState('');
+  const [pauseReason, setPauseReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
@@ -200,6 +201,39 @@ const ActiveEngagements = ({
     },
   });
 
+  const suspend = useMutation({
+    mutationFn: () => unwrap(adminManagedService.suspendBulk(selectedVisible, pauseReason)),
+    onSuccess: (r) => {
+      setError(null);
+      setResult(
+        `Paused ${r.suspended}${r.skipped.length > 0 ? ` · skipped ${r.skipped.length} that could not pause` : ''}.`
+      );
+      setSelected([]);
+      setPauseReason('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-active'] });
+    },
+    onError: (err: Error) => {
+      setResult(null);
+      setError(err.message || 'Could not pause the selected engagements.');
+    },
+  });
+
+  const resume = useMutation({
+    mutationFn: () => unwrap(adminManagedService.resumeBulk(selectedVisible)),
+    onSuccess: (r) => {
+      setError(null);
+      setResult(
+        `Resumed ${r.resumed}${r.skipped.length > 0 ? ` · skipped ${r.skipped.length} that could not resume` : ''}.`
+      );
+      setSelected([]);
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-active'] });
+    },
+    onError: (err: Error) => {
+      setResult(null);
+      setError(err.message || 'Could not resume the selected engagements.');
+    },
+  });
+
   if (active.isError) {
     return (
       <PageErrorState
@@ -235,36 +269,62 @@ const ActiveEngagements = ({
         />
       </div>
 
-      <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-primary"
-            checked={allVisibleSelected}
-            onChange={toggleAll}
-            aria-label="Select all visible"
-          />
-          {selectedVisible.length > 0
-            ? `${selectedVisible.length} selected`
-            : `Select all (${filtered.length})`}
-        </label>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="w-full sm:w-72">
-            <Select
-              ariaLabel="New portfolio manager for the selected engagements"
-              value={newManager}
-              onValueChange={setNewManager}
-              options={[{ value: '', label: 'Reassign to…' }, ...staffOptions]}
+      <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-primary"
+              checked={allVisibleSelected}
+              onChange={toggleAll}
+              aria-label="Select all visible"
             />
+            {selectedVisible.length > 0
+              ? `${selectedVisible.length} selected`
+              : `Select all (${filtered.length})`}
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="w-full sm:w-72">
+              <Select
+                ariaLabel="New portfolio manager for the selected engagements"
+                value={newManager}
+                onValueChange={setNewManager}
+                options={[{ value: '', label: 'Reassign to…' }, ...staffOptions]}
+              />
+            </div>
+            <Button
+              isLoading={reassign.isPending}
+              disabled={!newManager || selectedVisible.length === 0}
+              onClick={() => reassign.mutate()}
+            >
+              Reassign {selectedVisible.length || ''}
+            </Button>
           </div>
-          <Button
-            isLoading={reassign.isPending}
-            disabled={!newManager || selectedVisible.length === 0}
-            onClick={() => reassign.mutate()}
-          >
-            Reassign {selectedVisible.length || ''}
-          </Button>
         </div>
+        {/* Pause / resume the selection — pausing needs a reason, kept on each. */}
+        {selectedVisible.length > 0 && (
+          <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
+            <input
+              type="text"
+              value={pauseReason}
+              onChange={(event) => setPauseReason(event.target.value)}
+              placeholder="Reason for pausing (min 10 characters)"
+              aria-label="Reason for pausing the selected engagements"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-80"
+            />
+            <Button
+              variant="outline"
+              isLoading={suspend.isPending}
+              disabled={pauseReason.trim().length < 10}
+              onClick={() => suspend.mutate()}
+            >
+              Pause {selectedVisible.length}
+            </Button>
+            <Button variant="outline" isLoading={resume.isPending} onClick={() => resume.mutate()}>
+              Resume {selectedVisible.length}
+            </Button>
+          </div>
+        )}
       </div>
       {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
       {result && <p className="mb-3 text-sm text-muted-foreground">{result}</p>}
@@ -279,7 +339,12 @@ const ActiveEngagements = ({
         <div className="space-y-3">
           {filtered.map((mandate) => {
             const status = STATUS_META[mandate.status] ?? {
-              label: mandate.status === 'ACTIVE' ? 'Active' : mandate.status,
+              label:
+                mandate.status === 'ACTIVE'
+                  ? 'Active'
+                  : mandate.status === 'SUSPENDED'
+                    ? 'Suspended'
+                    : mandate.status,
               variant: (mandate.status === 'ACTIVE' ? 'success' : 'warning') as BadgeVariant,
             };
             return (

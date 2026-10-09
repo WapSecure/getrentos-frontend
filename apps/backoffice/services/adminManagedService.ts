@@ -98,6 +98,26 @@ export const adminManagedService = {
       })
     );
   },
+
+  /** Pause several live engagements in one pass, under one shared reason. */
+  suspendBulk(mandateIds: string[], reason: string): Promise<ApiResponse<BulkSuspendResult>> {
+    return safeCall(() =>
+      authFetch<BulkSuspendResult>('/admin/management-mandates/suspend-managed-bulk', {
+        method: 'POST',
+        body: JSON.stringify({ mandateIds, reason }),
+      })
+    );
+  },
+
+  /** Resume several paused engagements in one pass. */
+  resumeBulk(mandateIds: string[]): Promise<ApiResponse<BulkResumeResult>> {
+    return safeCall(() =>
+      authFetch<BulkResumeResult>('/admin/management-mandates/resume-managed-bulk', {
+        method: 'POST',
+        body: JSON.stringify({ mandateIds }),
+      })
+    );
+  },
 };
 
 /** The outcome of a bulk activation: a partial-success summary. */
@@ -118,5 +138,19 @@ export interface BulkRejectResult {
 export interface BulkReassignResult {
   requested: number;
   reassigned: number;
+  skipped: { id: string; reason: string }[];
+}
+
+/** The outcome of a bulk suspend: a partial-success summary. */
+export interface BulkSuspendResult {
+  requested: number;
+  suspended: number;
+  skipped: { id: string; reason: string }[];
+}
+
+/** The outcome of a bulk resume: a partial-success summary. */
+export interface BulkResumeResult {
+  requested: number;
+  resumed: number;
   skipped: { id: string; reason: string }[];
 }
