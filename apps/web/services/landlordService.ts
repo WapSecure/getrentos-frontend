@@ -948,6 +948,11 @@ export const landlordService = {
     );
   },
 
+  /** Download a statement as a PDF (draft or issued). */
+  async downloadOwnerStatementPdf(id: string): Promise<Blob> {
+    return authDownload(`/landlord/owner-statements/${id}/pdf`);
+  },
+
   /** Email the owner their copy of an issued statement again. */
   async resendOwnerStatementEmail(
     id: string

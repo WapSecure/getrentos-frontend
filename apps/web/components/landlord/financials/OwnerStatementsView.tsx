@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileBarChart, Mail, Plus, RotateCcw, Send } from 'lucide-react';
+import { Download, FileBarChart, Mail, Plus, RotateCcw, Send } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -180,6 +180,26 @@ export function OwnerStatementsView() {
     },
     onError: (error: Error) => {
       setToast({ message: error.message || 'Unable to send this statement.', variant: 'error' });
+    },
+  });
+
+  const downloadPdf = useMutation({
+    mutationFn: async (statement: { id: string; periodEnd: string }) => {
+      const blob = await landlordService.downloadOwnerStatementPdf(statement.id);
+      return { blob, periodEnd: statement.periodEnd };
+    },
+    onSuccess: ({ blob, periodEnd }) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `GetRentos-statement-${periodEnd.slice(0, 10)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to download the PDF.', variant: 'error' });
     },
   });
 
@@ -416,7 +436,19 @@ export function OwnerStatementsView() {
               />
 
               {detail.status === 'DRAFT' && (
-                <div className="mt-6 flex justify-end border-t border-border pt-5">
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
+                  <Button
+                    className="gap-2"
+                    variant="outline"
+                    rounded="md"
+                    isLoading={downloadPdf.isPending}
+                    onClick={() =>
+                      downloadPdf.mutate({ id: detail.id, periodEnd: detail.periodEnd })
+                    }
+                  >
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                  </Button>
                   <Button
                     className="gap-2"
                     rounded="md"
@@ -438,16 +470,30 @@ export function OwnerStatementsView() {
                         ? `Not emailed yet — ${detail.emailError}.`
                         : 'Not emailed yet.'}
                   </p>
-                  <Button
-                    className="gap-2"
-                    variant="outline"
-                    rounded="md"
-                    isLoading={resendEmail.isPending}
-                    onClick={() => resendEmail.mutate(detail.id)}
-                  >
-                    <Mail className="w-4 h-4" />
-                    {detail.emailSentAt ? 'Resend email' : 'Send email'}
-                  </Button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      className="gap-2"
+                      variant="outline"
+                      rounded="md"
+                      isLoading={downloadPdf.isPending}
+                      onClick={() =>
+                        downloadPdf.mutate({ id: detail.id, periodEnd: detail.periodEnd })
+                      }
+                    >
+                      <Download className="w-4 h-4" />
+                      Download PDF
+                    </Button>
+                    <Button
+                      className="gap-2"
+                      variant="outline"
+                      rounded="md"
+                      isLoading={resendEmail.isPending}
+                      onClick={() => resendEmail.mutate(detail.id)}
+                    >
+                      <Mail className="w-4 h-4" />
+                      {detail.emailSentAt ? 'Resend email' : 'Send email'}
+                    </Button>
+                  </div>
                 </div>
               )}
 
