@@ -137,3 +137,76 @@ Cross-sell path: DIY landlord → outgrows self-manage → **GetRentos Managed**
 ## 9. Recommendation
 
 The spine is done and is the hard part. **Prioritize Phase B (operational completeness) to make the product credible for self-manage + managed, then Phase C (Agency edition) to open the margin market.** The Agency edition is the single biggest untapped opportunity and is mostly _assembly_ on top of the engine we already have, not net-new infrastructure. Partner commercials and field/mobile are real but can follow.
+
+---
+
+# Part II — Strategy to dominate the market
+
+> Part I is **what we build**. Part II is **how we win the market**. Feature parity gets us _in the game_; domination comes from segmentation, a sharp wedge, network effects, and NG-native rails — not a longer feature list.
+
+## S1. Segments & beachhead (land → expand)
+
+| Segment                        | Size signal                                                           | Pain / willingness-to-pay                                                     | Our play                                                                                       |
+| ------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Diaspora / absentee owners** | Millions of Nigerians abroad with property at home; remittance-linked | **Highest** — can't self-manage, don't trust local agents, will pay a premium | **GetRentos Managed** (beachhead) — remote onboarding, protected money, English-language trust |
+| **Professional agencies**      | Fragmented, mostly on spreadsheets/WhatsApp                           | High — need trust accounting + owner reporting to scale & stay compliant      | **Agency edition** — margin + supplies the marketplace                                         |
+| **Self-managing landlords**    | Large, long tail                                                      | Low ARPU, high volume                                                         | **Self-Manage** (Free/Pro) — top of funnel, upsell to Managed/agency                           |
+| **Developers / estates**       | Bulk units, new builds                                                | Medium — lettings + service charges at scale                                  | Estate module + bulk onboarding (later)                                                        |
+| **Institutional / REIT-like**  | Emerging                                                              | High rigor                                                                    | Much later                                                                                     |
+
+**Beachhead: diaspora-owner _Managed_ + agencies, in parallel.** Diaspora owners are the segment that most needs what only we offer (hands-off + money protection) and pay the most; they showcase the trust spine. Agencies supply ranked managers and bring their owner books. Self-manage is the free funnel beneath both. Land there, expand down-market and into estates.
+
+## S2. Competitive positioning
+
+- **Reference set:** local NG proptech (rent-collection / listing / management startups — mostly single-feature) and global benchmarks (AppFolio, Buildium, DoorLoop, Yardi, Hemlane). _(A real competitive scan is an action item — names here are the category, not a verified audit.)_
+- **Where most local tools stop:** rent collection + listings. Few offer **compliant trust accounting**, fewer offer **platform-as-manager**, essentially none offer a **vetted-manager marketplace**.
+- **Positioning:** _"The trust rail for Nigerian property management — the one place an owner can self-manage, hire a vetted manager, or have GetRentos manage it, with their money protected and their records portable."_
+- **Must-reach parity (don't lose on):** payments UX, maintenance, reporting, mobile.
+- **Win on:** trust (held funds + protected deposits + dispute adjudication), the three-editions optionality, and NG-native rails below.
+
+## S3. The flywheel & network effects (why it compounds)
+
+- **Two-sided marketplace:** more owners → more mandates → more agencies join → better, _ranked_ supply → more owners choose us. The vetted-firm directory + real-data ranking (already built) is the engine.
+- **Trust rail = system of record:** client money, statements, and history accrue switching cost; leaving means abandoning the record.
+- **Data network effects:** rent benchmarks, tenant-quality signals, and agency performance ranking improve matching and pricing — and are hard to replicate without the volume.
+- **Portability as a feature, not a leak:** "your history stays with you" earns trust _and_ raises switching cost once the history is deep.
+
+## S4. NG-native wedges (how we win _here_ specifically)
+
+1. **Dedicated virtual accounts per tenant/lease** (Paystack/Flutterwave) → **automatic reconciliation**, no "I already sent it" disputes. One of the highest-leverage, most defensible NG wedges — build early.
+2. **Diaspora product**: remote owner onboarding, Managed-by-default, remittance-friendly payouts, status visibility from abroad.
+3. **WhatsApp as a first-class channel** (rent nudges, maintenance updates, approvals) — not generic in-app messaging. It's where Nigerians actually are.
+4. **Trust deficit as the wedge**: "Held by GetRentos," protected deposits, ranked managers, line-item dispute adjudication — directly answers the #1 reason owners distrust agents.
+5. **Cash / annual-rent realities**: Flex installments (built) + flexible schedules address how NG rent actually flows.
+6. **Service charges & estate levies** via the Estate module — captures the managed-community money layer.
+
+## S5. Modern / AI wedges
+
+- **AI**: arrears-risk scoring + collections prioritization, maintenance auto-triage + vendor suggestion, listing/description generation, owner-statement anomaly detection, owner/tenant copilots.
+- **Open API + integrations**: become the **rail others build on** — accounting/GL export for agencies, banks, insurers, utilities, screening bureaus. Ecosystem = durability.
+
+## S6. Monetization depth (pricing power from many lines)
+
+Beyond the per-edition table in Part I: **managed take-rate** (5/8/10%), **agency SaaS** (per-unit/seat), **payment float / virtual-account fees**, **Flex financing margin**, **marketplace commission** on agency appointments, and **premium add-ons** (insurance, screening, rent benchmarking). Multiple revenue lines → resilience and room to undercut single-line competitors on the headline fee.
+
+## S7. North star & KPIs
+
+- **North star:** **Units Under Management (UUM)** and **GMV through the trust rail**.
+- **KPIs:** UUM; GMV; agencies onboarded + their retention; managed-engagement count; owner net revenue retention; arrears rate; time-to-reconcile; dispute rate; NPS (owner / tenant / agency).
+- **Define "dominate":** e.g. **#1 by UUM in target metros (Lagos/Abuja/PH) and the default rail for professionally-managed units** within the plan horizon — set the number with the business.
+
+## S8. Execution & regulatory risk (the moat _and_ the threat)
+
+- **Client money at scale** is both the deepest moat and the biggest risk: protection-scheme posture, audits, segregation, and (likely) licensing must be invested in early, not bolted on. Get this right and it's very hard to catch us; get it wrong and it's existential.
+- **Ops scaling** for GetRentos Managed (portfolio-manager capacity), support, and field coverage gate how fast Managed can grow.
+- **Sequencing realism:** Part I's "mostly assembly" is true for the _engine_; the GTM, trust/regulatory, and supply (agency onboarding) work is its own lift.
+
+## S9. The path to dominance (revised recommendation)
+
+1. **Phase B** (operational completeness) to be credible — in parallel with:
+2. **Virtual-account reconciliation + WhatsApp + the diaspora Managed product** as the NG wedges that differentiate from day one.
+3. **Phase C — the Agency edition** to light the marketplace flywheel (supply of ranked managers).
+4. Then **AI + open API** to become the rail, and **estates/developers** to expand.
+5. Steer by **UUM / GMV**, and treat **client-money compliance** as a first-class workstream throughout.
+
+Feature parity makes us competitive. **The wedge (trust + virtual accounts + WhatsApp), the marketplace flywheel, and the diaspora beachhead are what make us the default — i.e., dominant.**
