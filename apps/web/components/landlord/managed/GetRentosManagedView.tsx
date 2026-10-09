@@ -22,6 +22,7 @@ import {
   managedSla,
   mine as myMandates,
   optIntoManaged,
+  recordHandover,
   submit as submitMandate,
   terminate as terminateMandate,
   vettedFirms,
@@ -63,9 +64,13 @@ const TIER_LABEL: Record<ServicingTier, string> = {
   FULL_MANAGEMENT: 'Full management',
 };
 
-/** A mandate counts as the live GetRentos engagement for a property unless it has ended. */
-const isLiveManaged = (m: ManagementMandateDto) =>
-  m.managerIsGetRentos && !['TERMINATED', 'EXPIRED', 'REJECTED'].includes(m.status);
+const ENDED_STATUSES = ['TERMINATED', 'EXPIRED', 'REJECTED'];
+
+/** Live = opted in, pending, or active — anything that is not an ended state. */
+const isLiveEngagement = (m: ManagementMandateDto) => !ENDED_STATUSES.includes(m.status);
+
+/** Terminated but the handover pack has not been exchanged yet — still winding down. */
+const isWindingDown = (m: ManagementMandateDto) => m.status === 'TERMINATED' && !m.handoverAt;
 
 const PRIORITY_LABEL: Record<ManagedSlaTarget['priority'], string> = {
   URGENT: 'Urgent',
@@ -182,19 +187,25 @@ export const GetRentosManagedView = () => {
     onError: (err: Error) => setError(err.message || 'Could not end the engagement.'),
   });
 
-  const managedByProperty = new Map<string, ManagementMandateDto>();
-  const firmMandateByProperty = new Map<string, ManagementMandateDto>();
+  const handover = useMutation({
+    mutationFn: (id: string) => unwrap(recordHandover(id)),
+    onSuccess: () => {
+      setError(null);
+      void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
+    },
+    onError: (err: Error) => setError(err.message || 'Could not record the handover.'),
+  });
+
+  // The current engagement for a property is its newest mandate (mine() is newest-first).
+  const currentByProperty = new Map<string, ManagementMandateDto>();
   for (const m of mandates.data ?? []) {
-    if (isLiveManaged(m)) managedByProperty.set(m.propertyId, m);
-    else if (!m.managerIsGetRentos && !['TERMINATED', 'EXPIRED', 'REJECTED'].includes(m.status)) {
-      firmMandateByProperty.set(m.propertyId, m);
-    }
+    if (!currentByProperty.has(m.propertyId)) currentByProperty.set(m.propertyId, m);
   }
-  /** A property is spoken for if GetRentos or a firm already holds a live mandate. */
-  const committedProperties = new Set<string>([
-    ...managedByProperty.keys(),
-    ...firmMandateByProperty.keys(),
-  ]);
+  /** A property is spoken for while a live mandate holds it, or a wind-down is mid-handover. */
+  const committedProperties = new Set<string>();
+  for (const [propertyId, m] of currentByProperty) {
+    if (isLiveEngagement(m) || isWindingDown(m)) committedProperties.add(propertyId);
+  }
 
   const cards = feeCard.data ?? [];
   const propertyList = properties.data?.items ?? [];
@@ -310,10 +321,15 @@ export const GetRentosManagedView = () => {
       ) : (
         <div className="space-y-3">
           {propertyList.map((property) => {
-            const managed = managedByProperty.get(property.id);
-            const firmMandate = firmMandateByProperty.get(property.id);
+            const current = currentByProperty.get(property.id);
+            const live = current && isLiveEngagement(current);
+            const managed = current && live && current.managerIsGetRentos ? current : undefined;
+            const firmMandate =
+              current && live && !current.managerIsGetRentos ? current : undefined;
+            const windingDown = current && isWindingDown(current) ? current : undefined;
             const selected = tierByProperty[property.id] ?? 'FULL_MANAGEMENT';
             const busy = optIn.isPending && optIn.variables?.propertyId === property.id;
+            const handoverBusy = handover.isPending && handover.variables === windingDown?.id;
 
             const activeMandate = managed ?? firmMandate;
             const isPendingMandate = activeMandate
@@ -380,6 +396,19 @@ export const GetRentosManagedView = () => {
                         {endLabel}
                       </button>
                     </div>
+                  ) : windingDown ? (
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      <Badge variant="warning">Ending — handover due</Badge>
+                      <button
+                        type="button"
+                        disabled={handoverBusy}
+                        onClick={() => handover.mutate(windingDown.id)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
+                      >
+                        {handoverBusy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+                        Confirm handover
+                      </button>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2 sm:shrink-0">
                       <select
@@ -420,8 +449,8 @@ export const GetRentosManagedView = () => {
                   <div className="mt-3 border-t border-border pt-3">
                     <p className="text-sm text-muted-foreground">
                       {isPendingMandate
-                        ? 'Withdraw this request. It is your consent, so it takes effect at once.'
-                        : 'End this engagement. Withdrawing your consent takes effect immediately — nobody has to approve it.'}
+                        ? 'Withdraw this request. Nothing has started, so there is nothing to settle — it just goes away.'
+                        : 'End this engagement. The manager’s access stops at once, then it moves to handover — the final statement, balances and keys — and any fees already earned are settled there. It takes effect immediately; nobody has to approve it.'}
                     </p>
                     <textarea
                       value={endReason}
