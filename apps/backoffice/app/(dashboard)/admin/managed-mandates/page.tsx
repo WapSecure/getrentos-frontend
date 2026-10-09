@@ -144,6 +144,191 @@ const ManagedMandateCard = ({
   );
 };
 
+/** The "Active engagements" mode: reassign the portfolio manager, in bulk. */
+const ActiveEngagements = ({
+  staffOptions,
+}: {
+  staffOptions: { value: string; label: string }[];
+}) => {
+  const queryClient = useQueryClient();
+  const active = useQuery({
+    queryKey: ['admin', 'managed-active'],
+    queryFn: () => unwrap(adminManagedService.listActive()),
+  });
+
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<string[]>([]);
+  const [newManager, setNewManager] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+
+  const all = useMemo(() => active.data ?? [], [active.data]);
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return all.filter(
+      (m) =>
+        needle === '' ||
+        (m.propertyTitle ?? '').toLowerCase().includes(needle) ||
+        (m.ownerName ?? '').toLowerCase().includes(needle) ||
+        (m.managerName ?? '').toLowerCase().includes(needle)
+    );
+  }, [all, search]);
+
+  const visibleIds = useMemo(() => new Set(filtered.map((m) => m.id)), [filtered]);
+  const selectedVisible = useMemo(
+    () => selected.filter((id) => visibleIds.has(id)),
+    [selected, visibleIds]
+  );
+  const allVisibleSelected = filtered.length > 0 && selectedVisible.length === filtered.length;
+  const toggle = (id: string) =>
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleAll = () => setSelected(allVisibleSelected ? [] : filtered.map((m) => m.id));
+
+  const reassign = useMutation({
+    mutationFn: () => unwrap(adminManagedService.reassignBulk(selectedVisible, newManager)),
+    onSuccess: (r) => {
+      setError(null);
+      setResult(
+        `Reassigned ${r.reassigned}${r.skipped.length > 0 ? ` · skipped ${r.skipped.length} that could not move` : ''}.`
+      );
+      setSelected([]);
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-active'] });
+    },
+    onError: (err: Error) => {
+      setResult(null);
+      setError(err.message || 'Could not reassign the selected engagements.');
+    },
+  });
+
+  if (active.isError) {
+    return (
+      <PageErrorState
+        title="Could not load engagements"
+        description={(active.error as Error).message}
+        onRetry={() => {
+          void active.refetch();
+        }}
+      />
+    );
+  }
+  if (active.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (all.length === 0) {
+    return (
+      <EmptyState
+        icon={Building2}
+        title="No live engagements"
+        description="No GetRentos Managed engagements are active right now."
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="mb-4 flex justify-end">
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search property, owner or manager…"
+          aria-label="Search active engagements"
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-72"
+        />
+      </div>
+
+      <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-primary"
+            checked={allVisibleSelected}
+            onChange={toggleAll}
+            aria-label="Select all visible"
+          />
+          {selectedVisible.length > 0
+            ? `${selectedVisible.length} selected`
+            : `Select all (${filtered.length})`}
+        </label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="w-full sm:w-72">
+            <Select
+              ariaLabel="New portfolio manager for the selected engagements"
+              value={newManager}
+              onValueChange={setNewManager}
+              options={[{ value: '', label: 'Reassign to…' }, ...staffOptions]}
+            />
+          </div>
+          <Button
+            isLoading={reassign.isPending}
+            disabled={!newManager || selectedVisible.length === 0}
+            onClick={() => reassign.mutate()}
+          >
+            Reassign {selectedVisible.length || ''}
+          </Button>
+        </div>
+      </div>
+      {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+      {result && <p className="mb-3 text-sm text-muted-foreground">{result}</p>}
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title="Nothing matches"
+          description="No active engagements match your search."
+        />
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((mandate) => {
+            const status = STATUS_META[mandate.status] ?? {
+              label: mandate.status === 'ACTIVE' ? 'Active' : mandate.status,
+              variant: (mandate.status === 'ACTIVE' ? 'success' : 'warning') as BadgeVariant,
+            };
+            return (
+              <Card key={mandate.id} className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1.5 h-4 w-4 shrink-0 accent-primary"
+                      checked={selected.includes(mandate.id)}
+                      onChange={() => toggle(mandate.id)}
+                      aria-label={`Select ${mandate.propertyTitle ?? 'property'} to reassign`}
+                    />
+                    <div className="shrink-0 rounded-xl bg-muted p-2.5">
+                      <Building2 className="h-5 w-5 text-primary" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-foreground">
+                        {mandate.propertyTitle ?? 'Property'}
+                      </h3>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        Owner:{' '}
+                        <span className="text-foreground">{mandate.ownerName ?? 'unknown'}</span> ·
+                        manager:{' '}
+                        <span className="text-foreground">
+                          {mandate.managerName ?? 'unassigned'}
+                        </span>
+                      </p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {mandate.servicingTier
+                          ? TIER_LABEL[mandate.servicingTier]
+                          : 'GetRentos Managed'}
+                        {mandate.deliveryPartnerName
+                          ? ` · delivered by ${mandate.deliveryPartnerName}`
+                          : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant={status.variant}>{status.label}</Badge>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+};
+
 export default function AdminManagedMandatesPage() {
   const queryClient = useQueryClient();
   const pending = useQuery({
@@ -159,6 +344,7 @@ export default function AdminManagedMandatesPage() {
     queryFn: () => unwrap(adminManagedService.listPartnerFirms()),
   });
 
+  const [mode, setMode] = useState<'pending' | 'active'>('pending');
   const [view, setView] = useState<View>('all');
   const [tier, setTier] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -262,12 +448,21 @@ export default function AdminManagedMandatesPage() {
           GetRentos Managed
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Owner opt-ins awaiting a portfolio manager. Assigning one activates the engagement and
-          provisions their access to run the property — one at a time, or several at once.
+          Turn on owner opt-ins and run the live engagements — assigning, activating or reassigning
+          a portfolio manager, one at a time or several at once.
         </p>
       </div>
 
-      {pending.isError ? (
+      <Tabs value={mode} onValueChange={(v) => setMode(v as 'pending' | 'active')}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="pending">Awaiting activation</TabsTrigger>
+          <TabsTrigger value="active">Active engagements</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {mode === 'active' ? (
+        <ActiveEngagements staffOptions={staffOptions} />
+      ) : pending.isError ? (
         <PageErrorState
           title="Could not load the queue"
           description={(pending.error as Error).message}

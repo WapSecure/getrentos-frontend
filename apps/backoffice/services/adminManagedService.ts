@@ -31,6 +31,11 @@ export const adminManagedService = {
     );
   },
 
+  /** Live GetRentos Managed engagements — the surface for reassigning a manager. */
+  listActive(): Promise<ApiResponse<ManagedMandate[]>> {
+    return safeCall(() => authFetch<ManagedMandate[]>('/admin/management-mandates/managed-active'));
+  },
+
   /** Vetted firms ops can designate as a delivery partner. */
   listPartnerFirms(): Promise<ApiResponse<PartnerFirm[]>> {
     return safeCall(() => authFetch<PartnerFirm[]>('/admin/management-mandates/partner-firms'));
@@ -80,6 +85,19 @@ export const adminManagedService = {
       })
     );
   },
+
+  /** Move several live engagements to the same new portfolio manager. */
+  reassignBulk(
+    mandateIds: string[],
+    managerUserId: string
+  ): Promise<ApiResponse<BulkReassignResult>> {
+    return safeCall(() =>
+      authFetch<BulkReassignResult>('/admin/management-mandates/reassign-manager-bulk', {
+        method: 'POST',
+        body: JSON.stringify({ mandateIds, managerUserId }),
+      })
+    );
+  },
 };
 
 /** The outcome of a bulk activation: a partial-success summary. */
@@ -93,5 +111,12 @@ export interface BulkActivateResult {
 export interface BulkRejectResult {
   requested: number;
   rejected: number;
+  skipped: { id: string; reason: string }[];
+}
+
+/** The outcome of a bulk reassignment: a partial-success summary. */
+export interface BulkReassignResult {
+  requested: number;
+  reassigned: number;
   skipped: { id: string; reason: string }[];
 }
