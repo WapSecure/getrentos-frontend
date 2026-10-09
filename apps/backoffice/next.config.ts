@@ -34,6 +34,7 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 }
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
   transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
   /**
    * Declares this app to the API as `x-client-app: backoffice`.

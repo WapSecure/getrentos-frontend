@@ -40,6 +40,7 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 }
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
   transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
   // Import only the modules a page uses from the shared UI barrel, so a page that
   // needs a dropdown doesn't also ship every animated component in the package.

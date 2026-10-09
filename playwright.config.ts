@@ -36,13 +36,13 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'pnpm dev:web',
+      command: 'NEXT_DIST_DIR=.next-e2e pnpm dev:web',
       url: webUrl,
       reuseExistingServer: true,
       timeout: 120_000,
     },
     {
-      command: 'pnpm dev:backoffice',
+      command: 'NEXT_DIST_DIR=.next-e2e pnpm dev:backoffice',
       url: backofficeUrl,
       reuseExistingServer: true,
       timeout: 120_000,
