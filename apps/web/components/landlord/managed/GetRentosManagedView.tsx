@@ -458,7 +458,7 @@ export const GetRentosManagedView = () => {
                     <p className="text-sm text-muted-foreground">
                       {isPendingMandate
                         ? 'Withdraw this request. Nothing has started, so there is nothing to settle — it just goes away.'
-                        : 'End this engagement. The manager’s access stops immediately. It then moves to handover: you and the manager exchange keys, balances and documents, and you confirm that here. Fees earned to date and any break fee appear on your owner statement. GetRentos does not have to approve it.'}
+                        : 'End this engagement. The manager’s access stops immediately, and GetRentos draws up your final statement — rent collected to date, fees and any break fee. It then moves to handover: you and the manager exchange keys, balances and documents, and you confirm that here. GetRentos does not have to approve it.'}
                     </p>
                     {!isPendingMandate && breakFeeQuery.data && (
                       <p
