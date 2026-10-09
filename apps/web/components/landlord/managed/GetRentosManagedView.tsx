@@ -23,6 +23,7 @@ import {
   mine as myMandates,
   optIntoManaged,
   submit as submitMandate,
+  terminate as terminateMandate,
   vettedFirms,
   type ManagedSlaTarget,
   type ManagedTierCard,
@@ -116,6 +117,8 @@ export const GetRentosManagedView = () => {
   const queryClient = useQueryClient();
   const [tierByProperty, setTierByProperty] = useState<Record<string, ServicingTier>>({});
   const [firmPropertyByFirm, setFirmPropertyByFirm] = useState<Record<string, string>>({});
+  const [endingId, setEndingId] = useState<string | null>(null);
+  const [endReason, setEndReason] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const feeCard = useQuery({
@@ -165,6 +168,18 @@ export const GetRentosManagedView = () => {
       void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
     },
     onError: (err: Error) => setError(err.message || 'Could not appoint the firm.'),
+  });
+
+  const endEngagement = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      unwrap(terminateMandate(id, reason)),
+    onSuccess: () => {
+      setError(null);
+      setEndingId(null);
+      setEndReason('');
+      void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
+    },
+    onError: (err: Error) => setError(err.message || 'Could not end the engagement.'),
   });
 
   const managedByProperty = new Map<string, ManagementMandateDto>();
@@ -300,76 +315,142 @@ export const GetRentosManagedView = () => {
             const selected = tierByProperty[property.id] ?? 'FULL_MANAGEMENT';
             const busy = optIn.isPending && optIn.variables?.propertyId === property.id;
 
+            const activeMandate = managed ?? firmMandate;
+            const isPendingMandate = activeMandate
+              ? ['PENDING_OWNER', 'PENDING_OPS', 'DRAFT'].includes(activeMandate.status)
+              : false;
+            const endLabel = isPendingMandate ? 'Cancel request' : 'End management';
+            const isEnding = Boolean(activeMandate) && endingId === activeMandate!.id;
+            const endBusy =
+              endEngagement.isPending && endEngagement.variables?.id === activeMandate?.id;
+
             return (
-              <div
-                key={property.id}
-                className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="shrink-0 rounded-xl bg-muted p-2.5">
-                    <Building2 className="h-5 w-5 text-primary" aria-hidden />
+              <div key={property.id} className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 rounded-xl bg-muted p-2.5">
+                      <Building2 className="h-5 w-5 text-primary" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">{property.name}</p>
+                      <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5" aria-hidden />
+                        {property.address}, {property.city}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-foreground">{property.name}</p>
-                    <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" aria-hidden />
-                      {property.address}, {property.city}
-                    </p>
-                  </div>
+
+                  {managed ? (
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      {managed.servicingTier && (
+                        <span className="text-sm text-muted-foreground">
+                          {TIER_LABEL[managed.servicingTier]}
+                        </span>
+                      )}
+                      <Badge variant={MANDATE_STATUS_BADGE[managed.status]?.variant ?? 'neutral'}>
+                        {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEndReason('');
+                          setEndingId(isEnding ? null : managed.id);
+                        }}
+                        className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:text-destructive"
+                      >
+                        {endLabel}
+                      </button>
+                    </div>
+                  ) : firmMandate ? (
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      <span className="text-sm text-muted-foreground">
+                        {firmMandate.managerOrganizationName ?? 'A firm'}
+                      </span>
+                      <Badge variant={firmMandate.status === 'ACTIVE' ? 'success' : 'warning'}>
+                        {firmMandate.status === 'ACTIVE' ? 'Managed by firm' : 'Firm pending'}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEndReason('');
+                          setEndingId(isEnding ? null : firmMandate.id);
+                        }}
+                        className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:text-destructive"
+                      >
+                        {endLabel}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      <select
+                        aria-label={`Service level for ${property.name}`}
+                        value={selected}
+                        onChange={(event) =>
+                          setTierByProperty((prev) => ({
+                            ...prev,
+                            [property.id]: event.target.value as ServicingTier,
+                          }))
+                        }
+                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      >
+                        {cards.map((card) => (
+                          <option key={card.tier} value={card.tier}>
+                            {card.name} — {card.feePct}%
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => optIn.mutate({ propertyId: property.id, tier: selected })}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                      >
+                        {busy ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                        ) : (
+                          <ShieldCheck className="h-4 w-4" aria-hidden />
+                        )}
+                        Request
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {managed ? (
-                  <div className="flex items-center gap-2 sm:shrink-0">
-                    {managed.servicingTier && (
-                      <span className="text-sm text-muted-foreground">
-                        {TIER_LABEL[managed.servicingTier]}
-                      </span>
-                    )}
-                    <Badge variant={MANDATE_STATUS_BADGE[managed.status]?.variant ?? 'neutral'}>
-                      {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
-                    </Badge>
-                  </div>
-                ) : firmMandate ? (
-                  <div className="flex items-center gap-2 sm:shrink-0">
-                    <span className="text-sm text-muted-foreground">
-                      {firmMandate.managerOrganizationName ?? 'A firm'}
-                    </span>
-                    <Badge variant={firmMandate.status === 'ACTIVE' ? 'success' : 'warning'}>
-                      {firmMandate.status === 'ACTIVE' ? 'Managed by firm' : 'Firm pending'}
-                    </Badge>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 sm:shrink-0">
-                    <select
-                      aria-label={`Service level for ${property.name}`}
-                      value={selected}
-                      onChange={(event) =>
-                        setTierByProperty((prev) => ({
-                          ...prev,
-                          [property.id]: event.target.value as ServicingTier,
-                        }))
-                      }
-                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                    >
-                      {cards.map((card) => (
-                        <option key={card.tier} value={card.tier}>
-                          {card.name} — {card.feePct}%
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => optIn.mutate({ propertyId: property.id, tier: selected })}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                    >
-                      {busy ? (
-                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                      ) : (
-                        <ShieldCheck className="h-4 w-4" aria-hidden />
-                      )}
-                      Request
-                    </button>
+                {isEnding && activeMandate && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="text-sm text-muted-foreground">
+                      {isPendingMandate
+                        ? 'Withdraw this request. It is your consent, so it takes effect at once.'
+                        : 'End this engagement. Withdrawing your consent takes effect immediately — nobody has to approve it.'}
+                    </p>
+                    <textarea
+                      value={endReason}
+                      onChange={(event) => setEndReason(event.target.value)}
+                      rows={2}
+                      placeholder="Why are you ending it? (at least 10 characters — it is kept on the record)"
+                      className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        disabled={endBusy || endReason.trim().length < 10}
+                        onClick={() =>
+                          endEngagement.mutate({ id: activeMandate.id, reason: endReason.trim() })
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground disabled:opacity-50"
+                      >
+                        {endBusy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+                        {isPendingMandate ? 'Cancel the request' : 'End management'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEndingId(null)}
+                        disabled={endBusy}
+                        className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+                      >
+                        Keep it
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
