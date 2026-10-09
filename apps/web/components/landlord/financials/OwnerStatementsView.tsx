@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileBarChart, Plus, RotateCcw, Send } from 'lucide-react';
+import { FileBarChart, Mail, Plus, RotateCcw, Send } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -159,6 +159,27 @@ export function OwnerStatementsView() {
     },
     onError: (error: Error) => {
       setToast({ message: error.message || 'Unable to retry this payout.', variant: 'error' });
+    },
+  });
+
+  const resendEmail = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.resendOwnerStatementEmail(id)),
+    onSuccess: (result, id) => {
+      invalidate();
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
+      setToast(
+        result.emailSentAt
+          ? { message: 'Statement emailed to you.', variant: 'success' }
+          : {
+              message: result.emailError
+                ? `Couldn't send it: ${result.emailError}`
+                : 'The email could not be sent. Try again shortly.',
+              variant: 'error',
+            }
+      );
+    },
+    onError: (error: Error) => {
+      setToast({ message: error.message || 'Unable to send this statement.', variant: 'error' });
     },
   });
 
@@ -404,6 +425,28 @@ export function OwnerStatementsView() {
                   >
                     <Send className="w-4 h-4" />
                     Issue statement
+                  </Button>
+                </div>
+              )}
+
+              {detail.status === 'ISSUED' && (
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
+                  <p className="text-xs text-muted-foreground">
+                    {detail.emailSentAt
+                      ? `Emailed to you on ${formatDate(detail.emailSentAt)}.`
+                      : detail.emailError
+                        ? `Not emailed yet — ${detail.emailError}.`
+                        : 'Not emailed yet.'}
+                  </p>
+                  <Button
+                    className="gap-2"
+                    variant="outline"
+                    rounded="md"
+                    isLoading={resendEmail.isPending}
+                    onClick={() => resendEmail.mutate(detail.id)}
+                  >
+                    <Mail className="w-4 h-4" />
+                    {detail.emailSentAt ? 'Resend email' : 'Send email'}
                   </Button>
                 </div>
               )}

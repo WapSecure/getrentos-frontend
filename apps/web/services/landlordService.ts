@@ -223,6 +223,10 @@ export interface OwnerStatement {
   paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;
+  /** When the owner was last emailed this statement, or null if not yet sent. */
+  emailSentAt: string | null;
+  /** The last email failure, when the most recent send did not land. */
+  emailError: string | null;
   lineItems?: OwnerStatementLineItem[];
 }
 
@@ -941,6 +945,15 @@ export const landlordService = {
   async retryOwnerStatementPayout(id: string): Promise<ApiResponse<OwnerStatement>> {
     return safeCall(() =>
       authFetch(`/landlord/owner-statements/${id}/retry-payout`, { method: 'POST' })
+    );
+  },
+
+  /** Email the owner their copy of an issued statement again. */
+  async resendOwnerStatementEmail(
+    id: string
+  ): Promise<ApiResponse<{ emailSentAt: string | null; emailError: string | null }>> {
+    return safeCall(() =>
+      authFetch(`/landlord/owner-statements/${id}/resend-email`, { method: 'POST' })
     );
   },
 
