@@ -201,6 +201,19 @@ export function managedSla(): Promise<ApiResponse<ManagedSlaTarget[]>> {
   return safeCall(() => authFetch<ManagedSlaTarget[]>('/management-mandates/managed/sla'));
 }
 
+/** A vetted third-party management firm an owner can appoint. */
+export interface VettedFirm {
+  id: string;
+  name: string;
+  teamSize: number;
+  mandateCount: number;
+  since: string;
+}
+
+export function vettedFirms(): Promise<ApiResponse<VettedFirm[]>> {
+  return safeCall(() => authFetch<VettedFirm[]>('/management-mandates/firms'));
+}
+
 export function optIntoManaged(
   propertyId: string,
   tier: ServicingTier

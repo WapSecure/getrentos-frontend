@@ -2,19 +2,33 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Check, Clock, Loader2, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  Briefcase,
+  Building2,
+  Check,
+  Clock,
+  Loader2,
+  MapPin,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 
 import { landlordService } from '@/services/landlordService';
 import {
+  create as createMandate,
   managedFeeCard,
   managedSla,
   mine as myMandates,
   optIntoManaged,
+  submit as submitMandate,
+  vettedFirms,
   type ManagedSlaTarget,
   type ManagedTierCard,
   type ManagementMandateDto,
   type ServicingTier,
+  type VettedFirm,
 } from '@/services/mandateService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -101,6 +115,7 @@ const FeeCardColumn = ({ card, highlight }: { card: ManagedTierCard; highlight: 
 export const GetRentosManagedView = () => {
   const queryClient = useQueryClient();
   const [tierByProperty, setTierByProperty] = useState<Record<string, ServicingTier>>({});
+  const [firmPropertyByFirm, setFirmPropertyByFirm] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
   const feeCard = useQuery({
@@ -119,6 +134,10 @@ export const GetRentosManagedView = () => {
     queryKey: ['managed', 'sla'],
     queryFn: () => unwrap(managedSla()),
   });
+  const firms = useQuery({
+    queryKey: ['managed', 'firms'],
+    queryFn: () => unwrap(vettedFirms()),
+  });
 
   const optIn = useMutation({
     mutationFn: ({ propertyId, tier }: { propertyId: string; tier: ServicingTier }) =>
@@ -130,10 +149,37 @@ export const GetRentosManagedView = () => {
     onError: (err: Error) => setError(err.message || 'Could not opt into GetRentos Managed.'),
   });
 
+  const appoint = useMutation({
+    mutationFn: async ({ firmId, propertyId }: { firmId: string; propertyId: string }) => {
+      const created = await unwrap(
+        createMandate({
+          propertyId,
+          managerOrganizationId: firmId,
+          scope: ['RENT', 'MAINTENANCE'],
+        })
+      );
+      return unwrap(submitMandate(created.id));
+    },
+    onSuccess: () => {
+      setError(null);
+      void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
+    },
+    onError: (err: Error) => setError(err.message || 'Could not appoint the firm.'),
+  });
+
   const managedByProperty = new Map<string, ManagementMandateDto>();
+  const firmMandateByProperty = new Map<string, ManagementMandateDto>();
   for (const m of mandates.data ?? []) {
     if (isLiveManaged(m)) managedByProperty.set(m.propertyId, m);
+    else if (!m.managerIsGetRentos && !['TERMINATED', 'EXPIRED', 'REJECTED'].includes(m.status)) {
+      firmMandateByProperty.set(m.propertyId, m);
+    }
   }
+  /** A property is spoken for if GetRentos or a firm already holds a live mandate. */
+  const committedProperties = new Set<string>([
+    ...managedByProperty.keys(),
+    ...firmMandateByProperty.keys(),
+  ]);
 
   const cards = feeCard.data ?? [];
   const propertyList = properties.data?.items ?? [];
@@ -141,17 +187,38 @@ export const GetRentosManagedView = () => {
   return (
     <>
       <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Sparkles className="h-6 w-6 text-primary" aria-hidden />
-          GetRentos Managed
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground">Get your property managed</h1>
         <p className="mt-1 text-muted-foreground">
-          Let GetRentos run your property — vetted, accountable, and on one published fee card. Pick
-          a service level; our ops team reviews and activates it.
+          Two ways to hand over the day-to-day. Either way, GetRentos holds the money and keeps the
+          record, so the property&rsquo;s history stays with you.
         </p>
       </div>
 
-      {/* The fee card */}
+      {/* Positioning: the two routes */}
+      <div className="mb-8 grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-5">
+          <h2 className="flex items-center gap-2 font-semibold text-foreground">
+            <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+            Let GetRentos manage it
+          </h2>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            We become the manager of record — one published fee card, a service commitment you can
+            hold us to, and an ops-assigned portfolio manager. Pick a tier below.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <h2 className="flex items-center gap-2 font-semibold text-foreground">
+            <Briefcase className="h-5 w-5 text-muted-foreground" aria-hidden />
+            Work with a vetted firm
+          </h2>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Appoint an independent agency you choose. You and the firm agree the terms; the
+            engagement still runs on GetRentos. See the firms further down.
+          </p>
+        </div>
+      </div>
+
+      {/* The GetRentos fee card */}
       {feeCard.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading the fee card…</p>
       ) : (
@@ -229,6 +296,7 @@ export const GetRentosManagedView = () => {
         <div className="space-y-3">
           {propertyList.map((property) => {
             const managed = managedByProperty.get(property.id);
+            const firmMandate = firmMandateByProperty.get(property.id);
             const selected = tierByProperty[property.id] ?? 'FULL_MANAGEMENT';
             const busy = optIn.isPending && optIn.variables?.propertyId === property.id;
 
@@ -259,6 +327,15 @@ export const GetRentosManagedView = () => {
                     )}
                     <Badge variant={MANDATE_STATUS_BADGE[managed.status]?.variant ?? 'neutral'}>
                       {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
+                    </Badge>
+                  </div>
+                ) : firmMandate ? (
+                  <div className="flex items-center gap-2 sm:shrink-0">
+                    <span className="text-sm text-muted-foreground">
+                      {firmMandate.managerOrganizationName ?? 'A firm'}
+                    </span>
+                    <Badge variant={firmMandate.status === 'ACTIVE' ? 'success' : 'warning'}>
+                      {firmMandate.status === 'ACTIVE' ? 'Managed by firm' : 'Firm pending'}
                     </Badge>
                   </div>
                 ) : (
@@ -300,6 +377,99 @@ export const GetRentosManagedView = () => {
           })}
         </div>
       )}
+
+      {/* Work with a vetted firm — the other route */}
+      <div className="mt-10">
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          <Briefcase className="h-4 w-4 text-muted-foreground" aria-hidden />
+          Vetted firms
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Independent agencies on GetRentos. Appoint one and it goes to them to accept, then to our
+          team to verify before anything turns on.
+        </p>
+
+        {firms.isLoading ? (
+          <p className="mt-3 text-sm text-muted-foreground">Loading firms…</p>
+        ) : (firms.data ?? []).length === 0 ? (
+          <div className="mt-3 rounded-2xl border border-border bg-card p-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              No vetted firms are listed yet. GetRentos Managed above is available now.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-3 space-y-3">
+            {(firms.data ?? []).map((firm: VettedFirm) => {
+              const openProperties = propertyList.filter((p) => !committedProperties.has(p.id));
+              const chosen = firmPropertyByFirm[firm.id] ?? openProperties[0]?.id ?? '';
+              const busy = appoint.isPending && appoint.variables?.firmId === firm.id;
+              return (
+                <div
+                  key={firm.id}
+                  className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 rounded-xl bg-muted p-2.5">
+                      <Briefcase className="h-5 w-5 text-primary" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">{firm.name}</p>
+                      <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3.5 w-3.5" aria-hidden />
+                          {firm.teamSize} on the team
+                        </span>
+                        <span>
+                          {firm.mandateCount} engagement{firm.mandateCount === 1 ? '' : 's'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {openProperties.length === 0 ? (
+                    <span className="text-sm text-muted-foreground sm:shrink-0">
+                      All your properties are already assigned
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      <select
+                        aria-label={`Property to appoint ${firm.name} for`}
+                        value={chosen}
+                        onChange={(event) =>
+                          setFirmPropertyByFirm((prev) => ({
+                            ...prev,
+                            [firm.id]: event.target.value,
+                          }))
+                        }
+                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      >
+                        {openProperties.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={busy || !chosen}
+                        onClick={() => appoint.mutate({ firmId: firm.id, propertyId: chosen })}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
+                      >
+                        {busy ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                        ) : (
+                          <Briefcase className="h-4 w-4" aria-hidden />
+                        )}
+                        Appoint
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </>
   );
 };
