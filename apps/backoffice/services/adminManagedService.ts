@@ -23,6 +23,12 @@ export interface PartnerFirm {
   name: string;
 }
 
+/** Counts for the GetRentos Managed ops queues. */
+export interface ManagedQueueCounts {
+  awaitingActivation: number;
+  terminationRequests: number;
+}
+
 export const adminManagedService = {
   /** GetRentos Managed opt-ins awaiting a portfolio manager and activation. */
   listPending(): Promise<ApiResponse<ManagedMandate[]>> {
@@ -39,6 +45,11 @@ export const adminManagedService = {
   /** Vetted firms ops can designate as a delivery partner. */
   listPartnerFirms(): Promise<ApiResponse<PartnerFirm[]>> {
     return safeCall(() => authFetch<PartnerFirm[]>('/admin/management-mandates/partner-firms'));
+  },
+
+  /** Counts for the GetRentos Managed ops queues — for the nav badge. */
+  queueCounts(): Promise<ApiResponse<ManagedQueueCounts>> {
+    return safeCall(() => authFetch<ManagedQueueCounts>('/admin/management-mandates/queue-counts'));
   },
 
   /** Assign the portfolio manager (and optionally a delivery partner) and turn the engagement on. */

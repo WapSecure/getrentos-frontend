@@ -599,6 +599,26 @@ const TerminationRequests = () => {
                       · {formatDate(request.createdAt)}
                     </p>
                     <p className="mt-0.5 text-sm text-foreground">“{request.reason}”</p>
+                    {/* The notice position the approver is deciding against: when
+                        GetRentos is the manager, the agreed period binds us, and
+                        approving an unserved one ends it immediately. */}
+                    {request.managerIsGetRentos && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                        {request.noticeServedAt ? (
+                          <span>
+                            Notice served {formatDate(request.noticeServedAt)} ·{' '}
+                            {request.noticePeriodDays}-day period
+                          </span>
+                        ) : (
+                          <>
+                            <Badge variant="warning">Notice not served</Badge>
+                            <span>
+                              Approving ends the {request.noticePeriodDays}-day notice period now.
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <Badge variant={request.managerIsGetRentos ? 'success' : 'neutral'}>

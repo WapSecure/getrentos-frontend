@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
   Users,
@@ -28,7 +30,7 @@ import {
   CreditCard,
   Sparkles,
 } from 'lucide-react';
-import { ROUTES } from '@getrentos/shared';
+import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
 import type { AdminPermission } from '@/types/admin';
 
@@ -222,8 +224,24 @@ const hasAccess = (roles: string[] | undefined, item: NavItem) =>
     ? hasStaffAccess(roles)
     : hasAdminPermission(roles, item.permission);
 
+const MANAGED_HREF = '/admin/managed-mandates';
+
 export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const pathname = usePathname();
+
+  // The managed queues drive a "work waiting" badge. Only fetched for staff who
+  // can act on them, and polled gently so the badge stays roughly current
+  // without the sidebar hammering the API.
+  const canSeeManaged = hasAdminPermission(roles, 'verifications.approve');
+  const queueCounts = useQuery({
+    queryKey: ['admin', 'managed-queue-counts'],
+    queryFn: () => unwrap(adminManagedService.queueCounts()),
+    enabled: canSeeManaged,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+  const managedWaiting =
+    (queueCounts.data?.awaitingActivation ?? 0) + (queueCounts.data?.terminationRequests ?? 0);
 
   return (
     <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-card lg:block">
@@ -258,6 +276,14 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
                     >
                       <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       <span className="min-w-0 truncate">{item.label}</span>
+                      {item.href === MANAGED_HREF && managedWaiting > 0 && (
+                        <span
+                          className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                          aria-label={`${managedWaiting} waiting`}
+                        >
+                          {managedWaiting}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
