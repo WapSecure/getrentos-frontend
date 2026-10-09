@@ -11,8 +11,16 @@ export interface ManagedMandate {
   servicingTier: ManagedServicingTier | null;
   managerUserId: string | null;
   managerName: string | null;
+  deliveryPartnerOrganizationId: string | null;
+  deliveryPartnerName: string | null;
   status: string;
   createdAt: string;
+}
+
+/** A vetted firm a managed engagement can be handed to for local delivery. */
+export interface PartnerFirm {
+  id: string;
+  name: string;
 }
 
 export const adminManagedService = {
@@ -23,25 +31,42 @@ export const adminManagedService = {
     );
   },
 
-  /** Assign the portfolio manager and turn the engagement on. */
-  activate(id: string, managerUserId: string): Promise<ApiResponse<ManagedMandate>> {
+  /** Vetted firms ops can designate as a delivery partner. */
+  listPartnerFirms(): Promise<ApiResponse<PartnerFirm[]>> {
+    return safeCall(() => authFetch<PartnerFirm[]>('/admin/management-mandates/partner-firms'));
+  },
+
+  /** Assign the portfolio manager (and optionally a delivery partner) and turn the engagement on. */
+  activate(
+    id: string,
+    managerUserId: string,
+    deliveryPartnerOrganizationId?: string
+  ): Promise<ApiResponse<ManagedMandate>> {
     return safeCall(() =>
       authFetch<ManagedMandate>(`/admin/management-mandates/${id}/activate-managed`, {
         method: 'POST',
-        body: JSON.stringify({ managerUserId }),
+        body: JSON.stringify({
+          managerUserId,
+          ...(deliveryPartnerOrganizationId ? { deliveryPartnerOrganizationId } : {}),
+        }),
       })
     );
   },
 
-  /** Assign one manager to several opt-ins and activate them in one pass. */
+  /** Assign one manager (and optional delivery partner) to several opt-ins at once. */
   activateBulk(
     mandateIds: string[],
-    managerUserId: string
+    managerUserId: string,
+    deliveryPartnerOrganizationId?: string
   ): Promise<ApiResponse<BulkActivateResult>> {
     return safeCall(() =>
       authFetch<BulkActivateResult>('/admin/management-mandates/activate-managed-bulk', {
         method: 'POST',
-        body: JSON.stringify({ mandateIds, managerUserId }),
+        body: JSON.stringify({
+          mandateIds,
+          managerUserId,
+          ...(deliveryPartnerOrganizationId ? { deliveryPartnerOrganizationId } : {}),
+        }),
       })
     );
   },

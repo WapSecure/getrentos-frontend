@@ -363,6 +363,12 @@ export const GetRentosManagedView = () => {
                         <MapPin className="h-3.5 w-3.5" aria-hidden />
                         {property.address}, {property.city}
                       </p>
+                      {managed?.deliveryPartnerName && (
+                        <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                          <Briefcase className="h-3.5 w-3.5" aria-hidden />
+                          Delivered locally by {managed.deliveryPartnerName}
+                        </p>
+                      )}
                     </div>
                   </div>
 

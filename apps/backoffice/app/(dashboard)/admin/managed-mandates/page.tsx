@@ -48,20 +48,24 @@ const VIEW_PREDICATE: Record<View, (m: ManagedMandate) => boolean> = {
 const ManagedMandateCard = ({
   mandate,
   staffOptions,
+  partnerOptions,
   selected,
   onToggleSelected,
 }: {
   mandate: ManagedMandate;
   staffOptions: { value: string; label: string }[];
+  partnerOptions: { value: string; label: string }[];
   selected: boolean;
   onToggleSelected: (id: string) => void;
 }) => {
   const queryClient = useQueryClient();
   const [managerUserId, setManagerUserId] = useState('');
+  const [deliveryPartner, setDeliveryPartner] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const activate = useMutation({
-    mutationFn: () => unwrap(adminManagedService.activate(mandate.id, managerUserId)),
+    mutationFn: () =>
+      unwrap(adminManagedService.activate(mandate.id, managerUserId, deliveryPartner || undefined)),
     onSuccess: () => {
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-mandates'] });
@@ -102,18 +106,31 @@ const ManagedMandateCard = ({
         <Badge variant={status.variant}>{status.label}</Badge>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 sm:flex-row sm:items-end sm:justify-between">
-        <label className="block">
-          <span className="text-sm text-muted-foreground">Portfolio manager</span>
-          <div className="mt-1 w-full sm:w-72">
-            <Select
-              ariaLabel={`Portfolio manager for ${mandate.propertyTitle ?? 'property'}`}
-              value={managerUserId}
-              onValueChange={setManagerUserId}
-              options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
-            />
-          </div>
-        </label>
+      <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <label className="block">
+            <span className="text-sm text-muted-foreground">Portfolio manager</span>
+            <div className="mt-1 w-full sm:w-64">
+              <Select
+                ariaLabel={`Portfolio manager for ${mandate.propertyTitle ?? 'property'}`}
+                value={managerUserId}
+                onValueChange={setManagerUserId}
+                options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+              />
+            </div>
+          </label>
+          <label className="block">
+            <span className="text-sm text-muted-foreground">Delivery partner (optional)</span>
+            <div className="mt-1 w-full sm:w-64">
+              <Select
+                ariaLabel={`Delivery partner for ${mandate.propertyTitle ?? 'property'}`}
+                value={deliveryPartner}
+                onValueChange={setDeliveryPartner}
+                options={[{ value: '', label: 'GetRentos operates it' }, ...partnerOptions]}
+              />
+            </div>
+          </label>
+        </div>
         <Button
           isLoading={activate.isPending}
           disabled={!managerUserId}
@@ -137,11 +154,16 @@ export default function AdminManagedMandatesPage() {
     queryKey: ['admin', 'staff', 'for-managed'],
     queryFn: () => unwrap(adminService.listStaff({ pageSize: 100 })),
   });
+  const partners = useQuery({
+    queryKey: ['admin', 'managed-partner-firms'],
+    queryFn: () => unwrap(adminManagedService.listPartnerFirms()),
+  });
 
   const [view, setView] = useState<View>('all');
   const [tier, setTier] = useState<string>('all');
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkManager, setBulkManager] = useState('');
+  const [bulkPartner, setBulkPartner] = useState('');
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [bulkResult, setBulkResult] = useState<{ activated: number; skipped: number } | null>(null);
 
@@ -152,6 +174,10 @@ export default function AdminManagedMandatesPage() {
         label: member.email ? `${member.legalName} · ${member.email}` : member.legalName,
       })),
     [staff.data]
+  );
+  const partnerOptions = useMemo(
+    () => (partners.data ?? []).map((firm) => ({ value: firm.id, label: firm.name })),
+    [partners.data]
   );
 
   const all = useMemo(() => pending.data ?? [], [pending.data]);
@@ -175,7 +201,10 @@ export default function AdminManagedMandatesPage() {
   const toggleSelectAll = () => setSelected(allVisibleSelected ? [] : filtered.map((m) => m.id));
 
   const bulkActivate = useMutation({
-    mutationFn: () => unwrap(adminManagedService.activateBulk(selectedVisible, bulkManager)),
+    mutationFn: () =>
+      unwrap(
+        adminManagedService.activateBulk(selectedVisible, bulkManager, bulkPartner || undefined)
+      ),
     onSuccess: (result) => {
       setBulkError(null);
       setBulkResult({ activated: result.activated, skipped: result.skipped.length });
@@ -269,12 +298,20 @@ export default function AdminManagedMandatesPage() {
                 : `Select all (${filtered.length})`}
             </label>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="w-full sm:w-72">
+              <div className="w-full sm:w-60">
                 <Select
                   ariaLabel="Portfolio manager for the selected engagements"
                   value={bulkManager}
                   onValueChange={setBulkManager}
                   options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+                />
+              </div>
+              <div className="w-full sm:w-56">
+                <Select
+                  ariaLabel="Delivery partner for the selected engagements"
+                  value={bulkPartner}
+                  onValueChange={setBulkPartner}
+                  options={[{ value: '', label: 'GetRentos operates it' }, ...partnerOptions]}
                 />
               </div>
               <Button
@@ -310,6 +347,7 @@ export default function AdminManagedMandatesPage() {
                   key={mandate.id}
                   mandate={mandate}
                   staffOptions={staffOptions}
+                  partnerOptions={partnerOptions}
                   selected={selected.includes(mandate.id)}
                   onToggleSelected={toggleSelected}
                 />

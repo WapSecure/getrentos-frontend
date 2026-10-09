@@ -112,6 +112,9 @@ export interface ManagementMandateDto {
   managerOrganizationId: string | null;
   managerOrganizationName?: string | null;
   managerIsGetRentos: boolean;
+  /** A vetted firm delivering a GetRentos-managed engagement locally, if any. */
+  deliveryPartnerOrganizationId?: string | null;
+  deliveryPartnerName?: string | null;
   servicingTier: ServicingTier | null;
   managerUserId: string | null;
   managerName?: string | null;
