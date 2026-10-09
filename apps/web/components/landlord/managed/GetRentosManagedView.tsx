@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Check, Loader2, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
+import { Building2, Check, Clock, Loader2, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 
 import { landlordService } from '@/services/landlordService';
 import {
   managedFeeCard,
+  managedSla,
   mine as myMandates,
   optIntoManaged,
+  type ManagedSlaTarget,
   type ManagedTierCard,
   type ManagementMandateDto,
   type ServicingTier,
@@ -49,6 +51,24 @@ const TIER_LABEL: Record<ServicingTier, string> = {
 /** A mandate counts as the live GetRentos engagement for a property unless it has ended. */
 const isLiveManaged = (m: ManagementMandateDto) =>
   m.managerIsGetRentos && !['TERMINATED', 'EXPIRED', 'REJECTED'].includes(m.status);
+
+const PRIORITY_LABEL: Record<ManagedSlaTarget['priority'], string> = {
+  URGENT: 'Urgent',
+  HIGH: 'High',
+  MEDIUM: 'Medium',
+  LOW: 'Low',
+};
+
+/** Minutes as the span an owner reads — "1 hour", "48 hours", "5 days". */
+const humanizeMinutes = (minutes: number): string => {
+  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 1440) {
+    const hours = Math.round(minutes / 60);
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  }
+  const days = Math.round(minutes / 1440);
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
+};
 
 const FeeCardColumn = ({ card, highlight }: { card: ManagedTierCard; highlight: boolean }) => (
   <div
@@ -94,6 +114,10 @@ export const GetRentosManagedView = () => {
   const mandates = useQuery({
     queryKey: ['managed', 'mandates'],
     queryFn: () => unwrap(myMandates()),
+  });
+  const sla = useQuery({
+    queryKey: ['managed', 'sla'],
+    queryFn: () => unwrap(managedSla()),
   });
 
   const optIn = useMutation({
@@ -143,6 +167,46 @@ export const GetRentosManagedView = () => {
       )}
 
       {/* The owner's properties */}
+      {/* The published service commitment */}
+      {(sla.data ?? []).length > 0 && (
+        <div className="mb-8 rounded-2xl border border-border bg-muted/30 p-5">
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden />
+            Our service commitment
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Every managed property is held to the same GetRentos SLA — not a partner&rsquo;s. These
+            are the targets for maintenance, by how urgent the issue is.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {(sla.data ?? []).map((row) => (
+              <div key={row.priority} className="rounded-xl border border-border bg-card p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">
+                    {PRIORITY_LABEL[row.priority]}
+                  </span>
+                  {row.emergencyRoutingEnabled && <Badge variant="danger">Emergency</Badge>}
+                </div>
+                <dl className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Respond</dt>
+                    <dd className="text-foreground">
+                      {humanizeMinutes(row.responseTargetMinutes)}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Resolve</dt>
+                    <dd className="text-foreground">
+                      {humanizeMinutes(row.resolutionTargetMinutes)}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <h2 className="mb-3 text-sm font-semibold text-foreground">Your properties</h2>
 
       {error && (

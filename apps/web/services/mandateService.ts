@@ -188,6 +188,19 @@ export function managedFeeCard(): Promise<ApiResponse<ManagedTierCard[]>> {
   return safeCall(() => authFetch<ManagedTierCard[]>('/management-mandates/managed/fee-card'));
 }
 
+/** A row of GetRentos Managed's published SLA, by maintenance priority. */
+export interface ManagedSlaTarget {
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  responseTargetMinutes: number;
+  resolutionTargetMinutes: number;
+  escalationTargetMinutes: number;
+  emergencyRoutingEnabled: boolean;
+}
+
+export function managedSla(): Promise<ApiResponse<ManagedSlaTarget[]>> {
+  return safeCall(() => authFetch<ManagedSlaTarget[]>('/management-mandates/managed/sla'));
+}
+
 export function optIntoManaged(
   propertyId: string,
   tier: ServicingTier
