@@ -12,6 +12,7 @@ import {
   MapPin,
   ShieldCheck,
   Sparkles,
+  UserRound,
   Users,
   Wrench,
 } from 'lucide-react';
@@ -363,6 +364,12 @@ export const GetRentosManagedView = () => {
                         <MapPin className="h-3.5 w-3.5" aria-hidden />
                         {property.address}, {property.city}
                       </p>
+                      {managed?.managerName && (
+                        <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                          <UserRound className="h-3.5 w-3.5" aria-hidden />
+                          Portfolio manager: {managed.managerName}
+                        </p>
+                      )}
                       {managed?.deliveryPartnerName && (
                         <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                           <Briefcase className="h-3.5 w-3.5" aria-hidden />
