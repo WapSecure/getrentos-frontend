@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Award,
   Briefcase,
   Building2,
   Check,
@@ -12,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   Users,
+  Wrench,
 } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 
@@ -516,8 +518,9 @@ export const GetRentosManagedView = () => {
           Vetted firms
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Independent agencies on GetRentos. Appoint one and it goes to them to accept, then to our
-          team to verify before anything turns on.
+          Independent agencies on GetRentos, ranked by a real track record — how they handle
+          maintenance on the properties they manage, then how much they run. Appoint one and it goes
+          to them to accept, then to our team to verify before anything turns on.
         </p>
 
         {firms.isLoading ? (
@@ -530,10 +533,19 @@ export const GetRentosManagedView = () => {
           </div>
         ) : (
           <div className="mt-3 space-y-3">
-            {(firms.data ?? []).map((firm: VettedFirm) => {
+            {(firms.data ?? []).map((firm: VettedFirm, index: number) => {
+              const canCompare = (firms.data ?? []).length >= 2;
               const openProperties = propertyList.filter((p) => !committedProperties.has(p.id));
               const chosen = firmPropertyByFirm[firm.id] ?? openProperties[0]?.id ?? '';
               const busy = appoint.isPending && appoint.variables?.firmId === firm.id;
+              const onTime =
+                firm.maintenance.slaOnTimeRate !== null
+                  ? Math.round(firm.maintenance.slaOnTimeRate * 100)
+                  : null;
+              const since = new Date(firm.since).toLocaleDateString('en-NG', {
+                month: 'short',
+                year: 'numeric',
+              });
               return (
                 <div
                   key={firm.id}
@@ -544,15 +556,41 @@ export const GetRentosManagedView = () => {
                       <Briefcase className="h-5 w-5 text-primary" aria-hidden />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-foreground">{firm.name}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-foreground">{firm.name}</p>
+                        {canCompare && index === 0 && (
+                          <Badge variant="success" className="gap-1">
+                            <Award className="h-3 w-3" aria-hidden />
+                            Top ranked
+                          </Badge>
+                        )}
+                        {canCompare && index > 0 && (
+                          <span className="text-xs text-muted-foreground">#{firm.rank}</span>
+                        )}
+                      </div>
                       <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users className="h-3.5 w-3.5" aria-hidden />
                           {firm.teamSize} on the team
                         </span>
                         <span>
-                          {firm.mandateCount} engagement{firm.mandateCount === 1 ? '' : 's'}
+                          {firm.activeEngagements > 0
+                            ? `Manages ${firm.activeEngagements} ${
+                                firm.activeEngagements === 1 ? 'property' : 'properties'
+                              } now`
+                            : 'Not managing any yet'}
                         </span>
+                        <span className="flex items-center gap-1">
+                          <Wrench className="h-3.5 w-3.5" aria-hidden />
+                          {onTime !== null
+                            ? `${onTime}% of repairs on time${
+                                firm.maintenance.averageResolutionDays !== null
+                                  ? ` · ~${firm.maintenance.averageResolutionDays}d to resolve`
+                                  : ''
+                              }`
+                            : 'No maintenance handled yet'}
+                        </span>
+                        <span>On GetRentos since {since}</span>
                       </p>
                     </div>
                   </div>

@@ -201,13 +201,28 @@ export function managedSla(): Promise<ApiResponse<ManagedSlaTarget[]>> {
   return safeCall(() => authFetch<ManagedSlaTarget[]>('/management-mandates/managed/sla'));
 }
 
-/** A vetted third-party management firm an owner can appoint. */
+/** A firm's maintenance track record, worked out from its real jobs. Null = unmeasured. */
+export interface FirmMaintenance {
+  resolvedJobs: number;
+  openJobs: number;
+  averageResolutionDays: number | null;
+  slaOnTimeRate: number | null;
+}
+
+/** A vetted third-party management firm an owner can appoint, with a real track record. */
 export interface VettedFirm {
   id: string;
   name: string;
-  teamSize: number;
-  mandateCount: number;
   since: string;
+  /** 1-based rank, best first. See the directory's ordering. */
+  rank: number;
+  teamSize: number;
+  activeEngagements: number;
+  endedEngagements: number;
+  ownerEndedEngagements: number;
+  maintenance: FirmMaintenance;
+  /** Inputs that do not exist yet, named rather than guessed (e.g. 'MAINTENANCE_ACTIVITY'). */
+  missing: string[];
 }
 
 export function vettedFirms(): Promise<ApiResponse<VettedFirm[]>> {
