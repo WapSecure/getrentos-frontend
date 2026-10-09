@@ -118,7 +118,57 @@ export const adminManagedService = {
       })
     );
   },
+
+  /** Raise a termination request against several engagements, under one shared reason. */
+  requestTerminationBulk(
+    mandateIds: string[],
+    reason: string
+  ): Promise<ApiResponse<BulkRequestTerminationResult>> {
+    return safeCall(() =>
+      authFetch<BulkRequestTerminationResult>(
+        '/admin/management-mandates/request-termination-bulk',
+        { method: 'POST', body: JSON.stringify({ mandateIds, reason }) }
+      )
+    );
+  },
+
+  /** Termination requests awaiting a second staff approver. */
+  listTerminationRequests(): Promise<ApiResponse<TerminationRequest[]>> {
+    return safeCall(() =>
+      authFetch<TerminationRequest[]>('/admin/management-mandates/termination-requests')
+    );
+  },
+
+  /** Approve several open termination requests — the checker half. */
+  approveTerminationBulk(
+    mandateIds: string[],
+    decisionNote: string
+  ): Promise<ApiResponse<BulkApproveTerminationResult>> {
+    return safeCall(() =>
+      authFetch<BulkApproveTerminationResult>(
+        '/admin/management-mandates/approve-termination-bulk',
+        { method: 'POST', body: JSON.stringify({ mandateIds, decisionNote }) }
+      )
+    );
+  },
 };
+
+/** An open ask to end an engagement, awaiting a second staff approver. */
+export interface TerminationRequest {
+  id: string;
+  mandateId: string;
+  requestedById: string;
+  requestedByName: string | null;
+  reason: string;
+  status: string;
+  createdAt: string;
+  propertyId: string;
+  propertyTitle: string | null;
+  managerIsGetRentos: boolean;
+  ownerName: string | null;
+  noticePeriodDays: number;
+  noticeServedAt: string | null;
+}
 
 /** The outcome of a bulk activation: a partial-success summary. */
 export interface BulkActivateResult {
@@ -152,5 +202,19 @@ export interface BulkSuspendResult {
 export interface BulkResumeResult {
   requested: number;
   resumed: number;
+  skipped: { id: string; reason: string }[];
+}
+
+/** The outcome of a bulk termination request: a partial-success summary. */
+export interface BulkRequestTerminationResult {
+  requested: number;
+  raised: number;
+  skipped: { id: string; reason: string }[];
+}
+
+/** The outcome of a bulk termination approval: a partial-success summary. */
+export interface BulkApproveTerminationResult {
+  requested: number;
+  approved: number;
   skipped: { id: string; reason: string }[];
 }

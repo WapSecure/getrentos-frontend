@@ -160,6 +160,7 @@ const ActiveEngagements = ({
   const [selected, setSelected] = useState<string[]>([]);
   const [newManager, setNewManager] = useState('');
   const [pauseReason, setPauseReason] = useState('');
+  const [endReason, setEndReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
@@ -231,6 +232,24 @@ const ActiveEngagements = ({
     onError: (err: Error) => {
       setResult(null);
       setError(err.message || 'Could not resume the selected engagements.');
+    },
+  });
+
+  const requestEnd = useMutation({
+    mutationFn: () =>
+      unwrap(adminManagedService.requestTerminationBulk(selectedVisible, endReason)),
+    onSuccess: (r) => {
+      setError(null);
+      setResult(
+        `Requested end for ${r.raised}${r.skipped.length > 0 ? ` · skipped ${r.skipped.length} (e.g. already requested)` : ''}. A second staff member approves these in Termination requests.`
+      );
+      setSelected([]);
+      setEndReason('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-active'] });
+    },
+    onError: (err: Error) => {
+      setResult(null);
+      setError(err.message || 'Could not raise termination requests.');
     },
   });
 
@@ -325,6 +344,28 @@ const ActiveEngagements = ({
             </Button>
           </div>
         )}
+        {/* Raise a termination request — the maker half. A second staff member
+            approves it under "Termination requests"; nothing ends here. */}
+        {selectedVisible.length > 0 && (
+          <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
+            <input
+              type="text"
+              value={endReason}
+              onChange={(event) => setEndReason(event.target.value)}
+              placeholder="Reason to request ending (min 10 characters)"
+              aria-label="Reason to request ending the selected engagements"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-80"
+            />
+            <Button
+              variant="danger"
+              isLoading={requestEnd.isPending}
+              disabled={endReason.trim().length < 10}
+              onClick={() => requestEnd.mutate()}
+            >
+              Request end {selectedVisible.length}
+            </Button>
+          </div>
+        )}
       </div>
       {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
       {result && <p className="mb-3 text-sm text-muted-foreground">{result}</p>}
@@ -394,6 +435,184 @@ const ActiveEngagements = ({
   );
 };
 
+/** The "Termination requests" mode: the checker half — bulk-approve open asks. */
+const TerminationRequests = () => {
+  const queryClient = useQueryClient();
+  const requests = useQuery({
+    queryKey: ['admin', 'managed-termination-requests'],
+    queryFn: () => unwrap(adminManagedService.listTerminationRequests()),
+  });
+
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<string[]>([]);
+  const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+
+  const all = useMemo(() => requests.data ?? [], [requests.data]);
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return all.filter(
+      (r) =>
+        needle === '' ||
+        (r.propertyTitle ?? '').toLowerCase().includes(needle) ||
+        (r.ownerName ?? '').toLowerCase().includes(needle) ||
+        (r.requestedByName ?? '').toLowerCase().includes(needle)
+    );
+  }, [all, search]);
+
+  // Selection keys off the mandate id, which the approve endpoint takes and which
+  // is unique here (only one open request per mandate).
+  const visibleIds = useMemo(() => new Set(filtered.map((r) => r.mandateId)), [filtered]);
+  const selectedVisible = useMemo(
+    () => selected.filter((id) => visibleIds.has(id)),
+    [selected, visibleIds]
+  );
+  const allVisibleSelected = filtered.length > 0 && selectedVisible.length === filtered.length;
+  const toggle = (id: string) =>
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleAll = () => setSelected(allVisibleSelected ? [] : filtered.map((r) => r.mandateId));
+
+  const approve = useMutation({
+    mutationFn: () => unwrap(adminManagedService.approveTerminationBulk(selectedVisible, note)),
+    onSuccess: (r) => {
+      setError(null);
+      setResult(
+        `Approved ${r.approved}${r.skipped.length > 0 ? ` · skipped ${r.skipped.length} (e.g. your own request, or notice not dischargeable)` : ''}.`
+      );
+      setSelected([]);
+      setNote('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-termination-requests'] });
+    },
+    onError: (err: Error) => {
+      setResult(null);
+      setError(err.message || 'Could not approve the selected requests.');
+    },
+  });
+
+  if (requests.isError) {
+    return (
+      <PageErrorState
+        title="Could not load requests"
+        description={(requests.error as Error).message}
+        onRetry={() => {
+          void requests.refetch();
+        }}
+      />
+    );
+  }
+  if (requests.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (all.length === 0) {
+    return (
+      <EmptyState
+        icon={Sparkles}
+        title="No requests waiting"
+        description="No termination requests are awaiting a second approver."
+      />
+    );
+  }
+
+  return (
+    <>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Approving ends the engagement and revokes the manager’s access. You cannot approve a request
+        you raised yourself — a different staff member must.
+      </p>
+
+      <div className="mb-4 flex justify-end">
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search property, owner or requester…"
+          aria-label="Search termination requests"
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-72"
+        />
+      </div>
+
+      <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-primary"
+            checked={allVisibleSelected}
+            onChange={toggleAll}
+            aria-label="Select all visible"
+          />
+          {selectedVisible.length > 0
+            ? `${selectedVisible.length} selected`
+            : `Select all (${filtered.length})`}
+        </label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            type="text"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Approval note (min 10 characters)"
+            aria-label="Approval note for the selected requests"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-80"
+          />
+          <Button
+            variant="danger"
+            isLoading={approve.isPending}
+            disabled={note.trim().length < 10 || selectedVisible.length === 0}
+            onClick={() => approve.mutate()}
+          >
+            Approve &amp; end {selectedVisible.length || ''}
+          </Button>
+        </div>
+      </div>
+      {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+      {result && <p className="mb-3 text-sm text-muted-foreground">{result}</p>}
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={Sparkles}
+          title="Nothing matches"
+          description="No requests match your search."
+        />
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((request) => (
+            <Card key={request.id} className="p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="mt-1.5 h-4 w-4 shrink-0 accent-primary"
+                    checked={selected.includes(request.mandateId)}
+                    onChange={() => toggle(request.mandateId)}
+                    aria-label={`Select the request for ${request.propertyTitle ?? 'property'}`}
+                  />
+                  <div className="shrink-0 rounded-xl bg-muted p-2.5">
+                    <Building2 className="h-5 w-5 text-primary" aria-hidden />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-foreground">
+                      {request.propertyTitle ?? 'Property'}
+                    </h3>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      Owner:{' '}
+                      <span className="text-foreground">{request.ownerName ?? 'unknown'}</span> ·
+                      requested by{' '}
+                      <span className="text-foreground">{request.requestedByName ?? 'staff'}</span>{' '}
+                      · {formatDate(request.createdAt)}
+                    </p>
+                    <p className="mt-0.5 text-sm text-foreground">“{request.reason}”</p>
+                  </div>
+                </div>
+                <Badge variant={request.managerIsGetRentos ? 'success' : 'neutral'}>
+                  {request.managerIsGetRentos ? 'GetRentos' : 'Firm'}
+                </Badge>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
+
 export default function AdminManagedMandatesPage() {
   const queryClient = useQueryClient();
   const pending = useQuery({
@@ -409,7 +628,7 @@ export default function AdminManagedMandatesPage() {
     queryFn: () => unwrap(adminManagedService.listPartnerFirms()),
   });
 
-  const [mode, setMode] = useState<'pending' | 'active'>('pending');
+  const [mode, setMode] = useState<'pending' | 'active' | 'requests'>('pending');
   const [view, setView] = useState<View>('all');
   const [tier, setTier] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -518,14 +737,17 @@ export default function AdminManagedMandatesPage() {
         </p>
       </div>
 
-      <Tabs value={mode} onValueChange={(v) => setMode(v as 'pending' | 'active')}>
+      <Tabs value={mode} onValueChange={(v) => setMode(v as 'pending' | 'active' | 'requests')}>
         <TabsList className="mb-4">
           <TabsTrigger value="pending">Awaiting activation</TabsTrigger>
           <TabsTrigger value="active">Active engagements</TabsTrigger>
+          <TabsTrigger value="requests">Termination requests</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      {mode === 'active' ? (
+      {mode === 'requests' ? (
+        <TerminationRequests />
+      ) : mode === 'active' ? (
         <ActiveEngagements staffOptions={staffOptions} />
       ) : pending.isError ? (
         <PageErrorState
