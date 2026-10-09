@@ -214,6 +214,17 @@ export function vettedFirms(): Promise<ApiResponse<VettedFirm[]>> {
   return safeCall(() => authFetch<VettedFirm[]>('/management-mandates/firms'));
 }
 
+/** What ending a managed engagement now would cost the owner (notice-in-lieu). */
+export interface ManagedBreakFee {
+  amount: number;
+  waived: boolean;
+  reason: string;
+}
+
+export function managedBreakFee(id: string): Promise<ApiResponse<ManagedBreakFee>> {
+  return safeCall(() => authFetch<ManagedBreakFee>(`/management-mandates/${id}/break-fee`));
+}
+
 export function optIntoManaged(
   propertyId: string,
   tier: ServicingTier

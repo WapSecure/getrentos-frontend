@@ -21,6 +21,7 @@ import {
   managedFeeCard,
   managedSla,
   mine as myMandates,
+  managedBreakFee,
   optIntoManaged,
   recordHandover,
   submit as submitMandate,
@@ -33,6 +34,7 @@ import {
   type VettedFirm,
 } from '@/services/mandateService';
 import { unwrap } from '@/lib/apiHelpers';
+import { formatCurrency } from '@/lib/format';
 
 /**
  * "Let GetRentos manage it": the owner-facing opt-in.
@@ -185,6 +187,12 @@ export const GetRentosManagedView = () => {
       void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
     },
     onError: (err: Error) => setError(err.message || 'Could not end the engagement.'),
+  });
+
+  const breakFeeQuery = useQuery({
+    queryKey: ['managed', 'break-fee', endingId],
+    queryFn: () => unwrap(managedBreakFee(endingId as string)),
+    enabled: Boolean(endingId),
   });
 
   const handover = useMutation({
@@ -452,6 +460,19 @@ export const GetRentosManagedView = () => {
                         ? 'Withdraw this request. Nothing has started, so there is nothing to settle — it just goes away.'
                         : 'End this engagement. The manager’s access stops at once, then it moves to handover — the final statement, balances and keys — and any fees already earned are settled there. It takes effect immediately; nobody has to approve it.'}
                     </p>
+                    {!isPendingMandate && breakFeeQuery.data && (
+                      <p
+                        className={`mt-2 rounded-lg border px-3 py-2 text-sm ${
+                          breakFeeQuery.data.waived
+                            ? 'border-border bg-muted/40 text-muted-foreground'
+                            : 'border-warning/30 bg-warning-subtle text-foreground'
+                        }`}
+                      >
+                        {breakFeeQuery.data.waived
+                          ? `No break fee — ${breakFeeQuery.data.reason}`
+                          : `Notice-in-lieu of ${formatCurrency(breakFeeQuery.data.amount)} (${breakFeeQuery.data.reason}) will be added to your final statement.`}
+                      </p>
+                    )}
                     <textarea
                       value={endReason}
                       onChange={(event) => setEndReason(event.target.value)}
