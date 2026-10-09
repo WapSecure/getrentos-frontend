@@ -70,11 +70,28 @@ export const adminManagedService = {
       })
     );
   },
+
+  /** Refuse several opt-ins in one pass, under one shared reason. */
+  rejectBulk(mandateIds: string[], reason: string): Promise<ApiResponse<BulkRejectResult>> {
+    return safeCall(() =>
+      authFetch<BulkRejectResult>('/admin/management-mandates/reject-managed-bulk', {
+        method: 'POST',
+        body: JSON.stringify({ mandateIds, reason }),
+      })
+    );
+  },
 };
 
 /** The outcome of a bulk activation: a partial-success summary. */
 export interface BulkActivateResult {
   requested: number;
   activated: number;
+  skipped: { id: string; reason: string }[];
+}
+
+/** The outcome of a bulk rejection: a partial-success summary. */
+export interface BulkRejectResult {
+  requested: number;
+  rejected: number;
   skipped: { id: string; reason: string }[];
 }

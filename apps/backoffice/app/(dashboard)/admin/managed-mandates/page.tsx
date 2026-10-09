@@ -161,11 +161,13 @@ export default function AdminManagedMandatesPage() {
 
   const [view, setView] = useState<View>('all');
   const [tier, setTier] = useState<string>('all');
+  const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkManager, setBulkManager] = useState('');
   const [bulkPartner, setBulkPartner] = useState('');
+  const [bulkReason, setBulkReason] = useState('');
   const [bulkError, setBulkError] = useState<string | null>(null);
-  const [bulkResult, setBulkResult] = useState<{ activated: number; skipped: number } | null>(null);
+  const [bulkResult, setBulkResult] = useState<string | null>(null);
 
   const staffOptions = useMemo(
     () =>
@@ -181,11 +183,18 @@ export default function AdminManagedMandatesPage() {
   );
 
   const all = useMemo(() => pending.data ?? [], [pending.data]);
-  const filtered = useMemo(
-    () =>
-      all.filter(VIEW_PREDICATE[view]).filter((m) => tier === 'all' || m.servicingTier === tier),
-    [all, view, tier]
-  );
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return all
+      .filter(VIEW_PREDICATE[view])
+      .filter((m) => tier === 'all' || m.servicingTier === tier)
+      .filter(
+        (m) =>
+          needle === '' ||
+          (m.propertyTitle ?? '').toLowerCase().includes(needle) ||
+          (m.ownerName ?? '').toLowerCase().includes(needle)
+      );
+  }, [all, view, tier, search]);
 
   // Keep the selection to what is actually on screen, so a hidden row is never
   // activated by a bulk action the operator cannot see.
@@ -200,6 +209,9 @@ export default function AdminManagedMandatesPage() {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   const toggleSelectAll = () => setSelected(allVisibleSelected ? [] : filtered.map((m) => m.id));
 
+  const summarise = (verb: string, done: number, skipped: number) =>
+    `${verb} ${done}${skipped > 0 ? ` · skipped ${skipped} that could not be` : ''}.`;
+
   const bulkActivate = useMutation({
     mutationFn: () =>
       unwrap(
@@ -207,13 +219,28 @@ export default function AdminManagedMandatesPage() {
       ),
     onSuccess: (result) => {
       setBulkError(null);
-      setBulkResult({ activated: result.activated, skipped: result.skipped.length });
+      setBulkResult(summarise('Activated', result.activated, result.skipped.length));
       setSelected([]);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-mandates'] });
     },
     onError: (err: Error) => {
       setBulkResult(null);
       setBulkError(err.message || 'Could not activate the selected engagements.');
+    },
+  });
+
+  const bulkReject = useMutation({
+    mutationFn: () => unwrap(adminManagedService.rejectBulk(selectedVisible, bulkReason)),
+    onSuccess: (result) => {
+      setBulkError(null);
+      setBulkResult(summarise('Refused', result.rejected, result.skipped.length));
+      setSelected([]);
+      setBulkReason('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-mandates'] });
+    },
+    onError: (err: Error) => {
+      setBulkResult(null);
+      setBulkError(err.message || 'Could not refuse the selected engagements.');
     },
   });
 
@@ -268,71 +295,96 @@ export default function AdminManagedMandatesPage() {
                 <TabsTrigger value="stale">Stale ({counts.stale})</TabsTrigger>
               </TabsList>
             </Tabs>
-            <div className="w-full sm:w-64">
-              <Select
-                ariaLabel="Filter by servicing tier"
-                value={tier}
-                onValueChange={setTier}
-                options={[
-                  { value: 'all', label: 'All tiers' },
-                  { value: 'COLLECT_ONLY', label: TIER_LABEL.COLLECT_ONLY },
-                  { value: 'COLLECT_MAINTAIN', label: TIER_LABEL.COLLECT_MAINTAIN },
-                  { value: 'FULL_MANAGEMENT', label: TIER_LABEL.FULL_MANAGEMENT },
-                ]}
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search property or owner…"
+                aria-label="Search by property or owner"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-60"
               />
+              <div className="w-full sm:w-56">
+                <Select
+                  ariaLabel="Filter by servicing tier"
+                  value={tier}
+                  onValueChange={setTier}
+                  options={[
+                    { value: 'all', label: 'All tiers' },
+                    { value: 'COLLECT_ONLY', label: TIER_LABEL.COLLECT_ONLY },
+                    { value: 'COLLECT_MAINTAIN', label: TIER_LABEL.COLLECT_MAINTAIN },
+                    { value: 'FULL_MANAGEMENT', label: TIER_LABEL.FULL_MANAGEMENT },
+                  ]}
+                />
+              </div>
             </div>
           </div>
 
           {/* Bulk action bar */}
-          <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-primary"
-                checked={allVisibleSelected}
-                onChange={toggleSelectAll}
-                aria-label="Select all visible"
-              />
-              {selectedVisible.length > 0
-                ? `${selectedVisible.length} selected`
-                : `Select all (${filtered.length})`}
-            </label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="w-full sm:w-60">
-                <Select
-                  ariaLabel="Portfolio manager for the selected engagements"
-                  value={bulkManager}
-                  onValueChange={setBulkManager}
-                  options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+          <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <label className="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-primary"
+                  checked={allVisibleSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="Select all visible"
                 />
+                {selectedVisible.length > 0
+                  ? `${selectedVisible.length} selected`
+                  : `Select all (${filtered.length})`}
+              </label>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="w-full sm:w-60">
+                  <Select
+                    ariaLabel="Portfolio manager for the selected engagements"
+                    value={bulkManager}
+                    onValueChange={setBulkManager}
+                    options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+                  />
+                </div>
+                <div className="w-full sm:w-56">
+                  <Select
+                    ariaLabel="Delivery partner for the selected engagements"
+                    value={bulkPartner}
+                    onValueChange={setBulkPartner}
+                    options={[{ value: '', label: 'GetRentos operates it' }, ...partnerOptions]}
+                  />
+                </div>
+                <Button
+                  isLoading={bulkActivate.isPending}
+                  disabled={!bulkManager || selectedVisible.length === 0}
+                  onClick={() => bulkActivate.mutate()}
+                >
+                  Assign &amp; activate {selectedVisible.length || ''}
+                </Button>
               </div>
-              <div className="w-full sm:w-56">
-                <Select
-                  ariaLabel="Delivery partner for the selected engagements"
-                  value={bulkPartner}
-                  onValueChange={setBulkPartner}
-                  options={[{ value: '', label: 'GetRentos operates it' }, ...partnerOptions]}
-                />
-              </div>
-              <Button
-                isLoading={bulkActivate.isPending}
-                disabled={!bulkManager || selectedVisible.length === 0}
-                onClick={() => bulkActivate.mutate()}
-              >
-                Assign &amp; activate {selectedVisible.length || ''}
-              </Button>
             </div>
+            {/* Refuse the selection — a reason is required and kept on each. */}
+            {selectedVisible.length > 0 && (
+              <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
+                <input
+                  type="text"
+                  value={bulkReason}
+                  onChange={(event) => setBulkReason(event.target.value)}
+                  placeholder="Reason for refusing (min 10 characters)"
+                  aria-label="Reason for refusing the selected engagements"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-96"
+                />
+                <Button
+                  variant="outline"
+                  isLoading={bulkReject.isPending}
+                  disabled={bulkReason.trim().length < 10}
+                  onClick={() => bulkReject.mutate()}
+                >
+                  Refuse {selectedVisible.length}
+                </Button>
+              </div>
+            )}
           </div>
           {bulkError && <p className="mb-3 text-sm text-destructive">{bulkError}</p>}
-          {bulkResult && (
-            <p className="mb-3 text-sm text-muted-foreground">
-              Activated {bulkResult.activated}
-              {bulkResult.skipped > 0
-                ? ` · skipped ${bulkResult.skipped} that could not be activated`
-                : ''}
-              .
-            </p>
-          )}
+          {bulkResult && <p className="mb-3 text-sm text-muted-foreground">{bulkResult}</p>}
 
           {filtered.length === 0 ? (
             <EmptyState
