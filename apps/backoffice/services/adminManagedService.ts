@@ -32,4 +32,24 @@ export const adminManagedService = {
       })
     );
   },
+
+  /** Assign one manager to several opt-ins and activate them in one pass. */
+  activateBulk(
+    mandateIds: string[],
+    managerUserId: string
+  ): Promise<ApiResponse<BulkActivateResult>> {
+    return safeCall(() =>
+      authFetch<BulkActivateResult>('/admin/management-mandates/activate-managed-bulk', {
+        method: 'POST',
+        body: JSON.stringify({ mandateIds, managerUserId }),
+      })
+    );
+  },
 };
+
+/** The outcome of a bulk activation: a partial-success summary. */
+export interface BulkActivateResult {
+  requested: number;
+  activated: number;
+  skipped: { id: string; reason: string }[];
+}
