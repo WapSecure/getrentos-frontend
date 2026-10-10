@@ -20,6 +20,8 @@ import {
   BedDouble,
   Luggage,
   KeyRound,
+  ClipboardCheck,
+  PiggyBank,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -58,6 +60,8 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.investment_analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },
   { labelKey: 'sidebar.home_management', href: ROUTES.OWNER_HOME_MANAGEMENT, icon: Wrench },
   { labelKey: 'sidebar.vendors', href: ROUTES.OWNER_VENDORS, icon: HardHat },
+  { labelKey: 'sidebar.inspections', href: ROUTES.OWNER_INSPECTIONS, icon: ClipboardCheck },
+  { labelKey: 'sidebar.deposits', href: ROUTES.OWNER_DEPOSITS, icon: PiggyBank },
   { labelKey: 'sidebar.documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
@@ -79,9 +83,9 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Portfolio and listings', items: navItems.slice(1, 6) },
-  { label: 'Sales and investment', items: navItems.slice(6, 12) },
-  { label: 'Communication', items: navItems.slice(12, 15) },
-  { label: 'Trust and account', items: navItems.slice(15) },
+  { label: 'Sales and investment', items: navItems.slice(6, 14) },
+  { label: 'Communication', items: navItems.slice(14, 17) },
+  { label: 'Trust and account', items: navItems.slice(17) },
 ];
 
 export const OwnerSidebar = () => {
