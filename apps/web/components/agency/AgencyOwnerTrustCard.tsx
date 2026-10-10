@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Loader2, ShieldCheck, Wallet } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -57,6 +58,27 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
                 </span>
               )}
             </div>
+
+            {data.protection ? (
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck
+                  className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400"
+                  aria-hidden
+                />
+                Protected under {data.protection.schemeName}
+                {data.protection.coverageAmount != null
+                  ? ` · up to ${formatCurrency(data.protection.coverageAmount)}`
+                  : ''}
+              </p>
+            ) : (
+              <Link
+                href="/agency/protection"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-700 hover:underline dark:text-amber-400"
+              >
+                <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+                No client-money protection on record — add one
+              </Link>
+            )}
 
             {data.entries.length > 0 && (
               <div className="mt-4 overflow-hidden rounded-xl border border-border">

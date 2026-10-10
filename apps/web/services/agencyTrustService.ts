@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import type { ProtectionAttestation } from './agencyProtectionService';
 
 export interface AgencyTrustEntry {
   id: string;
@@ -20,6 +21,7 @@ export interface AgencyOwnerTrust {
   balance: number | null;
   reconciledBalance: number;
   inSync: boolean;
+  protection: ProtectionAttestation | null;
   entries: AgencyTrustEntry[];
 }
 
