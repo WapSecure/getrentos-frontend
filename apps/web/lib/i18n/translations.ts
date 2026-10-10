@@ -42,6 +42,7 @@ export type TranslationKey =
   | 'sidebar.units'
   | 'sidebar.tenants'
   | 'sidebar.leases'
+  | 'sidebar.deposits'
   | 'sidebar.vendors'
   | 'sidebar.financials'
   | 'sidebar.owner_statements'
@@ -137,6 +138,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.units': 'Units',
     'sidebar.tenants': 'Tenants',
     'sidebar.leases': 'Leases',
+    'sidebar.deposits': 'Deposits',
     'sidebar.vendors': 'Vendors',
     'sidebar.financials': 'Financials',
     'sidebar.owner_statements': 'Owner Statements',
@@ -231,6 +233,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.units': 'Unit Dem',
     'sidebar.tenants': 'Tenant Dem',
     'sidebar.leases': 'Agreement Dem',
+    'sidebar.deposits': 'Deposit Dem',
     'sidebar.vendors': 'Vendor Dem',
     'sidebar.financials': 'Money Matter',
     'sidebar.owner_statements': 'Owner Statement Dem',

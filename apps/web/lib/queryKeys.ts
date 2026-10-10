@@ -22,6 +22,9 @@ export const landlordKeys = {
       params?.type ?? 'all',
     ] as const,
   inspection: (id: string) => ['landlord', 'inspections', 'detail', id] as const,
+  deposits: (params?: { propertyId?: string; status?: string }) =>
+    ['landlord', 'deposits', params?.propertyId ?? 'all', params?.status ?? 'all'] as const,
+  deposit: (id: string) => ['landlord', 'deposits', 'detail', id] as const,
   tenants: ['landlord', 'tenants'] as const,
   payments: (status?: string) => ['landlord', 'payments', status ?? 'all'] as const,
   rentCollectionStats: ['landlord', 'rentCollectionStats'] as const,
