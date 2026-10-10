@@ -10,6 +10,7 @@ import {
   Megaphone,
   ShieldCheck,
   SlidersHorizontal,
+  UsersRound,
   Sparkles,
   Vote,
   WalletCards,
@@ -39,6 +40,13 @@ export default function EstateAccount() {
       value: estate?.name,
       icon: Building2,
       onPress: () => setSwitching(true),
+    },
+    {
+      key: 'staff',
+      label: 'Staff',
+      description: 'Gatemen who work your gates',
+      icon: UsersRound,
+      onPress: go('/(app)/estate-staff'),
     },
     {
       key: 'announcements',

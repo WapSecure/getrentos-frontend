@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import {
+  Button,
   Card,
   EmptyState,
   ErrorState,
@@ -141,7 +142,10 @@ export default function EstateHome() {
         <EmptyState
           icon={<Building2 size={34} color={colors.mutedForeground} />}
           title="No estate yet"
-          description="Set your estate up on the GetRentos website (its gates, plan and payout details). It then appears here to run from your phone."
+          description="Set up your estate (its name, address and gates) and run it from here."
+          action={
+            <Button label="Set up your estate" onPress={() => router.push('/(app)/estate-setup')} />
+          }
         />
       </Screen>
     );
