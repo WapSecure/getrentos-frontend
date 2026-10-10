@@ -305,7 +305,7 @@ export default function RealtorHome() {
       <ActivityFeed
         description="Leads, viewings and offers across your clients"
         loading={activity.isPending}
-        emptyText="Leads, viewings and offers will show up here."
+        emptyText="Nothing yet. Add a lead or invite a client to get started."
         items={(activity.data ?? []).slice(0, 6).map((a) => ({
           id: a.id,
           Icon: ACTIVITY_ICON[a.type] ?? Bell,
