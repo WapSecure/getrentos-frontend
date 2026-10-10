@@ -19,6 +19,7 @@ import {
   SPEND_APPROVAL_STATUS_LABELS,
   type SpendApprovalStatus,
 } from '@/services/spendApprovalService';
+import { SpendCapSettings } from './SpendCapSettings';
 import { unwrap } from '@/lib/apiHelpers';
 
 const STATUS_VARIANT: Record<SpendApprovalStatus, BadgeVariant> = {
@@ -93,6 +94,8 @@ export function ApprovalsView() {
           Spend your manager wants to make above your approval limit.
         </p>
       </div>
+
+      <SpendCapSettings onToast={setToast} />
 
       <div className="mb-6 flex w-fit gap-1 rounded-lg bg-secondary p-1">
         {tabs.map((tab) => (

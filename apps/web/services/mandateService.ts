@@ -118,6 +118,8 @@ export interface ManagementMandateDto {
   servicingTier: ServicingTier | null;
   managerUserId: string | null;
   managerName?: string | null;
+  /** The most a manager may spend without owner sign-off (whole naira); null = no cap. */
+  maintenanceApprovalCap: number | null;
   scope: MandateScope[];
   capabilities: MandateCapabilities;
   permissions: MandateViewerPermissions;
