@@ -33,6 +33,18 @@ describe('notification routes', () => {
     }
   });
 
+  it('sends an estate listing request to the owner, and the answer to the estate', () => {
+    expect(routeForNotification({ type: 'ESTATE_LISTING_REQUESTED' }, 'owner')).toBe(
+      '/(app)/estate-agreements'
+    );
+    expect(routeForNotification({ type: 'ESTATE_LISTING_REQUESTED' }, 'landlord')).toBe(
+      '/(app)/estate-agreements'
+    );
+    expect(routeForNotification({ type: 'ESTATE_LISTING_DECIDED' }, 'estate')).toBe(
+      '/(app)/estate-marketplace'
+    );
+  });
+
   it('never returns a dead route', () => {
     expect(routeForNotification({ actionUrl: '/something/new', type: 'WELCOME' }, 'renter')).toBe(
       '/(app)/notifications'

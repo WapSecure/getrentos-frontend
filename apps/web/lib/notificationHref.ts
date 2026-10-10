@@ -36,8 +36,11 @@ const BY_TYPE: Partial<Record<NotificationPortal, [prefix: string, route: string
     ['estate_visit_overstay', ROUTES.ESTATE_DWELL],
     ['estate_delivery_', ROUTES.ESTATE_DELIVERIES],
     ['estate_poll_', ROUTES.ESTATE_POLLS],
-    ['estate_listing_', '/estate/marketplace'],
+    // The owner's answer to the estate's request to market their property.
+    ['estate_listing_decided', '/estate/marketplace'],
   ],
+  // An estate asking to market the owner's property.
+  owner: [['estate_listing_requested', '/owner/estate-agreements']],
   resident: [
     ['estate_due_', ROUTES.RESIDENT_DUES],
     ['estate_announcement_', ROUTES.RESIDENT_ANNOUNCEMENTS],
