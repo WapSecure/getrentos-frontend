@@ -109,10 +109,13 @@ export function AgencyOwnersView() {
           {groups.map((group) => (
             <div key={group.ownerId} className="rounded-2xl border border-border bg-card p-5">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2">
+                <Link
+                  href={`/agency/owners/${group.ownerId}`}
+                  className="flex min-w-0 items-center gap-2 hover:text-primary"
+                >
                   <UserRound className="h-5 w-5 shrink-0 text-primary" aria-hidden />
                   <span className="truncate font-semibold text-foreground">{group.ownerName}</span>
-                </div>
+                </Link>
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {group.mandates.length} propert{group.mandates.length === 1 ? 'y' : 'ies'}
                   {group.liveCount < group.mandates.length ? ` · ${group.liveCount} live` : ''}
