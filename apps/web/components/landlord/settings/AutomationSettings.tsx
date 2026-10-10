@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BellRing, AlertOctagon, CalendarClock, CalendarDays } from 'lucide-react';
+import { BellRing, AlertOctagon, CalendarClock, CalendarDays, Coins } from 'lucide-react';
 import { NumberInput } from '@getrentos/ui';
 import { landlordService, type LandlordAutomationSettings } from '@/services/landlordService';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 import type { PlanGateReason } from '@/lib/planGate';
 
 /** The switches, as opposed to the numeric policy that sits below them. */
-type AutomationToggleKey = 'rentReminders' | 'overdueAlerts' | 'autoInvoices' | 'leaseExpiry';
+type AutomationToggleKey =
+  | 'rentReminders'
+  | 'overdueAlerts'
+  | 'autoInvoices'
+  | 'leaseExpiry'
+  | 'lateFees';
 
 interface AutomationToggle {
   id: AutomationToggleKey;
@@ -36,6 +41,12 @@ const TOGGLE_META: AutomationToggle[] = [
     description: 'Get notified 60 days before a lease is set to expire',
     icon: CalendarClock,
   },
+  {
+    id: 'lateFees',
+    label: 'Charge Late Fees',
+    description: 'Automatically add a late fee to rent left unpaid past the window below',
+    icon: Coins,
+  },
 ];
 
 const DEFAULT_SETTINGS: LandlordAutomationSettings = {
@@ -44,14 +55,22 @@ const DEFAULT_SETTINGS: LandlordAutomationSettings = {
   autoInvoices: false,
   leaseExpiry: true,
   graceDays: 5,
+  lateFees: false,
+  lateFeePercent: 10,
+  lateFeeAfterDays: 7,
 };
 
 /** Mirrors MAX_RENT_GRACE_DAYS on the API, which rejects anything larger. */
 const MAX_GRACE_DAYS = 90;
+/** Mirror the API caps on the late-fee rule. */
+const MAX_LATE_FEE_PERCENT = 100;
+const MAX_LATE_FEE_AFTER_DAYS = 90;
 
 export const AutomationSettings = () => {
   const [settings, setSettings] = useState<LandlordAutomationSettings>(DEFAULT_SETTINGS);
   const [graceDays, setGraceDays] = useState(DEFAULT_SETTINGS.graceDays);
+  const [lateFeePercent, setLateFeePercent] = useState(DEFAULT_SETTINGS.lateFeePercent);
+  const [lateFeeAfterDays, setLateFeeAfterDays] = useState(DEFAULT_SETTINGS.lateFeeAfterDays);
   const [upgradeReason, setUpgradeReason] = useState<PlanGateReason | null>(null);
 
   useEffect(() => {
@@ -60,11 +79,36 @@ export const AutomationSettings = () => {
       if (response.success && response.data) {
         setSettings(response.data);
         setGraceDays(response.data.graceDays);
+        setLateFeePercent(response.data.lateFeePercent);
+        setLateFeeAfterDays(response.data.lateFeeAfterDays);
       }
     };
 
     fetchSettings();
   }, []);
+
+  /** Save a numeric late-fee field on blur, bounded, like the grace window. */
+  const saveLateFeeField = async (
+    field: 'lateFeePercent' | 'lateFeeAfterDays',
+    value: number,
+    max: number
+  ) => {
+    if (value === settings[field] || value < 0 || value > max) return;
+    const previous = settings;
+    const next = { ...settings, [field]: value };
+    setSettings(next);
+    const response = await landlordService.updateAutomationSettings(next);
+    if (response.success && response.data) {
+      setSettings(response.data);
+      setLateFeePercent(response.data.lateFeePercent);
+      setLateFeeAfterDays(response.data.lateFeeAfterDays);
+      return;
+    }
+    setSettings(previous);
+    setLateFeePercent(previous.lateFeePercent);
+    setLateFeeAfterDays(previous.lateFeeAfterDays);
+    if (response.planGateReason) setUpgradeReason(response.planGateReason);
+  };
 
   const toggle = async (id: AutomationToggleKey) => {
     const previous = settings;
@@ -176,6 +220,60 @@ export const AutomationSettings = () => {
           </div>
         </div>
       </div>
+
+      {settings.lateFees && (
+        <div className="mt-6 p-4 rounded-lg border border-border">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-secondary shrink-0">
+              <Coins className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">Late fee rule</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                A fee of {lateFeePercent}% of the overdue rent is charged once a payment is{' '}
+                {lateFeeAfterDays} day{lateFeeAfterDays === 1 ? '' : 's'} past due, on top of the
+                grace period.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-4">
+                <div className="w-32">
+                  <label className="text-xs text-muted-foreground" htmlFor="lateFeePercent">
+                    Fee (% of rent)
+                  </label>
+                  <NumberInput
+                    id="lateFeePercent"
+                    min={0}
+                    max={MAX_LATE_FEE_PERCENT}
+                    value={lateFeePercent}
+                    onValueChange={(value) => setLateFeePercent(Number(value) || 0)}
+                    onBlur={() =>
+                      void saveLateFeeField('lateFeePercent', lateFeePercent, MAX_LATE_FEE_PERCENT)
+                    }
+                  />
+                </div>
+                <div className="w-32">
+                  <label className="text-xs text-muted-foreground" htmlFor="lateFeeAfterDays">
+                    Days past due
+                  </label>
+                  <NumberInput
+                    id="lateFeeAfterDays"
+                    min={0}
+                    max={MAX_LATE_FEE_AFTER_DAYS}
+                    value={lateFeeAfterDays}
+                    onValueChange={(value) => setLateFeeAfterDays(Number(value) || 0)}
+                    onBlur={() =>
+                      void saveLateFeeField(
+                        'lateFeeAfterDays',
+                        lateFeeAfterDays,
+                        MAX_LATE_FEE_AFTER_DAYS
+                      )
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <UpgradeToProModal
         isOpen={upgradeReason !== null}

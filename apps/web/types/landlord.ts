@@ -288,6 +288,10 @@ export interface RentPayment {
   escrowStatus: EscrowStatus;
   releaseDate?: string;
   disputeReason?: string;
+  /** Lowercased charge category: 'rent' | 'late_fee' | 'service_charge' | ... */
+  category?: string;
+  /** True when a late fee has already been raised against this (rent) charge. */
+  lateFeeApplied?: boolean;
 }
 
 export interface Vendor {
