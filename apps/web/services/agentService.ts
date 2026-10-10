@@ -408,4 +408,15 @@ export const agentService = {
     files.forEach((file) => form.append('files', file));
     return safeCall(() => authFetch(`/agent/messages/${id}`, { method: 'POST', body: form }));
   },
+  getNotificationPreferences: () =>
+    safeCall(() =>
+      authFetch<{ id: string; email: boolean; push: boolean }[]>('/agent/settings/notifications')
+    ),
+  updateNotificationPreferences: (preferences: { id: string; email: boolean; push: boolean }[]) =>
+    safeCall(() =>
+      authFetch<{ id: string; email: boolean; push: boolean }[]>('/agent/settings/notifications', {
+        method: 'PUT',
+        body: JSON.stringify({ preferences }),
+      })
+    ),
 };
