@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
+  Building2,
   CircleHelp,
   KeyRound,
   LogOut,
@@ -16,6 +18,7 @@ import {
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -24,10 +27,19 @@ const go = (href: Href) => () => router.push(href);
 export default function EstateAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { estate } = useEstate();
+  const { estate, estates, estateId, select } = useEstate();
+  const [switching, setSwitching] = useState(false);
   const verified = !!profile?.isVerified;
 
   const office: SettingsItem[] = [
+    {
+      key: 'estate',
+      label: estates.length > 1 ? 'Switch estate' : 'Your estates',
+      description: estates.length > 1 ? `${estates.length} estates you run` : 'Add another estate',
+      value: estate?.name,
+      icon: Building2,
+      onPress: () => setSwitching(true),
+    },
     {
       key: 'announcements',
       label: 'Announcements',
@@ -169,6 +181,13 @@ export default function EstateAccount() {
       <Text variant="caption" color="mutedForeground" center style={{ marginBottom: spacing.lg }}>
         GetRentos {Constants.expoConfig?.version ?? ''}
       </Text>
+      <EstateSwitcherSheet
+        open={switching}
+        onClose={() => setSwitching(false)}
+        estates={estates}
+        currentId={estateId}
+        onSelect={select}
+      />
     </Screen>
   );
 }

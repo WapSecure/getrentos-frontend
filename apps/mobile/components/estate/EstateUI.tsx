@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Check, ChevronRight, Megaphone } from 'lucide-react-native';
+import { BadgeCheck, Check, ChevronRight, Megaphone, Plus } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -224,7 +224,22 @@ export function EstateSwitcherSheet({
 }) {
   const { colors, spacing } = useTheme();
   return (
-    <Sheet open={open} onClose={onClose} title="Your estates">
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title="Your estates"
+      footer={
+        <Button
+          label="Add another estate"
+          variant="outline"
+          icon={<Plus size={16} color={colors.foreground} />}
+          onPress={() => {
+            onClose();
+            router.push('/(app)/estate-setup');
+          }}
+        />
+      }
+    >
       <View style={{ gap: spacing.xs }}>
         {estates.map((e) => {
           const current = e.id === currentId;

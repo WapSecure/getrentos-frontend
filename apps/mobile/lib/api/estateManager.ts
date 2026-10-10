@@ -322,7 +322,7 @@ export const estateManagerApi = {
     opts: {
       page?: number;
       pageSize?: number;
-      status?: 'PENDING' | 'PAID' | 'OVERDUE';
+      status?: 'PENDING' | 'PAID' | 'OVERDUE' | 'PROCESSING';
       householdId?: string;
     } = {}
   ) =>
@@ -456,7 +456,8 @@ export const estateManagerApi = {
       method: 'PATCH',
     }),
 
-  watchlist: (estateId: string, status: 'ACTIVE' | 'LIFTED', page = 1) =>
+  /** No status lists every entry, lifted ones included. */
+  watchlist: (estateId: string, status: 'ACTIVE' | 'LIFTED' | undefined, page = 1) =>
     apiFetch<Paginated<WatchlistEntry>>(
       `/estate/${estateId}/watchlist${q({ page, pageSize: 30, status })}`
     ),
@@ -673,6 +674,15 @@ export const isLivePass = (status: string) =>
   status === 'checked_in';
 
 /** A registration as the gate reads it: upper case, no spaces or dashes. */
+/**
+ * An active entry past its end date: still on the list, but the gate no longer
+ * acts on it. Shown as such, so a phone never presents a lapsed entry as live.
+ */
+export const isLapsedWatchlistEntry = (
+  e: Pick<WatchlistEntry, 'status' | 'expiresAt'>,
+  now: Date = new Date()
+) => e.status === 'ACTIVE' && !!e.expiresAt && new Date(e.expiresAt).getTime() <= now.getTime();
+
 export const normalisePlate = (plate: string) => plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 /* -------------------------------- community ------------------------------- */

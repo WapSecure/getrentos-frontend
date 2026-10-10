@@ -26,10 +26,12 @@ import { estateManagerApi, type Due, type ManagedEstate } from '@/lib/api/estate
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 
-type View_ = 'OVERDUE' | 'PENDING' | 'PAID' | 'all';
+type View_ = 'OVERDUE' | 'PENDING' | 'PROCESSING' | 'PAID' | 'all';
 const VIEWS: { value: View_; label: string }[] = [
   { value: 'OVERDUE', label: 'Overdue' },
   { value: 'PENDING', label: 'Due' },
+  // Being paid online right now: check here before marking one paid by hand.
+  { value: 'PROCESSING', label: 'Paying now' },
   { value: 'PAID', label: 'Paid' },
   { value: 'all', label: 'All' },
 ];
@@ -117,7 +119,11 @@ export default function EstateDues() {
             onPress={() => router.push('/(app)/estate-charge')}
           />
         </View>
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing.sm }}
+        >
           {VIEWS.map((v) => (
             <Chip
               key={v.value}
@@ -126,7 +132,7 @@ export default function EstateDues() {
               onPress={() => setView(v.value)}
             />
           ))}
-        </View>
+        </ScrollView>
       </View>
 
       {!estateId ? (
@@ -182,15 +188,19 @@ export default function EstateDues() {
                     ? 'Nothing waiting to be paid'
                     : view === 'PAID'
                       ? 'No payments yet'
-                      : 'No charges yet'
+                      : view === 'PROCESSING'
+                        ? 'No payments going through'
+                        : 'No charges yet'
               }
               description={
                 view === 'OVERDUE'
                   ? 'Every household is up to date.'
-                  : 'Charge a service fee or levy to every home, or to the ones you pick.'
+                  : view === 'PROCESSING'
+                    ? 'Dues a resident is paying online show here until the payment clears.'
+                    : 'Charge a service fee or levy to every home, or to the ones you pick.'
               }
               action={
-                view === 'OVERDUE' || view === 'PAID' ? undefined : (
+                view === 'OVERDUE' || view === 'PAID' || view === 'PROCESSING' ? undefined : (
                   <Button label="Charge dues" onPress={() => router.push('/(app)/estate-charge')} />
                 )
               }

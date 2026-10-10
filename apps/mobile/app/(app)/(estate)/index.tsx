@@ -92,11 +92,12 @@ export default function EstateHome() {
   const header = (
     <Pressable
       onPress={() => setSheet('switch')}
-      disabled={estates.length < 2}
-      accessibilityRole={estates.length > 1 ? 'button' : undefined}
+      // Always openable once there is an estate: the sheet also adds another.
+      disabled={!estate}
+      accessibilityRole={estate ? 'button' : undefined}
       accessibilityLabel={
         estate
-          ? `${estate.name}${estates.length > 1 ? '. Switch estate' : ''}`
+          ? `${estate.name}. ${estates.length > 1 ? 'Switch estate' : 'Your estates'}`
           : 'Estate management'
       }
     >

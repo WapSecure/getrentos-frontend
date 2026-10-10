@@ -159,6 +159,16 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
       toast.show(err instanceof ApiError ? err.message : 'Could not cancel your plan.', 'error'),
   });
 
+  const reactivate = useMutation({
+    mutationFn: billingApi.reactivate,
+    onSuccess: (next) => {
+      qc.setQueryData(qk.billing.mine, next);
+      toast.show('Your plan will renew as normal.', 'success');
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not keep your plan.', 'error'),
+  });
+
   const accessEnds = trialing ? b.trialEndsAt : b.currentPeriodEnd;
   const confirmCancel = () =>
     Alert.alert(
@@ -215,6 +225,13 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
           variant="secondary"
           loading={cancel.isPending}
           onPress={confirmCancel}
+        />
+      ) : pro && b.cancelAtPeriodEnd ? (
+        // Changed their mind before the period ended.
+        <Button
+          label="Keep my plan"
+          loading={reactivate.isPending}
+          onPress={() => reactivate.mutate()}
         />
       ) : null}
       {!pro && !purchasesAvailable() ? (

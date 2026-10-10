@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Share, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, Share2, Ticket } from 'lucide-react-native';
@@ -33,15 +33,40 @@ import {
   type Tone,
 } from '@/lib/api/estateManager';
 import type { VisitorPass } from '@/lib/api/visitor-pass';
+import { gatemanApi } from '@/lib/api/gateman';
 import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 
-type View_ = 'CHECKED_IN' | 'PENDING' | 'all';
+type View_ =
+  | 'CHECKED_IN'
+  | 'AWAITING_APPROVAL'
+  | 'PENDING'
+  | 'APPROVED'
+  | 'CHECKED_OUT'
+  | 'DENIED'
+  | 'EXPIRED'
+  | 'REVOKED'
+  | 'all';
 const VIEWS: { value: View_; label: string }[] = [
   { value: 'CHECKED_IN', label: 'Inside now' },
+  // A walk-in at the gate, waiting for the household to say yes.
+  { value: 'AWAITING_APPROVAL', label: 'Waiting on resident' },
   { value: 'PENDING', label: 'Expected' },
+  { value: 'APPROVED', label: 'Approved' },
+  { value: 'CHECKED_OUT', label: 'Left' },
+  { value: 'DENIED', label: 'Refused' },
+  { value: 'EXPIRED', label: 'Expired' },
+  { value: 'REVOKED', label: 'Revoked' },
   { value: 'all', label: 'All' },
+];
+
+/** How long a pass the office issues stays valid. The API's default is 24 hours. */
+const VALIDITY: { hours: number; label: string }[] = [
+  { hours: 24, label: '24 hours' },
+  { hours: 72, label: '3 days' },
+  { hours: 24 * 7, label: '1 week' },
+  { hours: 24 * 14, label: '2 weeks' },
 ];
 
 const STATUS: Record<string, { label: string; tone: Tone }> = {
@@ -69,6 +94,7 @@ export default function EstateVisitors() {
   const { estate, estateId } = useEstate();
   const [view, setView] = useState<View_>('CHECKED_IN');
   const [issuing, setIssuing] = useState(false);
+  const [idFor, setIdFor] = useState<VisitorPass | null>(null);
 
   const query = useInfiniteQuery({
     queryKey: qk.estateManager.visitorPasses(estateId, view),
@@ -127,7 +153,9 @@ export default function EstateVisitors() {
                 ? `${total} inside right now`
                 : view === 'PENDING'
                   ? `${total} expected`
-                  : `${total.toLocaleString('en-NG')} passes`
+                  : view === 'AWAITING_APPROVAL'
+                    ? `${total} waiting on a resident`
+                    : `${total.toLocaleString('en-NG')} passes`
               : undefined
           }
           onBack={() => router.back()}
@@ -140,7 +168,11 @@ export default function EstateVisitors() {
             />
           }
         />
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing.sm }}
+        >
           {VIEWS.map((v) => (
             <Chip
               key={v.value}
@@ -149,7 +181,7 @@ export default function EstateVisitors() {
               onPress={() => setView(v.value)}
             />
           ))}
-        </View>
+        </ScrollView>
       </View>
 
       {query.isError && !query.data ? (
@@ -208,6 +240,15 @@ export default function EstateVisitors() {
                     </Text>
                   ) : null}
                 </View>
+                {item.checkedInAt ? (
+                  <Button
+                    label="View ID"
+                    size="sm"
+                    variant="ghost"
+                    accessibilityLabel={`View the ID recorded for ${item.visitorName}`}
+                    onPress={() => setIdFor(item)}
+                  />
+                ) : null}
                 {item.status === 'pending' ? (
                   <Button
                     label="Revoke pass"
@@ -242,12 +283,18 @@ export default function EstateVisitors() {
                   ? 'No visitors inside'
                   : view === 'PENDING'
                     ? 'Nobody expected'
-                    : 'No visitor passes yet'
+                    : view === 'AWAITING_APPROVAL'
+                      ? 'Nobody waiting'
+                      : view === 'all'
+                        ? 'No visitor passes yet'
+                        : `No ${VIEWS.find((v) => v.value === view)?.label.toLowerCase()} passes`
               }
               description={
                 view === 'CHECKED_IN'
                   ? 'Visitors the gate has let in and not yet logged out appear here.'
-                  : 'Residents invite their own visitors. You can also issue a pass for a household.'
+                  : view === 'AWAITING_APPROVAL'
+                    ? 'Walk-ins the gate has asked a household about show here until they answer.'
+                    : 'Residents invite their own visitors. You can also issue a pass for a household.'
               }
             />
           }
@@ -256,6 +303,13 @@ export default function EstateVisitors() {
 
       <Sheet open={issuing} onClose={() => setIssuing(false)} title="Issue a visitor pass">
         {issuing ? <IssueForm estateId={estateId} onDone={() => setIssuing(false)} /> : null}
+      </Sheet>
+      <Sheet
+        open={!!idFor}
+        onClose={() => setIdFor(null)}
+        title={idFor ? `${idFor.visitorName}’s ID` : 'Visitor ID'}
+      >
+        {idFor ? <IdCheckView estateId={estateId} pass={idFor} /> : null}
       </Sheet>
     </View>
   );
@@ -268,6 +322,7 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [purpose, setPurpose] = useState('');
+  const [validHours, setValidHours] = useState(24);
   const [issued, setIssued] = useState<IssuedVisitorPass | null>(null);
 
   const issue = useMutation({
@@ -277,6 +332,10 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
         visitorName: name.trim(),
         ...(phone.trim() ? { visitorPhone: phone.trim() } : {}),
         ...(purpose.trim() ? { purpose: purpose.trim() } : {}),
+        // Only sent when longer than the API's own 24-hour default.
+        ...(validHours !== 24
+          ? { expiresAt: new Date(Date.now() + validHours * 3_600_000).toISOString() }
+          : {}),
       }),
     onSuccess: (pass) => {
       void haptics.success();
@@ -344,6 +403,19 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
         maxLength={200}
         placeholder="e.g. Plumber, family visit"
       />
+      <View style={{ gap: spacing.xs }}>
+        <Text variant="label">Valid for</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          {VALIDITY.map((v) => (
+            <Chip
+              key={v.hours}
+              label={v.label}
+              selected={validHours === v.hours}
+              onPress={() => setValidHours(v.hours)}
+            />
+          ))}
+        </View>
+      </View>
       {issue.error ? (
         <FormAlert message={errorText(issue.error, 'Could not issue the pass.')} />
       ) : null}
@@ -353,6 +425,55 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
         loading={issue.isPending}
         onPress={() => issue.mutate()}
       />
+    </View>
+  );
+}
+
+/** The identity document the gate recorded for a visitor, if any. */
+function IdCheckView({ estateId, pass }: { estateId: string; pass: VisitorPass }) {
+  const { spacing, radius, colors } = useTheme();
+  const check = useQuery({
+    queryKey: ['estate-manager', estateId, 'visitor-passes', pass.id, 'id-check'],
+    queryFn: () => gatemanApi.getVisitorIdCheck(estateId, pass.id),
+  });
+
+  if (check.isPending) return <Skeleton height={220} radius={radius.lg} />;
+  if (check.isError) {
+    return <FormAlert message={errorText(check.error, 'Could not load the ID for this visit.')} />;
+  }
+  const doc = check.data;
+  if (!doc) {
+    return (
+      <Text variant="callout" color="mutedForeground">
+        The gate didn’t record an ID for this visit.
+      </Text>
+    );
+  }
+  return (
+    <View style={{ gap: spacing.md }}>
+      <Text variant="bodyStrong">{doc.documentTypeLabel}</Text>
+      <Text variant="caption" color="mutedForeground">
+        Checked {formatDate(doc.checkedAt, 'medium')} at {formatTime(doc.checkedAt)}
+        {doc.checkedByName ? ` by ${doc.checkedByName}` : ''}
+      </Text>
+      {doc.documentUrl && doc.mimeType.startsWith('image/') ? (
+        <Image
+          source={{ uri: doc.documentUrl }}
+          accessibilityLabel={`${doc.documentTypeLabel} for ${pass.visitorName}`}
+          contentFit="contain"
+          style={{
+            width: '100%',
+            height: 260,
+            borderRadius: radius.md,
+            backgroundColor: colors.muted,
+          }}
+        />
+      ) : null}
+      {doc.documentWithheld || doc.notice ? (
+        <Text variant="caption" color="mutedForeground">
+          {doc.notice ?? 'The document itself is no longer kept.'}
+        </Text>
+      ) : null}
     </View>
   );
 }
