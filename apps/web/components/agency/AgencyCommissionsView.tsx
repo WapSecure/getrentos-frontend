@@ -17,6 +17,7 @@ import {
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
+import { AgencyPayoutSection } from './AgencyPayoutSection';
 import {
   agencyCommissionService,
   AGENCY_COMMISSION_TYPE_LABELS,
@@ -248,6 +249,8 @@ export function AgencyCommissionsView() {
           </div>
         )}
       </div>
+
+      <AgencyPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
