@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { ClipboardList, AlertTriangle, RefreshCw, MessageCircle, Star } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Bell, ShieldCheck } from 'lucide-react';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService } from '@/services/agentService';
+import { categorySendsEmail } from '@getrentos/shared';
 
 interface NotificationPreference {
   id: string;
@@ -12,20 +17,57 @@ interface NotificationPreference {
   push: boolean;
 }
 
-const initialPreferences: NotificationPreference[] = [
-  { id: 'tasks', label: 'New Task Assignments', icon: ClipboardList, email: true, push: true },
-  { id: 'overdue', label: 'Overdue Task Alerts', icon: AlertTriangle, email: true, push: true },
-  { id: 'sync', label: 'Sync Status Updates', icon: RefreshCw, email: false, push: true },
-  { id: 'messages', label: 'New Messages', icon: MessageCircle, email: true, push: false },
-  { id: 'reviews', label: 'New Reviews', icon: Star, email: false, push: false },
-];
+// Only what is actually sent to an agent; the server returns these categories.
+const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
+  verification: { label: 'Verification Results', icon: ShieldCheck },
+  system: { label: 'Account & Listing Updates', icon: Bell },
+};
 
 export const NotificationSettings = () => {
-  const [preferences, setPreferences] = useState(initialPreferences);
+  const queryClient = useQueryClient();
+  const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+
+  const { data: serverPrefs = [] } = useQuery({
+    queryKey: agentKeys.settingsNotifications,
+    queryFn: () => unwrap(agentService.getNotificationPreferences()),
+  });
+
+  useEffect(() => {
+    if (serverPrefs.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPreferences(
+      serverPrefs.map((p) => ({
+        id: p.id,
+        label: CATEGORY_META[p.id]?.label ?? p.id,
+        icon: CATEGORY_META[p.id]?.icon ?? Bell,
+        email: p.email,
+        push: p.push,
+      }))
+    );
+  }, [serverPrefs]);
 
   const toggle = (id: string, channel: 'email' | 'push') => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
   };
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        agentService.updateNotificationPreferences(
+          preferences.map((p) => ({ id: p.id, email: p.email, push: p.push }))
+        )
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.settingsNotifications });
+      setToast({ message: 'Notification preferences saved.', variant: 'success' });
+    },
+    onError: (error) =>
+      setToast({
+        message: error.message || 'Unable to save your notification preferences.',
+        variant: 'error',
+      }),
+  });
 
   return (
     <div>
@@ -39,28 +81,47 @@ export const NotificationSettings = () => {
           <span className="w-11 text-center">Email</span>
           <span className="w-11 text-center">Push</span>
         </div>
-        {preferences.map((pref) => (
-          <div
-            key={pref.id}
-            className="flex items-center justify-between p-3 rounded-lg border border-border"
-          >
-            <div className="flex items-center gap-3">
-              <pref.icon className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-foreground">{pref.label}</span>
-            </div>
-            <div className="flex items-center gap-8">
-              <div className="w-10 flex justify-center">
-                <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+        {preferences.map((pref) => {
+          const Icon = pref.icon;
+          return (
+            <div
+              key={pref.id}
+              className="flex items-center justify-between p-3 rounded-lg border border-border"
+            >
+              <div className="flex items-center gap-3">
+                <Icon className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-foreground">{pref.label}</span>
               </div>
-              <div className="w-10 flex justify-center">
-                <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+              <div className="flex items-center gap-8">
+                <div className="w-10 flex justify-center">
+                  {categorySendsEmail(pref.id) ? (
+                    <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                  ) : (
+                    <NoEmail />
+                  )}
+                </div>
+                <div className="w-10 flex justify-center">
+                  <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+      <Button
+        variant="primary"
+        className="mt-6 gap-1.5"
+        isLoading={save.isPending}
+        disabled={preferences.length === 0 || save.isPending}
+        onClick={() => save.mutate()}
+      >
+        Save Preferences
+      </Button>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 };
@@ -76,4 +137,15 @@ const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void 
       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
     />
   </button>
+);
+
+/** Shown where a category has no email: these updates are in-app and push only. */
+const NoEmail = () => (
+  <span
+    className="text-xs text-muted-foreground"
+    title="Not sent by email. Email is for payments, offers and verification."
+    aria-label="Not sent by email"
+  >
+    —
+  </span>
 );

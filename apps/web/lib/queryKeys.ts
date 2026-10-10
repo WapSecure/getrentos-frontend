@@ -186,6 +186,7 @@ export const agentKeys = {
     ['agent', 'assignable-properties', assignmentId] as const,
   trustProfile: ['agent', 'trust-profile'] as const,
   reviews: ['agent', 'reviews'] as const,
+  settingsNotifications: ['agent', 'settings', 'notifications'] as const,
   sync: ['agent', 'sync'] as const,
 };
 
