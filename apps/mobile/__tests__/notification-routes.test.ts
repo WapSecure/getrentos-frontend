@@ -45,6 +45,18 @@ describe('notification routes', () => {
     );
   });
 
+  it('opens the gate tools for overstays and missed patrols', () => {
+    expect(routeForNotification({ type: 'ESTATE_VISIT_OVERSTAY' }, 'estate')).toBe(
+      '/(app)/estate-dwell'
+    );
+    expect(routeForNotification({ type: 'ESTATE_PATROL_MISSED' }, 'estate')).toBe(
+      '/(app)/estate-patrol'
+    );
+    expect(routeForNotification({ type: 'ESTATE_VISITOR_ARRIVED' }, 'estate')).toBe(
+      '/(app)/estate-visitors'
+    );
+  });
+
   it('never returns a dead route', () => {
     expect(routeForNotification({ actionUrl: '/something/new', type: 'WELCOME' }, 'renter')).toBe(
       '/(app)/notifications'

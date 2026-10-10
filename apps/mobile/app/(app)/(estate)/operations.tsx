@@ -4,6 +4,11 @@ import { router, type Href } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   CalendarCheck,
+  Car,
+  Footprints,
+  Package,
+  Timer,
+  UserCheck,
   ChevronRight,
   Gavel,
   ShieldAlert,
@@ -204,6 +209,36 @@ export default function EstateOperations() {
               countLabel="listed"
               note="Who the gate should stop or flag"
               href="/(app)/estate-watchlist"
+            />
+            <Row
+              Icon={Car}
+              label="Vehicles"
+              note="Who’s driven in, and who’s left"
+              href="/(app)/estate-vehicles"
+            />
+            <Row
+              Icon={Package}
+              label="Deliveries"
+              note="Parcels waiting at the gate"
+              href="/(app)/estate-deliveries"
+            />
+            <Row
+              Icon={UserCheck}
+              label="Regular visitors"
+              note="Cleaners, drivers and contractors"
+              href="/(app)/estate-contractors"
+            />
+            <Row
+              Icon={Timer}
+              label="Dwell"
+              note="Who’s still inside, and how long visits run"
+              href="/(app)/estate-dwell"
+            />
+            <Row
+              Icon={Footprints}
+              label="Patrols"
+              note="Did the night rounds happen"
+              href="/(app)/estate-patrol"
             />
           </View>
         </>

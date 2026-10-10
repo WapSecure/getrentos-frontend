@@ -10,6 +10,10 @@ import {
   Megaphone,
   ShieldCheck,
   SlidersHorizontal,
+  BookOpen,
+  Landmark,
+  FileBarChart,
+  Globe,
   Store,
   Inbox,
   UsersRound,
@@ -63,6 +67,34 @@ export default function EstateAccount() {
       description: 'People asking about your listings',
       icon: Inbox,
       onPress: go('/(app)/estate-enquiries'),
+    },
+    {
+      key: 'governance',
+      label: 'Governance',
+      description: 'Bylaws, minutes and who has signed',
+      icon: BookOpen,
+      onPress: go('/(app)/estate-governance'),
+    },
+    {
+      key: 'committee',
+      label: 'Committee',
+      description: 'Who sits on the estate committee',
+      icon: Landmark,
+      onPress: go('/(app)/estate-committee'),
+    },
+    {
+      key: 'financials',
+      label: 'Financials',
+      description: 'Collections, statements and your payout account',
+      icon: FileBarChart,
+      onPress: go('/(app)/estate-financials'),
+    },
+    {
+      key: 'microsite',
+      label: 'Estate page',
+      description: 'Your estate’s public page',
+      icon: Globe,
+      onPress: go('/(app)/estate-microsite'),
     },
     {
       key: 'announcements',
@@ -187,9 +219,6 @@ export default function EstateAccount() {
           </View>
         }
       />
-      <Text variant="caption" color="mutedForeground" center>
-        Gates, staff, patrols, statements and your microsite are set up on the GetRentos website.
-      </Text>
 
       <Button
         label="Sign out"

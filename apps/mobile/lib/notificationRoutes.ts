@@ -59,6 +59,16 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/incidents': '/(app)/estate-incidents',
   '/estate/maintenance': '/(app)/estate-maintenance',
   '/estate/marketplace': '/(app)/estate-marketplace',
+  '/estate/vehicles': '/(app)/estate-vehicles',
+  '/estate/deliveries': '/(app)/estate-deliveries',
+  '/estate/contractors': '/(app)/estate-contractors',
+  '/estate/dwell': '/(app)/estate-dwell',
+  '/estate/patrol': '/(app)/estate-patrol',
+  '/estate/staff': '/(app)/estate-staff',
+  '/estate/governance': '/(app)/estate-governance',
+  '/estate/committee': '/(app)/estate-committee',
+  '/estate/financials': '/(app)/estate-financials',
+  '/estate/microsite': '/(app)/estate-microsite',
   '/estate/leads': '/(app)/estate-enquiries',
   // A short-stay chat, from either side: it has its own inbox.
   '/shortlets/messages': '/(app)/shortlet-messages',
@@ -147,6 +157,9 @@ const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_MAINTENANCE_', '/(app)/estate-maintenance'],
   ['ESTATE_EMERGENCY_', '/(app)/estate-emergency'],
   ['ESTATE_WATCHLIST_', '/(app)/estate-watchlist'],
+  // Before the ESTATE_VISIT prefix, which would otherwise catch an overstay.
+  ['ESTATE_VISIT_OVERSTAY', '/(app)/estate-dwell'],
+  ['ESTATE_PATROL_', '/(app)/estate-patrol'],
   ['ESTATE_VISIT', '/(app)/estate-visitors'],
   ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];
