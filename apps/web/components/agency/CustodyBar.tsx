@@ -7,6 +7,7 @@ import {
   Building2,
   Check,
   ChevronDown,
+  Coins,
   Loader2,
   Lock,
   UserRound,
@@ -148,8 +149,16 @@ export function CustodyBar() {
       )}
 
       <Link
-        href="/agency/owners"
+        href="/agency/commissions"
         className="ml-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <Coins className="h-4 w-4" aria-hidden />
+        Commissions
+      </Link>
+
+      <Link
+        href="/agency/owners"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
       >
         <Users className="h-4 w-4" aria-hidden />
         All clients
