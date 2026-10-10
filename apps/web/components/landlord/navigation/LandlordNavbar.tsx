@@ -20,6 +20,7 @@ import { landlordService } from '@/services/landlordService';
 import { ROUTES } from '@/lib/constants/auth';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { notificationHref } from '@/lib/notificationHref';
 
 interface LandlordNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -68,6 +69,23 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
   const handleMarkAsRead = (id: string) => {
     markRead.mutate(id);
+  };
+
+  // Mark it read, then open what it is about (if it is about something).
+  const handleOpenNotification = (notification: {
+    id: string;
+    type: string;
+    read: boolean;
+    actionUrl?: string;
+    conversationId?: string;
+    action?: { url: string };
+  }) => {
+    if (!notification.read) handleMarkAsRead(notification.id);
+    const href = notificationHref('landlord', notification);
+    if (href) {
+      setShowNotifications(false);
+      router.push(href);
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -161,7 +179,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
                               className={`p-3 border-b border-border hover:bg-secondary cursor-pointer transition-colors ${
                                 !notification.read ? 'bg-accent' : ''
                               }`}
-                              onClick={() => handleMarkAsRead(notification.id)}
+                              onClick={() => handleOpenNotification(notification)}
                             >
                               <div className="flex justify-between items-start mb-1">
                                 <h4 className="text-sm font-medium text-foreground">

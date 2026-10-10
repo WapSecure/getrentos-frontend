@@ -20,6 +20,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
+import { notificationHref } from '@/lib/notificationHref';
 
 interface RenterNavbarProps {
   user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
@@ -92,6 +93,23 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
 
   const handleMarkAsRead = (id: string) => {
     markAsReadMutation.mutate(id);
+  };
+
+  // Mark it read, then open what it is about (if it is about something).
+  const handleOpenNotification = (notification: {
+    id: string;
+    type: string;
+    read: boolean;
+    actionUrl?: string;
+    conversationId?: string;
+    action?: { url: string };
+  }) => {
+    if (!notification.read) handleMarkAsRead(notification.id);
+    const href = notificationHref('renter', notification);
+    if (href) {
+      setShowNotifications(false);
+      router.push(href);
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -231,7 +249,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                               className={`block w-full p-3 text-left border-b border-border hover:bg-secondary transition-colors ${
                                 !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
-                              onClick={() => handleMarkAsRead(notification.id)}
+                              onClick={() => handleOpenNotification(notification)}
                             >
                               <div className="flex justify-between items-start mb-1">
                                 <h4 className="text-sm font-medium text-foreground">

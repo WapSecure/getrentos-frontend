@@ -171,6 +171,17 @@ function mapAgentVerification(verification: AgentVerificationApi): VerificationV
   };
 }
 
+export interface AgentNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+  actionUrl?: string;
+  conversationId?: string;
+}
+
 export const agentService = {
   listClientAssignments: (options: AgentClientListOptions = {}) =>
     safeCall(() =>
@@ -408,6 +419,11 @@ export const agentService = {
     files.forEach((file) => form.append('files', file));
     return safeCall(() => authFetch(`/agent/messages/${id}`, { method: 'POST', body: form }));
   },
+  getNotifications: () => safeCall(() => authFetch<AgentNotification[]>('/agent/notifications')),
+  markNotificationRead: (id: string) =>
+    safeCall(() => authFetch(`/agent/notifications/${id}/read`, { method: 'PATCH' })),
+  markAllNotificationsRead: () =>
+    safeCall(() => authFetch('/agent/notifications/read-all', { method: 'POST' })),
   getNotificationPreferences: () =>
     safeCall(() =>
       authFetch<{ id: string; email: boolean; push: boolean }[]>('/agent/settings/notifications')
