@@ -2,6 +2,6 @@
 
 import { DepositsView } from '@/components/landlord/deposits/DepositsView';
 
-export default function LandlordDepositsPage() {
+export default function OwnerDepositsPage() {
   return <DepositsView />;
 }
