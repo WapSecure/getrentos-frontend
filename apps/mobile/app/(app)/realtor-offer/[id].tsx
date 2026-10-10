@@ -142,7 +142,7 @@ export default function RealtorOfferDetail() {
                 tone={o.status === 'ACCEPTED' ? 'success' : 'info'}
                 message={
                   o.status === 'ACCEPTED'
-                    ? 'Your client accepted this offer. The sale continues in escrow.'
+                    ? 'Your client accepted this offer. The buyer pays the deposit to GetRentos, which holds it until the sale completes.'
                     : 'This offer is settled and can’t be countered.'
                 }
               />

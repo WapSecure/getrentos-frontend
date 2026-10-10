@@ -42,7 +42,7 @@ const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
 type Filter = 'all' | 'AVAILABLE' | 'PAID' | 'VOID';
 
-/** Commission earned when escrow releases, and getting it to the bank. */
+/** Commission earned when a sale completes, and getting it to the bank. */
 export default function RealtorCommissions() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -111,7 +111,7 @@ export default function RealtorCommissions() {
             <Card elevated style={{ gap: spacing.md }}>
               {(
                 [
-                  ['In escrow', summary.data.pending, 'Yours once the sale’s escrow releases'],
+                  ['On its way', summary.data.pending, 'Yours once the sale completes'],
                   ['Paid to your bank', summary.data.paid, 'Settled so far'],
                   [
                     'Earned in total',
@@ -203,7 +203,7 @@ export default function RealtorCommissions() {
 function ProGate() {
   const { colors, spacing } = useTheme();
   const perks = [
-    'See every commission as the sale’s escrow releases',
+    'See every commission as soon as the sale completes',
     'Your split snapshotted when you earn it, never restated',
     'Withdraw straight to your bank',
     'A full payout history for your records',
@@ -343,7 +343,7 @@ function Ledger() {
       ) : !query.data.items.length ? (
         <Text variant="callout" color="mutedForeground">
           {filter === 'all'
-            ? 'Commission appears here when a sale you worked on closes and its escrow releases.'
+            ? 'Commission appears here when a sale you worked on completes.'
             : 'Nothing here.'}
         </Text>
       ) : (

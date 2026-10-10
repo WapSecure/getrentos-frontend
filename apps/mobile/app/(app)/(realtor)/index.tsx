@@ -361,7 +361,7 @@ function Earnings({
   const accessibilityLabel = loading
     ? 'Loading commission'
     : showMoney
-      ? `Commission available, ${Math.round(available).toLocaleString('en-NG')} naira. ${Math.round(pending).toLocaleString('en-NG')} naira still in escrow. Open commissions`
+      ? `Commission available, ${Math.round(available).toLocaleString('en-NG')} naira. ${Math.round(pending).toLocaleString('en-NG')} naira on its way once sales complete. Open commissions`
       : 'Commission hidden. Open commissions';
 
   return (
@@ -387,8 +387,8 @@ function Earnings({
         <Text variant="caption" color="mutedForeground">
           {pending > 0
             ? showMoney
-              ? `₦${Math.round(pending).toLocaleString('en-NG')} more once escrow releases`
-              : 'More on the way once escrow releases'
+              ? `₦${Math.round(pending).toLocaleString('en-NG')} more once the sale completes`
+              : 'More on the way once the sale completes'
             : 'Earned when a sale you worked on closes'}
         </Text>
       </PressableScale>
