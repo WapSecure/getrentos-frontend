@@ -364,7 +364,9 @@ export function Stepper({
 /* ------------------------------ plans and fees ---------------------------- */
 
 export const isUpgradeError = (err: unknown) =>
-  err instanceof ApiError && (err.status === 402 || err.code === 'PLAN_UPGRADE_REQUIRED');
+  err instanceof ApiError &&
+  // A paid feature, or a free plan's cap (e.g. how many listings may be live).
+  (err.status === 402 || err.code === 'PLAN_UPGRADE_REQUIRED' || err.code === 'PLAN_LIMIT_REACHED');
 
 /** What GetRentos takes from each stay. Quiet until the rate has loaded. */
 export function HostFeeNote() {

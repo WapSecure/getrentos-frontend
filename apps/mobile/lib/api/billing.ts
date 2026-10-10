@@ -58,6 +58,8 @@ export const billingApi = {
   invoices: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<SubscriptionInvoice>>(`/billing/invoices?page=${page}&pageSize=${pageSize}`),
   cancel: () => apiFetch<MyBilling>('/billing/cancel', { method: 'POST' }),
+  /** Undo a cancel before the period ends, so the plan renews after all. */
+  reactivate: () => apiFetch<MyBilling>('/billing/reactivate', { method: 'POST' }),
 };
 
 /** Kobo → naira, for the Price component. */

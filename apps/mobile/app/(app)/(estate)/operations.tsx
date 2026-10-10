@@ -1,8 +1,14 @@
-import { View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   CalendarCheck,
+  Car,
+  Footprints,
+  Package,
+  Timer,
+  UserCheck,
   ChevronRight,
   Gavel,
   ShieldAlert,
@@ -22,6 +28,7 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { estateManagerApi, isOpenItem } from '@/lib/api/estateManager';
 import { qk } from '@/lib/query/keys';
@@ -32,7 +39,8 @@ import { qk } from '@/lib/query/keys';
  */
 export default function EstateOperations() {
   const { colors, spacing } = useTheme();
-  const { estate, estateId } = useEstate();
+  const { estate, estateId, estates, select } = useEstate();
+  const [switching, setSwitching] = useState(false);
   const on = { enabled: !!estateId };
 
   const muster = useQuery({
@@ -84,11 +92,22 @@ export default function EstateOperations() {
 
   return (
     <Screen refreshing={incidents.isRefetching || muster.isRefetching} onRefresh={refresh}>
-      <DashboardHeader
-        eyebrow="Operations"
-        title="Safety & gate"
-        subtitle={estate?.name ?? 'Your estate'}
-      />
+      <Pressable
+        onPress={() => setSwitching(true)}
+        disabled={estates.length < 2}
+        accessibilityRole={estates.length > 1 ? 'button' : undefined}
+        accessibilityLabel={`${estate?.name ?? 'Your estate'}${estates.length > 1 ? '. Switch estate' : ''}`}
+      >
+        <DashboardHeader
+          eyebrow="Operations"
+          title="Safety & gate"
+          subtitle={
+            estates.length > 1
+              ? `${estate?.name ?? 'Your estate'} · tap to switch`
+              : (estate?.name ?? 'Your estate')
+          }
+        />
+      </Pressable>
       {!estateId ? (
         <EmptyState
           icon={<ShieldAlert size={34} color={colors.mutedForeground} />}
@@ -191,9 +210,46 @@ export default function EstateOperations() {
               note="Who the gate should stop or flag"
               href="/(app)/estate-watchlist"
             />
+            <Row
+              Icon={Car}
+              label="Vehicles"
+              note="Who’s driven in, and who’s left"
+              href="/(app)/estate-vehicles"
+            />
+            <Row
+              Icon={Package}
+              label="Deliveries"
+              note="Parcels waiting at the gate"
+              href="/(app)/estate-deliveries"
+            />
+            <Row
+              Icon={UserCheck}
+              label="Regular visitors"
+              note="Cleaners, drivers and contractors"
+              href="/(app)/estate-contractors"
+            />
+            <Row
+              Icon={Timer}
+              label="Dwell"
+              note="Who’s still inside, and how long visits run"
+              href="/(app)/estate-dwell"
+            />
+            <Row
+              Icon={Footprints}
+              label="Patrols"
+              note="Did the night rounds happen"
+              href="/(app)/estate-patrol"
+            />
           </View>
         </>
       )}
+      <EstateSwitcherSheet
+        open={switching}
+        onClose={() => setSwitching(false)}
+        estates={estates}
+        currentId={estateId}
+        onSelect={select}
+      />
     </Screen>
   );
 }

@@ -58,6 +58,18 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/billing': '/(app)/billing',
   '/estate/incidents': '/(app)/estate-incidents',
   '/estate/maintenance': '/(app)/estate-maintenance',
+  '/estate/marketplace': '/(app)/estate-marketplace',
+  '/estate/vehicles': '/(app)/estate-vehicles',
+  '/estate/deliveries': '/(app)/estate-deliveries',
+  '/estate/contractors': '/(app)/estate-contractors',
+  '/estate/dwell': '/(app)/estate-dwell',
+  '/estate/patrol': '/(app)/estate-patrol',
+  '/estate/staff': '/(app)/estate-staff',
+  '/estate/governance': '/(app)/estate-governance',
+  '/estate/committee': '/(app)/estate-committee',
+  '/estate/financials': '/(app)/estate-financials',
+  '/estate/microsite': '/(app)/estate-microsite',
+  '/estate/leads': '/(app)/estate-enquiries',
   // A short-stay chat, from either side: it has its own inbox.
   '/shortlets/messages': '/(app)/shortlet-messages',
   '/estate/violations': '/(app)/estate-violations',
@@ -104,6 +116,8 @@ const TYPE_FALLBACK: [prefix: string, route: string][] = [
 
 /** Owner-side screens for the same notification types. */
 const OWNER_FALLBACK: [prefix: string, route: string][] = [
+  // An estate asking to market their property: answered in estate agreements.
+  ['ESTATE_LISTING_REQUESTED', '/(app)/estate-agreements'],
   ['OFFER_', '/(app)/(owner)/offers'],
   ['ESCROW_', '/(app)/owner-transactions'],
   // A realtor asking to represent them: answered where they manage realtors.
@@ -116,6 +130,7 @@ const OWNER_FALLBACK: [prefix: string, route: string][] = [
  */
 /** Landlord-side screens: rent, leases and repairs mean managing them, not paying them. */
 const LANDLORD_FALLBACK: [prefix: string, route: string][] = [
+  ['ESTATE_LISTING_REQUESTED', '/(app)/estate-agreements'],
   ['RENT_', '/(app)/landlord-payments'],
   ['PAYMENT_', '/(app)/landlord-payments'],
   ['LEASE_', '/(app)/landlord-leases'],
@@ -134,12 +149,17 @@ const REALTOR_FALLBACK: [prefix: string, route: string][] = [
 
 /** The estate office sees its residents' dues, not a resident's own. */
 const ESTATE_FALLBACK: [prefix: string, route: string][] = [
+  // An owner answered the estate's request to market their property.
+  ['ESTATE_LISTING_DECIDED', '/(app)/estate-marketplace'],
   ['ESTATE_DUE_', '/(app)/(estate)/dues'],
   ['ESTATE_ANNOUNCEMENT_', '/(app)/estate-announcements'],
   ['ESTATE_INCIDENT_', '/(app)/estate-incidents'],
   ['ESTATE_MAINTENANCE_', '/(app)/estate-maintenance'],
   ['ESTATE_EMERGENCY_', '/(app)/estate-emergency'],
   ['ESTATE_WATCHLIST_', '/(app)/estate-watchlist'],
+  // Before the ESTATE_VISIT prefix, which would otherwise catch an overstay.
+  ['ESTATE_VISIT_OVERSTAY', '/(app)/estate-dwell'],
+  ['ESTATE_PATROL_', '/(app)/estate-patrol'],
   ['ESTATE_VISIT', '/(app)/estate-visitors'],
   ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];

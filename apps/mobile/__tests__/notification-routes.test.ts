@@ -33,6 +33,30 @@ describe('notification routes', () => {
     }
   });
 
+  it('sends an estate listing request to the owner, and the answer to the estate', () => {
+    expect(routeForNotification({ type: 'ESTATE_LISTING_REQUESTED' }, 'owner')).toBe(
+      '/(app)/estate-agreements'
+    );
+    expect(routeForNotification({ type: 'ESTATE_LISTING_REQUESTED' }, 'landlord')).toBe(
+      '/(app)/estate-agreements'
+    );
+    expect(routeForNotification({ type: 'ESTATE_LISTING_DECIDED' }, 'estate')).toBe(
+      '/(app)/estate-marketplace'
+    );
+  });
+
+  it('opens the gate tools for overstays and missed patrols', () => {
+    expect(routeForNotification({ type: 'ESTATE_VISIT_OVERSTAY' }, 'estate')).toBe(
+      '/(app)/estate-dwell'
+    );
+    expect(routeForNotification({ type: 'ESTATE_PATROL_MISSED' }, 'estate')).toBe(
+      '/(app)/estate-patrol'
+    );
+    expect(routeForNotification({ type: 'ESTATE_VISITOR_ARRIVED' }, 'estate')).toBe(
+      '/(app)/estate-visitors'
+    );
+  });
+
   it('never returns a dead route', () => {
     expect(routeForNotification({ actionUrl: '/something/new', type: 'WELCOME' }, 'renter')).toBe(
       '/(app)/notifications'

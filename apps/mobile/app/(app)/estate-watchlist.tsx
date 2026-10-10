@@ -30,6 +30,7 @@ import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
 import {
   estateManagerApi,
+  isLapsedWatchlistEntry,
   normalisePlate,
   type WatchlistEntry,
   type WatchlistSeverity,
@@ -41,7 +42,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 
-type View_ = 'ACTIVE' | 'LIFTED';
+type View_ = 'ACTIVE' | 'LIFTED' | 'ALL';
 
 /**
  * People and vehicles the gate should stop or flag. Lifted entries are kept,
@@ -59,7 +60,8 @@ export default function EstateWatchlist() {
 
   const query = useInfiniteQuery({
     queryKey: qk.estateManager.watchlist(estateId, view),
-    queryFn: ({ pageParam }) => estateManagerApi.watchlist(estateId, view, pageParam),
+    queryFn: ({ pageParam }) =>
+      estateManagerApi.watchlist(estateId, view === 'ALL' ? undefined : view, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
@@ -120,6 +122,7 @@ export default function EstateWatchlist() {
           options={[
             { value: 'ACTIVE', label: 'On the list' },
             { value: 'LIFTED', label: 'Lifted' },
+            { value: 'ALL', label: 'All' },
           ]}
         />
       </View>
@@ -190,18 +193,29 @@ export default function EstateWatchlist() {
                       {[item.plateNumber, item.phone].filter(Boolean).join(' · ') ||
                         (vehicle ? 'No registration recorded' : 'Matched by name')}
                     </Text>
-                    <View style={{ flexDirection: 'row' }}>
-                      <StatusPill
-                        label={block ? 'Refuse entry' : 'Admit, tell office'}
-                        tone={block ? 'danger' : 'warning'}
-                      />
+                    <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+                      {isLapsedWatchlistEntry(item) ? (
+                        // Past its end date: the gate no longer acts on it.
+                        <StatusPill label="Not enforced" tone="neutral" />
+                      ) : item.status === 'LIFTED' ? (
+                        <StatusPill label="Lifted" tone="neutral" />
+                      ) : (
+                        <StatusPill
+                          label={block ? 'Refuse entry' : 'Admit, tell office'}
+                          tone={block ? 'danger' : 'warning'}
+                        />
+                      )}
                     </View>
                   </View>
                 </View>
                 <Text variant="callout">{item.reason}</Text>
                 <Text variant="caption" color="mutedForeground">
                   Added {formatDate(item.createdAt, 'medium')}
-                  {item.expiresAt ? ` · until ${formatDate(item.expiresAt, 'medium')}` : ''}
+                  {item.expiresAt
+                    ? isLapsedWatchlistEntry(item)
+                      ? ` · ended ${formatDate(item.expiresAt, 'medium')}`
+                      : ` · until ${formatDate(item.expiresAt, 'medium')}`
+                    : ''}
                   {item.liftedAt ? ` · lifted ${formatDate(item.liftedAt, 'medium')}` : ''}
                 </Text>
                 {item.liftReason ? (
@@ -224,14 +238,14 @@ export default function EstateWatchlist() {
           ListEmptyComponent={
             <EmptyState
               icon={<ShieldBan size={34} color={colors.mutedForeground} />}
-              title={view === 'ACTIVE' ? 'Nobody on the watch list' : 'Nothing lifted yet'}
+              title={view === 'LIFTED' ? 'Nothing lifted yet' : 'Nobody on the watch list'}
               description={
-                view === 'ACTIVE'
-                  ? 'Add a person or a vehicle and every gate checks arrivals against it.'
-                  : 'Entries you take off the list are kept here as a record.'
+                view === 'LIFTED'
+                  ? 'Entries you take off the list are kept here as a record.'
+                  : 'Add a person or a vehicle and every gate checks arrivals against it.'
               }
               action={
-                view === 'ACTIVE' ? (
+                view !== 'LIFTED' ? (
                   <Button label="Add to the watch list" onPress={() => setAdding(true)} />
                 ) : undefined
               }

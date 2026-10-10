@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import {
+  Button,
   Card,
   EmptyState,
   ErrorState,
@@ -92,11 +93,12 @@ export default function EstateHome() {
   const header = (
     <Pressable
       onPress={() => setSheet('switch')}
-      disabled={estates.length < 2}
-      accessibilityRole={estates.length > 1 ? 'button' : undefined}
+      // Always openable once there is an estate: the sheet also adds another.
+      disabled={!estate}
+      accessibilityRole={estate ? 'button' : undefined}
       accessibilityLabel={
         estate
-          ? `${estate.name}${estates.length > 1 ? '. Switch estate' : ''}`
+          ? `${estate.name}. ${estates.length > 1 ? 'Switch estate' : 'Your estates'}`
           : 'Estate management'
       }
     >
@@ -140,7 +142,10 @@ export default function EstateHome() {
         <EmptyState
           icon={<Building2 size={34} color={colors.mutedForeground} />}
           title="No estate yet"
-          description="Set your estate up on the GetRentos website (its gates, plan and payout details). It then appears here to run from your phone."
+          description="Set up your estate (its name, address and gates) and run it from here."
+          action={
+            <Button label="Set up your estate" onPress={() => router.push('/(app)/estate-setup')} />
+          }
         />
       </Screen>
     );
