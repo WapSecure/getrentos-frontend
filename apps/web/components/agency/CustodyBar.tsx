@@ -10,6 +10,7 @@ import {
   Loader2,
   Lock,
   UserRound,
+  Users,
 } from 'lucide-react';
 import { useCustody } from './CustodyProvider';
 import {
@@ -146,12 +147,20 @@ export function CustodyBar() {
         </>
       )}
 
+      <Link
+        href="/agency/owners"
+        className="ml-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <Users className="h-4 w-4" aria-hidden />
+        All clients
+      </Link>
+
       <button
         type="button"
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="ml-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
       >
         Switch client
         <ChevronDown
