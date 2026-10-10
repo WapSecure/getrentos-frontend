@@ -82,10 +82,10 @@ Each area is shared across editions unless noted. Status is the _starting point_
 1. ✅ **Inspections** _(shipped 2026-10-10)_ — move-in / move-out condition reports + routine inspections with photos; feeds deposit deductions and maintenance. _(highest-impact single gap)_
 2. ✅ **Deposit lifecycle** _(shipped 2026-10-10)_ — take, hold (protected), deduct at move-out, return; ties to inspections + compliance.
 3. ✅ **Automated late fees + arrears ladder** _(shipped 2026-10-10)_ — real receivables management, not just reminders. _(A full configurable rules engine remains P2 #14.)_
-4. ✅ **Owner approvals workflow** _(shipped 2026-10-10)_ — owner signs off manager spend above a per-mandate cap (new maker/checker approval + owner inbox + cap control). _(Scoped to expenses; maintenance-work-order approval deferred — that module is owner-only and not yet PropertyAuthority-wired.)_
+4. ✅ **Owner approvals workflow** _(shipped 2026-10-10)_ — owner signs off manager spend above a per-mandate cap (new maker/checker approval + owner inbox + cap control). _(Scoped to expenses; maintenance-work-order approval folded into Phase C, which does the needed home-management PropertyAuthority rewire.)_
 5. ✅ **Reporting & exports** _(shipped 2026-10-10)_ — rent roll, per-property P&L (date range), arrears, statement history; CSV exports (+ existing per-statement PDF).
 
-**P1 — the Agency edition (the margin market):** 6. **Multi-owner agency dashboards** + per-owner portfolio views. 7. **Client (owner) CRM + onboarding** for agencies. 8. **Commissions** — letting (10%) / renewal (5%) charging + **agent commission/payout**. 9. **Agency trust-accounting compliance** — per-owner ledgers, protection-scheme attestations.
+**P1 — the Agency edition (the margin market) — ◀ IN PROGRESS:** 6. ◀ **Multi-owner agency dashboards** _(slice 1 shipped 2026-10-10: /agency/owners groups mandates by client)_ + per-owner portfolio views. 7. **Client (owner) CRM + onboarding** for agencies. 8. **Commissions** — letting (10%) / renewal (5%) charging + **agent commission/payout**. 9. **Agency trust-accounting compliance** — per-owner ledgers, protection-scheme attestations.
 
 **P2 — scale & depth:** 10. **Scheduled owner disbursements + reserves/float.** 11. **Preventive/scheduled maintenance.** 12. **Budgets vs actuals.** 13. **Field/mobile inspection + maintenance app.** 14. **Automation rules engine** + bulk comms/templates. 15. **GetRentos Managed partner commercials** (deferred from the PMC stream — partner fee-split).
 
@@ -95,7 +95,7 @@ Each area is shared across editions unless noted. Status is the _starting point_
 
 - **Phase A — Spine (DONE):** mandates, authority, servicing tiers, trust accounting, owner statements, GetRentos Managed ops, owner lifecycle notifications.
 - **Phase B — Operational completeness (P0) — DONE (2026-10-10):** ✅ inspections, ✅ deposit lifecycle (both portals), ✅ late fees + arrears ladder, ✅ owner approvals, ✅ reporting/exports. _Outcome delivered: a credible self-manage + managed product._
-- **Phase C — Agency edition (P1):** multi-owner dashboards, client CRM + onboarding, commissions + agent payouts, per-owner trust views + protection attestations. _Outcome: sell to professional agencies._
+- **Phase C — Agency edition (P1) — IN PROGRESS:** ◀ multi-owner dashboards (owners grouping shipped 2026-10-10), ⬜ client CRM + onboarding, ⬜ commissions + agent payouts, ⬜ per-owner trust views + protection attestations; also folds in the home-management PropertyAuthority rewire + maintenance-spend owner approval. _Outcome: sell to professional agencies._
 - **Phase D — Scale & depth (P2):** scheduled disbursements + reserves, preventive maintenance, budgets, field/mobile, rules engine, partner commercials.
 
 Each phase ships in the established build→verify-live→commit slices, behind plan gating where it's a paid capability.
