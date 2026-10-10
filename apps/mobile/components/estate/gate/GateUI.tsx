@@ -46,10 +46,6 @@ export function EnterpriseUpsell({
           </Text>
         </View>
       ))}
-      <Text variant="caption" color="mutedForeground">
-        Not a safety feature: without it the estate makes slower decisions about who is on site, not
-        unsafe ones.
-      </Text>
       <Button label="See plans" onPress={() => router.push('/(app)/billing')} />
     </Card>
   );
