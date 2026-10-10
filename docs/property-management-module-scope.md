@@ -75,13 +75,13 @@ Each area is shared across editions unless noted. Status is the _starting point_
 
 ## 4. Gaps to close (prioritized)
 
-> **Delivery status (updated 2026-10-10):** Phase B is in progress — P0 #1 and #2 shipped (both landlord & owner portals), #3 in progress; #4–#5 next.
+> **Delivery status (updated 2026-10-10):** Phase B is in progress — P0 #1, #2 and #3 shipped; #4–#5 next.
 
 **P0 — operational completeness (serves all three editions, unblocks credibility):**
 
 1. ✅ **Inspections** _(shipped 2026-10-10)_ — move-in / move-out condition reports + routine inspections with photos; feeds deposit deductions and maintenance. _(highest-impact single gap)_
 2. ✅ **Deposit lifecycle** _(shipped 2026-10-10)_ — take, hold (protected), deduct at move-out, return; ties to inspections + compliance.
-3. ◀ **Automated late fees + arrears ladder** _(in progress)_ — real receivables management, not just reminders.
+3. ✅ **Automated late fees + arrears ladder** _(shipped 2026-10-10)_ — real receivables management, not just reminders. _(A full configurable rules engine remains P2 #14.)_
 4. ⬜ **Owner approvals workflow** — owner signs off expenses/maintenance over a cap and lease terms (reuses the TRANSACT/threshold gate, adds an owner-facing step).
 5. ⬜ **Reporting & exports** — rent roll, arrears, per-owner P&L, statement history; CSV/PDF.
 
@@ -94,7 +94,7 @@ Each area is shared across editions unless noted. Status is the _starting point_
 ## 5. Phased delivery
 
 - **Phase A — Spine (DONE):** mandates, authority, servicing tiers, trust accounting, owner statements, GetRentos Managed ops, owner lifecycle notifications.
-- **Phase B — Operational completeness (P0) — IN PROGRESS:** ✅ inspections, ✅ deposit lifecycle (both shipped to landlord & owner portals, 2026-10-10), ◀ late fees + arrears ladder (in progress), ⬜ owner approvals, ⬜ reporting/exports. _Outcome: a credible self-manage + managed product._
+- **Phase B — Operational completeness (P0) — IN PROGRESS:** ✅ inspections, ✅ deposit lifecycle (both shipped to landlord & owner portals), ✅ late fees + arrears ladder (2026-10-10), ⬜ owner approvals, ⬜ reporting/exports. _Outcome: a credible self-manage + managed product._
 - **Phase C — Agency edition (P1):** multi-owner dashboards, client CRM + onboarding, commissions + agent payouts, per-owner trust views + protection attestations. _Outcome: sell to professional agencies._
 - **Phase D — Scale & depth (P2):** scheduled disbursements + reserves, preventive maintenance, budgets, field/mobile, rules engine, partner commercials.
 
