@@ -58,6 +58,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/billing': '/(app)/billing',
   '/estate/incidents': '/(app)/estate-incidents',
   '/estate/maintenance': '/(app)/estate-maintenance',
+  // A short-stay chat, from either side: it has its own inbox.
+  '/shortlets/messages': '/(app)/shortlet-messages',
   '/estate/violations': '/(app)/estate-violations',
   '/estate/emergency': '/(app)/estate-emergency',
   '/estate/visitor-passes': '/(app)/estate-visitors',

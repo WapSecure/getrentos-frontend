@@ -25,6 +25,14 @@ describe('notification routes', () => {
     expect(routeForNotification({ type: 'NEW_MESSAGE' }, 'gateman')).toBe('/(app)/notifications');
   });
 
+  it('opens the short-stay inbox for a short-stay chat, whatever the portal', () => {
+    for (const portal of ['renter', 'owner', 'landlord'] as const) {
+      expect(
+        routeForNotification({ type: 'NEW_MESSAGE', actionUrl: '/shortlets/messages' }, portal)
+      ).toBe('/(app)/shortlet-messages');
+    }
+  });
+
   it('never returns a dead route', () => {
     expect(routeForNotification({ actionUrl: '/something/new', type: 'WELCOME' }, 'renter')).toBe(
       '/(app)/notifications'
