@@ -88,12 +88,19 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
       incurredAt: string;
       note?: string;
     }) => unwrap(landlordService.createExpense(input)),
-    onSuccess: () => {
+    onSuccess: (result) => {
       invalidate();
       setPage(1);
       setForm(initialForm);
       setIsCreateOpen(false);
-      setToast({ message: 'Expense recorded.', variant: 'success' });
+      setToast(
+        result.status === 'pending_approval'
+          ? {
+              message: 'This is above the owner’s approval limit — sent to them to approve.',
+              variant: 'success',
+            }
+          : { message: 'Expense recorded.', variant: 'success' }
+      );
     },
     onError: (error: Error) => {
       setToast({ message: error.message || 'Unable to record this expense.', variant: 'error' });

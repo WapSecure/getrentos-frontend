@@ -95,6 +95,7 @@ export const navGroups = [
       item('sidebar.notices', ROUTES.LANDLORD_NOTICES, ShieldAlert),
       item('sidebar.legal_cases', ROUTES.LANDLORD_LEGAL_CASES, Gavel),
       item('sidebar.managed', ROUTES.LANDLORD_MANAGED, Sparkles),
+      item('sidebar.approvals', ROUTES.LANDLORD_APPROVALS, ShieldCheck),
       item('sidebar.documents', ROUTES.LANDLORD_DOCUMENTS, FolderOpen),
     ],
   },

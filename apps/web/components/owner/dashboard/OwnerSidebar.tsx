@@ -62,6 +62,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.vendors', href: ROUTES.OWNER_VENDORS, icon: HardHat },
   { labelKey: 'sidebar.inspections', href: ROUTES.OWNER_INSPECTIONS, icon: ClipboardCheck },
   { labelKey: 'sidebar.deposits', href: ROUTES.OWNER_DEPOSITS, icon: PiggyBank },
+  { labelKey: 'sidebar.approvals', href: ROUTES.OWNER_APPROVALS, icon: ShieldCheck },
   { labelKey: 'sidebar.documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
@@ -83,9 +84,9 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Portfolio and listings', items: navItems.slice(1, 6) },
-  { label: 'Sales and investment', items: navItems.slice(6, 14) },
-  { label: 'Communication', items: navItems.slice(14, 17) },
-  { label: 'Trust and account', items: navItems.slice(17) },
+  { label: 'Sales and investment', items: navItems.slice(6, 15) },
+  { label: 'Communication', items: navItems.slice(15, 18) },
+  { label: 'Trust and account', items: navItems.slice(18) },
 ];
 
 export const OwnerSidebar = () => {
