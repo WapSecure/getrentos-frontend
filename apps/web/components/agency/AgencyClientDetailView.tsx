@@ -24,6 +24,7 @@ import {
 } from '@/services/agencyClientService';
 import { MANDATE_STATUS_LABELS, type MandateStatus } from '@/services/mandateService';
 import { unwrap } from '@/lib/apiHelpers';
+import { AgencyOwnerTrustCard } from './AgencyOwnerTrustCard';
 
 const STATUS_VARIANT: Partial<Record<MandateStatus, BadgeVariant>> = {
   ACTIVE: 'success',
@@ -157,6 +158,9 @@ export function AgencyClientDetailView() {
           ))}
         </div>
       </div>
+
+      {/* Client money held by the firm */}
+      <AgencyOwnerTrustCard ownerId={ownerId} />
 
       {/* Notes */}
       <div className="mt-6">
