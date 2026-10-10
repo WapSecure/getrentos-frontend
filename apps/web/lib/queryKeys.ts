@@ -13,6 +13,15 @@ export const landlordKeys = {
   applications: (status?: string) => ['landlord', 'applications', status ?? 'all'] as const,
   viewingRequests: (status?: string) => ['landlord', 'viewingRequests', status ?? 'all'] as const,
   leases: (status?: string) => ['landlord', 'leases', status ?? 'all'] as const,
+  inspections: (params?: { propertyId?: string; status?: string; type?: string }) =>
+    [
+      'landlord',
+      'inspections',
+      params?.propertyId ?? 'all',
+      params?.status ?? 'all',
+      params?.type ?? 'all',
+    ] as const,
+  inspection: (id: string) => ['landlord', 'inspections', 'detail', id] as const,
   tenants: ['landlord', 'tenants'] as const,
   payments: (status?: string) => ['landlord', 'payments', status ?? 'all'] as const,
   rentCollectionStats: ['landlord', 'rentCollectionStats'] as const,
