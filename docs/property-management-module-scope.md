@@ -75,7 +75,7 @@ Each area is shared across editions unless noted. Status is the _starting point_
 
 ## 4. Gaps to close (prioritized)
 
-> **Delivery status (updated 2026-10-10):** Phase B is in progress — P0 #1–#4 shipped; only #5 (reporting/exports) remains.
+> **Delivery status (updated 2026-10-10):** Phase B (operational completeness) is COMPLETE — all five P0 items shipped. Next up: Phase C (Agency edition).
 
 **P0 — operational completeness (serves all three editions, unblocks credibility):**
 
@@ -83,7 +83,7 @@ Each area is shared across editions unless noted. Status is the _starting point_
 2. ✅ **Deposit lifecycle** _(shipped 2026-10-10)_ — take, hold (protected), deduct at move-out, return; ties to inspections + compliance.
 3. ✅ **Automated late fees + arrears ladder** _(shipped 2026-10-10)_ — real receivables management, not just reminders. _(A full configurable rules engine remains P2 #14.)_
 4. ✅ **Owner approvals workflow** _(shipped 2026-10-10)_ — owner signs off manager spend above a per-mandate cap (new maker/checker approval + owner inbox + cap control). _(Scoped to expenses; maintenance-work-order approval deferred — that module is owner-only and not yet PropertyAuthority-wired.)_
-5. ⬜ **Reporting & exports** — rent roll, arrears, per-owner P&L, statement history; CSV/PDF.
+5. ✅ **Reporting & exports** _(shipped 2026-10-10)_ — rent roll, per-property P&L (date range), arrears, statement history; CSV exports (+ existing per-statement PDF).
 
 **P1 — the Agency edition (the margin market):** 6. **Multi-owner agency dashboards** + per-owner portfolio views. 7. **Client (owner) CRM + onboarding** for agencies. 8. **Commissions** — letting (10%) / renewal (5%) charging + **agent commission/payout**. 9. **Agency trust-accounting compliance** — per-owner ledgers, protection-scheme attestations.
 
@@ -94,7 +94,7 @@ Each area is shared across editions unless noted. Status is the _starting point_
 ## 5. Phased delivery
 
 - **Phase A — Spine (DONE):** mandates, authority, servicing tiers, trust accounting, owner statements, GetRentos Managed ops, owner lifecycle notifications.
-- **Phase B — Operational completeness (P0) — IN PROGRESS:** ✅ inspections, ✅ deposit lifecycle (both shipped to landlord & owner portals), ✅ late fees + arrears ladder, ✅ owner approvals (2026-10-10), ⬜ reporting/exports. _Outcome: a credible self-manage + managed product._
+- **Phase B — Operational completeness (P0) — DONE (2026-10-10):** ✅ inspections, ✅ deposit lifecycle (both portals), ✅ late fees + arrears ladder, ✅ owner approvals, ✅ reporting/exports. _Outcome delivered: a credible self-manage + managed product._
 - **Phase C — Agency edition (P1):** multi-owner dashboards, client CRM + onboarding, commissions + agent payouts, per-owner trust views + protection attestations. _Outcome: sell to professional agencies._
 - **Phase D — Scale & depth (P2):** scheduled disbursements + reserves, preventive maintenance, budgets, field/mobile, rules engine, partner commercials.
 
