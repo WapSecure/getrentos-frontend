@@ -1,5 +1,6 @@
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
+import type { SpendApproval } from './spendApprovalService';
 import type {
   Property,
   Unit,
@@ -102,6 +103,14 @@ export interface Expense {
   note: string | null;
   createdAt: string;
 }
+
+/**
+ * Recording an expense either posts it, or — when a manager's spend is above the
+ * owner's approval cap — returns a pending approval the owner must sign off.
+ */
+export type CreateExpenseResult =
+  | { status: 'posted'; expense: Expense }
+  | { status: 'pending_approval'; approval: SpendApproval };
 
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 
@@ -891,7 +900,7 @@ export const landlordService = {
     amount: number;
     incurredAt: string;
     note?: string;
-  }): Promise<ApiResponse<Expense>> {
+  }): Promise<ApiResponse<CreateExpenseResult>> {
     return safeCall(() =>
       authFetch('/landlord/expenses', { method: 'POST', body: JSON.stringify(data) })
     );
