@@ -8,13 +8,20 @@ import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
-import { paymentStatusBadges } from '@/lib/statusBadge';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const PAGE_SIZE = 10;
 
 const daysOverdue = (dueDate: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(dueDate).getTime()) / MS_PER_DAY));
+
+/** The arrears ladder rung a charge sits on, by how long it has run overdue. */
+const ladderStage = (days: number): { label: string; variant: 'warning' | 'danger' } =>
+  days >= 30
+    ? { label: 'Seriously overdue', variant: 'danger' }
+    : days >= 14
+      ? { label: 'Escalating', variant: 'danger' }
+      : { label: 'Overdue', variant: 'warning' };
 
 export function ArrearsView() {
   const [page, setPage] = useState(1);
@@ -73,8 +80,9 @@ export function ArrearsView() {
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {payments.map((payment) => {
-            const badge = paymentStatusBadges[payment.status];
             const overdueDays = daysOverdue(payment.dueDate);
+            const stage = ladderStage(overdueDays);
+            const isLateFee = payment.category === 'late_fee';
             return (
               <div key={payment.id} className="p-4 flex items-center justify-between gap-4">
                 <div className="min-w-0">
@@ -82,15 +90,20 @@ export function ArrearsView() {
                     {payment.tenantName || 'Tenant'} · {payment.propertyName} ({payment.unitName})
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Due {formatDate(payment.dueDate)} · {overdueDays} day
-                    {overdueDays === 1 ? '' : 's'} overdue
+                    {isLateFee ? 'Late fee · ' : ''}Due {formatDate(payment.dueDate)} ·{' '}
+                    {overdueDays} day{overdueDays === 1 ? '' : 's'} overdue
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(payment.amount)}
                   </span>
-                  <Badge variant={badge.variant}>{badge.label}</Badge>
+                  {payment.lateFeeApplied && <Badge variant="neutral">Late fee added</Badge>}
+                  {isLateFee ? (
+                    <Badge variant="danger">Late fee</Badge>
+                  ) : (
+                    <Badge variant={stage.variant}>{stage.label}</Badge>
+                  )}
                 </div>
               </div>
             );

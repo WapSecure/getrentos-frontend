@@ -292,6 +292,12 @@ export interface LandlordAutomationSettings {
   leaseExpiry: boolean;
   /** Days rent may run past its due date before it is flagged overdue. */
   graceDays: number;
+  /** Auto-charge a late fee on rent left unpaid past the window. */
+  lateFees: boolean;
+  /** The late fee as a percentage of the overdue amount. */
+  lateFeePercent: number;
+  /** Days past the due date before a late fee is raised (on top of grace). */
+  lateFeeAfterDays: number;
 }
 
 export interface LandlordDashboardStats {
