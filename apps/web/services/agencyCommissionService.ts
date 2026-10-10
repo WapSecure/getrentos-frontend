@@ -25,6 +25,29 @@ export interface AgencyCommissionSummary {
   commissions: AgencyCommission[];
 }
 
+export interface AgencyPayoutAccount {
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
+}
+
+export interface AgencyPayoutSummary {
+  available: number;
+  accountSet: boolean;
+}
+
+export interface AgencyPayout {
+  id: string;
+  amount: number;
+  status: string;
+  commissions: number;
+  failureReason: string | null;
+  paidAt: string | null;
+  createdAt: string;
+}
+
 export const agencyCommissionService = {
   summary(): Promise<ApiResponse<AgencyCommissionSummary>> {
     return safeCall(() => authFetch<AgencyCommissionSummary>('/agency/commissions'));
@@ -39,6 +62,36 @@ export const agencyCommissionService = {
         method: 'PUT',
         body: JSON.stringify(rates),
       })
+    );
+  },
+
+  getPayoutAccount(): Promise<ApiResponse<AgencyPayoutAccount>> {
+    return safeCall(() => authFetch<AgencyPayoutAccount>('/agency/commissions/payout-account'));
+  },
+
+  savePayoutAccount(input: {
+    bankCode: string;
+    accountNumber: string;
+  }): Promise<ApiResponse<AgencyPayoutAccount>> {
+    return safeCall(() =>
+      authFetch<AgencyPayoutAccount>('/agency/commissions/payout-account', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  payoutSummary(): Promise<ApiResponse<AgencyPayoutSummary>> {
+    return safeCall(() => authFetch<AgencyPayoutSummary>('/agency/commissions/payouts/summary'));
+  },
+
+  listPayouts(): Promise<ApiResponse<AgencyPayout[]>> {
+    return safeCall(() => authFetch<AgencyPayout[]>('/agency/commissions/payouts'));
+  },
+
+  requestPayout(): Promise<ApiResponse<AgencyPayout>> {
+    return safeCall(() =>
+      authFetch<AgencyPayout>('/agency/commissions/payouts/request', { method: 'POST' })
     );
   },
 };
