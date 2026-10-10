@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Handshake,
   ShieldAlert,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -79,6 +80,7 @@ export const navGroups = [
       item('sidebar.viewing_requests', ROUTES.LANDLORD_VIEWING_REQUESTS, CalendarCheck),
       item('sidebar.tenants', ROUTES.LANDLORD_TENANTS, Users),
       item('sidebar.leases', ROUTES.LANDLORD_LEASES, FileCheck),
+      item('sidebar.inspections', ROUTES.LANDLORD_INSPECTIONS, ClipboardCheck),
       item('sidebar.payments', ROUTES.LANDLORD_PAYMENTS, CreditCard),
       item('sidebar.maintenance', ROUTES.LANDLORD_MAINTENANCE, Wrench),
       item('sidebar.vendors', ROUTES.LANDLORD_VENDORS, HardHat),

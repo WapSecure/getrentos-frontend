@@ -334,6 +334,7 @@ export const ROUTES = {
   LANDLORD_OFFERS: '/landlord/offers',
   LANDLORD_TENANTS: '/landlord/tenants',
   LANDLORD_LEASES: '/landlord/leases',
+  LANDLORD_INSPECTIONS: '/landlord/inspections',
   LANDLORD_PAYMENTS: '/landlord/payments',
   LANDLORD_MAINTENANCE: '/landlord/maintenance',
   LANDLORD_VENDORS: '/landlord/vendors',
