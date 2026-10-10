@@ -20,6 +20,11 @@ import { AppLockGate } from '@/components/AppLockGate';
 import { ConnectivityBanner } from '@/components/ConnectivityBanner';
 import { Sentry } from '@/lib/monitoring';
 import { StepUpSheet } from '@/components/StepUpSheet';
+import { WebAlertHost } from '@/components/WebAlertHost';
+import { installWebAlert } from '@/lib/installWebAlert';
+
+// Before any screen can raise one: React Native's Alert does nothing on web.
+installWebAlert();
 
 export { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -139,6 +144,8 @@ function RootLayout() {
             <ToastProvider>
               <AuthProvider>
                 <Gate />
+                {/* Outside Gate, so an alert raised while it boots still shows. */}
+                <WebAlertHost />
               </AuthProvider>
             </ToastProvider>
           </ThemeProvider>
