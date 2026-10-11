@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock, X } from 'lucide-react';
 import { Button, Checkbox, DatePicker, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 
 interface UploadGovernanceRecordModalProps {
   isOpen: boolean;
@@ -40,7 +40,7 @@ export const UploadGovernanceRecordModal = ({
   const [meetingDate, setMeetingDate] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [requiresSignatures, setRequiresSignatures] = useState(false);
-  const { isPro } = usePlanTier();
+  const { isPro } = useEstatePlan();
 
   const handleClose = () => {
     setTitle(newVersionOf?.title ?? '');

@@ -16,7 +16,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import type { EstateFinancialStats as EstateFinancialStatsData } from '@/types/estate';
 
@@ -40,7 +40,7 @@ export default function EstateFinancialsPage() {
   const [period, setPeriod] = useState<ReportPeriod>('monthly');
   const [exported, setExported] = useState(false);
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
-  const { isPro } = usePlanTier();
+  const { isPro } = useEstatePlan();
 
   const { data: stats = EMPTY_STATS } = useQuery({
     queryKey: estateKeys.financialStats(estate?.id ?? '', period),
@@ -94,6 +94,7 @@ export default function EstateFinancialsPage() {
       </div>
 
       <ProFeatureGate
+        entitled={isPro}
         title="Financial reporting is a Pro feature"
         description="Upgrade to Pro to see dues collected, outstanding balances, and late fees by period, plus export your data as CSV."
       >

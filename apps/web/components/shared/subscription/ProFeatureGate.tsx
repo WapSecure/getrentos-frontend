@@ -16,6 +16,12 @@ interface ProFeatureGateProps {
    * mailto so the gate is never a dead end.
    */
   upgradeHref?: string;
+  /**
+   * Whether the feature is paid for, when that isn't the signed-in user's own
+   * plan. Estate pages pass the estate's plan (`useEstatePlan`): the estate
+   * owner pays, and a manager's personal plan is beside the point.
+   */
+  entitled?: boolean;
   children: ReactNode;
 }
 
@@ -33,11 +39,18 @@ function sectionBillingHref(pathname: string | null): string | undefined {
  * For a single gated action inside an otherwise-Free page, use
  * usePlanGateModal + UpgradeToProModal instead (see lib/planGate.ts).
  */
-export function ProFeatureGate({ title, description, upgradeHref, children }: ProFeatureGateProps) {
+export function ProFeatureGate({
+  title,
+  description,
+  upgradeHref,
+  entitled,
+  children,
+}: ProFeatureGateProps) {
   const pathname = usePathname();
-  const { isPro, isLoading } = usePlanTier();
+  const own = usePlanTier();
+  const isPro = entitled ?? own.isPro;
 
-  if (isLoading) return null;
+  if (entitled === undefined && own.isLoading) return null;
 
   if (!isPro) {
     const href = upgradeHref ?? sectionBillingHref(pathname);
