@@ -1,18 +1,21 @@
 import { useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Minus, Plus, Trash2 } from 'lucide-react-native';
+import { Camera, ChevronLeft, ImagePlus, Trash2, X } from 'lucide-react-native';
 import { Button, Card, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,
+  type AgentInspectionPhoto,
   type AgentInspectionRoom,
   type AgentInspectionType,
   type RoomCondition,
 } from '@/lib/api/agent';
 import { ApiError } from '@/lib/api/client';
+import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 
 const TYPES: { value: AgentInspectionType; label: string }[] = [
   { value: 'MOVE_IN', label: 'Move-in' },
@@ -45,7 +48,36 @@ export default function SubmitInspection() {
   const [clientName, setClientName] = useState('');
   const [overallCondition, setOverallCondition] = useState('');
   const [rooms, setRooms] = useState<RoomDraft[]>([]);
+  const [photos, setPhotos] = useState<AgentInspectionPhoto[]>([]);
+  const [uploadingKey, setUploadingKey] = useState<number | null>(null);
   const nextRoomKey = useRef(0);
+
+  const addPhoto = async (room: RoomDraft, source: 'camera' | 'library') => {
+    if (!room.room.trim()) {
+      toast.show('Name the room before adding its photos.', 'error');
+      return;
+    }
+    const file = await (source === 'camera' ? capturePhoto() : pickPhoto());
+    if (!file) return;
+    setUploadingKey(room.key);
+    try {
+      const photo = await agentApi.addInspectionPhoto(taskId, file, room.room.trim());
+      setPhotos((prev) => [...prev, photo]);
+    } catch (err) {
+      toast.show(err instanceof ApiError ? err.message : 'Could not upload that photo.', 'error');
+    } finally {
+      setUploadingKey(null);
+    }
+  };
+
+  const removePhoto = async (photoId: string) => {
+    setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    try {
+      await agentApi.removeInspectionPhoto(photoId);
+    } catch {
+      /* best effort — already removed from view */
+    }
+  };
 
   const addRoom = (name: string) => {
     const key = nextRoomKey.current++;
@@ -72,7 +104,7 @@ export default function SubmitInspection() {
           room: r.room,
           condition: r.condition,
           notes: r.notes?.trim() || undefined,
-          photoCount: r.photoCount,
+          photoCount: photos.filter((p) => p.room === r.room.trim()).length,
         })),
       }),
     onSuccess: () => {
@@ -193,53 +225,61 @@ export default function SubmitInspection() {
                 />
               </View>
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginTop: spacing.sm,
-                }}
-              >
+              <View style={{ marginTop: spacing.sm, gap: spacing.sm }}>
                 <Text variant="caption" color="mutedForeground">
-                  Photos taken
+                  Evidence photos
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                  <Pressable
-                    onPress={() =>
-                      updateRoom(room.key, { photoCount: Math.max(0, (room.photoCount ?? 0) - 1) })
-                    }
-                    hitSlop={8}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Minus size={14} color={colors.foreground} />
-                  </Pressable>
-                  <Text variant="callout" style={{ minWidth: 20, textAlign: 'center' }}>
-                    {room.photoCount ?? 0}
-                  </Text>
-                  <Pressable
-                    onPress={() => updateRoom(room.key, { photoCount: (room.photoCount ?? 0) + 1 })}
-                    hitSlop={8}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Plus size={14} color={colors.foreground} />
-                  </Pressable>
+                {(() => {
+                  const roomPhotos = photos.filter(
+                    (p) => p.room === room.room.trim() && room.room.trim()
+                  );
+                  return roomPhotos.length > 0 ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                      {roomPhotos.map((photo) => (
+                        <View key={photo.id} style={{ width: 64, height: 64 }}>
+                          <Image
+                            source={{ uri: photo.url }}
+                            style={{ width: 64, height: 64, borderRadius: 8 }}
+                            contentFit="cover"
+                          />
+                          <Pressable
+                            onPress={() => removePhoto(photo.id)}
+                            hitSlop={8}
+                            accessibilityLabel="Remove photo"
+                            style={{
+                              position: 'absolute',
+                              top: -6,
+                              right: -6,
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              backgroundColor: colors.destructive,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <X size={12} color="#fff" />
+                          </Pressable>
+                        </View>
+                      ))}
+                    </View>
+                  ) : null;
+                })()}
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Chip
+                    label="Camera"
+                    size="sm"
+                    leadingIcon={<Camera size={14} color={colors.foreground} />}
+                    disabled={uploadingKey !== null}
+                    onPress={() => addPhoto(room, 'camera')}
+                  />
+                  <Chip
+                    label={uploadingKey === room.key ? 'Uploading…' : 'Library'}
+                    size="sm"
+                    leadingIcon={<ImagePlus size={14} color={colors.foreground} />}
+                    disabled={uploadingKey !== null}
+                    onPress={() => addPhoto(room, 'library')}
+                  />
                 </View>
               </View>
             </Card>

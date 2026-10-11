@@ -1,4 +1,5 @@
-import { apiFetch } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 
 export const AGENT_TASK_TYPES = [
@@ -147,6 +148,14 @@ export interface AgentInspectionRoom {
 
 export type AgentInspectionType = 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
 
+export interface AgentInspectionPhoto {
+  id: string;
+  room: string;
+  url: string;
+  name: string;
+  caption?: string | null;
+}
+
 export interface AgentInspection {
   id: string;
   taskId: string;
@@ -160,6 +169,8 @@ export interface AgentInspection {
   status: 'DRAFT' | 'SUBMITTED';
   submittedAt?: string | null;
   createdAt: string;
+  /** Real evidence photos, tagged by room, with short-lived signed URLs. */
+  photos?: AgentInspectionPhoto[];
   /** Present on `agentApi.inspections()` items; omitted on `submitInspection()`'s response. */
   task?: { id: string; title: string; status: AgentTaskStatus };
   property?: AgentTaskProperty;
@@ -246,6 +257,20 @@ export const agentApi = {
 
   submitInspection: (input: SubmitInspectionInput) =>
     apiFetch<AgentInspection>('/agent/inspections', { method: 'POST', body: input }),
+
+  /** The inspection for a task (with evidence photos), or null if none started yet. */
+  inspection: (taskId: string) => apiFetchOrNull<AgentInspection>(`/agent/inspections/${taskId}`),
+
+  addInspectionPhoto: (taskId: string, file: PickedFile, room: string, caption?: string) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('room', room);
+    if (caption) form.append('caption', caption);
+    return apiUpload<AgentInspectionPhoto>(`/agent/inspections/${taskId}/photos`, form);
+  },
+
+  removeInspectionPhoto: (photoId: string) =>
+    apiFetch<void>(`/agent/inspections/photos/${photoId}`, { method: 'DELETE' }),
 
   verifications: (
     page = 1,
