@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CalendarCheck } from 'lucide-react';
 import { Badge, EmptyState, PageErrorState, PageLoadingState, Button } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
+import { VideoCallButton } from '@/components/shared/VideoCallButton';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { viewingRequestStatusBadges } from '@/lib/statusBadge';
@@ -73,6 +74,9 @@ export default function RenterViewingsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="font-semibold text-foreground">{viewing.propertyName}</h2>
+                    {viewing.mode === 'video' && (
+                      <p className="text-xs font-medium text-primary">Live video viewing</p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Requested {formatWhen(viewing.requestedAt)}
                     </p>
@@ -104,6 +108,12 @@ export default function RenterViewingsPage() {
                 {viewing.notes && (
                   <p className="mt-2 text-xs text-muted-foreground">{viewing.notes}</p>
                 )}
+                <div className="mt-3">
+                  <VideoCallButton
+                    viewing={viewing}
+                    join={() => renterService.joinVideoCall(viewing.id)}
+                  />
+                </div>
               </li>
             );
           })}

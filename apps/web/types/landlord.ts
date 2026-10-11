@@ -436,6 +436,8 @@ export interface LandlordViewingRequest {
   renterName: string;
   renterEmail: string;
   status: ViewingRequestStatus;
+  /** 'video': a live video call at scheduledAt that the landlord hosts. */
+  mode: 'in_person' | 'video';
   requestedAt: string;
   /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
   preferredAt?: string;
