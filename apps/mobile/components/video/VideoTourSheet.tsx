@@ -3,7 +3,7 @@ import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { Chip, Text } from '@getrentos/ui-native';
-import { tourSource } from '@getrentos/shared';
+import { tourSource, type VideoStream } from '@getrentos/shared';
 import { EmbedFrame } from './EmbedFrame';
 import { VideoTourPlayer } from './VideoTourPlayer';
 
@@ -16,6 +16,7 @@ export function VideoTourSheet({
   onClose,
   title,
   videoUrl,
+  videoStream,
   tourUrl,
   onExpired,
 }: {
@@ -23,6 +24,8 @@ export function VideoTourSheet({
   onClose: () => void;
   title: string;
   videoUrl?: string | null;
+  /** The uploaded video as an adaptive stream, when encoded. */
+  videoStream?: VideoStream | null;
   tourUrl?: string | null;
   onExpired?: () => void;
 }) {
@@ -55,21 +58,18 @@ export function VideoTourSheet({
         </View>
         {videoUrl && tour ? (
           <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 12 }}>
-            <Chip
-              label="Video"
-              selected={showing === 'video'}
-              onPress={() => setView('video')}
-            />
-            <Chip
-              label="360° tour"
-              selected={showing === 'tour'}
-              onPress={() => setView('tour')}
-            />
+            <Chip label="Video" selected={showing === 'video'} onPress={() => setView('video')} />
+            <Chip label="360° tour" selected={showing === 'tour'} onPress={() => setView('tour')} />
           </View>
         ) : null}
         <View style={{ flex: 1, justifyContent: 'center', paddingBottom: insets.bottom }}>
           {open && showing === 'video' && videoUrl ? (
-            <VideoTourPlayer url={videoUrl} title={title} onExpired={onExpired} />
+            <VideoTourPlayer
+              url={videoUrl}
+              stream={videoStream}
+              title={title}
+              onExpired={onExpired}
+            />
           ) : open && showing === 'tour' && tour ? (
             <EmbedFrame url={tour.embedUrl} title={`${title} 360° tour`} fill />
           ) : null}

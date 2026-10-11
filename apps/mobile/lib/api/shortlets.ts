@@ -8,6 +8,7 @@ import type {
   ShortletDispute,
   ShortletSeason,
 } from './hostShortlets';
+import type { VideoStream } from '@getrentos/shared';
 
 export type { DisputeMessage, ShortletDispute, ShortletSeason };
 
@@ -106,6 +107,8 @@ export interface ShortletListing {
   coverImageUrl?: string;
   images?: string[];
   videoUrl?: string;
+  /** The uploaded video as an adaptive stream, once encoded. */
+  videoStream?: VideoStream;
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;

@@ -266,6 +266,7 @@ export function ShortletListingDetail({
           video.kind === 'file' ? (
             <video
               src={video.url}
+              poster={listing.videoStream?.posterUrl}
               controls
               playsInline
               preload="metadata"
