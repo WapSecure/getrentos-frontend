@@ -37,6 +37,7 @@ import { Sheet } from '@/components/Sheet';
 import { OwnershipProofSheet } from '@/components/owner/OwnershipProofSheet';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { VideoTourField } from '@/components/video/VideoTourField';
+import { OwnerPhotosField } from '@/components/owner/OwnerPhotosField';
 import type { PickedVideo } from '@/lib/filePicker';
 
 export default function OwnerPropertyDetail() {
@@ -209,6 +210,13 @@ export default function OwnerPropertyDetail() {
                 ) : null}
                 <Fact label="Added" value={formatDate(p.createdAt, 'medium')} />
               </Card>
+
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading" accessibilityRole="header">
+                  Photos
+                </Text>
+                <OwnerPhotosField property={p} onChanged={refresh} />
+              </View>
 
               <View style={{ gap: spacing.sm }}>
                 <Text variant="heading" accessibilityRole="header">
