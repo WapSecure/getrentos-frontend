@@ -3,7 +3,8 @@ import { ActivityIndicator, Alert, Platform, Pressable, View } from 'react-nativ
 import { Play, Trash2, Video } from 'lucide-react-native';
 import { Card, Divider, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
-import { MAX_VIDEO_BYTES, pickVideo, recordVideo, type PickedVideo } from '@/lib/filePicker';
+import { videoProblem } from '@getrentos/shared';
+import { pickVideo, recordVideo, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourSheet } from './VideoTourSheet';
 
 /**
@@ -45,8 +46,12 @@ export function VideoTourField({
       return;
     }
     if (!file) return;
-    if (file.size != null && file.size > MAX_VIDEO_BYTES) {
-      toast.show('That video is over 150 MB. Trim it or film a shorter tour.', 'error');
+    const problem = videoProblem({
+      size: file.size,
+      durationSeconds: file.durationMs != null ? file.durationMs / 1000 : undefined,
+    });
+    if (problem) {
+      toast.show(problem, 'error');
       return;
     }
     setBusy('uploading');
@@ -126,7 +131,7 @@ export function VideoTourField({
             <Text variant="caption" color="mutedForeground">
               {busy === 'uploading'
                 ? 'Keep the app open until it finishes.'
-                : 'Film a walkthrough or pick a clip, up to 150 MB.'}
+                : 'Film a walkthrough or pick a clip, up to 5 minutes.'}
             </Text>
           </View>
         </Pressable>

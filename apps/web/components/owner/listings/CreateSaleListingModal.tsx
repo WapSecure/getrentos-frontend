@@ -15,6 +15,7 @@ import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
+import { videoFileProblem } from '@/lib/videoFile';
 
 interface CreateSaleListingModalProps {
   isOpen: boolean;
@@ -65,9 +66,8 @@ interface StagedMedia {
 
 const NO_MEDIA: StagedMedia = { cover: null, gallery: [], video: null };
 
-/** The server's ceilings for property media. */
+/** The server's ceiling for a property photo (videos: see videoFileProblem). */
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
-const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
 
 const initialFormState: FormState = {
   propertyId: '',
@@ -130,15 +130,13 @@ export const CreateSaleListingModal = ({
     (key) => key !== existingCover
   );
 
-  const tooBig = (file: File, kind: 'image' | 'video') =>
-    file.size > (kind === 'image' ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES)
-      ? `${file.name} is over ${kind === 'image' ? '15' : '150'} MB.`
-      : null;
+  const tooBig = (file: File) =>
+    file.size > MAX_IMAGE_BYTES ? `${file.name} is over 15 MB.` : null;
 
   const stage = async (slot: 'cover' | 'video', file: File | undefined) => {
     if (!file) return;
     const kind = slot === 'video' ? 'video' : 'image';
-    const problem = tooBig(file, kind);
+    const problem = kind === 'video' ? await videoFileProblem(file) : tooBig(file);
     setMediaError(problem);
     if (problem) return;
     setUploading(slot);
@@ -153,7 +151,7 @@ export const CreateSaleListingModal = ({
   };
 
   const stageGallery = async (files: File[]) => {
-    const problem = files.map((file) => tooBig(file, 'image')).find(Boolean) ?? null;
+    const problem = files.map((file) => tooBig(file)).find(Boolean) ?? null;
     setMediaError(problem);
     if (problem || !files.length) return;
     setUploading('gallery');
@@ -455,7 +453,7 @@ export const CreateSaleListingModal = ({
                           ? media.video.name
                           : propertyForForm?.videoTourKey
                             ? 'The property has a video tour: click to replace'
-                            : 'Upload a walkthrough, up to 150 MB'
+                            : 'Upload a walkthrough, up to 5 minutes'
                       }
                       done={!!media.video || !!propertyForForm?.videoTourKey}
                       onFiles={([file]) => void stage('video', file)}

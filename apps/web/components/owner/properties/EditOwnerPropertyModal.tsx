@@ -11,9 +11,7 @@ import type { MapPoint } from '@/services/geocodeService';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
-
-/** The server's ceiling for a property video. */
-const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
+import { videoFileProblem } from '@/lib/videoFile';
 
 type OwnerPropertyUpdates = Pick<
   OwnerProperty,
@@ -103,11 +101,9 @@ const EditOwnerPropertyForm = ({
   }, [videoPreview]);
 
   const handleVideoSelected = async (file: File) => {
-    setVideoError(null);
-    if (file.size > MAX_VIDEO_BYTES) {
-      setVideoError('That video is over 150 MB. Trim it or upload a shorter tour.');
-      return;
-    }
+    const problem = await videoFileProblem(file);
+    setVideoError(problem);
+    if (problem) return;
     setIsUploadingVideo(true);
     try {
       const { key } = await unwrap(ownerService.uploadPropertyMedia(file, 'video'));
@@ -320,7 +316,7 @@ const EditOwnerPropertyForm = ({
             ) : null}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            A short walkthrough, up to 150 MB. Buyers can watch it on your listing.
+            A short walkthrough, up to 5 minutes and 150 MB. Buyers can watch it on your listing.
           </p>
           <input
             ref={videoInputRef}
