@@ -13,6 +13,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { useAgentUser } from '../layout';
 import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
 import { enqueueAgentBinaryOperation } from '@/lib/agentBinaryQueue';
+import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 export default function AgentMessagesPage() {
   const agent = useAgentUser();
@@ -104,6 +105,9 @@ export default function AgentMessagesPage() {
   const handleSelect = (id: string) => {
     setActiveId(id);
   };
+
+  // Opened from a message notification.
+  useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
   const handleSend = (text: string, files: File[]) => {
     if (!activeId) return;

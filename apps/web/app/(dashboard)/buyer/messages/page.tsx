@@ -10,6 +10,7 @@ import { cn } from '@/lib/cn';
 import { buyerService, type BuyerConversation, type BuyerMessage } from '@/services/buyerService';
 import { buyerKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const roleLabel = (role: string): Conversation['participantRole'] => {
   if (role === 'realtor') return 'Realtor';
@@ -81,6 +82,9 @@ export default function BuyerMessagesPage() {
     const conv = conversations.find((c) => c.id === id);
     if (conv && conv.unreadCount > 0) markReadMutation.mutate(id);
   };
+
+  // Opened from a message notification.
+  useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
   const handleSend = (text: string) => {
     if (!activeId) return;
