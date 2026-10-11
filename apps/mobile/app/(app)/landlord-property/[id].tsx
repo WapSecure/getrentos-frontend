@@ -45,7 +45,8 @@ import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
 import { AssignTenantSheet } from '@/components/landlord/AssignTenantSheet';
 import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
 import { ManagementFeeSheet } from '@/components/landlord/SmallFormSheets';
-import { pickImage } from '@/lib/filePicker';
+import { pickImage, type PickedVideo } from '@/lib/filePicker';
+import { VideoTourField } from '@/components/video/VideoTourField';
 import { BulkPriceSheet } from '@/components/landlord/BulkPriceSheet';
 import { usePlanTier } from '@/lib/api/subscription';
 
@@ -122,6 +123,28 @@ export default function LandlordPropertyDetail() {
     },
     onError: (e) => fail(e, 'Could not add that photo.'),
   });
+
+  /** Uploads a video and puts it on the property in place of any earlier one. */
+  const attachVideo = async (file: PickedVideo) => {
+    const previous = p?.videoTourKey;
+    const { key } = await landlordApi.uploadPropertyMedia(file, 'video');
+    try {
+      await landlordApi.updateProperty(id, { videoTourKey: key });
+    } catch (e) {
+      // Not attached, so it is only staging: don't leave it behind.
+      landlordApi.removePropertyMedia(key).catch(() => undefined);
+      throw e;
+    }
+    // Detached now, so the old file can go; the server refuses if it is still in use.
+    if (previous) landlordApi.removePropertyMedia(previous).catch(() => undefined);
+    invalidate();
+  };
+  const removeVideo = async () => {
+    const previous = p?.videoTourKey;
+    await landlordApi.updateProperty(id, { videoTourKey: null });
+    if (previous) landlordApi.removePropertyMedia(previous).catch(() => undefined);
+    invalidate();
+  };
 
   const markVacant = useMutation({
     mutationFn: (unitId: string) => landlordApi.markUnitVacant(unitId),
@@ -363,6 +386,17 @@ export default function LandlordPropertyDetail() {
               </Card>
             )}
           </View>
+
+          {p && !p.archived ? (
+            <VideoTourField
+              title={p.name}
+              hasVideo={!!p.videoTourKey}
+              videoUrl={p.videoTourUrl}
+              onUpload={attachVideo}
+              onRemove={removeVideo}
+              onExpired={() => property.refetch()}
+            />
+          ) : null}
 
           {p && !p.archived ? (
             <Card padding="none">

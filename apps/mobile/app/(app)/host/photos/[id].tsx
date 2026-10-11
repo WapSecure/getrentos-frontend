@@ -17,7 +17,8 @@ import {
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
 import { ApiError } from '@/lib/api/client';
-import { pickPhotos } from '@/lib/filePicker';
+import { pickPhotos, type PickedVideo } from '@/lib/filePicker';
+import { VideoTourField } from '@/components/video/VideoTourField';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
@@ -117,6 +118,19 @@ function Gallery({ listing: l }: { listing: HostListing }) {
     },
     onError: () => void haptics.error(),
   });
+
+  // The video saves on its own, straight away, apart from the photo order.
+  const refresh = () => qc.invalidateQueries({ queryKey: qk.host.listings });
+  const attachVideo = async (file: PickedVideo) => {
+    const { key } = await hostShortletsApi.uploadVideo(file);
+    // An uploaded video replaces a pasted link; the server deletes the old file.
+    await hostShortletsApi.update(l.id, { videoKey: key, videoUrl: '' });
+    await refresh();
+  };
+  const removeVideo = async () => {
+    await hostShortletsApi.update(l.id, { videoKey: '' });
+    await refresh();
+  };
 
   const leave = () => {
     if (!changed) return router.back();
@@ -265,6 +279,21 @@ function Gallery({ listing: l }: { listing: HostListing }) {
           Bright, landscape photos of the living room, bedroom and bathroom book best. Up to{' '}
           {MAX_PHOTOS}.
         </Text>
+        <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+          <Text variant="heading">Video tour</Text>
+          <Text variant="caption" color="mutedForeground">
+            A short walkthrough helps guests book with confidence.
+            {l.videoUrl && !l.videoKey ? ' Uploading one replaces your video link.' : ''}
+          </Text>
+          <VideoTourField
+            title={l.title}
+            hasVideo={!!l.videoKey}
+            videoUrl={l.videoKey ? l.videoUrl : undefined}
+            onUpload={attachVideo}
+            onRemove={removeVideo}
+            onExpired={() => void refresh()}
+          />
+        </View>
         {save.error ? (
           <FormAlert
             message={save.error instanceof ApiError ? save.error.message : 'Could not save.'}

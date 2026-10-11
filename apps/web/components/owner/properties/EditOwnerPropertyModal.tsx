@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, Trash2, Video } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
@@ -11,6 +11,9 @@ import type { MapPoint } from '@/services/geocodeService';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
+
+/** The server's ceiling for a property video. */
+const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
 
 type OwnerPropertyUpdates = Pick<
   OwnerProperty,
@@ -22,6 +25,7 @@ type OwnerPropertyUpdates = Pick<
   | 'country'
   | 'estimatedValue'
   | 'coverImageKey'
+  | 'videoTourKey'
   | 'latitude'
   | 'longitude'
 >;
@@ -86,6 +90,36 @@ const EditOwnerPropertyForm = ({
   const [photoError, setPhotoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // The video tour works the same way: staged on pick, attached on save.
+  const [videoKey, setVideoKey] = useState<string | null>(property.videoTourKey ?? null);
+  const [videoPreview, setVideoPreview] = useState(property.videoTourUrl);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!videoPreview?.startsWith('blob:')) return;
+    return () => URL.revokeObjectURL(videoPreview);
+  }, [videoPreview]);
+
+  const handleVideoSelected = async (file: File) => {
+    setVideoError(null);
+    if (file.size > MAX_VIDEO_BYTES) {
+      setVideoError('That video is over 150 MB. Trim it or upload a shorter tour.');
+      return;
+    }
+    setIsUploadingVideo(true);
+    try {
+      const { key } = await unwrap(ownerService.uploadPropertyMedia(file, 'video'));
+      setVideoKey(key);
+      setVideoPreview(URL.createObjectURL(file));
+    } catch (reason) {
+      setVideoError(reason instanceof Error ? reason.message : 'Unable to upload that video.');
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
   // Release the local preview once it is replaced or the modal closes.
   useEffect(() => {
     if (!previewUrl?.startsWith('blob:')) return;
@@ -122,6 +156,7 @@ const EditOwnerPropertyForm = ({
       // Only send the cover when it changed; an unconditional write would
       // push a stale key back over a photo edited elsewhere.
       ...(coverKey !== property.coverImageKey ? { coverImageKey: coverKey } : {}),
+      ...(videoKey !== (property.videoTourKey ?? null) ? { videoTourKey: videoKey } : {}),
       // Only a pin the owner moved, so saving other details does not
       // re-confirm a location nobody looked at.
       ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
@@ -245,11 +280,67 @@ const EditOwnerPropertyForm = ({
           {photoError && <p className="mt-1 text-sm text-destructive">{photoError}</p>}
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Video Tour</label>
+          {videoKey && videoPreview ? (
+            <video
+              src={videoPreview}
+              controls
+              playsInline
+              preload="metadata"
+              className="mb-2 aspect-video w-full rounded-lg border border-border bg-black"
+            />
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => videoInputRef.current?.click()}
+              disabled={isUploadingVideo}
+            >
+              {isUploadingVideo ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Video className="h-4 w-4" />
+              )}
+              {isUploadingVideo ? 'Uploading…' : videoKey ? 'Replace video' : 'Add video tour'}
+            </Button>
+            {videoKey && !isUploadingVideo ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setVideoKey(null);
+                  setVideoPreview(undefined);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Remove
+              </Button>
+            ) : null}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            A short walkthrough, up to 150 MB. Buyers can watch it on your listing.
+          </p>
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = '';
+              if (file) void handleVideoSelected(file);
+            }}
+          />
+          {videoError && <p className="mt-1 text-sm text-destructive">{videoError}</p>}
+        </div>
+
         <Button
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || isSaving || isUploading}
+          disabled={!name.trim() || !address.trim() || isSaving || isUploading || isUploadingVideo}
           isLoading={isSaving}
         >
           {isSaving ? 'Saving…' : 'Save Changes'}
