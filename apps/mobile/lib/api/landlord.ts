@@ -1,6 +1,7 @@
 import { apiDownload, apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { VideoCallJoin } from '@getrentos/shared';
 
 /* ------------------------------ dashboard ------------------------------ */
 
@@ -850,6 +851,27 @@ export interface LandlordConversation {
   unreadCount: number;
 }
 
+export type LandlordViewingStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled';
+
+/** A renter's request to view one of the landlord's (or managed) properties. */
+export interface LandlordViewingRequest {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  renterId: string;
+  renterName: string;
+  renterEmail: string;
+  status: LandlordViewingStatus;
+  /** 'video': a live video call at scheduledAt that the landlord hosts. */
+  mode: 'in_person' | 'video';
+  requestedAt: string;
+  /** The slot the renter asked for; the confirmed time is `scheduledAt`. */
+  preferredAt?: string;
+  scheduledAt?: string;
+  notes?: string;
+}
+
 export const landlordApi = {
   dashboardStats: () => apiFetch<LandlordDashboardStats>('/landlord/dashboard/stats'),
 
@@ -1065,6 +1087,18 @@ export const landlordApi = {
       method: 'POST',
       body: input,
     }),
+
+  viewingRequests: (status?: LandlordViewingStatus, page = 1, pageSize = 50) =>
+    apiFetch<Paginated<LandlordViewingRequest>>(
+      `/landlord/viewing-requests?page=${page}&pageSize=${pageSize}${status ? `&status=${status.toUpperCase()}` : ''}`
+    ),
+
+  completeViewing: (id: string) =>
+    apiFetch<void>(`/landlord/viewing-requests/${id}/complete`, { method: 'PATCH' }),
+
+  /** The host's link into a confirmed video viewing, from 15 minutes before it. */
+  joinViewingCall: (id: string) =>
+    apiFetch<VideoCallJoin>(`/landlord/viewing-requests/${id}/video-call`, { method: 'POST' }),
 
   /** The API requires the agreed time as an ISO date-time. */
   confirmViewing: (id: string, scheduledAt: string) =>

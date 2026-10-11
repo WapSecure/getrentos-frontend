@@ -296,6 +296,7 @@ export const qk = {
     tenants: (page = 1, pageSize = 20) => ['landlord', 'tenants', { page, pageSize }] as const,
     applications: (page = 1, pageSize = 20) =>
       ['landlord', 'applications', { page, pageSize }] as const,
+    viewings: (status?: string) => ['landlord', 'viewings', { status }] as const,
     leases: (page = 1, pageSize = 20) => ['landlord', 'leases', { page, pageSize }] as const,
     maintenance: (page = 1, pageSize = 20) =>
       ['landlord', 'maintenance', { page, pageSize }] as const,
