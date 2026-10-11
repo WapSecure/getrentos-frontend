@@ -29,9 +29,19 @@ export default defineConfig({
       use: { ...devices['Pixel 7'], baseURL: webUrl },
     },
     {
+      name: 'web-dark',
+      testMatch: /web\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: webUrl, colorScheme: 'dark' },
+    },
+    {
       name: 'backoffice',
       testMatch: /backoffice\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: backofficeUrl },
+    },
+    {
+      name: 'backoffice-dark',
+      testMatch: /backoffice\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: backofficeUrl, colorScheme: 'dark' },
     },
   ],
   webServer: [

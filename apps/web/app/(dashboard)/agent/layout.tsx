@@ -77,7 +77,7 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
         <AgentNavbar user={user} />
         <div className="flex">
           <AgentSidebar />
-          <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
+          <main className="min-w-0 flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
