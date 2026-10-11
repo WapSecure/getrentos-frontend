@@ -69,7 +69,7 @@ export default function LandlordLayout({ children }: { children: ReactNode }) {
         <LandlordNavbar user={user} />
         <div className="flex">
           <LandlordSidebar />
-          <main className="flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
+          <main className="min-w-0 flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
