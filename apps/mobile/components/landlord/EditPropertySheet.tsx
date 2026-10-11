@@ -12,6 +12,8 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { LocationFields } from '@/components/forms/LocationFields';
+import { LocationPicker } from '@/components/property/LocationPicker';
+import type { MapPoint } from '@/lib/api/geocode';
 
 interface Props {
   open: boolean;
@@ -44,6 +46,14 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
   const [description, setDescription] = useState(property.description ?? '');
+  const [pin, setPin] = useState<MapPoint | null>(
+    property.latitude != null && property.longitude != null
+      ? { latitude: property.latitude, longitude: property.longitude }
+      : null
+  );
+  // Only a pin the landlord actually moved is sent, so saving the name alone
+  // does not re-confirm a location nobody looked at.
+  const [pinMoved, setPinMoved] = useState(false);
 
   const save = useMutation({
     mutationFn: () =>
@@ -55,6 +65,7 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
         city: city.trim(),
         state: state.trim(),
         description: description.trim() || undefined,
+        ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
@@ -113,6 +124,22 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
         onStateChange={setState}
         onCityChange={setCity}
       />
+
+      <LocationPicker
+        address={address}
+        city={city}
+        state={state}
+        value={pin}
+        onChange={(next) => {
+          setPin(next);
+          setPinMoved(true);
+        }}
+      />
+      {pin && !pinMoved && !property.locationConfirmedAt ? (
+        <Text variant="caption" color="mutedForeground">
+          This pin is our guess from the address. Drag it onto the building to confirm it.
+        </Text>
+      ) : null}
 
       <TextField
         label="Description (optional)"

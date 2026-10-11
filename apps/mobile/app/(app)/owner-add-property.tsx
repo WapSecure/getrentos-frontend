@@ -26,6 +26,8 @@ import type { PickedFile } from '@/lib/api/documents';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { LocationFields } from '@/components/forms/LocationFields';
+import { LocationPicker } from '@/components/property/LocationPicker';
+import type { MapPoint } from '@/lib/api/geocode';
 
 const TYPES: { value: CreateOwnerPropertyInput['propertyType']; label: string }[] = [
   { value: 'APARTMENT', label: 'Apartment' },
@@ -55,6 +57,7 @@ export default function OwnerAddProperty() {
   const [country, setCountry] = useState('Nigeria');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [pin, setPin] = useState<MapPoint | null>(null);
   const [estimatedValue, setEstimatedValue] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [docType, setDocType] = useState<OwnershipDocumentType>('C_OF_O');
@@ -81,6 +84,7 @@ export default function OwnerAddProperty() {
         country,
         estimatedValue: digits(estimatedValue),
         purchasePrice: digits(purchasePrice),
+        ...(pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       });
       // The property exists now; a failed upload must not lose it.
       let proofFailed = false;
@@ -183,6 +187,7 @@ export default function OwnerAddProperty() {
           onCityChange={setCity}
           errors={{ state: err('state'), city: err('city') }}
         />
+        <LocationPicker address={address} city={city} state={state} value={pin} onChange={setPin} />
         <View style={{ flexDirection: stackFieldPairs ? 'column' : 'row', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
             <TextField

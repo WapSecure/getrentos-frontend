@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { Camera, X } from 'lucide-react-native';
 import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { LocationPicker } from '@/components/property/LocationPicker';
+import type { MapPoint } from '@/lib/api/geocode';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import {
@@ -42,6 +44,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [description, setDescription] = useState('');
+  const [pin, setPin] = useState<MapPoint | null>(null);
   const [cover, setCover] = useState<{ uri: string; key: string } | null>(null);
 
   /**
@@ -74,6 +77,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         country,
         description: description.trim() || undefined,
         coverImageKey: cover?.key,
+        ...(pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
@@ -175,6 +179,8 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         onStateChange={setState}
         onCityChange={setCity}
       />
+
+      <LocationPicker address={address} city={city} state={state} value={pin} onChange={setPin} />
 
       <TextField
         label="Description (optional)"

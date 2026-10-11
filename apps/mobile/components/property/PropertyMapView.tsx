@@ -18,6 +18,8 @@ export function PropertyMapView({
   variant = 'price',
   selectedId,
   onMarkerPress,
+  onPinMove,
+  recenter,
   borderRadius = 16,
   style,
 }: PropertyMapViewProps) {
@@ -46,8 +48,8 @@ export function PropertyMapView({
   );
 
   const payload = useMemo(
-    () => ({ markers, center, zoom, variant, selectedId }),
-    [markers, center, zoom, variant, selectedId]
+    () => ({ markers, center, zoom, variant, selectedId, recenter }),
+    [markers, center, zoom, variant, selectedId, recenter]
   );
 
   useEffect(() => {
@@ -58,6 +60,13 @@ export function PropertyMapView({
     try {
       const data = JSON.parse(e.nativeEvent.data);
       if (data.type === 'markerPress' && data.id) onMarkerPress?.(data.id);
+      if (
+        data.type === 'pinMoved' &&
+        typeof data.latitude === 'number' &&
+        typeof data.longitude === 'number'
+      ) {
+        onPinMove?.({ latitude: data.latitude, longitude: data.longitude });
+      }
     } catch {
       // ignore malformed messages
     }

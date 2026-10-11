@@ -22,11 +22,22 @@ import { Button } from '@getrentos/ui';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { Property, PropertyType } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { MapPoint } from '@/services/geocodeService';
 
 export interface LandlordPropertySubmission {
   property: Pick<
     Property,
-    'name' | 'type' | 'address' | 'city' | 'state' | 'country' | 'description' | 'totalUnits'
+    | 'name'
+    | 'type'
+    | 'address'
+    | 'city'
+    | 'state'
+    | 'country'
+    | 'description'
+    | 'totalUnits'
+    | 'latitude'
+    | 'longitude'
   >;
   coverImage: File;
   galleryImages: File[];
@@ -67,6 +78,7 @@ interface FormState {
   titleDeed: File | null;
   certificateOfOccupancy: File | null;
   managementAuthorization: File | null;
+  pin: MapPoint | null;
 }
 
 const initialFormState: FormState = {
@@ -84,6 +96,7 @@ const initialFormState: FormState = {
   titleDeed: null,
   certificateOfOccupancy: null,
   managementAuthorization: null,
+  pin: null,
 };
 
 export const AddPropertyModal = ({
@@ -137,6 +150,7 @@ export const AddPropertyModal = ({
           country: form.country,
           description: form.description || undefined,
           totalUnits: Number(form.totalUnits) || 1,
+          ...(form.pin ? { latitude: form.pin.latitude, longitude: form.pin.longitude } : {}),
         },
         coverImage: form.coverImage,
         galleryImages: form.galleryImages,
@@ -247,6 +261,15 @@ export const AddPropertyModal = ({
                     onStateChange={(s) => update('state', s)}
                     onCityChange={(c) => update('city', c)}
                     required
+                  />
+
+                  <LocationPicker
+                    address={form.address}
+                    city={form.city}
+                    state={form.state}
+                    country={form.country}
+                    value={form.pin}
+                    onChange={(pin) => update('pin', pin)}
                   />
 
                   <div>
