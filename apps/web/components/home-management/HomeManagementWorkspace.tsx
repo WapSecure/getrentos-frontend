@@ -25,8 +25,9 @@ import {
   type HomeManagementVendor,
 } from '@/services/homeManagementService';
 import { ownerService } from '@/services/ownerService';
+import { propertyAuthorityService } from '@/services/propertyAuthorityService';
 
-export type HomeManagementWorkspaceRole = 'owner' | 'landlord';
+export type HomeManagementWorkspaceRole = 'owner' | 'landlord' | 'manager';
 
 interface HomeManagementWorkspaceProps {
   role: HomeManagementWorkspaceRole;
@@ -54,6 +55,18 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
   const propertiesQuery = useQuery({
     queryKey: homeManagementKeys.properties(role),
     queryFn: async (): Promise<HomeManagementProperty[]> => {
+      if (role === 'manager') {
+        // A manager operates the properties mandated to them, not their own.
+        const managed = await unwrap(propertyAuthorityService.managed());
+        return managed
+          .filter((property) => property.canManage && !property.archived)
+          .map((property) => ({
+            id: property.propertyId,
+            title: property.title,
+            city: property.city,
+            state: property.state,
+          }));
+      }
       if (role === 'owner') {
         const res = await unwrap(ownerService.listProperties({ page: 1, pageSize: 100 }));
         return normalizeProperties(res.items);
@@ -103,10 +116,14 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
-  // Owners and landlords both keep a vendor directory (/owner|landlord/vendors).
+  // Owners and landlords keep their own vendor directory (/owner|landlord/vendors).
+  // A manager's vendors belong to each property's owner, not to the manager, and
+  // there is no managed-vendor directory endpoint yet — so vendor pre-assignment
+  // is unavailable in the manager view (a follow-up). Everything else works.
   const vendorsQuery = useQuery({
-    queryKey: homeManagementKeys.vendors,
+    queryKey: [...homeManagementKeys.vendors, role],
     queryFn: async (): Promise<HomeManagementVendor[]> => {
+      if (role === 'manager') return [];
       const res = await unwrap(landlordService.listVendors({ page: 1, pageSize: 100 }));
       return res.items.map((vendor) => ({
         id: vendor.id,
@@ -208,7 +225,9 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
 
       <HomeManagementInspectionFeed />
 
-      <HomeManagementRecordsPanel role={role} />
+      {/* The records panel links to owner/landlord document + vendor routes that
+          the agency portal does not have, so it is omitted for managers. */}
+      {role !== 'manager' && <HomeManagementRecordsPanel role={role} />}
     </div>
   );
 }

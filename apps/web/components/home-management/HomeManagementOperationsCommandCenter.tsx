@@ -14,7 +14,7 @@ import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Badge, type BadgeVariant, Button, Card, Skeleton } from '@getrentos/ui';
 import type { HomeManagementDashboard } from '@/services/homeManagementService';
 
-type HomeManagementOperationsRole = 'owner' | 'landlord';
+type HomeManagementOperationsRole = 'owner' | 'landlord' | 'manager';
 type ActionTarget = 'work-orders' | 'care-plans' | 'assets';
 
 type AttentionMetric = {

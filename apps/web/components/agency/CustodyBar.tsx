@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   UserRound,
   Users,
+  Wrench,
 } from 'lucide-react';
 import { useCustody } from './CustodyProvider';
 import {
@@ -150,8 +151,16 @@ export function CustodyBar() {
       )}
 
       <Link
-        href="/agency/commissions"
+        href="/agency/home-management"
         className="ml-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <Wrench className="h-4 w-4" aria-hidden />
+        Home management
+      </Link>
+
+      <Link
+        href="/agency/commissions"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
       >
         <Coins className="h-4 w-4" aria-hidden />
         Commissions

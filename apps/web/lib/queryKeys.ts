@@ -214,7 +214,8 @@ export const homeManagementKeys = {
       params?.limit ?? 'default',
     ] as const,
   documents: (role: 'owner' | 'landlord') => ['home-management', role, 'documents'] as const,
-  properties: (role: 'owner' | 'landlord') => ['home-management', role, 'properties'] as const,
+  properties: (role: 'owner' | 'landlord' | 'manager') =>
+    ['home-management', role, 'properties'] as const,
   vendors: ['home-management', 'landlord', 'vendors'] as const,
   vendorPayoutAccount: (vendorId: string) =>
     ['home-management', 'vendors', vendorId, 'payout-account'] as const,
