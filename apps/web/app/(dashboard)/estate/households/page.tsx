@@ -17,7 +17,7 @@ import { ImportHouseholdsModal } from '@/components/estate/households/ImportHous
 import type { Household, ImportHouseholdsResult } from '@/types/estate';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 
 const PAGE_SIZE = 10;
 
@@ -33,7 +33,7 @@ export default function EstateHouseholdsPage() {
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const planGate = usePlanGateModal();
-  const { isPro } = usePlanTier();
+  const { isPro } = useEstatePlan();
 
   const { data, isLoading: isHouseholdsLoading } = useQuery({
     queryKey: [...estateKeys.households(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],

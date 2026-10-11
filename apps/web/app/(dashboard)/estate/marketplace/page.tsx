@@ -33,7 +33,7 @@ import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { EstateAgreement, EstateListing, EstateListingType } from '@/types/estate-marketplace';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 
 const statusBadge = (status: EstateAgreement['status']) => {
   switch (status) {
@@ -387,7 +387,7 @@ export default function EstateMarketplacePage() {
   const { estate } = useSelectedEstate();
   const estateId = estate?.id ?? '';
   const queryClient = useQueryClient();
-  const { isPro } = usePlanTier();
+  const { isEnterprise } = useEstatePlan();
 
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
@@ -589,7 +589,7 @@ export default function EstateMarketplacePage() {
                   onClick={() => bulkPublish.mutate(drafts.map((d) => d.id))}
                   disabled={bulkPublish.isPending}
                   title={
-                    isPro
+                    isEnterprise
                       ? 'Publish every draft at once (Enterprise)'
                       : 'Bulk publishing is an Enterprise feature'
                   }
