@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader2, MapPin } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { geocodeService, LAGOS_POINT, type MapPoint } from '@/services/geocodeService';
+import { addBaseTiles } from '@/lib/mapTiles';
 
 /**
  * Where the property is, as the owner says: "Find on map" suggests a pin from
@@ -57,11 +58,7 @@ export const LocationPicker = ({
       if (cancelled || !containerRef.current) return;
       leafletRef.current = L;
       const map = L.map(containerRef.current, { zoomControl: true });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(map);
+      addBaseTiles(L, map);
       map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
         pinRef.current?.setLatLng(e.latlng);
         onChangeRef.current({ latitude: e.latlng.lat, longitude: e.latlng.lng });

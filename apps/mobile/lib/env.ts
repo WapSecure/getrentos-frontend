@@ -36,4 +36,6 @@ export const env = {
   webUrl: WEB_URL,
   /** Sent as `x-client-app` so the API returns the refresh token in the body. */
   clientApp: 'mobile' as const,
+  /** Mapbox public token (pk.…) for map tiles; unset falls back to OpenStreetMap. */
+  mapboxToken: process.env.EXPO_PUBLIC_MAPBOX_TOKEN,
 };

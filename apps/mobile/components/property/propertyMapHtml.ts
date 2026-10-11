@@ -1,6 +1,9 @@
+import { mapTiles } from '@getrentos/shared';
+import { env } from '@/lib/env';
+
 /**
- * The map page both PropertyMapView builds load: Leaflet and OpenStreetMap
- * tiles, no key or billing. Phones host it in a WebView; the web build in an
+ * The map page both PropertyMapView builds load: Leaflet on Mapbox tiles when
+ * EXPO_PUBLIC_MAPBOX_TOKEN is set, OpenStreetMap otherwise. Phones host it in a WebView; the web build in an
  * iframe. Either way the app posts `{ markers, center, zoom, variant,
  * selectedId }` in, and the page posts `{ type: 'markerPress', id }` out.
  */
@@ -52,10 +55,10 @@ export function buildMapHtml(
   foreground: string,
   border: string
 ) {
-  const darkFilter =
-    scheme === 'dark'
-      ? 'filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);'
-      : '';
+  const tiles = mapTiles(env.mapboxToken, scheme);
+  const darkFilter = tiles.needsDarkFilter
+    ? 'filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);'
+    : '';
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -80,9 +83,11 @@ export function buildMapHtml(
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   var map = L.map('map', { zoomControl: true, attributionControl: true });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+  L.tileLayer(${JSON.stringify(tiles.url)}, {
+    maxZoom: ${tiles.maxZoom},
+    tileSize: ${tiles.tileSize},
+    zoomOffset: ${tiles.zoomOffset},
+    attribution: ${JSON.stringify(tiles.attribution)}
   }).addTo(map);
   map.setView([${LAGOS.latitude}, ${LAGOS.longitude}], 11);
 
