@@ -28,8 +28,12 @@ function BuyerViewingsPageContent() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.viewings });
 
   const createMutation = useMutation({
-    mutationFn: (data: { listingId: string; scheduledAt: string; notes?: string }) =>
-      unwrap(buyerService.requestViewing(data)),
+    mutationFn: (data: {
+      listingId: string;
+      scheduledAt: string;
+      notes?: string;
+      mode: 'IN_PERSON' | 'VIDEO';
+    }) => unwrap(buyerService.requestViewing(data)),
     onSuccess: invalidate,
   });
 
@@ -40,11 +44,18 @@ function BuyerViewingsPageContent() {
 
   const [isModalOpen, setIsModalOpen] = useState(!!defaultPropertyId);
 
-  const handleSubmit = (propertyId: string, date: string, time: string, notes: string) => {
+  const handleSubmit = (
+    propertyId: string,
+    date: string,
+    time: string,
+    notes: string,
+    mode: 'IN_PERSON' | 'VIDEO'
+  ) => {
     createMutation.mutate({
       listingId: propertyId,
       scheduledAt: new Date(`${date}T${time}`).toISOString(),
       notes: notes || undefined,
+      mode,
     });
     setIsModalOpen(false);
   };

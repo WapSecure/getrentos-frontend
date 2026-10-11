@@ -13,12 +13,19 @@ import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
+import { videoCallAvailabilityQuery, videoCallService } from '@/services/videoCallService';
 
 interface RequestViewingModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultPropertyId?: string;
-  onSubmit: (propertyId: string, date: string, time: string, notes: string) => void;
+  onSubmit: (
+    propertyId: string,
+    date: string,
+    time: string,
+    notes: string,
+    mode: 'IN_PERSON' | 'VIDEO'
+  ) => void;
 }
 
 const LISTING_PAGE_SIZE = 10;
@@ -38,6 +45,14 @@ export const RequestViewingModal = ({
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
+  const [mode, setMode] = useState<'IN_PERSON' | 'VIDEO'>('IN_PERSON');
+  // Video viewings are offered only once the call service is set up.
+  const { data: videoCalls } = useQuery({
+    ...videoCallAvailabilityQuery,
+    queryFn: () => unwrap(videoCallService.availability()),
+    enabled: isOpen,
+  });
+  const canVideo = videoCalls?.available === true;
 
   const { data: listingsPage, isLoading: isListingsLoading } = useQuery({
     queryKey: [
@@ -73,12 +88,13 @@ export const RequestViewingModal = ({
     setDate('');
     setTime('');
     setNotes('');
+    setMode('IN_PERSON');
     onClose();
   };
 
   const handleSubmit = () => {
     if (!selectedListing) return;
-    onSubmit(propertyId, date, time, notes);
+    onSubmit(propertyId, date, time, notes, canVideo ? mode : 'IN_PERSON');
     handleClose();
   };
 
@@ -143,6 +159,42 @@ export const RequestViewingModal = ({
                 <label className="block text-sm font-medium text-foreground mb-1">Time</label>
                 <TimePicker value={time} onChange={setTime} />
               </div>
+
+              {canVideo && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    How would you like to view it?
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        ['IN_PERSON', 'Visit in person'],
+                        ['VIDEO', 'Live video call'],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setMode(value)}
+                        aria-pressed={mode === value}
+                        className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                          mode === value
+                            ? 'border-primary bg-accent text-primary'
+                            : 'border-border text-muted-foreground hover:border-primary'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {mode === 'VIDEO' && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      The owner walks you through it on a video call once they confirm. Join it from
+                      your viewing requests.
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">

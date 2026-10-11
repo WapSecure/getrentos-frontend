@@ -240,6 +240,7 @@ export const qk = {
     property: (id: string) => ['owner', 'properties', id] as const,
     listings: ['owner', 'listings'] as const,
     offers: ['owner', 'offers'] as const,
+    viewings: (status?: string) => ['owner', 'viewings', { status }] as const,
     offerThread: (id: string) => ['owner', 'offers', id, 'thread'] as const,
     transactions: ['owner', 'transactions'] as const,
     leads: ['owner', 'leads'] as const,
