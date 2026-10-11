@@ -1,13 +1,22 @@
+import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
+  Building2,
   CircleHelp,
   KeyRound,
   LogOut,
   Megaphone,
   ShieldCheck,
   SlidersHorizontal,
+  BookOpen,
+  Landmark,
+  FileBarChart,
+  Globe,
+  Store,
+  Inbox,
+  UsersRound,
   Sparkles,
   Vote,
   WalletCards,
@@ -16,6 +25,7 @@ import {
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -24,10 +34,68 @@ const go = (href: Href) => () => router.push(href);
 export default function EstateAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { estate } = useEstate();
+  const { estate, estates, estateId, select } = useEstate();
+  const [switching, setSwitching] = useState(false);
   const verified = !!profile?.isVerified;
 
   const office: SettingsItem[] = [
+    {
+      key: 'estate',
+      label: estates.length > 1 ? 'Switch estate' : 'Your estates',
+      description: estates.length > 1 ? `${estates.length} estates you run` : 'Add another estate',
+      value: estate?.name,
+      icon: Building2,
+      onPress: () => setSwitching(true),
+    },
+    {
+      key: 'staff',
+      label: 'Staff',
+      description: 'Gatemen who work your gates',
+      icon: UsersRound,
+      onPress: go('/(app)/estate-staff'),
+    },
+    {
+      key: 'marketplace',
+      label: 'Marketplace',
+      description: 'Market owners’ homes in the estate',
+      icon: Store,
+      onPress: go('/(app)/estate-marketplace'),
+    },
+    {
+      key: 'enquiries',
+      label: 'Enquiries',
+      description: 'People asking about your listings',
+      icon: Inbox,
+      onPress: go('/(app)/estate-enquiries'),
+    },
+    {
+      key: 'governance',
+      label: 'Governance',
+      description: 'Bylaws, minutes and who has signed',
+      icon: BookOpen,
+      onPress: go('/(app)/estate-governance'),
+    },
+    {
+      key: 'committee',
+      label: 'Committee',
+      description: 'Who sits on the estate committee',
+      icon: Landmark,
+      onPress: go('/(app)/estate-committee'),
+    },
+    {
+      key: 'financials',
+      label: 'Financials',
+      description: 'Collections, statements and your payout account',
+      icon: FileBarChart,
+      onPress: go('/(app)/estate-financials'),
+    },
+    {
+      key: 'microsite',
+      label: 'Estate page',
+      description: 'Your estate’s public page',
+      icon: Globe,
+      onPress: go('/(app)/estate-microsite'),
+    },
     {
       key: 'announcements',
       label: 'Announcements',
@@ -151,9 +219,6 @@ export default function EstateAccount() {
           </View>
         }
       />
-      <Text variant="caption" color="mutedForeground" center>
-        Gates, staff, patrols, statements and your microsite are set up on the GetRentos website.
-      </Text>
 
       <Button
         label="Sign out"
@@ -169,6 +234,13 @@ export default function EstateAccount() {
       <Text variant="caption" color="mutedForeground" center style={{ marginBottom: spacing.lg }}>
         GetRentos {Constants.expoConfig?.version ?? ''}
       </Text>
+      <EstateSwitcherSheet
+        open={switching}
+        onClose={() => setSwitching(false)}
+        estates={estates}
+        currentId={estateId}
+        onSelect={select}
+      />
     </Screen>
   );
 }

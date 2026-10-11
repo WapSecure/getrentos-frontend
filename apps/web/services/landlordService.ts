@@ -344,7 +344,16 @@ export const landlordService = {
   // ---- Notifications feed ----
   async getNotifications(): Promise<
     ApiResponse<
-      { id: string; type: string; title: string; body: string; read: boolean; createdAt: string }[]
+      {
+        id: string;
+        type: string;
+        title: string;
+        body: string;
+        read: boolean;
+        createdAt: string;
+        actionUrl?: string;
+        conversationId?: string;
+      }[]
     >
   > {
     return safeCall(() => authFetch('/landlord/notifications'));

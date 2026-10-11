@@ -160,6 +160,8 @@ export interface RealtorNotificationApi {
   body: string;
   read: boolean;
   createdAt: string;
+  actionUrl?: string;
+  conversationId?: string;
 }
 
 export interface RealtorReviewsSummary {

@@ -3,6 +3,7 @@
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,17 +16,14 @@ import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSi
 import { formatRelativeTime } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { unwrap } from '@/lib/apiHelpers';
+import { agentKeys } from '@/lib/queryKeys';
+import { agentService, type AgentNotification } from '@/services/agentService';
+import { notificationHref } from '@/lib/notificationHref';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 
 interface AgentNavbarProps {
   user: { fullName: string; email: string } | null;
-}
-
-interface NavNotification {
-  id: number;
-  title: string;
-  message: string;
-  read: boolean;
-  time: string;
 }
 
 export const AgentNavbar = ({ user }: AgentNavbarProps) => {
@@ -41,29 +39,24 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const [notifications, setNotifications] = useState<NavNotification[]>([
-    {
-      id: 1,
-      title: 'New task assigned',
-      message: 'Property inspection requested for Ocean View Towers',
-      read: false,
-      time: '2026-08-08T09:20:00.000Z',
-    },
-    {
-      id: 2,
-      title: 'Task due soon',
-      message: 'Tenant verification visit for Unit 3B is due today',
-      read: false,
-      time: '2026-08-08T07:00:00.000Z',
-    },
-    {
-      id: 3,
-      title: 'Sync complete',
-      message: '2 offline records synced successfully',
-      read: true,
-      time: '2026-08-07T18:00:00.000Z',
-    },
-  ]);
+  const queryClient = useQueryClient();
+  const { data: notifications = [] } = useQuery({
+    queryKey: agentKeys.notifications,
+    queryFn: () => unwrap(agentService.getNotifications()),
+  });
+  const markRead = useMutation({
+    mutationFn: (id: string) => unwrap(agentService.markNotificationRead(id)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: agentKeys.notifications }),
+  });
+  const markAllRead = useMutation({
+    mutationFn: () => unwrap(agentService.markAllNotificationsRead()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: agentKeys.notifications }),
+  });
+
+  // Real-time: refresh the bell when the backend pushes a new notification.
+  useRealtimeEvent('notification:new', () => {
+    queryClient.invalidateQueries({ queryKey: agentKeys.notifications });
+  });
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
@@ -85,12 +78,18 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  // Mark it read, then open what it is about (if it is about something).
+  const handleOpenNotification = (notification: AgentNotification) => {
+    if (!notification.read) markRead.mutate(notification.id);
+    const href = notificationHref('agent', notification);
+    if (href) {
+      setShowNotifications(false);
+      router.push(href);
+    }
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllRead.mutate();
   };
 
   return (
@@ -189,19 +188,17 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
                               className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
                                 !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
-                              onClick={() => handleMarkAsRead(notification.id)}
+                              onClick={() => handleOpenNotification(notification)}
                             >
                               <div className="flex justify-between items-start mb-1">
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
                                 <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.time)}
+                                  {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.message}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{notification.body}</p>
                             </div>
                           ))
                         )}

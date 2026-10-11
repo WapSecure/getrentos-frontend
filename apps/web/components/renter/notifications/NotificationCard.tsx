@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   FileText,
   MessageCircle,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@getrentos/ui';
+import { notificationHref } from '@/lib/notificationHref';
 
 interface NotificationMetadata {
   propertyId?: string;
@@ -100,6 +102,7 @@ export const NotificationCard = ({
   onMarkAsRead,
   onDelete,
 }: NotificationCardProps) => {
+  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const config = typeConfig[notification.type] || typeConfig.system;
   const Icon = config.icon;
@@ -108,9 +111,8 @@ export const NotificationCard = ({
     if (!notification.read) {
       onMarkAsRead(notification.id);
     }
-    if (notification.action) {
-      window.location.href = notification.action.url;
-    }
+    const href = notificationHref('renter', notification);
+    if (href) router.push(href);
   };
 
   // No event parameter needed since Button component doesn't pass it

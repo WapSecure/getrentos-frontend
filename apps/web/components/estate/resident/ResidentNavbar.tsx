@@ -6,6 +6,7 @@ import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { ResidentProfileDropdown } from './ResidentProfileDropdown';
+import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { residentNavGroups } from './ResidentSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { ROUTES } from '@/lib/constants/auth';
@@ -39,6 +40,7 @@ export const ResidentNavbar = ({ user }: ResidentNavbarProps) => {
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
+              <NotificationBell portal="resident" basePath="/estate/resident/notifications" />
               <ResidentProfileDropdown user={user} />
 
               <button

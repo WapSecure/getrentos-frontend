@@ -474,7 +474,8 @@ export const gatemanApi = {
   verifyDeliveryCode: (estateId: string, code: string) =>
     apiFetch<DeliveryCodeScreen>(`/estate/${estateId}/deliveries/verify`, {
       method: 'POST',
-      body: JSON.stringify({ code }),
+      // apiFetch encodes the body itself; encoding it here too sent a string.
+      body: { code },
     }),
 
   /**
@@ -492,7 +493,7 @@ export const gatemanApi = {
   scanPatrolCheckpoint: (estateId: string, code: string, options: { occurredAt?: string } = {}) =>
     apiFetch<PatrolScanResult>(`/estate/${estateId}/patrols/scan`, {
       method: 'POST',
-      body: JSON.stringify({ code, ...options }),
+      body: { code, ...options },
     }),
 
   logDelivery: (

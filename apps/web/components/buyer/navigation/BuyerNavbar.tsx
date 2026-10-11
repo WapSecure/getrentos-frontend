@@ -20,6 +20,7 @@ import { buyerService } from '@/services/buyerService';
 import { ROUTES } from '@/lib/constants/auth';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { notificationHref } from '@/lib/notificationHref';
 
 interface BuyerNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -69,6 +70,23 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
   const handleMarkAsRead = (id: string) => {
     markRead.mutate(id);
+  };
+
+  // Mark it read, then open what it is about (if it is about something).
+  const handleOpenNotification = (notification: {
+    id: string;
+    type: string;
+    read: boolean;
+    actionUrl?: string;
+    conversationId?: string;
+    action?: { url: string };
+  }) => {
+    if (!notification.read) handleMarkAsRead(notification.id);
+    const href = notificationHref('buyer', notification);
+    if (href) {
+      setShowNotifications(false);
+      router.push(href);
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -160,7 +178,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                               className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
                                 !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
-                              onClick={() => handleMarkAsRead(notification.id)}
+                              onClick={() => handleOpenNotification(notification)}
                             >
                               <div className="flex justify-between items-start mb-1">
                                 <h4 className="text-sm font-medium text-foreground">

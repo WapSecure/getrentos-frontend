@@ -48,6 +48,8 @@ export interface BuyerNotification {
   body: string;
   read: boolean;
   createdAt: string;
+  actionUrl?: string;
+  conversationId?: string;
 }
 
 export interface BuyerOfferThreadMessage {

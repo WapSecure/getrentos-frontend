@@ -6,6 +6,7 @@ import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@getrentos/ui';
 import { EstateProfileDropdown } from './EstateProfileDropdown';
+import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { EstateSwitcher } from './EstateSwitcher';
 import { navGroups } from '../dashboard/EstateSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -43,6 +44,7 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
+              <NotificationBell portal="estate" basePath="/estate/notifications" />
               <EstateProfileDropdown user={user} />
 
               <button
