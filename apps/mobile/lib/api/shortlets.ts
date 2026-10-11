@@ -157,6 +157,8 @@ export interface ShortletListing {
   taxPct?: number;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   publishedAt?: string;
 }
 

@@ -90,6 +90,7 @@ export const GeoInsightsPanel = ({
             id: insights.listingId,
             latitude: insights.latitude,
             longitude: insights.longitude,
+            approximate: insights.locationPrecision === 'approximate',
             title: insights.title,
             priceLabel: formatPrice(insights.pricing.price, insights.pricing.rentPeriod ?? 'month'),
             href: undefined,

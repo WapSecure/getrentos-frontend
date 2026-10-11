@@ -14,6 +14,8 @@ export interface RenterProperty {
   country?: string;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   price: number;
   period: 'month';
   bedrooms: number;

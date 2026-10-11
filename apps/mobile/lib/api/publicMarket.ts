@@ -61,6 +61,8 @@ export interface MarketDetail extends MarketCard {
   amenities: string[];
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   /** Who is behind the listing: a name and trust signal only, never contact details. */
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
   facts: MarketFact[];
@@ -156,6 +158,8 @@ interface RentalDto {
   address?: string;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   price: number;
   period: 'month' | 'year';
   allowsMonthlyPayment?: boolean;
@@ -184,6 +188,8 @@ interface SaleDto {
   address?: string;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   bedrooms?: number;
   bathrooms?: number;
   propertyType?: string;

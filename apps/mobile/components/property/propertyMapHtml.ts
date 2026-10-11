@@ -19,8 +19,13 @@ export interface PropertyMapViewProps {
   zoom?: number;
   /** Fixed height in px. Omit when the wrapping view's `style` already sizes it (e.g. `flex: 1`). */
   height?: number;
-  /** `price` = pill price tags for a multi-listing map. `location` = a single pulsing pin for a property's exact spot. */
-  variant?: 'price' | 'location';
+  /**
+   * `price` = pill price tags for a multi-listing map. `location` = a single
+   * pulsing pin for a property's exact spot. `area` = a shaded circle for a
+   * property whose location is only approximate (unverified, or a short stay):
+   * it shows the neighbourhood without pointing at a door.
+   */
+  variant?: 'price' | 'location' | 'area';
   selectedId?: string;
   onMarkerPress?: (id: string) => void;
   borderRadius?: number;
@@ -28,6 +33,12 @@ export interface PropertyMapViewProps {
 }
 
 export const LAGOS = { latitude: 6.5244, longitude: 3.3792 };
+
+/**
+ * The circle drawn for an approximate location. The API moves such a point up
+ * to 500 m from the real one, so a 600 m circle always contains the property.
+ */
+export const APPROXIMATE_RADIUS_METRES = 600;
 
 export function buildMapHtml(
   scheme: 'light' | 'dark',
@@ -103,6 +114,17 @@ export function buildMapHtml(
     var pts = (payload.markers || []).filter(function (m) { return typeof m.latitude === 'number' && typeof m.longitude === 'number'; });
 
     pts.forEach(function (m) {
+      if (payload.variant === 'area') {
+        L.circle([m.latitude, m.longitude], {
+          radius: ${APPROXIMATE_RADIUS_METRES},
+          color: '${primary}',
+          weight: 2,
+          fillColor: '${primary}',
+          fillOpacity: 0.18,
+          interactive: false
+        }).addTo(markerLayer);
+        return;
+      }
       var icon = payload.variant === 'location' ? locationPinIcon() : pricePinIcon(m, m.id === payload.selectedId);
       var marker = L.marker([m.latitude, m.longitude], { icon: icon }).addTo(markerLayer);
       if (payload.variant !== 'location') {

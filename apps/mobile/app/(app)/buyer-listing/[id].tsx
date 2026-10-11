@@ -205,7 +205,7 @@ export default function BuyerListingDetail() {
                     markers={[
                       { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
                     ]}
-                    variant="location"
+                    variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
                     zoom={15}
                     height={200}
                   />
