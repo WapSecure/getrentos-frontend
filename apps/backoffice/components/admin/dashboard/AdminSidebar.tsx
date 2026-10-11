@@ -29,6 +29,7 @@ import {
   Warehouse,
   CreditCard,
   Sparkles,
+  Handshake,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -78,6 +79,12 @@ const navItems: NavItem[] = [
     href: '/admin/managed-mandates',
     icon: Sparkles,
     permission: 'verifications.approve',
+  },
+  {
+    label: 'Partner Commercials',
+    href: '/admin/partner-commercials',
+    icon: Handshake,
+    permission: 'rentfinance.view',
   },
   {
     label: 'Land Diligence',
