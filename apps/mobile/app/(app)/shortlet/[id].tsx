@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -49,6 +49,7 @@ import {
   PricingBlock,
   RulesBlock,
 } from '@/components/shortlet/StaySections';
+import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 
 type SheetName = 'dates' | 'book' | 'message' | null;
 
@@ -71,6 +72,7 @@ export default function ShortletDetail() {
       : null
   );
   const [guests, setGuests] = useState(Math.max(1, Number(params.guests) || 1));
+  const [touring, setTouring] = useState(false);
   const [sheet, setSheet] = useState<SheetName>(null);
   // Picking dates on the way to booking carries straight on to the booking sheet.
   const [bookAfterDates, setBookAfterDates] = useState(false);
@@ -266,8 +268,8 @@ export default function ShortletDetail() {
 
               {listing.videoUrl || listing.tourUrl ? (
                 <Pressable
-                  onPress={() => Linking.openURL((listing.videoUrl ?? listing.tourUrl)!)}
-                  accessibilityRole="link"
+                  onPress={() => setTouring(true)}
+                  accessibilityRole="button"
                 >
                   <Card elevated>
                     <InfoRow
@@ -505,6 +507,14 @@ export default function ShortletDetail() {
             open={sheet === 'message'}
             onClose={() => setSheet(null)}
             listing={listing}
+          />
+          <VideoTourSheet
+            open={touring}
+            onClose={() => setTouring(false)}
+            title={listing.title}
+            videoUrl={listing.videoUrl}
+            tourUrl={listing.tourUrl}
+            onExpired={() => void query.refetch()}
           />
         </>
       )}

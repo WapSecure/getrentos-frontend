@@ -78,7 +78,8 @@
           "faceIDPermission": "GetRentos uses Face ID to unlock the app when you turn on the app lock."
         }
       ],
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true
