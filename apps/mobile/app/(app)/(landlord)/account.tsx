@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import {
   BadgeCheck,
   Banknote,
+  CalendarClock,
   BarChart3,
   BedDouble,
   CalendarCheck,
@@ -74,6 +75,13 @@ export default function LandlordAccount() {
       description: 'What is live, paused or draft',
       icon: Megaphone,
       onPress: go('/(app)/landlord-listings'),
+    },
+    {
+      key: 'viewings',
+      label: 'Viewings',
+      description: 'Confirm visits and host video viewings',
+      icon: CalendarClock,
+      onPress: go('/(app)/landlord-viewings'),
     },
     {
       key: 'leads',
