@@ -61,6 +61,8 @@ export interface OwnerProperty {
   purchaseDate?: string;
   coverImageUrl?: string;
   galleryImageUrls?: string[];
+  /** Storage keys behind galleryImageUrls, cover first, in the same order. */
+  galleryImageKeys?: string[];
   videoTourKey?: string;
   /** Signed link to the video tour, valid for a few hours. */
   videoTourUrl?: string;
@@ -409,6 +411,12 @@ export const ownerApi = {
   property: (id: string) => apiFetch<OwnerProperty>(`/owner/properties/${id}`),
   createProperty: (input: CreateOwnerPropertyInput) =>
     apiFetch<OwnerProperty>('/owner/properties', { method: 'POST', body: input }),
+  /** Sets the photos in order; the first becomes the cover. */
+  setPhotos: (id: string, keys: string[]) =>
+    apiFetch<OwnerProperty>(`/owner/properties/${id}`, {
+      method: 'PATCH',
+      body: { coverImageKey: keys[0], galleryImageKeys: keys.slice(1) },
+    }),
   /** Attaches (key) or removes (null) the property's video tour. */
   setVideoTour: (id: string, videoTourKey: string | null) =>
     apiFetch<OwnerProperty>(`/owner/properties/${id}`, {
