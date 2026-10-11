@@ -2,6 +2,7 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
+import type { VideoCallJoin } from '@getrentos/shared';
 
 /**
  * The property-owner portal (sellers). Mirrors the backend's /owner/* routes;
@@ -401,7 +402,41 @@ export type OwnershipDocumentType = (typeof OWNERSHIP_DOCUMENTS)[number]['value'
 
 const page = (p: number, size: number, extra = '') => `?page=${p}&pageSize=${size}${extra}`;
 
+/** A buyer's request to view one of the seller's for-sale listings. */
+export interface OwnerViewing {
+  id: string;
+  listingId: string;
+  propertyId: string;
+  propertyName: string;
+  buyerId: string;
+  buyerName: string;
+  /** The buyer's asked-for time until confirmed, then the confirmed time. */
+  scheduledAt: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  mode: 'in_person' | 'video';
+  notes?: string;
+  requestedAt: string;
+}
+
 export const ownerApi = {
+  viewings: (status?: 'requested' | 'confirmed', p = 1, size = 50) =>
+    apiFetch<Paginated<OwnerViewing>>(
+      `/owner/viewings${page(p, size, status ? `&status=${status}` : '')}`
+    ),
+  /** Confirm at the buyer's time, or pass another ISO time to offer instead. */
+  confirmViewing: (id: string, scheduledAt?: string) =>
+    apiFetch<OwnerViewing>(`/owner/viewings/${id}/confirm`, {
+      method: 'PATCH',
+      body: scheduledAt ? { scheduledAt } : {},
+    }),
+  declineViewing: (id: string) =>
+    apiFetch<OwnerViewing>(`/owner/viewings/${id}/decline`, { method: 'PATCH' }),
+  completeViewing: (id: string) =>
+    apiFetch<OwnerViewing>(`/owner/viewings/${id}/complete`, { method: 'PATCH' }),
+  /** The seller's link into a confirmed video viewing, from 15 minutes before it. */
+  joinViewingCall: (id: string) =>
+    apiFetch<VideoCallJoin>(`/owner/viewings/${id}/video-call`, { method: 'POST' }),
+
   dashboard: () => apiFetch<OwnerDashboard>('/owner/dashboard'),
 
   properties: (p = 1, size = 50) =>

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  CalendarClock,
   LayoutDashboard,
   Building2,
   Megaphone,
@@ -55,6 +56,7 @@ export const navItems: NavItem[] = [
   { label: 'My stays', href: ROUTES.OWNER_BOOKINGS, icon: Luggage },
   { labelKey: 'sidebar.sale_listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
   { labelKey: 'sidebar.buyer_leads', href: ROUTES.OWNER_LEADS, icon: Users },
+  { labelKey: 'sidebar.viewings', href: ROUTES.OWNER_VIEWINGS, icon: CalendarClock },
   { labelKey: 'sidebar.offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
   { labelKey: 'sidebar.transactions', href: ROUTES.OWNER_TRANSACTIONS, icon: ShieldCheck },
   { labelKey: 'sidebar.investment_analytics', href: ROUTES.OWNER_ANALYTICS, icon: LineChart },

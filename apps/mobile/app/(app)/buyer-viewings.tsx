@@ -22,7 +22,8 @@ import {
   BUYER_VIEWING_STATUS_TONE,
   type BuyerViewing,
 } from '@/lib/api/buyerViewings';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatTime } from '@/lib/format';
+import { VideoCallAction } from '@/components/viewings/VideoCallAction';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
@@ -113,8 +114,15 @@ export default function BuyerViewings() {
                       {item.propertyTitle}
                     </Text>
                     <Text variant="caption" color="mutedForeground">
-                      {formatDate(item.requestedDate, 'medium')} · {item.requestedTime}
+                      {item.scheduledAt
+                        ? `${formatDate(item.scheduledAt, 'medium')} · ${formatTime(item.scheduledAt)}`
+                        : `${formatDate(item.requestedDate, 'medium')} · ${item.requestedTime}`}
                     </Text>
+                    {item.mode === 'video' ? (
+                      <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                        Live video viewing
+                      </Text>
+                    ) : null}
                   </View>
                   <Badge
                     label={BUYER_VIEWING_STATUS_LABEL[item.status]}
@@ -126,6 +134,12 @@ export default function BuyerViewings() {
                     {item.notes}
                   </Text>
                 ) : null}
+                <View style={{ marginTop: spacing.sm }}>
+                  <VideoCallAction
+                    viewing={item}
+                    join={() => buyerViewingsApi.joinVideoCall(item.id)}
+                  />
+                </View>
                 {item.status === 'pending' || item.status === 'confirmed' ? (
                   <Button
                     label="Cancel viewing"

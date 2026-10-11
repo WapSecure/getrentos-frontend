@@ -47,7 +47,11 @@ export interface ViewingRequest {
   propertyTitle: string;
   requestedDate: string;
   requestedTime: string;
+  /** The viewing time as an ISO instant. */
+  scheduledAt?: string;
   status: ViewingRequestStatus;
+  /** 'video': a live video call the seller hosts at scheduledAt. */
+  mode?: 'in_person' | 'video';
   notes?: string;
 }
 

@@ -9,6 +9,7 @@ import type {
   OwnershipTransferDocument,
 } from '@/types/owner';
 import type { TrustProfile } from '@/types/trust-score';
+import type { VideoCallJoin } from '@getrentos/shared';
 import { toApiPropertyType, toDisplayPropertyType } from '@/lib/propertyTypes';
 
 export interface OwnerDashboard {
@@ -144,6 +145,21 @@ const toOwnerPropertyPayload = (property: Partial<OwnerPropertyApi>): Partial<Ow
   return apiPropertyType ? { ...property, propertyType: apiPropertyType } : property;
 };
 
+/** A buyer's request to view one of the seller's for-sale listings. */
+export interface OwnerViewing {
+  id: string;
+  listingId: string;
+  propertyId: string;
+  propertyName: string;
+  buyerId: string;
+  buyerName: string;
+  scheduledAt: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  mode: 'in_person' | 'video';
+  notes?: string;
+  requestedAt: string;
+}
+
 export const ownerService = {
   // Dashboard
   getDashboard: () => safeCall(() => authFetch<OwnerDashboard>('/owner/dashboard')),
@@ -218,6 +234,27 @@ export const ownerService = {
         method: 'DELETE',
         body: JSON.stringify({ key }),
       })
+    ),
+
+  // Buyers' viewings on for-sale listings
+  listViewings: (params: { status?: string; page?: number; pageSize?: number } = {}) =>
+    safeCall(() => authFetch<Paginated<OwnerViewing>>(`/owner/viewings${toQuery(params)}`)),
+  /** Confirm at the buyer's time, or pass another ISO time to offer instead. */
+  confirmViewing: (id: string, scheduledAt?: string) =>
+    safeCall(() =>
+      authFetch<OwnerViewing>(`/owner/viewings/${id}/confirm`, {
+        method: 'PATCH',
+        body: JSON.stringify(scheduledAt ? { scheduledAt } : {}),
+      })
+    ),
+  declineViewing: (id: string) =>
+    safeCall(() => authFetch<OwnerViewing>(`/owner/viewings/${id}/decline`, { method: 'PATCH' })),
+  completeViewing: (id: string) =>
+    safeCall(() => authFetch<OwnerViewing>(`/owner/viewings/${id}/complete`, { method: 'PATCH' })),
+  /** The seller's link into a confirmed video viewing, from 15 minutes before it. */
+  joinViewingCall: (id: string) =>
+    safeCall(() =>
+      authFetch<VideoCallJoin>(`/owner/viewings/${id}/video-call`, { method: 'POST' })
     ),
 
   // Sale listings
