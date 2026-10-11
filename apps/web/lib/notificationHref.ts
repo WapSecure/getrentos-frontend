@@ -78,7 +78,12 @@ export function notificationHref(
   const isMessage =
     n.type.toLowerCase() === 'new_message' || (portal === 'renter' && n.type === 'message');
   if (url === SHORTLET_INBOX || (!url && (isMessage || n.conversationId))) {
-    return MESSAGES[portal] ?? null;
+    const inbox = MESSAGES[portal];
+    if (!inbox) return null;
+    // The inbox opens straight onto the conversation the message is in.
+    return n.conversationId
+      ? `${inbox}?conversation=${encodeURIComponent(n.conversationId)}`
+      : inbox;
   }
   if (url && url.startsWith('/') && !url.startsWith('//')) return url;
   const type = n.type.toLowerCase();
