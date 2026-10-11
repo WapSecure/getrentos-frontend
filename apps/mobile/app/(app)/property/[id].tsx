@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,20 +44,9 @@ import { env } from '@/lib/env';
 import { marketWebPath } from '@/lib/api/publicMarket';
 import { ViewingRequestSheet } from '@/components/property/ViewingRequestSheet';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { openDirections } from '@/lib/directions';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
-
-function openDirections(latitude: number, longitude: number, label: string) {
-  const encodedLabel = encodeURIComponent(label);
-  const url = Platform.select({
-    ios: `maps://?daddr=${latitude},${longitude}&q=${encodedLabel}`,
-    android: `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodedLabel})`,
-    default: `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
-  });
-  Linking.openURL(url).catch(() =>
-    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`)
-  );
-}
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -130,6 +119,11 @@ export default function PropertyDetail() {
                     {p.address ? `${p.address}, ${p.location}` : p.location}
                   </Text>
                 </View>
+                {p.addressHidden ? (
+                  <Text variant="caption" color="mutedForeground">
+                    The exact address is shared once the property is verified.
+                  </Text>
+                ) : null}
               </View>
 
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl }}>

@@ -438,8 +438,15 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                       </DialogTitle>
                       <DialogDescription className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" />
-                        {activeListing.address}, {activeListing.city}, {activeListing.state}
+                        {[activeListing.address, activeListing.city, activeListing.state]
+                          .filter(Boolean)
+                          .join(', ')}
                       </DialogDescription>
+                      {activeListing.addressHidden && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          The exact address is shared once the property is verified.
+                        </p>
+                      )}
                     </div>
                     <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
                       Verified parcel

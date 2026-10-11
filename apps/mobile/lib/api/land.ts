@@ -108,7 +108,9 @@ export interface LandListing {
   city: string;
   state: string;
   country: string;
-  address: string;
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
   /** `approximate` until the property is verified, and always for a stay: draw an area. */

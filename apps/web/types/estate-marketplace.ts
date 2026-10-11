@@ -129,7 +129,9 @@ export interface EstateStorefrontListing {
   propertyId: string;
   title: string;
   propertyType: string;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   city: string;
   state: string;
   bedrooms?: number | null;

@@ -71,7 +71,9 @@ const ListingCard = ({ listing, slug }: { listing: EstateStorefrontListing; slug
       <p className="font-semibold text-foreground truncate">{listing.title}</p>
       <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
         <MapPin className="w-3 h-3 shrink-0" />
-        <span className="truncate">{listing.address}</span>
+        <span className="truncate">
+          {[listing.address, listing.city].filter(Boolean).join(', ')}
+        </span>
       </p>
 
       <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">

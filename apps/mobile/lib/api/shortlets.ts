@@ -100,7 +100,9 @@ export interface ShortletListing {
   description: string;
   city: string;
   state: string;
-  address: string;
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   coverImageUrl?: string;
   images?: string[];
   videoUrl?: string;
@@ -205,6 +207,10 @@ export interface ShortletBooking {
   cancellationReason?: string;
   /** How to get in; only on a confirmed, paid stay. */
   checkInInstructions?: string;
+  /** The street address and exact spot, once the stay is paid for. */
+  address?: string;
+  latitude?: number;
+  longitude?: number;
   guestPromise?: GuestPromiseStatus;
   paymentStatus: ShortletPaymentStatus;
   paidAt?: string;

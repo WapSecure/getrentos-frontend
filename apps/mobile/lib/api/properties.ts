@@ -8,7 +8,9 @@ export interface RenterProperty {
   propertyId: string;
   title: string;
   location: string;
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
   address?: string;
+  addressHidden?: boolean;
   city?: string;
   state?: string;
   country?: string;
