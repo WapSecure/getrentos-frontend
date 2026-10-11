@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { useTheme } from '@getrentos/ui-native';
-import { buildMapHtml, type PropertyMapViewProps } from './propertyMapHtml';
+import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './propertyMapHtml';
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
 
@@ -20,6 +20,8 @@ export function PropertyMapView({
   onMarkerPress,
   onPinMove,
   recenter,
+  boundary,
+  onBoundaryChange,
   borderRadius = 16,
   style,
 }: PropertyMapViewProps) {
@@ -48,8 +50,8 @@ export function PropertyMapView({
   );
 
   const payload = useMemo(
-    () => ({ markers, center, zoom, variant, selectedId, recenter }),
-    [markers, center, zoom, variant, selectedId, recenter]
+    () => ({ markers, center, zoom, variant, selectedId, recenter, boundary }),
+    [markers, center, zoom, variant, selectedId, recenter, boundary]
   );
 
   useEffect(() => {
@@ -67,6 +69,8 @@ export function PropertyMapView({
       ) {
         onPinMove?.({ latitude: data.latitude, longitude: data.longitude });
       }
+      const corners = readBoundaryMessage(data);
+      if (corners) onBoundaryChange?.(corners);
     } catch {
       // ignore malformed messages
     }

@@ -45,6 +45,8 @@ import {
   LAND_TITLE_TYPE_LABELS,
   type PublicLandListing,
 } from '@/types/land';
+import { boundaryCorners } from '@getrentos/shared';
+import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -484,6 +486,17 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                     />
                     <Fact label="Diligence" value="Verified" />
                   </div>
+                  {(() => {
+                    const outline = boundaryCorners(activeListing.parcel.boundaryGeometry);
+                    return outline ? (
+                      <div className="mt-4 border-t border-border pt-3">
+                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                          Plot outline, as drawn by the owner
+                        </p>
+                        <ParcelBoundaryMap key={activeListing.id} corners={outline} height={240} />
+                      </div>
+                    ) : null;
+                  })()}
                   {activeListing.parcel.boundaryNotes && (
                     <p className="mt-4 border-t border-border pt-3 text-sm text-muted-foreground">
                       {activeListing.parcel.boundaryNotes}

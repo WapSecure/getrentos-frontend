@@ -85,6 +85,8 @@ export interface LandParcelPublic {
   areaUnit: LandAreaUnit;
   frontage?: number;
   depth?: number;
+  /** The plot outline as a GeoJSON Polygon (see boundaryCorners). */
+  boundaryGeometry?: unknown;
   boundaryNotes?: string;
   zoning?: string;
   permittedUse?: string;
