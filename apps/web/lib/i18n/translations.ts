@@ -19,6 +19,7 @@ export type TranslationKey =
   | 'sidebar.my_home'
   | 'sidebar.maintenance'
   | 'sidebar.messages'
+  | 'sidebar.automations'
   | 'sidebar.documents'
   | 'sidebar.legal_resources'
   | 'sidebar.roommates'
@@ -116,6 +117,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.my_home': 'My Home',
     'sidebar.maintenance': 'Maintenance',
     'sidebar.messages': 'Messages',
+    'sidebar.automations': 'Automations',
     'sidebar.documents': 'Documents',
     'sidebar.legal_resources': 'Legal Resources',
     'sidebar.roommates': 'Roommates',
@@ -212,6 +214,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.my_home': 'My House',
     'sidebar.maintenance': 'Repair Matter',
     'sidebar.messages': 'Message Dem',
+    'sidebar.automations': 'Auto Message',
     'sidebar.documents': 'Paper Dem',
     'sidebar.legal_resources': 'Law Matter',
     'sidebar.roommates': 'House People',
