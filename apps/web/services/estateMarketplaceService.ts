@@ -190,6 +190,20 @@ export const estateMarketplaceService = {
     );
   },
 
+  /** Change a listing's headline, price or dates. Only what is sent changes. */
+  updateListing(
+    estateId: string,
+    listingId: string,
+    changes: { listingTitle?: string; price?: number; availableFrom?: string },
+  ): Promise<ApiResponse<EstateListing>> {
+    return safeCall(() =>
+      authFetch(`/estates/${estateId}/listings/${listingId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(changes),
+      }),
+    );
+  },
+
   setListingStatus(
     estateId: string,
     listingId: string,

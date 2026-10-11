@@ -9,6 +9,7 @@ import {
   Home,
   ImagePlus,
   Loader2,
+  Pencil,
   Plus,
   Search,
   Send,
@@ -383,6 +384,92 @@ const NewListingPanel = ({
   );
 };
 
+/** Change a listing's headline, price or start date without closing it. */
+const EditListingPanel = ({
+  estateId,
+  listing,
+  onDone,
+}: {
+  estateId: string;
+  listing: EstateListing;
+  onDone: () => void;
+}) => {
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState(listing.listingTitle ?? '');
+  const [price, setPrice] = useState<number | string>(listing.price);
+  const [availableFrom, setAvailableFrom] = useState(
+    listing.availableFrom ? listing.availableFrom.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        estateMarketplaceService.updateListing(estateId, listing.id, {
+          ...(title.trim() && title.trim() !== (listing.listingTitle ?? '')
+            ? { listingTitle: title.trim() }
+            : {}),
+          ...(Number(price) !== listing.price ? { price: Number(price) } : {}),
+          ...(availableFrom !== listing.availableFrom?.slice(0, 10) ? { availableFrom } : {}),
+        })
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: estateKeys.estateListings(estateId) });
+      onDone();
+    },
+    onError: (err: Error) => setError(err.message || 'That listing could not be changed.'),
+  });
+
+  return (
+    <div className="rounded-xl border border-border p-3 space-y-3">
+      <div>
+        <label className="text-sm font-medium text-foreground" htmlFor={`edit-title-${listing.id}`}>
+          Headline
+        </label>
+        <Input
+          id={`edit-title-${listing.id}`}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={200}
+        />
+      </div>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm font-medium text-foreground" htmlFor={`edit-price-${listing.id}`}>
+            {listing.listingType === 'SHORTLET' ? 'Nightly rate' : 'Asking price'}
+          </label>
+          <NumberInput
+            id={`edit-price-${listing.id}`}
+            value={price}
+            onValueChange={(value) => setPrice(value)}
+          />
+        </div>
+        <div>
+          <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
+          <DatePicker value={availableFrom} onChange={setAvailableFrom} />
+        </div>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <div className="flex gap-2">
+        <Button
+          variant="primary"
+          disabled={Number(price) <= 0 || save.isPending}
+          onClick={() => {
+            setError(null);
+            save.mutate();
+          }}
+        >
+          {save.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          Save changes
+        </Button>
+        <Button variant="ghost" onClick={onDone}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export default function EstateMarketplacePage() {
   const { estate } = useSelectedEstate();
   const estateId = estate?.id ?? '';
@@ -394,6 +481,7 @@ export default function EstateMarketplacePage() {
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   /** Which listing's photo panel is open. One at a time: the list is long. */
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
+  const [editListingId, setEditListingId] = useState<string | null>(null);
 
   const inventory = useQuery({
     queryKey: estateKeys.inventory(estateId),
@@ -652,6 +740,17 @@ export default function EstateMarketplacePage() {
                         <ImagePlus className="w-4 h-4" />
                         {listing.media?.length ? `Photos (${listing.media.length})` : 'Photos'}
                       </Button>
+                      {listing.status !== 'CLOSED' && (
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            setEditListingId((current) => (current === listing.id ? null : listing.id))
+                          }
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      )}
                       {listing.status === 'PUBLISHED' ? (
                         <Button
                           variant="ghost"
@@ -673,6 +772,13 @@ export default function EstateMarketplacePage() {
                   </div>
                   {mediaListingId === listing.id && (
                     <ListingMediaPanel estateId={estateId} listing={listing} />
+                  )}
+                  {editListingId === listing.id && (
+                    <EditListingPanel
+                      estateId={estateId}
+                      listing={listing}
+                      onDone={() => setEditListingId(null)}
+                    />
                   )}
                 </div>
               ))
