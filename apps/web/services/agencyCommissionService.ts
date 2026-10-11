@@ -17,6 +17,25 @@ export interface AgencyCommission {
   amount: number;
   status: string;
   earnedAt: string;
+  attributedUserId: string | null;
+  attributedName: string | null;
+  agentShareAmount: number | null;
+}
+
+export interface AgencyTeamMember {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  role: string;
+  splitPct: number;
+  deals: number;
+  commissionTotal: number;
+  shareTotal: number;
+}
+
+export interface AgencyTeam {
+  members: AgencyTeamMember[];
+  unassigned: { deals: number; commissionTotal: number };
 }
 
 export interface AgencyCommissionSummary {
@@ -92,6 +111,32 @@ export const agencyCommissionService = {
   requestPayout(): Promise<ApiResponse<AgencyPayout>> {
     return safeCall(() =>
       authFetch<AgencyPayout>('/agency/commissions/payouts/request', { method: 'POST' })
+    );
+  },
+
+  team(): Promise<ApiResponse<AgencyTeam>> {
+    return safeCall(() => authFetch<AgencyTeam>('/agency/commissions/team'));
+  },
+
+  setAgentSplit(userId: string, splitPct: number): Promise<ApiResponse<AgencyTeam>> {
+    return safeCall(() =>
+      authFetch<AgencyTeam>(`/agency/commissions/team/${userId}/split`, {
+        method: 'PUT',
+        body: JSON.stringify({ splitPct }),
+      })
+    );
+  },
+
+  assignAgent(
+    commissionId: string,
+    agentUserId: string | null,
+    splitPct?: number
+  ): Promise<ApiResponse<unknown>> {
+    return safeCall(() =>
+      authFetch<unknown>(`/agency/commissions/${commissionId}/agent`, {
+        method: 'PUT',
+        body: JSON.stringify({ agentUserId, splitPct }),
+      })
     );
   },
 };
