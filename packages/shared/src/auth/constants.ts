@@ -351,6 +351,7 @@ export const ROUTES = {
   LANDLORD_REFERRALS: '/landlord/referrals',
   LANDLORD_DOCUMENTS: '/landlord/documents',
   LANDLORD_MESSAGES: '/landlord/messages',
+  LANDLORD_AUTOMATIONS: '/landlord/automations',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SHORTLETS: '/landlord/shortlets',
   LANDLORD_SETTINGS: '/landlord/settings',

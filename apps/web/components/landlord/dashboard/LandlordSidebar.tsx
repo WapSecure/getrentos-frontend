@@ -39,7 +39,11 @@ import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 /** Nav items whose destination page is gated behind the Pro plan (see Batch 7b). */
-const PRO_GATED_ROUTES = new Set<string>([ROUTES.LANDLORD_MICROSITE, ROUTES.LANDLORD_FINANCIALS]);
+const PRO_GATED_ROUTES = new Set<string>([
+  ROUTES.LANDLORD_MICROSITE,
+  ROUTES.LANDLORD_FINANCIALS,
+  ROUTES.LANDLORD_AUTOMATIONS,
+]);
 
 interface NavItem {
   labelKey: TranslationKey;
@@ -103,6 +107,7 @@ export const navGroups = [
     label: 'Communication and account',
     items: [
       item('sidebar.messages', ROUTES.LANDLORD_MESSAGES, MessageCircle),
+      item('sidebar.automations', ROUTES.LANDLORD_AUTOMATIONS, Megaphone),
       item('sidebar.realtor_access', ROUTES.LANDLORD_REALTORS, UserRoundCheck),
       item('sidebar.reviews', ROUTES.LANDLORD_REVIEWS, Star),
       item('sidebar.referrals', ROUTES.LANDLORD_REFERRALS, Gift),
