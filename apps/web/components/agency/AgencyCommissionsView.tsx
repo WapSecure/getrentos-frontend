@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   NumberInput,
+  Select,
   StatCard,
   PageLoadingState,
   PageErrorState,
@@ -18,6 +19,7 @@ import {
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { AgencyPayoutSection } from './AgencyPayoutSection';
+import { AgencyTeamSection } from './AgencyTeamSection';
 import {
   agencyCommissionService,
   AGENCY_COMMISSION_TYPE_LABELS,
@@ -64,6 +66,48 @@ export function AgencyCommissionsView() {
     onError: (e: Error) =>
       setToast({ message: e.message || 'Could not update the rate card.', variant: 'error' }),
   });
+
+  const teamQuery = useQuery({
+    queryKey: ['agency', 'team'],
+    queryFn: () => unwrap(agencyCommissionService.team()),
+  });
+
+  const refreshCommissionsAndTeam = () => {
+    queryClient.invalidateQueries({ queryKey });
+    queryClient.invalidateQueries({ queryKey: ['agency', 'team'] });
+  };
+
+  const splitMutation = useMutation({
+    mutationFn: ({ userId, splitPct }: { userId: string; splitPct: number }) =>
+      unwrap(agencyCommissionService.setAgentSplit(userId, splitPct)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agency', 'team'] });
+      setToast({ message: 'Split updated.', variant: 'success' });
+    },
+    onError: (e: Error) =>
+      setToast({ message: e.message || 'Could not update the split.', variant: 'error' }),
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: ({
+      commissionId,
+      agentUserId,
+    }: {
+      commissionId: string;
+      agentUserId: string | null;
+    }) => unwrap(agencyCommissionService.assignAgent(commissionId, agentUserId)),
+    onSuccess: () => refreshCommissionsAndTeam(),
+    onError: (e: Error) =>
+      setToast({ message: e.message || 'Could not credit the agent.', variant: 'error' }),
+  });
+
+  const agentOptions = [
+    { value: '', label: 'Unassigned' },
+    ...(teamQuery.data?.members ?? []).map((m) => ({
+      value: m.userId,
+      label: m.name ?? m.email ?? 'Agent',
+    })),
+  ];
 
   if (isLoading) return <PageLoadingState />;
   if (isError || !data)
@@ -214,6 +258,7 @@ export function AgencyCommissionsView() {
                   <th className="px-4 py-2.5 text-right font-medium">Rent</th>
                   <th className="px-4 py-2.5 text-right font-medium">Rate</th>
                   <th className="px-4 py-2.5 text-right font-medium">Commission</th>
+                  <th className="px-4 py-2.5 font-medium">Agent</th>
                   <th className="px-4 py-2.5 font-medium">Status</th>
                 </tr>
               </thead>
@@ -238,6 +283,22 @@ export function AgencyCommissionsView() {
                       {formatCurrency(c.amount)}
                     </td>
                     <td className="px-4 py-2.5">
+                      <div className="w-40">
+                        <Select
+                          value={c.attributedUserId ?? ''}
+                          onValueChange={(v) =>
+                            assignMutation.mutate({ commissionId: c.id, agentUserId: v || null })
+                          }
+                          options={agentOptions}
+                        />
+                      </div>
+                      {c.agentShareAmount != null && (
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                          share {formatCurrency(c.agentShareAmount)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5">
                       <Badge variant={STATUS_VARIANT[c.status] ?? 'neutral'}>
                         {c.status.toLowerCase()}
                       </Badge>
@@ -249,6 +310,13 @@ export function AgencyCommissionsView() {
           </div>
         )}
       </div>
+
+      <AgencyTeamSection
+        team={teamQuery.data}
+        isLoading={teamQuery.isLoading}
+        onSetSplit={(userId, splitPct) => splitMutation.mutate({ userId, splitPct })}
+        savingUserId={splitMutation.isPending ? splitMutation.variables?.userId : null}
+      />
 
       <AgencyPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
 
