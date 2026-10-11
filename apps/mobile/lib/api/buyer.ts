@@ -44,6 +44,8 @@ export interface BuyerListing {
   videoTourUrl?: string;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
 }
 
 export interface Paginated<T> {

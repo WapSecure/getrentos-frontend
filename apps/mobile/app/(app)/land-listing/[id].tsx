@@ -236,7 +236,7 @@ export default function LandListingDetail() {
                   markers={[
                     { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
                   ]}
-                  variant="location"
+                  variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
                   zoom={14}
                   height={200}
                 />

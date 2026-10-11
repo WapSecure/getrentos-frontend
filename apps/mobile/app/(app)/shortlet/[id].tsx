@@ -306,8 +306,9 @@ export default function ShortletDetail() {
                     markers={[
                       { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
                     ]}
-                    variant="location"
-                    zoom={15}
+                    // The area of the stay; the address comes with the booking.
+                    variant="area"
+                    zoom={14}
                     height={200}
                   />
                 </Section>

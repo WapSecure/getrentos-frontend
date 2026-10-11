@@ -15,6 +15,11 @@ export interface MapMarker {
   priceLabel?: string;
   imageUrl?: string;
   href?: string;
+  /**
+   * The location is only approximate (an unverified property): draw a shaded
+   * area that is sure to contain it, not a pin on a door.
+   */
+  approximate?: boolean;
 }
 
 interface PropertyMapProps {
@@ -131,6 +136,19 @@ export const PropertyMap = ({
     markersRef.current = [];
 
     withCoords.forEach((markerData) => {
+      if (markerData.approximate) {
+        // The API moves such a point up to 500 m, so 600 m always contains it.
+        const area = L.circle([markerData.latitude, markerData.longitude], {
+          radius: 600,
+          color: '#0b6e4f',
+          weight: 2,
+          fillColor: '#0b6e4f',
+          fillOpacity: 0.18,
+        }).addTo(map);
+        area.bindTooltip('Approximate area: the exact spot is shown once the property is verified');
+        markersRef.current.push(area);
+        return;
+      }
       const icon = L.divIcon({
         className: '',
         html: `<div style="transform:rotate(0deg)">${pinIconHtml(markerData.priceLabel)}</div>`,

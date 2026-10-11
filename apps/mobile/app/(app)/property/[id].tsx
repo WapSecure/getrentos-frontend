@@ -286,24 +286,35 @@ export default function PropertyDetail() {
                     <Text variant="bodyStrong" accessibilityRole="header">
                       Location
                     </Text>
-                    <Pressable
-                      onPress={() =>
-                        openDirections(p.latitude as number, p.longitude as number, p.title)
-                      }
-                      accessibilityRole="button"
-                      accessibilityLabel="Get directions"
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}
-                      hitSlop={8}
-                    >
-                      <Navigation size={13} color={colors.primary} />
-                      <Text variant="callout" style={{ color: colors.primary, fontWeight: '600' }}>
-                        Directions
-                      </Text>
-                    </Pressable>
+                    {/* Directions to an approximate point would lead to the wrong street. */}
+                    {p.locationPrecision !== 'approximate' ? (
+                      <Pressable
+                        onPress={() =>
+                          openDirections(p.latitude as number, p.longitude as number, p.title)
+                        }
+                        accessibilityRole="button"
+                        accessibilityLabel="Get directions"
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 4,
+                          minHeight: 44,
+                        }}
+                        hitSlop={8}
+                      >
+                        <Navigation size={13} color={colors.primary} />
+                        <Text
+                          variant="callout"
+                          style={{ color: colors.primary, fontWeight: '600' }}
+                        >
+                          Directions
+                        </Text>
+                      </Pressable>
+                    ) : null}
                   </View>
                   <PropertyMapView
                     markers={[{ id: p.id, latitude: p.latitude, longitude: p.longitude }]}
-                    variant="location"
+                    variant={p.locationPrecision === 'approximate' ? 'area' : 'location'}
                     zoom={15}
                     height={200}
                   />
