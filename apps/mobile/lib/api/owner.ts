@@ -288,6 +288,10 @@ export interface OwnerProfile {
 }
 
 export interface OwnerNotification {
+  /** An in-app path the notification is about. */
+  actionUrl?: string;
+  /** Set on a message: the conversation it is in. */
+  conversationId?: string;
   id: string;
   /** Lower-cased NotificationType, e.g. "offer_received". */
   type: string;
