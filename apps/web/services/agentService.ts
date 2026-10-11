@@ -9,7 +9,7 @@ import type {
   AgentReview,
   OfflineSyncItem,
 } from '@/types/agent';
-import type { AgentDocument } from '@/types/agent';
+import type { AgentDocument, InspectionPhoto } from '@/types/agent';
 import type { TrustProfile } from '@/types/trust-score';
 
 export interface AgentDashboard {
@@ -44,6 +44,7 @@ interface AgentInspectionApi {
   acknowledgedAt: string | null;
   task: { id: string; status: string };
   property: { title: string; address: string; city: string; state: string };
+  photos?: { id: string; room: string; url: string; name: string; caption: string | null }[];
 }
 
 interface AgentVerificationApi {
@@ -150,6 +151,13 @@ function mapAgentInspection(inspection: AgentInspectionApi): PropertyInspection 
     type: lower(inspection.type),
     rooms: inspection.rooms,
     overallCondition: inspection.overallCondition || undefined,
+    photos: (inspection.photos ?? []).map((p) => ({
+      id: p.id,
+      room: p.room,
+      url: p.url,
+      name: p.name,
+      caption: p.caption,
+    })),
     syncStatus: 'synced',
     acknowledgedAt: inspection.acknowledgedAt || undefined,
   };
@@ -318,6 +326,31 @@ export const agentService = {
     overallCondition?: string;
   }) =>
     safeCall(() => authFetch('/agent/inspections', { method: 'POST', body: JSON.stringify(data) })),
+  getInspection: async (taskId: string): Promise<ApiResponse<PropertyInspection | null>> => {
+    const response = await safeCall(() =>
+      authFetch<AgentInspectionApi | null>(`/agent/inspections/${taskId}`)
+    );
+    if (response.success) {
+      return { ...response, data: response.data ? mapAgentInspection(response.data) : null };
+    }
+    return response as ApiResponse<PropertyInspection | null>;
+  },
+  addInspectionPhoto: (
+    taskId: string,
+    file: File,
+    room: string,
+    caption?: string
+  ): Promise<ApiResponse<InspectionPhoto>> => {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('room', room);
+    if (caption) form.append('caption', caption);
+    return safeCall(() =>
+      authFetch(`/agent/inspections/${taskId}/photos`, { method: 'POST', body: form })
+    );
+  },
+  removeInspectionPhoto: (photoId: string): Promise<ApiResponse<void>> =>
+    safeCall(() => authFetch(`/agent/inspections/photos/${photoId}`, { method: 'DELETE' })),
   listVerifications: async (
     options: AgentVerificationListOptions = {}
   ): Promise<ApiResponse<Paginated<VerificationVisit>>> => {

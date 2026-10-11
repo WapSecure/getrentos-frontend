@@ -74,12 +74,35 @@ export const InspectionDetailModal = ({
                     </span>
                   </div>
                   {room.notes && <p className="text-xs text-muted-foreground mt-1">{room.notes}</p>}
-                  {room.photoCount > 0 && (
-                    <p className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
-                      <Camera className="w-3 h-3" />
-                      {room.photoCount} photo{room.photoCount === 1 ? '' : 's'}
-                    </p>
-                  )}
+                  {(() => {
+                    const roomPhotos = (inspection.photos ?? []).filter(
+                      (p) => p.room === room.room
+                    );
+                    if (roomPhotos.length > 0) {
+                      return (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {roomPhotos.map((photo) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              key={photo.id}
+                              src={photo.url}
+                              alt={photo.name}
+                              className="h-16 w-16 rounded-md object-cover"
+                            />
+                          ))}
+                        </div>
+                      );
+                    }
+                    if (room.photoCount > 0) {
+                      return (
+                        <p className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
+                          <Camera className="w-3 h-3" />
+                          {room.photoCount} photo{room.photoCount === 1 ? '' : 's'}
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               ))}
             </div>
