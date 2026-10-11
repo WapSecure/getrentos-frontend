@@ -111,6 +111,8 @@ export type PreventiveMaintenancePlan = {
   frequencyDays: number;
   nextDueAt: string;
   lastCompletedAt?: string | null;
+  /** When the scheduler last auto-raised a work order from this plan. */
+  lastGeneratedAt?: string | null;
   status: PreventivePlanStatus;
   assignedVendorId?: string | null;
   createdAt: string;

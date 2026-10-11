@@ -233,7 +233,8 @@ export function PreventiveMaintenancePlans({
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Schedule recurring care, keep the right vendor accountable, and preserve the service
-            history of every home.
+            history of every home. When a plan falls due, a work order is raised automatically — and
+            assigned to its vendor, if one is set.
           </p>
         </div>
         <Button
@@ -332,6 +333,11 @@ export function PreventiveMaintenancePlans({
                         {plan.lastCompletedAt && (
                           <span className="rounded-full bg-secondary px-2.5 py-1">
                             Last completed {formatDate(plan.lastCompletedAt)}
+                          </span>
+                        )}
+                        {plan.lastGeneratedAt && (
+                          <span className="rounded-full bg-secondary px-2.5 py-1">
+                            Last auto-raised {formatDate(plan.lastGeneratedAt)}
                           </span>
                         )}
                       </div>
