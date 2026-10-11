@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import type { VideoStream } from '@getrentos/shared';
 
 /** One rental listing as returned by `/renter/listings`. Mirrors `RenterPropertyDto`. */
 export interface RenterProperty {
@@ -31,6 +32,8 @@ export interface RenterProperty {
   images?: string[];
   /** Signed URL for the video tour. */
   videoTourUrl?: string;
+  /** The video tour as an adaptive stream, once encoded; preferred over the file. */
+  videoTourStream?: VideoStream;
   description?: string;
   amenities?: string[];
   landlordId?: string;

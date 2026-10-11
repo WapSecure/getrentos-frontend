@@ -285,6 +285,7 @@ export default function BuyerListingDetail() {
               onClose={() => setTouring(false)}
               title={listing.title}
               videoUrl={listing.videoTourUrl}
+              videoStream={listing.videoTourStream}
               onExpired={() => void query.refetch()}
             />
           ) : null}

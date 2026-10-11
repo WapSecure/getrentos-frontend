@@ -453,6 +453,7 @@ export default function PropertyDetail() {
           onClose={() => setTouring(false)}
           title={p.title}
           videoUrl={p.videoTourUrl}
+          videoStream={p.videoTourStream}
           // A signed link that has lapsed: fetch the listing for a fresh one.
           onExpired={() => void query.refetch()}
         />

@@ -13,6 +13,16 @@ export type VideoSource =
 
 export type TourSource = { kind: 'tour'; host: string; embedUrl: string };
 
+/**
+ * An uploaded video re-encoded for streaming (Mux), when the API has one.
+ * Phones play the adaptive stream; anything that cannot plays the original.
+ */
+export interface VideoStream {
+  hlsUrl: string;
+  posterUrl: string;
+  durationSeconds?: number;
+}
+
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
 
 function parse(raw: string): URL | null {
@@ -71,7 +81,13 @@ export function videoSource(url: string | null | undefined): VideoSource | null 
 }
 
 /** 360° / virtual-tour providers whose pages may be framed. */
-export const TOUR_HOSTS = ['matterport.com', 'kuula.co', 'cloudpano.com', 'theasys.io', 'momento360.com'];
+export const TOUR_HOSTS = [
+  'matterport.com',
+  'kuula.co',
+  'cloudpano.com',
+  'theasys.io',
+  'momento360.com',
+];
 
 /** A 360° tour link as an embeddable page; null for an unknown or unsafe link. */
 export function tourSource(raw: string | null | undefined): TourSource | null {

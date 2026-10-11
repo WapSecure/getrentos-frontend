@@ -267,10 +267,7 @@ export default function ShortletDetail() {
               ) : null}
 
               {listing.videoUrl || listing.tourUrl ? (
-                <Pressable
-                  onPress={() => setTouring(true)}
-                  accessibilityRole="button"
-                >
+                <Pressable onPress={() => setTouring(true)} accessibilityRole="button">
                   <Card elevated>
                     <InfoRow
                       icon={PlayCircle}
@@ -513,6 +510,7 @@ export default function ShortletDetail() {
             onClose={() => setTouring(false)}
             title={listing.title}
             videoUrl={listing.videoUrl}
+            videoStream={listing.videoStream}
             tourUrl={listing.tourUrl}
             onExpired={() => void query.refetch()}
           />

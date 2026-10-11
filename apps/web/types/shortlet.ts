@@ -51,6 +51,8 @@ export interface ShortletListing {
   images: string[];
   videoKey?: string;
   videoUrl?: string;
+  /** The uploaded video re-encoded for streaming, once ready (its poster is used here). */
+  videoStream?: { hlsUrl: string; posterUrl: string; durationSeconds?: number };
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;
