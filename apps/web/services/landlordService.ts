@@ -48,6 +48,7 @@ import type {
 } from '@/types/tenancy-notice';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
+import type { VideoCallJoin } from '@getrentos/shared';
 
 export interface RentCollectionStats {
   totalCollected: number;
@@ -1249,6 +1250,13 @@ export const landlordService = {
         method: 'PATCH',
         body: JSON.stringify({ scheduledAt }),
       })
+    );
+  },
+
+  /** The host's link into a confirmed video viewing, from 15 minutes before it. */
+  async joinVideoCall(id: string): Promise<ApiResponse<VideoCallJoin>> {
+    return safeCall(() =>
+      authFetch<VideoCallJoin>(`/landlord/viewing-requests/${id}/video-call`, { method: 'POST' })
     );
   },
 

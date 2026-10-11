@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { CalendarCheck, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
@@ -35,11 +35,24 @@ export const VirtualTourViewerModal = ({
   const [confirmedTime, setConfirmedTime] = useState<string | null>(null);
 
   const host = hostName ?? 'the landlord';
+  // Until the video service is set up, the same flow asks for a visit instead.
+  const videoCalls = useQuery({
+    queryKey: ['video-calls', 'availability'],
+    queryFn: () => unwrap(renterService.videoCallsAvailable()),
+    staleTime: 5 * 60 * 1000,
+  });
+  const live = videoCalls.data?.available === true;
 
   const requestViewing = useMutation({
     mutationFn: (requestedFor: string) =>
       unwrap(
-        renterService.requestViewing(propertyId!, undefined, new Date(requestedFor).toISOString())
+        renterService.requestViewing(
+          propertyId!,
+          undefined,
+          new Date(requestedFor).toISOString(),
+          undefined,
+          live ? 'VIDEO' : 'IN_PERSON'
+        )
       ),
     onSuccess: () => {
       setConfirmedTime(preferredTime);
@@ -66,7 +79,7 @@ export const VirtualTourViewerModal = ({
           <DialogTitle className="font-semibold text-foreground">{propertyTitle}</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {mode === 'tour' && (videoTourUrl ? 'Walkthrough video' : 'No video tour yet')}
-            {mode === 'booking' && 'Book a live video viewing'}
+            {mode === 'booking' && (live ? 'Book a live video viewing' : 'Request a viewing')}
             {mode === 'confirmed' && 'Viewing requested'}
           </DialogDescription>
         </div>
@@ -88,7 +101,9 @@ export const VirtualTourViewerModal = ({
                   This property has no video tour yet
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Ask {host} for a live video viewing and they can walk you through it.
+                  {live
+                    ? `Ask ${host} for a live video viewing and they can walk you through it.`
+                    : `Ask ${host} for a viewing to see it in person.`}
                 </p>
               </div>
             )}
@@ -100,7 +115,7 @@ export const VirtualTourViewerModal = ({
               onClick={() => setMode('booking')}
             >
               <Video className="w-4 h-4" />
-              Book a Live Video Viewing
+              {live ? 'Book a Live Video Viewing' : 'Request a Viewing'}
             </Button>
           </div>
         )}
@@ -108,7 +123,9 @@ export const VirtualTourViewerModal = ({
         {mode === 'booking' && (
           <div className="p-4 space-y-3">
             <p className="text-sm text-muted-foreground">
-              {host} will confirm a time to walk you through the property over video.
+              {live
+                ? `${host} will confirm a time to walk you through the property on a video call. You join from your viewing requests.`
+                : `${host} will confirm a time for you to visit the property.`}
             </p>
 
             <DateTimeField

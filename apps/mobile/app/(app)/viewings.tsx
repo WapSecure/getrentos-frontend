@@ -11,8 +11,9 @@ import {
   VIEWING_STATUS_TONE,
   type ViewingRequest,
 } from '@/lib/api/viewings';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { VideoCallAction } from '@/components/viewings/VideoCallAction';
 
 export default function Viewings() {
   const { colors, spacing, radius } = useTheme();
@@ -88,10 +89,12 @@ function ViewingRow({ request: r }: { request: ViewingRequest }) {
         <Badge label={VIEWING_STATUS_LABEL[r.status]} tone={VIEWING_STATUS_TONE[r.status]} />
       </View>
       <Text variant="caption" color="mutedForeground">
+        {r.mode === 'video' ? 'Live video viewing · ' : ''}
         {r.status === 'confirmed' && r.scheduledAt
-          ? `Scheduled for ${formatDate(r.scheduledAt, 'short')}`
+          ? `Scheduled for ${formatDate(r.scheduledAt, 'short')}, ${formatTime(r.scheduledAt)}`
           : `Requested ${formatDate(r.requestedAt, 'short')}`}
       </Text>
+      <VideoCallAction viewing={r} join={() => viewingsApi.joinVideoCall(r.id)} />
       {r.notes ? (
         <Text variant="callout" color="mutedForeground" numberOfLines={2}>
           “{r.notes}”

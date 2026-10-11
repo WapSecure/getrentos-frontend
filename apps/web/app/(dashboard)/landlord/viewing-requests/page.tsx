@@ -16,6 +16,7 @@ import {
   Pagination,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
+import { VideoCallButton } from '@/components/shared/VideoCallButton';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { viewingRequestStatusBadges } from '@/lib/statusBadge';
@@ -129,7 +130,10 @@ export default function LandlordViewingRequestsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="font-semibold text-foreground">{viewing.renterName}</h2>
-                      <p className="text-sm text-muted-foreground">{viewing.propertyName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {viewing.propertyName}
+                        {viewing.mode === 'video' && ' · Video call'}
+                      </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Requested {formatWhen(viewing.requestedAt)}
                         {viewing.preferredAt && <> · asked for {formatWhen(viewing.preferredAt)}</>}
@@ -175,6 +179,13 @@ export default function LandlordViewingRequestsPage() {
                       Confirmed for {formatWhen(viewing.scheduledAt)}
                     </p>
                   )}
+                  <div className="mt-2">
+                    <VideoCallButton
+                      viewing={viewing}
+                      label="Start video call"
+                      join={() => landlordService.joinVideoCall(viewing.id)}
+                    />
+                  </div>
                 </li>
               );
             })}

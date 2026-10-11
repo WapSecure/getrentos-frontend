@@ -4,3 +4,4 @@ export * from './planTier';
 export * from './videoSource';
 export * from './mapTiles';
 export * from './parcelBoundary';
+export * from './videoCall';
