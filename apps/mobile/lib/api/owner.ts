@@ -61,6 +61,9 @@ export interface OwnerProperty {
   purchaseDate?: string;
   coverImageUrl?: string;
   galleryImageUrls?: string[];
+  videoTourKey?: string;
+  /** Signed link to the video tour, valid for a few hours. */
+  videoTourUrl?: string;
   hasActiveSaleListing: boolean;
   createdAt: string;
 }
@@ -406,6 +409,27 @@ export const ownerApi = {
   property: (id: string) => apiFetch<OwnerProperty>(`/owner/properties/${id}`),
   createProperty: (input: CreateOwnerPropertyInput) =>
     apiFetch<OwnerProperty>('/owner/properties', { method: 'POST', body: input }),
+  /** Attaches (key) or removes (null) the property's video tour. */
+  setVideoTour: (id: string, videoTourKey: string | null) =>
+    apiFetch<OwnerProperty>(`/owner/properties/${id}`, {
+      method: 'PATCH',
+      body: { videoTourKey },
+    }),
+  /** Stages a photo or video; it becomes the property's once attached. */
+  uploadMedia: (file: PickedFile, kind: 'image' | 'video') => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('kind', kind);
+    return apiUpload<{ key: string; kind: 'image' | 'video' }>(
+      '/owner/properties/media/upload',
+      form
+    );
+  },
+  removeMedia: (key: string) =>
+    apiFetch<{ deleted: boolean }>('/owner/properties/media/upload', {
+      method: 'DELETE',
+      body: { key },
+    }),
 
   /** Starts ownership verification for a property with one proof document. */
   submitOwnershipProof: (

@@ -4,10 +4,10 @@ import { LegacyInput, NumberInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, type ReactNode } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Upload, Image as ImageIcon, Video } from 'lucide-react';
+import { X, Check, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
 import { Button, CurrencyInput } from '@getrentos/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
@@ -48,11 +48,26 @@ interface FormState {
   propertySize: string;
   bedrooms: string;
   bathrooms: string;
-  coverImageName: string;
-  galleryCount: number;
-  hasVideoTour: boolean;
   features: string[];
 }
+
+/** A file staged on the server, waiting to be attached to the property. */
+interface StagedFile {
+  key: string;
+  name: string;
+}
+
+interface StagedMedia {
+  cover: StagedFile | null;
+  gallery: StagedFile[];
+  video: StagedFile | null;
+}
+
+const NO_MEDIA: StagedMedia = { cover: null, gallery: [], video: null };
+
+/** The server's ceilings for property media. */
+const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
 
 const initialFormState: FormState = {
   propertyId: '',
@@ -62,9 +77,6 @@ const initialFormState: FormState = {
   propertySize: '',
   bedrooms: '',
   bathrooms: '',
-  coverImageName: '',
-  galleryCount: 0,
-  hasVideoTour: false,
   features: [],
 };
 
@@ -78,6 +90,11 @@ export const CreateSaleListingModal = ({
   const [propertySearch, setPropertySearch] = useState('');
   const [propertyPage, setPropertyPage] = useState(1);
   const [selectedProperty, setSelectedProperty] = useState<OwnerProperty | null>(null);
+  const [media, setMedia] = useState<StagedMedia>(NO_MEDIA);
+  const [uploading, setUploading] = useState<'cover' | 'gallery' | 'video' | null>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: propertiesPage, isLoading: isPropertiesLoading } = useQuery({
     queryKey: [
@@ -107,6 +124,51 @@ export const CreateSaleListingModal = ({
       ? selectedProperty
       : (verifiedProperties.find((property) => property.id === form.propertyId) ?? null);
 
+  const existingCover = propertyForForm?.coverImageKey;
+  // The API lists the cover first among the gallery keys; the gallery proper is the rest.
+  const existingGallery = (propertyForForm?.galleryImageKeys ?? []).filter(
+    (key) => key !== existingCover
+  );
+
+  const tooBig = (file: File, kind: 'image' | 'video') =>
+    file.size > (kind === 'image' ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES)
+      ? `${file.name} is over ${kind === 'image' ? '15' : '150'} MB.`
+      : null;
+
+  const stage = async (slot: 'cover' | 'video', file: File | undefined) => {
+    if (!file) return;
+    const kind = slot === 'video' ? 'video' : 'image';
+    const problem = tooBig(file, kind);
+    setMediaError(problem);
+    if (problem) return;
+    setUploading(slot);
+    try {
+      const { key } = await unwrap(ownerService.uploadPropertyMedia(file, kind));
+      setMedia((prev) => ({ ...prev, [slot]: { key, name: file.name } }));
+    } catch (reason) {
+      setMediaError(reason instanceof Error ? reason.message : `Unable to upload ${file.name}.`);
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const stageGallery = async (files: File[]) => {
+    const problem = files.map((file) => tooBig(file, 'image')).find(Boolean) ?? null;
+    setMediaError(problem);
+    if (problem || !files.length) return;
+    setUploading('gallery');
+    try {
+      for (const file of files) {
+        const { key } = await unwrap(ownerService.uploadPropertyMedia(file, 'image'));
+        setMedia((prev) => ({ ...prev, gallery: [...prev.gallery, { key, name: file.name }] }));
+      }
+    } catch (reason) {
+      setMediaError(reason instanceof Error ? reason.message : 'Unable to upload those images.');
+    } finally {
+      setUploading(null);
+    }
+  };
+
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -126,12 +188,14 @@ export const CreateSaleListingModal = ({
     setPropertySearch('');
     setPropertyPage(1);
     setSelectedProperty(null);
+    setMedia(NO_MEDIA);
+    setMediaError(null);
     onClose();
   };
 
   const canProceedFromStep1 =
     form.propertyId && form.listingTitle.trim() && Number(form.askingPrice) > 0;
-  const canProceedFromStep2 = form.coverImageName.trim().length > 0;
+  const canProceedFromStep2 = (!!media.cover || !!existingCover) && uploading === null;
 
   const buildListing = (status: SaleListing['status']): Omit<SaleListing, 'id' | 'createdAt'> => ({
     propertyId: form.propertyId,
@@ -147,7 +211,32 @@ export const CreateSaleListingModal = ({
     status,
   });
 
-  const handleCreate = (status: SaleListing['status']) => {
+  const handleCreate = async (status: SaleListing['status']) => {
+    const { cover, gallery, video } = media;
+    if (cover || gallery.length || video) {
+      setCreating(true);
+      setMediaError(null);
+      try {
+        await unwrap(
+          ownerService.updateProperty(form.propertyId, {
+            ...(cover ? { coverImageKey: cover.key } : {}),
+            ...(gallery.length
+              ? { galleryImageKeys: [...existingGallery, ...gallery.map((file) => file.key)] }
+              : {}),
+            ...(video ? { videoTourKey: video.key } : {}),
+          })
+        );
+        void queryClient.invalidateQueries({ queryKey: ownerKeys.properties });
+      } catch (reason) {
+        setMediaError(
+          reason instanceof Error ? reason.message : 'Unable to save the photos to the property.'
+        );
+        setStep(1);
+        return;
+      } finally {
+        setCreating(false);
+      }
+    }
     onCreate(buildListing(status), status === 'published');
     handleClose();
   };
@@ -309,37 +398,70 @@ export const CreateSaleListingModal = ({
 
               {step === 1 && (
                 <>
-                  <UploadField
-                    label="Cover Image"
-                    required
-                    fileName={form.coverImageName}
-                    onSelect={(name) => update('coverImageName', name)}
-                  />
+                  <p className="text-xs text-muted-foreground">
+                    Photos and the video tour belong to the property, so every listing of it shows
+                    them. Anything you add here is saved to the property when you create the
+                    listing.
+                  </p>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Cover Image {!existingCover && <span className="text-red-500">*</span>}
+                    </label>
+                    <MediaPicker
+                      accept="image/*"
+                      icon={<ImageIcon className="w-4 h-4 text-gray-400 shrink-0" />}
+                      busy={uploading === 'cover'}
+                      label={
+                        media.cover
+                          ? media.cover.name
+                          : existingCover
+                            ? 'Using the property’s cover: click to replace'
+                            : 'Click to upload'
+                      }
+                      done={!!media.cover || !!existingCover}
+                      onFiles={([file]) => void stage('cover', file)}
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Gallery Images <span className="text-gray-400 font-normal">(optional)</span>
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => update('galleryCount', form.galleryCount + 1)}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                    >
-                      <Upload className="w-4 h-4" />
-                      {form.galleryCount > 0
-                        ? `${form.galleryCount} image(s) added: add more`
-                        : 'Add gallery images'}
-                    </button>
-                  </div>
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={form.hasVideoTour}
-                      onChange={(e) => update('hasVideoTour', e.target.checked)}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    <MediaPicker
+                      accept="image/*"
+                      multiple
+                      icon={<Upload className="w-4 h-4 text-gray-400 shrink-0" />}
+                      busy={uploading === 'gallery'}
+                      label={
+                        media.gallery.length
+                          ? `${media.gallery.length} image(s) added: add more`
+                          : existingGallery.length
+                            ? `${existingGallery.length} on the property: add more`
+                            : 'Add gallery images'
+                      }
+                      done={media.gallery.length > 0}
+                      onFiles={(files) => void stageGallery(files)}
                     />
-                    <Video className="w-4 h-4" />
-                    Include video tour
-                  </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Video Tour <span className="text-gray-400 font-normal">(optional)</span>
+                    </label>
+                    <MediaPicker
+                      accept="video/*"
+                      icon={<Video className="w-4 h-4 text-gray-400 shrink-0" />}
+                      busy={uploading === 'video'}
+                      label={
+                        media.video
+                          ? media.video.name
+                          : propertyForForm?.videoTourKey
+                            ? 'The property has a video tour: click to replace'
+                            : 'Upload a walkthrough, up to 150 MB'
+                      }
+                      done={!!media.video || !!propertyForForm?.videoTourKey}
+                      onFiles={([file]) => void stage('video', file)}
+                    />
+                  </div>
+                  {mediaError && <p className="text-sm text-destructive">{mediaError}</p>}
                 </>
               )}
 
@@ -380,7 +502,17 @@ export const CreateSaleListingModal = ({
                       label="Asking Price"
                       value={form.askingPrice ? `₦${form.askingPrice}` : '—'}
                     />
-                    <SummaryRow label="Cover Image" value={form.coverImageName || 'Not uploaded'} />
+                    <SummaryRow
+                      label="Cover Image"
+                      value={media.cover?.name ?? (existingCover ? 'The property’s cover' : '—')}
+                    />
+                    <SummaryRow
+                      label="Video Tour"
+                      value={
+                        media.video?.name ??
+                        (propertyForForm?.videoTourKey ? 'The property’s video' : 'None')
+                      }
+                    />
                     <SummaryRow
                       label="Features"
                       value={form.features.length ? `${form.features.length} selected` : 'None'}
@@ -416,13 +548,19 @@ export const CreateSaleListingModal = ({
               )}
               {step === steps.length - 1 && (
                 <>
-                  <Button variant="outline" onClick={() => handleCreate('draft')}>
+                  <Button
+                    variant="outline"
+                    disabled={creating}
+                    onClick={() => void handleCreate('draft')}
+                  >
                     Save Draft
                   </Button>
                   <Button
                     variant="primary"
                     className="gap-2"
-                    onClick={() => handleCreate('published')}
+                    disabled={creating}
+                    isLoading={creating}
+                    onClick={() => void handleCreate('published')}
                   >
                     <Check className="w-4 h-4" />
                     Publish
@@ -437,34 +575,45 @@ export const CreateSaleListingModal = ({
   );
 };
 
-const UploadField = ({
+const MediaPicker = ({
+  accept,
+  multiple,
+  icon,
   label,
-  fileName,
-  onSelect,
-  required,
+  done,
+  busy,
+  onFiles,
 }: {
+  accept: string;
+  multiple?: boolean;
+  icon: ReactNode;
   label: string;
-  fileName: string;
-  onSelect: (name: string) => void;
-  required?: boolean;
+  done: boolean;
+  busy: boolean;
+  onFiles: (files: File[]) => void;
 }) => (
-  <div>
-    <label className="block text-sm font-medium text-foreground mb-1">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-      <LegacyInput
-        type="file"
-        className="hidden"
-        onChange={(e) => onSelect(e.target.files?.[0]?.name || '')}
-      />
-      <ImageIcon className="w-4 h-4 text-gray-400 shrink-0" />
-      <span className="text-sm text-muted-foreground truncate">
-        {fileName || 'Click to upload'}
-      </span>
-      {fileName && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
-    </label>
-  </div>
+  <label
+    className={`flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border transition-colors ${
+      busy ? 'opacity-70' : 'hover:border-primary cursor-pointer'
+    }`}
+  >
+    <LegacyInput
+      type="file"
+      accept={accept}
+      multiple={multiple}
+      disabled={busy}
+      className="hidden"
+      onChange={(e) => {
+        const files = Array.from(e.target.files ?? []);
+        // Reset so re-picking the same file still fires a change event.
+        e.target.value = '';
+        onFiles(files);
+      }}
+    />
+    {busy ? <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" /> : icon}
+    <span className="text-sm text-muted-foreground truncate">{busy ? 'Uploading…' : label}</span>
+    {done && !busy && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
+  </label>
 );
 
 const SummaryRow = ({ label, value }: { label: string; value: string }) => (

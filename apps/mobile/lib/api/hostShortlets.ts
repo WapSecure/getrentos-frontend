@@ -422,6 +422,16 @@ export const hostShortletsApi = {
     );
   },
 
+  uploadVideo: (file: PickedFile) => {
+    const form = new FormData();
+    form.append('kind', 'video');
+    appendFile(form, 'file', file);
+    return apiUpload<{ key: string; kind: 'image' | 'video' }>(
+      '/host/shortlets/media/upload',
+      form
+    );
+  },
+
   // ---- bookings ----
   bookings: (view: BookingView, p = 1, size = 20) =>
     apiFetch<Paginated<HostBooking>>(

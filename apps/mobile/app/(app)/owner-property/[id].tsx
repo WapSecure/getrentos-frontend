@@ -36,6 +36,8 @@ import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Sheet } from '@/components/Sheet';
 import { OwnershipProofSheet } from '@/components/owner/OwnershipProofSheet';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { VideoTourField } from '@/components/video/VideoTourField';
+import type { PickedVideo } from '@/lib/filePicker';
 
 export default function OwnerPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -91,6 +93,27 @@ export default function OwnerPropertyDetail() {
     qc.invalidateQueries({ queryKey: qk.owner.listings });
     qc.invalidateQueries({ queryKey: qk.owner.property(id) });
     qc.invalidateQueries({ queryKey: qk.owner.dashboard });
+  };
+
+  /** Uploads a video and puts it on the property in place of any earlier one. */
+  const attachVideo = async (file: PickedVideo) => {
+    const previous = property.data?.videoTourKey;
+    const { key } = await ownerApi.uploadMedia(file, 'video');
+    try {
+      await ownerApi.setVideoTour(id, key);
+    } catch (e) {
+      ownerApi.removeMedia(key).catch(() => undefined);
+      throw e;
+    }
+    // Detached now, so the old file can go; the server refuses if it is still in use.
+    if (previous) ownerApi.removeMedia(previous).catch(() => undefined);
+    refresh();
+  };
+  const removeVideo = async () => {
+    const previous = property.data?.videoTourKey;
+    await ownerApi.setVideoTour(id, null);
+    if (previous) ownerApi.removeMedia(previous).catch(() => undefined);
+    refresh();
   };
 
   const setStatus = useMutation({
@@ -186,6 +209,20 @@ export default function OwnerPropertyDetail() {
                 ) : null}
                 <Fact label="Added" value={formatDate(p.createdAt, 'medium')} />
               </Card>
+
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading" accessibilityRole="header">
+                  Video tour
+                </Text>
+                <VideoTourField
+                  title={p.name}
+                  hasVideo={!!p.videoTourKey}
+                  videoUrl={p.videoTourUrl}
+                  onUpload={attachVideo}
+                  onRemove={removeVideo}
+                  onExpired={() => property.refetch()}
+                />
+              </View>
 
               <View style={{ gap: spacing.sm }}>
                 <Text variant="heading" accessibilityRole="header">

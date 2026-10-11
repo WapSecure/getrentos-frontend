@@ -58,6 +58,9 @@ export interface LandlordProperty {
   galleryImages?: string[];
   /** Storage keys behind galleryImages — what an update must send back. */
   galleryImageKeys?: string[];
+  videoTourKey?: string;
+  /** Signed link to the video tour, valid for a few hours. */
+  videoTourUrl?: string;
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
@@ -754,6 +757,8 @@ export interface UpdatePropertyInput {
   /** Storage keys from uploadPropertyMedia; null clears the cover. */
   coverImageKey?: string | null;
   galleryImageKeys?: string[];
+  /** Storage key from uploadPropertyMedia; null removes the video tour. */
+  videoTourKey?: string | null;
 }
 
 /** Whether the applicant agreed to share their standing from a past tenancy. */
