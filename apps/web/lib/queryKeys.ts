@@ -38,6 +38,7 @@ export const landlordKeys = {
     ['landlord', 'managementFeeConfig', propertyId] as const,
   ownerStatements: ['landlord', 'ownerStatements'] as const,
   ownerStatement: (id: string) => ['landlord', 'ownerStatements', id] as const,
+  disbursementSchedule: ['landlord', 'disbursementSchedule'] as const,
   vendors: ['landlord', 'vendors'] as const,
   vendorDetail: (id: string) => ['landlord', 'vendors', 'detail', id] as const,
   maintenanceRequests: (params?: { status?: string; priority?: string }) =>
