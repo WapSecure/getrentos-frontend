@@ -200,11 +200,23 @@ const NewListingPanel = ({
   const [listingType, setListingType] = useState<EstateListingType>('RENT');
   const [price, setPrice] = useState<number | string>('');
   const [availableFrom, setAvailableFrom] = useState(() => new Date().toISOString().slice(0, 10));
+  // A short let needs its own terms; the API refuses one without them.
+  const [maxGuests, setMaxGuests] = useState<number | string>(2);
+  const [minNights, setMinNights] = useState<number | string>(1);
+  const [cleaningFee, setCleaningFee] = useState<number | string>('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const marketable = agreements.filter((a) => a.effective);
   const needsAgreement = marketable.length === 0;
-  const priceIsValid = Number(price) > 0;
+  const shortlet = listingType === 'SHORTLET';
+  const termsAreValid =
+    !shortlet ||
+    (Number.isInteger(Number(maxGuests)) &&
+      Number(maxGuests) >= 1 &&
+      Number.isInteger(Number(minNights)) &&
+      Number(minNights) >= 1 &&
+      (cleaningFee === '' || Number(cleaningFee) >= 0));
+  const priceIsValid = Number(price) > 0 && termsAreValid;
 
   const create = useMutation({
     mutationFn: (publish: boolean) =>
@@ -215,6 +227,17 @@ const NewListingPanel = ({
           price: Number(price),
           availableFrom,
           publish,
+          ...(shortlet
+            ? {
+                shortlet: {
+                  pricingMode: 'PER_NIGHT' as const,
+                  nightlyRate: Number(price),
+                  maxGuests: Number(maxGuests),
+                  minNights: Number(minNights),
+                  cleaningFee: cleaningFee === '' ? 0 : Number(cleaningFee),
+                },
+              }
+            : {}),
         })
       ),
     onSuccess: (listing) => {
@@ -290,6 +313,41 @@ const NewListingPanel = ({
           />
         </div>
       </div>
+
+      {shortlet ? (
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-guests">
+              Guests, at most
+            </label>
+            <NumberInput
+              id="estate-listing-guests"
+              value={maxGuests}
+              onValueChange={(value) => setMaxGuests(value)}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-nights">
+              Minimum nights
+            </label>
+            <NumberInput
+              id="estate-listing-nights"
+              value={minNights}
+              onValueChange={(value) => setMinNights(value)}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-cleaning">
+              Cleaning fee (optional)
+            </label>
+            <NumberInput
+              id="estate-listing-cleaning"
+              value={cleaningFee}
+              onValueChange={(value) => setCleaningFee(value)}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div className="max-w-56">
         <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
