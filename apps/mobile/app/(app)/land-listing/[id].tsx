@@ -102,8 +102,13 @@ export default function LandListingDetail() {
             <View style={{ gap: 4 }}>
               <Price amount={listing.price} variant="display" />
               <Text variant="callout" color="mutedForeground">
-                {listing.address}, {listing.city}, {listing.state}
+                {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
               </Text>
+              {listing.addressHidden ? (
+                <Text variant="caption" color="mutedForeground">
+                  The exact address is shared once the property is verified.
+                </Text>
+              ) : null}
               <Text variant="bodyStrong" style={{ marginTop: 4 }}>
                 {formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
               </Text>

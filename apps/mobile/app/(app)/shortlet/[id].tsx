@@ -301,7 +301,10 @@ export default function ShortletDetail() {
               </GuestPromiseCard>
 
               {listing.latitude != null && listing.longitude != null ? (
-                <Section title="Where you'll be" caption={`${listing.city}, ${listing.state}`}>
+                <Section
+                  title="Where you'll be"
+                  caption={`${listing.city}, ${listing.state} · exact address after you book`}
+                >
                   <PropertyMapView
                     markers={[
                       { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },

@@ -59,6 +59,7 @@ const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
   askingPrice: listing.price,
   description: listing.description,
   address: listing.address,
+  addressHidden: listing.addressHidden,
   city: listing.city,
   state: listing.state,
   country: listing.country,

@@ -134,7 +134,9 @@ export interface PublicLandListing {
   title: string;
   askingPrice: number;
   description?: string;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   city: string;
   state: string;
   country?: string;
@@ -177,7 +179,9 @@ export interface PublicLandListingApi {
   city: string;
   state: string;
   country: string;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
   coverImageUrl?: string;

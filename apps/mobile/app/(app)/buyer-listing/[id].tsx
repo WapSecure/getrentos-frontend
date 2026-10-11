@@ -119,8 +119,13 @@ export default function BuyerListingDetail() {
               <View style={{ gap: 4 }}>
                 <Price amount={listing.askingPrice} variant="display" />
                 <Text variant="callout" color="mutedForeground">
-                  {listing.address}, {listing.city}, {listing.state}
+                  {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
                 </Text>
+                {listing.addressHidden ? (
+                  <Text variant="caption" color="mutedForeground">
+                    The exact address is shared once the property is verified.
+                  </Text>
+                ) : null}
               </View>
 
               <View style={{ flexDirection: 'row', gap: spacing.lg, flexWrap: 'wrap' }}>

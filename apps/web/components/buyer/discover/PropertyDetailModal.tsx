@@ -76,8 +76,13 @@ export const PropertyDetailModal = ({
                 <h3 className="text-lg font-semibold text-foreground">{listing.title}</h3>
                 <p className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                   <MapPin className="w-3.5 h-3.5" />
-                  {listing.address}, {listing.city}, {listing.state}
+                  {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
                 </p>
+                {listing.addressHidden && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    The exact address is shared once the property is verified.
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-5 text-sm text-muted-foreground">

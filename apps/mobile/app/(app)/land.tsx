@@ -129,7 +129,7 @@ export default function LandMarketplace() {
                       {item.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {item.address}, {item.city}
+                      {[item.address, item.city].filter(Boolean).join(', ')}
                     </Text>
                     <Price amount={item.price} variant="bodyStrong" style={{ marginTop: 2 }} />
                     <Text variant="caption" color="mutedForeground">

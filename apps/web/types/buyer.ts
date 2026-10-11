@@ -26,7 +26,9 @@ export interface BuyerPropertyListing {
   title: string;
   propertyType: ListingPropertyType;
   askingPrice: number;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   city: string;
   state: string;
   bedrooms?: number;
