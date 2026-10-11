@@ -130,7 +130,14 @@ export default function RealtorNotifications() {
               <Pressable
                 onPress={() => {
                   if (!item.read) readOne.mutate(item.id);
-                  const to = routeForNotification({ type: item.type.toUpperCase() }, 'realtor');
+                  const to = routeForNotification(
+                    {
+                      type: item.type.toUpperCase(),
+                      actionUrl: item.actionUrl,
+                      conversationId: item.conversationId,
+                    },
+                    'realtor'
+                  );
                   if (to !== '/(app)/notifications') router.push(to as Href);
                 }}
                 accessibilityRole="button"
