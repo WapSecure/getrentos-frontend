@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,6 +47,7 @@ import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { openDirections } from '@/lib/directions';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
+import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -56,6 +57,7 @@ export default function PropertyDetail() {
   const toast = useToast();
   const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [touring, setTouring] = useState(false);
 
   const query = useQuery({
     queryKey: qk.listings.detail(id),
@@ -238,7 +240,7 @@ export default function PropertyDetail() {
 
               {p.videoTourUrl ? (
                 <Pressable
-                  onPress={() => Linking.openURL(p.videoTourUrl!)}
+                  onPress={() => setTouring(true)}
                   accessibilityRole="button"
                   accessibilityLabel="Watch the video tour"
                 >
@@ -443,6 +445,16 @@ export default function PropertyDetail() {
           onClose={() => setViewingSheetOpen(false)}
           propertyId={p.propertyId}
           propertyTitle={p.title}
+        />
+      ) : null}
+      {p?.videoTourUrl ? (
+        <VideoTourSheet
+          open={touring}
+          onClose={() => setTouring(false)}
+          title={p.title}
+          videoUrl={p.videoTourUrl}
+          // A signed link that has lapsed: fetch the listing for a fresh one.
+          onExpired={() => void query.refetch()}
         />
       ) : null}
     </View>
