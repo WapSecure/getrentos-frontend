@@ -6,8 +6,11 @@ import { X, Plus, Trash2, Camera, Check } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { agentService } from '@/services/agentService';
 import type {
   AgentTask,
+  InspectionPhoto,
   PropertyInspection,
   InspectionRoomEntry,
   InspectionType,
@@ -44,6 +47,9 @@ export const NewInspectionModal = ({
   const [type, setType] = useState<InspectionType>('periodic');
   const [clientName, setClientName] = useState('');
   const [rooms, setRooms] = useState<InspectionRoomEntry[]>([{ ...emptyRoom }]);
+  const [photos, setPhotos] = useState<InspectionPhoto[]>([]);
+  const [uploadingRoom, setUploadingRoom] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const selectedTask = tasks.find((t) => t.id === taskId);
 
@@ -52,7 +58,41 @@ export const NewInspectionModal = ({
     setType('periodic');
     setClientName('');
     setRooms([{ ...emptyRoom }]);
+    setPhotos([]);
+    setUploadingRoom(null);
+    setPhotoError(null);
     onClose();
+  };
+
+  const uploadPhoto = async (roomName: string, file: File | undefined) => {
+    setPhotoError(null);
+    if (!file) return;
+    if (!taskId) {
+      setPhotoError('Pick the inspection task first.');
+      return;
+    }
+    if (!roomName.trim()) {
+      setPhotoError('Name the room before adding its photos.');
+      return;
+    }
+    setUploadingRoom(roomName);
+    try {
+      const photo = await unwrap(agentService.addInspectionPhoto(taskId, file, roomName.trim()));
+      setPhotos((prev) => [...prev, photo]);
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : 'Could not upload that photo.');
+    } finally {
+      setUploadingRoom(null);
+    }
+  };
+
+  const removePhoto = async (photoId: string) => {
+    setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    try {
+      await unwrap(agentService.removeInspectionPhoto(photoId));
+    } catch {
+      /* best effort — the row is already gone from view */
+    }
   };
 
   const updateRoom = <K extends keyof InspectionRoomEntry>(
@@ -75,7 +115,10 @@ export const NewInspectionModal = ({
       scheduledDate: new Date().toISOString(),
       status: 'completed',
       type,
-      rooms,
+      rooms: rooms.map((r) => ({
+        ...r,
+        photoCount: photos.filter((p) => p.room === r.room.trim()).length,
+      })),
       overallCondition:
         rooms.find((r) => r.condition === 'poor')?.condition ||
         rooms.find((r) => r.condition === 'fair')?.condition ||
@@ -189,19 +232,59 @@ export const NewInspectionModal = ({
                         placeholder="Notes (optional)"
                         inputClassName="py-1.5"
                       />
-                      <button
-                        type="button"
-                        onClick={() => updateRoom(index, 'photoCount', room.photoCount + 1)}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                        {room.photoCount > 0
-                          ? `${room.photoCount} photo(s) attached: add more`
-                          : 'Attach photo'}
-                      </button>
+                      {(() => {
+                        const roomPhotos = photos.filter(
+                          (p) => p.room === room.room.trim() && room.room.trim()
+                        );
+                        return (
+                          <div className="space-y-2">
+                            {roomPhotos.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {roomPhotos.map((photo) => (
+                                  <div key={photo.id} className="relative h-14 w-14">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={photo.url}
+                                      alt={photo.name}
+                                      className="h-14 w-14 rounded-md object-cover"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removePhoto(photo.id)}
+                                      className="absolute -right-1.5 -top-1.5 rounded-full bg-destructive p-0.5 text-white"
+                                      aria-label="Remove photo"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <label className="flex w-fit cursor-pointer items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
+                              <Camera className="h-3.5 w-3.5" />
+                              {uploadingRoom === room.room && room.room
+                                ? 'Uploading…'
+                                : roomPhotos.length > 0
+                                  ? 'Add another photo'
+                                  : 'Attach photo'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={!taskId || !room.room.trim() || uploadingRoom !== null}
+                                onChange={(e) => {
+                                  void uploadPhoto(room.room, e.target.files?.[0]);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
+                {photoError && <p className="mt-2 text-xs text-destructive">{photoError}</p>}
               </div>
             </div>
 

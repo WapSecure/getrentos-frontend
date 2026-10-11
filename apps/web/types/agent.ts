@@ -25,6 +25,14 @@ export interface InspectionRoomEntry {
   photoCount: number;
 }
 
+export interface InspectionPhoto {
+  id: string;
+  room: string;
+  url: string;
+  name: string;
+  caption?: string | null;
+}
+
 export interface PropertyInspection {
   id: string;
   taskId: string;
@@ -35,6 +43,7 @@ export interface PropertyInspection {
   type: InspectionType;
   rooms: InspectionRoomEntry[];
   overallCondition?: RoomCondition;
+  photos?: InspectionPhoto[];
   syncStatus: SyncStatus;
   acknowledgedAt?: string;
 }
