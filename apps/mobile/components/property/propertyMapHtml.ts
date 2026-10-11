@@ -25,7 +25,11 @@ export interface PropertyMapViewProps {
    * property whose location is only approximate (unverified, or a short stay):
    * it shows the neighbourhood without pointing at a door.
    */
-  variant?: 'price' | 'location' | 'area';
+  variant?: 'price' | 'location' | 'area' | 'picker';
+  /** `picker` only: the pin was dragged or the map tapped to a new spot. */
+  onPinMove?: (point: { latitude: number; longitude: number }) => void;
+  /** `picker` only: change this to move the view to the pin (e.g. after a search). */
+  recenter?: number;
   selectedId?: string;
   onMarkerPress?: (id: string) => void;
   borderRadius?: number;
@@ -112,6 +116,26 @@ export function buildMapHtml(
   function render(payload) {
     markerLayer.clearLayers();
     var pts = (payload.markers || []).filter(function (m) { return typeof m.latitude === 'number' && typeof m.longitude === 'number'; });
+
+    if (payload.variant === 'picker') {
+      var start = pts[0]
+        || (payload.center ? { latitude: payload.center.latitude, longitude: payload.center.longitude } : null);
+      if (start) {
+        var pin = L.marker([start.latitude, start.longitude], { icon: locationPinIcon(), draggable: true }).addTo(markerLayer);
+        var report = function (ll) { post({ type: 'pinMoved', latitude: ll.lat, longitude: ll.lng }); };
+        pin.on('dragend', function () { report(pin.getLatLng()); });
+        // Tapping the map moves the pin there too: easier than dragging on a phone.
+        map.off('click');
+        map.on('click', function (e) { pin.setLatLng(e.latlng); report(e.latlng); });
+        // Recentre only when asked (a fresh "Find on map"), never because the
+        // owner just moved the pin themselves.
+        if (payload.recenter !== window.__lastRecenter) {
+          window.__lastRecenter = payload.recenter;
+          map.setView([start.latitude, start.longitude], payload.zoom || 17);
+        }
+      }
+      return;
+    }
 
     pts.forEach(function (m) {
       if (payload.variant === 'area') {

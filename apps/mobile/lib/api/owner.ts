@@ -66,6 +66,9 @@ export interface OwnerProperty {
 }
 
 export interface CreateOwnerPropertyInput {
+  /** The pin the owner placed on the map; both or neither. */
+  latitude?: number;
+  longitude?: number;
   name: string;
   propertyType: 'APARTMENT' | 'DUPLEX' | 'CONDO' | 'COMMERCIAL' | 'LAND' | 'SHARED_APARTMENT';
   address: string;

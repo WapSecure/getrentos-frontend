@@ -34,6 +34,10 @@ export interface Property {
   city: string;
   state: string;
   country: string;
+  /** The map pin, and when the landlord confirmed it (absent: a guess from the address). */
+  latitude?: number;
+  longitude?: number;
+  locationConfirmedAt?: string;
   description?: string;
   coverImage: string;
   galleryImages?: string[];
@@ -69,6 +73,8 @@ export type PropertyUpdatePayload = Partial<
     | 'country'
     | 'description'
     | 'totalUnits'
+    | 'latitude'
+    | 'longitude'
     | 'galleryImageKeys'
     | 'estimatedValue'
     | 'purchasePrice'

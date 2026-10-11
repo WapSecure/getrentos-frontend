@@ -44,6 +44,10 @@ export interface OwnerProperty {
   city: string;
   state: string;
   country: string;
+  /** The map pin, and when the owner confirmed it (absent: a guess from the address). */
+  latitude?: number;
+  longitude?: number;
+  locationConfirmedAt?: string;
   ownerName: string;
   verificationStatus: OwnershipVerificationStatus;
   rejectionReason?: string;

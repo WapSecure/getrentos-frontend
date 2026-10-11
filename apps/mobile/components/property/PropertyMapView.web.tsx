@@ -18,6 +18,8 @@ export function PropertyMapView({
   variant = 'price',
   selectedId,
   onMarkerPress,
+  onPinMove,
+  recenter,
   borderRadius = 16,
   style,
 }: PropertyMapViewProps) {
@@ -25,8 +27,10 @@ export function PropertyMapView({
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const loadedRef = useRef(false);
   const onMarkerPressRef = useRef(onMarkerPress);
+  const onPinMoveRef = useRef(onPinMove);
   useEffect(() => {
     onMarkerPressRef.current = onMarkerPress;
+    onPinMoveRef.current = onPinMove;
   });
 
   const html = useMemo(
@@ -50,8 +54,8 @@ export function PropertyMapView({
   );
 
   const payload = useMemo(
-    () => JSON.stringify({ markers, center, zoom, variant, selectedId }),
-    [markers, center, zoom, variant, selectedId]
+    () => JSON.stringify({ markers, center, zoom, variant, selectedId, recenter }),
+    [markers, center, zoom, variant, selectedId, recenter]
   );
   const payloadRef = useRef(payload);
   useEffect(() => {
@@ -72,6 +76,13 @@ export function PropertyMapView({
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : null;
         if (data?.type === 'markerPress' && typeof data.id === 'string') {
           onMarkerPressRef.current?.(data.id);
+        }
+        if (
+          data?.type === 'pinMoved' &&
+          typeof data.latitude === 'number' &&
+          typeof data.longitude === 'number'
+        ) {
+          onPinMoveRef.current?.({ latitude: data.latitude, longitude: data.longitude });
         }
       } catch {
         // ignore malformed messages

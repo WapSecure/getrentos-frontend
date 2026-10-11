@@ -6,6 +6,8 @@ import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
 import { Camera, Loader2 } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import { LocationFields } from '@/components/shared/location/LocationFields';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { MapPoint } from '@/services/geocodeService';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -20,6 +22,8 @@ type OwnerPropertyUpdates = Pick<
   | 'country'
   | 'estimatedValue'
   | 'coverImageKey'
+  | 'latitude'
+  | 'longitude'
 >;
 
 interface EditOwnerPropertyModalProps {
@@ -64,6 +68,12 @@ const EditOwnerPropertyForm = ({
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
   const [country, setCountry] = useState(property.country ?? 'Nigeria');
+  const [pin, setPin] = useState<MapPoint | null>(
+    property.latitude != null && property.longitude != null
+      ? { latitude: property.latitude, longitude: property.longitude }
+      : null
+  );
+  const [pinMoved, setPinMoved] = useState(false);
   const [estimatedValue, setEstimatedValue] = useState(String(property.estimatedValue));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +122,9 @@ const EditOwnerPropertyForm = ({
       // Only send the cover when it changed; an unconditional write would
       // push a stale key back over a photo edited elsewhere.
       ...(coverKey !== property.coverImageKey ? { coverImageKey: coverKey } : {}),
+      // Only a pin the owner moved, so saving other details does not
+      // re-confirm a location nobody looked at.
+      ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
     };
     try {
       await onSave(property.id, payload);
@@ -161,6 +174,19 @@ const EditOwnerPropertyForm = ({
           onStateChange={setState}
           onCityChange={setCity}
           required
+        />
+
+        <LocationPicker
+          address={address}
+          city={city}
+          state={state}
+          country={country}
+          value={pin}
+          guessed={!pinMoved && !property.locationConfirmedAt}
+          onChange={(next) => {
+            setPin(next);
+            setPinMoved(true);
+          }}
         />
 
         <div>

@@ -49,6 +49,10 @@ export interface LandlordProperty {
   city: string;
   state: string;
   country: string;
+  /** The map pin, and when the landlord confirmed it (absent: a guess from the address). */
+  latitude?: number;
+  longitude?: number;
+  locationConfirmedAt?: string;
   description?: string;
   coverImage?: string;
   galleryImages?: string[];
@@ -737,6 +741,9 @@ export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
 };
 
 export interface UpdatePropertyInput {
+  /** The pin the owner placed on the map; both or neither. */
+  latitude?: number;
+  longitude?: number;
   name?: string;
   type?: PropertyType;
   address?: string;
@@ -772,6 +779,9 @@ export interface ManagementFeeConfig {
 }
 
 export interface CreatePropertyInput {
+  /** The pin the owner placed on the map; both or neither. */
+  latitude?: number;
+  longitude?: number;
   name: string;
   type: PropertyType;
   address: string;

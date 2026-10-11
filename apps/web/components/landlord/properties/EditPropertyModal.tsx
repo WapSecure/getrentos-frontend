@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrento
 import { Button } from '@getrentos/ui';
 import { ImagePlus, Loader2, Play, Star, Video, X } from 'lucide-react';
 import { LocationFields } from '@/components/shared/location/LocationFields';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { MapPoint } from '@/services/geocodeService';
 import {
   PropertyValueFields,
   toOptionalAmount,
@@ -80,6 +82,14 @@ const EditPropertyForm = ({
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
   const [country, setCountry] = useState(property.country ?? 'Nigeria');
+  const [pin, setPin] = useState<MapPoint | null>(
+    property.latitude != null && property.longitude != null
+      ? { latitude: property.latitude, longitude: property.longitude }
+      : null
+  );
+  // Only a pin the landlord moved is sent, so saving other details does not
+  // re-confirm a location nobody looked at.
+  const [pinMoved, setPinMoved] = useState(false);
   const [totalUnits, setTotalUnits] = useState(String(property.totalUnits));
   const [estimatedValue, setEstimatedValue] = useState(
     property.estimatedValue ? String(property.estimatedValue) : ''
@@ -171,6 +181,7 @@ const EditPropertyForm = ({
         city,
         state,
         country,
+        ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
         totalUnits: Number(totalUnits) || property.totalUnits,
         estimatedValue: toOptionalAmount(estimatedValue),
         purchasePrice: toOptionalAmount(purchasePrice),
@@ -249,6 +260,19 @@ const EditPropertyForm = ({
           onStateChange={setState}
           onCityChange={setCity}
           required
+        />
+
+        <LocationPicker
+          address={address}
+          city={city}
+          state={state}
+          country={country}
+          value={pin}
+          guessed={!pinMoved && !property.locationConfirmedAt}
+          onChange={(next) => {
+            setPin(next);
+            setPinMoved(true);
+          }}
         />
 
         <div>
