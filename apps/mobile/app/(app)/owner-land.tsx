@@ -31,6 +31,13 @@ import {
 } from '@/lib/api/ownerLand';
 import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
+import {
+  boundaryAreaSqm,
+  boundaryCorners,
+  boundaryGeometry,
+  type BoundaryCorner,
+} from '@getrentos/shared';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
 /**
@@ -188,7 +195,10 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
   const [zoning, setZoning] = useState(p?.zoning ?? '');
   const [roadAccess, setRoadAccess] = useState(p?.roadAccess ?? false);
   const [notes, setNotes] = useState(p?.boundaryNotes ?? '');
+  const [savedCorners] = useState(() => boundaryCorners(p?.boundaryGeometry));
+  const [corners, setCorners] = useState<BoundaryCorner[]>(savedCorners ?? []);
   const areaValue = Number(area.replace(/,/g, ''));
+  const outlined = boundaryAreaSqm(corners);
 
   const save = useMutation({
     mutationFn: () =>
@@ -204,6 +214,8 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
         zoning: orUndefined(zoning),
         roadAccess,
         boundaryNotes: orUndefined(notes),
+        // Fewer than 3 corners is no outline: clear a saved one, otherwise send nothing.
+        boundaryGeometry: boundaryGeometry(corners) ?? (savedCorners ? null : undefined),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.owner.land });
@@ -283,6 +295,45 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
           accessibilityLabel="Has road access"
           trackColor={{ true: colors.primary, false: colors.border }}
         />
+      </View>
+      <View style={{ gap: spacing.sm }}>
+        <Text variant="bodyStrong">Plot outline</Text>
+        <Text variant="caption" color="mutedForeground">
+          Tap each corner of the plot in turn, following your survey plan. Drag a corner to adjust
+          it. Buyers see the outline once the land is verified.
+        </Text>
+        <PropertyMapView
+          markers={[]}
+          variant="boundary"
+          boundary={corners}
+          onBoundaryChange={setCorners}
+          center={
+            r.latitude != null && r.longitude != null
+              ? { latitude: r.latitude, longitude: r.longitude }
+              : undefined
+          }
+          zoom={r.latitude != null ? 17 : 12}
+          height={260}
+        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+            {corners.length >= 3
+              ? `Outlined area: about ${
+                  outlined >= 10_000
+                    ? `${(outlined / 10_000).toFixed(2)} ha`
+                    : `${Math.round(outlined).toLocaleString('en-NG')} m²`
+                }`
+              : corners.length
+                ? `${corners.length} of at least 3 corners`
+                : 'No outline yet'}
+          </Text>
+          {corners.length ? (
+            <>
+              <Chip label="Undo" size="sm" onPress={() => setCorners((c) => c.slice(0, -1))} />
+              <Chip label="Clear" size="sm" onPress={() => setCorners([])} />
+            </>
+          ) : null}
+        </View>
       </View>
       <TextField
         label="Boundary notes (optional)"

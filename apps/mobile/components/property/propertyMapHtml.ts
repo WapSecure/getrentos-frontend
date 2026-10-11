@@ -1,6 +1,9 @@
+import { mapTiles, type BoundaryCorner } from '@getrentos/shared';
+import { env } from '@/lib/env';
+
 /**
- * The map page both PropertyMapView builds load: Leaflet and OpenStreetMap
- * tiles, no key or billing. Phones host it in a WebView; the web build in an
+ * The map page both PropertyMapView builds load: Leaflet on Mapbox tiles when
+ * EXPO_PUBLIC_MAPBOX_TOKEN is set, OpenStreetMap otherwise. Phones host it in a WebView; the web build in an
  * iframe. Either way the app posts `{ markers, center, zoom, variant,
  * selectedId }` in, and the page posts `{ type: 'markerPress', id }` out.
  */
@@ -25,11 +28,18 @@ export interface PropertyMapViewProps {
    * property whose location is only approximate (unverified, or a short stay):
    * it shows the neighbourhood without pointing at a door.
    */
-  variant?: 'price' | 'location' | 'area' | 'picker';
+  variant?: 'price' | 'location' | 'area' | 'picker' | 'boundary';
   /** `picker` only: the pin was dragged or the map tapped to a new spot. */
   onPinMove?: (point: { latitude: number; longitude: number }) => void;
   /** `picker` only: change this to move the view to the pin (e.g. after a search). */
   recenter?: number;
+  /**
+   * A land plot's outline, drawn over any variant. With `variant="boundary"`
+   * the owner edits it: a tap adds a corner and corners drag.
+   */
+  boundary?: BoundaryCorner[];
+  /** `boundary` only: the outline was changed on the map. */
+  onBoundaryChange?: (corners: BoundaryCorner[]) => void;
   selectedId?: string;
   onMarkerPress?: (id: string) => void;
   borderRadius?: number;
@@ -37,6 +47,18 @@ export interface PropertyMapViewProps {
 }
 
 export const LAGOS = { latitude: 6.5244, longitude: 3.3792 };
+
+/** The corners in a `boundaryChanged` message from the map page; null if malformed. */
+export function readBoundaryMessage(data: unknown): BoundaryCorner[] | null {
+  const msg = data as { type?: unknown; corners?: unknown } | null;
+  if (msg?.type !== 'boundaryChanged' || !Array.isArray(msg.corners)) return null;
+  const corners: BoundaryCorner[] = [];
+  for (const c of msg.corners as { latitude?: unknown; longitude?: unknown }[]) {
+    if (typeof c?.latitude !== 'number' || typeof c?.longitude !== 'number') return null;
+    corners.push({ latitude: c.latitude, longitude: c.longitude });
+  }
+  return corners;
+}
 
 /**
  * The circle drawn for an approximate location. The API moves such a point up
@@ -52,10 +74,10 @@ export function buildMapHtml(
   foreground: string,
   border: string
 ) {
-  const darkFilter =
-    scheme === 'dark'
-      ? 'filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);'
-      : '';
+  const tiles = mapTiles(env.mapboxToken, scheme);
+  const darkFilter = tiles.needsDarkFilter
+    ? 'filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);'
+    : '';
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -80,9 +102,11 @@ export function buildMapHtml(
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   var map = L.map('map', { zoomControl: true, attributionControl: true });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+  L.tileLayer(${JSON.stringify(tiles.url)}, {
+    maxZoom: ${tiles.maxZoom},
+    tileSize: ${tiles.tileSize},
+    zoomOffset: ${tiles.zoomOffset},
+    attribution: ${JSON.stringify(tiles.attribution)}
   }).addTo(map);
   map.setView([${LAGOS.latitude}, ${LAGOS.longitude}], 11);
 
@@ -113,8 +137,57 @@ export function buildMapHtml(
     });
   }
 
+  function cornerIcon() {
+    return L.divIcon({
+      className: '',
+      html: '<div style="width:18px;height:18px;border-radius:50%;background:${card};border:3px solid ${primary};box-shadow:0 1px 4px rgba(0,0,0,0.35)"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+  }
+
+  // The plot outline. Editable: a tap adds a corner, corners drag, and every
+  // change is posted back for the app to keep.
+  function drawBoundary(payload, editable) {
+    var corners = (payload.boundary || []).filter(function (c) { return typeof c.latitude === 'number' && typeof c.longitude === 'number'; });
+    var latlngs = corners.map(function (c) { return [c.latitude, c.longitude]; });
+    if (corners.length >= 3) {
+      L.polygon(latlngs, { color: '${primary}', weight: 2, fillColor: '${primary}', fillOpacity: 0.18, interactive: false }).addTo(markerLayer);
+    } else if (corners.length === 2) {
+      L.polyline(latlngs, { color: '${primary}', weight: 2, dashArray: '4 4', interactive: false }).addTo(markerLayer);
+    }
+    if (editable) {
+      var send = function (next) { post({ type: 'boundaryChanged', corners: next }); };
+      map.off('click');
+      map.on('click', function (e) { send(corners.concat([{ latitude: e.latlng.lat, longitude: e.latlng.lng }])); });
+      corners.forEach(function (c, i) {
+        var handle = L.marker([c.latitude, c.longitude], { icon: cornerIcon(), draggable: true }).addTo(markerLayer);
+        handle.on('dragend', function () {
+          var ll = handle.getLatLng();
+          var next = corners.slice();
+          next[i] = { latitude: ll.lat, longitude: ll.lng };
+          send(next);
+        });
+      });
+    }
+    // Frame the outline once; after that the view stays where the viewer put it.
+    if (!window.__boundaryFitted) {
+      if (corners.length >= 3) {
+        map.fitBounds(L.latLngBounds(latlngs), { padding: [24, 24], maxZoom: 19 });
+        window.__boundaryFitted = true;
+      } else if (editable && payload.center) {
+        map.setView([payload.center.latitude, payload.center.longitude], payload.zoom || 17);
+        window.__boundaryFitted = true;
+      }
+    }
+  }
+
   function render(payload) {
     markerLayer.clearLayers();
+    if (payload.variant === 'boundary') {
+      drawBoundary(payload, true);
+      return;
+    }
     var pts = (payload.markers || []).filter(function (m) { return typeof m.latitude === 'number' && typeof m.longitude === 'number'; });
 
     if (payload.variant === 'picker') {
@@ -159,7 +232,10 @@ export function buildMapHtml(
     var center = payload.center
       ? [payload.center.latitude, payload.center.longitude]
       : pts.length ? [pts[0].latitude, pts[0].longitude] : null;
-    if (center) map.setView(center, payload.zoom || 13);
+    if (payload.boundary && payload.boundary.length >= 3) {
+      // The outline frames the view itself; a pin's zoom would fight it.
+      drawBoundary(payload, false);
+    } else if (center) map.setView(center, payload.zoom || 13);
   }
 
   function onMessage(e) {

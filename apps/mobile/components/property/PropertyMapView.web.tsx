@@ -1,7 +1,7 @@
 import { createElement, useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@getrentos/ui-native';
-import { buildMapHtml, type PropertyMapViewProps } from './propertyMapHtml';
+import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './propertyMapHtml';
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
 
@@ -20,6 +20,8 @@ export function PropertyMapView({
   onMarkerPress,
   onPinMove,
   recenter,
+  boundary,
+  onBoundaryChange,
   borderRadius = 16,
   style,
 }: PropertyMapViewProps) {
@@ -28,9 +30,11 @@ export function PropertyMapView({
   const loadedRef = useRef(false);
   const onMarkerPressRef = useRef(onMarkerPress);
   const onPinMoveRef = useRef(onPinMove);
+  const onBoundaryChangeRef = useRef(onBoundaryChange);
   useEffect(() => {
     onMarkerPressRef.current = onMarkerPress;
     onPinMoveRef.current = onPinMove;
+    onBoundaryChangeRef.current = onBoundaryChange;
   });
 
   const html = useMemo(
@@ -54,8 +58,8 @@ export function PropertyMapView({
   );
 
   const payload = useMemo(
-    () => JSON.stringify({ markers, center, zoom, variant, selectedId, recenter }),
-    [markers, center, zoom, variant, selectedId, recenter]
+    () => JSON.stringify({ markers, center, zoom, variant, selectedId, recenter, boundary }),
+    [markers, center, zoom, variant, selectedId, recenter, boundary]
   );
   const payloadRef = useRef(payload);
   useEffect(() => {
@@ -84,6 +88,8 @@ export function PropertyMapView({
         ) {
           onPinMoveRef.current?.({ latitude: data.latitude, longitude: data.longitude });
         }
+        const corners = readBoundaryMessage(data);
+        if (corners) onBoundaryChangeRef.current?.(corners);
       } catch {
         // ignore malformed messages
       }

@@ -87,6 +87,9 @@ export interface LandPropertySummary {
   city: string;
   state: string;
   country?: string;
+  /** The property's map pin, where the outline editor starts. */
+  latitude?: number;
+  longitude?: number;
   verificationStatus?: string;
   estimatedValue?: number | null;
   purchasePrice?: number | null;

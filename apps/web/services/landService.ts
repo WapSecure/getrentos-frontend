@@ -44,6 +44,8 @@ const mapOwnerLand = (record: OwnerLandApiRecord): OwnerLandRecord => ({
     city: record.city,
     state: record.state,
     country: record.country,
+    latitude: record.latitude,
+    longitude: record.longitude,
     verificationStatus: record.propertyVerificationStatus,
     coverImageKey: record.coverImageUrl,
     hasActiveSaleListing: record.hasActiveSaleListing,

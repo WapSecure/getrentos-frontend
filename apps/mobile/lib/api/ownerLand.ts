@@ -54,6 +54,8 @@ export interface LandParcelInput {
   titleNumber?: string;
   surveyNumber?: string;
   boundaryNotes?: string;
+  /** The plot outline as a GeoJSON Polygon; null clears it. */
+  boundaryGeometry?: unknown;
 }
 
 export interface LandParcel extends LandParcelInput {
@@ -66,6 +68,9 @@ export interface OwnerLandRecord {
   address: string;
   city: string;
   state: string;
+  /** The property's map pin, where the outline editor starts. */
+  latitude?: number;
+  longitude?: number;
   isPropertyVerified: boolean;
   ownershipProofCount: number;
   hasActiveSaleListing: boolean;
