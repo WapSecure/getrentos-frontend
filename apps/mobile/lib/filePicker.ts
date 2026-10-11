@@ -1,5 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { MAX_VIDEO_SECONDS } from '@getrentos/shared';
 import type { PickedFile } from './api/documents';
 
 const EXT_MIME: Record<string, string> = {
@@ -121,18 +122,12 @@ export async function pickPhotos(limit = 10): Promise<PickedFile[]> {
   });
 }
 
-/** The server's ceiling for a property or listing video. */
-export const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
-
 /** A picked or recorded video, with what is known of its size before upload. */
 export interface PickedVideo extends PickedFile {
   /** Bytes, when the platform reports it. */
   size?: number;
   durationMs?: number;
 }
-
-/** Longest video a walkthrough recording may run. */
-const MAX_RECORDING_SECONDS = 5 * 60;
 
 function toPickedVideo(asset: ImagePicker.ImagePickerAsset, fallbackName: string): PickedVideo {
   const name = asset.fileName || asset.uri.split('/').pop() || fallbackName;
@@ -165,7 +160,7 @@ export async function recordVideo(): Promise<PickedVideo | null> {
   const result = await ImagePicker.launchCameraAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Videos,
     cameraType: ImagePicker.CameraType.back,
-    videoMaxDuration: MAX_RECORDING_SECONDS,
+    videoMaxDuration: MAX_VIDEO_SECONDS,
   });
   if (result.canceled || !result.assets?.length) return null;
   return toPickedVideo(result.assets[0], 'tour.mp4');

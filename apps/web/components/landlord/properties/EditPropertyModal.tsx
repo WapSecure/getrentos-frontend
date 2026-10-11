@@ -18,6 +18,7 @@ import {
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/landlord';
+import { videoFileProblem } from '@/lib/videoFile';
 
 type Photo = {
   /** Stable key for React; the storage key for saved photos, a synthetic id for new files. */
@@ -116,8 +117,11 @@ const EditPropertyForm = ({
     []
   );
 
-  const selectVideo = (file: File | undefined) => {
+  const selectVideo = async (file: File | undefined) => {
     if (!file) return;
+    const problem = await videoFileProblem(file);
+    setMediaError(problem);
+    if (problem) return;
     const url = URL.createObjectURL(file);
     objectUrls.current.push(url);
     setVideoFile(file);
@@ -393,7 +397,7 @@ const EditPropertyForm = ({
                   accept="video/mp4,video/webm,video/quicktime"
                   className="hidden"
                   onChange={(event) => {
-                    selectVideo(event.target.files?.[0]);
+                    void selectVideo(event.target.files?.[0]);
                     event.target.value = '';
                   }}
                 />

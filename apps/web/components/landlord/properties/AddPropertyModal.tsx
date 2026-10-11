@@ -24,6 +24,7 @@ import type { Property, PropertyType } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
+import { videoFileProblem } from '@/lib/videoFile';
 
 export interface LandlordPropertySubmission {
   property: Pick<
@@ -352,7 +353,11 @@ export const AddPropertyModal = ({
                     icon={Video}
                     file={form.videoTour}
                     accept="video/mp4,video/webm,video/quicktime"
-                    onSelect={(file) => update('videoTour', file)}
+                    onSelect={async (file) => {
+                      const problem = file ? await videoFileProblem(file) : null;
+                      setSubmitError(problem);
+                      update('videoTour', problem ? null : file);
+                    }}
                   />
                 </>
               )}
