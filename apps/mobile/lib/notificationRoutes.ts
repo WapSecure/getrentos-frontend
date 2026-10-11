@@ -99,6 +99,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/resident/dues': '/(app)/dues',
   '/resident/deliveries': '/(app)/deliveries',
   '/resident/announcements': '/(app)/(resident)/announcements',
+  '/resident/governance': '/(app)/governance',
+  '/resident/committee': '/(app)/committee',
 };
 
 /** Type prefix → route, for notifications that carry no usable action URL. */

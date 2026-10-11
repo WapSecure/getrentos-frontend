@@ -57,6 +57,15 @@ describe('notification routes', () => {
     );
   });
 
+  it('takes a committee member to the document waiting for their signature', () => {
+    expect(
+      routeForNotification(
+        { type: 'ESTATE_SIGNATURE_REQUESTED', actionUrl: '/resident/governance' },
+        'resident'
+      )
+    ).toBe('/(app)/governance');
+  });
+
   it('never returns a dead route', () => {
     expect(routeForNotification({ actionUrl: '/something/new', type: 'WELCOME' }, 'renter')).toBe(
       '/(app)/notifications'
