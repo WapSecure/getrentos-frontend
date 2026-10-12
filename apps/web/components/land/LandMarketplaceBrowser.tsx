@@ -530,32 +530,33 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   </p>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3 border-t border-border p-5">
-                <Button
-                  href={buyerRoute(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)}
-                  variant="outline"
-                  rounded="lg"
-                  icon={<MessageSquare className="h-4 w-4" />}
-                >
-                  {canOffer
-                    ? 'Ask a question'
-                    : needsSignIn
-                      ? 'Sign in to ask'
-                      : 'Buyer accounts only'}
-                </Button>
-                <Button
-                  href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
-                  variant="primary"
-                  rounded="lg"
-                  icon={<ShieldCheck className="h-4 w-4" />}
-                >
-                  {canOffer
-                    ? 'Make an offer'
-                    : needsSignIn
-                      ? 'Sign in to offer'
-                      : 'Buyer accounts only'}
-                </Button>
-              </div>
+              {canOffer || needsSignIn ? (
+                <div className="grid grid-cols-2 gap-3 border-t border-border p-5">
+                  <Button
+                    href={buyerRoute(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)}
+                    variant="outline"
+                    rounded="lg"
+                    icon={<MessageSquare className="h-4 w-4" />}
+                  >
+                    {canOffer ? 'Ask a question' : 'Sign in to ask'}
+                  </Button>
+                  <Button
+                    href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
+                    variant="primary"
+                    rounded="lg"
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                  >
+                    {canOffer ? 'Make an offer' : 'Sign in to offer'}
+                  </Button>
+                </div>
+              ) : (
+                // Signed in, but not as a buyer: there is nothing here this
+                // account can do, so say why instead of two dead-end buttons.
+                <p className="border-t border-border p-5 text-sm text-muted-foreground">
+                  Questions and offers on land come from a buyer account. This account isn&apos;t
+                  set up to buy property.
+                </p>
+              )}
             </div>
           )}
         </DialogContent>
