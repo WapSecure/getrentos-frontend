@@ -48,6 +48,8 @@ export interface PropertyAuthorityDto {
   createdAt: string;
   /** The property's shareable reference code (PR-AB7K-9Q), shown instead of the UUID. */
   propertyReferenceCode?: string | null;
+  /** On a `request()` response: true when this call filed/re-opened the claim, false when an identical one already existed. */
+  justCreated?: boolean;
   /** Whether the publication gate would count this claim right now. */
   effective: boolean;
 }

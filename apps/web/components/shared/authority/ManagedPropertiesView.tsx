@@ -21,7 +21,6 @@ import {
   AUTHORITY_RELATIONSHIP_LABELS,
   propertyAuthorityService,
   type AuthorityRelationship,
-  type AuthorityStatus,
   type ManagedPropertyDto,
   type PropertyAuthorityDto,
   type ResolvedPropertyRefDto,
@@ -182,13 +181,16 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
  * What actually happened when a claim was submitted.
  *
  * The backend answers a claim that already exists by returning it untouched
- * rather than creating a duplicate: both an ACTIVE authority and a PENDING
- * claim come straight back. Announcing "claim filed" in those cases describes
- * something that did not happen, so the message follows the status we got back.
+ * rather than creating a duplicate, and `justCreated` says which happened — a
+ * fresh claim is PENDING just like a pre-existing one, so the status alone can't
+ * tell them apart. Announce "filed" only when something was actually filed.
  */
-const claimOutcomeMessage = (status: AuthorityStatus) => {
-  if (status === 'ACTIVE') return 'You already act for this property: nothing new was filed.';
-  if (status === 'PENDING') return 'You already have a claim on this property awaiting an officer.';
+const claimOutcomeMessage = (authority: PropertyAuthorityDto) => {
+  if (authority.justCreated) return 'Claim filed. It grants nothing until an officer approves it.';
+  if (authority.status === 'ACTIVE')
+    return 'You already act for this property: nothing new was filed.';
+  if (authority.status === 'PENDING')
+    return 'You already have a claim on this property awaiting an officer.';
   return 'Claim filed. It grants nothing until an officer approves it.';
 };
 
@@ -241,7 +243,7 @@ const ClaimForm = () => {
       ),
     onSuccess: (authority) => {
       setError(null);
-      setSuccess(claimOutcomeMessage(authority.status));
+      setSuccess(claimOutcomeMessage(authority));
       setPropertyRef('');
       setNote('');
       setResolved(null);
