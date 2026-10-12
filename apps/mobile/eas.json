@@ -11,7 +11,21 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "http://localhost:4000"
       },
-      "ios": { "simulator": true }
+      "ios": {
+        "simulator": true
+      }
+    },
+    "device-test": {
+      "distribution": "internal",
+      "channel": "device-test",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://172.20.10.6:4001",
+        "ALLOW_CLEARTEXT": "1",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
     },
     "preview": {
       "distribution": "internal",
