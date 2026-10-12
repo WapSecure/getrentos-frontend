@@ -19,6 +19,7 @@ import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
 import { ApiError } from '@/lib/api/client';
 import { pickPhotos, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourField } from '@/components/video/VideoTourField';
+import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
@@ -121,10 +122,14 @@ function Gallery({ listing: l }: { listing: HostListing }) {
 
   // The video saves on its own, straight away, apart from the photo order.
   const refresh = () => qc.invalidateQueries({ queryKey: qk.host.listings });
-  const attachVideo = async (file: PickedVideo) => {
+  const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const { key } = await hostShortletsApi.uploadVideo(file);
     // An uploaded video replaces a pasted link; the server deletes the old file.
-    await hostShortletsApi.update(l.id, { videoKey: key, videoUrl: '' });
+    await hostShortletsApi.update(l.id, {
+      videoKey: key,
+      videoUrl: '',
+      ...(onSite ? { videoOnSite: onSite } : {}),
+    });
     await refresh();
   };
   const removeVideo = async () => {
@@ -294,6 +299,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
           <VideoTourField
             title={l.title}
             hasVideo={!!l.videoKey}
+            filmedOnSite={l.videoFilmedOnSite}
             videoUrl={l.videoKey ? l.videoUrl : undefined}
             onUpload={attachVideo}
             onRemove={removeVideo}

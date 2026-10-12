@@ -50,6 +50,7 @@ import {
   RulesBlock,
 } from '@/components/shortlet/StaySections';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
+import { FilmedOnSite } from '@/components/video/FilmedOnSite';
 
 type SheetName = 'dates' | 'book' | 'message' | null;
 
@@ -274,6 +275,7 @@ export default function ShortletDetail() {
                       title={listing.videoUrl ? 'Watch the video tour' : 'Take the virtual tour'}
                       detail="See the space before you book"
                     />
+                    {listing.videoUrl && listing.videoFilmedOnSite ? <FilmedOnSite /> : null}
                   </Card>
                 </Pressable>
               ) : null}
