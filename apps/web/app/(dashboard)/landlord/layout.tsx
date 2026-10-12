@@ -10,6 +10,7 @@ import {
   isAuthenticated,
   getDashboardRoute,
   BACKEND_ROLE_TO_ID,
+  resolvePrimaryRoleId,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
@@ -39,11 +40,14 @@ export default function LandlordLayout({ children }: { children: ReactNode }) {
 
       const parsedUser = getStoredUser<LandlordUser>();
       if (parsedUser) {
-        const hasLandlordRole = (parsedUser.roles || []).some(
-          (r) => BACKEND_ROLE_TO_ID[r] === 'landlord'
+        // A property manager works here too, on the properties a mandate gives
+        // them: the backend scopes every /landlord route to those (see
+        // PROPERTY_CONTROLLER_ROLES), so the workspace is the same one.
+        const hasLandlordRole = (parsedUser.roles || []).some((r) =>
+          ['landlord', 'manager'].includes(BACKEND_ROLE_TO_ID[r])
         );
         if (!hasLandlordRole) {
-          router.replace(getDashboardRoute(parsedUser.role || 'renter'));
+          router.replace(getDashboardRoute(resolvePrimaryRoleId(parsedUser.roles)));
           return;
         }
 

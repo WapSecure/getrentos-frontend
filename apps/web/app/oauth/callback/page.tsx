@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
-import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
+import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { apiFetch } from '@/lib/apiClient';
 import { authService } from '@/services/authService';
 
@@ -31,7 +31,7 @@ function OAuthCallbackContent() {
   const [verifying, setVerifying] = useState(false);
 
   const openSession = (accessToken: string, me: MeResponse) => {
-    const primaryRoleId = BACKEND_ROLE_TO_ID[me.roles[0]] || 'renter';
+    const primaryRoleId = resolvePrimaryRoleId(me.roles);
     // Session-only by default (refresh token is an httpOnly session cookie)
     //: consistent with an unchecked "Remember me" checkbox.
     saveAuthSession(
