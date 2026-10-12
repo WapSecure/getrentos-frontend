@@ -231,7 +231,9 @@ function ViewingCard({
           </View>
         ) : null}
         <Text variant="caption" color="mutedForeground">
-          {v.status === 'pending' ? `Asked for ${when(v.scheduledAt)}` : when(v.scheduledAt)}
+          {v.status === 'pending'
+            ? `Asked for ${when(v.scheduledAt)}${past ? ' (passed)' : ''}`
+            : when(v.scheduledAt)}
         </Text>
         {v.notes ? (
           <Text variant="callout" color="mutedForeground" numberOfLines={3}>
@@ -241,11 +243,14 @@ function ViewingCard({
 
         {v.status === 'pending' ? (
           <View style={{ gap: spacing.sm }}>
-            <Button label="Confirm this time" size="sm" disabled={busy} onPress={onConfirm} />
+            {/* A time already gone can't be confirmed; offer another. */}
+            {!past ? (
+              <Button label="Confirm this time" size="sm" disabled={busy} onPress={onConfirm} />
+            ) : null}
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <Button
                 label="Offer another time"
-                variant="outline"
+                variant={past ? 'primary' : 'outline'}
                 size="sm"
                 style={{ flex: 1 }}
                 disabled={busy}
@@ -288,8 +293,17 @@ function ViewingCard({
 function RescheduleForm({ viewing, onDone }: { viewing: OwnerViewing; onDone: () => void }) {
   const { spacing } = useTheme();
   const toast = useToast();
-  // Start from the buyer's own slot, in local time.
-  const asked = new Date(viewing.scheduledAt);
+  // Start from the buyer's own slot, in local time; if that has passed, the
+  // same time tomorrow.
+  const [asked] = useState(() => {
+    const at = new Date(viewing.scheduledAt);
+    const now = new Date();
+    if (at.getTime() >= now.getTime()) return at;
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(at.getHours(), at.getMinutes(), 0, 0);
+    return tomorrow;
+  });
   const [date, setDate] = useState(toISODate(asked));
   const [time, setTime] = useState(
     `${String(asked.getHours()).padStart(2, '0')}:${String(asked.getMinutes()).padStart(2, '0')}`

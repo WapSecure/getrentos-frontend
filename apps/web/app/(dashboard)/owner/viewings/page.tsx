@@ -147,6 +147,9 @@ export default function OwnerViewingsPage() {
                       <p className="text-sm text-foreground mt-1">
                         {viewing.status === 'pending' ? 'Asked for ' : ''}
                         {formatWhen(viewing.scheduledAt)}
+                        {viewing.status === 'pending' && past && (
+                          <span className="text-muted-foreground"> (passed)</span>
+                        )}
                       </p>
                     </div>
                     <Badge
@@ -162,15 +165,18 @@ export default function OwnerViewingsPage() {
 
                   {viewing.status === 'pending' && (
                     <div className="mt-3 flex flex-wrap gap-2">
+                      {/* A time already gone can't be confirmed; offer another. */}
+                      {!past && (
+                        <Button
+                          variant="primary"
+                          disabled={confirm.isPending}
+                          onClick={() => confirm.mutate({ id: viewing.id })}
+                        >
+                          Confirm this time
+                        </Button>
+                      )}
                       <Button
-                        variant="primary"
-                        disabled={confirm.isPending}
-                        onClick={() => confirm.mutate({ id: viewing.id })}
-                      >
-                        Confirm this time
-                      </Button>
-                      <Button
-                        variant="outline"
+                        variant={past ? 'primary' : 'outline'}
                         onClick={() => {
                           setRescheduling(viewing);
                           setNewTime('');
