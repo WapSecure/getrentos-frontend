@@ -52,6 +52,10 @@ const mapOwnerLand = (record: OwnerLandApiRecord): OwnerLandRecord => ({
   },
   parcel: record.parcel ?? null,
   diligence: record.parcel?.diligence ?? null,
+  submission: {
+    canSubmit: record.canSubmitForReview ?? false,
+    blockers: record.submissionBlockers ?? [],
+  },
 });
 
 const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
@@ -99,6 +103,14 @@ export const landService = {
           method: 'PUT',
           body: JSON.stringify(parcel),
         })
+      )
+    ),
+
+  /** Puts the parcel into the diligence review queue (or back into it after changes). */
+  submitForReview: (propertyId: string) =>
+    safeCall(async () =>
+      mapOwnerLand(
+        await authFetch<OwnerLandApiRecord>(`/owner/land/${propertyId}/submit`, { method: 'POST' })
       )
     ),
 

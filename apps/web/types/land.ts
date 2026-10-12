@@ -35,13 +35,36 @@ export type LandOwnershipDocumentType =
   | 'MANAGEMENT_AUTHORIZATION'
   | 'OTHER';
 
+export type LandDiligenceCheckStatus = 'PENDING' | 'PASSED' | 'FLAGGED' | 'NOT_APPLICABLE';
+
+export type LandAssuranceTier = 'BASIC' | 'STANDARD' | 'PREMIUM';
+
+/** One item of the diligence checklist seeded for the parcel's title type. */
+export interface LandDiligenceCheck {
+  key: string;
+  label: string;
+  required: boolean;
+  requiresDocument: boolean;
+  status: LandDiligenceCheckStatus;
+  note?: string;
+  decidedAt?: string;
+  /** A document has been cited against this check. */
+  hasEvidence: boolean;
+}
+
 export interface LandDiligence {
   status: LandDiligenceStatus;
   findings?: string | null;
   /** Public and owner-safe checklist entries supplied by compliance. */
   checklist?: unknown;
+  checks?: LandDiligenceCheck[];
   reviewedAt?: string | null;
   expiresAt?: string | null;
+  submittedAt?: string;
+  /** When the review is owed by. */
+  slaDueAt?: string;
+  riskScore?: number;
+  assuranceTier?: LandAssuranceTier;
 }
 
 export interface LandParcelInput {
@@ -101,6 +124,8 @@ export interface OwnerLandRecord {
   property: LandPropertySummary;
   parcel: LandParcel | null;
   diligence: LandDiligence | null;
+  /** Whether diligence can be submitted (or resubmitted) now, and if not, why. */
+  submission: { canSubmit: boolean; blockers: string[] };
   /** Backend may expose this at the top level for fast collection rendering. */
   listing?: {
     id: string;
@@ -127,6 +152,8 @@ export interface OwnerLandApiRecord {
   ownershipProofCount: number;
   hasActiveSaleListing: boolean;
   parcel?: LandParcel | null;
+  canSubmitForReview?: boolean;
+  submissionBlockers?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -147,7 +174,7 @@ export interface PublicLandListing {
   coverImageUrl?: string | null;
   ownerVerified?: boolean;
   parcel: PublicLandParcel;
-  diligence?: Pick<LandDiligence, 'status' | 'reviewedAt' | 'expiresAt'> | null;
+  diligence?: Pick<LandDiligence, 'status' | 'reviewedAt' | 'expiresAt' | 'assuranceTier'> | null;
 }
 
 /** The public API intentionally omits private title references and proof files. */
@@ -195,7 +222,7 @@ export interface PublicLandListingApi {
   propertyVerificationStatus: string;
   publishedAt: string;
   parcel: PublicLandParcel;
-  diligence: Pick<LandDiligence, 'status' | 'reviewedAt' | 'expiresAt'>;
+  diligence: Pick<LandDiligence, 'status' | 'reviewedAt' | 'expiresAt' | 'assuranceTier'>;
 }
 
 export interface LandOwnershipProofInput {
@@ -227,4 +254,10 @@ export const LAND_TITLE_TYPE_LABELS: Record<LandTitleType, string> = {
   REGISTERED_CONVEYANCE: 'Registered Conveyance',
   SURVEY_PLAN: 'Survey Plan',
   OTHER: 'Other title record',
+};
+
+export const LAND_ASSURANCE_TIER_LABELS: Record<LandAssuranceTier, string> = {
+  BASIC: 'Verified',
+  STANDARD: 'Registry-searched',
+  PREMIUM: 'Premium verified',
 };
