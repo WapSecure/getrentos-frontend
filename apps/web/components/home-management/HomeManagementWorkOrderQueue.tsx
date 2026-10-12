@@ -235,6 +235,15 @@ export function HomeManagementWorkOrderQueue({
       ),
   });
   const propertyAssets = useMemo(() => assetsQuery.data?.items ?? [], [assetsQuery.data]);
+  // Vendors scoped to the selected property's owner, so a manager/agent spanning
+  // several owners only sees vendors valid for the property they picked. Falls
+  // back to the portfolio-wide prop before a property is chosen.
+  const createVendorsQuery = useQuery({
+    enabled: isCreateOpen && Boolean(form.propertyId),
+    queryKey: [...homeManagementKeys.vendors, 'work-order-create', form.propertyId],
+    queryFn: () => unwrap(homeManagementService.listAssignableVendors(form.propertyId)),
+  });
+  const createVendors = form.propertyId ? (createVendorsQuery.data ?? []) : vendors;
   const selectedProperty = properties.find((property) => property.id === form.propertyId);
   const availableAssets = useMemo(
     () =>
@@ -1305,9 +1314,13 @@ export function HomeManagementWorkOrderQueue({
                   options={[
                     {
                       value: '',
-                      label: vendors.length > 0 ? 'Assign later' : 'No active vendors',
+                      label: createVendorsQuery.isLoading
+                        ? 'Loading vendors…'
+                        : createVendors.length > 0
+                          ? 'Assign later'
+                          : 'No active vendors',
                     },
-                    ...vendors.map((vendor) => ({
+                    ...createVendors.map((vendor) => ({
                       value: vendor.id,
                       label: vendor.serviceType
                         ? `${vendor.name} · ${vendor.serviceType}`

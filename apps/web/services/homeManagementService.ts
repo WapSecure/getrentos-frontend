@@ -542,8 +542,12 @@ export const homeManagementService = {
    * properties they control. Used by the manager/agent view, whose vendors
    * belong to the property owners, not to themselves.
    */
-  listAssignableVendors: () =>
-    safeCall(() => authFetch<HomeManagementVendor[]>('/home-management/vendors')),
+  listAssignableVendors: (propertyId?: string) =>
+    safeCall(() =>
+      authFetch<HomeManagementVendor[]>(
+        `/home-management/vendors${propertyId ? `?propertyId=${encodeURIComponent(propertyId)}` : ''}`
+      )
+    ),
   listAssets: (params: HomeManagementAssetsParams = {}) =>
     safeCall(() => authFetch<Paginated<HomeAsset>>(`/home-management/assets${toQuery(params)}`)),
   createAsset: (data: CreateHomeAssetInput) =>

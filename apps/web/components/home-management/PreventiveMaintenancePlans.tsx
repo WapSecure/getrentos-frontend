@@ -141,6 +141,14 @@ export function PreventiveMaintenancePlans({
   });
   const propertyAssets = useMemo(() => assetsQuery.data?.items ?? [], [assetsQuery.data]);
 
+  // Vendors scoped to the selected property's owner (see work-order queue).
+  const createVendorsQuery = useQuery({
+    enabled: isCreateOpen && Boolean(form.propertyId),
+    queryKey: [...homeManagementKeys.vendors, 'plan-create', form.propertyId],
+    queryFn: () => unwrap(homeManagementService.listAssignableVendors(form.propertyId)),
+  });
+  const createVendors = form.propertyId ? (createVendorsQuery.data ?? []) : vendors;
+
   const availableAssets = useMemo(
     () =>
       propertyAssets.filter(
@@ -526,7 +534,7 @@ export function PreventiveMaintenancePlans({
                   onChange={(value) => setForm((current) => ({ ...current, nextDueAt: value }))}
                 />
               </Field>
-              {vendors.length > 0 && (
+              {createVendors.length > 0 && (
                 <Field label="Preferred vendor" hint="Optional">
                   <Select
                     ariaLabel="Preferred vendor"
@@ -536,7 +544,7 @@ export function PreventiveMaintenancePlans({
                     }
                     options={[
                       { value: '', label: 'Assign later' },
-                      ...vendors.map((vendor) => ({
+                      ...createVendors.map((vendor) => ({
                         value: vendor.id,
                         label: vendor.serviceType
                           ? `${vendor.name} · ${vendor.serviceType}`
