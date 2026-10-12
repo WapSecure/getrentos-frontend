@@ -53,6 +53,8 @@ export interface Property {
   /** What the property is worth today and what was paid for it, in naira. Optional — they drive cap rate and yield. */
   estimatedValue?: number;
   purchasePrice?: number;
+  /** Human-friendly shareable handle, e.g. "PR-AB7K-9Q". Share it so an agent can request to act for the property. */
+  referenceCode?: string | null;
   createdAt: string;
   archived?: boolean;
 }

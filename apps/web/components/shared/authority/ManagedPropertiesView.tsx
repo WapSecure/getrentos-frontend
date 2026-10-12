@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
+  Check,
   Clock,
   KeyRound,
   Loader2,
@@ -14,6 +15,7 @@ import {
   Wallet,
   Wrench,
 } from 'lucide-react';
+import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import {
   AUTHORITY_RELATIONSHIPS,
   AUTHORITY_RELATIONSHIP_LABELS,
@@ -22,6 +24,7 @@ import {
   type AuthorityStatus,
   type ManagedPropertyDto,
   type PropertyAuthorityDto,
+  type ResolvedPropertyRefDto,
 } from '@/services/propertyAuthorityService';
 import { authorityKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -118,6 +121,11 @@ const ManagedPropertyCard = ({ property }: { property: ManagedPropertyDto }) => 
             <MapPin className="w-3.5 h-3.5" />
             {property.address}, {property.city}
           </p>
+          {property.referenceCode && (
+            <div className="mt-2">
+              <ReferenceCodeChip code={property.referenceCode} />
+            </div>
+          )}
         </div>
       </div>
       {statusBadge(property.status)}
@@ -159,7 +167,9 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
         {AUTHORITY_RELATIONSHIP_LABELS[claim.relationship as AuthorityRelationship] ??
           claim.relationship}
       </p>
-      <p className="text-xs text-muted-foreground font-mono truncate">{claim.propertyId}</p>
+      <p className="text-xs text-muted-foreground font-mono truncate">
+        {claim.propertyReferenceCode ?? claim.propertyId}
+      </p>
       {claim.decisionNote && (
         <p className="text-xs text-muted-foreground mt-1">Officer: {claim.decisionNote}</p>
       )}
@@ -184,22 +194,58 @@ const claimOutcomeMessage = (status: AuthorityStatus) => {
 
 const ClaimForm = () => {
   const queryClient = useQueryClient();
-  const [propertyId, setPropertyId] = useState('');
+  const [propertyRef, setPropertyRef] = useState('');
   const [relationship, setRelationship] = useState<AuthorityRelationship>('PROPERTY_MANAGER');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [resolved, setResolved] = useState<ResolvedPropertyRefDto | null>(null);
+  const [lookup, setLookup] = useState<'idle' | 'resolving' | 'notfound'>('idle');
+  const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resolveSeq = useRef(0);
+
+  // Live-confirm the property behind the code as it is typed, so a mistyped code
+  // is caught before a claim is filed rather than after an officer looks at it.
+  // Debounced, and guarded by a sequence number so a slow lookup can't overwrite
+  // the result of a later keystroke.
+  const onRefChange = (value: string) => {
+    setPropertyRef(value);
+    setResolved(null);
+    setError(null);
+    if (resolveTimer.current) clearTimeout(resolveTimer.current);
+    const trimmed = value.trim();
+    if (trimmed.length < 6) {
+      setLookup('idle');
+      return;
+    }
+    setLookup('resolving');
+    const seq = (resolveSeq.current += 1);
+    resolveTimer.current = setTimeout(() => {
+      void propertyAuthorityService.resolve(trimmed).then((res) => {
+        if (seq !== resolveSeq.current) return; // a newer keystroke won
+        if (res.success && res.data) {
+          setResolved(res.data);
+          setLookup('idle');
+        } else {
+          setResolved(null);
+          setLookup('notfound');
+        }
+      });
+    }, 400);
+  };
 
   const mutation = useMutation({
     mutationFn: () =>
       unwrap(
-        propertyAuthorityService.request({ propertyId: propertyId.trim(), relationship, note })
+        propertyAuthorityService.request({ propertyRef: propertyRef.trim(), relationship, note })
       ),
     onSuccess: (authority) => {
       setError(null);
       setSuccess(claimOutcomeMessage(authority.status));
-      setPropertyId('');
+      setPropertyRef('');
       setNote('');
+      setResolved(null);
+      setLookup('idle');
       void queryClient.invalidateQueries({ queryKey: authorityKeys.mine });
     },
     onError: (err: Error) => {
@@ -208,25 +254,43 @@ const ClaimForm = () => {
     },
   });
 
-  const canSubmit = propertyId.trim().length > 0 && !mutation.isPending;
+  const canSubmit = propertyRef.trim().length >= 6 && !mutation.isPending;
 
   return (
     <div className="bg-card rounded-2xl border border-border p-5">
       <h2 className="font-semibold text-foreground mb-1">Ask to act for a property</h2>
       <p className="text-sm text-muted-foreground mb-4">
-        Use the property’s id. An officer checks the mandate, then grants the two capabilities
-        separately: listing a property and moving money on it are not the same permission.
+        Enter the property’s code — the owner can copy it from their property page (it looks like
+        PR-AB7K-9Q). An officer checks the mandate, then grants the two capabilities separately:
+        listing a property and moving money on it are not the same permission.
       </p>
 
       <div className="grid sm:grid-cols-2 gap-3">
         <label className="block">
-          <span className="text-sm text-muted-foreground">Property id</span>
+          <span className="text-sm text-muted-foreground">Property code</span>
           <input
-            value={propertyId}
-            onChange={(event) => setPropertyId(event.target.value)}
-            placeholder="00000000-0000-0000-0000-000000000000"
+            value={propertyRef}
+            onChange={(event) => onRefChange(event.target.value)}
+            placeholder="PR-AB7K-9Q"
             className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
+          {lookup === 'resolving' && (
+            <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Looking up…
+            </span>
+          )}
+          {resolved && (
+            <span className="mt-1 flex items-start gap-1 text-xs text-emerald-700 dark:text-emerald-400">
+              <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              {resolved.title} — {resolved.address}, {resolved.city}
+            </span>
+          )}
+          {lookup === 'notfound' && (
+            <span className="mt-1 block text-xs text-amber-700 dark:text-amber-400">
+              No property found for that code. Check it with the owner.
+            </span>
+          )}
         </label>
 
         <label className="block">

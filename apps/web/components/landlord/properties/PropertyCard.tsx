@@ -21,6 +21,7 @@ import {
 } from '@getrentos/ui';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
+import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import type { Property } from '@/types/landlord';
 
 const propertyTypeLabels: Record<Property['type'], string> = {
@@ -148,6 +149,11 @@ export const PropertyCard = ({
           <MapPin className="w-3 h-3" />
           {property.city}, {property.state}
         </p>
+        {property.referenceCode && (
+          <div className="mt-2">
+            <ReferenceCodeChip code={property.referenceCode} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

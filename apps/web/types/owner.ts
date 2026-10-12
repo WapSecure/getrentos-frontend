@@ -63,6 +63,8 @@ export interface OwnerProperty {
   /** Signed link to the video tour, valid for a few hours. */
   videoTourUrl?: string;
   hasActiveSaleListing: boolean;
+  /** Human-friendly shareable handle, e.g. "PR-AB7K-9Q". Owners share it so an agent can request to act for the property. */
+  referenceCode?: string | null;
   createdAt: string;
 }
 

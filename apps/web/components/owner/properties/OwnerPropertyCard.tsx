@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
 } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
+import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 
 const verificationConfig: Record<
@@ -124,6 +125,11 @@ export const OwnerPropertyCard = ({
           <MapPin className="w-3 h-3" />
           {property.city}, {property.state}
         </p>
+        {property.referenceCode && (
+          <div className="mt-2">
+            <ReferenceCodeChip code={property.referenceCode} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div>

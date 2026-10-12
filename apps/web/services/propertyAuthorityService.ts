@@ -46,8 +46,19 @@ export interface PropertyAuthorityDto {
   decisionNote?: string | null;
   expiresAt?: string | null;
   createdAt: string;
+  /** The property's shareable reference code (PR-AB7K-9Q), shown instead of the UUID. */
+  propertyReferenceCode?: string | null;
   /** Whether the publication gate would count this claim right now. */
   effective: boolean;
+}
+
+/** The property behind a reference code, for confirming a claim before filing it. */
+export interface ResolvedPropertyRefDto {
+  propertyId: string;
+  referenceCode: string | null;
+  title: string;
+  address: string;
+  city: string;
 }
 
 /** A property the caller may act for, with what the mandate permits. */
@@ -59,6 +70,8 @@ export interface ManagedPropertyDto {
   address: string;
   city: string;
   state: string;
+  /** The property's shareable reference code (PR-AB7K-9Q). */
+  referenceCode?: string | null;
   ownerId: string;
   ownerName: string;
   relationship: string;
@@ -86,20 +99,37 @@ export const propertyAuthorityService = {
   },
 
   /**
+   * Preview the property behind a reference code (or UUID) before filing, so the
+   * claim form can confirm the right property. 404 when nothing matches.
+   */
+  async resolve(ref: string): Promise<ApiResponse<ResolvedPropertyRefDto>> {
+    return safeCall(() =>
+      authFetch<ResolvedPropertyRefDto>(
+        `/property-authorities/resolve?ref=${encodeURIComponent(ref)}`
+      )
+    );
+  },
+
+  /**
    * Files a claim. It confers nothing until an officer approves it — the copy in
    * the UI says so, because a form that looks like it grants access would be a
-   * lie to the person filling it in.
+   * lie to the person filling it in. `propertyRef` is the shareable code the owner
+   * handed out (or a raw UUID); the backend resolves either.
    */
   async request(input: {
-    propertyId: string;
+    propertyRef: string;
     relationship: AuthorityRelationship;
     note?: string;
   }): Promise<ApiResponse<PropertyAuthorityDto>> {
     return safeCall(() =>
       authFetch<PropertyAuthorityDto>('/property-authorities', {
         method: 'POST',
-        body: JSON.stringify(input),
-      }),
+        body: JSON.stringify({
+          propertyId: input.propertyRef,
+          relationship: input.relationship,
+          note: input.note,
+        }),
+      })
     );
   },
 };
