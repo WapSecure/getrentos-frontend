@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, Repeat } from 'lucide-react';
+import { Check, Plus, Repeat } from 'lucide-react';
+import { openAddRoleDialog } from './AddRoleDialog';
 import { BACKEND_ROLE_TO_ID, ROLES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 
@@ -18,8 +19,6 @@ export const RoleSwitcher = ({ currentRoleId }: RoleSwitcherProps) => {
     new Set((user?.roles || []).map((r) => BACKEND_ROLE_TO_ID[r]).filter(Boolean))
   );
 
-  if (userRoleIds.length <= 1) return null;
-
   const activeRoleId = currentRoleId ?? user?.role ?? 'renter';
   const activeDef = roleDefs.find((r) => r.id === activeRoleId);
   const otherRoles = userRoleIds
@@ -35,6 +34,15 @@ export const RoleSwitcher = ({ currentRoleId }: RoleSwitcherProps) => {
     }
     router.push(getDashboardRoute(roleId));
   };
+
+  // A single-role account has nothing to switch to, but can still add a role.
+  if (userRoleIds.length <= 1) {
+    return (
+      <div className="py-2 border-b border-border">
+        <AddRoleButton />
+      </div>
+    );
+  }
 
   return (
     <div className="py-2 border-b border-border">
@@ -60,6 +68,18 @@ export const RoleSwitcher = ({ currentRoleId }: RoleSwitcherProps) => {
           {role.name}
         </button>
       ))}
+      <AddRoleButton />
     </div>
   );
 };
+
+const AddRoleButton = () => (
+  <button
+    type="button"
+    onClick={openAddRoleDialog}
+    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-secondary transition-colors"
+  >
+    <Plus className="w-3.5 h-3.5" />
+    Add a role
+  </button>
+);
