@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   UserCheck,
   RefreshCw,
+  Wrench,
   FolderOpen,
   MessageCircle,
   Star,
@@ -31,6 +32,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
   { labelKey: 'sidebar.inspections', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
   { labelKey: 'sidebar.verifications', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
+  { label: 'Work Orders', href: ROUTES.AGENT_WORK_ORDERS, icon: Wrench },
   { labelKey: 'sidebar.sync_center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
   { labelKey: 'sidebar.documents', href: ROUTES.AGENT_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.AGENT_MESSAGES, icon: MessageCircle },
@@ -44,9 +46,9 @@ export const navItems: NavItem[] = [
 
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Field operations', items: navItems.slice(1, 5) },
-  { label: 'Communication', items: navItems.slice(5, 7) },
-  { label: 'Trust and account', items: navItems.slice(7) },
+  { label: 'Field operations', items: navItems.slice(1, 6) },
+  { label: 'Communication', items: navItems.slice(6, 8) },
+  { label: 'Trust and account', items: navItems.slice(8) },
 ];
 
 export const AgentSidebar = () => {

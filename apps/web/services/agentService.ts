@@ -190,6 +190,24 @@ export interface AgentNotification {
   conversationId?: string;
 }
 
+export interface AgentWorkOrder {
+  id: string;
+  issueTitle: string;
+  description: string;
+  category: string;
+  priority: string;
+  status: 'SUBMITTED' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELLED';
+  propertyTitle: string;
+  propertyAddress: string;
+  unitName: string;
+  scheduledFor: string | null;
+  fieldStartedAt: string | null;
+  fieldCompletedAt: string | null;
+  fieldReport: string | null;
+  photos: { url: string }[];
+  createdAt: string;
+}
+
 export const agentService = {
   listClientAssignments: (options: AgentClientListOptions = {}) =>
     safeCall(() =>
@@ -351,6 +369,28 @@ export const agentService = {
   },
   removeInspectionPhoto: (photoId: string): Promise<ApiResponse<void>> =>
     safeCall(() => authFetch(`/agent/inspections/photos/${photoId}`, { method: 'DELETE' })),
+
+  // ---- field work orders ----
+  listWorkOrders: (): Promise<ApiResponse<AgentWorkOrder[]>> =>
+    safeCall(() => authFetch<AgentWorkOrder[]>('/agent/work-orders')),
+  getWorkOrder: (id: string): Promise<ApiResponse<AgentWorkOrder>> =>
+    safeCall(() => authFetch<AgentWorkOrder>(`/agent/work-orders/${id}`)),
+  startWorkOrder: (id: string): Promise<ApiResponse<AgentWorkOrder>> =>
+    safeCall(() => authFetch(`/agent/work-orders/${id}/start`, { method: 'POST' })),
+  addWorkOrderPhoto: (id: string, fileToUpload: File): Promise<ApiResponse<{ url: string }>> => {
+    const form = new FormData();
+    form.append('file', fileToUpload);
+    return safeCall(() =>
+      authFetch(`/agent/work-orders/${id}/photos`, { method: 'POST', body: form })
+    );
+  },
+  completeWorkOrder: (id: string, report: string): Promise<ApiResponse<AgentWorkOrder>> =>
+    safeCall(() =>
+      authFetch(`/agent/work-orders/${id}/complete`, {
+        method: 'POST',
+        body: JSON.stringify({ report }),
+      })
+    ),
   listVerifications: async (
     options: AgentVerificationListOptions = {}
   ): Promise<ApiResponse<Paginated<VerificationVisit>>> => {
