@@ -6,7 +6,7 @@ import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerFinancingType } from '@/lib/api/buyerOffers';
-import type { BuyerListing } from '@/lib/api/buyer';
+import type { BuyerListingTarget } from '@/lib/api/buyer';
 import { ApiError } from '@/lib/api/client';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { readGate } from '@/lib/verificationGate';
@@ -14,7 +14,7 @@ import { readGate } from '@/lib/verificationGate';
 interface Props {
   open: boolean;
   onClose: () => void;
-  listing: BuyerListing | null;
+  listing: BuyerListingTarget | null;
 }
 
 const FINANCING_OPTIONS: { value: BuyerFinancingType; label: string }[] = [
@@ -34,7 +34,7 @@ export function MakeOfferSheet({ open, onClose, listing }: Props) {
   );
 }
 
-function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerListing }) {
+function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerListingTarget }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();

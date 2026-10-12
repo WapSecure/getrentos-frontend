@@ -35,6 +35,7 @@ import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { formatDate } from '@/lib/format';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
+import { useAskSeller } from '@/hooks/useAskSeller';
 
 export default function BuyerListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,6 +45,7 @@ export default function BuyerListingDetail() {
   const [viewingOpen, setViewingOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
   const [touring, setTouring] = useState(false);
+  const ask = useAskSeller();
 
   const query = useQuery({
     queryKey: qk.buyer.listingDetail(id),
@@ -80,7 +82,8 @@ export default function BuyerListingDetail() {
         {listing ? (
           <>
             <Pressable
-              onPress={() => router.push('/(app)/(buyer)/messages')}
+              onPress={() => ask.mutate(listing.id)}
+              disabled={ask.isPending}
               accessibilityRole="button"
               accessibilityLabel="Message the owner"
               hitSlop={10}
