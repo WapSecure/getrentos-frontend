@@ -80,7 +80,13 @@
         }
       ],
       "expo-apple-authentication",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "GetRentos checks you are at the property when you film its video tour, so buyers and renters see it was filmed on site."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

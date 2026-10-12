@@ -3,6 +3,7 @@ import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
 import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoOnSiteReport } from '../filmedOnSite';
 
 /**
  * The property-owner portal (sellers). Mirrors the backend's /owner/* routes;
@@ -67,6 +68,8 @@ export interface OwnerProperty {
   videoTourKey?: string;
   /** Signed link to the video tour, valid for a few hours. */
   videoTourUrl?: string;
+  /** The video tour was filmed in the app at the property. */
+  videoTourFilmedOnSite?: boolean;
   hasActiveSaleListing: boolean;
   createdAt: string;
 }
@@ -453,10 +456,10 @@ export const ownerApi = {
       body: { coverImageKey: keys[0], galleryImageKeys: keys.slice(1) },
     }),
   /** Attaches (key) or removes (null) the property's video tour. */
-  setVideoTour: (id: string, videoTourKey: string | null) =>
+  setVideoTour: (id: string, videoTourKey: string | null, onSite?: VideoOnSiteReport | null) =>
     apiFetch<OwnerProperty>(`/owner/properties/${id}`, {
       method: 'PATCH',
-      body: { videoTourKey },
+      body: { videoTourKey, ...(onSite ? { videoTourOnSite: onSite } : {}) },
     }),
   /** Stages a photo or video; it becomes the property's once attached. */
   uploadMedia: (file: PickedFile, kind: 'image' | 'video') => {

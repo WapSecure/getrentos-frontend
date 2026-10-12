@@ -36,6 +36,7 @@ import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { formatDate } from '@/lib/format';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { useAskSeller } from '@/hooks/useAskSeller';
+import { FilmedOnSite } from '@/components/video/FilmedOnSite';
 
 export default function BuyerListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -184,7 +185,11 @@ export default function BuyerListingDetail() {
                 <Pressable
                   onPress={() => setTouring(true)}
                   accessibilityRole="button"
-                  accessibilityLabel="Watch the video tour"
+                  accessibilityLabel={
+                    listing.videoTourFilmedOnSite
+                      ? 'Watch the video tour, filmed on site'
+                      : 'Watch the video tour'
+                  }
                 >
                   <Card
                     elevated
@@ -204,9 +209,13 @@ export default function BuyerListingDetail() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text variant="bodyStrong">Video tour</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        Walk through this property on video
-                      </Text>
+                      {listing.videoTourFilmedOnSite ? (
+                        <FilmedOnSite />
+                      ) : (
+                        <Text variant="caption" color="mutedForeground">
+                          Walk through this property on video
+                        </Text>
+                      )}
                     </View>
                   </Card>
                 </Pressable>

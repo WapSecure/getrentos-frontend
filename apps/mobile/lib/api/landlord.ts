@@ -2,6 +2,7 @@ import { apiDownload, apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoOnSiteReport } from '../filmedOnSite';
 
 /* ------------------------------ dashboard ------------------------------ */
 
@@ -62,6 +63,8 @@ export interface LandlordProperty {
   videoTourKey?: string;
   /** Signed link to the video tour, valid for a few hours. */
   videoTourUrl?: string;
+  /** The video tour was filmed in the app at the property. */
+  videoTourFilmedOnSite?: boolean;
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
@@ -745,6 +748,8 @@ export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
 };
 
 export interface UpdatePropertyInput {
+  /** Where the app's camera filmed a new video tour, for the badge. */
+  videoTourOnSite?: VideoOnSiteReport;
   /** The pin the owner placed on the map; both or neither. */
   latitude?: number;
   longitude?: number;

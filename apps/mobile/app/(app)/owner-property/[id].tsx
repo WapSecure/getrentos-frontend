@@ -37,6 +37,7 @@ import { Sheet } from '@/components/Sheet';
 import { OwnershipProofSheet } from '@/components/owner/OwnershipProofSheet';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { VideoTourField } from '@/components/video/VideoTourField';
+import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
 import { OwnerPhotosField } from '@/components/owner/OwnerPhotosField';
 import type { PickedVideo } from '@/lib/filePicker';
 
@@ -97,11 +98,11 @@ export default function OwnerPropertyDetail() {
   };
 
   /** Uploads a video and puts it on the property in place of any earlier one. */
-  const attachVideo = async (file: PickedVideo) => {
+  const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const previous = property.data?.videoTourKey;
     const { key } = await ownerApi.uploadMedia(file, 'video');
     try {
-      await ownerApi.setVideoTour(id, key);
+      await ownerApi.setVideoTour(id, key, onSite);
     } catch (e) {
       ownerApi.removeMedia(key).catch(() => undefined);
       throw e;
@@ -225,6 +226,7 @@ export default function OwnerPropertyDetail() {
                 <VideoTourField
                   title={p.name}
                   hasVideo={!!p.videoTourKey}
+                  filmedOnSite={p.videoTourFilmedOnSite}
                   videoUrl={p.videoTourUrl}
                   onUpload={attachVideo}
                   onRemove={removeVideo}
