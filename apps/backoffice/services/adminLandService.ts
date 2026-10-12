@@ -10,6 +10,8 @@ import type {
   LandDiligenceDecisionInput,
   LandDiligenceDocumentLinkInput,
   LandDiligenceRecord,
+  LandDocumentUploadInput,
+  LandUploadedDocument,
   LandDiligenceReviewSummary,
   LandDiligenceStatus,
   LandEncumbrance,
@@ -150,6 +152,25 @@ export const adminLandService = {
     return safeCall(() =>
       authFetch(`${base(propertyId)}/documents/${encodeURIComponent(documentId)}`, {
         method: 'DELETE',
+      })
+    );
+  },
+
+  /**
+   * Puts staff evidence (e.g. a registry search report) on the property so it
+   * can be cited. Multipart: the browser sets the boundary, so no Content-Type.
+   */
+  uploadDocument(
+    propertyId: string,
+    input: LandDocumentUploadInput
+  ): Promise<ApiResponse<LandUploadedDocument>> {
+    const form = new FormData();
+    form.append('file', input.file);
+    form.append('documentType', input.documentType);
+    return safeCall(() =>
+      authFetch<LandUploadedDocument>(`${base(propertyId)}/documents/upload`, {
+        method: 'POST',
+        body: form,
       })
     );
   },

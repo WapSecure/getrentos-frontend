@@ -24,6 +24,7 @@ import {
   LAND_PURCHASE_STATUSES,
   type LandPurchaseStatus,
   type LandPurchaseSummary,
+  type OwnerLandLayoutSummary,
 } from '@/types/landDeveloper';
 import { PURCHASE_STATUS } from '../developer/labels';
 import { LandPropertyNav } from '../developer/LandPropertyNav';
@@ -37,6 +38,39 @@ interface SalesDeskProps {
   /** Opens the desk filtered to this parcel's estate (from the property navigation). */
   initialPropertyId?: string;
 }
+
+/** The chosen estate at a glance: whose it is and what is left to sell. */
+const EstateSummary = ({ layout }: { layout: OwnerLandLayoutSummary }) => {
+  const { plots } = layout;
+  const figures = [
+    { label: 'Available', value: plots.available },
+    { label: 'Reserved', value: plots.reserved },
+    { label: 'Paying', value: plots.underInstallment },
+    { label: 'Sold', value: plots.sold + plots.allocated },
+    { label: 'Withheld', value: plots.withheld },
+  ];
+  return (
+    <div className="mb-6 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="flex flex-wrap items-center gap-2 font-medium text-foreground">
+          {layout.name}
+          {layout.access === 'MANDATE' && <Badge variant="info">Selling under mandate</Badge>}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {layout.propertyTitle} · {layout.city}, {layout.state} · {plots.total} plots
+        </p>
+      </div>
+      <dl className="grid grid-cols-3 gap-x-5 gap-y-2 text-sm sm:flex sm:gap-5">
+        {figures.map((figure) => (
+          <div key={figure.label}>
+            <dt className="text-xs text-muted-foreground">{figure.label}</dt>
+            <dd className="font-semibold text-foreground">{figure.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+};
 
 const columns: Column<LandPurchaseSummary>[] = [
   {
@@ -134,7 +168,7 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
         : undefined,
     [initialPropertyId, layouts.data]
   );
-  const layoutId = layoutChoice ?? scopedLayout?.layoutId ?? ALL;
+  const layoutId = layoutChoice ?? scopedLayout?.id ?? ALL;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -161,9 +195,9 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
   const layoutOptions = [
     { value: ALL, label: 'All estates' },
     ...(layouts.data ?? []).map((layout) => ({
-      value: layout.layoutId,
-      label: layout.layoutName,
-      searchText: `${layout.layoutName} ${layout.propertyTitle}`,
+      value: layout.id,
+      label: layout.access === 'MANDATE' ? `${layout.name} (mandate)` : layout.name,
+      searchText: `${layout.name} ${layout.propertyTitle} ${layout.city}`,
     })),
   ];
   const statusOptions: { value: LandPurchaseStatus | undefined; label: string }[] = [
@@ -171,6 +205,7 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
     ...LAND_PURCHASE_STATUSES.map((value) => ({ value, label: PURCHASE_STATUS[value].label })),
   ];
   const filtered = Boolean(status || activeLayoutId || search);
+  const activeLayout = layouts.data?.find((layout) => layout.id === activeLayoutId);
 
   return (
     <>
@@ -197,6 +232,8 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
           </Link>
         </p>
       )}
+
+      {activeLayout && <EstateSummary layout={activeLayout} />}
 
       <CollectionsSummaryCards layoutId={activeLayoutId} />
 

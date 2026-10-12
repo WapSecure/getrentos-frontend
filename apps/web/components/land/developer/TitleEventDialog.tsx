@@ -17,10 +17,11 @@ import {
   type LandTitleEventInput,
   type LandTitleEventKind,
 } from '@/types/landDeveloper';
-import { DocumentReferenceField } from './feedback';
+import { LandDocumentPicker } from '../documents/LandDocumentPicker';
 import { TITLE_EVENT_KIND_LABELS } from './labels';
 
 interface TitleEventDialogProps {
+  propertyId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isSaving: boolean;
@@ -35,6 +36,7 @@ const KIND_OPTIONS = LAND_TITLE_EVENT_KINDS.map((kind) => ({
 const today = () => new Date().toISOString().slice(0, 10);
 
 const TitleEventForm = ({
+  propertyId,
   isSaving,
   onSubmit,
   onCancel,
@@ -69,7 +71,7 @@ const TitleEventForm = ({
       instrumentReference: optional(instrumentReference),
       registeredAt: optional(registeredAt),
       note: optional(note),
-      documentId: optional(documentId),
+      documentId: documentId || undefined,
     });
   };
 
@@ -139,11 +141,13 @@ const TitleEventForm = ({
           onChange={(event) => setNote(event.target.value)}
         />
       </Field>
-      <DocumentReferenceField
-        id={`${id}-document`}
+      <LandDocumentPicker
+        propertyId={propertyId}
         label="Supporting document"
+        hint="Optional. The instrument itself, e.g. the registered deed or consent."
         value={documentId}
         onChange={setDocumentId}
+        disabled={isSaving}
       />
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>

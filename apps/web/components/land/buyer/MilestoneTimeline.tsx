@@ -156,7 +156,7 @@ export const MilestoneTimeline = ({
           const Icon = ICONS[m.status];
           const action = milestoneAction(ordered, m, { requiredOnly, contractOpen });
           return (
-            <li key={m.id} className="relative">
+            <li key={m.key} className="relative">
               <Icon
                 className={`absolute -left-[33px] top-0.5 h-5 w-5 bg-background ${ICON_TONE[m.status]}`}
                 aria-hidden

@@ -4,9 +4,11 @@ import { useId, useState, type FormEvent } from 'react';
 import { Button, CurrencyInput, Field, Input, NumberInput, Textarea } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { LandLayoutInput, OwnerLandLayout } from '@/types/landDeveloper';
-import { DocumentReferenceField } from './feedback';
+import { LandDocumentPicker } from '../documents/LandDocumentPicker';
 
 interface LayoutFormProps {
+  /** The parcel the estate is laid out on; its documents back the layout plan. */
+  propertyId: string;
   /** Editing an existing layout; omit to create one. */
   layout?: OwnerLandLayout;
   isSaving: boolean;
@@ -39,6 +41,7 @@ const fromLayout = (layout?: OwnerLandLayout): FormState => ({
 
 /** Estate name, approval, reservation hold and the per-plot fees. */
 export const LayoutForm = ({
+  propertyId,
   layout,
   isSaving,
   submitLabel,
@@ -131,11 +134,14 @@ export const LayoutForm = ({
         </Field>
       </div>
 
-      <DocumentReferenceField
-        id={`${id}-plan`}
+      <LandDocumentPicker
+        propertyId={propertyId}
         label="Approved layout plan document"
+        hint="Optional. The approved layout plan, shown to compliance and buyers as evidence."
+        suggestedType="LAYOUT_PLAN"
         value={form.layoutPlanDocumentId}
         onChange={(value) => set('layoutPlanDocumentId', value)}
+        disabled={isSaving}
       />
 
       <fieldset className="rounded-xl border border-border p-4">

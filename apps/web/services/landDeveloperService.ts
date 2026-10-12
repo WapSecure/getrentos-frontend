@@ -15,14 +15,17 @@ import type {
   LandPlotUpdateInput,
   LandPurchaseDetail,
   LandPurchaseSummary,
+  LandResaleSummary,
   LandRiskAssessment,
   LandSaleDocumentKind,
   LandSellerAnalytics,
   LandTitleEvent,
   LandTitleEventInput,
   OwnerLandLayout,
+  OwnerLandLayoutSummary,
   SellerLandPurchaseListParams,
 } from '@/types/landDeveloper';
+import type { LandDocument, LandDocumentUploadInput } from '@/types/landDocument';
 
 const json = (method: string, body?: unknown): RequestInit => ({
   method,
@@ -30,6 +33,8 @@ const json = (method: string, body?: unknown): RequestInit => ({
 });
 
 const layoutPath = (propertyId: string) => `/owner/land/${encodeURIComponent(propertyId)}/layout`;
+const documentsPath = (propertyId: string) =>
+  `/owner/land/${encodeURIComponent(propertyId)}/documents`;
 
 const saveBlob = (blob: Blob, filename: string) => {
   const url = window.URL.createObjectURL(blob);
@@ -49,6 +54,9 @@ const saveBlob = (blob: Blob, filename: string) => {
  */
 export const landDeveloperService = {
   // ─── Layout ────────────────────────────────────────────────────────────────
+
+  /** Every layout the caller can sell from: owned outright or under a listing mandate. */
+  listMyLayouts: () => safeCall(() => authFetch<OwnerLandLayoutSummary[]>('/owner/land/layouts')),
 
   /** 404 when the parcel has no layout yet; pair with `unwrapOptional`. */
   getLayout: (propertyId: string) =>
@@ -168,6 +176,10 @@ export const landDeveloperService = {
   // ─── Resale conveyance ─────────────────────────────────────────────────────
 
   /** 400 for a transaction that is not a land sale. */
+  /** The resale being conveyed: its property (for document pickers), buyer and escrow state. */
+  getResale: (txId: string) =>
+    safeCall(() => authFetch<LandResaleSummary>(`/owner/land/transactions/${txId}`)),
+
   listTransactionMilestones: (txId: string) =>
     safeCall(() => authFetch<LandMilestone[]>(`/owner/land/transactions/${txId}/milestones`)),
 
@@ -177,6 +189,30 @@ export const landDeveloperService = {
         `/owner/land/transactions/${txId}/milestones/${encodeURIComponent(key)}/deliver`,
         json('POST', input)
       )
+    ),
+
+  // ─── Property documents ────────────────────────────────────────────────────
+
+  /** Newest first, each with a short-lived preview link and where it is used. */
+  listDocuments: (propertyId: string) =>
+    safeCall(() => authFetch<LandDocument[]>(documentsPath(propertyId))),
+
+  /** Multipart; the browser sets the boundary, so no Content-Type here. */
+  uploadDocument: (propertyId: string, input: LandDocumentUploadInput) => {
+    const form = new FormData();
+    form.append('file', input.file);
+    form.append('documentType', input.documentType);
+    return safeCall(() =>
+      authFetch<LandDocument>(documentsPath(propertyId), { method: 'POST', body: form })
+    );
+  },
+
+  /** Refused (400) while anything cites the document. */
+  deleteDocument: (propertyId: string, documentId: string) =>
+    safeCall(() =>
+      authFetch<void>(`${documentsPath(propertyId)}/${encodeURIComponent(documentId)}`, {
+        method: 'DELETE',
+      })
     ),
 
   // ─── Insights and chain of title ───────────────────────────────────────────

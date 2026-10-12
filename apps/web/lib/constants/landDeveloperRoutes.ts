@@ -21,8 +21,11 @@ export const LAND_DEVELOPER_ROUTES = {
       : `${ROUTES.OWNER_LAND}/purchases`,
   purchase: (purchaseId: string) =>
     `${ROUTES.OWNER_LAND}/purchases/${encodeURIComponent(purchaseId)}`,
-  transactionMilestones: (txId: string) =>
-    `${ROUTES.OWNER_LAND}/transactions/${encodeURIComponent(txId)}`,
+  /** `propertyId` lets the delivery form attach the land's own documents. */
+  transactionMilestones: (txId: string, propertyId?: string) =>
+    `${ROUTES.OWNER_LAND}/transactions/${encodeURIComponent(txId)}${
+      propertyId ? `?property=${encodeURIComponent(propertyId)}` : ''
+    }`,
 } as const;
 
 /** The sidebar entry for the sales desk (a plain string for nav matching). */

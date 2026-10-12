@@ -23,7 +23,10 @@ import {
   LAND_REVIEW_REPORT_MAX,
   LAND_REVIEW_REPORT_MIN,
   type LandReviewCase,
+  type LandReviewCiteInput,
+  type LandReviewUploadInput,
 } from '@/types/landReviewer';
+import type { ReviewEvidenceActions } from './ReviewCheckEvidence';
 import { ReviewCheckRow } from './ReviewCheckRow';
 import { ReviewDocuments } from './ReviewDocuments';
 import { pendingChecks } from './reviewRules';
@@ -76,6 +79,44 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
       if (reason instanceof ApiError && reason.status === 409) refetch();
     },
     onSettled: () => setSavingKey(null),
+  });
+
+  // Evidence calls answer with the refreshed case, so Pass re-enables from it.
+  const [evidenceKey, setEvidenceKey] = useState<string | null>(null);
+  const evidenceCall =
+    <T,>(call: (input: T) => Promise<LandReviewCase>, done: string) =>
+    async (key: string, input: T) => {
+      setEvidenceKey(key);
+      try {
+        store(await call(input));
+        setToast({ message: done, variant: 'success' });
+      } catch (reason) {
+        setToast({
+          message: reason instanceof Error ? reason.message : 'That did not go through.',
+          variant: 'error',
+        });
+        throw reason;
+      } finally {
+        setEvidenceKey(null);
+      }
+    };
+  const uploadEvidence = evidenceCall(
+    (input: LandReviewUploadInput) => unwrap(landReviewerService.uploadDocument(seatId, input)),
+    'Document uploaded and cited.'
+  );
+  const citeEvidence = evidenceCall(
+    (input: LandReviewCiteInput) => unwrap(landReviewerService.citeDocument(seatId, input)),
+    'Document cited.'
+  );
+  const unciteEvidence = evidenceCall(
+    (documentId: string) => unwrap(landReviewerService.uncite(seatId, documentId)),
+    'Citation removed.'
+  );
+  const evidenceFor = (key: string): ReviewEvidenceActions => ({
+    upload: (input) => uploadEvidence(key, input),
+    cite: (input) => citeEvidence(key, input),
+    uncite: (documentId) => unciteEvidence(key, documentId),
+    busyKey: evidenceKey,
   });
 
   const submit = useMutation({
@@ -182,6 +223,7 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
                   editable={active}
                   isSaving={savingKey === check.key}
                   onDecide={(status, note) => decide.mutate({ key: check.key, status, note })}
+                  evidence={evidenceFor(check.key)}
                 />
               ))}
             </ul>

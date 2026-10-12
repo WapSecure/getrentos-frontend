@@ -21,6 +21,7 @@ import { LandRegistrationDialog, type LandRegistrationInput } from './LandRegist
 import { LandPropertyNav } from './developer/LandPropertyNav';
 import { RiskBreakdownCard } from './developer/RiskBreakdownCard';
 import { TitleHistorySection } from './developer/TitleHistorySection';
+import { LAND_DOCUMENTS_ANCHOR, LandDocumentsSection } from './documents/LandDocumentsSection';
 
 const PAGE_SIZE = 9;
 
@@ -288,6 +289,7 @@ export const OwnerLandWorkspace = () => {
                 record={selected}
                 isSubmitting={submitForReview.isPending}
                 onSubmit={() => submitForReview.mutate(selected.property.id)}
+                documentsAnchor={LAND_DOCUMENTS_ANCHOR}
               />
               <LandParcelEditor
                 key={selected.property.id}
@@ -299,6 +301,11 @@ export const OwnerLandWorkspace = () => {
                 onUploadProof={async (proof) => {
                   await uploadProof.mutateAsync({ propertyId: selected.property.id, proof });
                 }}
+              />
+              <LandDocumentsSection
+                key={`documents-${selected.property.id}`}
+                propertyId={selected.property.id}
+                notify={notify}
               />
               <TitleHistorySection
                 key={`title-${selected.property.id}`}

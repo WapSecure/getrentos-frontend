@@ -18,7 +18,7 @@ export const decisionProblem = (
   documents: LandReviewDocument[]
 ): string | null => {
   if (status === 'PASSED' && check.requiresDocument && !hasCitedDocument(check, documents)) {
-    return 'This check can only pass once a document is cited against it. Ask the GetRentos case reviewer to cite the document you relied on, or flag it.';
+    return 'This check can only pass once a document is cited against it. Upload the document you relied on, or cite one already on the property, above. Otherwise flag it.';
   }
   const needsNote = status === 'FLAGGED' || (status === 'NOT_APPLICABLE' && check.required);
   if (needsNote && !note.trim()) {

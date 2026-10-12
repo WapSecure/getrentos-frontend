@@ -7,28 +7,35 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
 import { landDeveloperService } from '@/services/landDeveloperService';
+import type { EscrowSaleTransaction } from '@/types/owner';
+
+interface LandConveyanceEntryProps {
+  transaction: Pick<EscrowSaleTransaction, 'id' | 'propertyId' | 'propertyType'>;
+}
 
 /**
  * A link to the conveyance steps of a land sale, for the owner's transaction
- * detail. Transactions do not say what kind of property they are for, so this
- * asks for the land milestones and renders nothing when the sale is not land
- * (the API refuses with 400) or the request fails for any other reason.
+ * detail. Only land sales have them: the transaction says what it sold, so
+ * nothing is asked of the API for any other property. Reading the steps writes
+ * nothing; before anyone acts they are the planned steps of the sale.
  */
-export const LandConveyanceEntry = ({ transactionId }: { transactionId: string }) => {
-  const { data } = useQuery({
-    queryKey: landDeveloperKeys.transactionMilestones(transactionId),
-    queryFn: () => unwrap(landDeveloperService.listTransactionMilestones(transactionId)),
-    retry: false,
+export const LandConveyanceEntry = ({ transaction }: LandConveyanceEntryProps) => {
+  const isLand = transaction.propertyType === 'LAND';
+  const { data, isError } = useQuery({
+    queryKey: landDeveloperKeys.transactionMilestones(transaction.id),
+    queryFn: () => unwrap(landDeveloperService.listTransactionMilestones(transaction.id)),
+    enabled: isLand,
     staleTime: 60_000,
   });
 
-  if (!data || data.length === 0) return null;
+  if (!isLand) return null;
 
-  const required = data.filter((milestone) => milestone.required);
+  const milestones = data ?? [];
+  const required = milestones.filter((milestone) => milestone.required);
   const confirmed = required.filter(
     (milestone) => milestone.status === 'CONFIRMED' || milestone.status === 'WAIVED'
   ).length;
-  const awaitingYou = data.filter(
+  const awaitingYou = milestones.filter(
     (milestone) => milestone.status === 'PENDING' || milestone.status === 'DISPUTED'
   ).length;
 
@@ -39,13 +46,18 @@ export const LandConveyanceEntry = ({ transactionId }: { transactionId: string }
         <div>
           <p className="text-sm font-medium text-foreground">Land conveyance</p>
           <p className="text-xs text-muted-foreground">
-            {confirmed} of {required.length} required steps confirmed
-            {awaitingYou > 0 ? ` · ${awaitingYou} for you to deliver` : ''}
+            {!data
+              ? isError
+                ? 'Deed, survey and possession steps the buyer confirms before payout.'
+                : 'Loading the conveyance steps…'
+              : `${confirmed} of ${required.length} required steps confirmed${
+                  awaitingYou > 0 ? ` · ${awaitingYou} for you to deliver` : ''
+                }`}
           </p>
         </div>
       </div>
       <Button
-        href={LAND_DEVELOPER_ROUTES.transactionMilestones(transactionId)}
+        href={LAND_DEVELOPER_ROUTES.transactionMilestones(transaction.id, transaction.propertyId)}
         variant="outline"
         size="sm"
         rounded="lg"

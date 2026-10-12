@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, PageErrorState } from '@getrentos/ui';
 import { ArrowLeft, Info } from 'lucide-react';
@@ -23,6 +24,13 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   const { notify, toast } = useNotify();
   const [delivering, setDelivering] = useState<LandMilestone | null>(null);
   const key = landDeveloperKeys.transactionMilestones(txId);
+  const propertyHint = useSearchParams().get('property');
+  // The sale says which land it is; the link's hint only bridges the first load.
+  const resale = useQuery({
+    queryKey: [...key, 'sale'],
+    queryFn: () => unwrap(landDeveloperService.getResale(txId)),
+  });
+  const propertyId = resale.data?.propertyId ?? propertyHint;
 
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: key,
@@ -38,9 +46,15 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
       input: LandMilestoneDeliverInput;
     }) => unwrap(landDeveloperService.deliverTransactionMilestone(txId, milestone.key, input)),
     onSuccess: (updated) => {
+      // By key: before the first action the steps are planned (`planned:<KEY>` ids)
+      // and acting creates every row, so the list is reloaded for the real ids.
       queryClient.setQueryData<LandMilestone[]>(key, (current) =>
-        current?.map((milestone) => (milestone.id === updated.id ? updated : milestone))
+        current?.map((milestone) => (milestone.key === updated.key ? updated : milestone))
       );
+      queryClient.invalidateQueries({ queryKey: key });
+      if (propertyId) {
+        queryClient.invalidateQueries({ queryKey: landDeveloperKeys.documents(propertyId) });
+      }
       setDelivering(null);
       notify(`${updated.label}: marked delivered. The buyer has been asked to confirm.`);
     },
@@ -100,6 +114,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
 
       <DeliverMilestoneDialog
         milestone={delivering}
+        propertyId={propertyId}
         onOpenChange={(open) => !open && setDelivering(null)}
         isSaving={deliver.isPending}
         onDeliver={(milestone, input) => deliver.mutate({ milestone, input })}

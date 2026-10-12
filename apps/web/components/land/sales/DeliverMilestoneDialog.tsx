@@ -11,10 +11,12 @@ import {
   Textarea,
 } from '@getrentos/ui';
 import type { LandMilestone, LandMilestoneDeliverInput } from '@/types/landDeveloper';
-import { DocumentReferenceField } from '../developer/feedback';
+import { LandDocumentPicker } from '../documents/LandDocumentPicker';
 
 interface DeliverMilestoneDialogProps {
   milestone: LandMilestone | null;
+  /** The land sold; its documents can be attached as evidence. Unknown: no picker. */
+  propertyId?: string | null;
   onOpenChange: (open: boolean) => void;
   isSaving: boolean;
   onDeliver: (milestone: LandMilestone, input: LandMilestoneDeliverInput) => void;
@@ -22,11 +24,13 @@ interface DeliverMilestoneDialogProps {
 
 const DeliverForm = ({
   milestone,
+  propertyId,
   isSaving,
   onDeliver,
   onCancel,
 }: {
   milestone: LandMilestone;
+  propertyId?: string | null;
   isSaving: boolean;
   onDeliver: DeliverMilestoneDialogProps['onDeliver'];
   onCancel: () => void;
@@ -42,7 +46,7 @@ const DeliverForm = ({
         event.preventDefault();
         onDeliver(milestone, {
           ...(note.trim() ? { note: note.trim() } : {}),
-          ...(documentId.trim() ? { documentId: documentId.trim() } : {}),
+          ...(documentId ? { documentId } : {}),
         });
       }}
     >
@@ -59,11 +63,13 @@ const DeliverForm = ({
           onChange={(event) => setNote(event.target.value)}
         />
       </Field>
-      <DocumentReferenceField
-        id={`${id}-document`}
+      <LandDocumentPicker
+        propertyId={propertyId}
         label="Evidence document"
+        hint="Optional. e.g. the executed deed or the survey plan in the buyer's name."
         value={documentId}
         onChange={setDocumentId}
+        disabled={isSaving}
       />
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
@@ -80,6 +86,7 @@ const DeliverForm = ({
 /** Marks a conveyance step delivered, with an optional note and evidence document. */
 export const DeliverMilestoneDialog = ({
   milestone,
+  propertyId,
   onOpenChange,
   isSaving,
   onDeliver,
@@ -95,8 +102,9 @@ export const DeliverMilestoneDialog = ({
           dispute it if it was not done.
         </DialogDescription>
         <DeliverForm
-          key={milestone.id}
+          key={milestone.key}
           milestone={milestone}
+          propertyId={propertyId}
           isSaving={isSaving}
           onDeliver={onDeliver}
           onCancel={() => onOpenChange(false)}

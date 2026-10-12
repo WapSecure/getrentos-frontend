@@ -186,6 +186,41 @@ export interface LandDiligenceDocumentLinkInput {
   note?: string;
 }
 
+/** What a land document claims to be (LAND_DOCUMENT_TYPES in the API's land-document.dto.ts). */
+export const LAND_DOCUMENT_TYPES = [
+  'CERTIFICATE_OF_OCCUPANCY',
+  'GOVERNORS_CONSENT',
+  'DEED_OF_ASSIGNMENT',
+  'REGISTERED_CONVEYANCE',
+  'SURVEY_PLAN',
+  'EXCISION_GAZETTE',
+  'ALLOCATION_LETTER',
+  'LAYOUT_PLAN',
+  'REGISTRY_SEARCH_REPORT',
+  'CHARTING_REPORT',
+  'LITIGATION_SEARCH_REPORT',
+  'SITE_INSPECTION_REPORT',
+  'VALUATION_REPORT',
+  'CONTRACT_OF_SALE',
+  'POWER_OF_ATTORNEY',
+  'RECEIPT',
+  'PHOTO',
+  'OTHER',
+] as const;
+export type LandDocumentType = (typeof LAND_DOCUMENT_TYPES)[number];
+
+/** Staff evidence put on the property, e.g. a registry search report, to cite. */
+export interface LandDocumentUploadInput {
+  documentType: LandDocumentType;
+  file: File;
+}
+
+/** The uploaded document as the API returns it (LandDocumentDto). */
+export interface LandUploadedDocument extends EvidenceItem {
+  documentType: string;
+  canDelete: boolean;
+}
+
 // ─── Integrity: conflicts, encumbrances, chain of title ────────────────────
 
 export type LandConflictKind = 'TITLE_NUMBER' | 'SURVEY_NUMBER' | 'BOUNDARY_OVERLAP';
