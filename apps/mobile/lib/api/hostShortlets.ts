@@ -2,6 +2,7 @@ import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortlets';
+import type { VideoOnSiteReport } from '../filmedOnSite';
 
 /**
  * Hosting short stays: the host's side of /host/shortlets. Owners, landlords,
@@ -36,6 +37,8 @@ export interface HostListing {
   images: string[];
   videoKey?: string;
   videoUrl?: string;
+  /** The uploaded video was filmed in the app at the property. */
+  videoFilmedOnSite?: boolean;
   tourUrl?: string;
   status: HostListingStatus;
   pricingMode: PricingMode;
@@ -90,6 +93,8 @@ export interface ListingPricingInput {
   cancellationPolicy?: ShortletCancellationPolicy;
   imageKeys?: string[];
   videoKey?: string;
+  /** Where the app's camera filmed a new video, for the "Filmed on site" badge. */
+  videoOnSite?: VideoOnSiteReport;
   videoUrl?: string;
   tourUrl?: string;
 }
