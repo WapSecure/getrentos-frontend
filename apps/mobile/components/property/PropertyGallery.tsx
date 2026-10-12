@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
-  Dimensions,
   ScrollView,
   View,
+  useWindowDimensions,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
@@ -17,8 +18,6 @@ export interface PropertyGalleryProps {
   emptyLabel?: string;
 }
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 /** Swipeable photo gallery with page dots, falling back to a labelled placeholder. */
 export function PropertyGallery({
   images,
@@ -26,10 +25,21 @@ export function PropertyGallery({
   emptyLabel = 'No photos for this listing yet',
 }: PropertyGalleryProps) {
   const { colors, spacing } = useTheme();
+  const window = useWindowDimensions();
   const [page, setPage] = useState(0);
+  // Each photo is exactly as wide as the gallery itself. The window's width at
+  // launch is not that on the web, in split screen or after a rotation, and a
+  // narrower photo let the next one show beside it.
+  const [measured, setMeasured] = useState<number | null>(null);
+  const width = measured ?? window.width;
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    const next = Math.round(e.nativeEvent.layout.width);
+    if (next > 0 && next !== measured) setMeasured(next);
+  };
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const next = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+    const next = Math.round(e.nativeEvent.contentOffset.x / width);
     if (next !== page) setPage(next);
   };
 
@@ -53,7 +63,7 @@ export function PropertyGallery({
   }
 
   return (
-    <View style={{ height }}>
+    <View style={{ height }} onLayout={onLayout}>
       <ScrollView
         horizontal
         pagingEnabled
@@ -71,7 +81,7 @@ export function PropertyGallery({
             recyclingKey={uri}
             transition={200}
             accessible={false}
-            style={{ width: SCREEN_WIDTH, height }}
+            style={{ width, height }}
           />
         ))}
       </ScrollView>

@@ -73,7 +73,10 @@ export default function BuyerNotificationInbox() {
       onRefresh={() => query.refetch()}
       onOpen={(n) => {
         if (!n.read) readOne.mutate(n.id);
-        const to = routeForNotification({ type: n.type.toUpperCase() }, 'buyer');
+        const to = routeForNotification(
+          { type: n.type.toUpperCase(), actionUrl: n.actionUrl, conversationId: n.conversationId },
+          'buyer'
+        );
         if (to !== '/(app)/notifications') router.push(to as Href);
       }}
       onReadAll={() => readAll.mutate()}

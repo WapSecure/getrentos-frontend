@@ -1,3 +1,4 @@
+import type { VideoCallJoin } from '@getrentos/shared';
 import { apiFetch } from './client';
 
 export const VIEWING_STATUSES = ['requested', 'confirmed', 'completed', 'cancelled'] as const;
@@ -26,6 +27,8 @@ export interface ViewingRequest {
   propertyName: string;
   unitId?: string;
   status: ViewingStatus;
+  /** 'video': a live video call at scheduledAt, hosted by the landlord. */
+  mode: 'in_person' | 'video';
   requestedAt: string;
   scheduledAt?: string;
   notes?: string;
@@ -34,9 +37,16 @@ export interface ViewingRequest {
 export const viewingsApi = {
   list: () => apiFetch<ViewingRequest[]>('/renter/viewing-requests'),
 
-  create: (propertyId: string, notes?: string) =>
+  create: (propertyId: string, notes?: string, mode: 'IN_PERSON' | 'VIDEO' = 'IN_PERSON') =>
     apiFetch<ViewingRequest>('/renter/viewing-requests', {
       method: 'POST',
-      body: { propertyId, notes: notes || undefined },
+      body: { propertyId, notes: notes || undefined, mode },
     }),
+
+  /** A personal link into a confirmed video viewing, from 15 minutes before it. */
+  joinVideoCall: (id: string) =>
+    apiFetch<VideoCallJoin>(`/renter/viewing-requests/${id}/video-call`, { method: 'POST' }),
+
+  /** Whether video viewings can be booked (the call service is configured). */
+  videoCallsAvailable: () => apiFetch<{ available: boolean }>('/video-calls/availability'),
 };

@@ -9,6 +9,7 @@ import {
   Home,
   ImagePlus,
   Loader2,
+  Pencil,
   Plus,
   Search,
   Send,
@@ -33,7 +34,7 @@ import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { EstateAgreement, EstateListing, EstateListingType } from '@/types/estate-marketplace';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 
 const statusBadge = (status: EstateAgreement['status']) => {
   switch (status) {
@@ -200,11 +201,23 @@ const NewListingPanel = ({
   const [listingType, setListingType] = useState<EstateListingType>('RENT');
   const [price, setPrice] = useState<number | string>('');
   const [availableFrom, setAvailableFrom] = useState(() => new Date().toISOString().slice(0, 10));
+  // A short let needs its own terms; the API refuses one without them.
+  const [maxGuests, setMaxGuests] = useState<number | string>(2);
+  const [minNights, setMinNights] = useState<number | string>(1);
+  const [cleaningFee, setCleaningFee] = useState<number | string>('');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const marketable = agreements.filter((a) => a.effective);
   const needsAgreement = marketable.length === 0;
-  const priceIsValid = Number(price) > 0;
+  const shortlet = listingType === 'SHORTLET';
+  const termsAreValid =
+    !shortlet ||
+    (Number.isInteger(Number(maxGuests)) &&
+      Number(maxGuests) >= 1 &&
+      Number.isInteger(Number(minNights)) &&
+      Number(minNights) >= 1 &&
+      (cleaningFee === '' || Number(cleaningFee) >= 0));
+  const priceIsValid = Number(price) > 0 && termsAreValid;
 
   const create = useMutation({
     mutationFn: (publish: boolean) =>
@@ -215,6 +228,17 @@ const NewListingPanel = ({
           price: Number(price),
           availableFrom,
           publish,
+          ...(shortlet
+            ? {
+                shortlet: {
+                  pricingMode: 'PER_NIGHT' as const,
+                  nightlyRate: Number(price),
+                  maxGuests: Number(maxGuests),
+                  minNights: Number(minNights),
+                  cleaningFee: cleaningFee === '' ? 0 : Number(cleaningFee),
+                },
+              }
+            : {}),
         })
       ),
     onSuccess: (listing) => {
@@ -291,6 +315,41 @@ const NewListingPanel = ({
         </div>
       </div>
 
+      {shortlet ? (
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-guests">
+              Guests, at most
+            </label>
+            <NumberInput
+              id="estate-listing-guests"
+              value={maxGuests}
+              onValueChange={(value) => setMaxGuests(value)}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-nights">
+              Minimum nights
+            </label>
+            <NumberInput
+              id="estate-listing-nights"
+              value={minNights}
+              onValueChange={(value) => setMinNights(value)}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-cleaning">
+              Cleaning fee (optional)
+            </label>
+            <NumberInput
+              id="estate-listing-cleaning"
+              value={cleaningFee}
+              onValueChange={(value) => setCleaningFee(value)}
+            />
+          </div>
+        </div>
+      ) : null}
+
       <div className="max-w-56">
         <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
         <DatePicker value={availableFrom} onChange={setAvailableFrom} />
@@ -325,17 +384,104 @@ const NewListingPanel = ({
   );
 };
 
+/** Change a listing's headline, price or start date without closing it. */
+const EditListingPanel = ({
+  estateId,
+  listing,
+  onDone,
+}: {
+  estateId: string;
+  listing: EstateListing;
+  onDone: () => void;
+}) => {
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState(listing.listingTitle ?? '');
+  const [price, setPrice] = useState<number | string>(listing.price);
+  const [availableFrom, setAvailableFrom] = useState(
+    listing.availableFrom ? listing.availableFrom.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(
+        estateMarketplaceService.updateListing(estateId, listing.id, {
+          ...(title.trim() && title.trim() !== (listing.listingTitle ?? '')
+            ? { listingTitle: title.trim() }
+            : {}),
+          ...(Number(price) !== listing.price ? { price: Number(price) } : {}),
+          ...(availableFrom !== listing.availableFrom?.slice(0, 10) ? { availableFrom } : {}),
+        })
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: estateKeys.estateListings(estateId) });
+      onDone();
+    },
+    onError: (err: Error) => setError(err.message || 'That listing could not be changed.'),
+  });
+
+  return (
+    <div className="rounded-xl border border-border p-3 space-y-3">
+      <div>
+        <label className="text-sm font-medium text-foreground" htmlFor={`edit-title-${listing.id}`}>
+          Headline
+        </label>
+        <Input
+          id={`edit-title-${listing.id}`}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={200}
+        />
+      </div>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm font-medium text-foreground" htmlFor={`edit-price-${listing.id}`}>
+            {listing.listingType === 'SHORTLET' ? 'Nightly rate' : 'Asking price'}
+          </label>
+          <NumberInput
+            id={`edit-price-${listing.id}`}
+            value={price}
+            onValueChange={(value) => setPrice(value)}
+          />
+        </div>
+        <div>
+          <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
+          <DatePicker value={availableFrom} onChange={setAvailableFrom} />
+        </div>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <div className="flex gap-2">
+        <Button
+          variant="primary"
+          disabled={Number(price) <= 0 || save.isPending}
+          onClick={() => {
+            setError(null);
+            save.mutate();
+          }}
+        >
+          {save.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          Save changes
+        </Button>
+        <Button variant="ghost" onClick={onDone}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export default function EstateMarketplacePage() {
   const { estate } = useSelectedEstate();
   const estateId = estate?.id ?? '';
   const queryClient = useQueryClient();
-  const { isPro } = usePlanTier();
+  const { isEnterprise } = useEstatePlan();
 
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   /** Which listing's photo panel is open. One at a time: the list is long. */
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
+  const [editListingId, setEditListingId] = useState<string | null>(null);
 
   const inventory = useQuery({
     queryKey: estateKeys.inventory(estateId),
@@ -531,7 +677,7 @@ export default function EstateMarketplacePage() {
                   onClick={() => bulkPublish.mutate(drafts.map((d) => d.id))}
                   disabled={bulkPublish.isPending}
                   title={
-                    isPro
+                    isEnterprise
                       ? 'Publish every draft at once (Enterprise)'
                       : 'Bulk publishing is an Enterprise feature'
                   }
@@ -594,6 +740,17 @@ export default function EstateMarketplacePage() {
                         <ImagePlus className="w-4 h-4" />
                         {listing.media?.length ? `Photos (${listing.media.length})` : 'Photos'}
                       </Button>
+                      {listing.status !== 'CLOSED' && (
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            setEditListingId((current) => (current === listing.id ? null : listing.id))
+                          }
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      )}
                       {listing.status === 'PUBLISHED' ? (
                         <Button
                           variant="ghost"
@@ -615,6 +772,13 @@ export default function EstateMarketplacePage() {
                   </div>
                   {mediaListingId === listing.id && (
                     <ListingMediaPanel estateId={estateId} listing={listing} />
+                  )}
+                  {editListingId === listing.id && (
+                    <EditListingPanel
+                      estateId={estateId}
+                      listing={listing}
+                      onDone={() => setEditListingId(null)}
+                    />
                   )}
                 </div>
               ))

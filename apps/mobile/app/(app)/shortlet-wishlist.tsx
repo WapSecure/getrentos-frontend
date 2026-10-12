@@ -128,7 +128,7 @@ export default function ShortletWishlist() {
                       {item.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {item.address}, {item.city}
+                      {[item.address, item.city].filter(Boolean).join(', ')}
                     </Text>
                     <View
                       style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 2 }}

@@ -27,7 +27,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import { EstateDuesTrendChart } from '@/components/estate/dashboard/EstateDuesTrendChart';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const modules = [
@@ -79,7 +79,7 @@ const modules = [
 
 export default function EstateDashboardPage() {
   const { estate, isLoading } = useSelectedEstate();
-  const { isPro } = usePlanTier();
+  const { isPro } = useEstatePlan();
 
   const { data: stats } = useQuery({
     queryKey: estateKeys.dashboardStats(estate?.id ?? ''),
@@ -131,6 +131,7 @@ export default function EstateDashboardPage() {
       </section>
 
       <ProFeatureGate
+        entitled={isPro}
         title="Analytics is a Pro feature"
         description="Upgrade to Pro to see collection stats and a 6-month dues trend for this estate."
       >

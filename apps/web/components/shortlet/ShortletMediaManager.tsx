@@ -7,6 +7,7 @@ import { Badge, Button, Field, Input, Toast, type ToastVariant } from '@getrento
 import { ImagePlus, Link2, Map as MapIcon, Star, Trash2, Video } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
+import { videoFileProblem } from '@/lib/videoFile';
 
 export interface ShortletMediaState {
   imageKeys: string[];
@@ -68,6 +69,8 @@ export function ShortletMediaManager({
 
   const uploadVideo = useMutation({
     mutationFn: async (file: File) => {
+      const problem = await videoFileProblem(file);
+      if (problem) throw new Error(problem);
       const res = await unwrap(shortletService.uploadMedia('video', file));
       setVideoPreview(URL.createObjectURL(file));
       onChange({ ...value, videoKey: res.key, videoUrl: '' });

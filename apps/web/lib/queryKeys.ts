@@ -230,6 +230,7 @@ export const ownerKeys = {
   properties: ['owner', 'properties'] as const,
   listings: ['owner', 'listings'] as const,
   offers: ['owner', 'offers'] as const,
+  viewings: ['owner', 'viewings'] as const,
   transactions: ['owner', 'transactions'] as const,
   analytics: ['owner', 'analytics'] as const,
   leads: ['owner', 'leads'] as const,

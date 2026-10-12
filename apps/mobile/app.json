@@ -42,8 +42,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "GetRentos needs access to your photos to attach identity and application documents.",
-          "cameraPermission": "GetRentos needs camera access to take a selfie for identity verification."
+          "photosPermission": "GetRentos needs access to your photos and videos to attach documents and add them to your listings.",
+          "cameraPermission": "GetRentos needs camera access to take a selfie for identity verification and to film property tours.",
+          "microphonePermission": "GetRentos needs the microphone to record sound with a property video tour."
         }
       ],
       [
@@ -78,7 +79,8 @@
           "faceIDPermission": "GetRentos uses Face ID to unlock the app when you turn on the app lock."
         }
       ],
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true

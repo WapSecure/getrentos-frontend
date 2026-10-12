@@ -87,8 +87,12 @@ export interface GeoInsights {
   title: string;
   latitude: number | null;
   longitude: number | null;
+  /** `approximate` until the property is verified: draw an area, not a pin. */
+  locationPrecision?: 'exact' | 'approximate';
   formattedAddress: string | null;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   city: string;
   state: string;
   country: string;

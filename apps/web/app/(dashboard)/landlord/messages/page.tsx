@@ -14,6 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
+import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const PAGE_SIZE = 10;
 
@@ -81,6 +82,9 @@ export default function LandlordMessagesPage() {
       void queryClient.invalidateQueries({ queryKey: landlordKeys.conversations });
     });
   };
+
+  // Opened from a message notification.
+  useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
   const handleSend = async (text: string) => {
     if (!activeId) return;

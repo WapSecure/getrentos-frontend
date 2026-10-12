@@ -56,11 +56,15 @@ export interface MarketFact {
 
 export interface MarketDetail extends MarketCard {
   images: string[];
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
   address?: string;
+  addressHidden?: boolean;
   description?: string;
   amenities: string[];
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   /** Who is behind the listing: a name and trust signal only, never contact details. */
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
   facts: MarketFact[];
@@ -153,9 +157,13 @@ interface RentalDto {
   id: string;
   title: string;
   location: string;
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
   address?: string;
+  addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   price: number;
   period: 'month' | 'year';
   allowsMonthlyPayment?: boolean;
@@ -181,9 +189,13 @@ interface SaleDto {
   price: number;
   city: string;
   state: string;
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
   address?: string;
+  addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
   bedrooms?: number;
   bathrooms?: number;
   propertyType?: string;

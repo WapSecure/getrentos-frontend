@@ -28,7 +28,7 @@ export default function BuyerSaved() {
         <Pressable
           onPress={() => router.push(`/(app)/buyer-listing/${item.id}`)}
           accessibilityRole="button"
-          accessibilityLabel={`${item.title}, ${item.address}, ${item.city}, ${Math.round(item.askingPrice).toLocaleString('en-NG')} naira`}
+          accessibilityLabel={`${[item.title, item.address, item.city].filter(Boolean).join(', ')}, ${Math.round(item.askingPrice).toLocaleString('en-NG')} naira`}
           accessibilityHint="Opens property details"
         >
           <Card elevated>
@@ -45,7 +45,7 @@ export default function BuyerSaved() {
                   {item.title}
                 </Text>
                 <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                  {item.address}, {item.city}
+                  {[item.address, item.city].filter(Boolean).join(', ')}
                 </Text>
                 <Price amount={item.askingPrice} variant="bodyStrong" style={{ marginTop: 4 }} />
               </View>

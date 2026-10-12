@@ -87,6 +87,9 @@ export interface LandPropertySummary {
   city: string;
   state: string;
   country?: string;
+  /** The property's map pin, where the outline editor starts. */
+  latitude?: number;
+  longitude?: number;
   verificationStatus?: string;
   estimatedValue?: number | null;
   purchasePrice?: number | null;
@@ -134,7 +137,9 @@ export interface PublicLandListing {
   title: string;
   askingPrice: number;
   description?: string;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   city: string;
   state: string;
   country?: string;
@@ -177,7 +182,9 @@ export interface PublicLandListingApi {
   city: string;
   state: string;
   country: string;
-  address: string;
+  /** Left out until the property is verified; see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
   coverImageUrl?: string;

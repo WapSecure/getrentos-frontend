@@ -57,6 +57,34 @@ describe('notification routes', () => {
     );
   });
 
+  it('takes a committee member to the document waiting for their signature', () => {
+    expect(
+      routeForNotification(
+        { type: 'ESTATE_SIGNATURE_REQUESTED', actionUrl: '/resident/governance' },
+        'resident'
+      )
+    ).toBe('/(app)/governance');
+  });
+
+  it('opens the conversation a message is in, in the reader’s own portal', () => {
+    expect(routeForNotification({ type: 'NEW_MESSAGE', conversationId: 'c1' }, 'landlord')).toBe(
+      '/(app)/landlord-conversation/c1'
+    );
+    expect(routeForNotification({ type: 'NEW_MESSAGE', conversationId: 'c1' }, 'renter')).toBe(
+      '/(app)/conversation/c1'
+    );
+    expect(
+      routeForNotification(
+        { type: 'NEW_MESSAGE', conversationId: 'c1', actionUrl: '/shortlets/messages' },
+        'owner'
+      )
+    ).toBe('/(app)/shortlet-conversation/c1');
+    // No chat screen for this portal: its inbox, as before.
+    expect(routeForNotification({ type: 'NEW_MESSAGE', conversationId: 'c1' }, 'gateman')).toBe(
+      '/(app)/notifications'
+    );
+  });
+
   it('never returns a dead route', () => {
     expect(routeForNotification({ actionUrl: '/something/new', type: 'WELCOME' }, 'renter')).toBe(
       '/(app)/notifications'

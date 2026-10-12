@@ -325,7 +325,7 @@ function EditForm({
         onPress={() =>
           Alert.alert(
             `Remove ${member.residentName}?`,
-            'They lose their seat, and any signatures they gave on the estate’s documents are removed with it.',
+            'They lose their seat. Documents they’ve already signed stay signed.',
             [
               { text: 'Keep them', style: 'cancel' },
               { text: 'Remove', style: 'destructive', onPress: () => remove.mutate() },

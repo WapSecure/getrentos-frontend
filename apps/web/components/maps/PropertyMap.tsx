@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import 'leaflet/dist/leaflet.css';
+import { addBaseTiles } from '@/lib/mapTiles';
 
 export interface MapMarker {
   id: string;
@@ -15,6 +16,11 @@ export interface MapMarker {
   priceLabel?: string;
   imageUrl?: string;
   href?: string;
+  /**
+   * The location is only approximate (an unverified property): draw a shaded
+   * area that is sure to contain it, not a pin on a door.
+   */
+  approximate?: boolean;
 }
 
 interface PropertyMapProps {
@@ -59,8 +65,8 @@ function pinIconHtml(priceLabel?: string): string {
 }
 
 /**
- * Keyless map powered by Leaflet + OpenStreetMap tiles.
- * No API keys, no billing: works out of the box anywhere.
+ * Leaflet map on Mapbox tiles when a token is configured, OpenStreetMap
+ * otherwise (see lib/mapTiles).
  */
 export const PropertyMap = ({
   center,
@@ -90,11 +96,7 @@ export const PropertyMap = ({
           zoomControl: true,
           attributionControl: true,
         });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        }).addTo(map);
+        addBaseTiles(L, map);
         mapRef.current = map;
         setReady(true);
       } catch (e) {
@@ -131,6 +133,19 @@ export const PropertyMap = ({
     markersRef.current = [];
 
     withCoords.forEach((markerData) => {
+      if (markerData.approximate) {
+        // The API moves such a point up to 500 m, so 600 m always contains it.
+        const area = L.circle([markerData.latitude, markerData.longitude], {
+          radius: 600,
+          color: '#0b6e4f',
+          weight: 2,
+          fillColor: '#0b6e4f',
+          fillOpacity: 0.18,
+        }).addTo(map);
+        area.bindTooltip('Approximate area: the exact spot is shown once the property is verified');
+        markersRef.current.push(area);
+        return;
+      }
       const icon = L.divIcon({
         className: '',
         html: `<div style="transform:rotate(0deg)">${pinIconHtml(markerData.priceLabel)}</div>`,

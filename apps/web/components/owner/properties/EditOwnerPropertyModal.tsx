@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, Trash2, Video } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import { LocationFields } from '@/components/shared/location/LocationFields';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { MapPoint } from '@/services/geocodeService';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
+import { videoFileProblem } from '@/lib/videoFile';
 
 type OwnerPropertyUpdates = Pick<
   OwnerProperty,
@@ -20,6 +23,9 @@ type OwnerPropertyUpdates = Pick<
   | 'country'
   | 'estimatedValue'
   | 'coverImageKey'
+  | 'videoTourKey'
+  | 'latitude'
+  | 'longitude'
 >;
 
 interface EditOwnerPropertyModalProps {
@@ -64,6 +70,12 @@ const EditOwnerPropertyForm = ({
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
   const [country, setCountry] = useState(property.country ?? 'Nigeria');
+  const [pin, setPin] = useState<MapPoint | null>(
+    property.latitude != null && property.longitude != null
+      ? { latitude: property.latitude, longitude: property.longitude }
+      : null
+  );
+  const [pinMoved, setPinMoved] = useState(false);
   const [estimatedValue, setEstimatedValue] = useState(String(property.estimatedValue));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +87,34 @@ const EditOwnerPropertyForm = ({
   const [isUploading, setIsUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // The video tour works the same way: staged on pick, attached on save.
+  const [videoKey, setVideoKey] = useState<string | null>(property.videoTourKey ?? null);
+  const [videoPreview, setVideoPreview] = useState(property.videoTourUrl);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!videoPreview?.startsWith('blob:')) return;
+    return () => URL.revokeObjectURL(videoPreview);
+  }, [videoPreview]);
+
+  const handleVideoSelected = async (file: File) => {
+    const problem = await videoFileProblem(file);
+    setVideoError(problem);
+    if (problem) return;
+    setIsUploadingVideo(true);
+    try {
+      const { key } = await unwrap(ownerService.uploadPropertyMedia(file, 'video'));
+      setVideoKey(key);
+      setVideoPreview(URL.createObjectURL(file));
+    } catch (reason) {
+      setVideoError(reason instanceof Error ? reason.message : 'Unable to upload that video.');
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
 
   // Release the local preview once it is replaced or the modal closes.
   useEffect(() => {
@@ -112,6 +152,10 @@ const EditOwnerPropertyForm = ({
       // Only send the cover when it changed; an unconditional write would
       // push a stale key back over a photo edited elsewhere.
       ...(coverKey !== property.coverImageKey ? { coverImageKey: coverKey } : {}),
+      ...(videoKey !== (property.videoTourKey ?? null) ? { videoTourKey: videoKey } : {}),
+      // Only a pin the owner moved, so saving other details does not
+      // re-confirm a location nobody looked at.
+      ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
     };
     try {
       await onSave(property.id, payload);
@@ -161,6 +205,19 @@ const EditOwnerPropertyForm = ({
           onStateChange={setState}
           onCityChange={setCity}
           required
+        />
+
+        <LocationPicker
+          address={address}
+          city={city}
+          state={state}
+          country={country}
+          value={pin}
+          guessed={!pinMoved && !property.locationConfirmedAt}
+          onChange={(next) => {
+            setPin(next);
+            setPinMoved(true);
+          }}
         />
 
         <div>
@@ -219,11 +276,67 @@ const EditOwnerPropertyForm = ({
           {photoError && <p className="mt-1 text-sm text-destructive">{photoError}</p>}
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Video Tour</label>
+          {videoKey && videoPreview ? (
+            <video
+              src={videoPreview}
+              controls
+              playsInline
+              preload="metadata"
+              className="mb-2 aspect-video w-full rounded-lg border border-border bg-black"
+            />
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => videoInputRef.current?.click()}
+              disabled={isUploadingVideo}
+            >
+              {isUploadingVideo ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Video className="h-4 w-4" />
+              )}
+              {isUploadingVideo ? 'Uploading…' : videoKey ? 'Replace video' : 'Add video tour'}
+            </Button>
+            {videoKey && !isUploadingVideo ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setVideoKey(null);
+                  setVideoPreview(undefined);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Remove
+              </Button>
+            ) : null}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            A short walkthrough, up to 5 minutes and 150 MB. Buyers can watch it on your listing.
+          </p>
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = '';
+              if (file) void handleVideoSelected(file);
+            }}
+          />
+          {videoError && <p className="mt-1 text-sm text-destructive">{videoError}</p>}
+        </div>
+
         <Button
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || isSaving || isUploading}
+          disabled={!name.trim() || !address.trim() || isSaving || isUploading || isUploadingVideo}
           isLoading={isSaving}
         >
           {isSaving ? 'Saving…' : 'Save Changes'}

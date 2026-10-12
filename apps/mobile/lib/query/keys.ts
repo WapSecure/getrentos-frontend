@@ -240,6 +240,7 @@ export const qk = {
     property: (id: string) => ['owner', 'properties', id] as const,
     listings: ['owner', 'listings'] as const,
     offers: ['owner', 'offers'] as const,
+    viewings: (status?: string) => ['owner', 'viewings', { status }] as const,
     offerThread: (id: string) => ['owner', 'offers', id, 'thread'] as const,
     transactions: ['owner', 'transactions'] as const,
     leads: ['owner', 'leads'] as const,
@@ -296,6 +297,7 @@ export const qk = {
     tenants: (page = 1, pageSize = 20) => ['landlord', 'tenants', { page, pageSize }] as const,
     applications: (page = 1, pageSize = 20) =>
       ['landlord', 'applications', { page, pageSize }] as const,
+    viewings: (status?: string) => ['landlord', 'viewings', { status }] as const,
     leases: (page = 1, pageSize = 20) => ['landlord', 'leases', { page, pageSize }] as const,
     maintenance: (page = 1, pageSize = 20) =>
       ['landlord', 'maintenance', { page, pageSize }] as const,

@@ -74,7 +74,10 @@ export default function LandlordNotifications() {
       onRefresh={() => query.refetch()}
       onOpen={(n) => {
         if (!n.read) readOne.mutate(n.id);
-        const to = routeForNotification({ type: n.type.toUpperCase() }, 'landlord');
+        const to = routeForNotification(
+          { type: n.type.toUpperCase(), actionUrl: n.actionUrl, conversationId: n.conversationId },
+          'landlord'
+        );
         if (to !== '/(app)/notifications') router.push(to as Href);
       }}
       onReadAll={() => readAll.mutate()}

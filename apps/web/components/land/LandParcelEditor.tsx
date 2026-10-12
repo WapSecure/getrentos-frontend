@@ -12,7 +12,9 @@ import {
   Textarea,
 } from '@getrentos/ui';
 import { FileUp, Save, ShieldCheck } from 'lucide-react';
+import { boundaryCorners, boundaryGeometry, type BoundaryCorner } from '@getrentos/shared';
 import { LandDiligenceBadge } from './LandDiligenceBadge';
+import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import {
   LAND_AREA_UNIT_LABELS,
   LAND_TITLE_TYPE_LABELS,
@@ -52,6 +54,15 @@ export const LandParcelEditor = ({
   const [parcel, setParcel] = useState<LandParcelInput>(record.parcel ?? emptyParcel);
   const [utilitiesText, setUtilitiesText] = useState((record.parcel?.utilities ?? []).join(', '));
   const [uploadOpen, setUploadOpen] = useState(false);
+  const savedCorners = useMemo(
+    () => boundaryCorners(record.parcel?.boundaryGeometry),
+    [record.parcel?.boundaryGeometry]
+  );
+  const [corners, setCorners] = useState<BoundaryCorner[]>(savedCorners ?? []);
+  const pin =
+    record.property.latitude != null && record.property.longitude != null
+      ? { latitude: record.property.latitude, longitude: record.property.longitude }
+      : null;
 
   const diligence = record.diligence ?? record.parcel?.diligence;
   const propertyTitle = record.property.title || record.property.name || 'Land parcel';
@@ -71,8 +82,11 @@ export const LandParcelEditor = ({
   };
 
   const handleSave = async () => {
+    // Fewer than 3 corners is no outline: clear a saved one, otherwise send nothing.
+    const outline = boundaryGeometry(corners) ?? (savedCorners ? null : undefined);
     await onSave({
       ...parcel,
+      boundaryGeometry: outline,
       areaValue: Number(parcel.areaValue) || 0,
       frontage: parcel.frontage ? Number(parcel.frontage) : undefined,
       depth: parcel.depth ? Number(parcel.depth) : undefined,
@@ -301,8 +315,21 @@ export const LandParcelEditor = ({
 
         <Field
           className="mt-4"
+          label="Plot outline"
+          hint="Click each corner of the plot on the map, following your survey plan. Drag a corner to adjust it. Buyers see the outline once the land is verified."
+        >
+          <ParcelBoundaryMap corners={corners} onChange={setCorners} center={pin} />
+          {corners.length > 0 && corners.length < 3 && (
+            <p className="mt-1 text-xs text-warning">
+              An outline needs at least 3 corners; with fewer it won’t be saved.
+            </p>
+          )}
+        </Field>
+
+        <Field
+          className="mt-4"
           label="Boundary / survey notes"
-          hint="Add a concise note until mapped boundary support is connected."
+          hint="Survey beacon numbers and anything the outline doesn’t show."
         >
           <Textarea
             value={textValue(parcel.boundaryNotes)}

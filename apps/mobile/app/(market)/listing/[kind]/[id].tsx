@@ -391,10 +391,17 @@ function Body({ listing: p }: { listing: MarketDetail }) {
 
       {hasCoords ? (
         <View style={{ gap: spacing.sm }}>
-          <SectionHeader title="Location" description="Approximate area" />
+          <SectionHeader
+            title="Location"
+            description={
+              p.locationPrecision === 'approximate'
+                ? 'Approximate area: the exact spot is shown once the property is verified'
+                : undefined
+            }
+          />
           <PropertyMapView
             markers={[{ id: p.id, latitude: p.latitude!, longitude: p.longitude! }]}
-            variant="location"
+            variant={p.locationPrecision === 'approximate' ? 'area' : 'location'}
             zoom={14}
             height={200}
             borderRadius={radius.lg}

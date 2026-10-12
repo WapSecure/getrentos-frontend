@@ -24,6 +24,7 @@ import {
   LAND_TITLE_TYPE_LABEL,
 } from '@/lib/api/land';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { boundaryCorners } from '@getrentos/shared';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { formatDate } from '@/lib/format';
 
@@ -56,6 +57,7 @@ export default function LandListingDetail() {
 
   const query = useQuery({ queryKey: qk.land.detail(id), queryFn: () => landApi.get(id) });
   const listing = query.data;
+  const outline = boundaryCorners(listing?.parcel.boundaryGeometry);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -102,8 +104,13 @@ export default function LandListingDetail() {
             <View style={{ gap: 4 }}>
               <Price amount={listing.price} variant="display" />
               <Text variant="callout" color="mutedForeground">
-                {listing.address}, {listing.city}, {listing.state}
+                {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
               </Text>
+              {listing.addressHidden ? (
+                <Text variant="caption" color="mutedForeground">
+                  The exact address is shared once the property is verified.
+                </Text>
+              ) : null}
               <Text variant="bodyStrong" style={{ marginTop: 4 }}>
                 {formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
               </Text>
@@ -229,17 +236,31 @@ export default function LandListingDetail() {
               </View>
             ) : null}
 
-            {listing.latitude != null && listing.longitude != null ? (
+            {outline || (listing.latitude != null && listing.longitude != null) ? (
               <View style={{ gap: spacing.sm }}>
                 <Text variant="heading">Location</Text>
                 <PropertyMapView
-                  markers={[
-                    { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
-                  ]}
-                  variant="location"
+                  markers={
+                    listing.latitude != null && listing.longitude != null
+                      ? [
+                          {
+                            id: listing.id,
+                            latitude: listing.latitude,
+                            longitude: listing.longitude,
+                          },
+                        ]
+                      : []
+                  }
+                  variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
+                  boundary={outline ?? undefined}
                   zoom={14}
-                  height={200}
+                  height={outline ? 240 : 200}
                 />
+                {outline ? (
+                  <Text variant="caption" color="mutedForeground">
+                    The shaded outline is the plot as drawn by the owner.
+                  </Text>
+                ) : null}
               </View>
             ) : null}
           </View>

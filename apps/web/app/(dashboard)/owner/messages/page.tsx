@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { Pagination } from '@getrentos/ui';
@@ -10,6 +10,7 @@ import { cn } from '@/lib/cn';
 import { ownerService, type OwnerConversation, type OwnerMessage } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const roleLabel = (role: string): Conversation['participantRole'] => {
   if (role === 'realtor') return 'Realtor';
@@ -42,12 +43,18 @@ export default function OwnerMessagesPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const lastSearch = useRef('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setPage(1);
-      setActiveId(null);
+      // Only a new search closes the open conversation; the first run on load
+      // must not undo one opened from a notification.
+      if (lastSearch.current !== searchQuery) {
+        lastSearch.current = searchQuery;
+        setPage(1);
+        setActiveId(null);
+      }
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -92,6 +99,9 @@ export default function OwnerMessagesPage() {
     const conv = conversations.find((c) => c.id === id);
     if (conv && conv.unreadCount > 0) markReadMutation.mutate(id);
   };
+
+  // Opened from a message notification.
+  useOpenConversationFromUrl(data !== undefined, handleSelect);
 
   const handleSend = (text: string) => {
     if (!activeId) return;

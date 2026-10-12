@@ -100,6 +100,8 @@ export interface PushData {
   actionUrl?: string;
   /** The booking a shortlet notification is about, so a tap can open it. */
   bookingId?: string;
+  /** The conversation a message is in, so a tap opens that chat. */
+  conversationId?: string;
 }
 
 export function readPushData(response: Notifications.NotificationResponse | null): PushData | null {

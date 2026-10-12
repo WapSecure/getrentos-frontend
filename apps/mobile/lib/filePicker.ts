@@ -1,5 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { MAX_VIDEO_SECONDS } from '@getrentos/shared';
 import type { PickedFile } from './api/documents';
 
 const EXT_MIME: Record<string, string> = {
@@ -11,6 +12,11 @@ const EXT_MIME: Record<string, string> = {
   webp: 'image/webp',
   doc: 'application/msword',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  mp4: 'video/mp4',
+  m4v: 'video/x-m4v',
+  mov: 'video/quicktime',
+  webm: 'video/webm',
+  '3gp': 'video/3gpp',
 };
 
 function resolveMimeType(name: string, reported?: string | null): string {
@@ -114,4 +120,48 @@ export async function pickPhotos(limit = 10): Promise<PickedFile[]> {
     const name = asset.fileName || asset.uri.split('/').pop() || `photo-${i + 1}.jpg`;
     return { uri: asset.uri, name, mimeType: resolveMimeType(name, asset.mimeType) };
   });
+}
+
+/** A picked or recorded video, with what is known of its size before upload. */
+export interface PickedVideo extends PickedFile {
+  /** Bytes, when the platform reports it. */
+  size?: number;
+  durationMs?: number;
+}
+
+function toPickedVideo(asset: ImagePicker.ImagePickerAsset, fallbackName: string): PickedVideo {
+  const name = asset.fileName || asset.uri.split('/').pop() || fallbackName;
+  return {
+    uri: asset.uri,
+    name,
+    mimeType: resolveMimeType(name, asset.mimeType ?? 'video/mp4'),
+    size: asset.fileSize ?? undefined,
+    durationMs: asset.duration ?? undefined,
+  };
+}
+
+/** Opens the library for one video (e.g. a property tour). Returns `null` if cancelled. */
+export async function pickVideo(): Promise<PickedVideo | null> {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) return null;
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+  });
+  if (result.canceled || !result.assets?.length) return null;
+  return toPickedVideo(result.assets[0], 'tour.mp4');
+}
+
+/** Films a walkthrough with the back camera, up to five minutes. Returns `null` if denied or cancelled. */
+export async function recordVideo(): Promise<PickedVideo | null> {
+  const perm = await ImagePicker.requestCameraPermissionsAsync();
+  if (!perm.granted) return null;
+
+  const result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+    cameraType: ImagePicker.CameraType.back,
+    videoMaxDuration: MAX_VIDEO_SECONDS,
+  });
+  if (result.canceled || !result.assets?.length) return null;
+  return toPickedVideo(result.assets[0], 'tour.mp4');
 }

@@ -15,6 +15,10 @@ export interface InboxNotification {
   body: string;
   read: boolean;
   createdAt: string;
+  /** Where it leads, when the API says. */
+  actionUrl?: string;
+  /** Set on a message: the conversation it is in. */
+  conversationId?: string;
 }
 
 /**

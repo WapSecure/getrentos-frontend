@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Linking, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,6 +34,7 @@ import { PropertyGallery, toGallery } from '@/components/property/PropertyGaller
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { formatDate } from '@/lib/format';
+import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 
 export default function BuyerListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,6 +43,7 @@ export default function BuyerListingDetail() {
   const { savedIds, toggle } = useBuyerSaved();
   const [viewingOpen, setViewingOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
+  const [touring, setTouring] = useState(false);
 
   const query = useQuery({
     queryKey: qk.buyer.listingDetail(id),
@@ -119,8 +121,13 @@ export default function BuyerListingDetail() {
               <View style={{ gap: 4 }}>
                 <Price amount={listing.askingPrice} variant="display" />
                 <Text variant="callout" color="mutedForeground">
-                  {listing.address}, {listing.city}, {listing.state}
+                  {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
                 </Text>
+                {listing.addressHidden ? (
+                  <Text variant="caption" color="mutedForeground">
+                    The exact address is shared once the property is verified.
+                  </Text>
+                ) : null}
               </View>
 
               <View style={{ flexDirection: 'row', gap: spacing.lg, flexWrap: 'wrap' }}>
@@ -171,7 +178,11 @@ export default function BuyerListingDetail() {
               ) : null}
 
               {listing.videoTourUrl ? (
-                <Pressable onPress={() => Linking.openURL(listing.videoTourUrl!)}>
+                <Pressable
+                  onPress={() => setTouring(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Watch the video tour"
+                >
                   <Card
                     elevated
                     style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
@@ -205,7 +216,7 @@ export default function BuyerListingDetail() {
                     markers={[
                       { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
                     ]}
-                    variant="location"
+                    variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
                     zoom={15}
                     height={200}
                   />
@@ -268,6 +279,16 @@ export default function BuyerListingDetail() {
             listing={listing}
           />
           <MakeOfferSheet open={offerOpen} onClose={() => setOfferOpen(false)} listing={listing} />
+          {listing.videoTourUrl ? (
+            <VideoTourSheet
+              open={touring}
+              onClose={() => setTouring(false)}
+              title={listing.title}
+              videoUrl={listing.videoTourUrl}
+              videoStream={listing.videoTourStream}
+              onExpired={() => void query.refetch()}
+            />
+          ) : null}
         </>
       )}
     </View>

@@ -99,6 +99,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/resident/dues': '/(app)/dues',
   '/resident/deliveries': '/(app)/deliveries',
   '/resident/announcements': '/(app)/(resident)/announcements',
+  '/resident/governance': '/(app)/governance',
+  '/resident/committee': '/(app)/committee',
 };
 
 /** Type prefix → route, for notifications that carry no usable action URL. */
@@ -199,15 +201,40 @@ export function routeForActionUrl(url?: string | null): string | null {
   return WEB_PATH_TO_ROUTE[path] ?? null;
 }
 
+/** Each portal's own conversation screen, for a message notification. */
+const CONVERSATION_ROUTE: Partial<Record<Portal, string>> = {
+  renter: '/(app)/conversation',
+  landlord: '/(app)/landlord-conversation',
+  owner: '/(app)/owner-conversation',
+  buyer: '/(app)/buyer-conversation',
+  realtor: '/(app)/realtor-conversation',
+  agent: '/(app)/agent-conversation',
+};
+
 /** Where tapping a push notification should land. Always returns a real route. */
 export function routeForNotification(
   {
     actionUrl,
     type,
     bookingId,
-  }: { actionUrl?: string | null; type?: string | null; bookingId?: string | null },
+    conversationId,
+  }: {
+    actionUrl?: string | null;
+    type?: string | null;
+    bookingId?: string | null;
+    conversationId?: string | null;
+  },
   portal: Portal | null
 ): string {
+  // A message opens its conversation, not just the inbox.
+  if (type === 'NEW_MESSAGE' && conversationId) {
+    const id = encodeURIComponent(conversationId);
+    if (routeForActionUrl(actionUrl) === '/(app)/shortlet-messages') {
+      return `/(app)/shortlet-conversation/${id}`;
+    }
+    const chat = portal ? CONVERSATION_ROUTE[portal] : undefined;
+    if (chat) return `${chat}/${id}`;
+  }
   // A guest's stay notification opens that stay: status, money and what to do next.
   if (
     bookingId &&

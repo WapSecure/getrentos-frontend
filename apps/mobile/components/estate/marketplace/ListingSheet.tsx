@@ -1,8 +1,18 @@
+import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImagePlus, X } from 'lucide-react-native';
-import { Button, Price, Text, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  DateField,
+  Price,
+  Text,
+  TextField,
+  toISODate,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import {
@@ -15,6 +25,7 @@ import {
   listingStatus,
   listingTypeLabel,
   marketplaceKeys,
+  parseNaira,
   photoRoom,
   statusChangedMessage,
   type EstateListing,
@@ -23,7 +34,7 @@ import {
 import { pickPhotos } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { patchListing, reportError } from './MarketplaceUI';
+import { MarketplaceFormError, patchListing, reportError } from './MarketplaceUI';
 
 /** Manage one listing: publish, pause or take it down, and its photos. */
 export function ListingSheet({
@@ -50,6 +61,7 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
   const photos = listing.media ?? [];
   const room = photoRoom(listing);
   const moves = listingMoves(listing.status);
+  const [editing, setEditing] = useState(false);
 
   const settle = (updated: EstateListing) => {
     patchListing(qc, estateId, updated);
@@ -148,6 +160,26 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
         </Text>
       ) : null}
 
+      {listing.status !== 'CLOSED' ? (
+        editing ? (
+          <EditListingForm
+            estateId={estateId}
+            listing={listing}
+            onDone={(updated) => {
+              if (updated) settle(updated);
+              setEditing(false);
+            }}
+          />
+        ) : (
+          <Button
+            label="Edit price, headline or date"
+            variant="outline"
+            size="sm"
+            onPress={() => setEditing(true)}
+          />
+        )
+      ) : null}
+
       {moves.length ? (
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           {moves.map((to) => (
@@ -239,6 +271,76 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
             Photos belong to this listing, not the owner’s property. The first is the cover.
           </Text>
         ) : null}
+      </View>
+    </View>
+  );
+}
+
+/** Change the headline, price or start date without taking the listing down. */
+function EditListingForm({
+  estateId,
+  listing,
+  onDone,
+}: {
+  estateId: string;
+  listing: EstateListing;
+  onDone: (updated?: EstateListing) => void;
+}) {
+  const { spacing } = useTheme();
+  const toast = useToast();
+  const [title, setTitle] = useState(listing.listingTitle ?? '');
+  const [price, setPrice] = useState(String(listing.price));
+  const [availableFrom, setAvailableFrom] = useState(
+    listing.availableFrom ? listing.availableFrom.slice(0, 10) : toISODate(new Date())
+  );
+  const amount = parseNaira(price);
+
+  const save = useMutation({
+    mutationFn: () =>
+      estateMarketplaceApi.updateListing(estateId, listing.id, {
+        ...(title.trim() && title.trim() !== (listing.listingTitle ?? '')
+          ? { listingTitle: title.trim() }
+          : {}),
+        ...(amount !== null && amount !== listing.price ? { price: amount } : {}),
+        ...(availableFrom !== listing.availableFrom?.slice(0, 10) ? { availableFrom } : {}),
+      }),
+    onSuccess: (updated) => {
+      void haptics.success();
+      toast.show('Listing updated.', 'success');
+      onDone(updated);
+    },
+  });
+
+  return (
+    <View style={{ gap: spacing.md }}>
+      <TextField label="Headline" value={title} onChangeText={setTitle} maxLength={200} />
+      <TextField
+        label={listing.listingType === 'SHORTLET' ? 'Nightly rate (₦)' : 'Price (₦)'}
+        value={price}
+        onChangeText={setPrice}
+        keyboardType="number-pad"
+        error={
+          price.trim() && amount === null ? 'Enter an amount in naira, numbers only.' : undefined
+        }
+      />
+      <DateField label="Available from" value={availableFrom} onChange={setAvailableFrom} />
+      <MarketplaceFormError error={save.error} fallback="That listing couldn’t be changed." />
+      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <Button
+          label="Save changes"
+          size="sm"
+          style={{ flex: 1 }}
+          disabled={!amount || amount <= 0}
+          loading={save.isPending}
+          onPress={() => save.mutate()}
+        />
+        <Button
+          label="Cancel"
+          size="sm"
+          variant="ghost"
+          style={{ flex: 1 }}
+          onPress={() => onDone()}
+        />
       </View>
     </View>
   );

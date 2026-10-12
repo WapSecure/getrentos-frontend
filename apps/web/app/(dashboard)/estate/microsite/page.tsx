@@ -12,7 +12,7 @@ import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import type { EstateMicrositeSettings } from '@/types/estate';
-import { usePlanTier } from '@/hooks/usePlanTier';
+import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -213,7 +213,7 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
 export default function EstateMicrositePage() {
   const router = useRouter();
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
-  const { isPro, isLoading: isPlanLoading } = usePlanTier();
+  const { isPro, isLoading: isPlanLoading } = useEstatePlan();
 
   const { data: settings, isLoading: isSettingsLoading } = useQuery({
     queryKey: estateKeys.microsite(estate?.id ?? ''),
@@ -233,6 +233,7 @@ export default function EstateMicrositePage() {
   if (!isPro) {
     return (
       <ProFeatureGate
+        entitled={isPro}
         title="Microsite is a Pro feature"
         description="Upgrade to Pro to get a public page showcasing your estate: one link to share with residents and prospective buyers."
       >

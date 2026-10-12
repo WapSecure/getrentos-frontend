@@ -5,6 +5,8 @@ import { CalendarClock, Clock, CheckCircle2, XCircle, X } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingRequest, ViewingRequestStatus } from '@/types/buyer';
+import { VideoCallButton } from '@/components/shared/VideoCallButton';
+import { buyerService } from '@/services/buyerService';
 
 const statusConfig: Record<
   ViewingRequestStatus,
@@ -54,8 +56,16 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
         <div className="min-w-0">
           <h3 className="font-semibold text-foreground truncate">{request.propertyTitle}</h3>
           <p className="text-xs text-muted-foreground mt-1">
-            {formatDate(request.requestedDate)} · {request.requestedTime}
+            {request.scheduledAt
+              ? new Date(request.scheduledAt).toLocaleString(undefined, {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })
+              : `${formatDate(request.requestedDate)} · ${request.requestedTime}`}
           </p>
+          {request.mode === 'video' && (
+            <p className="text-xs font-medium text-primary mt-0.5">Live video viewing</p>
+          )}
         </div>
         <span
           className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
@@ -66,6 +76,10 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
       </div>
 
       {request.notes && <p className="text-xs text-muted-foreground mt-3">{request.notes}</p>}
+
+      <div className="mt-3">
+        <VideoCallButton viewing={request} join={() => buyerService.joinVideoCall(request.id)} />
+      </div>
 
       {canCancel && (
         <div className="flex justify-end mt-4 pt-4 border-t border-border">

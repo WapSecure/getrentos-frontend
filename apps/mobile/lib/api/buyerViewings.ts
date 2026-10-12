@@ -1,3 +1,4 @@
+import type { VideoCallJoin } from '@getrentos/shared';
 import { apiFetch } from './client';
 import type { Paginated } from './buyer';
 
@@ -27,7 +28,11 @@ export interface BuyerViewing {
   propertyTitle: string;
   requestedDate: string;
   requestedTime: string;
+  /** The viewing time as an ISO instant: show this, in local time. */
+  scheduledAt?: string;
   status: BuyerViewingDisplayStatus;
+  /** 'video': a live video call the seller hosts. */
+  mode?: 'in_person' | 'video';
   notes?: string;
 }
 
@@ -35,11 +40,20 @@ export const buyerViewingsApi = {
   list: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<BuyerViewing>>(`/buyer/viewings?page=${page}&pageSize=${pageSize}`),
 
-  create: (listingId: string, scheduledAt: string, notes?: string) =>
+  create: (
+    listingId: string,
+    scheduledAt: string,
+    notes?: string,
+    mode: 'IN_PERSON' | 'VIDEO' = 'IN_PERSON'
+  ) =>
     apiFetch<BuyerViewing>('/buyer/viewings', {
       method: 'POST',
-      body: { listingId, scheduledAt, notes },
+      body: { listingId, scheduledAt, notes, mode },
     }),
+
+  /** A personal link into a confirmed video viewing, from 15 minutes before it. */
+  joinVideoCall: (id: string) =>
+    apiFetch<VideoCallJoin>(`/buyer/viewings/${id}/video-call`, { method: 'POST' }),
 
   cancel: (id: string) =>
     apiFetch<BuyerViewing>(`/buyer/viewings/${id}`, {

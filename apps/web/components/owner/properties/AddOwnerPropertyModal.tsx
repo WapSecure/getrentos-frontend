@@ -14,6 +14,8 @@ import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { ROUTES } from '@/lib/constants/auth';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { MapPoint } from '@/services/geocodeService';
 
 interface AddOwnerPropertyModalProps {
   isOpen: boolean;
@@ -52,6 +54,7 @@ interface FormState {
   deedOfAssignment: File | null;
   govtRegistryExtract: File | null;
   declared: boolean;
+  pin: MapPoint | null;
 }
 
 const initialFormState: FormState = {
@@ -69,6 +72,7 @@ const initialFormState: FormState = {
   certificateOfOccupancy: null,
   deedOfAssignment: null,
   govtRegistryExtract: null,
+  pin: null,
   declared: false,
 };
 
@@ -144,6 +148,7 @@ export const AddOwnerPropertyModal = ({
           estimatedValue: Number(form.estimatedValue) || 0,
           purchasePrice: Number(form.purchasePrice) || 0,
           purchaseDate: form.purchaseDate || new Date().toISOString(),
+          ...(form.pin ? { latitude: form.pin.latitude, longitude: form.pin.longitude } : {}),
         },
         ownershipProofs
       );
@@ -269,6 +274,15 @@ export const AddOwnerPropertyModal = ({
                     onStateChange={(s) => update('state', s)}
                     onCityChange={(c) => update('city', c)}
                     required
+                  />
+
+                  <LocationPicker
+                    address={form.address}
+                    city={form.city}
+                    state={form.state}
+                    country={form.country}
+                    value={form.pin}
+                    onChange={(pin) => update('pin', pin)}
                   />
 
                   <div className="grid grid-cols-2 gap-3">

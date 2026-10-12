@@ -47,6 +47,13 @@ export default function OwnerAccount() {
       onPress: go('/(app)/owner-transactions'),
     },
     {
+      key: 'viewings',
+      label: 'Viewings',
+      description: 'Confirm buyer visits and host video viewings',
+      icon: CalendarCheck,
+      onPress: go('/(app)/owner-viewings'),
+    },
+    {
       key: 'leads',
       label: 'Buyer leads',
       description: 'People who asked about your listings',

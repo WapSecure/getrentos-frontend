@@ -14,6 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const PAGE_SIZE = 10;
 
@@ -61,6 +62,9 @@ function RealtorMessagesPageContent() {
     setMessagePage(1);
     setActiveId(conversationId);
   };
+
+  // Opened from a message notification.
+  useOpenConversationFromUrl(!conversationsLoading, activateConversation);
 
   // Open (or start) the conversation for a client the user navigated from,
   // e.g. the "Message" button on the Clients page (?client=<id>).

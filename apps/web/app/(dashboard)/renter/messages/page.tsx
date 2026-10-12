@@ -19,6 +19,7 @@ import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
+import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 export default function MessagesPage() {
   const user = useRenterUser();
@@ -159,6 +160,13 @@ export default function MessagesPage() {
       markReadMutation.mutate(conversation.id);
     }
   };
+
+  // Opened from a message notification.
+  useOpenConversationFromUrl(data !== undefined, (id) => {
+    const conversation = conversations.find((c) => c.id === id);
+    if (conversation) handleSelectConversation(conversation);
+    else setSelectedConversationId(id);
+  });
 
   const handlePinConversation = (conversationId: string) => pinMutation.mutate(conversationId);
 

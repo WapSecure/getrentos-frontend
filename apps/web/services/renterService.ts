@@ -1,5 +1,6 @@
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
+import type { VideoCallJoin } from '@getrentos/shared';
 import type {
   Application,
   ApplicationStatus,
@@ -24,6 +25,8 @@ export interface ViewingRequest {
   propertyName: string;
   unitId?: string;
   status: 'requested' | 'confirmed' | 'completed' | 'cancelled';
+  /** 'video': a live video call at scheduledAt, hosted by the landlord. */
+  mode: 'in_person' | 'video';
   requestedAt: string;
   /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
   preferredAt?: string;
@@ -845,14 +848,27 @@ export const renterService = {
     propertyId: string,
     unitId?: string,
     preferredAt?: string,
-    notes?: string
+    notes?: string,
+    mode: 'IN_PERSON' | 'VIDEO' = 'IN_PERSON'
   ): Promise<ApiResponse<ViewingRequest>> {
     return safeCall(() =>
       authFetch('/renter/viewing-requests', {
         method: 'POST',
-        body: JSON.stringify({ propertyId, unitId, preferredAt, notes }),
+        body: JSON.stringify({ propertyId, unitId, preferredAt, notes, mode }),
       })
     );
+  },
+
+  /** A personal link into a confirmed video viewing, from 15 minutes before it. */
+  async joinVideoCall(id: string): Promise<ApiResponse<VideoCallJoin>> {
+    return safeCall(() =>
+      authFetch<VideoCallJoin>(`/renter/viewing-requests/${id}/video-call`, { method: 'POST' })
+    );
+  },
+
+  /** Whether live video viewings can be booked at all (the service is configured). */
+  async videoCallsAvailable(): Promise<ApiResponse<{ available: boolean }>> {
+    return safeCall(() => authFetch<{ available: boolean }>('/video-calls/availability'));
   },
 
   async listViewingRequests(): Promise<ApiResponse<ViewingRequest[]>> {

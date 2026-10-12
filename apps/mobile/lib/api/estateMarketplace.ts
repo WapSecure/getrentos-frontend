@@ -210,6 +210,16 @@ export const estateMarketplaceApi = {
     ),
   createListing: (estateId: string, body: NewListing) =>
     apiFetch<EstateListing>(`/estates/${estateId}/listings`, { method: 'POST', body }),
+  /** Change a listing's headline, price or start date. Only what is sent changes. */
+  updateListing: (
+    estateId: string,
+    listingId: string,
+    changes: { listingTitle?: string; price?: number; availableFrom?: string }
+  ) =>
+    apiFetch<EstateListing>(`/estates/${estateId}/listings/${listingId}`, {
+      method: 'PATCH',
+      body: changes,
+    }),
   setListingStatus: (estateId: string, listingId: string, status: ListingStatusChange) =>
     apiFetch<EstateListing>(`/estates/${estateId}/listings/${listingId}/status`, {
       method: 'PATCH',

@@ -1,6 +1,7 @@
 import { apiDownload, apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { VideoCallJoin } from '@getrentos/shared';
 
 /* ------------------------------ dashboard ------------------------------ */
 
@@ -49,11 +50,18 @@ export interface LandlordProperty {
   city: string;
   state: string;
   country: string;
+  /** The map pin, and when the landlord confirmed it (absent: a guess from the address). */
+  latitude?: number;
+  longitude?: number;
+  locationConfirmedAt?: string;
   description?: string;
   coverImage?: string;
   galleryImages?: string[];
   /** Storage keys behind galleryImages — what an update must send back. */
   galleryImageKeys?: string[];
+  videoTourKey?: string;
+  /** Signed link to the video tour, valid for a few hours. */
+  videoTourUrl?: string;
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
@@ -585,6 +593,10 @@ export interface LandlordDocument {
 /* ---------------------------- notifications ---------------------------- */
 
 export interface LandlordNotification {
+  /** An in-app path the notification is about. */
+  actionUrl?: string;
+  /** Set on a message: the conversation it is in. */
+  conversationId?: string;
   id: string;
   type: string;
   title: string;
@@ -733,6 +745,9 @@ export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
 };
 
 export interface UpdatePropertyInput {
+  /** The pin the owner placed on the map; both or neither. */
+  latitude?: number;
+  longitude?: number;
   name?: string;
   type?: PropertyType;
   address?: string;
@@ -743,6 +758,8 @@ export interface UpdatePropertyInput {
   /** Storage keys from uploadPropertyMedia; null clears the cover. */
   coverImageKey?: string | null;
   galleryImageKeys?: string[];
+  /** Storage key from uploadPropertyMedia; null removes the video tour. */
+  videoTourKey?: string | null;
 }
 
 /** Whether the applicant agreed to share their standing from a past tenancy. */
@@ -768,6 +785,9 @@ export interface ManagementFeeConfig {
 }
 
 export interface CreatePropertyInput {
+  /** The pin the owner placed on the map; both or neither. */
+  latitude?: number;
+  longitude?: number;
   name: string;
   type: PropertyType;
   address: string;
@@ -829,6 +849,27 @@ export interface LandlordConversation {
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
+}
+
+export type LandlordViewingStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled';
+
+/** A renter's request to view one of the landlord's (or managed) properties. */
+export interface LandlordViewingRequest {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  renterId: string;
+  renterName: string;
+  renterEmail: string;
+  status: LandlordViewingStatus;
+  /** 'video': a live video call at scheduledAt that the landlord hosts. */
+  mode: 'in_person' | 'video';
+  requestedAt: string;
+  /** The slot the renter asked for; the confirmed time is `scheduledAt`. */
+  preferredAt?: string;
+  scheduledAt?: string;
+  notes?: string;
 }
 
 export const landlordApi = {
@@ -1046,6 +1087,18 @@ export const landlordApi = {
       method: 'POST',
       body: input,
     }),
+
+  viewingRequests: (status?: LandlordViewingStatus, page = 1, pageSize = 50) =>
+    apiFetch<Paginated<LandlordViewingRequest>>(
+      `/landlord/viewing-requests?page=${page}&pageSize=${pageSize}${status ? `&status=${status.toUpperCase()}` : ''}`
+    ),
+
+  completeViewing: (id: string) =>
+    apiFetch<void>(`/landlord/viewing-requests/${id}/complete`, { method: 'PATCH' }),
+
+  /** The host's link into a confirmed video viewing, from 15 minutes before it. */
+  joinViewingCall: (id: string) =>
+    apiFetch<VideoCallJoin>(`/landlord/viewing-requests/${id}/video-call`, { method: 'POST' }),
 
   /** The API requires the agreed time as an ISO date-time. */
   confirmViewing: (id: string, scheduledAt: string) =>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,20 +44,10 @@ import { env } from '@/lib/env';
 import { marketWebPath } from '@/lib/api/publicMarket';
 import { ViewingRequestSheet } from '@/components/property/ViewingRequestSheet';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { openDirections } from '@/lib/directions';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
-
-function openDirections(latitude: number, longitude: number, label: string) {
-  const encodedLabel = encodeURIComponent(label);
-  const url = Platform.select({
-    ios: `maps://?daddr=${latitude},${longitude}&q=${encodedLabel}`,
-    android: `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodedLabel})`,
-    default: `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
-  });
-  Linking.openURL(url).catch(() =>
-    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`)
-  );
-}
+import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -67,6 +57,7 @@ export default function PropertyDetail() {
   const toast = useToast();
   const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [touring, setTouring] = useState(false);
 
   const query = useQuery({
     queryKey: qk.listings.detail(id),
@@ -130,6 +121,11 @@ export default function PropertyDetail() {
                     {p.address ? `${p.address}, ${p.location}` : p.location}
                   </Text>
                 </View>
+                {p.addressHidden ? (
+                  <Text variant="caption" color="mutedForeground">
+                    The exact address is shared once the property is verified.
+                  </Text>
+                ) : null}
               </View>
 
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl }}>
@@ -244,7 +240,7 @@ export default function PropertyDetail() {
 
               {p.videoTourUrl ? (
                 <Pressable
-                  onPress={() => Linking.openURL(p.videoTourUrl!)}
+                  onPress={() => setTouring(true)}
                   accessibilityRole="button"
                   accessibilityLabel="Watch the video tour"
                 >
@@ -286,24 +282,35 @@ export default function PropertyDetail() {
                     <Text variant="bodyStrong" accessibilityRole="header">
                       Location
                     </Text>
-                    <Pressable
-                      onPress={() =>
-                        openDirections(p.latitude as number, p.longitude as number, p.title)
-                      }
-                      accessibilityRole="button"
-                      accessibilityLabel="Get directions"
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}
-                      hitSlop={8}
-                    >
-                      <Navigation size={13} color={colors.primary} />
-                      <Text variant="callout" style={{ color: colors.primary, fontWeight: '600' }}>
-                        Directions
-                      </Text>
-                    </Pressable>
+                    {/* Directions to an approximate point would lead to the wrong street. */}
+                    {p.locationPrecision !== 'approximate' ? (
+                      <Pressable
+                        onPress={() =>
+                          openDirections(p.latitude as number, p.longitude as number, p.title)
+                        }
+                        accessibilityRole="button"
+                        accessibilityLabel="Get directions"
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 4,
+                          minHeight: 44,
+                        }}
+                        hitSlop={8}
+                      >
+                        <Navigation size={13} color={colors.primary} />
+                        <Text
+                          variant="callout"
+                          style={{ color: colors.primary, fontWeight: '600' }}
+                        >
+                          Directions
+                        </Text>
+                      </Pressable>
+                    ) : null}
                   </View>
                   <PropertyMapView
                     markers={[{ id: p.id, latitude: p.latitude, longitude: p.longitude }]}
-                    variant="location"
+                    variant={p.locationPrecision === 'approximate' ? 'area' : 'location'}
                     zoom={15}
                     height={200}
                   />
@@ -438,6 +445,17 @@ export default function PropertyDetail() {
           onClose={() => setViewingSheetOpen(false)}
           propertyId={p.propertyId}
           propertyTitle={p.title}
+        />
+      ) : null}
+      {p?.videoTourUrl ? (
+        <VideoTourSheet
+          open={touring}
+          onClose={() => setTouring(false)}
+          title={p.title}
+          videoUrl={p.videoTourUrl}
+          videoStream={p.videoTourStream}
+          // A signed link that has lapsed: fetch the listing for a fresh one.
+          onExpired={() => void query.refetch()}
         />
       ) : null}
     </View>

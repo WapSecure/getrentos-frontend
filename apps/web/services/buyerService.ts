@@ -8,6 +8,7 @@ import type {
 } from '@/types/buyer';
 import type { TrustProfile } from '@/types/trust-score';
 import { toDisplayPropertyType } from '@/lib/propertyTypes';
+import type { VideoCallJoin } from '@getrentos/shared';
 
 export interface BuyerDashboard {
   savedListings: number;
@@ -233,8 +234,18 @@ export const buyerService = {
         })}`
       )
     ),
-  requestViewing: (data: { listingId: string; scheduledAt: string; notes?: string }) =>
+  requestViewing: (data: {
+    listingId: string;
+    scheduledAt: string;
+    notes?: string;
+    mode?: 'IN_PERSON' | 'VIDEO';
+  }) =>
     safeCall(() => authFetch('/buyer/viewings', { method: 'POST', body: JSON.stringify(data) })),
+  /** A personal link into a confirmed video viewing, from 15 minutes before it. */
+  joinVideoCall: (id: string) =>
+    safeCall(() =>
+      authFetch<VideoCallJoin>(`/buyer/viewings/${id}/video-call`, { method: 'POST' })
+    ),
   updateViewing: (id: string, data: { status?: string; scheduledAt?: string; notes?: string }) =>
     safeCall(() =>
       authFetch(`/buyer/viewings/${id}`, { method: 'PATCH', body: JSON.stringify(data) })

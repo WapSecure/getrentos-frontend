@@ -11,6 +11,7 @@ import {
   Home,
   KeyRound,
   Lock,
+  MapPin,
   MessageSquare,
   ShieldAlert,
   Star,
@@ -31,6 +32,8 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { openDirections } from '@/lib/directions';
 import { StatusPill, Thumb } from '@/components/host/HostUI';
 import { useMyStays } from '@/components/shortlet/useMyStays';
 import { GuestPromiseCard, InfoRow, Section, SupportContact } from '@/components/shortlet/StayUI';
@@ -232,6 +235,33 @@ export default function StayDetail() {
         {/* Getting in */}
         {b.status === 'CONFIRMED' || b.status === 'COMPLETED' ? (
           <Section title="Getting in">
+            {b.address ? (
+              <Card elevated style={{ gap: spacing.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <MapPin size={18} color={colors.primary} />
+                  <Text variant="bodyStrong">Address</Text>
+                </View>
+                <Text variant="body" selectable>
+                  {[b.address, b.city].filter(Boolean).join(', ')}
+                </Text>
+                {b.latitude != null && b.longitude != null ? (
+                  <>
+                    <PropertyMapView
+                      markers={[{ id: b.id, latitude: b.latitude, longitude: b.longitude }]}
+                      variant="location"
+                      zoom={16}
+                      height={180}
+                    />
+                    <Button
+                      label="Get directions"
+                      variant="outline"
+                      size="sm"
+                      onPress={() => openDirections(b.latitude!, b.longitude!, b.propertyTitle)}
+                    />
+                  </>
+                ) : null}
+              </Card>
+            ) : null}
             {b.checkInInstructions ? (
               <Card elevated style={{ gap: spacing.sm }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

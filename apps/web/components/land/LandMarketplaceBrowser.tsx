@@ -45,6 +45,8 @@ import {
   LAND_TITLE_TYPE_LABELS,
   type PublicLandListing,
 } from '@/types/land';
+import { boundaryCorners } from '@getrentos/shared';
+import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -438,8 +440,15 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                       </DialogTitle>
                       <DialogDescription className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" />
-                        {activeListing.address}, {activeListing.city}, {activeListing.state}
+                        {[activeListing.address, activeListing.city, activeListing.state]
+                          .filter(Boolean)
+                          .join(', ')}
                       </DialogDescription>
+                      {activeListing.addressHidden && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          The exact address is shared once the property is verified.
+                        </p>
+                      )}
                     </div>
                     <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
                       Verified parcel
@@ -477,6 +486,17 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                     />
                     <Fact label="Diligence" value="Verified" />
                   </div>
+                  {(() => {
+                    const outline = boundaryCorners(activeListing.parcel.boundaryGeometry);
+                    return outline ? (
+                      <div className="mt-4 border-t border-border pt-3">
+                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                          Plot outline, as drawn by the owner
+                        </p>
+                        <ParcelBoundaryMap key={activeListing.id} corners={outline} height={240} />
+                      </div>
+                    ) : null;
+                  })()}
                   {activeListing.parcel.boundaryNotes && (
                     <p className="mt-4 border-t border-border pt-3 text-sm text-muted-foreground">
                       {activeListing.parcel.boundaryNotes}

@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import type { VideoStream } from '@getrentos/shared';
 
 export interface BuyerDashboard {
   savedListings: number;
@@ -25,7 +26,9 @@ export interface BuyerListing {
   title: string;
   propertyType: string;
   askingPrice: number;
-  address: string;
+  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
+  address?: string;
+  addressHidden?: boolean;
   city: string;
   state: string;
   bedrooms?: number;
@@ -42,8 +45,12 @@ export interface BuyerListing {
   images?: string[];
   /** Signed URL for the video tour. */
   videoTourUrl?: string;
+  /** The video tour as an adaptive stream, once encoded; preferred over the file. */
+  videoTourStream?: VideoStream;
   latitude?: number;
   longitude?: number;
+  /** `approximate` until the property is verified, and always for a stay: draw an area. */
+  locationPrecision?: 'exact' | 'approximate';
 }
 
 export interface Paginated<T> {

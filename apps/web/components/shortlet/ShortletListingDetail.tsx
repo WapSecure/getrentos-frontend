@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAuthToken } from '@getrentos/shared';
+import { getAuthToken, tourSource, videoSource } from '@getrentos/shared';
 import { Badge, Button, EmptyState, Skeleton, Toast, type ToastVariant } from '@getrentos/ui';
 import {
   Armchair,
@@ -197,8 +197,10 @@ export function ShortletListingDetail({
     );
   }
 
-  const hasVideo = Boolean(listing.videoUrl);
-  const hasTour = Boolean(listing.tourUrl);
+  const video = videoSource(listing.videoUrl);
+  const tour = tourSource(listing.tourUrl);
+  const hasVideo = Boolean(video);
+  const hasTour = Boolean(tour);
   const tab: MediaTab =
     mediaTab === 'video' && !hasVideo
       ? 'photos'
@@ -260,13 +262,37 @@ export function ShortletListingDetail({
           </div>
         )}
 
-        {tab === 'video' && listing.videoUrl ? (
-          <video src={listing.videoUrl} controls className="aspect-video w-full bg-black" />
-        ) : tab === 'tour' && listing.tourUrl ? (
+        {tab === 'video' && video ? (
+          video.kind === 'file' ? (
+            <video
+              src={video.url}
+              poster={listing.videoStream?.posterUrl}
+              controls
+              playsInline
+              preload="metadata"
+              className="aspect-video w-full bg-black"
+            />
+          ) : (
+            // A pasted YouTube or Vimeo link: that provider's own player, not
+            // a <video> element, which cannot play a web page.
+            <iframe
+              src={video.embedUrl}
+              title={`${listing.title} video tour`}
+              className="aspect-video w-full bg-black"
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+              allowFullScreen
+              loading="lazy"
+            />
+          )
+        ) : tab === 'tour' && tour ? (
+          // Only known 360° providers are framed; scripts run, but the page
+          // cannot reach ours.
           <iframe
-            src={listing.tourUrl}
-            title="Virtual tour"
+            src={tour.embedUrl}
+            title={`${listing.title} 360° tour`}
             className="aspect-video w-full"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+            allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer"
             allowFullScreen
             loading="lazy"
           />

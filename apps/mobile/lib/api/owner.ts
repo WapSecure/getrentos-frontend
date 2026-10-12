@@ -2,6 +2,7 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
+import type { VideoCallJoin } from '@getrentos/shared';
 
 /**
  * The property-owner portal (sellers). Mirrors the backend's /owner/* routes;
@@ -61,11 +62,19 @@ export interface OwnerProperty {
   purchaseDate?: string;
   coverImageUrl?: string;
   galleryImageUrls?: string[];
+  /** Storage keys behind galleryImageUrls, cover first, in the same order. */
+  galleryImageKeys?: string[];
+  videoTourKey?: string;
+  /** Signed link to the video tour, valid for a few hours. */
+  videoTourUrl?: string;
   hasActiveSaleListing: boolean;
   createdAt: string;
 }
 
 export interface CreateOwnerPropertyInput {
+  /** The pin the owner placed on the map; both or neither. */
+  latitude?: number;
+  longitude?: number;
   name: string;
   propertyType: 'APARTMENT' | 'DUPLEX' | 'CONDO' | 'COMMERCIAL' | 'LAND' | 'SHARED_APARTMENT';
   address: string;
@@ -288,6 +297,10 @@ export interface OwnerProfile {
 }
 
 export interface OwnerNotification {
+  /** An in-app path the notification is about. */
+  actionUrl?: string;
+  /** Set on a message: the conversation it is in. */
+  conversationId?: string;
   id: string;
   /** Lower-cased NotificationType, e.g. "offer_received". */
   type: string;
@@ -391,7 +404,41 @@ export type OwnershipDocumentType = (typeof OWNERSHIP_DOCUMENTS)[number]['value'
 
 const page = (p: number, size: number, extra = '') => `?page=${p}&pageSize=${size}${extra}`;
 
+/** A buyer's request to view one of the seller's for-sale listings. */
+export interface OwnerViewing {
+  id: string;
+  listingId: string;
+  propertyId: string;
+  propertyName: string;
+  buyerId: string;
+  buyerName: string;
+  /** The buyer's asked-for time until confirmed, then the confirmed time. */
+  scheduledAt: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  mode: 'in_person' | 'video';
+  notes?: string;
+  requestedAt: string;
+}
+
 export const ownerApi = {
+  viewings: (status?: 'requested' | 'confirmed', p = 1, size = 50) =>
+    apiFetch<Paginated<OwnerViewing>>(
+      `/owner/viewings${page(p, size, status ? `&status=${status}` : '')}`
+    ),
+  /** Confirm at the buyer's time, or pass another ISO time to offer instead. */
+  confirmViewing: (id: string, scheduledAt?: string) =>
+    apiFetch<OwnerViewing>(`/owner/viewings/${id}/confirm`, {
+      method: 'PATCH',
+      body: scheduledAt ? { scheduledAt } : {},
+    }),
+  declineViewing: (id: string) =>
+    apiFetch<OwnerViewing>(`/owner/viewings/${id}/decline`, { method: 'PATCH' }),
+  completeViewing: (id: string) =>
+    apiFetch<OwnerViewing>(`/owner/viewings/${id}/complete`, { method: 'PATCH' }),
+  /** The seller's link into a confirmed video viewing, from 15 minutes before it. */
+  joinViewingCall: (id: string) =>
+    apiFetch<VideoCallJoin>(`/owner/viewings/${id}/video-call`, { method: 'POST' }),
+
   dashboard: () => apiFetch<OwnerDashboard>('/owner/dashboard'),
 
   properties: (p = 1, size = 50) =>
@@ -399,6 +446,33 @@ export const ownerApi = {
   property: (id: string) => apiFetch<OwnerProperty>(`/owner/properties/${id}`),
   createProperty: (input: CreateOwnerPropertyInput) =>
     apiFetch<OwnerProperty>('/owner/properties', { method: 'POST', body: input }),
+  /** Sets the photos in order; the first becomes the cover. */
+  setPhotos: (id: string, keys: string[]) =>
+    apiFetch<OwnerProperty>(`/owner/properties/${id}`, {
+      method: 'PATCH',
+      body: { coverImageKey: keys[0], galleryImageKeys: keys.slice(1) },
+    }),
+  /** Attaches (key) or removes (null) the property's video tour. */
+  setVideoTour: (id: string, videoTourKey: string | null) =>
+    apiFetch<OwnerProperty>(`/owner/properties/${id}`, {
+      method: 'PATCH',
+      body: { videoTourKey },
+    }),
+  /** Stages a photo or video; it becomes the property's once attached. */
+  uploadMedia: (file: PickedFile, kind: 'image' | 'video') => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('kind', kind);
+    return apiUpload<{ key: string; kind: 'image' | 'video' }>(
+      '/owner/properties/media/upload',
+      form
+    );
+  },
+  removeMedia: (key: string) =>
+    apiFetch<{ deleted: boolean }>('/owner/properties/media/upload', {
+      method: 'DELETE',
+      body: { key },
+    }),
 
   /** Starts ownership verification for a property with one proof document. */
   submitOwnershipProof: (

@@ -44,6 +44,10 @@ export interface OwnerProperty {
   city: string;
   state: string;
   country: string;
+  /** The map pin, and when the owner confirmed it (absent: a guess from the address). */
+  latitude?: number;
+  longitude?: number;
+  locationConfirmedAt?: string;
   ownerName: string;
   verificationStatus: OwnershipVerificationStatus;
   rejectionReason?: string;
@@ -54,6 +58,10 @@ export interface OwnerProperty {
   galleryImageKeys?: string[];
   coverImageUrl?: string;
   galleryImageUrls?: string[];
+  /** Storage key of the video tour; null on an update removes it. */
+  videoTourKey?: string | null;
+  /** Signed link to the video tour, valid for a few hours. */
+  videoTourUrl?: string;
   hasActiveSaleListing: boolean;
   createdAt: string;
 }

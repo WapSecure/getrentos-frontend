@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrento
 import { Button } from '@getrentos/ui';
 import { ImagePlus, Loader2, Play, Star, Video, X } from 'lucide-react';
 import { LocationFields } from '@/components/shared/location/LocationFields';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { MapPoint } from '@/services/geocodeService';
 import {
   PropertyValueFields,
   toOptionalAmount,
@@ -16,6 +18,7 @@ import {
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/landlord';
+import { videoFileProblem } from '@/lib/videoFile';
 
 type Photo = {
   /** Stable key for React; the storage key for saved photos, a synthetic id for new files. */
@@ -80,6 +83,14 @@ const EditPropertyForm = ({
   const [city, setCity] = useState(property.city);
   const [state, setState] = useState(property.state);
   const [country, setCountry] = useState(property.country ?? 'Nigeria');
+  const [pin, setPin] = useState<MapPoint | null>(
+    property.latitude != null && property.longitude != null
+      ? { latitude: property.latitude, longitude: property.longitude }
+      : null
+  );
+  // Only a pin the landlord moved is sent, so saving other details does not
+  // re-confirm a location nobody looked at.
+  const [pinMoved, setPinMoved] = useState(false);
   const [totalUnits, setTotalUnits] = useState(String(property.totalUnits));
   const [estimatedValue, setEstimatedValue] = useState(
     property.estimatedValue ? String(property.estimatedValue) : ''
@@ -106,8 +117,11 @@ const EditPropertyForm = ({
     []
   );
 
-  const selectVideo = (file: File | undefined) => {
+  const selectVideo = async (file: File | undefined) => {
     if (!file) return;
+    const problem = await videoFileProblem(file);
+    setMediaError(problem);
+    if (problem) return;
     const url = URL.createObjectURL(file);
     objectUrls.current.push(url);
     setVideoFile(file);
@@ -171,6 +185,7 @@ const EditPropertyForm = ({
         city,
         state,
         country,
+        ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
         totalUnits: Number(totalUnits) || property.totalUnits,
         estimatedValue: toOptionalAmount(estimatedValue),
         purchasePrice: toOptionalAmount(purchasePrice),
@@ -249,6 +264,19 @@ const EditPropertyForm = ({
           onStateChange={setState}
           onCityChange={setCity}
           required
+        />
+
+        <LocationPicker
+          address={address}
+          city={city}
+          state={state}
+          country={country}
+          value={pin}
+          guessed={!pinMoved && !property.locationConfirmedAt}
+          onChange={(next) => {
+            setPin(next);
+            setPinMoved(true);
+          }}
         />
 
         <div>
@@ -369,7 +397,7 @@ const EditPropertyForm = ({
                   accept="video/mp4,video/webm,video/quicktime"
                   className="hidden"
                   onChange={(event) => {
-                    selectVideo(event.target.files?.[0]);
+                    void selectVideo(event.target.files?.[0]);
                     event.target.value = '';
                   }}
                 />
