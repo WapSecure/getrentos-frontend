@@ -44,6 +44,7 @@ export const TitleHistorySection = ({
     onSuccess: (events) => {
       queryClient.setQueryData(key, events);
       queryClient.invalidateQueries({ queryKey: landDeveloperKeys.risk(propertyId) });
+      queryClient.invalidateQueries({ queryKey: landDeveloperKeys.documents(propertyId) });
       setOpen(false);
       notify('Added to the chain of title. Compliance will verify it.');
     },
@@ -139,6 +140,7 @@ export const TitleHistorySection = ({
       </div>
 
       <TitleEventDialog
+        propertyId={propertyId}
         open={open}
         onOpenChange={setOpen}
         isSaving={add.isPending}

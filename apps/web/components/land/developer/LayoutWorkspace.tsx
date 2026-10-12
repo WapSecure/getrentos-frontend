@@ -72,6 +72,7 @@ const LayoutSetup = ({
     onSuccess: (layout) => {
       queryClient.setQueryData(landDeveloperKeys.layout(propertyId), layout);
       queryClient.invalidateQueries({ queryKey: landDeveloperKeys.layouts });
+      queryClient.invalidateQueries({ queryKey: landDeveloperKeys.documents(propertyId) });
       notify('Estate layout created. Add plots and a payment plan next.');
     },
     onError: (reason) => notify(errorMessage(reason), 'error'),
@@ -116,6 +117,7 @@ const LayoutSetup = ({
       ) : (
         <div className="mt-6">
           <LayoutForm
+            propertyId={propertyId}
             isSaving={create.isPending}
             submitLabel="Create layout"
             onSubmit={(input) => create.mutate(input)}
@@ -151,6 +153,7 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
     onSuccess: (updated) => {
       queryClient.setQueryData(landDeveloperKeys.layout(propertyId), updated);
       queryClient.invalidateQueries({ queryKey: landDeveloperKeys.layouts });
+      queryClient.invalidateQueries({ queryKey: landDeveloperKeys.documents(propertyId) });
       setEditOpen(false);
       notify('Estate details saved.');
     },
@@ -205,6 +208,7 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
             </DialogTitle>
             <LayoutForm
               key={layout.id}
+              propertyId={propertyId}
               layout={layout}
               isSaving={update.isPending}
               submitLabel="Save changes"

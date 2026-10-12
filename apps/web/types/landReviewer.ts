@@ -1,4 +1,5 @@
 import type { LandDiligenceCheckStatus, LandTitleType } from '@/types/land';
+import type { LandDocumentType } from '@/types/landDocument';
 
 /**
  * The outside professional's desk (`/land/reviews`), mirroring the backend's
@@ -73,7 +74,17 @@ export interface LandReviewDocument {
   uploadedAt: string;
   urlExpiresInSeconds?: number | null;
   documentType: string;
-  link?: { linkedByName: string; linkedAt: string; checklistKey?: string | null } | null;
+  /** Set only when the document is cited against one of this seat's checks. */
+  link?: {
+    linkedByName: string;
+    /** You made this citation, so you may remove it. */
+    linkedByMe?: boolean;
+    linkedAt: string;
+    checklistKey?: string | null;
+    note?: string | null;
+  } | null;
+  /** Already cited on a check outside your seat, so it cannot be cited again. */
+  citedOnOtherCheck?: boolean;
 }
 
 export interface LandReviewCase extends MyLandReviewSummary {
@@ -91,6 +102,20 @@ export interface DecideLandReviewCheckInput {
   status: LandDiligenceCheckStatus;
   note?: string;
   expectedVersion?: number;
+}
+
+/** The reviewer's own evidence, optionally cited on one of their checks straight away. */
+export interface LandReviewUploadInput {
+  documentType: LandDocumentType;
+  file: File;
+  checklistKey?: string;
+  note?: string;
+}
+
+export interface LandReviewCiteInput {
+  documentId: string;
+  checklistKey: string;
+  note?: string;
 }
 
 export const LAND_REVIEWER_ROLE_LABELS: Record<LandReviewerRole, string> = {

@@ -141,6 +141,8 @@ export interface EscrowSaleTransaction {
   offerId: string;
   propertyId: string;
   propertyName: string;
+  /** The property's type, e.g. 'LAND' (whose sales carry conveyance steps). */
+  propertyType?: string;
   buyerName: string;
   salePrice: number;
   escrowStatus: SaleEscrowStatus;

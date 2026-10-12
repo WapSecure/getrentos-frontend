@@ -44,7 +44,7 @@ export const MILESTONE_STATUS: Record<LandMilestoneStatus, Labelled> = {
 };
 
 export const INSTALLMENT_STATUS: Record<LandInstallmentStatus, Labelled> = {
-  PENDING: { label: 'Due', variant: 'neutral' },
+  PENDING: { label: 'Upcoming', variant: 'neutral' },
   PAID: { label: 'Paid', variant: 'success' },
   OVERDUE: { label: 'Overdue', variant: 'danger' },
   WAIVED: { label: 'Waived', variant: 'neutral' },

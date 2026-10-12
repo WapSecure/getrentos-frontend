@@ -17,7 +17,10 @@ export const landDeveloperKeys = {
   risk: (propertyId: string) => ['land', 'developer', 'property', propertyId, 'risk'] as const,
   titleHistory: (propertyId: string) =>
     ['land', 'developer', 'property', propertyId, 'title-history'] as const,
-  /** Every layout the owner runs, resolved from their land portfolio. */
+  /** The property's documents; their usage changes whenever something cites one. */
+  documents: (propertyId: string) =>
+    ['land', 'developer', 'property', propertyId, 'documents'] as const,
+  /** Every layout the owner can sell from (owned or under a mandate). */
   layouts: ['land', 'developer', 'layouts'] as const,
   purchases: ['land', 'developer', 'purchases'] as const,
   purchaseList: (params: SellerLandPurchaseListParams) =>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Link2 } from 'lucide-react';
+import { Link2, Upload } from 'lucide-react';
 import {
   Button,
   Dialog,
@@ -34,6 +34,8 @@ interface LandCiteDocumentDialogProps {
   onSubmit: (input: LandDiligenceDocumentLinkInput) => void;
   isPending: boolean;
   onResolveUrl?: (documentId: string) => Promise<string | null | undefined>;
+  /** Switches to uploading a new document, cited on the chosen check. */
+  onUploadInstead?: (checkKey?: string) => void;
 }
 
 /**
@@ -48,6 +50,7 @@ export const LandCiteDocumentDialog = ({
   onSubmit,
   isPending,
   onResolveUrl,
+  onUploadInstead,
 }: LandCiteDocumentDialogProps) => {
   const [documentId, setDocumentId] = useState(target?.documentId ?? '');
   const [checkKey, setCheckKey] = useState(target?.checkKey ?? '');
@@ -111,6 +114,21 @@ export const LandCiteDocumentDialog = ({
                   />
                 </Field>
               </>
+            )}
+
+            {onUploadInstead && (
+              <p className="text-sm text-muted-foreground">
+                Not on the property yet?{' '}
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                  onClick={() => onUploadInstead(checkKey || undefined)}
+                  disabled={isPending}
+                >
+                  <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+                  Upload a document and cite it
+                </button>
+              </p>
             )}
 
             <div className="flex justify-end gap-2 pt-1">

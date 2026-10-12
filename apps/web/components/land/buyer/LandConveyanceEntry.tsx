@@ -7,25 +7,32 @@ import { unwrap } from '@/lib/apiHelpers';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
+import type { BuyerEscrowTransaction } from '@/types/buyer';
+
+interface LandConveyanceEntryProps {
+  transaction: Pick<BuyerEscrowTransaction, 'id' | 'propertyType'>;
+}
 
 /**
- * The way into a land resale's conveyance steps from a transaction. The
- * transaction itself does not say whether the property is land, so this asks
- * the conveyance endpoint, which answers an empty list for anything else, and
- * renders nothing in that case (or on any error).
+ * The way into a land resale's conveyance steps from a transaction. Only land
+ * sales have them, and the transaction says what it sold, so nothing is asked
+ * of the API for any other property.
  */
-export const LandConveyanceEntry = ({ txId }: { txId: string }) => {
+export const LandConveyanceEntry = ({ transaction }: LandConveyanceEntryProps) => {
+  const txId = transaction.id;
+  const isLand = transaction.propertyType === 'LAND';
   const { data } = useQuery({
     queryKey: buyerLandKeys.transactionMilestones(txId),
     queryFn: () => unwrap(landBuyerService.listTransactionMilestones(txId)),
-    retry: false,
+    enabled: isLand,
   });
-  if (!data || data.length === 0) return null;
+  if (!isLand) return null;
 
-  const outstanding = data.filter(
+  const milestones = data ?? [];
+  const outstanding = milestones.filter(
     (m) => m.required && m.status !== 'CONFIRMED' && m.status !== 'WAIVED'
   ).length;
-  const awaiting = data.filter((m) => m.status === 'DELIVERED').length;
+  const awaiting = milestones.filter((m) => m.status === 'DELIVERED').length;
 
   return (
     <Link
@@ -36,9 +43,11 @@ export const LandConveyanceEntry = ({ txId }: { txId: string }) => {
       <span className="min-w-0 flex-1">
         <span className="block font-medium text-foreground">Land conveyance</span>
         <span className="block text-xs text-muted-foreground">
-          {outstanding === 0
-            ? 'All required steps confirmed.'
-            : `Escrow releases only after the deed and possession are confirmed. ${outstanding} required step${outstanding === 1 ? '' : 's'} left${awaiting ? `, ${awaiting} awaiting you` : ''}.`}
+          {!data
+            ? 'Escrow releases only after the deed and possession are confirmed.'
+            : outstanding === 0
+              ? 'All required steps confirmed.'
+              : `Escrow releases only after the deed and possession are confirmed. ${outstanding} required step${outstanding === 1 ? '' : 's'} left${awaiting ? `, ${awaiting} awaiting you` : ''}.`}
         </span>
       </span>
       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />

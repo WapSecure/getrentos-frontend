@@ -23,6 +23,7 @@ import { DeliverMilestoneDialog } from './DeliverMilestoneDialog';
 import { InstallmentSchedule } from './InstallmentSchedule';
 import { MilestoneList, type MilestoneDeliverability } from './MilestoneList';
 import { PurchasePayments } from './PurchasePayments';
+import { useOwnerLayouts } from './useOwnerLayouts';
 
 const DELIVERABLE = new Set(['ACTIVE', 'PAID_IN_FULL', 'DEFAULTED']);
 
@@ -69,6 +70,10 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
     queryKey: landDeveloperKeys.purchase(purchaseId),
     queryFn: () => unwrap(landDeveloperService.getPurchase(purchaseId)),
   });
+  // A purchase names its layout, not its land; the layout list says which parcel that is.
+  const layouts = useOwnerLayouts();
+  const propertyId =
+    data?.propertyId ?? layouts.data?.find((layout) => layout.id === data?.layoutId)?.propertyId;
 
   const applyDetail = (detail: LandPurchaseDetail) => {
     queryClient.setQueryData(landDeveloperKeys.purchase(purchaseId), detail);
@@ -83,8 +88,11 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
       milestone: LandMilestone;
       input: LandMilestoneDeliverInput;
     }) => unwrap(landDeveloperService.deliverPurchaseMilestone(purchaseId, milestone.key, input)),
-    onSuccess: (detail, { milestone }) => {
+    onSuccess: (detail, { milestone, input }) => {
       applyDetail(detail);
+      if (input.documentId && propertyId) {
+        queryClient.invalidateQueries({ queryKey: landDeveloperKeys.documents(propertyId) });
+      }
       setDelivering(null);
       notify(`${milestone.label}: marked delivered. The buyer has been asked to confirm.`);
     },
@@ -277,6 +285,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
 
       <DeliverMilestoneDialog
         milestone={delivering}
+        propertyId={propertyId}
         onOpenChange={(open) => !open && setDelivering(null)}
         isSaving={deliver.isPending}
         onDeliver={(milestone, input) => deliver.mutate({ milestone, input })}

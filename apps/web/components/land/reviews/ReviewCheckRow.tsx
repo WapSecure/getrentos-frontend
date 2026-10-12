@@ -6,6 +6,7 @@ import { FileCheck2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheckStatus } from '@/types/land';
 import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
+import { ReviewCheckEvidence, type ReviewEvidenceActions } from './ReviewCheckEvidence';
 import { decisionProblem, hasCitedDocument } from './reviewRules';
 
 const CHOICES: { value: LandDiligenceCheckStatus; label: string; tone: string }[] = [
@@ -43,12 +44,15 @@ export const ReviewCheckRow = ({
   editable,
   isSaving,
   onDecide,
+  evidence,
 }: {
   check: LandReviewCheck;
   documents: LandReviewDocument[];
   editable: boolean;
   isSaving: boolean;
   onDecide: (status: LandDiligenceCheckStatus, note: string) => void;
+  /** Upload / cite / uncite on this seat; offered on document-backed checks. */
+  evidence?: ReviewEvidenceActions;
 }) => {
   const [status, setStatus] = useState<LandDiligenceCheckStatus | null>(
     check.status === 'PENDING' ? null : check.status
@@ -83,6 +87,10 @@ export const ReviewCheckRow = ({
         </div>
         <Badge variant={badge.variant}>{badge.label}</Badge>
       </div>
+
+      {editable && check.requiresDocument && evidence && (
+        <ReviewCheckEvidence check={check} documents={documents} actions={evidence} />
+      )}
 
       {editable ? (
         <form

@@ -123,7 +123,9 @@ export const PurchaseDocuments = ({
               </Button>
               {disabled && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Issued once the deposit is paid.
+                  {['CANCELLED', 'REVOKED'].includes(purchase.status)
+                    ? 'Not issued: this purchase has ended.'
+                    : 'Issued once the deposit is paid.'}
                 </p>
               )}
             </li>

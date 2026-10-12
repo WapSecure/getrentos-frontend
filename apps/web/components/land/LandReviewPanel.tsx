@@ -11,7 +11,12 @@ interface LandReviewPanelProps {
   record: OwnerLandRecord;
   isSubmitting: boolean;
   onSubmit: () => void;
+  /** Id of the parcel's documents section, linked from a missing-documents blocker. */
+  documentsAnchor?: string;
 }
+
+/** A blocker the owner clears by uploading documents ("Upload the title documents…"). */
+const isDocumentsBlocker = (blocker: string) => /^upload\b|document/i.test(blocker);
 
 const CHECK_ICON: Record<
   LandDiligenceCheck['status'],
@@ -55,7 +60,12 @@ const PROMPT: Record<string, { title: string; body: string; action: string }> = 
  * not, why — those reasons are shown as a list rather than surfaced as an
  * error after the owner presses the button.
  */
-export const LandReviewPanel = ({ record, isSubmitting, onSubmit }: LandReviewPanelProps) => {
+export const LandReviewPanel = ({
+  record,
+  isSubmitting,
+  onSubmit,
+  documentsAnchor,
+}: LandReviewPanelProps) => {
   const diligence = record.diligence;
   const status = diligence?.status ?? 'NOT_STARTED';
   const prompt = PROMPT[status];
@@ -139,7 +149,27 @@ export const LandReviewPanel = ({ record, isSubmitting, onSubmit }: LandReviewPa
               {blockers.map((blocker) => (
                 <li key={blocker} className="flex gap-2 text-sm text-muted-foreground">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-                  {blocker}
+                  <span>
+                    {blocker}
+                    {documentsAnchor && isDocumentsBlocker(blocker) && (
+                      <>
+                        {' '}
+                        <a
+                          href={`#${documentsAnchor}`}
+                          onClick={(event) => {
+                            const target = document.getElementById(documentsAnchor);
+                            if (!target) return;
+                            event.preventDefault();
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            target.focus({ preventScroll: true });
+                          }}
+                          className="font-medium text-primary underline-offset-2 hover:underline"
+                        >
+                          Go to documents
+                        </a>
+                      </>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>

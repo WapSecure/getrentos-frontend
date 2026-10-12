@@ -14,6 +14,7 @@ import type {
 import { LandChecksPanel } from './LandChecksPanel';
 import { LandCiteDocumentDialog, type CiteTarget } from './LandCiteDocumentDialog';
 import { LandDocumentsPanel } from './LandDocumentsPanel';
+import { LandUploadDocumentDialog, type LandUploadDocumentInput } from './LandUploadDocumentDialog';
 import { useInvalidateLandCase, type LandCasePanelProps } from './shared';
 
 const EDITABLE_STATUSES = new Set(['IN_REVIEW', 'ACTION_REQUIRED']);
@@ -37,6 +38,7 @@ export const LandEvidenceSection = ({
   const checks = detail.diligence.checks ?? [];
   const [citeTarget, setCiteTarget] = useState<CiteTarget | null>(null);
   const [stopCiting, setStopCiting] = useState<LandDiligenceDocument | null>(null);
+  const [uploadTarget, setUploadTarget] = useState<{ checkKey?: string } | null>(null);
 
   const recordCheck = useMutation({
     mutationFn: ({ key, input }: { key: string; input: LandDiligenceCheckInput }) =>
@@ -57,6 +59,41 @@ export const LandEvidenceSection = ({
       onSuccess('Document cited: the review now records what this check rests on.');
     },
     onError: (error) => onError(error, 'Unable to cite that document.'),
+  });
+
+  // Upload, then cite when a check was chosen. A failed citation leaves the
+  // upload in place (it is on the property) and says so.
+  const upload = useMutation({
+    mutationFn: async ({ checklistKey, note, ...file }: LandUploadDocumentInput) => {
+      const document = await unwrap(adminLandService.uploadDocument(propertyId, file));
+      if (!checklistKey) return { document, citeError: null };
+      try {
+        await unwrap(
+          adminLandService.linkDiligenceDocument(propertyId, {
+            documentId: document.id,
+            checklistKey,
+            note,
+          })
+        );
+        return { document, citeError: null };
+      } catch (citeError) {
+        return { document, citeError };
+      }
+    },
+    onSuccess: ({ document, citeError }, { checklistKey }) => {
+      invalidate();
+      setUploadTarget(null);
+      if (citeError) {
+        onError(citeError, `${document.name} was uploaded but could not be cited.`);
+      } else {
+        onSuccess(
+          checklistKey
+            ? `${document.name} uploaded and cited.`
+            : `${document.name} uploaded. Cite it to rest a check on it.`
+        );
+      }
+    },
+    onError: (error) => onError(error, 'Unable to upload that document.'),
   });
 
   const unlink = useMutation({
@@ -100,6 +137,7 @@ export const LandEvidenceSection = ({
         canReview={canReview}
         onCite={(documentId) => setCiteTarget({ documentId })}
         onStopCiting={setStopCiting}
+        onUpload={() => setUploadTarget({})}
         unlinkingId={unlink.isPending ? (unlink.variables ?? null) : null}
         onResolveUrl={onResolveUrl}
       />
@@ -113,6 +151,23 @@ export const LandEvidenceSection = ({
         onSubmit={(input) => link.mutate(input)}
         isPending={link.isPending}
         onResolveUrl={onResolveUrl}
+        onUploadInstead={
+          canReview
+            ? (checkKey) => {
+                setCiteTarget(null);
+                setUploadTarget({ checkKey });
+              }
+            : undefined
+        }
+      />
+
+      <LandUploadDocumentDialog
+        key={uploadTarget ? `upload:${uploadTarget.checkKey ?? ''}` : 'upload-closed'}
+        target={uploadTarget}
+        onClose={() => setUploadTarget(null)}
+        checks={checks}
+        onSubmit={(input) => upload.mutate(input)}
+        isPending={upload.isPending}
       />
 
       <ConfirmDialog

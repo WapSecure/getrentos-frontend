@@ -51,7 +51,7 @@ export const MilestoneList = ({
           : { allowed: false, reason: undefined };
         return (
           <li
-            key={milestone.id}
+            key={milestone.key}
             className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-start sm:justify-between"
           >
             <div className="flex min-w-0 gap-3">

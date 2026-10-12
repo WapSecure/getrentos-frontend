@@ -200,6 +200,8 @@ export interface LandPurchaseSummary {
   status: LandPurchaseStatus;
   layoutId: string;
   layoutName: string;
+  /** The master land property the estate sits on. */
+  propertyId?: string;
   plotId: string;
   plotNumber: string;
   block?: string;
@@ -389,4 +391,44 @@ export interface LandTitleEventInput {
   registeredAt?: string;
   note?: string;
   documentId?: string;
+}
+
+// ─── My layouts ──────────────────────────────────────────────────────────────
+
+export interface LandPlotCounts {
+  total: number;
+  available: number;
+  reserved: number;
+  underInstallment: number;
+  sold: number;
+  allocated: number;
+  withheld: number;
+}
+
+/** One estate layout the caller can sell from (GET owner/land/layouts). */
+export interface OwnerLandLayoutSummary {
+  id: string;
+  name: string;
+  status: LandLayoutStatus;
+  propertyId: string;
+  propertyTitle: string;
+  city: string;
+  state: string;
+  /** Owned outright, or reached through a listing mandate. */
+  access: 'OWNER' | 'MANDATE';
+  plots: LandPlotCounts;
+  publishedAt?: string;
+  createdAt: string;
+}
+
+/** The land resale a seller is conveying. */
+export interface LandResaleSummary {
+  transactionId: string;
+  propertyId: string;
+  propertyTitle: string;
+  buyerName: string;
+  /** Sale price, naira. */
+  amount: number;
+  escrowStatus: string;
+  createdAt: string;
 }

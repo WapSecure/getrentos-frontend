@@ -1,6 +1,6 @@
 'use client';
 
-import { FileLock2, Link2, Unlink } from 'lucide-react';
+import { FileLock2, Link2, Unlink, Upload } from 'lucide-react';
 import { Badge, Button } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import type { LandDiligenceCheck, LandDiligenceDocument } from '@/types/land';
@@ -13,6 +13,8 @@ interface LandDocumentsPanelProps {
   canReview: boolean;
   onCite: (documentId: string) => void;
   onStopCiting: (document: LandDiligenceDocument) => void;
+  /** Opens the staff upload (e.g. a registry search report). */
+  onUpload: () => void;
   unlinkingId: string | null;
   onResolveUrl?: (documentId: string) => Promise<string | null | undefined>;
 }
@@ -27,6 +29,7 @@ export const LandDocumentsPanel = ({
   canReview,
   onCite,
   onStopCiting,
+  onUpload,
   unlinkingId,
   onResolveUrl,
 }: LandDocumentsPanelProps) => {
@@ -40,11 +43,24 @@ export const LandDocumentsPanel = ({
       title="Documents on this property"
       icon={FileLock2}
       description={`${cited.length} cited by this review · ${uncited.length} not cited`}
+      actions={
+        canReview ? (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={onUpload}
+            icon={<Upload className="h-3.5 w-3.5" />}
+          >
+            Upload document
+          </Button>
+        ) : undefined
+      }
     >
       {documents.length === 0 ? (
         <PanelMessage>
           This property has no documents yet. Request clarification for the title, survey plan or
-          ownership proof before deciding.
+          ownership proof, or upload evidence you obtained (e.g. a registry search), before
+          deciding.
         </PanelMessage>
       ) : (
         <ul className="space-y-2">
