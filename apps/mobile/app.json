@@ -97,6 +97,13 @@
     "updates": {
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6cc26d00-7ec0-4251-8c6e-ce49aae8510a"
+      }
+    },
+    "owner": "wapsecure"
   }
 }

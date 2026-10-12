@@ -19,6 +19,7 @@ import {
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { AgencyPayoutSection } from './AgencyPayoutSection';
+import { AgencyAgentPayoutSection } from './AgencyAgentPayoutSection';
 import { AgencyTeamSection } from './AgencyTeamSection';
 import {
   agencyCommissionService,
@@ -319,6 +320,8 @@ export function AgencyCommissionsView() {
       />
 
       <AgencyPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
+
+      <AgencyAgentPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
 
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
