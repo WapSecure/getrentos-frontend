@@ -1,4 +1,9 @@
-import { boundaryAreaSqm, boundaryCorners, boundaryGeometry } from '@getrentos/shared';
+import {
+  boundaryAreaMismatch,
+  boundaryAreaSqm,
+  boundaryCorners,
+  boundaryGeometry,
+} from '@getrentos/shared';
 
 const square = [
   { latitude: 6.44, longitude: 3.47 },
@@ -27,5 +32,21 @@ describe('parcel boundary', () => {
     const area = boundaryAreaSqm(square);
     expect(area).toBeGreaterThan(9_700);
     expect(area).toBeLessThan(10_000);
+  });
+
+  it('flags an outline far from the stated area, in any unit, and nothing close', () => {
+    // The square is about one hectare.
+    expect(boundaryAreaMismatch(square, 1, 'HECTARE')).toBeNull();
+    expect(boundaryAreaMismatch(square, 2.5, 'ACRE')).toBeNull();
+    expect(boundaryAreaMismatch(square, 9_000, 'SQUARE_METERS')).toBeNull();
+
+    const typo = boundaryAreaMismatch(square, 600, 'SQUARE_METERS');
+    expect(typo?.ratio).toBeGreaterThan(15);
+    expect(boundaryAreaMismatch(square, 3, 'HECTARE')?.ratio).toBeLessThan(0.4);
+  });
+
+  it('has nothing to compare without an outline or a stated area', () => {
+    expect(boundaryAreaMismatch(square.slice(0, 2), 600, 'SQUARE_METERS')).toBeNull();
+    expect(boundaryAreaMismatch(square, 0, 'SQUARE_METERS')).toBeNull();
   });
 });

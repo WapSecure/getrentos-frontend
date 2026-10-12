@@ -161,7 +161,9 @@ export function buildMapHtml(
       map.off('click');
       map.on('click', function (e) { send(corners.concat([{ latitude: e.latlng.lat, longitude: e.latlng.lng }])); });
       corners.forEach(function (c, i) {
-        var handle = L.marker([c.latitude, c.longitude], { icon: cornerIcon(), draggable: true }).addTo(markerLayer);
+        var label = 'Corner ' + (i + 1) + ' of ' + corners.length + ': drag to move it';
+        var handle = L.marker([c.latitude, c.longitude], { icon: cornerIcon(), draggable: true, title: label }).addTo(markerLayer);
+        if (handle.getElement()) handle.getElement().setAttribute('aria-label', label);
         handle.on('dragend', function () {
           var ll = handle.getLatLng();
           var next = corners.slice();
@@ -194,7 +196,9 @@ export function buildMapHtml(
       var start = pts[0]
         || (payload.center ? { latitude: payload.center.latitude, longitude: payload.center.longitude } : null);
       if (start) {
-        var pin = L.marker([start.latitude, start.longitude], { icon: locationPinIcon(), draggable: true }).addTo(markerLayer);
+        var pinLabel = 'Property location: drag to move it, or tap the map';
+        var pin = L.marker([start.latitude, start.longitude], { icon: locationPinIcon(), draggable: true, title: pinLabel }).addTo(markerLayer);
+        if (pin.getElement()) pin.getElement().setAttribute('aria-label', pinLabel);
         var report = function (ll) { post({ type: 'pinMoved', latitude: ll.lat, longitude: ll.lng }); };
         pin.on('dragend', function () { report(pin.getLatLng()); });
         // Tapping the map moves the pin there too: easier than dragging on a phone.

@@ -537,8 +537,9 @@ export const CreateSaleListingModal = ({
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Publishing makes this listing searchable to verified buyers. You can also save
-                    it as a draft and publish later, or preview it first.
+                    Publishing makes this listing searchable to verified buyers, or puts it in
+                    review first when we need to check something. A draft stays off the market until
+                    you publish it.
                   </p>
                 </div>
               )}

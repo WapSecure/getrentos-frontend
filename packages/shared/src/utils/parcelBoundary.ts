@@ -69,3 +69,25 @@ export function boundaryAreaSqm(corners: BoundaryCorner[]): number {
   }
   return Math.abs(twice) / 2;
 }
+
+const SQM_PER_UNIT = { SQUARE_METERS: 1, ACRE: 4046.8564224, HECTARE: 10_000 } as const;
+
+/**
+ * How far the drawn outline is from the area the owner typed, when far enough
+ * to say so. Buyers see both, so a 600 sqm plot outlined as two hectares (a
+ * corner dropped in the wrong street, or the wrong unit picked) would read as
+ * a misrepresentation. Null when there is nothing to compare or they agree
+ * within the tolerance: hand-drawn outlines are rarely exact.
+ */
+export function boundaryAreaMismatch(
+  corners: BoundaryCorner[],
+  statedValue: number,
+  statedUnit: keyof typeof SQM_PER_UNIT,
+  tolerance = 0.25
+): { outlinedSqm: number; statedSqm: number; ratio: number } | null {
+  const outlinedSqm = boundaryAreaSqm(corners);
+  const statedSqm = statedValue * (SQM_PER_UNIT[statedUnit] ?? 1);
+  if (!(outlinedSqm > 0) || !(statedSqm > 0)) return null;
+  const ratio = outlinedSqm / statedSqm;
+  return Math.abs(ratio - 1) > tolerance ? { outlinedSqm, statedSqm, ratio } : null;
+}
