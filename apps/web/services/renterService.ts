@@ -11,7 +11,12 @@ import type {
 import type { SharedCreditCheck } from '@/types/credit-check';
 import type { ApplicationFormData } from '@/components/renter/property-apply/ApplicationWizard';
 import type { CalendarEvent, CalendarEventFormData } from '@/types/calendar';
-import type { VerificationItem, TrustScoreHistoryItem, Badge } from '@/types/trust-score';
+import type {
+  VerificationItem,
+  TrustScoreHistoryItem,
+  Badge,
+  TrustScoreBreakdown,
+} from '@/types/trust-score';
 import type { Conversation, Reminder } from '@/types/messages';
 import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
@@ -325,6 +330,14 @@ export interface TrustScoreOverview {
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: Badge[];
+  /**
+   * Dimension-engine breakdown (identity/financial/role/contact/activity minus
+   * penalty), surfaced only while the trust-score engine is on — same shape the
+   * other roles already receive from `/<role>/trust-profile`. Optional so the
+   * renter page degrades to the legacy factor list when the engine is off or
+   * the field is absent.
+   */
+  scoreBreakdown?: TrustScoreBreakdown;
 }
 
 export interface RenterDocument {

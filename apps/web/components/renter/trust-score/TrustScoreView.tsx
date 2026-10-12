@@ -8,6 +8,7 @@ import { VerificationList } from '@/components/renter/trust-score/VerificationLi
 import { TrustScoreHistory } from '@/components/renter/trust-score/TrustScoreHistory';
 import { ImprovementSuggestions } from '@/components/renter/trust-score/ImprovementSuggestions';
 import { TrustBadges } from '@/components/shared/trust/TrustBadges';
+import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
 import { VerificationTimeline } from '@/components/renter/trust-score/VerificationTimeline';
 import { TrustScoreBenefits } from '@/components/renter/trust-score/TrustScoreBenefits';
 import { TrustScoreComparison } from '@/components/renter/trust-score/TrustScoreComparison';
@@ -31,6 +32,7 @@ export const TrustScoreView = () => {
   const verifications = data?.verifications ?? [];
   const history = data?.history ?? [];
   const badges = data?.badges ?? [];
+  const scoreBreakdown = data?.scoreBreakdown;
 
   if (trustScoreQuery.isLoading) return <PageLoadingState />;
   if (trustScoreQuery.isError) {
@@ -67,7 +69,17 @@ export const TrustScoreView = () => {
           <VerificationList verifications={verifications} />
           <TrustScoreHistory history={history} />
           <VerificationTimeline verifications={verifications} />
-          <ScoreFactors verifications={verifications} />
+          {/*
+            Prefer the real dimension-engine breakdown (cost-to-fake weighted,
+            with reason codes) — the same explanation every other role already
+            sees — and fall back to the legacy verification-derived factor list
+            only when the engine is off or the field is absent.
+          */}
+          {scoreBreakdown ? (
+            <TrustScoreBreakdownCard breakdown={scoreBreakdown} />
+          ) : (
+            <ScoreFactors verifications={verifications} />
+          )}
         </div>
         <div className="space-y-6">
           <TrustBadges badges={badges} />
