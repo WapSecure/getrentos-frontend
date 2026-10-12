@@ -20,7 +20,10 @@ import {
 import {
   ArrowUpDown,
   BadgeCheck,
+  BarChart3,
+  ExternalLink,
   Heart,
+  LayoutGrid,
   MapPin,
   MessageSquare,
   Ruler,
@@ -28,7 +31,7 @@ import {
   ShieldCheck,
   Trees,
 } from 'lucide-react';
-import { landService } from '@/services/landService';
+import { landMarketService } from '@/services/landMarketService';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
@@ -48,6 +51,10 @@ import {
 import { boundaryCorners } from '@getrentos/shared';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import { useAddRole } from '@/hooks/useAddRole';
+import Link from 'next/link';
+import { AssuranceTierBadge } from '@/components/land/market/AssuranceTierBadge';
+import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
+import type { LandAssuranceTier } from '@/types/land';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -89,6 +96,13 @@ const TITLE_TYPE_OPTIONS = [
   { value: 'SURVEY_PLAN', label: 'Survey plan' },
 ];
 
+/** "At least this tier"; BASIC is every verified listing, so it is the default. */
+const ASSURANCE_OPTIONS = [
+  { value: '', label: 'Any assurance' },
+  { value: 'STANDARD', label: 'Registry-searched or better' },
+  { value: 'PREMIUM', label: 'Premium verified only' },
+];
+
 /** Square metres; a standard Lagos plot is roughly 450–650 sqm. */
 const AREA_OPTIONS = [
   { value: '', label: 'Any plot size' },
@@ -109,6 +123,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   const [titleType, setTitleType] = useState('');
   const [minArea, setMinArea] = useState('');
   const [roadAccess, setRoadAccess] = useState(false);
+  const [minAssuranceTier, setMinAssuranceTier] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -125,6 +140,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
       titleType: titleType || undefined,
       minAreaSqm: minArea ? Number(minArea) : undefined,
       roadAccess,
+      minAssuranceTier: (minAssuranceTier || undefined) as LandAssuranceTier | undefined,
       city: city.trim() || undefined,
       state: state.trim() || undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
@@ -133,12 +149,24 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
       page,
       pageSize: PAGE_SIZE,
     }),
-    [city, maxPrice, minPrice, page, sort, state, debouncedSearch, titleType, minArea, roadAccess]
+    [
+      city,
+      maxPrice,
+      minPrice,
+      page,
+      sort,
+      state,
+      debouncedSearch,
+      titleType,
+      minArea,
+      roadAccess,
+      minAssuranceTier,
+    ]
   );
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [...landKeys.public, queryParams],
-    queryFn: () => unwrap(landService.listPublic(queryParams)),
+    queryFn: () => unwrap(landMarketService.listPublic(queryParams)),
   });
   const listings = data?.items ?? [];
 
@@ -221,6 +249,22 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             Every listing here has a verified owner, an approved diligence review, and a live
             escrow-ready sale flow.
           </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={LAND_BUYER_ROUTES.LAYOUTS}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              <LayoutGrid className="h-4 w-4" aria-hidden />
+              Estates selling plots
+            </Link>
+            <Link
+              href={LAND_BUYER_ROUTES.MARKET_INSIGHTS}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              <BarChart3 className="h-4 w-4" aria-hidden />
+              Land prices by area
+            </Link>
+          </div>
         </div>
 
         <div className="mb-3">
@@ -303,6 +347,14 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               ariaLabel="Minimum plot size"
             />
           </div>
+          <div className="w-56">
+            <Select
+              value={minAssuranceTier}
+              onValueChange={(value) => updateFilter(setMinAssuranceTier, value)}
+              options={ASSURANCE_OPTIONS}
+              ariaLabel="Minimum assurance"
+            />
+          </div>
           <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
             <Checkbox
               checked={roadAccess}
@@ -360,10 +412,11 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                 >
                   <div className="relative flex h-44 items-center justify-center overflow-hidden bg-muted">
                     <Trees className="h-12 w-12 text-primary/60" />
-                    <div className="absolute left-3 top-3">
+                    <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
                       <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
                         Diligence verified
                       </Badge>
+                      <AssuranceTierBadge tier={listing.diligence?.assuranceTier} />
                     </div>
                     {mode === 'buyer' && (
                       <button
@@ -467,9 +520,12 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                         </p>
                       )}
                     </div>
-                    <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
-                      Verified parcel
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
+                        Verified parcel
+                      </Badge>
+                      <AssuranceTierBadge tier={activeListing.diligence?.assuranceTier} />
+                    </div>
                   </div>
                   {activeListing.description && (
                     <p className="mt-4 text-sm leading-6 text-muted-foreground">
@@ -546,6 +602,13 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                     Published {formatDate(activeListing.listedDate)}
                   </p>
                 )}
+                <Link
+                  href={LAND_BUYER_ROUTES.listing(activeListing.id)}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                >
+                  Full listing and price comparison
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                </Link>
               </div>
               {canOffer || needsSignIn ? (
                 <div className="grid grid-cols-2 gap-3 border-t border-border p-5">

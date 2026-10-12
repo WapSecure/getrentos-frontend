@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -72,9 +73,12 @@ export async function publicListingMetadata(
 export async function PublicListingPage({
   market,
   id,
+  extra,
 }: {
   market: PublicDetailMarket;
   id: string;
+  /** Market-specific sections under the listing (land: comparables and assurance). */
+  extra?: ReactNode;
 }) {
   const listing = await fetchPublicListing(market, id);
   if (!listing) notFound();
@@ -287,6 +291,7 @@ export async function PublicListingPage({
             bedrooms={listing.bedrooms}
           />
         ) : null}
+        {extra}
       </article>
       <Footer />
     </main>

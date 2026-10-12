@@ -75,6 +75,7 @@ export type TranslationKey =
   | 'sidebar.saved_properties'
   | 'sidebar.viewing_requests'
   | 'sidebar.land_marketplace'
+  | 'sidebar.land_purchases'
   | 'sidebar.shortlets'
   | 'sidebar.shortlet_bookings'
   | 'dashboard.greeting_morning'
@@ -173,6 +174,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.saved_properties': 'Saved Properties',
     'sidebar.viewing_requests': 'Viewing Requests',
     'sidebar.land_marketplace': 'Land Marketplace',
+    'sidebar.land_purchases': 'My Land',
     'sidebar.shortlets': 'Shortlets',
     'sidebar.shortlet_bookings': 'My Bookings',
     'dashboard.greeting_morning': 'Good morning',
@@ -270,6 +272,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.saved_properties': 'House Wey I Save',
     'sidebar.viewing_requests': 'Viewing Wey Dem Request',
     'sidebar.land_marketplace': 'Land Market',
+    'sidebar.land_purchases': 'My Land',
     'sidebar.shortlets': 'Shortlet',
     'sidebar.shortlet_bookings': 'My Booking Dem',
     'dashboard.greeting_morning': 'Good morning o',

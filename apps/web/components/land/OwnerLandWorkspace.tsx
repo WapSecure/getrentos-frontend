@@ -1,21 +1,26 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
-import { ArrowRight, FileSearch, MapPin, Plus, Ruler, ShieldCheck } from 'lucide-react';
+import { ArrowRight, FileSearch, MapPin, Plus, Receipt, Ruler, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
 import { landService } from '@/services/landService';
 import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
+import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
 import type { LandOwnershipProofInput, LandParcelInput, OwnerLandRecord } from '@/types/land';
 import { LAND_AREA_UNIT_LABELS } from '@/types/land';
 import { LandDiligenceBadge } from './LandDiligenceBadge';
 import { LandParcelEditor } from './LandParcelEditor';
 import { LandReviewPanel } from './LandReviewPanel';
 import { LandRegistrationDialog, type LandRegistrationInput } from './LandRegistrationDialog';
+import { LandPropertyNav } from './developer/LandPropertyNav';
+import { RiskBreakdownCard } from './developer/RiskBreakdownCard';
+import { TitleHistorySection } from './developer/TitleHistorySection';
 
 const PAGE_SIZE = 9;
 
@@ -25,9 +30,15 @@ const titleOf = (record: OwnerLandRecord) =>
 export const OwnerLandWorkspace = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  // `?property=` opens a parcel directly, e.g. when coming back from its layout or sales.
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(() =>
+    searchParams.get('property')
+  );
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const notify = (message: string, variant: ToastVariant = 'success') =>
+    setToast({ message, variant });
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [...landKeys.owner, { page, pageSize: PAGE_SIZE }],
@@ -146,14 +157,24 @@ export const OwnerLandWorkspace = () => {
             diligence are verified.
           </p>
         </div>
-        <Button
-          variant="primary"
-          rounded="lg"
-          onClick={() => setRegistrationOpen(true)}
-          icon={<Plus className="h-4 w-4" />}
-        >
-          Register land
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            href={LAND_DEVELOPER_ROUTES.purchases()}
+            variant="outline"
+            rounded="lg"
+            icon={<Receipt className="h-4 w-4" />}
+          >
+            Plot sales
+          </Button>
+          <Button
+            variant="primary"
+            rounded="lg"
+            onClick={() => setRegistrationOpen(true)}
+            icon={<Plus className="h-4 w-4" />}
+          >
+            Register land
+          </Button>
+        </div>
       </div>
 
       <section className="mb-6 grid gap-4 md:grid-cols-3">
@@ -261,7 +282,8 @@ export const OwnerLandWorkspace = () => {
           </div>
 
           {selected && (
-            <div>
+            <div className="min-w-0">
+              <LandPropertyNav propertyId={selected.property.id} active="parcel" className="mb-4" />
               <LandReviewPanel
                 record={selected}
                 isSubmitting={submitForReview.isPending}
@@ -278,6 +300,16 @@ export const OwnerLandWorkspace = () => {
                   await uploadProof.mutateAsync({ propertyId: selected.property.id, proof });
                 }}
               />
+              <TitleHistorySection
+                key={`title-${selected.property.id}`}
+                propertyId={selected.property.id}
+                notify={notify}
+              />
+              {selected.parcel && (
+                <div className="mt-4">
+                  <RiskBreakdownCard propertyId={selected.property.id} compact />
+                </div>
+              )}
               {selected.diligence?.status === 'VERIFIED' &&
                 selected.property.verificationStatus === 'APPROVED' && (
                   <div className="mt-4 rounded-2xl border border-success/25 bg-success/5 p-4">

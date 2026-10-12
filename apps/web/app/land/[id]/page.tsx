@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { PublicListingPage, publicListingMetadata } from '@/components/market/PublicListingPage';
+import { ListingMarketSection } from '@/components/land/market/ListingMarketSection';
 
 // Must be a literal for Next to read it; matches PUBLIC_DETAIL_REVALIDATE.
 export const revalidate = 60;
@@ -13,5 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function LandListingPage({ params }: Props) {
-  return <PublicListingPage market="land" id={(await params).id} />;
+  const { id } = await params;
+  return (
+    <PublicListingPage market="land" id={id} extra={<ListingMarketSection listingId={id} />} />
+  );
 }

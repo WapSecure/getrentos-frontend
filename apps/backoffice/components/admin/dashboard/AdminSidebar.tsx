@@ -30,6 +30,7 @@ import {
   CreditCard,
   Sparkles,
   Handshake,
+  FileSignature,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -91,6 +92,12 @@ const navItems: NavItem[] = [
     href: '/admin/land/diligence',
     icon: MapPinned,
     permission: 'verifications.review',
+  },
+  {
+    label: 'Land Purchases',
+    href: '/admin/land/purchases',
+    icon: FileSignature,
+    permission: 'sales.view',
   },
   {
     label: 'Shortlets',
@@ -220,10 +227,10 @@ const navItems: NavItem[] = [
 const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'People and trust', items: navItems.slice(1, 5) },
-  { label: 'Marketplace operations', items: navItems.slice(5, 14) },
-  { label: 'Risk and finance', items: navItems.slice(14, 18) },
-  { label: 'Support and insights', items: navItems.slice(18, 21) },
-  { label: 'Platform administration', items: navItems.slice(21) },
+  { label: 'Marketplace operations', items: navItems.slice(5, 15) },
+  { label: 'Risk and finance', items: navItems.slice(15, 19) },
+  { label: 'Support and insights', items: navItems.slice(19, 22) },
+  { label: 'Platform administration', items: navItems.slice(22) },
 ];
 
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
