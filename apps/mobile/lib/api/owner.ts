@@ -488,8 +488,13 @@ export const ownerApi = {
 
   listings: (p = 1, size = 50) =>
     apiFetch<Paginated<OwnerListing>>(`/owner/listings${page(p, size)}`),
-  createListing: (input: { propertyId: string; price: number; listingTitle?: string }) =>
-    apiFetch<OwnerListing>('/owner/listings', { method: 'POST', body: input }),
+  createListing: (input: {
+    propertyId: string;
+    price: number;
+    listingTitle?: string;
+    /** 'publish' goes live, or into review when a person must check first. */
+    intent?: 'draft' | 'publish';
+  }) => apiFetch<OwnerListing>('/owner/listings', { method: 'POST', body: input }),
   setListingStatus: (id: string, status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>
     apiFetch<OwnerListing>(`/owner/listings/${id}/status`, { method: 'PATCH', body: { status } }),
 

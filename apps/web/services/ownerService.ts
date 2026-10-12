@@ -267,6 +267,8 @@ export const ownerService = {
     price: number;
     listingTitle?: string;
     amenities?: string[];
+    /** Save Draft or Publish; left out, the listing waits for review. */
+    intent?: 'draft' | 'publish';
   }) =>
     safeCall(() => authFetch('/owner/listings', { method: 'POST', body: JSON.stringify(data) })),
   setListingStatus: (id: string, status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>

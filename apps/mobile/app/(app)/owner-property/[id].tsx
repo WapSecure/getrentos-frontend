@@ -425,9 +425,15 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
         propertyId: property.id,
         price: value,
         listingTitle: title.trim() || undefined,
+        intent: 'publish',
       }),
-    onSuccess: () => {
-      toast.show('Listing created. Buyers can now make offers.', 'success');
+    onSuccess: (listing) => {
+      toast.show(
+        listing.status === 'published'
+          ? 'Your listing is live. Buyers can now make offers.'
+          : "Listing created. It goes live once we've checked it.",
+        'success'
+      );
       onDone();
     },
     onError: (err) => {

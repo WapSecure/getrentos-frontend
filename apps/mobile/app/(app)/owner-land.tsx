@@ -33,6 +33,7 @@ import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import {
+  boundaryAreaMismatch,
   boundaryAreaSqm,
   boundaryCorners,
   boundaryGeometry,
@@ -199,6 +200,7 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
   const [corners, setCorners] = useState<BoundaryCorner[]>(savedCorners ?? []);
   const areaValue = Number(area.replace(/,/g, ''));
   const outlined = boundaryAreaSqm(corners);
+  const mismatch = boundaryAreaMismatch(corners, areaValue, areaUnit);
 
   const save = useMutation({
     mutationFn: () =>
@@ -318,11 +320,7 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
             {corners.length >= 3
-              ? `Outlined area: about ${
-                  outlined >= 10_000
-                    ? `${(outlined / 10_000).toFixed(2)} ha`
-                    : `${Math.round(outlined).toLocaleString('en-NG')} m²`
-                }`
+              ? `Outlined area: about ${formatSqm(outlined)}`
               : corners.length
                 ? `${corners.length} of at least 3 corners`
                 : 'No outline yet'}
@@ -334,6 +332,13 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
             </>
           ) : null}
         </View>
+        {mismatch ? (
+          <Text variant="caption" style={{ color: colors.warning }}>
+            The outline covers about {formatSqm(mismatch.outlinedSqm)}, but the area above is{' '}
+            {formatSqm(mismatch.statedSqm)}. Buyers see both: check the corners and the area unit
+            before saving.
+          </Text>
+        ) : null}
       </View>
       <TextField
         label="Boundary notes (optional)"
@@ -364,4 +369,10 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
       />
     </View>
   );
+}
+
+function formatSqm(sqm: number): string {
+  return sqm >= 10_000
+    ? `${(sqm / 10_000).toFixed(2)} ha`
+    : `${Math.round(sqm).toLocaleString('en-NG')} m²`;
 }

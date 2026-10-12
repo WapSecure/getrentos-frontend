@@ -10,7 +10,8 @@ import { addBaseTiles } from '@/lib/mapTiles';
 
 const PRIMARY = '#0b6e4f';
 
-const formatArea = (sqm: number) =>
+/** An area for people: m² for a plot, hectares for a farm. */
+export const formatArea = (sqm: number) =>
   sqm >= 10_000
     ? `${(sqm / 10_000).toFixed(2)} ha`
     : `${Math.round(sqm).toLocaleString('en-NG')} m²`;
@@ -104,7 +105,14 @@ export const ParcelBoundaryMap = ({
         iconAnchor: [7, 7],
       });
       corners.forEach((c, i) => {
-        const handle = L.marker([c.latitude, c.longitude], { icon, draggable: true }).addTo(layer);
+        const label = `Corner ${i + 1} of ${corners.length}: drag to move it`;
+        const handle = L.marker([c.latitude, c.longitude], {
+          icon,
+          draggable: true,
+          title: label,
+        }).addTo(layer);
+        // Leaflet already makes a draggable marker a focusable button; give it a name.
+        handle.getElement()?.setAttribute('aria-label', label);
         handle.on('dragend', () => {
           const ll = handle.getLatLng();
           const next = [...cornersRef.current];
