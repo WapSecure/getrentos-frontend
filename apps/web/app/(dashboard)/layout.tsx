@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { SessionTimeoutGuard } from '@getrentos/ui';
+import { AddRoleDialogHost } from '@/components/shared/navigation/AddRoleDialog';
 
 /**
  * Shared shell for every signed-in area of the main app.
@@ -17,6 +18,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <>
       {children}
       <SessionTimeoutGuard />
+      <AddRoleDialogHost />
     </>
   );
 }
