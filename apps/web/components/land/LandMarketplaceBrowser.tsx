@@ -47,6 +47,7 @@ import {
 } from '@/types/land';
 import { boundaryCorners } from '@getrentos/shared';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
+import { useAddRole } from '@/hooks/useAddRole';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -114,7 +115,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   const [maxPrice, setMaxPrice] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
-  const [activeListing, setActiveListing] = useState<PublicLandListing | null>(null);
+  const [chosenListing, setActiveListing] = useState<PublicLandListing | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<string[]>([]);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
@@ -140,6 +141,17 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     queryFn: () => unwrap(landService.listPublic(queryParams)),
   });
   const listings = data?.items ?? [];
+
+  // A link naming a listing (?property=<id>, as after "Add a buyer account")
+  // opens it as soon as it is on the page, until it is closed.
+  const [linkedListingId, setLinkedListingId] = useState<string | null>(() =>
+    typeof window === 'undefined'
+      ? null
+      : new URLSearchParams(window.location.search).get('property')
+  );
+  const activeListing =
+    chosenListing ??
+    (linkedListingId ? (listings.find((listing) => listing.id === linkedListingId) ?? null) : null);
   const total = data?.total ?? 0;
 
   const saveListing = useMutation({
@@ -183,6 +195,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     viewerHasRole('buyer') ? 'buyer' : viewerIsSignedIn() ? 'member' : 'anonymous'
   );
   const canOffer = mode === 'buyer' || viewer === 'buyer';
+  const addRole = useAddRole();
   const needsSignIn = viewer === 'anonymous';
 
   /**
@@ -420,7 +433,11 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
 
       <Dialog
         open={Boolean(activeListing)}
-        onOpenChange={(open) => !open && setActiveListing(null)}
+        onOpenChange={(open) => {
+          if (open) return;
+          setActiveListing(null);
+          setLinkedListingId(null);
+        }}
       >
         <DialogContent className="p-0">
           {activeListing && (
@@ -530,32 +547,50 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   </p>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3 border-t border-border p-5">
-                <Button
-                  href={buyerRoute(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)}
-                  variant="outline"
-                  rounded="lg"
-                  icon={<MessageSquare className="h-4 w-4" />}
-                >
-                  {canOffer
-                    ? 'Ask a question'
-                    : needsSignIn
-                      ? 'Sign in to ask'
-                      : 'Buyer accounts only'}
-                </Button>
-                <Button
-                  href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
-                  variant="primary"
-                  rounded="lg"
-                  icon={<ShieldCheck className="h-4 w-4" />}
-                >
-                  {canOffer
-                    ? 'Make an offer'
-                    : needsSignIn
-                      ? 'Sign in to offer'
-                      : 'Buyer accounts only'}
-                </Button>
-              </div>
+              {canOffer || needsSignIn ? (
+                <div className="grid grid-cols-2 gap-3 border-t border-border p-5">
+                  <Button
+                    href={buyerRoute(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)}
+                    variant="outline"
+                    rounded="lg"
+                    icon={<MessageSquare className="h-4 w-4" />}
+                  >
+                    {canOffer ? 'Ask a question' : 'Sign in to ask'}
+                  </Button>
+                  <Button
+                    href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
+                    variant="primary"
+                    rounded="lg"
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                  >
+                    {canOffer ? 'Make an offer' : 'Sign in to offer'}
+                  </Button>
+                </div>
+              ) : (
+                // Signed in, but not as a buyer: there is nothing here this
+                // account can do, so say why instead of two dead-end buttons.
+                <div className="flex flex-col gap-3 border-t border-border p-5 sm:flex-row sm:items-center">
+                  <p className="flex-1 text-sm text-muted-foreground">
+                    Questions and offers on land come from a buyer account. Add one to this account
+                    to make an offer.
+                  </p>
+                  <Button
+                    variant="primary"
+                    rounded="lg"
+                    icon={<ShieldCheck className="h-4 w-4" />}
+                    disabled={addRole.isPending}
+                    isLoading={addRole.isPending}
+                    onClick={() =>
+                      addRole.mutate({
+                        role: 'buyer',
+                        to: `${ROUTES.BUYER_LAND}?property=${activeListing.id}`,
+                      })
+                    }
+                  >
+                    Add a buyer account
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
