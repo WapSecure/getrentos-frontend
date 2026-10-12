@@ -154,6 +154,7 @@ export default function PropertyDetailPage() {
           <PropertyGallery
             images={property.images}
             videoTourUrl={property.videoTourUrl}
+            filmedOnSite={property.videoTourFilmedOnSite}
             fallbackImage={property.image}
             onOpenTour={() => openTour('tour')}
           />

@@ -40,6 +40,8 @@ export interface Property {
   images?: string[];
   /** Signed URL of the landlord's uploaded walkthrough video, when present. */
   videoTourUrl?: string;
+  /** The video tour was filmed in the GetRentos app at the property. */
+  videoTourFilmedOnSite?: boolean;
   score?: number;
   landlordResponseRate?: number;
   landlordRating?: number;

@@ -6,16 +6,22 @@ import { ApiError } from '@/lib/api/client';
 import { videoProblem } from '@getrentos/shared';
 import { pickVideo, recordVideo, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourSheet } from './VideoTourSheet';
+import { FilmedOnSite } from './FilmedOnSite';
+import { locateRecording, type VideoOnSiteReport } from '@/lib/filmedOnSite';
 
 /**
  * A property's or listing's video tour, for the person listing it: film a
  * walkthrough or pick a clip, watch what was uploaded, replace or remove it.
  * The caller does the upload and attaches the key; this only drives the flow.
+ *
+ * Filming in the app also reads where the phone is, so the server can mark the
+ * tour "Filmed on site"; a clip from the library never carries that.
  */
 export function VideoTourField({
   title,
   videoUrl,
   hasVideo,
+  filmedOnSite,
   onUpload,
   onRemove,
   onExpired,
@@ -24,8 +30,10 @@ export function VideoTourField({
   /** Signed link to the current video, for the preview. */
   videoUrl?: string | null;
   hasVideo: boolean;
-  /** Uploads the file and attaches it; rejects to show an error. */
-  onUpload: (file: PickedVideo) => Promise<unknown>;
+  /** The current video was filmed in the app at the property. */
+  filmedOnSite?: boolean;
+  /** Uploads the file and attaches it with where it was filmed, if known; rejects to show an error. */
+  onUpload: (file: PickedVideo, onSite: VideoOnSiteReport | null) => Promise<unknown>;
   onRemove: () => Promise<unknown>;
   onExpired?: () => void;
 }) {
@@ -37,7 +45,7 @@ export function VideoTourField({
   const fail = (e: unknown, fallback: string) =>
     toast.show(e instanceof ApiError ? e.message : fallback, 'error');
 
-  const upload = async (pick: () => Promise<PickedVideo | null>) => {
+  const upload = async (pick: () => Promise<PickedVideo | null>, filmed = false) => {
     let file: PickedVideo | null;
     try {
       file = await pick();
@@ -56,7 +64,9 @@ export function VideoTourField({
     }
     setBusy('uploading');
     try {
-      await onUpload(file);
+      // Right after the camera closes: the phone is still where it filmed.
+      const onSite = filmed ? await locateRecording() : null;
+      await onUpload(file, onSite);
       toast.show(hasVideo ? 'Video tour replaced.' : 'Video tour added.', 'success');
     } catch (e) {
       fail(e, 'Could not upload that video.');
@@ -72,7 +82,7 @@ export function VideoTourField({
       return;
     }
     Alert.alert(hasVideo ? 'Replace the video tour' : 'Add a video tour', undefined, [
-      { text: 'Film a walkthrough', onPress: () => void upload(recordVideo) },
+      { text: 'Film a walkthrough', onPress: () => void upload(recordVideo, true) },
       { text: 'Choose from library', onPress: () => void upload(pickVideo) },
       { text: 'Cancel', style: 'cancel' },
     ]);
@@ -131,7 +141,7 @@ export function VideoTourField({
             <Text variant="caption" color="mutedForeground">
               {busy === 'uploading'
                 ? 'Keep the app open until it finishes.'
-                : 'Film a walkthrough or pick a clip, up to 5 minutes.'}
+                : 'Film at the property for a “Filmed on site” badge, or pick a clip. Up to 5 minutes.'}
             </Text>
           </View>
         </Pressable>
@@ -146,7 +156,10 @@ export function VideoTourField({
                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
               >
                 <Play size={18} color={colors.primary} />
-                <Text variant="bodyStrong">Watch the video tour</Text>
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyStrong">Watch the video tour</Text>
+                  {filmedOnSite ? <FilmedOnSite /> : null}
+                </View>
               </Pressable>
               <Pressable
                 onPress={remove}
