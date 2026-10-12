@@ -221,6 +221,8 @@ export default function BuyerDiscoverPage() {
       )}
 
       <PropertyDetailModal
+        // A fresh modal per listing, so a playing tour never carries over.
+        key={activeListing?.id ?? 'none'}
         listing={activeListing}
         isSaved={activeListing ? savedIds.includes(activeListing.id) : false}
         onClose={() => setActiveListing(null)}
