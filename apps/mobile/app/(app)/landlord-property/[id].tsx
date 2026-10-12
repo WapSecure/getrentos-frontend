@@ -47,6 +47,7 @@ import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
 import { ManagementFeeSheet } from '@/components/landlord/SmallFormSheets';
 import { pickImage, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourField } from '@/components/video/VideoTourField';
+import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
 import { BulkPriceSheet } from '@/components/landlord/BulkPriceSheet';
 import { usePlanTier } from '@/lib/api/subscription';
 
@@ -125,11 +126,14 @@ export default function LandlordPropertyDetail() {
   });
 
   /** Uploads a video and puts it on the property in place of any earlier one. */
-  const attachVideo = async (file: PickedVideo) => {
+  const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const previous = p?.videoTourKey;
     const { key } = await landlordApi.uploadPropertyMedia(file, 'video');
     try {
-      await landlordApi.updateProperty(id, { videoTourKey: key });
+      await landlordApi.updateProperty(id, {
+        videoTourKey: key,
+        videoTourOnSite: onSite ?? undefined,
+      });
     } catch (e) {
       // Not attached, so it is only staging: don't leave it behind.
       landlordApi.removePropertyMedia(key).catch(() => undefined);
@@ -391,6 +395,7 @@ export default function LandlordPropertyDetail() {
             <VideoTourField
               title={p.name}
               hasVideo={!!p.videoTourKey}
+              filmedOnSite={p.videoTourFilmedOnSite}
               videoUrl={p.videoTourUrl}
               onUpload={attachVideo}
               onRemove={removeVideo}

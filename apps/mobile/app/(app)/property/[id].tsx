@@ -48,6 +48,7 @@ import { openDirections } from '@/lib/directions';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
+import { FilmedOnSite } from '@/components/video/FilmedOnSite';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -242,7 +243,11 @@ export default function PropertyDetail() {
                 <Pressable
                   onPress={() => setTouring(true)}
                   accessibilityRole="button"
-                  accessibilityLabel="Watch the video tour"
+                  accessibilityLabel={
+                    p.videoTourFilmedOnSite
+                      ? 'Watch the video tour, filmed on site'
+                      : 'Watch the video tour'
+                  }
                 >
                   <Card
                     elevated
@@ -262,9 +267,13 @@ export default function PropertyDetail() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text variant="bodyStrong">Video tour</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        Walk through this property on video
-                      </Text>
+                      {p.videoTourFilmedOnSite ? (
+                        <FilmedOnSite />
+                      ) : (
+                        <Text variant="caption" color="mutedForeground">
+                          Walk through this property on video
+                        </Text>
+                      )}
                     </View>
                   </Card>
                 </Pressable>

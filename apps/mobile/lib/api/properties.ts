@@ -32,6 +32,8 @@ export interface RenterProperty {
   images?: string[];
   /** Signed URL for the video tour. */
   videoTourUrl?: string;
+  /** The video tour was filmed in the app at the property. */
+  videoTourFilmedOnSite?: boolean;
   /** The video tour as an adaptive stream, once encoded; preferred over the file. */
   videoTourStream?: VideoStream;
   description?: string;

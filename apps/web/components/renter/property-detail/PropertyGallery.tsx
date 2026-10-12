@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Camera, Home, Play } from 'lucide-react';
+import { Camera, Home, MapPin, Play } from 'lucide-react';
 
 interface PropertyGalleryProps {
   /** Signed photo URLs, cover first. */
   images?: string[];
   /** Signed URL of the landlord's walkthrough video, when there is one. */
   videoTourUrl?: string;
+  /** The video was filmed in the GetRentos app at the property. */
+  filmedOnSite?: boolean;
   /** Fallback for older payloads that only carry a single cover URL. */
   fallbackImage?: string;
   onOpenTour: () => void;
@@ -16,6 +18,7 @@ interface PropertyGalleryProps {
 export const PropertyGallery = ({
   images,
   videoTourUrl,
+  filmedOnSite,
   fallbackImage,
   onOpenTour,
 }: PropertyGalleryProps) => {
@@ -48,10 +51,19 @@ export const PropertyGallery = ({
         {videoTourUrl && (
           <button
             onClick={onOpenTour}
+            aria-label={
+              filmedOnSite ? 'Watch the video tour, filmed on site' : 'Watch the video tour'
+            }
             className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/70 backdrop-blur-sm text-white text-xs rounded-full hover:bg-black/80 transition-colors"
           >
             <Camera className="w-3 h-3" />
             <span>Video tour</span>
+            {filmedOnSite && (
+              <span className="flex items-center gap-0.5 text-emerald-300">
+                · <MapPin className="w-3 h-3" aria-hidden />
+                Filmed on site
+              </span>
+            )}
             <Play className="w-2 h-2 ml-0.5" />
           </button>
         )}
