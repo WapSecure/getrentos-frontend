@@ -537,6 +537,13 @@ const normalizeTimelineEvents = (payload: unknown): HomeManagementTimelineEvent[
 export const homeManagementService = {
   getDashboard: () =>
     safeCall(() => authFetch<HomeManagementDashboard>('/home-management/dashboard')),
+  /**
+   * Vendors the caller can pre-assign — the owners' directories for the
+   * properties they control. Used by the manager/agent view, whose vendors
+   * belong to the property owners, not to themselves.
+   */
+  listAssignableVendors: () =>
+    safeCall(() => authFetch<HomeManagementVendor[]>('/home-management/vendors')),
   listAssets: (params: HomeManagementAssetsParams = {}) =>
     safeCall(() => authFetch<Paginated<HomeAsset>>(`/home-management/assets${toQuery(params)}`)),
   createAsset: (data: CreateHomeAssetInput) =>

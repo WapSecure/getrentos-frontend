@@ -117,13 +117,16 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
   });
 
   // Owners and landlords keep their own vendor directory (/owner|landlord/vendors).
-  // A manager's vendors belong to each property's owner, not to the manager, and
-  // there is no managed-vendor directory endpoint yet — so vendor pre-assignment
-  // is unavailable in the manager view (a follow-up). Everything else works.
+  // A manager or agent operates someone else's property, so their assignable
+  // vendors are the OWNERS' directories for the properties they control — served
+  // by /home-management/vendors, deduped across those owners. Assignment is still
+  // validated against each property's owner at write time.
   const vendorsQuery = useQuery({
     queryKey: [...homeManagementKeys.vendors, role],
     queryFn: async (): Promise<HomeManagementVendor[]> => {
-      if (role === 'manager') return [];
+      if (role === 'manager') {
+        return unwrap(homeManagementService.listAssignableVendors());
+      }
       const res = await unwrap(landlordService.listVendors({ page: 1, pageSize: 100 }));
       return res.items.map((vendor) => ({
         id: vendor.id,
