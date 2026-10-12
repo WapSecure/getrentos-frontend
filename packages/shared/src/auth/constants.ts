@@ -352,6 +352,7 @@ export const ROUTES = {
   LANDLORD_DOCUMENTS: '/landlord/documents',
   LANDLORD_MESSAGES: '/landlord/messages',
   LANDLORD_AUTOMATIONS: '/landlord/automations',
+  AGENT_WORK_ORDERS: '/agent/work-orders',
   LANDLORD_REVIEWS: '/landlord/reviews',
   LANDLORD_SHORTLETS: '/landlord/shortlets',
   LANDLORD_SETTINGS: '/landlord/settings',
