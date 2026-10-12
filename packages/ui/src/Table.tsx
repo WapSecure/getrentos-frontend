@@ -7,6 +7,8 @@ export interface Column<T> {
   header: string;
   render: (row: T) => ReactNode;
   className?: string;
+  /** Align amounts, counts and actions without each table inventing its own rules. */
+  align?: 'left' | 'center' | 'right';
 }
 
 interface DataTableProps<T> {
@@ -43,19 +45,20 @@ export function DataTable<T>({
 
   return (
     <div
-      className={cn(
-        'overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm',
-        className
-      )}
+      className={cn('overflow-hidden rounded-xl border border-border bg-card shadow-xs', className)}
     >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr className="border-b border-border/80 bg-muted/40 text-left">
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground/90"
+                  className={cn(
+                    'whitespace-nowrap px-5 py-3 text-xs font-semibold tracking-[0.02em] text-muted-foreground',
+                    column.align === 'center' && 'text-center',
+                    column.align === 'right' && 'text-right'
+                  )}
                 >
                   {column.header}
                 </th>
@@ -86,7 +89,15 @@ export function DataTable<T>({
                 )}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={cn('px-5 py-3.5 align-middle', column.className)}>
+                  <td
+                    key={column.key}
+                    className={cn(
+                      'px-5 py-3.5 align-middle',
+                      column.align === 'center' && 'text-center',
+                      column.align === 'right' && 'text-right tabular-nums',
+                      column.className
+                    )}
+                  >
                     {column.render(row)}
                   </td>
                 ))}

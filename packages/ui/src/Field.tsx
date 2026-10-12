@@ -23,7 +23,10 @@ export function Field({ label, children, htmlFor, hint, error, required, classNa
       </label>
       {children}
       {(error || hint) && (
-        <p className={cn('text-xs', error ? 'text-destructive' : 'text-muted-foreground')}>
+        <p
+          className={cn('text-xs leading-5', error ? 'text-destructive' : 'text-muted-foreground')}
+          role={error ? 'alert' : undefined}
+        >
           {error ?? hint}
         </p>
       )}

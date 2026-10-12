@@ -84,7 +84,7 @@ export function Button({
       minHeight: MIN_HEIGHT[size],
       paddingHorizontal: size === 'sm' ? 16 : 22,
       paddingVertical: VERTICAL_PADDING[size],
-      borderRadius: radius.lg,
+      borderRadius: radius.md,
       alignSelf: fullWidth ? 'stretch' : 'flex-start',
       borderColor: palette.border,
       borderWidth: variant === 'outline' ? StyleSheet.hairlineWidth * 2 : 0,

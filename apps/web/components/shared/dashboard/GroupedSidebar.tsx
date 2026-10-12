@@ -44,8 +44,8 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
   const pathname = usePathname();
 
   return (
-    <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-card lg:block">
-      <nav className="space-y-6 p-4" aria-label={ariaLabel}>
+    <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-background lg:block">
+      <nav className="space-y-6 px-3 py-5" aria-label={ariaLabel}>
         {groups.map((group) => (
           <section
             key={group.label}
@@ -53,7 +53,7 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
           >
             <h2
               id={`sidebar-${group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-              className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75"
+              className="mb-2 px-3 text-[11px] font-semibold tracking-[0.04em] text-muted-foreground"
             >
               {group.label}
             </h2>
@@ -66,10 +66,10 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
                     key={item.href}
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+                    className={`relative flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
                       isActive
-                        ? 'bg-accent text-primary'
-                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                        ? 'bg-card text-foreground shadow-xs ring-1 ring-border before:absolute before:bottom-2 before:left-0 before:top-2 before:w-0.5 before:rounded-full before:bg-primary'
+                        : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'
                     }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -115,7 +115,7 @@ export function GroupedMobileNavigation({
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={onNavigate}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+                  className={`flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'}`}
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>

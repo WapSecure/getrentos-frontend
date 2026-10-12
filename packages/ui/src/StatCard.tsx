@@ -1,40 +1,30 @@
-'use client';
-
 import { LucideIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { formatCurrency } from '@getrentos/shared';
 import { cn } from '@getrentos/shared';
 
 export type StatCardAccent = 'blue' | 'primary' | 'orange' | 'red' | 'purple' | 'emerald' | 'green';
 
-const accentClasses: Record<StatCardAccent, { bg: string; icon: string }> = {
+const accentClasses: Record<StatCardAccent, { icon: string }> = {
   blue: {
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    icon: 'text-blue-600 dark:text-blue-400',
+    icon: 'text-muted-foreground',
   },
   primary: {
-    bg: 'bg-accent',
     icon: 'text-primary',
   },
   orange: {
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    icon: 'text-orange-600 dark:text-orange-400',
+    icon: 'text-warning',
   },
   red: {
-    bg: 'bg-red-50 dark:bg-red-950/20',
-    icon: 'text-red-600 dark:text-red-400',
+    icon: 'text-destructive',
   },
   purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    icon: 'text-purple-600 dark:text-purple-400',
+    icon: 'text-muted-foreground',
   },
   emerald: {
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    icon: 'text-emerald-600 dark:text-emerald-400',
+    icon: 'text-success',
   },
   green: {
-    bg: 'bg-green-50 dark:bg-green-950/20',
-    icon: 'text-green-600 dark:text-green-400',
+    icon: 'text-success',
   },
 };
 
@@ -54,7 +44,6 @@ export const StatCard = ({
   value,
   subtitle,
   accent = 'blue',
-  delay = 0,
   isCurrency = false,
 }: StatCardProps) => {
   const formattedValue =
@@ -64,30 +53,20 @@ export const StatCard = ({
   const colors = accentClasses[accent];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-    >
-      <div className="relative p-4">
-        <div
-          className={cn(
-            'mb-3 inline-flex rounded-xl p-2.5 shadow-sm transition-all duration-300 group-hover:scale-110',
-            colors.bg
-          )}
-        >
-          <Icon className={cn('w-5 h-5', colors.icon)} />
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="relative p-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <Icon className={cn('h-4 w-4', colors.icon)} aria-hidden="true" />
         </div>
 
         <div>
-          <p className="text-sm text-muted-foreground mb-1">{label}</p>
           <p className={cn('font-semibold tracking-[-0.03em] text-foreground', valueSize)}>
             {formattedValue}
           </p>
           {subtitle && <p className="text-xs text-muted-foreground/70 mt-1">{subtitle}</p>}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };

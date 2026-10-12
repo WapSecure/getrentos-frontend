@@ -31,7 +31,7 @@ export const Badge = ({ children, variant = 'neutral', icon, className }: BadgeP
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium tracking-[-0.01em] ring-1 ring-inset',
+        'inline-flex items-center gap-1 whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-medium tracking-[-0.005em]',
         variants[variant],
         className
       )}

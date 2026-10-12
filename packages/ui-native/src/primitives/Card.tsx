@@ -14,7 +14,7 @@ export function Card({ padding = 16, elevated = false, style, children, ...rest 
       style={[
         {
           backgroundColor: colors.card,
-          borderRadius: radius.lg,
+          borderRadius: radius.md,
           borderWidth: elevated ? 0 : 1,
           borderColor: colors.border,
           padding: padding === 'none' ? 0 : padding,

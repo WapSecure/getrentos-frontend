@@ -21,12 +21,12 @@ export const EmptyState = ({
     <div
       role="status"
       className={cn(
-        'rounded-xl border border-border/90 bg-card px-6 py-12 text-center shadow-sm',
+        'rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center',
         className
       )}
     >
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/70 ring-1 ring-inset ring-primary/10">
-        <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
+      <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-secondary/60">
+        <Icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
       </div>
       <p className="font-semibold tracking-[-0.01em] text-foreground">{title}</p>
       {description && <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>}

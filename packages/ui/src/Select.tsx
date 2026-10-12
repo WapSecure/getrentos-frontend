@@ -69,7 +69,7 @@ export function Select({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 text-left text-sm text-foreground outline-none transition-[border-color,background-color,box-shadow] duration-150',
+            'flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border border-border bg-card px-3.5 text-left text-sm text-foreground outline-none transition-[border-color,background-color,box-shadow] duration-150',
             'hover:border-foreground/20',
             'focus:border-primary focus:ring-4 focus:ring-primary/12 data-[placeholder]:text-muted-foreground disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60 disabled:hover:border-border',
             className
@@ -85,7 +85,7 @@ export function Select({
         <RadixPopover.Content
           sideOffset={6}
           align="start"
-          className="z-[70] min-w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border border-border bg-card p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.16)]"
+          className="z-[70] min-w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-lg border border-border bg-card p-1.5 shadow-lg"
         >
           {searchable && (
             <div className="relative mb-1 border-b border-border p-1 pb-2">
@@ -117,7 +117,7 @@ export function Select({
                   handleOpenChange(false);
                 }}
                 className={cn(
-                  'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-9 text-left text-sm text-foreground outline-none transition-colors hover:bg-secondary focus:bg-secondary disabled:pointer-events-none disabled:opacity-45',
+                  'relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-3 pr-9 text-left text-sm text-foreground outline-none transition-colors hover:bg-secondary focus:bg-secondary disabled:pointer-events-none disabled:opacity-45',
                   option.value === value && 'font-medium'
                 )}
               >

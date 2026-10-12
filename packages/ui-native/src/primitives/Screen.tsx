@@ -92,7 +92,7 @@ export function Screen({
               paddingHorizontal: spacing.xl,
               paddingTop: spacing.md,
               paddingBottom: insets.bottom + spacing.md,
-              backgroundColor: colors.background,
+              backgroundColor: colors.card,
               borderTopColor: colors.border,
             },
           ]}

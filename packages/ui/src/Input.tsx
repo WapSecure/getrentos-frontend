@@ -14,7 +14,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, inputClassName, leadingIcon, trailingIcon, disabled, ...props }, ref) => (
     <span
       className={cn(
-        'group flex min-h-11 w-full items-center gap-2 rounded-xl border border-border bg-card px-3.5 transition-[border-color,background-color,box-shadow] duration-150',
+        'group flex min-h-11 w-full items-center gap-2 rounded-lg border border-border bg-card px-3.5 transition-[border-color,background-color,box-shadow] duration-150',
         'hover:border-foreground/20',
         'focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/12',
         disabled && 'cursor-not-allowed bg-secondary/60 opacity-60 hover:border-border',

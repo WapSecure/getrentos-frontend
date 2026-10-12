@@ -27,7 +27,7 @@ export const TableSkeleton = ({ rows = 6, columns = 5 }: { rows?: number; column
       role="status"
       aria-live="polite"
       aria-label="Loading table"
-      className="overflow-hidden rounded-2xl border border-border bg-card"
+      className="overflow-hidden rounded-xl border border-border bg-card"
     >
       <span className="sr-only">Loading table…</span>
       <div className="divide-y divide-border">
