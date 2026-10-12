@@ -11,6 +11,7 @@ import {
   Loader2,
   Lock,
   ShieldCheck,
+  UserCheck,
   UserRound,
   Users,
   Wrench,
@@ -172,6 +173,14 @@ export function CustodyBar() {
       >
         <ShieldCheck className="h-4 w-4" aria-hidden />
         Protection
+      </Link>
+
+      <Link
+        href="/agency/realtors"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <UserCheck className="h-4 w-4" aria-hidden />
+        Realtor access
       </Link>
 
       <Link
