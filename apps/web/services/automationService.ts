@@ -4,6 +4,8 @@ import type { BillingCycle } from '@/services/landlordService';
 
 export type BroadcastAudience = 'ALL_TENANTS' | 'PROPERTY' | 'IN_ARREARS';
 
+export type AutomationTrigger = 'SCHEDULE' | 'RENT_DUE_SOON' | 'RENT_OVERDUE' | 'LEASE_EXPIRING';
+
 export interface AnnouncementTemplate {
   id: string;
   title: string;
@@ -17,13 +19,14 @@ export interface AutomationRule {
   id: string;
   landlordId: string;
   name: string;
-  audience: BroadcastAudience;
+  trigger: AutomationTrigger;
+  audience: BroadcastAudience | null;
   propertyId: string | null;
   title: string;
   body: string;
-  cadence: BillingCycle;
+  cadence: BillingCycle | null;
   enabled: boolean;
-  nextRunAt: string;
+  nextRunAt: string | null;
   lastRunAt: string | null;
   lastRecipientCount: number | null;
   createdAt: string;
@@ -39,12 +42,13 @@ export interface BroadcastInput {
 
 export interface CreateRuleInput {
   name: string;
-  audience: BroadcastAudience;
+  trigger?: AutomationTrigger;
+  audience?: BroadcastAudience;
   propertyId?: string;
   title: string;
   body: string;
-  cadence: BillingCycle;
-  firstRunAt: string;
+  cadence?: BillingCycle;
+  firstRunAt?: string;
   enabled?: boolean;
 }
 

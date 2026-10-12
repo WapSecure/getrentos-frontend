@@ -10,7 +10,7 @@ import { AutomationRulesManager } from '@/components/landlord/automations/Automa
 
 const TABS: HubTab[] = [
   { id: 'broadcast', label: 'Send', icon: Send },
-  { id: 'rules', label: 'Scheduled rules', icon: CalendarClock },
+  { id: 'rules', label: 'Rules', icon: CalendarClock },
   { id: 'templates', label: 'Templates', icon: FileText },
 ];
 

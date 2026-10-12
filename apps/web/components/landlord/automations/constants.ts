@@ -1,5 +1,19 @@
-import type { BroadcastAudience } from '@/services/automationService';
+import type { AutomationTrigger, BroadcastAudience } from '@/services/automationService';
 import type { BillingCycle } from '@/services/landlordService';
+
+export const TRIGGER_OPTIONS: { value: AutomationTrigger; label: string }[] = [
+  { value: 'SCHEDULE', label: 'On a schedule' },
+  { value: 'RENT_DUE_SOON', label: "When a tenant's rent is due soon" },
+  { value: 'RENT_OVERDUE', label: "When a tenant's rent goes overdue" },
+  { value: 'LEASE_EXPIRING', label: "When a tenant's lease is expiring" },
+];
+
+export const TRIGGER_LABELS: Record<AutomationTrigger, string> = {
+  SCHEDULE: 'Scheduled',
+  RENT_DUE_SOON: 'Rent due soon',
+  RENT_OVERDUE: 'Rent overdue',
+  LEASE_EXPIRING: 'Lease expiring',
+};
 
 export const AUDIENCE_OPTIONS: { value: BroadcastAudience; label: string }[] = [
   { value: 'ALL_TENANTS', label: 'All tenants' },
