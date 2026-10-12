@@ -7,6 +7,7 @@ import { User, Bell, Landmark, MapPin, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/agent/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/agent/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
+import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout';
 import { FieldPreferencesSettings } from '@/components/agent/settings/FieldPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 
@@ -36,7 +37,10 @@ export default function AgentSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once GetRentos pays it out to you: transfers run through Paystack." />
+          <>
+            <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once GetRentos pays it out to you: transfers run through Paystack." />
+            <AgencyAgentSelfPayout standalone />
+          </>
         );
       case 'preferences':
         return <FieldPreferencesSettings />;
