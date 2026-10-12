@@ -80,15 +80,15 @@ export default function OwnerListingsPage() {
     onSuccess: invalidate,
   });
 
-  const handleCreate = (data: Omit<SaleListing, 'id' | 'createdAt'>) => {
-    createMutation.mutate({
+  // Awaited by the form, which then saves the photos and closes; a refusal
+  // stays in the form (and in the notice below) instead of vanishing.
+  const handleCreate = (data: Omit<SaleListing, 'id' | 'createdAt'>) =>
+    createMutation.mutateAsync({
       propertyId: data.propertyId,
       price: data.askingPrice,
       listingTitle: data.listingTitle,
       amenities: data.features,
     });
-    setIsCreateModalOpen(false);
-  };
 
   const handleChangeStatus = (listingId: string, status: SaleListingStatus) => {
     statusMutation.mutate({ id: listingId, status });

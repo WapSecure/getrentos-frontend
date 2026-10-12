@@ -20,7 +20,11 @@ import { videoFileProblem } from '@/lib/videoFile';
 interface CreateSaleListingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (listing: Omit<SaleListing, 'id' | 'createdAt'>, publishNow: boolean) => void;
+  /** Creates the listing; rejects (with the server's reason) if it is refused. */
+  onCreate: (
+    listing: Omit<SaleListing, 'id' | 'createdAt'>,
+    publishNow: boolean
+  ) => Promise<unknown>;
 }
 
 const steps = ['Listing Info', 'Media', 'Features', 'Publish'];
@@ -94,6 +98,7 @@ export const CreateSaleListingModal = ({
   const [uploading, setUploading] = useState<'cover' | 'gallery' | 'video' | null>(null);
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: propertiesPage, isLoading: isPropertiesLoading } = useQuery({
@@ -188,6 +193,7 @@ export const CreateSaleListingModal = ({
     setSelectedProperty(null);
     setMedia(NO_MEDIA);
     setMediaError(null);
+    setCreateError(null);
     onClose();
   };
 
@@ -211,9 +217,18 @@ export const CreateSaleListingModal = ({
 
   const handleCreate = async (status: SaleListing['status']) => {
     const { cover, gallery, video } = media;
+    setCreating(true);
+    setCreateError(null);
+    // The listing first: if it is refused (an unverified account, say), the
+    // property's photos and video must be left as they were.
+    try {
+      await onCreate(buildListing(status), status === 'published');
+    } catch (reason) {
+      setCreateError(reason instanceof Error ? reason.message : 'Unable to create the listing.');
+      setCreating(false);
+      return;
+    }
     if (cover || gallery.length || video) {
-      setCreating(true);
-      setMediaError(null);
       try {
         await unwrap(
           ownerService.updateProperty(form.propertyId, {
@@ -226,16 +241,16 @@ export const CreateSaleListingModal = ({
         );
         void queryClient.invalidateQueries({ queryKey: ownerKeys.properties });
       } catch (reason) {
-        setMediaError(
-          reason instanceof Error ? reason.message : 'Unable to save the photos to the property.'
+        setCreateError(
+          `The listing was created, but its photos could not be saved to the property: ${
+            reason instanceof Error ? reason.message : 'please add them from the property page.'
+          }`
         );
-        setStep(1);
-        return;
-      } finally {
         setCreating(false);
+        return;
       }
     }
-    onCreate(buildListing(status), status === 'published');
+    setCreating(false);
     handleClose();
   };
 
@@ -516,6 +531,11 @@ export const CreateSaleListingModal = ({
                       value={form.features.length ? `${form.features.length} selected` : 'None'}
                     />
                   </div>
+                  {createError && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {createError}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     Publishing makes this listing searchable to verified buyers. You can also save
                     it as a draft and publish later, or preview it first.
