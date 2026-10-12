@@ -14,6 +14,7 @@ import type { LandOwnershipProofInput, LandParcelInput, OwnerLandRecord } from '
 import { LAND_AREA_UNIT_LABELS } from '@/types/land';
 import { LandDiligenceBadge } from './LandDiligenceBadge';
 import { LandParcelEditor } from './LandParcelEditor';
+import { LandReviewPanel } from './LandReviewPanel';
 import { LandRegistrationDialog, type LandRegistrationInput } from './LandRegistrationDialog';
 
 const PAGE_SIZE = 9;
@@ -57,6 +58,15 @@ export const OwnerLandWorkspace = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
+  const submitForReview = useMutation({
+    mutationFn: (propertyId: string) => unwrap(landService.submitForReview(propertyId)),
+    onSuccess: () => {
+      invalidate();
+      setToast({ message: 'Submitted. Compliance will review this parcel.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
   const uploadProof = useMutation({
     mutationFn: ({ propertyId, proof }: { propertyId: string; proof: LandOwnershipProofInput }) =>
       unwrap(landService.submitOwnershipProof(propertyId, proof)),
@@ -83,7 +93,7 @@ export const OwnerLandWorkspace = () => {
       } catch {
         // Keep the registered LAND property discoverable in the private workspace
         // so the owner can complete the parcel record instead of creating a duplicate.
-        return { property, parcelSaved: false, failedProofCount: 0 };
+        return { property, parcelSaved: false, failedProofCount: 0, submitted: false };
       }
 
       const proofResult = input.ownershipProof
@@ -91,13 +101,21 @@ export const OwnerLandWorkspace = () => {
             unwrap(landService.submitOwnershipProof(property.id, input.ownershipProof)),
           ])
         : [];
-      return {
-        property,
-        parcelSaved: true,
-        failedProofCount: proofResult.filter((result) => result.status === 'rejected').length,
-      };
+      const failedProofCount = proofResult.filter((result) => result.status === 'rejected').length;
+      // A parcel registered complete goes straight into review. If it is not
+      // complete yet, the review panel lists what is missing instead.
+      let submitted = false;
+      if (input.ownershipProof && failedProofCount === 0) {
+        try {
+          await unwrap(landService.submitForReview(property.id));
+          submitted = true;
+        } catch {
+          submitted = false;
+        }
+      }
+      return { property, parcelSaved: true, failedProofCount, submitted };
     },
-    onSuccess: ({ property, parcelSaved, failedProofCount }) => {
+    onSuccess: ({ property, parcelSaved, failedProofCount, submitted }) => {
       setPage(1);
       setSelectedPropertyId(property.id);
       invalidate();
@@ -106,8 +124,10 @@ export const OwnerLandWorkspace = () => {
           ? 'Land was registered, but parcel details were not saved. Select it from your portfolio to complete the record.'
           : failedProofCount > 0
             ? 'Land was registered. Upload its ownership evidence again from the parcel record to begin review.'
-            : 'Land registered. Compliance will now verify its ownership evidence and diligence record.',
-        variant: !parcelSaved || failedProofCount > 0 ? 'warning' : 'success',
+            : submitted
+              ? 'Land registered and submitted. Compliance will now verify its ownership and title.'
+              : 'Land registered. Complete the items in the review panel, then submit it for review.',
+        variant: !parcelSaved || failedProofCount > 0 || !submitted ? 'warning' : 'success',
       });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
@@ -242,6 +262,11 @@ export const OwnerLandWorkspace = () => {
 
           {selected && (
             <div>
+              <LandReviewPanel
+                record={selected}
+                isSubmitting={submitForReview.isPending}
+                onSubmit={() => submitForReview.mutate(selected.property.id)}
+              />
               <LandParcelEditor
                 key={selected.property.id}
                 record={selected}
