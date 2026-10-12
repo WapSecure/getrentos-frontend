@@ -21,6 +21,9 @@ export interface BuyerProfile {
   verificationStatus: string;
 }
 
+/** What an offer or a viewing request needs to know about a for-sale listing, house or land. */
+export type BuyerListingTarget = Pick<BuyerListing, 'id' | 'title' | 'askingPrice'>;
+
 export interface BuyerListing {
   id: string;
   title: string;

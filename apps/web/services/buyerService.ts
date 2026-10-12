@@ -393,6 +393,14 @@ export const buyerService = {
     safeCall(() => authFetch('/buyer/notifications/read-all', { method: 'POST' })),
 
   // Messages
+  /** Opens (or reopens) the thread with the seller of a for-sale listing. */
+  startConversationAboutListing: (listingId: string) =>
+    safeCall(() =>
+      authFetch<BuyerConversation>('/buyer/messages/conversations', {
+        method: 'POST',
+        body: JSON.stringify({ listingId }),
+      })
+    ),
   listConversations: (filters: BuyerConversationsFilters = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerConversation>>(

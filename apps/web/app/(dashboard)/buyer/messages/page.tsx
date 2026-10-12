@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { Pagination } from '@getrentos/ui';
@@ -86,6 +87,27 @@ export default function BuyerMessagesPage() {
   // Opened from a message notification.
   useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
+  // "Ask a question" on a listing links here as ?property=<listingId>: open the
+  // thread with its seller, then hand over to ?conversation= to show it.
+  const router = useRouter();
+  const pathname = usePathname();
+  const askingAbout = useSearchParams().get('property');
+  const startedFor = useRef<string | null>(null);
+  const [startError, setStartError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!askingAbout || startedFor.current === askingAbout) return;
+    startedFor.current = askingAbout;
+    void buyerService.startConversationAboutListing(askingAbout).then(async (result) => {
+      if (!result.success || !result.data) {
+        setStartError(result.error ?? 'Could not reach the seller.');
+        router.replace(pathname);
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: buyerKeys.conversations });
+      router.replace(`${pathname}?conversation=${result.data.id}`);
+    });
+  }, [askingAbout, pathname, queryClient, router]);
+
   const handleSend = (text: string) => {
     if (!activeId) return;
     sendMutation.mutate({ conversationId: activeId, text });
@@ -100,6 +122,11 @@ export default function BuyerMessagesPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Messages</h1>
         <p className="text-muted-foreground mt-1">Communicate with owners, realtors, and support</p>
+        {startError ? (
+          <p role="alert" className="mt-2 text-sm text-destructive">
+            {startError}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex gap-4 h-[calc(100%-4.5rem)]">

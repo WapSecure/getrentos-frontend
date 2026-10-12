@@ -15,7 +15,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerViewingsApi } from '@/lib/api/buyerViewings';
-import type { BuyerListing } from '@/lib/api/buyer';
+import type { BuyerListingTarget } from '@/lib/api/buyer';
 import { ApiError } from '@/lib/api/client';
 import { localInstant } from '@/lib/api/realtor';
 import { viewingsApi } from '@/lib/api/viewings';
@@ -23,7 +23,7 @@ import { viewingsApi } from '@/lib/api/viewings';
 interface Props {
   open: boolean;
   onClose: () => void;
-  listing: BuyerListing | null;
+  listing: BuyerListingTarget | null;
 }
 
 export function RequestViewingSheet({ open, onClose, listing }: Props) {
@@ -37,7 +37,7 @@ export function RequestViewingSheet({ open, onClose, listing }: Props) {
   );
 }
 
-function RequestForm({ onClose, listing }: { onClose: () => void; listing: BuyerListing }) {
+function RequestForm({ onClose, listing }: { onClose: () => void; listing: BuyerListingTarget }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
