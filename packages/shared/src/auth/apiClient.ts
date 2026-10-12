@@ -1,4 +1,4 @@
-import { BACKEND_ROLE_TO_ID, STORAGE_KEYS } from './constants';
+import { STORAGE_KEYS, resolvePrimaryRoleId } from './constants';
 import { clearAuthSession, getAuthToken, getStoredUser, saveAuthSession } from './authStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -278,7 +278,7 @@ async function fetchSessionProfile(accessToken: string): Promise<Record<string, 
     return {
       ...me,
       fullName: me.legalName,
-      role: BACKEND_ROLE_TO_ID[me.roles?.[0]] ?? 'renter',
+      role: resolvePrimaryRoleId(me.roles),
     };
   } catch {
     return {};

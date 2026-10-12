@@ -134,6 +134,17 @@ export const ROLES = {
     order: 100,
     dashboardRoute: '/resident/dashboard',
   },
+  MANAGER: {
+    id: 'manager',
+    name: 'Property Manager',
+    description: 'Run properties for owners under a management mandate.',
+    icon: 'Briefcase',
+    requiresVerification: ['identity'],
+    // Held by a managing firm's staff, granted with the firm: never self-serve.
+    canAddLater: false,
+    order: 101,
+    dashboardRoute: '/agency',
+  },
   ADMIN: {
     id: 'admin',
     name: 'Admin',
@@ -213,6 +224,7 @@ export const ROUTES = {
   // Role-specific dashboards
   RENTER_DASHBOARD: '/renter/dashboard',
   LANDLORD_DASHBOARD: '/landlord/dashboard',
+  AGENCY_DASHBOARD: '/agency',
   OWNER_DASHBOARD: '/owner/dashboard',
   BUYER_DASHBOARD: '/buyer/dashboard',
   REALTOR_DASHBOARD: '/realtor/dashboard',
@@ -487,6 +499,7 @@ export const BACKEND_ROLE_TO_ID: Record<string, string> = {
   LANDLORD: 'landlord',
   PROPERTY_OWNER: 'owner',
   PROPERTY_BUYER: 'buyer',
+  PROPERTY_MANAGER: 'manager',
   REALTOR: 'realtor',
   AGENT: 'agent',
   ESTATE_MANAGER: 'estate',
@@ -515,9 +528,19 @@ export const getDashboardRoute = (roleId: string): string => {
     gateman: ROUTES.GATEMAN_DASHBOARD,
     resident: ROUTES.RESIDENT_DASHBOARD,
     admin: ROUTES.ADMIN_DASHBOARD,
+    manager: ROUTES.AGENCY_DASHBOARD,
   };
   return roleMap[roleId] || ROUTES.DASHBOARD;
 };
+
+/**
+ * The portal a signed-in account lands in: its first role the web app has a
+ * portal for. Taking roles[0] blindly sent an account whose first role had no
+ * mapping to the renter fallback, and a non-renter then bounced between the
+ * renter guard and that same fallback forever.
+ */
+export const resolvePrimaryRoleId = (backendRoles: readonly string[] | undefined | null): string =>
+  (backendRoles ?? []).map((r) => BACKEND_ROLE_TO_ID[r]).find(Boolean) ?? 'renter';
 
 // Helper function to get role from stored user
 export const getUserRole = (): string | null => {
