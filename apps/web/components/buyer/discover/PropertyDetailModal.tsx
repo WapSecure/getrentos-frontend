@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   X,
@@ -12,6 +13,7 @@ import {
   CalendarClock,
   Handshake,
   MessageSquare,
+  PlayCircle,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -36,6 +38,7 @@ export const PropertyDetailModal = ({
   onMakeOffer,
   onMessageOwner,
 }: PropertyDetailModalProps) => {
+  const [watching, setWatching] = useState(false);
   if (!listing) return null;
 
   return (
@@ -49,9 +52,18 @@ export const PropertyDetailModal = ({
             className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
             <div className="relative h-48 bg-muted shrink-0">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-5xl">🏠</span>
-              </div>
+              {listing.image ? (
+                // eslint-disable-next-line @next/next/no-img-element -- signed, short-lived storage URL
+                <img
+                  src={listing.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-5xl">🏠</span>
+                </div>
+              )}
               <button
                 onClick={onClose}
                 className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70"
@@ -107,6 +119,35 @@ export const PropertyDetailModal = ({
               </div>
 
               <p className="text-sm text-muted-foreground">{listing.description}</p>
+
+              {listing.videoTourUrl && (
+                <div className="rounded-lg border border-border p-3 space-y-2">
+                  {watching ? (
+                    <video
+                      src={listing.videoTourUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                      className="w-full rounded-md bg-black"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setWatching(true)}
+                      className="flex w-full items-center gap-2 text-left text-sm font-medium text-foreground"
+                    >
+                      <PlayCircle className="w-5 h-5 text-primary" />
+                      Watch the video tour
+                    </button>
+                  )}
+                  {listing.videoTourFilmedOnSite && (
+                    <p className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
+                      <MapPin className="w-3 h-3" aria-hidden />
+                      Filmed on site in the GetRentos app
+                    </p>
+                  )}
+                </div>
+              )}
 
               {listing.features.length > 0 && (
                 <div>
