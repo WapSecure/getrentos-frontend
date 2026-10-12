@@ -9,6 +9,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { RealtorPayoutSection } from '@/components/realtor/commissions/RealtorPayoutSection';
+import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout';
 import type { CommissionSide, CommissionStatus } from '@/types/realtor';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
@@ -257,6 +258,9 @@ export default function RealtorCommissionsPage() {
           />
         )}
       </ProFeatureGate>
+
+      {/* Outside the Pro gate: a firm's share owed to this realtor is never paywalled. */}
+      <AgencyAgentSelfPayout standalone />
     </>
   );
 }

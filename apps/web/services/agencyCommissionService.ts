@@ -156,7 +156,9 @@ export const agencyCommissionService = {
 
   /** The signed-in agent's own payout account. */
   getMyAgentAccount(): Promise<ApiResponse<AgentPayoutAccount>> {
-    return safeCall(() => authFetch<AgentPayoutAccount>('/agency/commissions/agent-payouts/my-account'));
+    return safeCall(() =>
+      authFetch<AgentPayoutAccount>('/agency/commissions/agent-payouts/my-account')
+    );
   },
 
   saveMyAgentAccount(input: {
@@ -172,7 +174,9 @@ export const agencyCommissionService = {
   },
 
   myAgentSummary(): Promise<ApiResponse<AgentPayoutSummary>> {
-    return safeCall(() => authFetch<AgentPayoutSummary>('/agency/commissions/agent-payouts/my-summary'));
+    return safeCall(() =>
+      authFetch<AgentPayoutSummary>('/agency/commissions/agent-payouts/my-summary')
+    );
   },
 
   myAgentPayouts(): Promise<ApiResponse<AgentPayout[]>> {
@@ -222,4 +226,6 @@ export interface AgentPayoutSummary {
   tier: number;
   withdrawTierRequired: number;
   canReceive: boolean;
+  /** The agency the viewer belongs to; null outside one. */
+  agencyName: string | null;
 }
