@@ -42,11 +42,17 @@ export default function RoleSelectionPage() {
     router.back();
   };
 
-  // Admin/BackOffice, Gateman, and Resident are provisioned out of band:
-  // never offered as a self-serve signup option (gateman and resident are
-  // both granted by an estate manager, not chosen at signup).
+  // Admin/BackOffice, Gateman, Resident and Property Manager are provisioned out
+  // of band: never offered as a self-serve signup option (gateman and resident
+  // are granted by an estate manager, a property manager with their firm).
   const roleList = Object.values(ROLES)
-    .filter((role) => role.id !== 'admin' && role.id !== 'gateman' && role.id !== 'resident')
+    .filter(
+      (role) =>
+        role.id !== 'admin' &&
+        role.id !== 'gateman' &&
+        role.id !== 'resident' &&
+        role.id !== 'manager'
+    )
     .sort((a, b) => a.order - b.order);
 
   return (

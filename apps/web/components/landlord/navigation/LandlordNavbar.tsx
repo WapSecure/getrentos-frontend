@@ -23,7 +23,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { notificationHref } from '@/lib/notificationHref';
 
 interface LandlordNavbarProps {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; roles?: string[] } | null;
 }
 
 export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {

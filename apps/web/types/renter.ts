@@ -16,6 +16,27 @@ export interface PropertyFee {
   amount: number;
 }
 
+/** The four links of the GetRentos trust chain, in display order. */
+export type PropertyTrustStepId = 'owner' | 'authority' | 'property' | 'payment';
+
+export interface PropertyTrustStep {
+  id: PropertyTrustStepId;
+  label: string;
+  met: boolean;
+  detail: string;
+}
+
+/**
+ * The consumer-facing trust chain for a property: verified owner → authorized
+ * to list → property verified → payment protected. Only present on the
+ * single-property detail payload; the browse list omits it.
+ */
+export interface PropertyTrustChain {
+  steps: PropertyTrustStep[];
+  metCount: number;
+  totalCount: number;
+}
+
 export interface Property {
   id: string;
   propertyId: string;
@@ -58,6 +79,8 @@ export interface Property {
   reviews?: PropertyReview[];
   /** Whether the landlord allows paying this property's rent in monthly installments (GetRentos Flex), instead of the standard upfront yearly payment. */
   allowsMonthlyPayment?: boolean;
+  /** The trust chain, present only on the property detail payload. */
+  trustChain?: PropertyTrustChain;
 }
 
 // ---- Real map / neighborhood insights (OpenStreetMap + optional AI) ----

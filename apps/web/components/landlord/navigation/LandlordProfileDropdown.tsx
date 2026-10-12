@@ -11,7 +11,7 @@ import { getInitials } from '@/lib/format';
 import { RoleSwitcher } from '@/components/shared/navigation/RoleSwitcher';
 
 interface LandlordProfileDropdownProps {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; roles?: string[] } | null;
 }
 
 export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) => {
@@ -36,6 +36,11 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
 
   const fullName = user?.fullName || 'User';
   const initials = getInitials(fullName);
+  // A firm's manager works in this same workspace for their clients.
+  const roleLabel =
+    user?.roles?.includes('PROPERTY_MANAGER') && !user.roles.includes('LANDLORD')
+      ? 'Property Manager'
+      : 'Landlord';
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -48,7 +53,7 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
         </div>
         <div className="hidden sm:block text-left">
           <p className="text-sm font-medium text-foreground">{fullName}</p>
-          <p className="text-xs text-muted-foreground">Landlord</p>
+          <p className="text-xs text-muted-foreground">{roleLabel}</p>
         </div>
         <ChevronDown
           className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}

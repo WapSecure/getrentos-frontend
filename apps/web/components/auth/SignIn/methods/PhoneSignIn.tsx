@@ -11,7 +11,7 @@ import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-re
 import { Button } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import {
-  BACKEND_ROLE_TO_ID,
+  resolvePrimaryRoleId,
   ROUTES,
   VALIDATION_PATTERNS,
   getDashboardRoute,
@@ -74,7 +74,7 @@ export const PhoneSignIn = ({
   });
 
   const finishLogin = (result: AuthResult, identifier?: string) => {
-    const primaryRoleId = BACKEND_ROLE_TO_ID[result.roles[0]] || 'renter';
+    const primaryRoleId = resolvePrimaryRoleId(result.roles);
 
     saveAuthSession(
       {
