@@ -14,10 +14,12 @@ import {
   Settings,
   MapPinned,
   BedDouble,
+  Landmark,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
+import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
@@ -36,6 +38,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.viewing_requests', href: ROUTES.BUYER_VIEWINGS, icon: CalendarClock },
   { labelKey: 'sidebar.offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
   { labelKey: 'sidebar.transactions', href: ROUTES.BUYER_TRANSACTIONS, icon: ShieldCheck },
+  { labelKey: 'sidebar.land_purchases', href: LAND_BUYER_ROUTES.HUB, icon: Landmark },
   { labelKey: 'sidebar.documents', href: ROUTES.BUYER_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.BUYER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.reviews', href: ROUTES.BUYER_REVIEWS, icon: Star },
@@ -47,9 +50,9 @@ export const navItems: NavItem[] = [
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Find property', items: navItems.slice(1, 5) },
-  { label: 'Buying journey', items: navItems.slice(5, 8) },
-  { label: 'Communication', items: navItems.slice(8, 10) },
-  { label: 'Trust and account', items: navItems.slice(10) },
+  { label: 'Buying journey', items: navItems.slice(5, 9) },
+  { label: 'Communication', items: navItems.slice(9, 11) },
+  { label: 'Trust and account', items: navItems.slice(11) },
 ];
 
 export const BuyerSidebar = () => {

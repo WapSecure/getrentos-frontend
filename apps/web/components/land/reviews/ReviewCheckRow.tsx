@@ -1,0 +1,157 @@
+'use client';
+
+import { useState } from 'react';
+import { Badge, Button, Textarea } from '@getrentos/ui';
+import { FileCheck2 } from 'lucide-react';
+import { formatDate } from '@/lib/format';
+import type { LandDiligenceCheckStatus } from '@/types/land';
+import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
+import { decisionProblem, hasCitedDocument } from './reviewRules';
+
+const CHOICES: { value: LandDiligenceCheckStatus; label: string; tone: string }[] = [
+  {
+    value: 'PASSED',
+    label: 'Pass',
+    tone: 'peer-checked:border-success peer-checked:bg-success/10 peer-checked:text-success',
+  },
+  {
+    value: 'FLAGGED',
+    label: 'Flag',
+    tone: 'peer-checked:border-destructive peer-checked:bg-destructive/10 peer-checked:text-destructive',
+  },
+  {
+    value: 'NOT_APPLICABLE',
+    label: 'N/A',
+    tone: 'peer-checked:border-info peer-checked:bg-info/10 peer-checked:text-info',
+  },
+];
+
+const STATUS_BADGE: Record<
+  LandDiligenceCheckStatus,
+  { label: string; variant: 'neutral' | 'success' | 'danger' | 'info' }
+> = {
+  PENDING: { label: 'Pending', variant: 'neutral' },
+  PASSED: { label: 'Passed', variant: 'success' },
+  FLAGGED: { label: 'Flagged', variant: 'danger' },
+  NOT_APPLICABLE: { label: 'Not applicable', variant: 'info' },
+};
+
+/** One check on the reviewer's seat: Pass / Flag / N-A with a note. */
+export const ReviewCheckRow = ({
+  check,
+  documents,
+  editable,
+  isSaving,
+  onDecide,
+}: {
+  check: LandReviewCheck;
+  documents: LandReviewDocument[];
+  editable: boolean;
+  isSaving: boolean;
+  onDecide: (status: LandDiligenceCheckStatus, note: string) => void;
+}) => {
+  const [status, setStatus] = useState<LandDiligenceCheckStatus | null>(
+    check.status === 'PENDING' ? null : check.status
+  );
+  const [note, setNote] = useState(check.note ?? '');
+  const problem = status ? decisionProblem(check, status, note, documents) : null;
+  const changed =
+    status !== null && (status !== check.status || note.trim() !== (check.note ?? '').trim());
+  const badge = STATUS_BADGE[check.status];
+  const name = `check-${check.key}`;
+
+  return (
+    <li className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="font-medium text-foreground">{check.label}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {[
+              check.required ? 'Required' : 'Optional',
+              check.requiresDocument
+                ? hasCitedDocument(check, documents)
+                  ? 'Document cited'
+                  : 'Needs a cited document to pass'
+                : null,
+              check.decidedAt
+                ? `Decided ${formatDate(check.decidedAt)}${check.decidedByMe ? ' by you' : ' by GetRentos'}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
+        <Badge variant={badge.variant}>{badge.label}</Badge>
+      </div>
+
+      {editable ? (
+        <form
+          className="mt-3 space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (status && !problem) onDecide(status, note);
+          }}
+        >
+          <fieldset>
+            <legend className="sr-only">Decision for {check.label}</legend>
+            <div className="flex flex-wrap gap-2">
+              {CHOICES.map((choice) => (
+                <label key={choice.value} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name={name}
+                    value={choice.value}
+                    checked={status === choice.value}
+                    onChange={() => setStatus(choice.value)}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={`inline-flex min-h-10 min-w-16 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-foreground transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary ${choice.tone}`}
+                  >
+                    {choice.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <div className="space-y-1">
+            <label htmlFor={`${name}-note`} className="text-xs font-medium text-muted-foreground">
+              Your note
+              {status === 'FLAGGED' || (status === 'NOT_APPLICABLE' && check.required)
+                ? ' (required)'
+                : ' (optional)'}
+            </label>
+            <Textarea
+              id={`${name}-note`}
+              rows={2}
+              maxLength={2000}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="What you checked and what you found"
+            />
+          </div>
+          {problem && (
+            <p className="text-xs text-destructive" role="status">
+              {problem}
+            </p>
+          )}
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!changed || !!problem || isSaving}
+            isLoading={isSaving}
+          >
+            Save decision
+          </Button>
+        </form>
+      ) : (
+        check.note && (
+          <p className="mt-2 flex gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-sm text-foreground">
+            <FileCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            {check.note}
+          </p>
+        )
+      )}
+    </li>
+  );
+};
