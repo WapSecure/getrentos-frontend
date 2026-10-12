@@ -114,7 +114,7 @@ export function AgencyProtectionView() {
             Client-money protection
           </h1>
           <p className="mt-1 text-muted-foreground">
-            How your firm protects the money it holds for clients — shown to them on their money
+            How your firm protects the money it holds for clients. Clients see this on their money
             view.
           </p>
         </div>

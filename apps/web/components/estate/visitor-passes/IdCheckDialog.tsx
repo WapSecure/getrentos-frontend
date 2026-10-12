@@ -110,8 +110,8 @@ export const IdCheckDialog = ({
               </p>
             ) : !check ? (
               <p className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
-                No identity document was recorded for this visit. That is not a failure — the estate
-                does not require one, and this visit was admitted on its pass.
+                No identity document was recorded for this visit. This does not mean the check
+                failed. The estate does not require one, and this visit was admitted on its pass.
               </p>
             ) : (
               <>

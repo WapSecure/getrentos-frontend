@@ -82,7 +82,7 @@ export default function RealtorConversation() {
       const error =
         err instanceof ApiError
           ? err.isNetwork
-            ? 'Not sent — you’re offline.'
+            ? 'Not sent. You’re offline.'
             : err.message
           : 'Not sent.';
       setPending((list) => list.map((x) => (x.key === p.key ? { ...x, error } : x)));

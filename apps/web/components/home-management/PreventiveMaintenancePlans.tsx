@@ -233,7 +233,7 @@ export function PreventiveMaintenancePlans({
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Schedule recurring care, keep the right vendor accountable, and preserve the service
-            history of every home. When a plan falls due, a work order is raised automatically — and
+            history of every home. When a plan falls due, a work order is raised automatically and
             assigned to its vendor, if one is set.
           </p>
         </div>

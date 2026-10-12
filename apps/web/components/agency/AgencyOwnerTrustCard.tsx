@@ -76,7 +76,7 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
                 className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-700 hover:underline dark:text-amber-400"
               >
                 <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-                No client-money protection on record — add one
+                No client-money protection on record. Add one
               </Link>
             )}
 

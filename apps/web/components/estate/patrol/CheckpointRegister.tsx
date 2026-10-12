@@ -137,7 +137,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         <EmptyState
           icon={MapPin}
           title="No checkpoints yet"
-          description="Add the places a patrol has to reach — the gate, the generator house, the back fence. Each one gets a code you print and put up there."
+          description="Add the places a patrol must reach, such as the gate, generator house or back fence. Each place gets a code to print and display there."
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -289,7 +289,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         }
         description={
           retiring?.active
-            ? 'It stops counting towards rounds, and its code stops working. Every scan it has ever recorded is kept — retiring a checkpoint never erases the patrols that visited it.'
+            ? 'It stops counting towards rounds, and its code stops working. Previous scans remain in the record.'
             : 'It starts counting towards rounds again. Its old code still works, so give it a new one if that code may have been seen.'
         }
         confirmLabel={retiring?.active ? 'Retire' : 'Put back in use'}

@@ -124,7 +124,7 @@ export function RaiseNoticeDialog({
                   unconfigured.some(
                     (u) => u.jurisdiction === jurisdiction && u.kind === entry.value
                   )
-                    ? `${entry.label} — no period recorded`
+                    ? `${entry.label}: no period recorded`
                     : entry.label,
               }))}
             />
@@ -157,7 +157,7 @@ export function RaiseNoticeDialog({
           </Field>
           {blockedByReason && reason.length > 0 && (
             <p className="text-xs text-destructive">
-              At least {MIN_REASON} characters — this is preserved as the record of what was served.
+              Enter at least {MIN_REASON} characters. This becomes part of the service record.
             </p>
           )}
 
@@ -277,7 +277,7 @@ export function ServeNoticeDialog({
             <Field
               label="Date the period runs from"
               required
-              hint="Declared, not assumed. Whether a period runs from the day of service or the day after is interpretation, so this platform will not choose for you — and this date is what the expiry is computed from."
+              hint="Enter the date you use to calculate expiry. The platform will not assume whether the period starts on the service date or the next day."
             >
               <DatePicker
                 value={serviceDate}

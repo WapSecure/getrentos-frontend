@@ -56,7 +56,7 @@ export const ExpectedTodayBoard = ({ estateId }: { estateId: string }) => {
               hour: '2-digit',
               minute: '2-digit',
             })}
-            . Nothing here admits anybody — a visitor still presents their pass.
+            . This list does not admit anyone. Each visitor must still present their pass.
           </p>
         </div>
         <Badge variant={board.tally.byEndOfToday > 0 ? 'info' : 'neutral'}>

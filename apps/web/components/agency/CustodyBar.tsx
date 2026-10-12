@@ -82,7 +82,7 @@ export function CustodyBar() {
     return (
       <div className="flex items-center gap-2 border-b border-border bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
         <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
-        We could not load your clients ({error}). Do not act on a property until this list is back —
+        We could not load your clients ({error}). Do not act on a property until this list is back.
         you cannot tell whose it is.
       </div>
     );

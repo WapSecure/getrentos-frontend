@@ -220,7 +220,7 @@ export function MandateDetailView() {
           <p className="mt-4 flex items-start gap-1.5 text-xs text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             Both sides have signed. A GetRentos officer still has to verify it before anyone can act
-            under it — until then it provisions no access at all.
+            under it. Until then, it provides no access.
           </p>
         )}
       </Card>

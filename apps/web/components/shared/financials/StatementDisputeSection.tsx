@@ -144,7 +144,7 @@ export function StatementDisputeSection({
                 {dispute.outcomeNote && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {dispute.status === 'UPHELD'
-                      ? 'Upheld — credited on your next statement'
+                      ? 'Upheld. Credited on your next statement'
                       : dispute.status === 'REJECTED'
                         ? 'Not upheld'
                         : 'Closed'}
@@ -197,7 +197,7 @@ export function StatementDisputeSection({
               <Field
                 label="What is wrong with it?"
                 htmlFor="dispute-reason"
-                hint={`At least ${MIN_DISPUTE_REASON} characters — somebody has to adjudicate this, and this is all they get.`}
+                hint={`Enter at least ${MIN_DISPUTE_REASON} characters. The reviewer will use this explanation.`}
               >
                 <Textarea
                   id="dispute-reason"
@@ -209,7 +209,7 @@ export function StatementDisputeSection({
 
               <p className="text-xs text-muted-foreground">
                 The statement will not be changed. If GetRentos upholds this, the correction appears
-                on your next statement — and until it is decided, a payout that has not been sent is
+                on your next statement. Until it is decided, a payout that has not been sent is
                 paused.
               </p>
 

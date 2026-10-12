@@ -139,7 +139,10 @@ export function DisbursementScheduleView() {
               disabled={!enabled}
             />
           </Field>
-          <Field label="Reserve to keep back" hint="Never paid out — a float for upcoming costs.">
+          <Field
+            label="Reserve to keep back"
+            hint="This stays in the account as a float for upcoming costs."
+          >
             <CurrencyInput
               value={reserveAmount}
               onValueChange={setReserveAmount}

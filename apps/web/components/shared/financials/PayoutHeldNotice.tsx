@@ -115,8 +115,8 @@ export function PayoutHeldNotice({
           )}
           <p className="text-xs text-muted-foreground">
             {/* The distinction that matters to the reader. */}
-            The money is still owed to you — it has not been sent, rather than lost. Sending it
-            again is possible once whatever was raised has been dealt with.
+            The money is still owed to you. It has not been sent or lost. Sending it again is
+            possible once whatever was raised has been dealt with.
           </p>
           {release?.decidedAt && (
             <p className="text-xs text-muted-foreground">Held on {formatDate(release.decidedAt)}</p>

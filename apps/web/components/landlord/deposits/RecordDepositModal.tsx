@@ -76,7 +76,7 @@ export const RecordDepositModal = ({
             <CurrencyInput value={amount} onValueChange={setAmount} placeholder="Deposit amount" />
             {selected && !selected.securityDeposit && (
               <span className="text-xs text-muted-foreground">
-                This lease has no deposit on record — set the amount here.
+                This lease has no deposit on record. Set the amount here.
               </span>
             )}
           </label>

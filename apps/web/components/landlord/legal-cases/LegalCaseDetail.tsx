@@ -127,7 +127,7 @@ function timelineFor(legalCase: LegalCase): TimelineEntry[] {
   if (legalCase.outcomeAt) {
     entries.push({
       at: legalCase.outcomeAt,
-      title: `Decided — ${OUTCOME_LABEL[legalCase.outcome ?? ''] ?? legalCase.outcome}`,
+      title: `Decided: ${OUTCOME_LABEL[legalCase.outcome ?? ''] ?? legalCase.outcome}`,
       detail: legalCase.outcomeNotes ?? undefined,
       tone: legalCase.outcome === 'WON' ? 'good' : 'warn',
     });
@@ -136,7 +136,7 @@ function timelineFor(legalCase: LegalCase): TimelineEntry[] {
   if (legalCase.advocateInstructedAt) {
     entries.push({
       at: legalCase.advocateInstructedAt,
-      title: `Counsel instructed — ${legalCase.advocateName ?? ''}`.trim(),
+      title: `Counsel instructed: ${legalCase.advocateName ?? ''}`.trim(),
       detail:
         [legalCase.advocateFirm, legalCase.advocateFeeAgreement].filter(Boolean).join(' · ') ||
         undefined,
@@ -147,7 +147,7 @@ function timelineFor(legalCase: LegalCase): TimelineEntry[] {
   if (legalCase.enforcementAt) {
     entries.push({
       at: legalCase.enforcementAt,
-      title: `Enforcement — ${legalCase.enforcementMethod?.replace(/_/g, ' ').toLowerCase() ?? 'recorded'}`,
+      title: `Enforcement: ${legalCase.enforcementMethod?.replace(/_/g, ' ').toLowerCase() ?? 'recorded'}`,
       detail: legalCase.enforcementNotes ?? undefined,
       tone: 'neutral',
     });
@@ -267,7 +267,7 @@ export function LegalCaseDetail({
         return {
           kind: 'blocked' as const,
           title: 'Cannot be filed',
-          why: 'This case names no tenancy, so there is no notice record to check — and the notices are what a possession claim is built on.',
+          why: 'This case names no tenancy, so there is no notice record to check. A possession claim needs those notices.',
         };
       }
       if (fileBlocked) {

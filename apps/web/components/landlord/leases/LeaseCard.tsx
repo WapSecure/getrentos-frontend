@@ -195,7 +195,7 @@ export const LeaseCard = ({
         <div className="mt-3 p-3 rounded-xl bg-warning-subtle border border-warning/30 flex gap-2">
           <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-warning" />
           <p className="text-xs text-muted-foreground">
-            Renewal offer sent {formatDate(lease.pendingRenewalOffer.offeredAt)} —{' '}
+            Renewal offer sent {formatDate(lease.pendingRenewalOffer.offeredAt)}.{' '}
             {formatCurrency(lease.pendingRenewalOffer.newRentAmount)} (
             {lease.pendingRenewalOffer.increasePercentage >= 0 ? '+' : ''}
             {lease.pendingRenewalOffer.increasePercentage}%) until{' '}

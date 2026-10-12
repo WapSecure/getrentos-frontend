@@ -128,7 +128,8 @@ export const LandParcelEditor = ({
         <div className="mb-5">
           <h3 className="font-semibold text-foreground">Parcel and title record</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            These details help buyers and compliance identify the exact parcel—not just the address.
+            These details help buyers and compliance identify the exact parcel, not just the
+            address.
           </p>
         </div>
 

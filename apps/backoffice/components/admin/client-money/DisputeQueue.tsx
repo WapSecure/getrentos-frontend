@@ -98,7 +98,7 @@ export function DisputeQueue({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-2xl text-sm text-muted-foreground">
           Owners disagreeing with a figure on an issued statement. Upholding a query does not change
-          the statement — it credits the owner on their next one. Until a query is decided, a payout
+          the statement. It credits the owner on their next one. Until a query is decided, a payout
           that has not been sent is held.
         </p>
         <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>
@@ -222,7 +222,7 @@ export function DisputeQueue({
                     options={[
                       {
                         value: 'UPHELD',
-                        label: `Upheld — reverse ₦${Math.abs(pending.row.lineAmount).toLocaleString('en-NG')} on the next statement`,
+                        label: `Upheld: reverse ₦${Math.abs(pending.row.lineAmount).toLocaleString('en-NG')} on the next statement`,
                       },
                       { value: 'REJECTED', label: 'Not upheld — the line stands' },
                     ]}
@@ -252,7 +252,7 @@ export function DisputeQueue({
                 <Field
                   label="What did you check?"
                   htmlFor="dispute-note"
-                  hint="At least 10 characters — the owner is told this, and it is the reason the field is required."
+                  hint="Enter at least 10 characters. The owner will see this reason."
                 >
                   <Textarea
                     id="dispute-note"

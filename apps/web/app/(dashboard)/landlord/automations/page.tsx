@@ -29,8 +29,7 @@ export default function LandlordAutomationsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">Automations</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Reach your tenants at scale — a one-off broadcast, saved templates, or a recurring
-          schedule.
+          Reach your tenants with a one-off broadcast, saved templates or a recurring schedule.
         </p>
       </div>
       <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />

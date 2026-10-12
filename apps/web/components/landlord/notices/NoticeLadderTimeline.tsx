@@ -88,7 +88,7 @@ function NoticeStep({
   } else if (notice.periodDays !== null) {
     facts.push(`Runs ${notice.periodDays} days from service`);
   } else {
-    facts.push('No set period — this step does not count down');
+    facts.push('No set period. This step does not count down');
   }
 
   const source = SOURCE_LABEL[notice.periodSource];

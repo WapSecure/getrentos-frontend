@@ -178,8 +178,8 @@ export function AgencyCommissionsView() {
               Rate card
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Charged on the annual rent — letting once when a tenancy is let, renewal when a
-              renewal is accepted.
+              Charged on the annual rent: once when a tenancy is let, then again when a renewal is
+              accepted.
             </p>
           </div>
           {!editing && (

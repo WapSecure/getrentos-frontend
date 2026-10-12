@@ -97,7 +97,7 @@ export function ReleaseQueue({
       const short = (pool.drift ?? 0) < 0;
       return ` Be aware: this pool is ${short ? 'short' : 'over'} by ${naira(
         Math.abs(pool.drift ?? 0)
-      )} as of ${pool.asOfDate}. Not a block — the decision is still yours.`;
+      )} as of ${pool.asOfDate}. This does not block the decision.`;
     }
     return ' Be aware: nobody has counted this pool, so nothing has confirmed it holds what we say owners are owed.';
   };
@@ -254,7 +254,7 @@ export function ReleaseQueue({
           }
           description={
             pending.action === 'approve'
-              ? 'This sends the owner their money and cannot be undone from here. Say what you checked — the note is the record that two people looked at this.' +
+              ? 'This sends the owner their money and cannot be undone here. Record what you checked. The note confirms that two people reviewed this.' +
                 poolClause(pending.row.organizationId)
               : 'The statement stays issued and the owner is still owed the money. This refuses the release, not the debt, and they can send it for approval again.'
           }
@@ -265,8 +265,8 @@ export function ReleaseQueue({
           // placeholder must not promise them a reason for a release.
           promptPlaceholder={
             pending.action === 'approve'
-              ? 'At least 10 characters — this is the second signature on the payout'
-              : 'At least 10 characters — the owner is told why it was held'
+              ? 'Enter at least 10 characters. This is the second signature on the payout.'
+              : 'Enter at least 10 characters. The owner will see why it was held.'
           }
           promptValue={note}
           onPromptChange={setNote}

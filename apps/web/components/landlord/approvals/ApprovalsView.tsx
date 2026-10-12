@@ -67,7 +67,7 @@ export function ApprovalsView() {
     mutationFn: (id: string) => unwrap(spendApprovalService.approve(id)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Approved — the expense has been recorded.', variant: 'success' });
+      setToast({ message: 'Approved. The expense has been recorded.', variant: 'success' });
     },
     onError: (e: Error) =>
       setToast({ message: e.message || 'Could not approve.', variant: 'error' }),

@@ -127,7 +127,7 @@ export function IdDocumentSheet({
     <Sheet
       open={open}
       onClose={onClose}
-      title={visitorName ? `Identity document — ${visitorName}` : 'Identity document'}
+      title={visitorName ? `Identity document: ${visitorName}` : 'Identity document'}
       snapPoints={['85%']}
     >
       <View style={{ gap: spacing.lg }}>
