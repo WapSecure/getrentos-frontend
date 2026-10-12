@@ -6,6 +6,7 @@ import { Building2, FileSignature, KeyRound, MapPin, ShieldAlert } from 'lucide-
 import { Badge, Button, Card, EmptyState, PageErrorState } from '@getrentos/ui';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import { unwrap } from '@/lib/apiHelpers';
+import { ROUTES } from '@/lib/constants/auth';
 import { authorityKeys } from '@/lib/queryKeys';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
 import { grantsNothing, noticeSummary } from '@/services/mandateService';
@@ -143,7 +144,9 @@ export function AgencyWorkspaceView() {
                     </p>
                   </div>
                   <Link
-                    href={`/landlord/properties/${property.propertyId}`}
+                    // The owner workspace has no per-property page; a property opens as
+                    // its units, the same place a landlord's property card goes.
+                    href={`${ROUTES.LANDLORD_UNITS}?property=${property.propertyId}`}
                     className="text-sm font-medium text-primary hover:underline"
                   >
                     Open the property

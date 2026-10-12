@@ -10,6 +10,7 @@ import {
   isAuthenticated,
   getDashboardRoute,
   BACKEND_ROLE_TO_ID,
+  resolvePrimaryRoleId,
 } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { ensureValidSession } from '@/lib/apiClient';
@@ -43,7 +44,7 @@ export default function BuyerLayout({ children }: { children: ReactNode }) {
           (r) => BACKEND_ROLE_TO_ID[r] === 'buyer'
         );
         if (!hasBuyerRole) {
-          router.replace(getDashboardRoute(parsedUser.role || 'renter'));
+          router.replace(getDashboardRoute(resolvePrimaryRoleId(parsedUser.roles)));
           return;
         }
 

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
-import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
+import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { authService } from '@/services/authService';
 import { Logo } from '@/components/ui/Logo';
 
@@ -27,7 +27,7 @@ function MagicLinkVerifyContent() {
       const response = await authService.verifyMagicLink(token);
       if (response.success && response.data) {
         const { accessToken, ...user } = response.data;
-        const primaryRoleId = BACKEND_ROLE_TO_ID[user.roles[0]] || 'renter';
+        const primaryRoleId = resolvePrimaryRoleId(user.roles);
 
         // Magic-link sign-in is session-only by default (the refresh token is
         // an httpOnly session cookie): consistent with an unchecked
