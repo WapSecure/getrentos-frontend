@@ -437,6 +437,7 @@ export const ROUTES = {
   AGENT_TRUST_PROFILE: '/agent/trust-profile',
   /** Properties this agent may act for under a granted mandate. */
   AGENT_MANAGED: '/agent/managed',
+  AGENT_HOME_MANAGEMENT: '/agent/home-management',
   AGENT_SETTINGS: '/agent/settings',
   AGENT_VERIFICATION: '/agent/verification',
   AGENT_BOOKINGS: '/agent/bookings',

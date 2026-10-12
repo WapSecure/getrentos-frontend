@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
@@ -107,7 +108,13 @@ const CapabilityChips = ({
   </div>
 );
 
-const ManagedPropertyCard = ({ property }: { property: ManagedPropertyDto }) => (
+const ManagedPropertyCard = ({
+  property,
+  managePath,
+}: {
+  property: ManagedPropertyDto;
+  managePath?: string;
+}) => (
   <div className="bg-card rounded-2xl border border-border p-5">
     <div className="flex items-start justify-between gap-3 mb-3">
       <div className="flex items-start gap-3">
@@ -156,6 +163,16 @@ const ManagedPropertyCard = ({ property }: { property: ManagedPropertyDto }) => 
           : 'no expiry'}
       </span>
     </div>
+
+    {managePath && property.canManage && property.status === 'ACTIVE' && (
+      <Link
+        href={`${managePath}?propertyId=${property.propertyId}`}
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+      >
+        <Wrench className="h-4 w-4" />
+        Manage this property
+      </Link>
+    )}
   </div>
 );
 
@@ -343,7 +360,7 @@ const ClaimForm = () => {
   );
 };
 
-export const ManagedPropertiesView = () => {
+export const ManagedPropertiesView = ({ managePath }: { managePath?: string } = {}) => {
   const managed = useQuery({
     queryKey: authorityKeys.managed,
     queryFn: () => unwrap(propertyAuthorityService.managed()),
@@ -384,7 +401,11 @@ export const ManagedPropertiesView = () => {
       ) : (
         <div className="grid lg:grid-cols-2 gap-4 mb-6">
           {properties.map((property) => (
-            <ManagedPropertyCard key={property.mandateId} property={property} />
+            <ManagedPropertyCard
+              key={property.mandateId}
+              property={property}
+              managePath={managePath}
+            />
           ))}
         </div>
       )}
