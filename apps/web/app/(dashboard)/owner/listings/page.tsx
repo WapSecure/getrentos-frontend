@@ -68,6 +68,7 @@ export default function OwnerListingsPage() {
       price: number;
       listingTitle?: string;
       amenities?: string[];
+      intent: 'draft' | 'publish';
     }) => unwrap(ownerService.createListing(data)),
     onSuccess: invalidate,
   });
@@ -82,12 +83,14 @@ export default function OwnerListingsPage() {
 
   // Awaited by the form, which then saves the photos and closes; a refusal
   // stays in the form (and in the notice below) instead of vanishing.
-  const handleCreate = (data: Omit<SaleListing, 'id' | 'createdAt'>) =>
+  const handleCreate = (data: Omit<SaleListing, 'id' | 'createdAt'>, publishNow: boolean) =>
     createMutation.mutateAsync({
       propertyId: data.propertyId,
       price: data.askingPrice,
       listingTitle: data.listingTitle,
       amenities: data.features,
+      // Save Draft keeps it off the market; Publish puts it live, or in review.
+      intent: publishNow ? 'publish' : 'draft',
     });
 
   const handleChangeStatus = (listingId: string, status: SaleListingStatus) => {

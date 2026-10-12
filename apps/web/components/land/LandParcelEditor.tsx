@@ -12,9 +12,14 @@ import {
   Textarea,
 } from '@getrentos/ui';
 import { FileUp, Save, ShieldCheck } from 'lucide-react';
-import { boundaryCorners, boundaryGeometry, type BoundaryCorner } from '@getrentos/shared';
+import {
+  boundaryAreaMismatch,
+  boundaryCorners,
+  boundaryGeometry,
+  type BoundaryCorner,
+} from '@getrentos/shared';
 import { LandDiligenceBadge } from './LandDiligenceBadge';
-import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
+import { ParcelBoundaryMap, formatArea } from '@/components/maps/ParcelBoundaryMap';
 import {
   LAND_AREA_UNIT_LABELS,
   LAND_TITLE_TYPE_LABELS,
@@ -59,6 +64,11 @@ export const LandParcelEditor = ({
     [record.parcel?.boundaryGeometry]
   );
   const [corners, setCorners] = useState<BoundaryCorner[]>(savedCorners ?? []);
+  const areaMismatch = boundaryAreaMismatch(
+    corners,
+    Number(parcel.areaValue) || 0,
+    parcel.areaUnit
+  );
   const pin =
     record.property.latitude != null && record.property.longitude != null
       ? { latitude: record.property.latitude, longitude: record.property.longitude }
@@ -322,6 +332,13 @@ export const LandParcelEditor = ({
           {corners.length > 0 && corners.length < 3 && (
             <p className="mt-1 text-xs text-warning">
               An outline needs at least 3 corners; with fewer it won’t be saved.
+            </p>
+          )}
+          {areaMismatch && (
+            <p role="status" className="mt-1 text-xs text-warning">
+              The outline covers about {formatArea(areaMismatch.outlinedSqm)}, but the area above is{' '}
+              {formatArea(areaMismatch.statedSqm)}. Buyers see both: check the corners and the area
+              unit before saving.
             </p>
           )}
         </Field>
