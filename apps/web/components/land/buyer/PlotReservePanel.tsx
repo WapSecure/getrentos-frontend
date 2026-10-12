@@ -107,7 +107,7 @@ export const PlotReservePanel = ({
       {!available ? (
         <p className="text-sm text-muted-foreground">
           {plot.status === 'RESERVED' && plot.heldUntil
-            ? `Another buyer is holding this plot until ${formatDate(plot.heldUntil)}. It returns to sale if they do not start a purchase.`
+            ? `This plot is reserved until ${formatDate(plot.heldUntil)}. If it is your reservation, start your purchase from My land; otherwise it returns to sale if no purchase starts.`
             : 'This plot is no longer for sale.'}
         </p>
       ) : viewer === 'anonymous' ? (

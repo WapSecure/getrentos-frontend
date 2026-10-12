@@ -24,6 +24,7 @@ import {
   LAND_AREA_UNIT_LABELS,
   LAND_TITLE_TYPE_LABELS,
   type LandOwnershipProofInput,
+  type LandParcel,
   type LandParcelInput,
   type OwnerLandRecord,
 } from '@/types/land';
@@ -48,6 +49,21 @@ const emptyParcel: LandParcelInput = {
 const textValue = (value: string | number | undefined | null) =>
   value === undefined || value === null ? '' : String(value);
 
+/**
+ * The editable part of a saved parcel. The record also carries server-owned
+ * fields (id, propertyId, diligence, timestamps), and the API refuses any
+ * field it does not accept, so sending the record back as-is failed every save.
+ */
+const editableParcel = (parcel: LandParcel): LandParcelInput => {
+  const { id, propertyId, diligence, createdAt, updatedAt, ...input } = parcel;
+  void id;
+  void propertyId;
+  void diligence;
+  void createdAt;
+  void updatedAt;
+  return input;
+};
+
 export const LandParcelEditor = ({
   record,
   isSaving,
@@ -56,7 +72,9 @@ export const LandParcelEditor = ({
 }: LandParcelEditorProps) => {
   // The parent keys this editor by property id, so it remounts on record
   // change and the initializers always reflect the active parcel.
-  const [parcel, setParcel] = useState<LandParcelInput>(record.parcel ?? emptyParcel);
+  const [parcel, setParcel] = useState<LandParcelInput>(
+    record.parcel ? editableParcel(record.parcel) : emptyParcel
+  );
   const [utilitiesText, setUtilitiesText] = useState((record.parcel?.utilities ?? []).join(', '));
   const [uploadOpen, setUploadOpen] = useState(false);
   const savedCorners = useMemo(

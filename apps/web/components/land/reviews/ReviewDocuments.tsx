@@ -41,7 +41,9 @@ export const ReviewDocuments = ({
             <p className="text-xs text-muted-foreground">
               {[
                 humanise(doc.documentType),
-                doc.source === 'ADMIN' ? 'Added by GetRentos' : 'From the owner',
+                // PARTY covers the owner and engaged professionals alike, so it is not
+                // attributed to the owner.
+                doc.source === 'ADMIN' ? 'Added by GetRentos' : 'On the property file',
                 formatDate(doc.uploadedAt),
                 sizeLabel(doc.sizeBytes),
               ]
