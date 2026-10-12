@@ -166,70 +166,76 @@ function Gallery({ listing: l }: { listing: HostListing }) {
         ) : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
           {photos.map((p, i) => (
-            <Pressable
+            // Choose-cover and remove are sibling buttons: a button inside a
+            // button is invalid on the web build.
+            <View
               key={p.uri + i}
-              onPress={() => (i ? makeCover(i) : undefined)}
-              accessibilityRole="button"
-              accessibilityLabel={
-                i === 0 ? 'Cover photo' : `Photo ${i + 1}. Tap to make it the cover`
-              }
               style={[tile, { overflow: 'hidden', backgroundColor: colors.secondary }]}
             >
-              <Image
-                source={{ uri: p.uri }}
-                style={{ width: '100%', height: '100%' }}
-                contentFit="cover"
-                transition={150}
-                accessibilityIgnoresInvertColors
-              />
-              {!p.key && !p.failed ? (
-                <View
-                  style={{
-                    ...StyleFill,
-                    backgroundColor: 'rgba(0,0,0,0.35)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <ActivityIndicator color="#fff" />
-                </View>
-              ) : null}
-              {p.failed ? (
-                <View
-                  style={{
-                    ...StyleFill,
-                    backgroundColor: 'rgba(180,0,0,0.55)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: spacing.sm,
-                  }}
-                >
-                  <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }} center>
-                    Upload failed: remove and try again
-                  </Text>
-                </View>
-              ) : null}
-              {i === 0 && p.key ? (
-                <View
-                  style={{
-                    position: 'absolute',
-                    left: 8,
-                    top: 8,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 4,
-                    paddingHorizontal: 8,
-                    paddingVertical: 3,
-                    borderRadius: radius.full,
-                    backgroundColor: colors.card,
-                  }}
-                >
-                  <Star size={11} color={colors.warning} fill={colors.warning} />
-                  <Text variant="caption" style={{ fontWeight: '700' }}>
-                    Cover
-                  </Text>
-                </View>
-              ) : null}
+              <Pressable
+                onPress={() => (i ? makeCover(i) : undefined)}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  i === 0 ? 'Cover photo' : `Photo ${i + 1}. Tap to make it the cover`
+                }
+                style={StyleFill}
+              >
+                <Image
+                  source={{ uri: p.uri }}
+                  style={{ width: '100%', height: '100%' }}
+                  contentFit="cover"
+                  transition={150}
+                  accessibilityIgnoresInvertColors
+                />
+                {!p.key && !p.failed ? (
+                  <View
+                    style={{
+                      ...StyleFill,
+                      backgroundColor: 'rgba(0,0,0,0.35)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <ActivityIndicator color="#fff" />
+                  </View>
+                ) : null}
+                {p.failed ? (
+                  <View
+                    style={{
+                      ...StyleFill,
+                      backgroundColor: 'rgba(180,0,0,0.55)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: spacing.sm,
+                    }}
+                  >
+                    <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }} center>
+                      Upload failed: remove and try again
+                    </Text>
+                  </View>
+                ) : null}
+                {i === 0 && p.key ? (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 8,
+                      top: 8,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: radius.full,
+                      backgroundColor: colors.card,
+                    }}
+                  >
+                    <Star size={11} color={colors.warning} fill={colors.warning} />
+                    <Text variant="caption" style={{ fontWeight: '700' }}>
+                      Cover
+                    </Text>
+                  </View>
+                ) : null}
+              </Pressable>
               <Pressable
                 onPress={() => remove(i)}
                 accessibilityRole="button"
@@ -249,7 +255,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
               >
                 <X size={15} color="#fff" />
               </Pressable>
-            </Pressable>
+            </View>
           ))}
           {photos.length < MAX_PHOTOS ? (
             <Pressable

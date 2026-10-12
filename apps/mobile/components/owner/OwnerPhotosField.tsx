@@ -96,48 +96,54 @@ export function OwnerPhotosField({
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           {keys.map((key, i) => (
-            <Pressable
+            // Two sibling buttons (choose cover, remove) over the photo: a button
+            // inside a button is invalid on the web build.
+            <View
               key={key}
-              onPress={() =>
-                i > 0 && !busy
-                  ? void save([key, ...keys.filter((k) => k !== key)], 'Cover photo changed.')
-                  : undefined
-              }
-              accessibilityRole="button"
-              accessibilityLabel={
-                i === 0 ? 'Cover photo' : `Photo ${i + 1}. Tap to make it the cover`
-              }
               style={[tile, { overflow: 'hidden', backgroundColor: colors.secondary }]}
             >
-              {urls[i] ? (
-                <Image
-                  source={{ uri: urls[i] }}
-                  style={{ width: '100%', height: '100%' }}
-                  contentFit="cover"
-                  accessibilityIgnoresInvertColors
-                />
-              ) : null}
-              {i === 0 ? (
-                <View
-                  style={{
-                    position: 'absolute',
-                    left: 6,
-                    top: 6,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 3,
-                    paddingHorizontal: 6,
-                    paddingVertical: 2,
-                    borderRadius: radius.full,
-                    backgroundColor: colors.card,
-                  }}
-                >
-                  <Star size={10} color={colors.warning} fill={colors.warning} />
-                  <Text variant="caption" style={{ fontSize: 10, fontWeight: '700' }}>
-                    Cover
-                  </Text>
-                </View>
-              ) : null}
+              <Pressable
+                onPress={() =>
+                  i > 0 && !busy
+                    ? void save([key, ...keys.filter((k) => k !== key)], 'Cover photo changed.')
+                    : undefined
+                }
+                accessibilityRole="button"
+                accessibilityLabel={
+                  i === 0 ? 'Cover photo' : `Photo ${i + 1}. Tap to make it the cover`
+                }
+                style={{ width: '100%', height: '100%' }}
+              >
+                {urls[i] ? (
+                  <Image
+                    source={{ uri: urls[i] }}
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="cover"
+                    accessibilityIgnoresInvertColors
+                  />
+                ) : null}
+                {i === 0 ? (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 6,
+                      top: 6,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 3,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      borderRadius: radius.full,
+                      backgroundColor: colors.card,
+                    }}
+                  >
+                    <Star size={10} color={colors.warning} fill={colors.warning} />
+                    <Text variant="caption" style={{ fontSize: 10, fontWeight: '700' }}>
+                      Cover
+                    </Text>
+                  </View>
+                ) : null}
+              </Pressable>
               <Pressable
                 onPress={() => remove(i)}
                 disabled={busy}
@@ -158,7 +164,7 @@ export function OwnerPhotosField({
               >
                 <X size={13} color="#fff" />
               </Pressable>
-            </Pressable>
+            </View>
           ))}
           <Pressable
             onPress={() => void add()}
