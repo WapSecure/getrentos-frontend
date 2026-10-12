@@ -44,7 +44,7 @@ const REASON_ACTIONS: Record<
     title: 'Serve notice?',
     description:
       'This records the date your notice clock started. The engagement keeps running until the ' +
-      'agreed notice period has passed — it does not end the mandate today, and it cannot be ' +
+      'agreed notice period has passed. It does not end the mandate today, and it cannot be ' +
       'back-dated.',
     confirmLabel: 'Serve notice',
     promptLabel: '',
@@ -73,7 +73,7 @@ const REASON_ACTIONS: Record<
     title: 'Ask GetRentos to end this engagement?',
     description:
       'This raises a request, not an ending. The mandate keeps running and your access stays ' +
-      'while it is open, and a second GetRentos staff member has to approve it — no one person ' +
+      'while it is open, and a second GetRentos staff member has to approve it. No one person ' +
       'ends a client engagement alone.',
     confirmLabel: 'Raise the request',
     promptLabel: 'Why should this engagement end?',
@@ -160,7 +160,7 @@ export function useMandateActions() {
         }
         promptPlaceholder={
           REASON_ACTIONS[pending.action].needsReason
-            ? 'At least 10 characters — whoever has to decide will read this'
+            ? 'Enter at least 10 characters. The person deciding will read this.'
             : undefined
         }
         promptValue={reason}

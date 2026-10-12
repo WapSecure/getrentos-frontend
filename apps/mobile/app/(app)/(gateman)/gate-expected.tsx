@@ -69,7 +69,7 @@ export default function GatemanExpected() {
         ) : boardQuery.isError ? (
           <ErrorState
             title="Could not read the board"
-            description="Nobody is stranded by this — check visitors in by their pass as usual."
+            description="This does not affect visitor access. Check visitors in by their pass as usual."
             onRetry={() => void boardQuery.refetch()}
           />
         ) : !board || total === 0 ? (

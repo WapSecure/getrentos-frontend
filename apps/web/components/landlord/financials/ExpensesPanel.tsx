@@ -96,7 +96,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
       setToast(
         result.status === 'pending_approval'
           ? {
-              message: 'This is above the owner’s approval limit — sent to them to approve.',
+              message: 'This is above the owner’s approval limit. We sent it to them for approval.',
               variant: 'success',
             }
           : { message: 'Expense recorded.', variant: 'success' }

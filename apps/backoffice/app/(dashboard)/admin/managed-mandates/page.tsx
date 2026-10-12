@@ -516,7 +516,7 @@ const TerminationRequests = () => {
     <>
       <p className="mb-4 text-sm text-muted-foreground">
         Approving ends the engagement and revokes the manager’s access. You cannot approve a request
-        you raised yourself — a different staff member must.
+        you raised yourself. A different staff member must do it.
       </p>
 
       <div className="mb-4 flex justify-end">
@@ -752,8 +752,8 @@ export default function AdminManagedMandatesPage() {
           GetRentos Managed
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Turn on owner opt-ins and run the live engagements — assigning, activating or reassigning
-          a portfolio manager, one at a time or several at once.
+          Turn on owner opt-ins and manage live engagements, including assignment, activation and
+          reassignment a portfolio manager, one at a time or several at once.
         </p>
       </div>
 

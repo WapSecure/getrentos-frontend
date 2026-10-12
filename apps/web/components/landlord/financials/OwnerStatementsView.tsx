@@ -109,7 +109,7 @@ export function OwnerStatementsView() {
         result.payoutStatus === 'AWAITING_APPROVAL'
           ? {
               message:
-                'Statement issued. The payout is held while a second GetRentos officer approves it — your money is unaffected.',
+                'Statement issued. The payout is held while a second GetRentos officer approves it. Your money is unaffected.',
               variant: 'success',
             }
           : result.payoutStatus === 'FAILED'
@@ -467,7 +467,7 @@ export function OwnerStatementsView() {
                     {detail.emailSentAt
                       ? `Emailed to you on ${formatDate(detail.emailSentAt)}.`
                       : detail.emailError
-                        ? `Not emailed yet — ${detail.emailError}.`
+                        ? `Not emailed yet. ${detail.emailError}.`
                         : 'Not emailed yet.'}
                   </p>
                   <div className="flex items-center gap-2 shrink-0">

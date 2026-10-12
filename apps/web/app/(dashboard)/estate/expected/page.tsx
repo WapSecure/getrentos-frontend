@@ -73,8 +73,8 @@ export default function EstateExpectedPage() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Expected today</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Invitations nobody has used, regular visitors due today, and parcels still waiting —
-              on one board.
+              Unused invitations, regular visitors due today and parcels still waiting. on one
+              board.
             </p>
           </div>
           <Button rounded="md" onClick={() => setIsImportOpen(true)}>
@@ -84,9 +84,8 @@ export default function EstateExpectedPage() {
         </div>
 
         <div className="mb-6 rounded-xl border border-border bg-card px-3 py-2.5 text-xs leading-5 text-muted-foreground">
-          This is a hint board, not a door. Nothing here admits anybody — every visitor still
-          presents their own pass at the gate, and a guard can always turn somebody away whatever
-          this says.
+          This is a reference board, not an access control. Every visitor must still presents their
+          own pass at the gate, and a guard can always turn somebody away whatever this says.
         </div>
 
         <ExpectedTodayBoard estateId={estate.id} />

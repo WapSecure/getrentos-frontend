@@ -89,7 +89,8 @@ export const ImportGuestListModal = ({
         </DialogTitle>
         <DialogDescription className="mt-1 text-sm leading-6 text-muted-foreground">
           Every guest on the list gets their own invitation, screened the same way a single one
-          would be. Nobody is admitted by appearing here — each guest still presents their own pass.
+          would be. Appearing here does not admit anyone. Each guest must still present their own
+          pass.
         </DialogDescription>
 
         {result ? (

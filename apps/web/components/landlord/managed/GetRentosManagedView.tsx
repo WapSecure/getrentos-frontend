@@ -239,8 +239,8 @@ export const GetRentosManagedView = () => {
             Let GetRentos manage it
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            We become the manager of record — one published fee card, a service commitment you can
-            hold us to, and an ops-assigned portfolio manager. Pick a tier below.
+            We become the manager of record, with one published fee card and a service commitment
+            you can hold us to, and an ops-assigned portfolio manager. Pick a tier below.
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5">
@@ -279,8 +279,8 @@ export const GetRentosManagedView = () => {
             Our service commitment
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every managed property is held to the same GetRentos SLA — not a partner&rsquo;s. These
-            are the targets for maintenance, by how urgent the issue is.
+            Every managed property follows the same GetRentos SLA, not a partner&rsquo;s. These are
+            the targets for maintenance, by how urgent the issue is.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {(sla.data ?? []).map((row) => (
@@ -421,7 +421,7 @@ export const GetRentosManagedView = () => {
                     </div>
                   ) : windingDown ? (
                     <div className="flex items-center gap-2 sm:shrink-0">
-                      <Badge variant="warning">Ending — handover due</Badge>
+                      <Badge variant="warning">Ending: handover due</Badge>
                       <button
                         type="button"
                         disabled={handoverBusy}
@@ -472,8 +472,8 @@ export const GetRentosManagedView = () => {
                   <div className="mt-3 border-t border-border pt-3">
                     <p className="text-sm text-muted-foreground">
                       {isPendingMandate
-                        ? 'Withdraw this request. Nothing has started, so there is nothing to settle — it just goes away.'
-                        : 'End this engagement. The manager’s access stops immediately, and GetRentos draws up your final statement — rent collected to date, fees and any break fee. It then moves to handover: you and the manager exchange keys, balances and documents, and you confirm that here. GetRentos does not have to approve it.'}
+                        ? 'Withdraw this request. Nothing has started, so there is nothing to settle.'
+                        : 'End this engagement. The manager’s access stops immediately. GetRentos then prepares your final statement with rent collected to date, fees and any break fee. During handover, you and the manager exchange keys, balances and documents, then confirm completion here. GetRentos does not need to approve it.'}
                     </p>
                     {!isPendingMandate && breakFeeQuery.data && (
                       <p
@@ -484,7 +484,7 @@ export const GetRentosManagedView = () => {
                         }`}
                       >
                         {breakFeeQuery.data.waived
-                          ? `No break fee — ${breakFeeQuery.data.reason}`
+                          ? `No break fee. ${breakFeeQuery.data.reason}`
                           : `Notice-in-lieu of ${formatCurrency(breakFeeQuery.data.amount)} (${breakFeeQuery.data.reason}) will be added to your final statement.`}
                       </p>
                     )}
@@ -492,7 +492,7 @@ export const GetRentosManagedView = () => {
                       value={endReason}
                       onChange={(event) => setEndReason(event.target.value)}
                       rows={2}
-                      placeholder="Why are you ending it? (at least 10 characters — it is kept on the record)"
+                      placeholder="Why are you ending it? Enter at least 10 characters."
                       className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                     />
                     <div className="mt-2 flex gap-2">
@@ -531,9 +531,9 @@ export const GetRentosManagedView = () => {
           Vetted firms
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Independent agencies on GetRentos, ranked by a real track record — how they handle
-          maintenance on the properties they manage, then how much they run. Appoint one and it goes
-          to them to accept, then to our team to verify before anything turns on.
+          Independent agencies on GetRentos, ranked by their track record for handling maintenance
+          on the properties they manage, then how much they run. Appoint one and it goes to them to
+          accept, then to our team to verify before anything turns on.
         </p>
 
         {firms.isLoading ? (

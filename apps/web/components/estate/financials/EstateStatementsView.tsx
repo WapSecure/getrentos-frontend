@@ -99,7 +99,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         result.payoutStatus === 'AWAITING_APPROVAL'
           ? {
               message:
-                'Statement issued. The payout is held while a second GetRentos officer approves it — the estate\u2019s money is unaffected.',
+                'Statement issued. The payout is held while a second GetRentos officer approves it. The estate\u2019s money is unaffected.',
               variant: 'success',
             }
           : result.payoutStatus === 'FAILED'

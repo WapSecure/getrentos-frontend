@@ -118,7 +118,7 @@ export function NoticePeriodRegister({
             <Field
               label="Basis"
               required
-              hint="Where this number comes from — the provision, the advice, the date. This is what makes a mis-service diagnosable rather than mysterious."
+              hint="Record where this number comes from: the provision, advice or date. This helps explain any service error."
             >
               <Textarea
                 value={basis}
@@ -208,8 +208,8 @@ export function NoticePeriodRegister({
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             <p>
               This register is a tracking record, not legal advice. Nothing here is asserted by this
-              platform — the entries are yours, and the basis is recorded so the reasoning survives
-              the person who made the entry.
+              platform. The entries are yours, and the recorded basis preserves the reasoning the
+              person who made the entry.
             </p>
           </div>
         </div>

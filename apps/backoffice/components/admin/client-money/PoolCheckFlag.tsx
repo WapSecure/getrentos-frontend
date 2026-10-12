@@ -57,7 +57,7 @@ export function PoolCheckFlag({ pool }: { pool: ReconciliationRow | null | undef
         title="Our own ledger records disagree"
         detail={
           `${pool.integrityFindings.length} account(s) hold a balance that does not equal the sum of ` +
-          `their own entries. This is a fault on our side, not at the bank — do not go looking for it there.`
+          `their own entries. This is a fault on our side, not at the bank. Do not investigate it there.`
         }
       />
     );
