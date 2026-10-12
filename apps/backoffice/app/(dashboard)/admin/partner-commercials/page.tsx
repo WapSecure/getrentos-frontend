@@ -46,6 +46,23 @@ export default function PartnerCommercialsPage() {
     onError: (e: Error) => setToast({ message: e.message || 'Unable to save.', variant: 'error' }),
   });
 
+  const payout = useMutation({
+    mutationFn: (organizationId: string) =>
+      unwrap(adminPartnerCommercialsService.requestPayout(organizationId)),
+    onSuccess: (p) => {
+      queryClient.invalidateQueries({ queryKey: KEY });
+      setToast({
+        message:
+          p.status === 'SUCCESS'
+            ? `Paid ${formatCurrency(p.amount)} to the partner.`
+            : `Payout of ${formatCurrency(p.amount)} is ${p.status.toLowerCase()}.`,
+        variant: p.status === 'FAILED' ? 'error' : 'success',
+      });
+    },
+    onError: (e: Error) =>
+      setToast({ message: e.message || 'Unable to pay out.', variant: 'error' }),
+  });
+
   const draftFor = (p: PartnerCommercialRow) =>
     drafts[p.organizationId] ?? String(p.partnerSharePct);
 
@@ -118,6 +135,16 @@ export default function PartnerCommercialsPage() {
                     >
                       Save
                     </Button>
+                    {p.earnedPartnerShare > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={payout.isPending}
+                        onClick={() => payout.mutate(p.organizationId)}
+                      >
+                        Pay out {formatCurrency(p.earnedPartnerShare)}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>

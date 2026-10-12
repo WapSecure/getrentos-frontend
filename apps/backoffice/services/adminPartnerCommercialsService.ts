@@ -48,4 +48,24 @@ export const adminPartnerCommercialsService = {
       })
     );
   },
+  listPayouts(organizationId: string): Promise<ApiResponse<PartnerPayout[]>> {
+    return safeCall(() =>
+      authFetch<PartnerPayout[]>(`/admin/partner-commercials/${organizationId}/payouts`)
+    );
+  },
+  requestPayout(organizationId: string): Promise<ApiResponse<PartnerPayout>> {
+    return safeCall(() =>
+      authFetch(`/admin/partner-commercials/${organizationId}/payout`, { method: 'POST' })
+    );
+  },
 };
+
+export interface PartnerPayout {
+  id: string;
+  amount: number;
+  status: string;
+  commissions: number;
+  failureReason: string | null;
+  paidAt: string | null;
+  createdAt: string;
+}
